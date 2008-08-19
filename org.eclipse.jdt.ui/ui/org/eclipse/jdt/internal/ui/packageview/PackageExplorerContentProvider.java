@@ -15,6 +15,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Widget;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,11 +29,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -118,7 +118,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	public void elementChanged(final ElementChangedEvent event) {
 		final ArrayList runnables= new ArrayList();
 		try {
-			// 58952 delete project does not update Package Explorer [package explorer] 
+			// 58952 delete project does not update Package Explorer [package explorer]
 			// if the input to the viewer is deleted then refresh to avoid the display of stale elements
 			if (inputDeleted(runnables))
 				return;
@@ -126,7 +126,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			processDelta(event.getDelta(), runnables);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-		} finally {	
+		} finally {
 			executeRunnables(runnables);
 		}
 	}
@@ -136,8 +136,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		// now post all collected runnables
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
+			final boolean hasPendingUpdates;
+			synchronized (this) {
+				hasPendingUpdates= fPendingUpdates != null;
+			}
 			//Are we in the UIThread? If so spin it until we are done
-			if ((ctrl.getDisplay().getThread() == Thread.currentThread()) && !fViewer.isBusy()) {
+			if (!hasPendingUpdates && ctrl.getDisplay().getThread() == Thread.currentThread() && !fViewer.isBusy()) {
 				runUpdates(runnables);
 			} else {
 				synchronized (this) {
@@ -283,7 +287,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	
 	public Object[] getChildren(Object parentElement) {
 		try {
-			if (parentElement instanceof IJavaModel) 
+			if (parentElement instanceof IJavaModel)
 				return concatenate(getJavaProjects((IJavaModel)parentElement), getNonJavaProjects((IJavaModel)parentElement));
 
 			if (parentElement instanceof PackageFragmentRootContainer)
@@ -317,7 +321,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			IClasspathEntry classpathEntry= root.getRawClasspathEntry();
 			int entryKind= classpathEntry.getEntryKind();
 			if (entryKind == IClasspathEntry.CPE_CONTAINER) {
-				// all ClassPathContainers are added later 
+				// all ClassPathContainers are added later
 			} else if (fShowLibrariesNode && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
 				// skip: will add the referenced library node later
 			} else {
@@ -344,8 +348,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			IClasspathEntry classpathEntry= rawClasspath[i];
 			if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				result.add(new ClassPathContainer(project, classpathEntry));
-			}	
-		}	
+			}
+		}
 		Object[] resources= project.getNonJavaResources();
 		for (int i= 0; i < resources.length; i++) {
 			result.add(resources[i]);
@@ -394,9 +398,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		super.inputChanged(viewer, oldInput, newInput);
 		fViewer= (TreeViewer)viewer;
 		if (oldInput == null && newInput != null) {
-			JavaCore.addElementChangedListener(this); 
+			JavaCore.addElementChangedListener(this);
 		} else if (oldInput != null && newInput == null) {
-			JavaCore.removeElementChangedListener(this); 
+			JavaCore.removeElementChangedListener(this);
 		}
 		fInput= newInput;
 	}
@@ -446,9 +450,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 						IPackageFragmentRoot root= (IPackageFragmentRoot) fragment.getParent();
 						element= getFolded(root.getChildren(), fragment);
 					}
-					result.add(element);	
-				} 
-			}	
+					result.add(element);
+				}
+			}
 		}
 	}
 
@@ -537,7 +541,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (elementType != IJavaElement.JAVA_MODEL && elementType != IJavaElement.JAVA_PROJECT) {
 			IJavaProject proj= element.getJavaProject();
 			if (proj == null || !proj.getProject().isOpen()) // TODO: Not needed if parent already did the 'open' check!
-				return false;	
+				return false;
 		}
 		
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
@@ -606,18 +610,18 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		
 		if (elementType == IJavaElement.JAVA_PROJECT) {
 			// handle open and closing of a project
-			if ((flags & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0) {			
+			if ((flags & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0) {
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;
 			}
 			// if the class path has changed we refresh the entire project
 			if ((flags & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0) {
 				postRefresh(element, ORIGINAL, element, runnables);
-				return false;				
+				return false;
 			}
 			// if added it could be that the corresponding IProject is already shown. Remove it first.
 			// bug 184296
-			if (kind == IJavaElementDelta.ADDED) { 
+			if (kind == IJavaElementDelta.ADDED) {
 				postRemove(element.getResource(), runnables);
 				postAdd(element.getParent(), element, runnables);
 				return false;
@@ -625,7 +629,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 	
 		if (kind == IJavaElementDelta.REMOVED) {
-			Object parent= internalGetParent(element);			
+			Object parent= internalGetParent(element);
 			if (element instanceof IPackageFragment) {
 				// refresh package fragment root to allow filtering empty (parent) packages: bug 72923
 				if (fViewer.testFindItem(parent) != null)
@@ -634,22 +638,22 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 			
 			postRemove(element, runnables);
-			if (parent instanceof IPackageFragment) 
+			if (parent instanceof IPackageFragment)
 				postUpdateIcon((IPackageFragment)parent, runnables);
 			// we are filtering out empty subpackages, so we
-			// a package becomes empty we remove it from the viewer. 
+			// a package becomes empty we remove it from the viewer.
 			if (isPackageFragmentEmpty(element.getParent())) {
 				if (fViewer.testFindItem(parent) != null)
 					postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
 				return true;
-			}  
+			}
 			return false;
 		}
 	
-		if (kind == IJavaElementDelta.ADDED) { 
+		if (kind == IJavaElementDelta.ADDED) {
 			Object parent= internalGetParent(element);
 			// we are filtering out empty subpackages, so we
-			// have to handle additions to them specially. 
+			// have to handle additions to them specially.
 			if (parent instanceof IPackageFragment) {
 				Object grandparent= internalGetParent(parent);
 				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
@@ -662,10 +666,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 						postRefresh(grandparent, GRANT_PARENT, element, runnables);
 					else {
 						postRefresh(parent, PARENT, element, runnables);
-					}	
+					}
 				}
-				return true;		
-			} else {  
+				return true;
+			} else {
 				postAdd(parent, element, runnables);
 			}
 		}
@@ -696,7 +700,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postUpdateIcon(element, runnables);
 			
 			if (isClassPathChange(delta)) {
-				 // throw the towel and do a full refresh of the affected java project. 
+				 // throw the towel and do a full refresh of the affected java project.
 				postRefresh(element.getJavaProject(), PROJECT, element, runnables);
 				return true;
 			}
@@ -795,16 +799,16 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					if (fViewer.testFindItem(addedElement) != null)
 						fViewer.setSelection(selection);
 				}
-			});	
-		}	
+			});
+		}
 	}
 
 	private IJavaElement findAddedElement(IJavaElementDelta delta) {
-		if (delta.getKind() == IJavaElementDelta.ADDED)  
+		if (delta.getKind() == IJavaElementDelta.ADDED)
 			return delta.getElement();
 		
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
-		for (int i= 0; i < affectedChildren.length; i++) 
+		for (int i= 0; i < affectedChildren.length; i++)
 			return findAddedElement(affectedChildren[i]);
 			
 		return null;
@@ -839,7 +843,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		IResource resource= delta.getResource();
 		// filter out changes affecting the output folder
 		if (resource == null)
-			return false;	
+			return false;
 			
 		// this could be optimized by handling all the added children in the parent
 		if ((status & IResourceDelta.REMOVED) != 0) {
@@ -847,7 +851,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				// refresh one level above to deal with empty package filtering properly
 				postRefresh(internalGetParent(parent), PARENT, parent, runnables);
 				return true;
-			} else { 
+			} else {
 				postRemove(resource, runnables);
 				return false;
 			}
@@ -855,7 +859,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if ((status & IResourceDelta.ADDED) != 0) {
 			if (parent instanceof IPackageFragment) {
 				// refresh one level above to deal with empty package filtering properly
-				postRefresh(internalGetParent(parent), PARENT, parent, runnables);	
+				postRefresh(internalGetParent(parent), PARENT, parent, runnables);
 				return true;
 			} else {
 				postAdd(parent, resource, runnables);
@@ -871,7 +875,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		// open/close state change of a project
 		if ((flags & IResourceDelta.OPEN) != 0) {
 			postProjectStateChanged(internalGetParent(parent), runnables);
-			return true;		
+			return true;
 		}
 		IResourceDelta[] resourceDeltas= delta.getAffectedChildren();
 		
@@ -885,7 +889,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					return true;
 				}
 			}
-		}		
+		}
 		for (int i= 0; i < resourceDeltas.length; i++) {
 			if (processResourceDelta(resourceDeltas[i], resource, runnables)) {
 				return false; // early return, element got refreshed
@@ -905,7 +909,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private void postRefresh(Object root, int relation, Object affectedElement, Collection runnables) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
-		if (isParent(root, fInput)) 
+		if (isParent(root, fInput))
 			root= fInput;
 		List toRefresh= new ArrayList(1);
 		toRefresh.add(root);
@@ -989,7 +993,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (fViewer != null && !fViewer.getControl().isDisposed()) {
 				fViewer.getControl().setRedraw(false);
 				Object[] expandedObjects= fViewer.getExpandedElements();
-				fViewer.refresh();	
+				fViewer.refresh();
 				fViewer.setExpandedElements(expandedObjects);
 				fViewer.getControl().setRedraw(true);
 			}
