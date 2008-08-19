@@ -48,7 +48,13 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 
 
 public class PackagesViewContentProviderTests2 extends TestCase {
-
+	
+	/**
+	 * Workaround for "IProject#delete(..) should suppress deltas from CharsetDeltaJob"
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=243912
+	 */
+	private static final boolean BUG_243912= true;
+	
 	public static Test suite() {
 		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.PackagesViewContentProviderTests2"); //$NON-NLS-1$
 		//$JUnit-BEGIN$
@@ -463,7 +469,10 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(true);
 
-		
+		if (BUG_243912) {
+			Thread.sleep(1000);
+			fMyPart.pushDisplay();
+		}
 		super.tearDown();
 	}
 	
