@@ -138,7 +138,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (ctrl != null && !ctrl.isDisposed()) {
 			final boolean hasPendingUpdates;
 			synchronized (this) {
-				hasPendingUpdates= fPendingUpdates != null;
+				hasPendingUpdates= fPendingUpdates != null && !fPendingUpdates.isEmpty();
 			}
 			//Are we in the UIThread? If so spin it until we are done
 			if (!hasPendingUpdates && ctrl.getDisplay().getThread() == Thread.currentThread() && !fViewer.isBusy()) {
