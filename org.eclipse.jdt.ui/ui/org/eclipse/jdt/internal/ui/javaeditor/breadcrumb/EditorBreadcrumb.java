@@ -159,7 +159,8 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		if (element == null)
 			return;
 
-		if (fBreadcrumbViewer.getInput() == element || element.equals(fBreadcrumbViewer.getInput()))
+		Object input= fBreadcrumbViewer.getInput();
+		if (input == element || element.equals(input))
 			return;
 		
 		if (fBreadcrumbViewer.isDropDownOpen())
