@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -100,8 +100,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * </p>
  * 
  * @since 3.2
- * 
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction {
 

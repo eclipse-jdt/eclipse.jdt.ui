@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 
@@ -29,6 +29,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.SelectionDialog;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -74,7 +75,6 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  * </p>
  * 
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class JavaUI {
 	
