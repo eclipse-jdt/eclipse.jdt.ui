@@ -16,6 +16,9 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -44,13 +47,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class AddUnimplementedConstructorsTest extends CoreTests {
 
@@ -1174,7 +1174,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 				assertEquals(expectedConstructor, source);
 			} finally {
 				if (unit != null) {
-					unit.delete(true, null);
+					JavaProjectHelper.delete(unit);
 				}
 			}
 		}

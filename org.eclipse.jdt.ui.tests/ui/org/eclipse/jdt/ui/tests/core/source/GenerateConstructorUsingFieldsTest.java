@@ -16,6 +16,8 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -751,7 +753,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				assertEquals(expectedConstructor, source);
 			} finally {
 				if (unit != null) {
-					unit.delete(true, null);
+					JavaProjectHelper.delete(unit);
 				}
 			}
 		}

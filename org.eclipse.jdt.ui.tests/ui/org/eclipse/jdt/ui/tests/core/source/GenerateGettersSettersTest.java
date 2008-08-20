@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.core.source;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -782,7 +784,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				assertEquals("Insert before " + insertBefore, expectedMethod, source);
 			} finally {
 				if (unit != null) {
-					unit.delete(true, null);
+					JavaProjectHelper.delete(unit);
 				}
 			}
 		}
@@ -847,7 +849,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				assertEquals("Insert before " + insertBefore, expectedMethod, source);
 			} finally {
 				if (unit != null) {
-					unit.delete(true, null);
+					JavaProjectHelper.delete(unit);
 				}
 			}
 		}

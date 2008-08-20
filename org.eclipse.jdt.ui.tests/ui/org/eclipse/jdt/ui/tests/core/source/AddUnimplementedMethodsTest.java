@@ -16,6 +16,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -51,10 +54,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class AddUnimplementedMethodsTest extends TestCase {
@@ -312,7 +311,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 				assertEquals(expectedConstructor, source);
 			} finally {
 				if (unit != null) {
-					unit.delete(true, null);
+					JavaProjectHelper.delete(unit);
 				}
 			}
 		}
