@@ -317,7 +317,7 @@ public class JavaNavigatorContentProvider extends
 
 	protected void postAdd(final Object parent, final Object element, Collection runnables) {
 		if (parent instanceof IJavaModel)
-			super.postAdd(((IJavaModel) parent).getWorkspace(), element, runnables);
+			super.postAdd(((IJavaModel) parent).getWorkspace().getRoot(), element, runnables);
 		else if (parent instanceof IJavaProject) 
 			super.postAdd( ((IJavaProject)parent).getProject(), element, runnables);
 		else
