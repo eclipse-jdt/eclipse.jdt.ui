@@ -20,8 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -31,8 +35,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -40,12 +42,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -412,7 +412,7 @@ public class PasteAction extends SelectionDispatchAction{
 				String typeName= null;
 				int maxVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
 				
-				// Each public type starts a new cu:
+				// Public types must be in separate CUs:
 				for (Iterator iter= types.iterator(); iter.hasNext(); ) {
 					AbstractTypeDeclaration type= (AbstractTypeDeclaration) iter.next();
 					if (typeName == null) {
@@ -421,8 +421,8 @@ public class PasteAction extends SelectionDispatchAction{
 						typeName= type.getName().getIdentifier();
 					} else {
 						int visibility= JdtFlags.getVisibilityCode(type);
-						if (visibility == Modifier.PUBLIC) {
-							// public => create CU for previous:
+						if (visibility == Modifier.PUBLIC && maxVisibility == Modifier.PUBLIC) {
+							// public and there was a public type before => create CU for previous:
 							int prevEnd= type.getStartPosition();
 							String source= text.substring(startOffset, prevEnd);
 							cus.add(new ParsedCu(source, ASTParser.K_COMPILATION_UNIT, typeName, packageName));
