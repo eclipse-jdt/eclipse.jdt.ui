@@ -12,10 +12,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +23,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -150,7 +150,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	/**
 	 * Runs the operation.
 	 * @param monitor The progress monitor
-	 * @throws CoreException  
+	 * @throws CoreException
 	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
@@ -158,7 +158,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4); 
+			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4);
 			
 			CompilationUnit astRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
 
@@ -255,7 +255,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						return null;
 					}
 					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, new String());
-				} else if (binding instanceof IVariableBinding || binding instanceof IMethodBinding) {
+				} else if (JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject()) && (binding instanceof IVariableBinding || binding instanceof IMethodBinding)) {
 					boolean isField= binding instanceof IVariableBinding;
 					ITypeBinding declaringClass= isField ? ((IVariableBinding) binding).getDeclaringClass() : ((IMethodBinding) binding).getDeclaringClass();
 					if (declaringClass == null) {
@@ -267,7 +267,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 							return null;
 						}
 						
-						if (containerName.length() > 0) { 
+						if (containerName.length() > 0) {
 							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
 								String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
 								if (!res.equals(simpleName)) {
@@ -285,7 +285,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			}
 			if (binding != null && binding.getKind() != IBinding.TYPE) {
 				// recovered binding
-				return null; 
+				return null;
 			}
 			
 		} else {
@@ -313,7 +313,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			
 			int res= importRewrite.getDefaultImportRewriteContext().findInContext(containerName, simpleName, ImportRewriteContext.KIND_TYPE);
 			if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
-				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_importclash, null); 
+				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_importclash, null);
 				return null;
 			} else if (res == ImportRewriteContext.RES_NAME_FOUND) {
 				return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
@@ -323,7 +323,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		
 		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
 		if (types.length == 0) {
-			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, BasicElementLabels.getJavaElementName(simpleName)), null); 
+			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, BasicElementLabels.getJavaElementName(simpleName)), null);
 			return null;
 		}
 		

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,12 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -45,9 +48,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 public class AddImportTest extends CoreTests {
 	
 	private static final Class THIS= AddImportTest.class;
@@ -67,7 +67,7 @@ public class AddImportTest extends CoreTests {
 			return allTests();
 		} else {
 			return setUpTest(new AddImportTest("testAddImportContextSensitive06"));
-		}	
+		}
 	}
 	
 	public static Test setUpTest(Test test) {
@@ -77,7 +77,8 @@ public class AddImportTest extends CoreTests {
 
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
-		
+		JavaProjectHelper.set15CompilerOptions(fJProject1);
+
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
 		JavaCore.setOptions(options);
@@ -126,7 +127,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("import com.something.Foo;\n");
 		buf.append("\n");
 		buf.append("import p.A;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("import pack.List;\n");
 		buf.append("import pack.List2;\n");
 		buf.append("\n");
@@ -160,7 +161,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.x.Socket;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("import java.util.Set;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("\n");
@@ -313,7 +314,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("import java.awt.Panel;\n");
 		buf.append("\n");
 		buf.append("import java.math.BigInteger;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
@@ -346,7 +347,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
@@ -363,7 +364,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.io.Exception;\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
@@ -377,7 +378,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
@@ -412,7 +413,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
@@ -435,7 +436,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("import java.lang.System;\n");
 		buf.append("\n");
 		buf.append("import xy.MyConstants;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
@@ -457,14 +458,14 @@ public class AddImportTest extends CoreTests {
 		buf.append("        URL[][] t;\n");
 		buf.append("        List<SocketAddress> x;\n");
 		buf.append("    }\n");
-		buf.append("}\n");	
+		buf.append("}\n");
 		String content= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class B {\n");
-		buf.append("}\n");	
+		buf.append("}\n");
 		String content2= buf.toString();
 		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
 		
@@ -511,7 +512,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("import java.net.URL;\n");
 		buf.append("\n");
 		buf.append("public class B {\n");
-		buf.append("}\n");	
+		buf.append("}\n");
 		
 		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
 		
@@ -523,7 +524,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack1;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        getClass();\n");
@@ -562,7 +563,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack1;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class E<X> {\n");
 		buf.append("    public static <T> E<T> bar(T t) { return null; }\n");
 		buf.append("    public void foo(E<?> e) {\n");
@@ -602,7 +603,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack1;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class E<X> {\n");
 		buf.append("    public static <T> E<? extends T> bar(T t) { return null; }\n");
 		buf.append("    public void foo(E<?> e) {\n");
@@ -651,14 +652,14 @@ public class AddImportTest extends CoreTests {
 		buf.append("    public void foo() {\n");
 		buf.append("        Map<?, ? extends Set<? super ServerSocket>> z;\n");
 		buf.append("    }\n");
-		buf.append("}\n");	
+		buf.append("}\n");
 		String content= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class B {\n");
-		buf.append("}\n");	
+		buf.append("}\n");
 		String content2= buf.toString();
 		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
 		
@@ -673,7 +674,7 @@ public class AddImportTest extends CoreTests {
 			String signature= new BindingKey(key).toSignature();
 			
 			importsRewrite.addImportFromSignature(signature, ast);
-		}			
+		}
 		
 		apply(importsRewrite);
 		
@@ -686,7 +687,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("import java.net.ServerSocket;\n");
 		buf.append("\n");
 		buf.append("public class B {\n");
-		buf.append("}\n");	
+		buf.append("}\n");
 		
 		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
 		
@@ -701,7 +702,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public final static int CONST= 9;\n");
 		buf.append("}\n");
@@ -775,7 +776,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    java.util.Vector c= null;\n");
 		buf.append("}\n");
@@ -791,7 +792,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
 		buf.append("import java.util.Vector;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector c= null;\n");
 		buf.append("}\n");
@@ -806,7 +807,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector c= null;\n");
 		buf.append("}\n");
@@ -822,7 +823,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
 		buf.append("import java.util.Vector;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector c= null;\n");
 		buf.append("}\n");
@@ -837,7 +838,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector c= null\n"); // missing semicolon
 		buf.append("}\n");
@@ -853,7 +854,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
 		buf.append("import java.util.Vector;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector c= null\n");
 		buf.append("}\n");
@@ -868,7 +869,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    java.util.Vector c= null\n"); // missing semicolon
 		buf.append("}\n");
@@ -884,7 +885,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
 		buf.append("import java.util.Vector;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector c= null\n");
 		buf.append("}\n");
@@ -899,7 +900,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    java.util.Vector.class x;\n");
 		buf.append("}\n");
@@ -914,12 +915,12 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    java.util.Vector.class x;\n"); // no change
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
-	}	
+	}
 
 	public void testAddImportActionStatic1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -929,7 +930,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    String str= java.io.File.separator;\n");
 		buf.append("}\n");
@@ -946,12 +947,44 @@ public class AddImportTest extends CoreTests {
 		buf.append("import static java.io.File.separator;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
-		buf.append("\n");		
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    String str= separator;\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
-	}	
+	}
+	
+	public void testAddImportActionStaticWith14() throws Exception {
+		JavaProjectHelper.set14CompilerOptions(fJProject1);
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    String str= java.io.File.separator;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		int selOffset= buf.indexOf("separator");
+
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    String str= java.io.File.separator;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 	public void testAddImportContextSensitive01() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
