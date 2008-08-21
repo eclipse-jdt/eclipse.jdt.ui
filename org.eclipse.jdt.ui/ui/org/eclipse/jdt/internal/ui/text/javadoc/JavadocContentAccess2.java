@@ -1217,14 +1217,8 @@ public class JavadocContentAccess2 {
 					Object first= fragments.get(0);
 					if (first instanceof Name) {
 						String name= ASTNodes.getSimpleNameIdentifier((Name) first);
-						String[] exceptionTypes= fMethod.getExceptionTypes();
-						for (int i= 0; i < exceptionTypes.length; i++) {
-							String exceptionName= Signature.getSimpleName(Signature.toString(exceptionTypes[i]));
-							if (name.equals(exceptionName)) {
-								CharSequence inherited= fJavadocLookup.getInheritedExceptionDescription(fMethod, name);
-								return handleInherited(inherited);
-							}
-						}
+						CharSequence inherited= fJavadocLookup.getInheritedExceptionDescription(fMethod, name);
+						return handleInherited(inherited);
 					}
 				}
 			}
