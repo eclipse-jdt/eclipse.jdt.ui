@@ -16,19 +16,21 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -178,18 +180,32 @@ public class JavaElementLinks {
 			}
 		};
 	}
-	
+
+	/**
+	 * Creates an {@link URI} with the given scheme for the given element.
+	 * 
+	 * @param scheme the scheme
+	 * @param element the element
+	 * @return an {@link URI}, encoded as {@link URI#toASCIIString() ASCII} string, ready to be used
+	 *         as <code>href</code> attribute in an <code>&lt;a&gt;</code> tag
+	 * @throws URISyntaxException
+	 */
 	public static String createURI(String scheme, IJavaElement element) throws URISyntaxException {
 		return createURI(scheme, element, null, null, null);
 	}
 
 	/**
+	 * Creates an {@link URI} with the given scheme based on the given element.
+	 * The additional arguments specify a member referenced from the given element.
+	 * 
 	 * @param scheme a scheme
 	 * @param element the declaring element
 	 * @param refTypeName a (possibly qualified) type name, can be <code>null</code>
 	 * @param refMemberName a member name, can be <code>null</code>
-	 * @param refParameterTypes a (possibly empty) array of (possibly qualified) parameter type names, can be <code>null</code>
-	 * @return an encoded URI, ready to be used as <code>href</code> attribute in an <code>&lt;a&gt;</code> tag
+	 * @param refParameterTypes a (possibly empty) array of (possibly qualified) parameter type
+	 *            names, can be <code>null</code>
+	 * @return an {@link URI}, encoded as {@link URI#toASCIIString() ASCII} string, ready to be used
+	 *         as <code>href</code> attribute in an <code>&lt;a&gt;</code> tag
 	 * @throws URISyntaxException
 	 */
 	public static String createURI(String scheme, IJavaElement element, String refTypeName, String refMemberName, String[] refParameterTypes) throws URISyntaxException {
@@ -233,14 +249,21 @@ public class JavaElementLinks {
 		IJavaElement element= JavaCore.create(segments[1].replace(LINK_BRACKET_REPLACEMENT, '['));
 
 		if (segments.length > 2) {
+			if (element instanceof ILocalVariable) {
+				element= element.getAncestor(IJavaElement.TYPE);
+			} else if (element instanceof ITypeParameter) {
+				element= ((ITypeParameter)element).getDeclaringMember();
+			}
 			if (element instanceof IMember && !(element instanceof IType)) {
 				element= ((IMember) element).getDeclaringType();
 			}
 			if (element instanceof IType) {
 				String refTypeName= segments[2];
 				try {
-					IType baseType= (IType) element;
-					IType type= resolveType(baseType, refTypeName);
+					IType type= (IType) element;
+					if (refTypeName.length() > 0) {
+						type= resolveType(type, refTypeName);
+					}
 					if (type != null) {
 						element= type;
 						if (segments.length > 3) {
@@ -252,8 +275,22 @@ public class JavaElementLinks {
 								}
 								IMethod method= type.getMethod(refMemberName, paramSignatures);
 								IMethod[] methods= type.findMethods(method);
-								if (methods != null)
+								if (methods != null) {
 									return methods[0];
+								} else {
+									//TODO: methods whose signature contains type parameters can not be found
+									// easily, since the Javadoc references are erasures
+									//TODO: reference can also point to method from supertype
+									
+									//Shortcut: only check name and parameter count:
+									methods= type.getMethods();
+									for (int i= 0; i < methods.length; i++) {
+										method= methods[i];
+										if (method.getElementName().equals(refMemberName) && method.getNumberOfParameters() == paramSignatures.length)
+											return method;
+									}
+									
+								}
 							} else {
 								IField field= type.getField(refMemberName);
 								if (field.exists()) {
