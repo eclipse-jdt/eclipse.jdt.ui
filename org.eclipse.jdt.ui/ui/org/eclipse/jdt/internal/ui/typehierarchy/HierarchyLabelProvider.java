@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -152,9 +153,23 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		
 		boolean isInterface= Flags.isInterface(flags);
-		boolean isInner= (type.getDeclaringType() != null);
+		IType declaringType= type.getDeclaringType();
+		boolean isInner= declaringType != null;
+		boolean isInInterfaceOrAnnotation= false;
+		if (isInner) {
+			int declaringTypeFlags= hierarchy.getCachedFlags(declaringType);
+			if (declaringTypeFlags != -1) {
+				isInInterfaceOrAnnotation= Flags.isInterface(declaringTypeFlags);
+			} else {
+				// declaring type is not in hierarchy, so we have to pay the price for resolving here
+				try {
+					isInInterfaceOrAnnotation= declaringType.isInterface();
+				} catch (JavaModelException e) {
+				}
+			}
+		}
 		
-		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, false, flags, isDifferentScope(type));
+		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, isInInterfaceOrAnnotation, flags, isDifferentScope(type));
 
 		int adornmentFlags= 0;
 		if (Flags.isFinal(flags)) {
