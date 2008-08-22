@@ -11,21 +11,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.model.IWorkbenchAdapter;
-
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
@@ -304,6 +303,9 @@ public class JavaElementImageProvider {
 
 				case IJavaElement.TYPE_PARAMETER:
 					return JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE;
+					
+				case IJavaElement.ANNOTATION:
+					return JavaPluginImages.DESC_OBJS_ANNOTATION; 
 					
 				default:
 					// ignore. Must be a new, yet unknown Java element
