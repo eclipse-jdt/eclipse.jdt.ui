@@ -67,10 +67,47 @@ import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
  */
 public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	
+	private static final String SETTINGS_SECTION_METHODS= "SourceActionDialog.methods"; //$NON-NLS-1$
+
+	private static final String SETTINGS_SECTION_CONSTRUCTORS= "SourceActionDialog.constructors"; //$NON-NLS-1$
+	
+	/**
+	 * Valid values are:
+	 * <ul>
+	 * <li>{@link #INSERT_FIRST_INDEX}</li>
+	 * <li>{@link #INSERT_LAST_INDEX}</li>
+	 * <li>{@link #INSERT_POSITION_FROM_EDITOR}</li>
+	 * </ul>
+	 */
+	private static final String SETTINGS_INSERT_POSITION= "InsertPosition"; //$NON-NLS-1$
+	
+	// Valid values for the insert position:
+	private static final int INSERT_FIRST_INDEX= 0;
+	private static final int INSERT_LAST_INDEX= 1;
+	private static final int INSERT_POSITION_FROM_EDITOR= 2;
+
+	private static final String SETTINGS_VISIBILITY_MODIFIER= "VisibilityModifier"; //$NON-NLS-1$
+
+	private static final String SETTINGS_FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
+
+	private static final String SETTINGS_SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
+
+	private static final String SETTINGS_COMMENTS= "Comments"; //$NON-NLS-1$
+	
+	
 	private List fInsertPositions;
 	private List fLabels;
+
+	/**
+	 * One of:
+	 * <ul>
+	 * <li>{@link #INSERT_FIRST_INDEX}</li>
+	 * <li>{@link #INSERT_LAST_INDEX}</li>
+	 * <li><code>i + 2</code>, where <code>i</code> is the index of the member after which new
+	 * members should be inserted</li>
+	 * </ul>
+	 */
 	private int fCurrentPositionIndex;
-	
 	private IDialogSettings fSettings;
 	private CompilationUnitEditor fEditor;
 	private ITreeContentProvider fContentProvider;
@@ -79,78 +116,67 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private int fWidth, fHeight;
 	private String fCommentString;
 	private boolean fEnableInsertPosition= true;
-		
 	private int fVisibilityModifier;
 	private boolean fFinal;
 	private boolean fSynchronized;
-	
-	private final String SETTINGS_SECTION_METHODS= "SourceActionDialog.methods"; //$NON-NLS-1$
-	private final String SETTINGS_SECTION_CONSTRUCTORS= "SourceActionDialog.constructors"; //$NON-NLS-1$
-	
-	private final String SETTINGS_INSERTPOSITION= "InsertPosition"; //$NON-NLS-1$
-	private final String SETTINGS_VISIBILITY_MODIFIER= "VisibilityModifier"; //$NON-NLS-1$
-	private final String SETTINGS_FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
-	private final String SETTINGS_SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
-	private final String SETTINGS_COMMENTS= "Comments"; //$NON-NLS-1$
 	private Composite fInsertPositionComposite;
+	private boolean fHasUserChangedPositionIndex;
+	
 	
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
 		super(parent, labelProvider, contentProvider);
 		fEditor= editor;
-		fContentProvider= contentProvider;		
+		fContentProvider= contentProvider;
 		fType= type;
-		fCommentString= ActionMessages.SourceActionDialog_createMethodComment; 
-		setEmptyListMessage(ActionMessages.SourceActionDialog_no_entries); 
+		fCommentString= ActionMessages.SourceActionDialog_createMethodComment;
+		setEmptyListMessage(ActionMessages.SourceActionDialog_no_entries);
 
 		fWidth= 60;
 		fHeight= 18;
 		
-		int insertionDefault= isConstructor ? 0 : 1;
 		boolean generateCommentsDefault= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()).createComments;
 		
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		String sectionId= isConstructor ? SETTINGS_SECTION_CONSTRUCTORS : SETTINGS_SECTION_METHODS;
-		fSettings= dialogSettings.getSection(sectionId);		
+		fSettings= dialogSettings.getSection(sectionId);
 		if (fSettings == null)  {
 			fSettings= dialogSettings.addNewSection(sectionId);
-		}	
+		}
 		
 		fVisibilityModifier= asInt(fSettings.get(SETTINGS_VISIBILITY_MODIFIER), Modifier.PUBLIC);
 		fFinal= asBoolean(fSettings.get(SETTINGS_FINAL_MODIFIER), false);
 		fSynchronized= asBoolean(fSettings.get(SETTINGS_SYNCHRONIZED_MODIFIER), false);
-		fCurrentPositionIndex= asInt(fSettings.get(SETTINGS_INSERTPOSITION), insertionDefault);
 		fGenerateComment= asBoolean(fSettings.get(SETTINGS_COMMENTS), generateCommentsDefault);
 		fInsertPositions= new ArrayList();
-		fLabels= new ArrayList(); 
+		fLabels= new ArrayList();
 		
 		IJavaElement[] members= fType.getChildren();
 		
 		fInsertPositions.add(members.length > 0 ? members[0]: null); // first
 		fInsertPositions.add(null); // last
 		
-		fLabels.add(ActionMessages.SourceActionDialog_first); 
-		fLabels.add(ActionMessages.SourceActionDialog_last); 
+		fLabels.add(ActionMessages.SourceActionDialog_first);
+		fLabels.add(ActionMessages.SourceActionDialog_last);
 
 		for (int i = 0; i < members.length; i++) {
 			IJavaElement curr= members[i];
 			String methodLabel= JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES);
-			fLabels.add(Messages.format(ActionMessages.SourceActionDialog_after, methodLabel)); 
+			fLabels.add(Messages.format(ActionMessages.SourceActionDialog_after, methodLabel));
 			fInsertPositions.add(findSibling(curr, members));
 		}
 		fInsertPositions.add(null);
-		
-		int indexBeforeCursor= getElementAfterCursorPosition(fEditor, members);
-		if (indexBeforeCursor != -1) {
-			if (indexBeforeCursor == 0) {
-				fCurrentPositionIndex= 0; // first
-			} else {
-				fCurrentPositionIndex= indexBeforeCursor + 1;
-			}
-		} else {
-			// code is needed to deal with bogus values already present in the dialog store.
-			fCurrentPositionIndex= Math.max(fCurrentPositionIndex, 0);
-			fCurrentPositionIndex= Math.min(fCurrentPositionIndex, 1);
-		}
+
+		int storedPositionIndex= asInt(fSettings.get(SETTINGS_INSERT_POSITION), INSERT_POSITION_FROM_EDITOR);
+		if (storedPositionIndex == INSERT_POSITION_FROM_EDITOR) {
+			int indexAfterCursor= getElementAfterCursorPosition(fEditor, members);
+			if (indexAfterCursor == -1)
+				fCurrentPositionIndex= isConstructor ? INSERT_FIRST_INDEX : INSERT_LAST_INDEX;
+			else if (indexAfterCursor == 0)
+				fCurrentPositionIndex= INSERT_FIRST_INDEX;
+			else if (indexAfterCursor > 0)
+				fCurrentPositionIndex= indexAfterCursor + 1;
+		} else
+			fCurrentPositionIndex= storedPositionIndex <= INSERT_FIRST_INDEX ? INSERT_FIRST_INDEX : INSERT_LAST_INDEX; // handle illegal values already present in the dialog store
 	}
 
 	protected IType getType() {
@@ -207,11 +233,15 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fSettings.put(SETTINGS_VISIBILITY_MODIFIER, StringConverter.asString(fVisibilityModifier));
 		fSettings.put(SETTINGS_FINAL_MODIFIER, StringConverter.asString(fFinal));
 		fSettings.put(SETTINGS_SYNCHRONIZED_MODIFIER, StringConverter.asString(fSynchronized));
-		
-		if (fCurrentPositionIndex == 0 || fCurrentPositionIndex == 1) {
-			fSettings.put(SETTINGS_INSERTPOSITION, StringConverter.asString(fCurrentPositionIndex));
-		}
 		fSettings.put(SETTINGS_COMMENTS, fGenerateComment);
+
+		if (fHasUserChangedPositionIndex) {
+			if (fCurrentPositionIndex == INSERT_FIRST_INDEX || fCurrentPositionIndex == INSERT_LAST_INDEX)
+				fSettings.put(SETTINGS_INSERT_POSITION, StringConverter.asString(fCurrentPositionIndex));
+			else if (fEditor != null)
+				fSettings.put(SETTINGS_INSERT_POSITION, StringConverter.asString(INSERT_POSITION_FROM_EDITOR));
+		}
+
 		return super.close();
 	}
 	
@@ -227,12 +257,14 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 	
 	/***
-	 * Set insert position valid input is 0 for the first position, 1 for the last position, > 1 for all else.
+	 * Set insert position valid input is 0 for the first position, 1 for the last position,
+	 * i + 2 for after member with index i.
 	 * @param insert the insert position
+	 * @see #fCurrentPositionIndex
 	 */
 	private void setInsertPosition(int insert) {
 		fCurrentPositionIndex= insert;
-	}	
+	}
 	
 	public void setCommentString(String string) {
 		fCommentString= string;
@@ -264,20 +296,20 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		
 	private void setSynchronized(boolean value)  {
 		fSynchronized= value;
-	}	
+	}
 	
 	protected Composite createSelectionButtons(Composite composite) {
 		Composite buttonComposite= super.createSelectionButtons(composite);
 
 		GridLayout layout = new GridLayout();
-		buttonComposite.setLayout(layout);						
+		buttonComposite.setLayout(layout);
 
 		layout.marginHeight= 0;
-		layout.marginWidth= 0;						
+		layout.marginWidth= 0;
 		layout.numColumns= 1;
 			
 		return buttonComposite;
-	}	
+	}
 	
 	protected void buttonPressed(int buttonId) {
 		switch (buttonId) {
@@ -304,7 +336,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			label.setText(getMessage());
 			label.setFont(composite.getFont());
 			return label;
-		} 
+		}
 		return null;
 	}
 	
@@ -321,14 +353,14 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
+		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		composite.setLayout(layout);
 						
-		Label messageLabel = createMessageArea(composite);			
+		Label messageLabel = createMessageArea(composite);
 		if (messageLabel != null) {
 			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.horizontalSpan= 2;
-			messageLabel.setLayoutData(gd);	
+			messageLabel.setLayoutData(gd);
 		}
 			
 		Composite inner= new Composite(composite, SWT.NONE);
@@ -337,13 +369,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		innerLayout.marginHeight= 0;
 		innerLayout.marginWidth= 0;
 		inner.setLayout(innerLayout);
-		inner.setFont(parent.getFont());		
+		inner.setFont(parent.getFont());
 			
 		CheckboxTreeViewer treeViewer= createTreeViewer(inner);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint = convertWidthInCharsToPixels(fWidth);
 		gd.heightHint = convertHeightInCharsToPixels(fHeight);
-		treeViewer.getControl().setLayoutData(gd);			
+		treeViewer.getControl().setLayoutData(gd);
 		
 		Composite buttonComposite= createSelectionButtons(inner);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
@@ -356,7 +388,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fInsertPositionComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite commentComposite= createCommentSelection(composite);
-		commentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
+		commentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Control linkControl= createLinkControl(composite);
 		if (linkControl != null)
@@ -368,7 +400,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		applyDialogFont(composite);
 					
 		return composite;
-	}				
+	}
 
 	/**
 	 * Clients override to provide link control
@@ -393,10 +425,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		commentComposite.setLayout(layout);
-		commentComposite.setFont(composite.getFont());	
+		commentComposite.setFont(composite.getFont());
 		
 		Button commentButton= new Button(commentComposite, SWT.CHECK);
-		commentButton.setText(fCommentString); 
+		commentButton.setText(fCommentString);
 
 		commentButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -423,11 +455,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			public void visibilityChanged(int newVisibility) {
 				setVisibility(newVisibility);
 			}
-			public void modifierChanged(int modifier, boolean isChecked) {	
+			public void modifierChanged(int modifier, boolean isChecked) {
 				switch (modifier) {
 					case Modifier.FINAL:  {
 						setFinal(isChecked);
-						return; 
+						return;
 					}
 					case Modifier.SYNCHRONIZED:  {
 						setSynchronized(isChecked);
@@ -442,7 +474,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		int[] availableVisibilities= new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.NONE};
 			
 		Composite visibilityComposite= createVisibilityControlAndModifiers(buttonComposite, visibilityChangeListener, availableVisibilities, initialVisibility);
-		return visibilityComposite;				
+		return visibilityComposite;
 	}
 	
 	private List convertToIntegerList(int[] array) {
@@ -482,19 +514,19 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			return null;
 		
 		Group group= new Group(parent, SWT.NONE);
-		group.setText(ActionMessages.SourceActionDialog_modifier_group); 
+		group.setText(ActionMessages.SourceActionDialog_modifier_group);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
 		layout.makeColumnsEqualWidth= true;
-		layout.numColumns= 4; 
+		layout.numColumns= 4;
 		group.setLayout(layout);
 		
 		String[] labels= new String[] {
-			ActionMessages.SourceActionDialog_modifier_public, 
-			ActionMessages.SourceActionDialog_modifier_protected, 
-			ActionMessages.SourceActionDialog_modifier_default, 
-			ActionMessages.SourceActionDialog_modifier_private, 
+			ActionMessages.SourceActionDialog_modifier_public,
+			ActionMessages.SourceActionDialog_modifier_protected,
+			ActionMessages.SourceActionDialog_modifier_default,
+			ActionMessages.SourceActionDialog_modifier_private,
 		};
 		Integer[] data= new Integer[] {
 					new Integer(Modifier.PUBLIC),
@@ -523,7 +555,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
 
 		Button finalCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
-		finalCheckboxButton.setText(ActionMessages.SourceActionDialog_modifier_final); 
+		finalCheckboxButton.setText(ActionMessages.SourceActionDialog_modifier_final);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		finalCheckboxButton.setLayoutData(gd);
 		finalCheckboxButton.setData(new Integer(Modifier.FINAL));
@@ -537,10 +569,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
 			}
-		});	
+		});
 			
 		Button syncCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
-		syncCheckboxButton.setText(ActionMessages.SourceActionDialog_modifier_synchronized); 
+		syncCheckboxButton.setText(ActionMessages.SourceActionDialog_modifier_synchronized);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		syncCheckboxButton.setLayoutData(gd);
 		syncCheckboxButton.setData(new Integer(Modifier.SYNCHRONIZED));
@@ -554,9 +586,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
 			}
-		});	
-		return visibilityComposite;			
-	}	
+		});
+		return visibilityComposite;
+	}
 			
 	protected Composite createInsertPositionCombo(Composite composite) {
 		Composite selectionComposite = new Composite(composite, SWT.NONE);
@@ -565,36 +597,38 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		layout.marginWidth= 0;
 		selectionComposite.setLayout(layout);
 					
-		addOrderEntryChoices(selectionComposite);	
+		addOrderEntryChoices(selectionComposite);
 										
 		return selectionComposite;
 	}
 
 	private Composite addOrderEntryChoices(Composite buttonComposite) {
 		Label enterLabel= new Label(buttonComposite, SWT.NONE);
-		enterLabel.setText(ActionMessages.SourceActionDialog_enterAt_label); 
+		enterLabel.setText(ActionMessages.SourceActionDialog_enterAt_label);
 		if (!fEnableInsertPosition)
 			enterLabel.setEnabled(false);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		enterLabel.setLayoutData(gd);
 
 		final Combo enterCombo= new Combo(buttonComposite, SWT.READ_ONLY);
+		enterCombo.setVisibleItemCount(30);
 		if (!fEnableInsertPosition)
 			enterCombo.setEnabled(false);
 		fillWithPossibleInsertPositions(enterCombo);
-			
+
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(fWidth);
 		enterCombo.setLayoutData(gd);
 		enterCombo.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				int index= enterCombo.getSelectionIndex();
-				// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400				
+				// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
 				setInsertPosition(index);
+				fHasUserChangedPositionIndex= true;
 			}
-		});	
+		});
 
-		return buttonComposite;			
+		return buttonComposite;
 	}
 
 	private void fillWithPossibleInsertPositions(Combo combo) {
@@ -604,11 +638,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	
 	public boolean getFinal() {
 		return fFinal;
-	}		
+	}
 	
 	public boolean getSynchronized() {
 		return fSynchronized;
-	}	
+	}
 	
 	public boolean isFinal() {
 		return fFinal;
@@ -616,7 +650,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 	public boolean isSynchronized() {
 		return fSynchronized;
-	}	
+	}
 	
 	public void setElementPositionEnabled(boolean enabled) {
 		fEnableInsertPosition= enabled;
@@ -630,7 +664,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * Determine where in the file to enter the newly created methods.
 	 */
 	public IJavaElement getElementPosition() {
-		return (IJavaElement) fInsertPositions.get(fCurrentPositionIndex);	
+		return (IJavaElement) fInsertPositions.get(fCurrentPositionIndex);
 	}
 	
 	public int getInsertOffset() throws JavaModelException {
