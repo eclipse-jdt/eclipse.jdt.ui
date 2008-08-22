@@ -15,12 +15,15 @@ import java.io.ByteArrayInputStream;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -29,6 +32,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.IHandlerService;
 
@@ -39,6 +43,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.ui.leaktest.LeakTestCase;
+import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -46,12 +53,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.util.DisplayHelper;
-
-import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
 
 public class JavaLeakTest extends LeakTestCase {
 	
@@ -71,6 +72,10 @@ public class JavaLeakTest extends LeakTestCase {
 			suite.addTest(new JavaLeakTest("testJavaEditorActionDelegate"));
 			return new LeakTestSetup(suite);
 		}
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new LeakTestSetup(test);
 	}
 	
 	public void testTextEditorClose() throws Exception {
@@ -364,7 +369,9 @@ public class JavaLeakTest extends LeakTestCase {
 		ICompilationUnit cu= createTestCU("Test");
 		IEditorPart part= internalTestEditorOpen(cu, CompilationUnitEditor.class);
 				
-		IWorkbench workbench= part.getSite().getWorkbenchWindow().getWorkbench();
+		IWorkbenchWindow workbenchWindow= part.getSite().getWorkbenchWindow();
+		workbenchWindow.getShell().forceActive();
+		IWorkbench workbench= workbenchWindow.getWorkbench();
 		part.getEditorSite().getPage().activate(part);
 		IHandlerService handlerService= (IHandlerService) workbench.getService(IHandlerService.class);
 		handlerService.executeCommand("org.eclipse.jdt.ui.tests.JavaLeakTestActionDelegate", null);
