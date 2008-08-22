@@ -72,10 +72,18 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 	private static final String SETTINGS_SECTION_CONSTRUCTORS= "SourceActionDialog.constructors"; //$NON-NLS-1$
 	
+	/**
+	 * Valid values are:
+	 * <ul>
+	 * <li>{@link #INSERT_FIRST_INDEX}</li>
+	 * <li>{@link #INSERT_LAST_INDEX}</li>
+	 * <li>{@link #INSERT_POSITION_FROM_EDITOR}</li>
+	 * </ul>
+	 */
 	private static final String SETTINGS_INSERT_POSITION= "InsertPosition"; //$NON-NLS-1$
+	
 	// Valid values for the insert position:
 	private static final int INSERT_FIRST_INDEX= 0;
-
 	private static final int INSERT_LAST_INDEX= 1;
 	private static final int INSERT_POSITION_FROM_EDITOR= 2;
 
@@ -90,6 +98,16 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	
 	private List fInsertPositions;
 	private List fLabels;
+
+	/**
+	 * One of:
+	 * <ul>
+	 * <li>{@link #INSERT_FIRST_INDEX}</li>
+	 * <li>{@link #INSERT_LAST_INDEX}</li>
+	 * <li><code>i + 2</code>, where <code>i</code> is the index of the member after which new
+	 * members should be inserted</li>
+	 * </ul>
+	 */
 	private int fCurrentPositionIndex;
 	private IDialogSettings fSettings;
 	private CompilationUnitEditor fEditor;
@@ -240,8 +258,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 	
 	/***
-	 * Set insert position valid input is 0 for the first position, 1 for the last position, > 1 for all else.
+	 * Set insert position valid input is 0 for the first position, 1 for the last position,
+	 * i + 2 for after member with index i.
 	 * @param insert the insert position
+	 * @see #fCurrentPositionIndex
 	 */
 	private void setInsertPosition(int insert) {
 		fCurrentPositionIndex= insert;
