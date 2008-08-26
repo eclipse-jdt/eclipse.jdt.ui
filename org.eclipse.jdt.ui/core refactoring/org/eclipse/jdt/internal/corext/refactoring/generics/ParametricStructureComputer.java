@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,7 +123,7 @@ public class ParametricStructureComputer {
 				if (isParametricType(varType) && !isUnmodifiableFieldOrMethod(v)) {
 					if (DEBUG_INITIALIZATION) System.out.println("Entity has           container structure: " + v); //$NON-NLS-1$
 					setStructureAndPush(v, newParametricType(varType));
-				} else if (varType != null && !mightBeParametric(varType)) {
+				} else if (!mightBeParametric(varType)) {
 					// Not a supertype of any container type - can't have container structure
 					if (DEBUG_INITIALIZATION) System.out.println("Entity DOES NOT have container structure: " + v); //$NON-NLS-1$
 					setStructureAndPush(v, ParametricStructure.NONE);
@@ -236,7 +236,7 @@ public class ParametricStructureComputer {
 			return;
 
 		if (DEBUG_INITIALIZATION)
-			System.out.println("Examining constraint " + lhs + " {" + elemStructure(lhs) + "} <= " + rhs + " {" + elemStructure(rhs) + "}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
+			System.out.println("Examining constraint " + lhs + " {" + elemStructure(lhs) + "} <= " + rhs + " {" + elemStructure(rhs) + "}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
 		if (updateStructureOfVar(lhs, elemStructure(rhs), TypeOperator.SubType)) {
 			if (lhs instanceof CollectionElementVariable2)
@@ -525,7 +525,7 @@ public class ParametricStructureComputer {
 		TType base = parmType.getBase();
 		if (isParametricType(base)) {
 			return createAndInitVars(v, parmType);
-		} 
+		}
 		throw new IllegalStateException("Attempt to create element variables for parametric variable of unknown type: " + parmType); //$NON-NLS-1$
 	}
 
