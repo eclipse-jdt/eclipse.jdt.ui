@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 
 public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		
@@ -105,7 +106,12 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		private void handle(Statement body, ChildPropertyDescriptor bodyProperty) {
-			Statement parent= (Statement) body.getParent();
+			if ((body.getFlags() & ASTNode.RECOVERED) != 0)
+				return;
+			Statement parent= (Statement)body.getParent();
+			if ((parent.getFlags() & ASTNode.RECOVERED) != 0)
+				return;
+			
 			if (fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
 				if (!(body instanceof Block)) {
 					if (body.getNodeType() != ASTNode.IF_STATEMENT && body.getNodeType() != ASTNode.RETURN_STATEMENT && body.getNodeType() != ASTNode.THROW_STATEMENT) {
@@ -251,7 +257,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
         	
         	if (controlStatement instanceof IfStatement) {
         		// if (true) {
-        		//  while (true) 
+        		//  while (true)
         		// 	 if (false)
         		//    ;
         		// } else
@@ -414,8 +420,8 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		return null;
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, 
-			boolean convertSingleStatementToBlock, 
+	public static IFix createCleanUp(CompilationUnit compilationUnit,
+			boolean convertSingleStatementToBlock,
 			boolean removeUnnecessaryBlock,
 			boolean removeUnnecessaryBlockContainingReturnOrThrow) {
 		
