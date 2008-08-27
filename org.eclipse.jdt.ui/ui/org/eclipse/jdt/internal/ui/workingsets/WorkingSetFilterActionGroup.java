@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
 public class WorkingSetFilterActionGroup extends ActionGroup implements IWorkingSetActionGroup {
 
 	private static final String TAG_WORKING_SET_NAME= "workingSetName"; //$NON-NLS-1$
-	private static final String TAG_IS_WINDOW_WORKING_SET= "isWindowWorkingSet";  //$NON-NLS-1$
 	private static final String LRU_GROUP= "workingSet_lru_group"; //$NON-NLS-1$
 
 	private final WorkingSetFilter fWorkingSetFilter;
@@ -171,17 +170,10 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 * @param memento the memento
 	 */
 	public void saveState(IMemento memento) {
-		String workingSetName= ""; //$NON-NLS-1$
-		boolean isWindowWorkingSet= false;
-		if (fWorkingSet != null) {
-			if (fWorkingSet.isAggregateWorkingSet()) { 
-				isWindowWorkingSet= true;
-			} else {
-				workingSetName= fWorkingSet.getName();
-			}
-		}
-		memento.putString(TAG_IS_WINDOW_WORKING_SET, Boolean.toString(isWindowWorkingSet));
-		memento.putString(TAG_WORKING_SET_NAME, workingSetName);
+		if (fWorkingSet != null)
+			memento.putString(TAG_WORKING_SET_NAME, fWorkingSet.getName());
+		else
+			memento.putString(TAG_WORKING_SET_NAME, ""); //$NON-NLS-1$
 	}
 
 	/**
@@ -189,26 +181,16 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 * <p>
 	 * Note: This method does not refresh the viewer.
 	 * </p>
-	 * @param memento
-	 */	
+	 * 
+	 * @param memento the memento
+	 */
 	public void restoreState(IMemento memento) {
-		boolean isWindowWorkingSet;
-		if (memento.getString(TAG_IS_WINDOW_WORKING_SET) != null) {
-			isWindowWorkingSet= Boolean.valueOf(memento.getString(TAG_IS_WINDOW_WORKING_SET)).booleanValue();
-		} else {
-			isWindowWorkingSet= useWindowWorkingSetByDefault();
-		}
 		String workingSetName= memento.getString(TAG_WORKING_SET_NAME);
-		boolean hasWorkingSetName= workingSetName != null && workingSetName.length() > 0;
-		
-		IWorkingSet ws= null;
-		// First handle name if present.
-		if (hasWorkingSetName) {
-			ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-		} else if (isWindowWorkingSet && fWorkbenchPage != null) {
-			ws= fWorkbenchPage.getAggregateWorkingSet();
+		if (workingSetName != null && workingSetName.length() > 0) {
+			setWorkingSet(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName), false);
+		} else if (fWorkbenchPage != null && useWindowWorkingSetByDefault()) {
+			setWorkingSet(fWorkbenchPage.getAggregateWorkingSet(), false);
 		}
-		setWorkingSet(ws, false);
 	}
 
 	private boolean useWindowWorkingSetByDefault() {
@@ -240,7 +222,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 */
 	public void fillViewMenu(IMenuManager mm) {
 		if (mm.find(IWorkingSetActionGroup.ACTION_GROUP) == null) {
-			mm.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));			
+			mm.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));
 		}
 		add(mm, fSelectWorkingSetAction);
 		add(mm, fClearWorkingSetAction);
@@ -333,7 +315,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	}
 	
 	/**
-	 * @return Returns viewer filter always configured with the current working set. 
+	 * @return Returns viewer filter always configured with the current working set.
 	 */
 	public ViewerFilter getWorkingSetFilter() {
 		return fWorkingSetFilter;
