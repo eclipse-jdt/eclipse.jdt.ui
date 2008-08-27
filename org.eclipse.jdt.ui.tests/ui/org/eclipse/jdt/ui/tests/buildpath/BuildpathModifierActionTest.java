@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -30,7 +32,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
@@ -38,11 +39,8 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 public class BuildpathModifierActionTest extends TestCase {
 
-	private static final Class THIS= BuildpathModifierActionTest.class;
     private static final String DEFAULT_OUTPUT_FOLDER_NAME= "bin";
 	private static final String PROJECT_NAME= "P01";
 	
@@ -52,15 +50,8 @@ public class BuildpathModifierActionTest extends TestCase {
 		super(name);
 	}
 	
-	public static Test allTests() {
-		TestSuite result= new TestSuite();
-		result.addTest(new TestSuite(THIS));
-		result.addTest(new TestSuite(BuildpathModifierActionEnablementTest.THIS));
-		return result;
-	}
-
 	public static Test suite() {
-		return allTests();	
+		return new TestSuite(BuildpathModifierActionTest.class);
 	}
 
 	protected void setUp() throws Exception {
@@ -74,13 +65,13 @@ public class BuildpathModifierActionTest extends TestCase {
 	}
 	
 	private static IJavaProject createProject(String defaultOutputFolder) throws CoreException {
-    	IJavaProject result= JavaProjectHelper.createJavaProject(PROJECT_NAME, defaultOutputFolder);	
+    	IJavaProject result= JavaProjectHelper.createJavaProject(PROJECT_NAME, defaultOutputFolder);
     	IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_15);
     	result.setRawClasspath(new IClasspathEntry[] {  JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) }, null);
     	return result;
     }
 	
-	private static void assertIsOnBuildpath(IClasspathEntry[] entries, IPath path) throws JavaModelException {
+	private static void assertIsOnBuildpath(IClasspathEntry[] entries, IPath path) {
 		for (int i= 0; i < entries.length; i++) {
 	        if (entries[i].getPath().equals(path))
 	        	return;
@@ -266,7 +257,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 3);
 		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.MYLIB.makeAbsolute());
-		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.NLS_LIB.makeAbsolute());	
+		assertIsOnBuildpath(classpathEntries, JavaProjectHelper.NLS_LIB.makeAbsolute());
 	}
 
 	public void testAddExternalJarBug132827() throws Exception {
@@ -299,7 +290,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
 		IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath outputPath= projectPath.append("srcbin");
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -328,7 +319,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		JavaProjectHelper.addSourceContainer(fJavaProject, null, new IPath[] {new Path("src/")});
 		IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath outputPath= projectPath.append("srcbin");
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -358,7 +349,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath outputPath= projectPath.append("src1").append(DEFAULT_OUTPUT_FOLDER_NAME);
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -390,7 +381,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		IPackageFragmentRoot src2= JavaProjectHelper.addSourceContainer(fJavaProject, "src2");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath outputPath= projectPath.append("src2").append(DEFAULT_OUTPUT_FOLDER_NAME);
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -426,7 +417,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		IPackageFragmentRoot src2= JavaProjectHelper.addSourceContainer(fJavaProject, "src2");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath outputPath= projectPath.append("src2").append(DEFAULT_OUTPUT_FOLDER_NAME);
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -463,7 +454,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		JavaProjectHelper.addSourceContainer(fJavaProject, "src2");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath outputPath= projectPath.append("src2");
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -476,7 +467,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
 		IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath outputPath= projectPath.append(".");
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -489,7 +480,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath oldOutputPath= projectPath.append("src1").append("sub").append(DEFAULT_OUTPUT_FOLDER_NAME);
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -527,7 +518,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		fJavaProject= createProject(null);
 		IPackageFragmentRoot p01= JavaProjectHelper.addSourceContainer(fJavaProject, null);
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(p01.getRawClasspathEntry(), fJavaProject));
@@ -564,7 +555,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath oldOutputPath= projectPath.append(DEFAULT_OUTPUT_FOLDER_NAME);
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
@@ -601,7 +592,7 @@ public class BuildpathModifierActionTest extends TestCase {
 		fJavaProject= createProject(DEFAULT_OUTPUT_FOLDER_NAME);
 		IPackageFragmentRoot src1= JavaProjectHelper.addSourceContainer(fJavaProject, "src1");
 		
-		IPath projectPath= fJavaProject.getProject().getFullPath();		
+		IPath projectPath= fJavaProject.getProject().getFullPath();
 		IPath oldOutputPath= projectPath.append("binary");
 		
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);

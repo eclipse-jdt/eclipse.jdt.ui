@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,15 @@
 package org.eclipse.jdt.ui.tests.buildpath;
 
 import java.io.ByteArrayInputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -59,8 +62,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.EditOutputFo
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ExcludeFromBuildpathAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.IncludeToBuildpathAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.RemoveFromBuildpathAction;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class BuildpathModifierActionEnablementTest extends TestCase {
     
@@ -167,7 +168,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         }
     }
     
-    public void testProjectWithOthers() throws JavaModelException {
+    public void testProjectWithOthers() {
         select(new Object[] {fProject});
         assertOnlyEnabled(new IAction[] {fAddFolderToBuildpathAction, fCreateLinkedSourceFolderAction});
         
@@ -298,7 +299,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testSrcWithOthers() throws JavaModelException {
+    public void testSrcWithOthers() {
         select(new Object[] {fSourceFolder});
         assertOnlyEnabled(new IAction[] {fRemoveFromBuildpathAction, fEditFilterAction});
         
@@ -342,7 +343,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testNormalFolderWithOthers() throws JavaModelException {
+    public void testNormalFolderWithOthers() {
         select(new Object[] {fFolder});
         assertOnlyEnabled(new IAction[] {fAddFolderToBuildpathAction});
         
@@ -410,7 +411,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testPackageWithOthers() throws JavaModelException {
+    public void testPackageWithOthers() {
         select(new Object[] {fPackage});
         assertOnlyEnabled(new IAction[] {fAddFolderToBuildpathAction, fExcludeFromBuildpathAction});
         
@@ -466,7 +467,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testCUWithOthers() throws JavaModelException {
+    public void testCUWithOthers() {
         select(new Object[] {fCompilationUnit});
         assertOnlyEnabled(new IAction[] {fExcludeFromBuildpathAction});
         
@@ -510,7 +511,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testExcludedFileWithOthers() throws JavaModelException {
+    public void testExcludedFileWithOthers() {
         select(new Object[] {fExcludedFile});
         assertOnlyEnabled(new IAction[] {fIncludeToBuildpathAction});
         
@@ -542,7 +543,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testFileWithOthers() throws JavaModelException {
+    public void testFileWithOthers() {
         select(new Object[] {fFile});
         assertAllDisabled();
         
@@ -562,7 +563,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testExcludedPackWithOthers() throws JavaModelException {
+    public void testExcludedPackWithOthers() {
         select(new Object[] {fExcludedPackage});
         assertOnlyEnabled(new IAction[] {fAddFolderToBuildpathAction, fIncludeToBuildpathAction});
         
@@ -588,7 +589,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testDefaultPackWithOthers() throws JavaModelException {
+    public void testDefaultPackWithOthers() {
         select(new Object[] {fDefaultPackage});
         assertAllDisabled();
         
@@ -602,7 +603,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testDefaultJARWithOthers() throws JavaModelException {
+    public void testDefaultJARWithOthers() {
         select(new Object[] {fLibrary});
         assertOnlyEnabled(new IAction[] {fRemoveFromBuildpathAction});
         
@@ -610,7 +611,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertAllDisabled();
     }
     
-    public void testDefaultZipWithOthers() throws JavaModelException, InvocationTargetException {
+    public void testDefaultZipWithOthers() {
         select(new Object[] {fExcludedLibrary});
         assertAllDisabled();
           
@@ -632,7 +633,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         assertOnlyEnabled(new IAction[] {fRemoveFromBuildpathAction});
     }
 
-	private IJavaProject createProject() throws CoreException, InvocationTargetException {
+	private IJavaProject createProject() throws CoreException {
         fProject= JavaProjectHelper.createJavaProject("Dummy project", "bin");
         IPath srcPath= new Path("src");
         IPath normalFolderPath= new Path("NormalFolder");
@@ -673,7 +674,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         
         // two compilation units A and B in 'package'
         ICompilationUnit cuA= createICompilationUnit("A", pack1);
-        final IResource excludedElements[]= {null, null}; 
+        final IResource excludedElements[]= {null, null};
         final IPackageFragment pack2= root.createPackageFragment("pack1.pack2", true, null);
         final ICompilationUnit cuB= createICompilationUnit("B", pack1);
         ExcludeFromBuildpathAction exclude= new ExcludeFromBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
@@ -753,11 +754,15 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
     private StringBuffer getFileContent(String className, String packageHeader) {
         StringBuffer buf= new StringBuffer();
         buf.append(packageHeader);
-        buf.append("\n");   
+        buf.append("\n");
         buf.append("public class "+className+ " {\n");
         buf.append("    public void foo() {\n");
-        buf.append("    }\n");      
+        buf.append("    }\n");
         buf.append("}\n");
         return buf;
-    }   
+    }
+
+	public static Test suite() {
+		return new TestSuite(BuildpathModifierActionEnablementTest.class);
+	}
 }
