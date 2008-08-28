@@ -19,6 +19,9 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -40,6 +43,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
@@ -47,11 +51,6 @@ import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class CleanUpTest extends CleanUpTestCase {
 	
@@ -3014,7 +3013,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("        return E2.FOO;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E3.java", buf.toString(), false, null); 
+		ICompilationUnit cu1= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
@@ -4233,6 +4232,33 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testBug245254() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= 0;\n");
+		buf.append("    void method() {\n");
+		buf.append("        if (true\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= 0;\n");
+		buf.append("    void method() {\n");
+		buf.append("        if (true\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 	
 	public void testCombinationBug120585() throws Exception {
@@ -5527,7 +5553,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("        n= 1 * (2 * 3);\n");
 		buf.append("        return 2 * (n % 10);\n");
 		buf.append("    }\n");
-		buf.append("}\n");		
+		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
