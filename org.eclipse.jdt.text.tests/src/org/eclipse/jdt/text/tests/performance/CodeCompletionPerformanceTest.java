@@ -17,18 +17,18 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.ISourceViewer;
-
-import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,9 +38,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -205,9 +202,9 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			meter.start();
 			for (int accumulated= 0; accumulated < ACC_APPLICATION; accumulated++) {
 				
-				applyProposal(proposals[0], "equals()");
-				applyProposal(proposals[2], "hashCode()");
-				applyProposal(proposals[9], "wait()");
+				applyProposal(proposals[0]);
+				applyProposal(proposals[2]);
+				applyProposal(proposals[9]);
 				
 			}
 			meter.stop();
@@ -259,9 +256,9 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			meter.start();
 			
 			for (int accumulated= 0; accumulated < ACC_APPLICATION; accumulated++) {
-				applyProposal(proposals[0], "equals(arg0)");
-				applyProposal(proposals[2], "hashCode()");
-				applyProposal(proposals[9], "wait(arg0, arg1)");
+				applyProposal(proposals[0]);
+				applyProposal(proposals[2]);
+				applyProposal(proposals[9]);
 			}
 			
 			meter.stop();
@@ -314,9 +311,9 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			meter.start();
 			
 			for (int accumulated= 0; accumulated < ACC_PARAMETER_APPLICATION; accumulated++) {
-				applyProposal(proposals[0], "equals(run)");
-				applyProposal(proposals[2], "hashCode()");
-				applyProposal(proposals[9], "wait(longVal, intVal)");
+				applyProposal(proposals[0]);
+				applyProposal(proposals[2]);
+				applyProposal(proposals[9]);
 			}
 			
 			meter.stop();
@@ -334,7 +331,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		assertAllPerformance();
 	}
 	
-	private void createTypeHierarchy() throws JavaModelException, PartInitException {
+	private void createTypeHierarchy() throws JavaModelException {
 		IPackageFragment fragment= fSourceFolder.createPackageFragment("test2", false, null);
 		
 		String parent= "HashMap";
@@ -377,7 +374,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		assertAllPerformance();
 	}
 	
-	private void applyProposal(IJavaCompletionProposal proposal, String completion) {
+	private void applyProposal(IJavaCompletionProposal proposal) {
 		ISourceViewer viewer= fEditor.getViewer();
 		viewer.getDocument().set(fContents);
 		viewer.setSelectedRange(fCodeAssistOffset, 0);

@@ -13,6 +13,8 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
@@ -24,8 +26,6 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -86,10 +86,9 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	}
 
 	/**
-	 * Measures the time to retrieve the content type for a modified text
-	 * file buffer.
+	 * Measures the time to retrieve the content type for a modified text file buffer.
 	 * 
-	 * @throws Exception
+	 * @throws Exception if measure fails
 	 */
 	public void testTextDirty() throws Exception {
 		measure(TEXT_FILE, TEXT_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns());
@@ -99,10 +98,9 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	}
 
 	/**
-	 * Measures the time to retrieve the content type for a modified Java
-	 * file buffer.
+	 * Measures the time to retrieve the content type for a modified Java file buffer.
 	 * 
-	 * @throws Exception
+	 * @throws Exception if measure fails
 	 */
 	public void testJavaDirty() throws Exception {
 		measure(JAVA_FILE, JAVA_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns());
@@ -112,10 +110,9 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	}
 
 	/**
-	 * Measures the time to retrieve the content type for a modified properties
-	 * file buffer.
+	 * Measures the time to retrieve the content type for a modified properties file buffer.
 	 * 
-	 * @throws Exception
+	 * @throws Exception if measure fails
 	 */
 	public void testPropertiesDirty() throws Exception {
 		measure(PROPERTIES_FILE, PROPERTIES_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns());
@@ -125,10 +122,9 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	}
 
 	/**
-	 * Measures the time to retrieve the content type for a modified plugin.xml
-	 * file buffer.
+	 * Measures the time to retrieve the content type for a modified plugin.xml file buffer.
 	 * 
-	 * @throws Exception
+	 * @throws Exception if measure fails
 	 */
 	public void testPluginXMLDirty() throws Exception {
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns(), PLUGIN_XML_ITERATIONS);
@@ -140,10 +136,9 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	}
 
 	/**
-	 * Measures the time to retrieve the content type for a modified
-	 * plugin properties file buffer.
+	 * Measures the time to retrieve the content type for a modified plugin properties file buffer.
 	 * 
-	 * @throws Exception
+	 * @throws Exception if measure fails
 	 */
 	public void testPluginPropertiesDirty() throws Exception {
 		measure(PLUGIN_PROPERTIES_FILE, PLUGIN_PROPERTIES_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns());

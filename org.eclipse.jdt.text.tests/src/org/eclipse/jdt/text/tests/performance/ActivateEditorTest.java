@@ -14,10 +14,12 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
@@ -108,6 +110,11 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 		}
 	}
 	
+	/**
+	 * Waits until the editor is ready.
+	 * 
+	 * @param editor the editor
+	 */
 	protected void waitUntilReady(AbstractTextEditor editor) {
 	}
 	

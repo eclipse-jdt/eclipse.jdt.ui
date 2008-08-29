@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import com.ibm.icu.text.BreakIterator;
-
 import junit.framework.TestCase;
+
+import com.ibm.icu.text.BreakIterator;
 
 
 /**
@@ -31,7 +31,7 @@ public class BreakIteratorTest extends TestCase {
 		
 		// test next()
 		for (int i = 0; i < positions.length; i++) {
-			int pos= fBreakIterator.next(); 
+			int pos= fBreakIterator.next();
 			assertEquals(positions[i], pos);
 		}
 		
@@ -49,9 +49,11 @@ public class BreakIteratorTest extends TestCase {
 	}
 
 	/**
-	 * Check if we are in a multibyte delimiter
-	 * @param idx
-	 * @return
+	 * Check if we are in a multi-byte delimiter.
+	 * 
+	 * @param seq the sequence
+	 * @param idx the index
+	 * @return <code>true</code> if position is illegal
 	 */
 	private boolean illegalPos(CharSequence seq, int idx) {
 		String DELIMS= "\n\r";
@@ -71,7 +73,7 @@ public class BreakIteratorTest extends TestCase {
 		fBreakIterator.last();
 		
 		for (int i = positions.length - 1; i >= 0; i--) {
-			int pos= fBreakIterator.previous(); 
+			int pos= fBreakIterator.previous();
 			assertEquals(positions[i], pos);
 		}
 	

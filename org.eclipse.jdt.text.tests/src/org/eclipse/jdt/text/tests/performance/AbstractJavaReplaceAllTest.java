@@ -11,13 +11,13 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
@@ -65,7 +65,7 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 	/**
 	 * Measures the time to replaceAll in a large file.
 	 * 
-	 * @throws Exception
+	 * @throws Exception if measure fails
 	 */
 	public void test() throws Exception {
 		measure(getNullPerformanceMeter(), getWarmUpRuns());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.jdt.text.tests;
 
 import junit.framework.TestCase;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -34,8 +36,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
@@ -64,8 +64,10 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 
 	/**
 	 * Removes the test java project.
-	 */	
-	protected void tearDown () throws Exception {
+	 * 
+	 * @throws CoreException if deletion fails
+	 */
+	protected void tearDown() throws CoreException {
 		if (fJavaProject != null)
 			JavaProjectHelper.delete(fJavaProject);
 		
@@ -127,7 +129,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		ICompilationUnitDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 		assertNotNull(provider);
 		
-		provider.connect(input);		
+		provider.connect(input);
 		assertNotNull(provider.getDocument(input));
 		assertNotNull(provider.getAnnotationModel(input));
 		provider.disconnect(input);
