@@ -163,9 +163,9 @@ public final class ProjectTemplateStore {
 
 	public void restoreDefaults() {
 		if (fProjectStore == null) {
-			fInstanceStore.restoreDefaults();
+			fInstanceStore.restoreDefaults(false);
 		} else {
-			fProjectStore.restoreDefaults();
+			fProjectStore.restoreDefaults(false);
 		}
 	}
 	
