@@ -165,10 +165,14 @@ public final class ProjectTemplateStore {
 		if (fProjectStore == null) {
 			fInstanceStore.restoreDefaults(false);
 		} else {
-			fProjectStore.restoreDefaults(false);
+			try {
+				load();
+			} catch (IOException e) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
-	
+
 	public void save() throws IOException {
 		if (fProjectStore == null) {
 			fInstanceStore.save();

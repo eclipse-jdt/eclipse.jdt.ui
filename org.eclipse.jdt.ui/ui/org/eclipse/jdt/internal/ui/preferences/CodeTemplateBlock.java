@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class     
+ *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
@@ -38,6 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -212,63 +212,63 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
 			String id=data.getId();
 			if (CodeTemplateContextType.CATCHBLOCK_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_catchblock_label; 
+				return PreferencesMessages.CodeTemplateBlock_catchblock_label;
 			} else if (CodeTemplateContextType.METHODSTUB_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_methodstub_label; 
+				return PreferencesMessages.CodeTemplateBlock_methodstub_label;
 			} else if (CodeTemplateContextType.CONSTRUCTORSTUB_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_constructorstub_label; 
+				return PreferencesMessages.CodeTemplateBlock_constructorstub_label;
 			} else if (CodeTemplateContextType.GETTERSTUB_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_getterstub_label; 
+				return PreferencesMessages.CodeTemplateBlock_getterstub_label;
 			} else if (CodeTemplateContextType.SETTERSTUB_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_setterstub_label; 
+				return PreferencesMessages.CodeTemplateBlock_setterstub_label;
 			} else if (CodeTemplateContextType.NEWTYPE_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_newtype_label; 
+				return PreferencesMessages.CodeTemplateBlock_newtype_label;
 			} else if (CodeTemplateContextType.CLASSBODY_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_classbody_label; 
+				return PreferencesMessages.CodeTemplateBlock_classbody_label;
 			} else if (CodeTemplateContextType.INTERFACEBODY_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_interfacebody_label; 
+				return PreferencesMessages.CodeTemplateBlock_interfacebody_label;
 			} else if (CodeTemplateContextType.ENUMBODY_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_enumbody_label; 
+				return PreferencesMessages.CodeTemplateBlock_enumbody_label;
 			} else if (CodeTemplateContextType.ANNOTATIONBODY_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_annotationbody_label; 
+				return PreferencesMessages.CodeTemplateBlock_annotationbody_label;
 			} else if (CodeTemplateContextType.FILECOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_filecomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_filecomment_label;
 			} else if (CodeTemplateContextType.TYPECOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_typecomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_typecomment_label;
 			} else if (CodeTemplateContextType.FIELDCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_fieldcomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_fieldcomment_label;
 			} else if (CodeTemplateContextType.METHODCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_methodcomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_methodcomment_label;
 			} else if (CodeTemplateContextType.OVERRIDECOMMENT_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_overridecomment_label;
 			} else if (CodeTemplateContextType.DELEGATECOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_delegatecomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_delegatecomment_label;
 			} else if (CodeTemplateContextType.CONSTRUCTORCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_constructorcomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_constructorcomment_label;
 			} else if (CodeTemplateContextType.GETTERCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_gettercomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_gettercomment_label;
 			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_settercomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_settercomment_label;
 			}
 			return data.getTemplate().getDescription();
 		}
-	}		
+	}
 	
 	private static final Key PREF_GENERATE_COMMENTS= getJDTUIKey(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 	
 	private static Key[] getAllKeys() {
 		return new Key[] {
 			PREF_GENERATE_COMMENTS
-		};	
-	}	
+		};
+	}
 	
 	private final static int IDX_EDIT= 0;
 	private final static int IDX_IMPORT= 2;
 	private final static int IDX_EXPORT= 3;
 	private final static int IDX_EXPORTALL= 4;
 	
-	protected final static Object COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node; 
-	protected final static Object CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node; 
+	protected final static Object COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node;
+	protected final static Object CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node;
 
 	private TreeListDialogField fCodeTemplateTree;
 	private SelectionButtonDialogField fGenerateComments;
@@ -281,7 +281,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	private TemplateVariableProcessor fTemplateProcessor;
 	
 	public CodeTemplateBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
-		super(context, project, getAllKeys(), container);		
+		super(context, project, getAllKeys(), container);
 		
 		fTemplateStore= new ProjectTemplateStore(project);
 		try {
@@ -294,14 +294,14 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		
 		CodeTemplateAdapter adapter= new CodeTemplateAdapter();
 
-		String[] buttonLabels= new String[] { 
-			PreferencesMessages.CodeTemplateBlock_templates_edit_button,	
-			/* */ null,  
-			PreferencesMessages.CodeTemplateBlock_templates_import_button, 
-			PreferencesMessages.CodeTemplateBlock_templates_export_button, 
+		String[] buttonLabels= new String[] {
+			PreferencesMessages.CodeTemplateBlock_templates_edit_button,
+			/* */ null,
+			PreferencesMessages.CodeTemplateBlock_templates_import_button,
+			PreferencesMessages.CodeTemplateBlock_templates_export_button,
 			PreferencesMessages.CodeTemplateBlock_templates_exportall_button
 
-		};		
+		};
 		fCodeTemplateTree= new TreeListDialogField(adapter, buttonLabels, new CodeTemplateLabelProvider());
 		fCodeTemplateTree.setDialogFieldListener(adapter);
 		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label);
@@ -313,11 +313,11 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		fCodeTemplateTree.addElement(COMMENT_NODE);
 		fCodeTemplateTree.addElement(CODE_NODE);
 
-		fCodeTemplateTree.selectFirstElement();	
+		fCodeTemplateTree.selectFirstElement();
 		
 		fGenerateComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
 		fGenerateComments.setDialogFieldListener(adapter);
-		fGenerateComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label); 
+		fGenerateComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label);
 		
 		updateControls();
 	}
@@ -334,7 +334,16 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			return ProjectTemplateStore.hasProjectSpecificTempates(project);
 		}
 		return false;
-	}	
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
+	 * @since 3.5
+	 */
+	public void useProjectSpecificSettings(boolean enable) {
+		fCodeTemplateTree.setEnabled(enable); // need to set because super implementation only updates controls
+		super.useProjectSpecificSettings(enable);
+	}
 	
 	protected Control createContents(Composite parent) {
 		fPixelConverter=  new PixelConverter(parent);
@@ -366,11 +375,11 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	 */
 	protected void updateControls() {
 		fGenerateComments.setSelection(getBooleanValue(PREF_GENERATE_COMMENTS));
-	}	
+	}
 		
 	private SourceViewer createViewer(Composite parent, int nColumns) {
 		Label label= new Label(parent, SWT.NONE);
-		label.setText(PreferencesMessages.CodeTemplateBlock_preview); 
+		label.setText(PreferencesMessages.CodeTemplateBlock_preview);
 		GridData data= new GridData();
 		data.horizontalSpan= nColumns;
 		label.setLayoutData(data);
@@ -412,7 +421,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	
 	protected static boolean canEdit(List selected) {
 		return selected.size() == 1 && (selected.get(0) instanceof TemplatePersistenceData);
-	}	
+	}
 	
 	protected void updateSourceViewerInput(List selection) {
 		if (fPatternViewer == null || fPatternViewer.getTextWidget().isDisposed()) {
@@ -426,7 +435,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {
 			fPatternViewer.getDocument().set(""); //$NON-NLS-1$
-		}		
+		}
 	}
 		
 	protected void doButtonPressed(int buttonIndex, List selected) {
@@ -454,8 +463,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		
 	private void import_() {
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(PreferencesMessages.CodeTemplateBlock_import_title); 
-		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_import_extension}); 
+		dialog.setText(PreferencesMessages.CodeTemplateBlock_import_title);
+		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_import_extension});
 		String path= dialog.open();
 		
 		if (path == null)
@@ -502,7 +511,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 	
 	private void exportAll() {
-		export(fTemplateStore.getTemplateData());	
+		export(fTemplateStore.getTemplateData());
 	}
 	
 	private void export(List selected) {
@@ -521,26 +530,26 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	
 	private void export(TemplatePersistenceData[] templates) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(Messages.format(PreferencesMessages.CodeTemplateBlock_export_title, String.valueOf(templates.length))); 
-		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_export_extension}); 
-		dialog.setFileName(PreferencesMessages.CodeTemplateBlock_export_filename); 
+		dialog.setText(Messages.format(PreferencesMessages.CodeTemplateBlock_export_title, String.valueOf(templates.length)));
+		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_export_extension});
+		dialog.setFileName(PreferencesMessages.CodeTemplateBlock_export_filename);
 		String path= dialog.open();
 
 		if (path == null)
 			return;
 		
-		File file= new File(path);		
+		File file= new File(path);
 
 		if (file.isHidden()) {
-			String title= PreferencesMessages.CodeTemplateBlock_export_error_title; 
-			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_hidden, BasicElementLabels.getPathLabel(file)); 
+			String title= PreferencesMessages.CodeTemplateBlock_export_error_title;
+			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_hidden, BasicElementLabels.getPathLabel(file));
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
 		
 		if (file.exists() && !file.canWrite()) {
-			String title= PreferencesMessages.CodeTemplateBlock_export_error_title; 
-			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_canNotWrite, BasicElementLabels.getPathLabel(file)); 
+			String title= PreferencesMessages.CodeTemplateBlock_export_error_title;
+			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_canNotWrite, BasicElementLabels.getPathLabel(file));
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
@@ -557,7 +566,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 					try {
 						output.close();
 					} catch (IOException e2) {
-						// ignore 
+						// ignore
 					}
 				}
 				openWriteErrorDialog();
@@ -568,17 +577,17 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 	private boolean confirmOverwrite(File file) {
 		return MessageDialog.openQuestion(getShell(),
-			PreferencesMessages.CodeTemplateBlock_export_exists_title, 
+			PreferencesMessages.CodeTemplateBlock_export_exists_title,
 			Messages.format(PreferencesMessages.CodeTemplateBlock_export_exists_message, BasicElementLabels.getPathLabel(file)));
 	}
 
 	public void performDefaults() {
-		super.performDefaults();
 		fTemplateStore.restoreDefaults();
-		
+
 		// refresh
 		fCodeTemplateTree.refresh();
-		updateSourceViewerInput(fCodeTemplateTree.getSelectedElements());
+		
+		super.performDefaults();
 	}
 	
 	public boolean performOk(boolean enabled) {
@@ -610,19 +619,19 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 	
 	private void openReadErrorDialog(Exception e) {
-		String title= PreferencesMessages.CodeTemplateBlock_error_read_title; 
+		String title= PreferencesMessages.CodeTemplateBlock_error_read_title;
 		
 		String message= e.getLocalizedMessage();
 		if (message != null)
-			message= Messages.format(PreferencesMessages.CodeTemplateBlock_error_parse_message, message); 
+			message= Messages.format(PreferencesMessages.CodeTemplateBlock_error_parse_message, message);
 		else
-			message= PreferencesMessages.CodeTemplateBlock_error_read_message; 
+			message= PreferencesMessages.CodeTemplateBlock_error_read_message;
 		MessageDialog.openError(getShell(), title, message);
 	}
 	
 	private void openWriteErrorDialog() {
-		String title= PreferencesMessages.CodeTemplateBlock_error_write_title; 
-		String message= PreferencesMessages.CodeTemplateBlock_error_write_message; 
+		String title= PreferencesMessages.CodeTemplateBlock_error_write_title;
+		String message= PreferencesMessages.CodeTemplateBlock_error_write_message;
 		MessageDialog.openError(getShell(), title, message);
 	}
 
