@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -369,9 +369,9 @@ public final class ASTProvider {
 
 	/**
 	 * Caches the given compilation unit AST for the given Java element.
-	 *
-	 * @param ast
-	 * @param javaElement
+	 * 
+	 * @param ast the ast
+	 * @param javaElement the java element
 	 */
 	private synchronized void cache(CompilationUnit ast, ITypeRoot javaElement) {
 
@@ -396,21 +396,16 @@ public final class ASTProvider {
 	}
 
 	/**
-	 * Returns a shared compilation unit AST for the given
-	 * Java element.
+	 * Returns a shared compilation unit AST for the given Java element.
 	 * <p>
-	 * Clients are not allowed to modify the AST and must
-	 * synchronize all access to its nodes.
+	 * Clients are not allowed to modify the AST and must synchronize all access to its nodes.
 	 * </p>
-	 *
-	 * @param input
-	 * 			the Java element, must not be <code>null</code>
-	 * @param waitFlag
-	 * 			{@link SharedASTProvider#WAIT_YES}, {@link SharedASTProvider#WAIT_NO} or {@link SharedASTProvider#WAIT_ACTIVE_ONLY}
-	 * @param progressMonitor
-	 * 			the progress monitor or <code>null</code>
-	 * @return
-	 * 			the AST or <code>null</code> if the AST is not available
+	 * 
+	 * @param input the Java element, must not be <code>null</code>
+	 * @param waitFlag {@link SharedASTProvider#WAIT_YES}, {@link SharedASTProvider#WAIT_NO} or
+	 *            {@link SharedASTProvider#WAIT_ACTIVE_ONLY}
+	 * @param progressMonitor the progress monitor or <code>null</code>
+	 * @return the AST or <code>null</code> if the AST is not available
 	 */
 	public CompilationUnit getAST(ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		if (input == null || waitFlag == null)
@@ -438,7 +433,18 @@ public final class ASTProvider {
 				}
 			}
 		}
-		if (isActiveElement && isReconciling(input)) {
+
+		final boolean canReturnNull= waitFlag == SharedASTProvider.WAIT_NO || (waitFlag == SharedASTProvider.WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null));
+		boolean isReconciling= false;
+		if (isActiveElement) {
+			synchronized (fReconcileLock) {
+				isReconciling= isReconciling(input);
+				if (!isReconciling && !canReturnNull)
+					aboutToBeReconciled(input);
+			}
+		}
+
+		if (isReconciling) {
 			try {
 				final ITypeRoot activeElement= fReconcilingJavaElement;
 
@@ -463,11 +469,9 @@ public final class ASTProvider {
 			} catch (InterruptedException e) {
 				return null; // thread has been interrupted don't compute AST
 			}
-		} else if (waitFlag == SharedASTProvider.WAIT_NO || (waitFlag == SharedASTProvider.WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null)))
+		} else if (canReturnNull)
 			return null;
 
-		if (isActiveElement)
-			aboutToBeReconciled(input);
 
 		CompilationUnit ast= null;
 		try {
@@ -528,7 +532,7 @@ public final class ASTProvider {
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
 
-		final CompilationUnit root[]= new CompilationUnit[1]; 
+		final CompilationUnit root[]= new CompilationUnit[1];
 		
 		SafeRunner.run(new ISafeRunnable() {
 			public void run() {
@@ -597,7 +601,6 @@ public final class ASTProvider {
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		synchronized (fReconcileLock) {
-			fIsReconciling= progressMonitor != null && progressMonitor.isCanceled();
 			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 
 				if (DEBUG)
@@ -610,7 +613,7 @@ public final class ASTProvider {
 
 				return;
 			}
-
+			fIsReconciling= progressMonitor != null && progressMonitor.isCanceled();
 			cache(ast, javaElement);
 		}
 	}
