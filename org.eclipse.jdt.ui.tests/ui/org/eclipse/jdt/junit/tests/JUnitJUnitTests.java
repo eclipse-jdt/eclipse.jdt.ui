@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 public class JUnitJUnitTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite();
+		TestSuite suite= new TestSuite(JUnitJUnitTests.class.getName());
 		//$JUnit-BEGIN$
 		
 		// TODO disabled unreliable tests driving the event loop:
@@ -41,7 +41,7 @@ public class JUnitJUnitTests {
 		return suite;
 	}
 	
-	/** 
+	/**
 	 * @param suite the suite
 	 * @deprecated
 	 */
