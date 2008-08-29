@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
@@ -101,16 +102,12 @@ public abstract class JavaPreview {
 	private int fTabSize= 0;
 	private WhitespaceCharacterPainter fWhitespaceCharacterPainter;
 	
-	/**
-	 * Create a new Java preview
-	 * @param workingValues
-	 * @param parent
-	 */
+
 	public JavaPreview(Map workingValues, Composite parent) {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		fPreviewDocument= new Document();
 		fWorkingValues= workingValues;
-		tools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);	
+		tools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);
 		
 		PreferenceStore prioritizedSettings= new PreferenceStore();
 		prioritizedSettings.setValue(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
@@ -120,7 +117,12 @@ public abstract class JavaPreview {
 		
 		IPreferenceStore[] chain= { prioritizedSettings, JavaPlugin.getDefault().getCombinedPreferenceStore() };
 		fPreferenceStore= new ChainedPreferenceStore(chain);
-		fSourceViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, fPreferenceStore);
+		fSourceViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, fPreferenceStore);
+		fSourceViewer.setEditable(false);
+		Cursor arrowCursor= fSourceViewer.getTextWidget().getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
+		fSourceViewer.getTextWidget().setCursor(arrowCursor);
+		fSourceViewer.getTextWidget().setCaret(null);
+		
 		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING, true);
 		fSourceViewer.configure(fViewerConfiguration);
 		fSourceViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
@@ -194,7 +196,7 @@ public abstract class JavaPreview {
 	    } catch (NumberFormatException e) {
 	    }
 	    return defaultValue;
-	}		
+	}
 	
 
 	

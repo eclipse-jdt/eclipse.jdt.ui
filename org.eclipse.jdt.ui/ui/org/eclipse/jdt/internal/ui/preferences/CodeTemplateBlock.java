@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -391,7 +392,12 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, store);
 		CodeTemplateSourceViewerConfiguration configuration= new CodeTemplateSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
 		viewer.configure(configuration);
+		
 		viewer.setEditable(false);
+		Cursor arrowCursor= viewer.getTextWidget().getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
+		viewer.getTextWidget().setCursor(arrowCursor);
+		viewer.getTextWidget().setCaret(null);
+		
 		viewer.setDocument(document);
 	
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);

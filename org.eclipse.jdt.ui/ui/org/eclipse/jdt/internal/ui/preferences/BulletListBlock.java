@@ -15,6 +15,7 @@ import org.eclipse.swt.custom.Bullet;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,7 +46,11 @@ public class BulletListBlock extends Composite {
 	}
 
 	private Control createControl(Composite parent) {
-		fStyledText= new StyledText(parent, SWT.FLAT | SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
+		fStyledText= new StyledText(parent, SWT.FLAT | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		fStyledText.setEditable(false);
+		Cursor arrowCursor= fStyledText.getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
+		fStyledText.setCursor(arrowCursor);
+		fStyledText.setCaret(null);
 		
 		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		fStyledText.setLayoutData(data);
@@ -86,7 +91,7 @@ public class BulletListBlock extends Composite {
 					
 		StyleRange styleRange= new StyleRange(0, count, foreground, null);
 		styleRange.metrics= new GlyphMetrics(0, 0, 20);
-		fStyledText.setLineBullet(0, fStyledText.getLineCount(), new Bullet(styleRange));	
+		fStyledText.setLineBullet(0, fStyledText.getLineCount(), new Bullet(styleRange));
 		
 		fStyledText.setEnabled(enabled);
 	}

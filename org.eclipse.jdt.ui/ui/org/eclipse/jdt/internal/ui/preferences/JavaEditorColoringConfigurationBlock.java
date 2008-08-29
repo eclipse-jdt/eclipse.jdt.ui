@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,12 +17,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.Preferences;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
@@ -37,6 +36,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Scrollable;
+
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -61,6 +62,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -432,22 +434,19 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		
 		return scrolled;
 	}
-	
+
 	/**
-     * Returns the number of pixels corresponding to the width of the given
-     * number of characters.
-     * <p>
-     * This method may only be called after <code>initializeDialogUnits</code>
-     * has been called.
-     * </p>
-     * <p>
-     * Clients may call this framework method, but should not override it.
-     * </p>
-     * 
-     * @param chars
-     *            the number of characters
-     * @return the number of pixels
-     */
+	 * Returns the number of pixels corresponding to the width of the given number of characters.
+	 * <p>
+	 * This method may only be called after <code>initializeDialogUnits</code> has been called.
+	 * </p>
+	 * <p>
+	 * Clients may call this framework method, but should not override it.
+	 * </p>
+	 * 
+	 * @param chars the number of characters
+	 * @return the number of pixels
+	 */
     private int convertWidthInCharsToPixels(int chars) {
         // test for failure to initialize for backward compatibility
         if (fFontMetrics == null)
@@ -456,20 +455,17 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
     }
 
 	/**
-     * Returns the number of pixels corresponding to the height of the given
-     * number of characters.
-     * <p>
-     * This method may only be called after <code>initializeDialogUnits</code>
-     * has been called.
-     * </p>
-     * <p>
-     * Clients may call this framework method, but should not override it.
-     * </p>
-     * 
-     * @param chars
-     *            the number of characters
-     * @return the number of pixels
-     */
+	 * Returns the number of pixels corresponding to the height of the given number of characters.
+	 * <p>
+	 * This method may only be called after <code>initializeDialogUnits</code> has been called.
+	 * </p>
+	 * <p>
+	 * Clients may call this framework method, but should not override it.
+	 * </p>
+	 * 
+	 * @param chars the number of characters
+	 * @return the number of pixels
+	 */
     private int convertHeightInCharsToPixels(int chars) {
         // test for failure to initialize for backward compatibility
         if (fFontMetrics == null)
@@ -805,7 +801,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);
+		
 		fPreviewViewer.setEditable(false);
+		Cursor arrowCursor= fPreviewViewer.getTextWidget().getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
+		fPreviewViewer.getTextWidget().setCursor(arrowCursor);
+		fPreviewViewer.getTextWidget().setCaret(null);
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
@@ -813,6 +813,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fPreviewViewer.setDocument(document);
 	
 		installSemanticHighlighting();
+		
 		
 		return fPreviewViewer.getControl();
 	}
@@ -946,18 +947,16 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			return null;
 		return (HighlightingColorListItem) element;
 	}
-	
+
 	/**
-     * Initializes the computation of horizontal and vertical dialog units based
-     * on the size of current font.
-     * <p>
-     * This method must be called before any of the dialog unit based conversion
-     * methods are called.
-     * </p>
-     * 
-     * @param testControl
-     *            a control from which to obtain the current font
-     */
+	 * Initializes the computation of horizontal and vertical dialog units based on the size of
+	 * current font.
+	 * <p>
+	 * This method must be called before any of the dialog unit based conversion methods are called.
+	 * </p>
+	 * 
+	 * @param testControl a control from which to obtain the current font
+	 */
     private void initializeDialogUnits(Control testControl) {
         // Compute and store a font metric
         GC gc = new GC(testControl);
