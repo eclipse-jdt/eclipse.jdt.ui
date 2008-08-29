@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,29 +151,38 @@ public class JavaReconciler extends MonoReconciler {
 		public void elementChanged(ElementChangedEvent event) {
 			if (isRunningInReconcilerThread())
 				return;
+			
+			if (event.getDelta().getFlags() == IJavaElementDelta.F_AST_AFFECTED || canIgnore(event.getDelta().getAffectedChildren()))
+				return;
 
 			setJavaModelChanged(true);
-			if (isEditorActive() && !isSaveDelta(event.getDelta().getAffectedChildren()))
+			if (isEditorActive())
 				JavaReconciler.this.forceReconciling();
 		}
-	}
 
-	/**
-	 * Check whether the given delta has been
-	 * sent when saving this reconciler's editor.
-	 * 
-	 * @param delta the deltas
-	 * @return <code>true</code> if the given delta
-	 * @since 3.4
-	 */
-	private boolean isSaveDelta(IJavaElementDelta[] delta) {
-		if (delta.length != 1)
-			return false;
+		/**
+		 * Check whether the given delta has been
+		 * sent when saving this reconciler's editor.
+		 * 
+		 * @param delta the deltas
+		 * @return <code>true</code> if the given delta
+		 * @since 3.5
+		 */
+		private boolean canIgnore(IJavaElementDelta[] delta) {
+			if (delta.length != 1)
+				return false;
 
-		if (delta[0].getFlags() == IJavaElementDelta.F_PRIMARY_RESOURCE && delta[0].getElement().equals(fReconciledElement))
-			return true;
+			// become working copy
+			if (delta[0].getFlags() == IJavaElementDelta.F_PRIMARY_WORKING_COPY)
+				return true;
 
-		return isSaveDelta(delta[0].getAffectedChildren());
+			// save
+			if (delta[0].getFlags() == IJavaElementDelta.F_PRIMARY_RESOURCE && delta[0].getElement().equals(fReconciledElement))
+				return true;
+
+			return canIgnore(delta[0].getAffectedChildren());
+		}
+
 	}
 
 	/**
@@ -237,7 +246,7 @@ public class JavaReconciler extends MonoReconciler {
 	 * Tells whether the Java model sent out a changed event.
 	 * @since 3.0
 	 */
-	private volatile boolean fHasJavaModelChanged= true;
+	private volatile boolean fHasJavaModelChanged= false;
 	/**
 	 * Tells whether this reconciler's editor is active.
 	 * @since 3.1
@@ -265,7 +274,7 @@ public class JavaReconciler extends MonoReconciler {
 	/**
 	 * Creates a new reconciler.
 	 * 
-	 * @param editor the editor 
+	 * @param editor the editor
 	 * @param strategy the reconcile strategy
 	 * @param isIncremental <code>true</code> if this is an incremental reconciler
 	 */
