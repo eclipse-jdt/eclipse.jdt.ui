@@ -15,6 +15,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -22,19 +37,6 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -86,6 +88,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -1282,7 +1285,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IStatus status= exception.getStatus();
 		if (JavaUI.ID_PLUGIN.equals(status.getPlugin())
 				&& (status.getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION || status.getCode() == IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION)) {
-			openSaveListenerErrorDialog(title, message, exception);
+			openSaveListenerWarningDialog(title, message, exception);
 			return;
 		}
 
@@ -1290,14 +1293,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	/**
-	 * Open a error dialog informing about a failure during handling of save listeners.
+	 * Opens a warning dialog informing about a failure during handling of save listeners.
 	 * 
-	 * @param title	the dialog title
+	 * @param title the dialog title
 	 * @param message the message to display
 	 * @param exception the exception to handle
 	 * @since 3.4
 	 */
-	private void openSaveListenerErrorDialog(String title, String message, CoreException exception) {
+	private void openSaveListenerWarningDialog(String title, String message, CoreException exception) {
 		final String linkText;
 		if (exception.getStatus().getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION) {
 			message= JavaEditorMessages.CompilationUnitEditor_error_saving_participant_message;
@@ -1308,10 +1311,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 		IStatus status= exception.getStatus();
-		int mask= IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR;
+		int mask= IStatus.WARNING | IStatus.ERROR;
 		ErrorDialog dialog= new ErrorDialog(getSite().getShell(), title, message, status, mask) {
-			protected Control createDialogArea(Composite parent) {
-				parent= (Composite) super.createDialogArea(parent);
+			protected Control createMessageArea(Composite parent) {
+				Control result= super.createMessageArea(parent);
+
+				// Panic code: use 'parent' instead of 'result' in case super implementation changes in the future
+				new Label(parent, SWT.NONE);  // filler as parent has 2 columns (icon and label)
 				Link link= new Link(parent, SWT.NONE);
 				link.setText(linkText);
 				link.setFont(parent.getFont());
@@ -1322,7 +1328,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				});
 				GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 				link.setLayoutData(gridData);
-				return parent;
+
+				return result;
+			}
+			protected Image getImage() {
+				return getWarningImage();
 			}
 		};
 		dialog.open();
