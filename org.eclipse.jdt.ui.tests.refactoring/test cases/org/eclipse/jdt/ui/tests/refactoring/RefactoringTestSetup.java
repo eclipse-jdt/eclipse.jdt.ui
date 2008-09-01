@@ -12,6 +12,8 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Test;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -70,9 +72,13 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 			int breakpointTarget= 0; breakpointTarget++;
 		}
 		fgJavaTestProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
-		fgJRELibrary= JavaProjectHelper.addRTJar(fgJavaTestProject);
+		fgJRELibrary= addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
+	}
+
+	protected IPackageFragmentRoot addRTJar(IJavaProject project) throws CoreException {
+		return JavaProjectHelper.addRTJar(project);
 	}
 	
 	protected void tearDown() throws Exception {

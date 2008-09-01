@@ -25,6 +25,11 @@ import java.util.zip.ZipFile;
 
 import junit.framework.Assert;
 
+import org.osgi.framework.Bundle;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Synchronizer;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,9 +46,6 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Synchronizer;
 
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
@@ -63,8 +65,6 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-import org.osgi.framework.Bundle;
-
 /**
  * Helper methods to set up a IJavaProject.
  */
@@ -82,6 +82,7 @@ public class JavaProjectHelper {
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 	
 	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
+	public static final IPath RT_STUBS_16= new Path("testresources/rtstubs16.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 	
@@ -199,6 +200,18 @@ public class JavaProjectHelper {
 		Map options= project.getOptions(false);
 		JavaProjectHelper.set14CompilerOptions(options);
 		project.setOptions(options);
+	}
+	
+	/**
+	 * Sets the compiler options to 1.6
+	 * @param options The compiler options to configure
+	 */	
+	public static void set16CompilerOptions(Map options) {
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
+		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_6);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_6);
 	}
 	
 	/**
@@ -558,16 +571,30 @@ public class JavaProjectHelper {
 	 * @throws CoreException
 	 */	
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
-		IPath[] rtJarPath= findRtJar(RT_STUBS_15);
-		set15CompilerOptions(jproject);
-		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+		return addRTJar15(jproject);
 	}
-	
+
 	public static IPackageFragmentRoot addRTJar13(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_13);
 		
 		Map options= jproject.getOptions(false);
 		JavaProjectHelper.set13CompilerOptions(options);
+		jproject.setOptions(options);
+		
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+	
+	public static IPackageFragmentRoot addRTJar15(IJavaProject jproject) throws CoreException, JavaModelException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS_15);
+		set15CompilerOptions(jproject);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+	
+	public static IPackageFragmentRoot addRTJar16(IJavaProject jproject) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS_16);
+		
+		Map options= jproject.getOptions(false);
+		JavaProjectHelper.set16CompilerOptions(options);
 		jproject.setOptions(options);
 		
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);

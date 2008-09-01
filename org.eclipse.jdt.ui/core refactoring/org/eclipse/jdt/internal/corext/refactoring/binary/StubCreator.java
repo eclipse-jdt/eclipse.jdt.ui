@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -204,15 +204,15 @@ public class StubCreator {
 	protected void appendMethodDeclaration(final IMethod method) throws JavaModelException {
 		appendFlags(method);
 		fBuffer.append(" "); //$NON-NLS-1$
+		final ITypeParameter[] parameters= method.getTypeParameters();
+		if (parameters.length > 0) {
+			appendTypeParameters(parameters);
+			fBuffer.append(" "); //$NON-NLS-1$
+		}
 		final String returnType= method.getReturnType();
 		if (!method.isConstructor()) {
 			fBuffer.append(Signature.toString(returnType));
 			fBuffer.append(" "); //$NON-NLS-1$
-			final ITypeParameter[] parameters= method.getTypeParameters();
-			if (parameters.length > 0) {
-				appendTypeParameters(parameters);
-				fBuffer.append(" "); //$NON-NLS-1$
-			}
 		}
 		fBuffer.append(method.getElementName());
 		fBuffer.append("("); //$NON-NLS-1$
@@ -291,7 +291,14 @@ public class StubCreator {
 	protected void appendTypeDeclaration(final IType type, final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 1);
-			if (type.isInterface()) {
+			if (type.isAnnotation()) {
+				appendFlags(type);
+				fBuffer.append(" @interface "); //$NON-NLS-1$
+				fBuffer.append(type.getElementName());
+				fBuffer.append("{\n"); //$NON-NLS-1$
+				appendMembers(type, new SubProgressMonitor(monitor, 1));
+				fBuffer.append("}"); //$NON-NLS-1$
+			} else if (type.isInterface()) {
 				appendFlags(type);
 				fBuffer.append(" interface "); //$NON-NLS-1$
 				fBuffer.append(type.getElementName());
@@ -311,13 +318,6 @@ public class StubCreator {
 					fBuffer.append(Signature.toString(signature));
 				}
 				appendSuperInterfaceTypes(type);
-				fBuffer.append("{\n"); //$NON-NLS-1$
-				appendMembers(type, new SubProgressMonitor(monitor, 1));
-				fBuffer.append("}"); //$NON-NLS-1$
-			} else if (type.isAnnotation()) {
-				appendFlags(type);
-				fBuffer.append(" @interface "); //$NON-NLS-1$
-				fBuffer.append(type.getElementName());
 				fBuffer.append("{\n"); //$NON-NLS-1$
 				appendMembers(type, new SubProgressMonitor(monitor, 1));
 				fBuffer.append("}"); //$NON-NLS-1$
