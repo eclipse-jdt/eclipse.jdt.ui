@@ -615,6 +615,7 @@ public class TypeContextChecker {
 				if (i < typeParametersCount - 1)
 					buf.append(',');
 			}
+			buf.append('>');
 		}
 	}
 
