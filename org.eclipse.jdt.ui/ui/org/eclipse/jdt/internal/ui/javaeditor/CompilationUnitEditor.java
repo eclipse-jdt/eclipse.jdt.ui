@@ -760,7 +760,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				clear();
 			}
 		}
-		
+
 		/**
 		 * Computes the element line of a java element (the start of the element, or the line with
 		 * the element's name range).
@@ -768,8 +768,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * @param document the displayed document for line information
 		 * @param element the java element, may be <code>null</code>
 		 * @return the element's start line, or -1
-		 * @throws BadLocationException
-		 * @throws JavaModelException
+		 * @exception BadLocationException if the offset is invalid in this document
+		 * @throws JavaModelException if getting the name range of the element fails
 		 * @since 3.2
 		 */
 		private int getElementLine(IDocument document, IJavaElement element) throws BadLocationException, JavaModelException {
