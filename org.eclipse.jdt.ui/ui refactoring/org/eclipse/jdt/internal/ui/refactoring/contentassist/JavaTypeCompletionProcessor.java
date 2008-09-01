@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -154,7 +156,8 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 					return;
 					
 				case CompletionProposal.TYPE_REF :
-					char[] fullName= Signature.toCharArray(proposal.getSignature());
+					char[] signature= proposal.getSignature();
+					char[] fullName= Signature.toCharArray(signature);
 					if (TypeFilter.isFiltered(fullName))
 						return;
 					StringBuffer buf= new StringBuffer();
@@ -170,13 +173,26 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 					
 					// Only fully qualify if it's a top level type:
 					boolean fullyQualify= fFullyQualify && CharOperation.equals(proposal.getDeclarationSignature(), typeQualifier);
+					
+					ImageDescriptor typeImageDescriptor;
+					switch (Signature.getTypeSignatureKind(signature)) {
+						case Signature.TYPE_VARIABLE_SIGNATURE :
+							typeImageDescriptor= JavaPluginImages.DESC_OBJS_TYPEVARIABLE;
+							break;
+						case Signature.CLASS_TYPE_SIGNATURE :
+							typeImageDescriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, proposal.getFlags(), false);
+							break;
+						default :
+							typeImageDescriptor= null;
+					}
+					
 					addAdjustedTypeCompletion(
 							name,
 							new String(proposal.getCompletion()),
 							proposal.getReplaceStart(),
 							proposal.getReplaceEnd(),
 							proposal.getRelevance(),
-							JavaElementImageProvider.getTypeImageDescriptor(false, false, proposal.getFlags(), false),
+							typeImageDescriptor,
 							fullyQualify ? new String(fullName) : null);
 					return;
 					
