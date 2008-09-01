@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,16 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.zip.ZipInputStream;
 
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -25,6 +30,7 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,9 +39,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 
@@ -53,11 +56,11 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	private boolean fLeaveUnconstrainedRaw= true;
 	
 	public static Test suite() {
-		return new Java15Setup(new TestSuite(clazz));
+		return setUpTest(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test someTest) {
-		return new Java15Setup(someTest);
+		return new Java16Setup(someTest);
 	}
 	
 	public InferTypeArgumentsTests(String name) {
@@ -140,6 +143,30 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	
 	public void testCuGetClass() throws Exception {
 		performCuOK();
+	}
+	
+	public void testCuGetClass2() throws Exception {
+		// Test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=211037
+		// In 1.6, Object#getClass() declares return type Class<?>, but in 1.5, it's Class<? extends Object>.
+		performCuOK();
+		
+		// Test the same with 1.5:
+		IJavaProject project= RefactoringTestSetup.getProject();
+		
+		ArrayList classpath= new ArrayList(Arrays.asList(project.getRawClasspath()));
+		IClasspathEntry jreEntry= RefactoringTestSetup.getJRELibrary().getRawClasspathEntry();
+		classpath.remove(jreEntry);
+		IClasspathEntry[] noRTJarCPEs= (IClasspathEntry[])classpath.toArray(new IClasspathEntry[classpath.size()]);
+		
+		project.setRawClasspath(noRTJarCPEs, new NullProgressMonitor());
+		JavaProjectHelper.addRTJar15(project);
+		
+		try {
+			performCuOK();
+		} finally {
+			project.setRawClasspath(noRTJarCPEs, new NullProgressMonitor());
+			JavaProjectHelper.addRTJar16(project);
+		}
 	}
 	
 	public void testCuGetSuperclass() throws Exception {
