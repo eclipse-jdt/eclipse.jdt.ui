@@ -360,11 +360,13 @@ public class StubCreator {
 	}
 
 	/**
-	 * @param topLevelType
-	 * @param monitor
-	 *            progress monitor, can be <code>null</code>
-	 * @return source stub
-	 * @throws JavaModelException
+	 * Creates and returns a stub for the given top-level type.
+	 * 
+	 * @param topLevelType the top-level type
+	 * @param monitor the progress monitor, can be <code>null</code>
+	 * @return the source stub
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
 	 */
 	public String createStub(IType topLevelType, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(Checks.isTopLevel(topLevelType));
