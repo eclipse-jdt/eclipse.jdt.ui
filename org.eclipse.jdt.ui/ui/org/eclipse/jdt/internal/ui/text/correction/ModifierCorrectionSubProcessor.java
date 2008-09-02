@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] 'Remove invalid modifiers' does not appear for enums and annotations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=110589
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -720,6 +721,24 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
+
+	public static void addSynchronizedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+
+		IBinding binding= ((MethodDeclaration) selectedNode).resolveBinding();
+		if (binding instanceof IMethodBinding) {
+			binding= ((IMethodBinding) binding).getMethodDeclaration();
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addsynchronized_description, BasicElementLabels.getJavaElementName(binding.getName()));
+			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.SYNCHRONIZED, 0, 5, image));
+		}
+	}
+	
 	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
 	
 	private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroup.Proposal {

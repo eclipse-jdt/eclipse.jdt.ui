@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -29,6 +30,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_renaming_duplicate_method;
 	public static String LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description;
 	public static String ModifierCorrectionSubProcessor_addstatictoparenttype_description;
+	public static String ModifierCorrectionSubProcessor_addsynchronized_description;
 	public static String ModifierCorrectionSubProcessor_changefieldmodifiertononstatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description;
 	public static String ModifierCorrectionSubProcessor_overrides_deprecated_description;

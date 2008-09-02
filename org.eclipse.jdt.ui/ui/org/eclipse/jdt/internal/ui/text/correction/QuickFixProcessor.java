@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -203,6 +204,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocInvalidMemberTypeQualification:
 			case IProblem.IncompatibleTypesInForeach:
 			case IProblem.MissingEnumConstantCase:
+			case IProblem.MissingSynchronizedModifierInInheritedMethod:
 				return true;
 			default:
 				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
@@ -578,6 +580,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.MissingEnumConstantCase:
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
+				break;
+			case IProblem.MissingSynchronizedModifierInInheritedMethod:
+				ModifierCorrectionSubProcessor.addSynchronizedMethodProposal(context, problem, proposals);
 				break;
 			default:
 		}

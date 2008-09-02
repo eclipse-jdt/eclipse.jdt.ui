@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] 'Remove invalid modifiers' does not appear for enums and annotations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=110589
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -16,6 +17,9 @@ import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -31,14 +35,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	
@@ -3295,6 +3295,45 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("class E {\n");
 		buf.append("	enum A {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testMissingSynchronizedOnInheritedMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("	protected synchronized void foo() {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("class B extends A {\n");
+		buf.append("	protected void foo() {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("class B extends A {\n");
+		buf.append("	protected synchronized void foo() {\n");
 		buf.append("	}\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
