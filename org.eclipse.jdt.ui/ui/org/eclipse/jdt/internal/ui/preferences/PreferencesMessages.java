@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *     Sebastian Davids, sdavids@gmx.de - 187316 [preferences] Mark Occurences Pref Page; Link to
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [preferences] Add preference for new compiler warning: MissingSynchronizedModifierInInheritedMethod - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245240
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -414,6 +415,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_when_overriding_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_ignore_unchecked_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_missing_serial_version_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_missing_synchronized_on_inherited_method;
 	public static String ProblemSeveritiesConfigurationBlock_pb_overriding_pkg_dflt_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_method_naming_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_no_effect_assignment_label;
