@@ -106,7 +106,7 @@ public class FatJarExportTests extends TestCase {
 
 		Map options= fProject.getOptions(false);
 		String compliance= JavaCore.VERSION_1_4;
-		JavaModelUtil.setCompilanceOptions(options, compliance);
+		JavaModelUtil.setComplianceOptions(options, compliance);
 		JavaModelUtil.setDefaultClassfileOptions(options, compliance); // complete compliance options
 		fProject.setOptions(options);
 

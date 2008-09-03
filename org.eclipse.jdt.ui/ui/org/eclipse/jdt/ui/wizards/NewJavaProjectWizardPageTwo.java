@@ -473,7 +473,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				if (compliance != null) {
 					IJavaProject project= JavaCore.create(fCurrProject);
 					Map options= project.getOptions(false);
-					JavaModelUtil.setCompilanceOptions(options, compliance);
+					JavaModelUtil.setComplianceOptions(options, compliance);
 					JavaModelUtil.setDefaultClassfileOptions(options, compliance); // complete compliance options
 					project.setOptions(options);
 				}

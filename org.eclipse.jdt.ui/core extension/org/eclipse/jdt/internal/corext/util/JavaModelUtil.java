@@ -15,8 +15,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -29,6 +27,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
@@ -590,9 +590,11 @@ public final class JavaModelUtil {
 
 	/**
 	 * Get all compilation units of a selection.
+	 * 
 	 * @param javaElements the selected java elements
 	 * @return all compilation units containing and contained in elements from javaElements
-	 * @throws JavaModelException
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
 	 */
 	public static ICompilationUnit[] getAllCompilationUnits(IJavaElement[] javaElements) throws JavaModelException {
 		HashSet result= new HashSet();
@@ -641,11 +643,11 @@ public final class JavaModelUtil {
 	 * Sets all compliance settings in the given map to 5.0
 	 * @param map the map to update
 	 */
-	public static void set50CompilanceOptions(Map map) {
-		setCompilanceOptions(map, JavaCore.VERSION_1_5);
+	public static void set50ComplianceOptions(Map map) {
+		setComplianceOptions(map, JavaCore.VERSION_1_5);
 	}
 
-	public static void setCompilanceOptions(Map map, String compliance) {
+	public static void setComplianceOptions(Map map, String compliance) {
 		JavaCore.setComplianceOptions(compliance, map);
 	}
 
@@ -689,11 +691,13 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Checks if the JRE of the given project or workspace default JRE have source compliance 5.0 or greater.
+	 * Checks if the JRE of the given project or workspace default JRE have source compliance 5.0 or
+	 * greater.
 	 * 
 	 * @param project the project to test or <code>null</code> to test the workspace JRE
-	 * @return <code>true</code> if the JRE of the given project or workspace default JRE have source compliance 5.0 or greater.
-	 * @throws CoreException
+	 * @return <code>true</code> if the JRE of the given project or workspace default JRE have
+	 *         source compliance 5.0 or greater.
+	 * @throws CoreException if unable to determine the project's VM install
 	 */
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
 		IVMInstall vmInstall;
@@ -816,15 +820,15 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Returns true iff the given local variable is a parameter of its
-	 * declaring method.
-	 *
+	 * Returns true iff the given local variable is a parameter of its declaring method.
+	 * 
 	 * TODO replace this method with new API when available:
-	 * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
+	 * 
 	 * @param currentLocal the local variable to test
-	 *
+	 * 
 	 * @return returns true if the variable is a parameter
-	 * @throws JavaModelException
+	 * @throws JavaModelException if getting the method parameter names fails
 	 */
 	public static boolean isParameter(ILocalVariable currentLocal) throws JavaModelException {
 

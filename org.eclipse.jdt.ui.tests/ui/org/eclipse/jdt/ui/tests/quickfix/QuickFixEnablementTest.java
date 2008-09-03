@@ -69,7 +69,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 	public void testContributedQuickFix1() throws Exception {
 		
 		HashMap options= new HashMap();
-		JavaModelUtil.setCompilanceOptions(options, JavaCore.VERSION_1_5);
+		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_5);
 		fJProject1.setOptions(options);
 		
 		// quick fix is contributed only for files with name 'A.java' in a 1.5 project
@@ -115,13 +115,13 @@ public class QuickFixEnablementTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 		
 		HashMap options= new HashMap();
-		JavaModelUtil.setCompilanceOptions(options, JavaCore.VERSION_1_6);
+		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_6);
 		fJProject1.setOptions(options);
 		
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 1); // ok
 		
 		options= new HashMap();
-		JavaModelUtil.setCompilanceOptions(options, JavaCore.VERSION_1_4);
+		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_4);
 		fJProject1.setOptions(options);
 		
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 0); // wrong version
@@ -136,7 +136,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 		cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		options= new HashMap();
-		JavaModelUtil.setCompilanceOptions(options, JavaCore.VERSION_1_5);
+		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_5);
 		fJProject1.setOptions(options);
 		
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 0); // wrong name

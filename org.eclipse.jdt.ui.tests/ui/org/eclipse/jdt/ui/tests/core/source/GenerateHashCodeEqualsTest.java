@@ -1197,7 +1197,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		IJavaProject javaProject= fPackageP.getJavaProject();
 		Map oldOptions= javaProject.getOptions(false);
 		Map newOptions= new HashMap(oldOptions);
-		JavaModelUtil.setCompilanceOptions(newOptions, JavaCore.VERSION_1_4);
+		JavaModelUtil.setComplianceOptions(newOptions, JavaCore.VERSION_1_4);
 		javaProject.setOptions(newOptions);
 		try {
 			fPackageP.createCompilationUnit("B.java", "package p;\r\n" +

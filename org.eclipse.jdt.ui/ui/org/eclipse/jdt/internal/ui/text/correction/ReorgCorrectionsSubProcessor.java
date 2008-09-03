@@ -487,12 +487,12 @@ public class ReorgCorrectionsSubProcessor {
 		public void apply(IDocument document) {
 			if (fChangeOnWorkspace) {
 				Hashtable map= JavaCore.getOptions();
-				JavaModelUtil.set50CompilanceOptions(map);
+				JavaModelUtil.set50ComplianceOptions(map);
 				JavaCore.setOptions(map);
 			} else {
 				Map map= fProject.getOptions(false);
 				int optionsCount= map.size();
-				JavaModelUtil.set50CompilanceOptions(map);
+				JavaModelUtil.set50ComplianceOptions(map);
 				if (map.size() > optionsCount) {
 					// options have been added -> ensure that all compliance options from preference page set
 					JavaModelUtil.setDefaultClassfileOptions(map, JavaCore.VERSION_1_5);

@@ -73,7 +73,7 @@ public class PlainJarExportTests extends TestCase {
 
 		Map options= fProject.getOptions(false);
 		String compliance= JavaCore.VERSION_1_4;
-		JavaModelUtil.setCompilanceOptions(options, compliance);
+		JavaModelUtil.setComplianceOptions(options, compliance);
 		JavaModelUtil.setDefaultClassfileOptions(options, compliance);
 		fProject.setOptions(options);
 

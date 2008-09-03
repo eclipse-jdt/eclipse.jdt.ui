@@ -790,7 +790,7 @@ public abstract class ProfileManager extends Observable {
 	}
 	
 	private static void setLatestCompliance(Map map) {
-		JavaModelUtil.set50CompilanceOptions(map);
+		JavaModelUtil.set50ComplianceOptions(map);
 	}
 
     public abstract Profile getDefaultProfile();

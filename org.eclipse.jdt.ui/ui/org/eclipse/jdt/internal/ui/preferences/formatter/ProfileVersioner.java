@@ -117,7 +117,7 @@ public class ProfileVersioner implements IProfileVersioner {
 	 * @param map The map to update
 	 */
 	public static void setLatestCompliance(Map map) {
-		JavaModelUtil.set50CompilanceOptions(map);
+		JavaModelUtil.set50ComplianceOptions(map);
 	}
 		
 	private static void version1to2(final Map oldSettings) {
