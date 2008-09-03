@@ -15,11 +15,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -31,6 +26,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 
@@ -118,12 +118,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	public ComplianceConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
+		setDefaultCompilerComplianceValues();
 
 		fBlockEnableState= null;
 		fComplianceControls= new ArrayList();
-			
-		fComplianceStatus= new StatusInfo();
 		
+		fComplianceStatus= new StatusInfo();
+
 		fRememberedUserCompliance= new String[] { // caution: order depends on IDX_* constants
 			getValue(PREF_PB_ASSERT_AS_IDENTIFIER),
 			getValue(PREF_PB_ENUM_AS_IDENTIFIER),
@@ -185,8 +186,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
 		String[] values3456Labels= new String[] {
-			PreferencesMessages.ComplianceConfigurationBlock_version13,  
-			PreferencesMessages.ComplianceConfigurationBlock_version14, 
+			PreferencesMessages.ComplianceConfigurationBlock_version13,
+			PreferencesMessages.ComplianceConfigurationBlock_version14,
 			PreferencesMessages.ComplianceConfigurationBlock_version15,
 			PreferencesMessages.ComplianceConfigurationBlock_version16
 		};
@@ -215,49 +216,49 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		Group group= new Group(fControlsComposite, SWT.NONE);
 		group.setFont(fControlsComposite.getFont());
-		group.setText(PreferencesMessages.ComplianceConfigurationBlock_compliance_group_label); 
+		group.setText(PreferencesMessages.ComplianceConfigurationBlock_compliance_group_label);
 		group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		group.setLayout(layout);
 	
-		String label= PreferencesMessages.ComplianceConfigurationBlock_compiler_compliance_label; 
+		String label= PreferencesMessages.ComplianceConfigurationBlock_compiler_compliance_label;
 		addComboBox(group, label, PREF_COMPLIANCE, values3456, values3456Labels, 0);
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_default_settings_label; 
-		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT_CONF, USER_CONF }, 0);	
+		label= PreferencesMessages.ComplianceConfigurationBlock_default_settings_label;
+		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT_CONF, USER_CONF }, 0);
 
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
-		Control[] otherChildren= group.getChildren();	
+		Control[] otherChildren= group.getChildren();
 				
 		String[] versions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
 		String[] versionsLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
-			PreferencesMessages.ComplianceConfigurationBlock_version11,  
-			PreferencesMessages.ComplianceConfigurationBlock_version12, 
-			PreferencesMessages.ComplianceConfigurationBlock_version13, 
+			PreferencesMessages.ComplianceConfigurationBlock_version11,
+			PreferencesMessages.ComplianceConfigurationBlock_version12,
+			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
-			PreferencesMessages.ComplianceConfigurationBlock_version15, 
+			PreferencesMessages.ComplianceConfigurationBlock_version15,
 			PreferencesMessages.ComplianceConfigurationBlock_version16
 		};
 		
-		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label; 
-		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);	
+		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label;
+		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_source_compatibility_label; 
-		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values3456, values3456Labels, indent);	
+		label= PreferencesMessages.ComplianceConfigurationBlock_source_compatibility_label;
+		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values3456, values3456Labels, indent);
 
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			PreferencesMessages.ComplianceConfigurationBlock_error,  
-			PreferencesMessages.ComplianceConfigurationBlock_warning, 
+			PreferencesMessages.ComplianceConfigurationBlock_error,
+			PreferencesMessages.ComplianceConfigurationBlock_warning,
 			PreferencesMessages.ComplianceConfigurationBlock_ignore
 		};
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_pb_assert_as_identifier_label; 
-		addComboBox(group, label, PREF_PB_ASSERT_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);		
+		label= PreferencesMessages.ComplianceConfigurationBlock_pb_assert_as_identifier_label;
+		addComboBox(group, label, PREF_PB_ASSERT_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_pb_enum_as_identifier_label; 
-		addComboBox(group, label, PREF_PB_ENUM_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);		
+		label= PreferencesMessages.ComplianceConfigurationBlock_pb_enum_as_identifier_label;
+		addComboBox(group, label, PREF_PB_ENUM_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);
 
 		
 		Control[] allChildren= group.getChildren();
@@ -269,27 +270,27 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		group= new Group(fControlsComposite, SWT.NONE);
 		group.setFont(fControlsComposite.getFont());
-		group.setText(PreferencesMessages.ComplianceConfigurationBlock_classfiles_group_label); 
+		group.setText(PreferencesMessages.ComplianceConfigurationBlock_classfiles_group_label);
 		group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		group.setLayout(layout);
 
 		String[] generateValues= new String[] { GENERATE, DO_NOT_GENERATE };
 		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_variable_attr_label; 
+		label= PreferencesMessages.ComplianceConfigurationBlock_variable_attr_label;
 		addCheckBox(group, label, PREF_LOCAL_VARIABLE_ATTR, generateValues, 0);
 		
-		label= PreferencesMessages.ComplianceConfigurationBlock_line_number_attr_label; 
-		addCheckBox(group, label, PREF_LINE_NUMBER_ATTR, generateValues, 0);		
+		label= PreferencesMessages.ComplianceConfigurationBlock_line_number_attr_label;
+		addCheckBox(group, label, PREF_LINE_NUMBER_ATTR, generateValues, 0);
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_source_file_attr_label; 
-		addCheckBox(group, label, PREF_SOURCE_FILE_ATTR, generateValues, 0);		
+		label= PreferencesMessages.ComplianceConfigurationBlock_source_file_attr_label;
+		addCheckBox(group, label, PREF_SOURCE_FILE_ATTR, generateValues, 0);
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_unused_local_label; 
-		addCheckBox(group, label, PREF_CODEGEN_UNUSED_LOCAL, new String[] { PRESERVE, OPTIMIZE_OUT }, 0);	
+		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_unused_local_label;
+		addCheckBox(group, label, PREF_CODEGEN_UNUSED_LOCAL, new String[] { PRESERVE, OPTIMIZE_OUT }, 0);
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label; 
-		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);	
+		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label;
+		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);
 		
 		fJRE50InfoText= new Link(composite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
@@ -338,7 +339,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
-	 */	
+	 */
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (!areSettingsEnabled()) {
 			return;
@@ -385,7 +386,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateInlineJSREnableState();
 			fComplianceStatus= validateCompliance();
 			validateComplianceStatus();
-		}		
+		}
 		fContext.statusChanged(fComplianceStatus);
 	}
 	
@@ -432,12 +433,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		// compliance must not be smaller than source or target
 		if (JavaModelUtil.isVersionLessThan(compliance, source)) {
-			status.setError(PreferencesMessages.ComplianceConfigurationBlock_src_greater_compliance); 
+			status.setError(PreferencesMessages.ComplianceConfigurationBlock_src_greater_compliance);
 			return status;
 		}
 		
 		if (JavaModelUtil.isVersionLessThan(compliance, target)) {
-			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_compliance); 
+			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_compliance);
 			return status;
 		}
 
@@ -450,7 +451,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		// target must not be smaller than source
 		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(target, source)) {
-			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source); 
+			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source);
 			return status;
 		}
 		
@@ -468,7 +469,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 	/*
 	 * Update the compliance controls' enable state
-	 */		
+	 */
 	private void updateComplianceEnableState() {
 		boolean enabled= checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF);
 		for (int i= fComplianceControls.size() - 1; i >= 0; i--) {
@@ -535,7 +536,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	/*
 	 * Set the default compliance values derived from the chosen level
-	 */	
+	 */
 	private void updateComplianceDefaultSettings(boolean rememberOld, String oldComplianceLevel) {
 		String assertAsId, enumAsId, source, target;
 		boolean isDefault= checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
@@ -568,7 +569,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				assertAsId= ERROR;
 				enumAsId= ERROR;
 				source= VERSION_1_6;
-				target= VERSION_1_6;				
+				target= VERSION_1_6;
 			} else {
 				assertAsId= IGNORE;
 				enumAsId= IGNORE;
@@ -628,14 +629,27 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title= PreferencesMessages.ComplianceConfigurationBlock_needsbuild_title; 
+		String title= PreferencesMessages.ComplianceConfigurationBlock_needsbuild_title;
 		String message;
 		if (workspaceSettings) {
-			message= PreferencesMessages.ComplianceConfigurationBlock_needsfullbuild_message; 
+			message= PreferencesMessages.ComplianceConfigurationBlock_needsfullbuild_message;
 		} else {
-			message= PreferencesMessages.ComplianceConfigurationBlock_needsprojectbuild_message; 
+			message= PreferencesMessages.ComplianceConfigurationBlock_needsprojectbuild_message;
 		}
 		return new String[] { title, message };
 	}
-			
+
+	private void setDefaultCompilerComplianceValues() {
+		if(JavaRuntime.getDefaultVMInstall() instanceof IVMInstall2){
+			String complianceLevel = JavaModelUtil.getCompilerCompliance((IVMInstall2)JavaRuntime.getDefaultVMInstall(), JavaCore.VERSION_1_4);
+			Map complianceOptions= new HashMap();
+			JavaModelUtil.setCompilanceOptions(complianceOptions, complianceLevel);
+			setDefaultValue(PREF_COMPLIANCE, (String)complianceOptions.get(PREF_COMPLIANCE.getName()));
+			setDefaultValue(PREF_PB_ASSERT_AS_IDENTIFIER, (String)complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));
+			setDefaultValue(PREF_PB_ENUM_AS_IDENTIFIER, (String)complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));
+			setDefaultValue(PREF_SOURCE_COMPATIBILITY, (String)complianceOptions.get(PREF_SOURCE_COMPATIBILITY.getName()));
+			setDefaultValue(PREF_CODEGEN_TARGET_PLATFORM, (String)complianceOptions.get(PREF_CODEGEN_TARGET_PLATFORM.getName()));
+		}
+	}
+
 }

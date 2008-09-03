@@ -240,7 +240,6 @@ public abstract class OptionsConfigurationBlock {
 				new DefaultScope()
 			};
 		}
-		
 		testIfOptionsComplete(allKeys);
 		if (fProject == null || hasProjectSpecificOptions(fProject)) {
 			fDisabledProjectSettings= null;
@@ -663,9 +662,14 @@ public abstract class OptionsConfigurationBlock {
 		return setValue(key, String.valueOf(value));
 	}
 
+	protected final void setDefaultValue(Key key, String value) {
+		key.setStoredValue(fLookupOrder[fLookupOrder.length - 1], value, fManager);
+	}
+
 	/**
 	 * Returns the value as actually stored in the preference store.
-	 * @param key
+	 * 
+	 * @param key the key
 	 * @return the value as actually stored in the preference store.
 	 */
 	protected String getStoredValue(Key key) {
