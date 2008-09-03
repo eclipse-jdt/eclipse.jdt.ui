@@ -46,7 +46,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -303,7 +306,10 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < proposals.length; i++) {
 			addLinkedPositionProposal(KEY_TYPE, proposals[i]);
 		}
-		return getImportRewrite().addImport(fTypeBinding, ast);
+		ImportRewrite importRewrite= getImportRewrite();
+		CompilationUnit cuNode= (CompilationUnit) fNodeToAssign.getRoot();
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(cuNode, fNodeToAssign.getStartPosition(), importRewrite);
+		return importRewrite.addImport(fTypeBinding, ast, context);
 	}
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {

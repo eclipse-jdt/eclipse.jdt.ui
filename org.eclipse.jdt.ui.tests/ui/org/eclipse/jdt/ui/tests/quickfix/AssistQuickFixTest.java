@@ -799,6 +799,55 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}	
 	
+	public void testAssignToLocal13() throws Exception {
+		// assign to local in context that requires fully qualified type, https://bugs.eclipse.org/bugs/show_bug.cgi?id=239735
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Timer {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        new java.util.Timer();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Timer.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("new java.util.Timer()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Timer {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        java.util.Timer timer = new java.util.Timer();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Timer {\n");
+		buf.append("    private static java.util.Timer timer;\n");
+		buf.append("\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        timer = new java.util.Timer();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}	
+	
 	public void testAssignParamToField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
