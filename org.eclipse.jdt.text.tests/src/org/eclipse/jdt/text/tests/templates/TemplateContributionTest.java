@@ -20,6 +20,7 @@ import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
@@ -43,67 +44,45 @@ public class TemplateContributionTest extends TestCase {
 		return new TestSuite(TemplateContributionTest.class);
 	}
 
+	private void checkContribution(String resolverContextTypeId, String contextTypeId) throws TemplateException {
+		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		TemplateContextType context= registry.getContextType(resolverContextTypeId);
+		
+		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
+		Template[] templates= templateStore.getTemplates(contextTypeId);
+		
+		for (int i= 0; i < templates.length; i++) {
+			Template template= templates[i];
+			TemplateTranslator translator= new TemplateTranslator();
+			TemplateBuffer buffer= translator.translate(template);
+			TemplateVariable[] variables= buffer.getVariables();
+			for (int j= 0; j < variables.length; j++) {
+				TemplateVariable variable= variables[j];
+				if (!variable.getType().equals(variable.getName())) {
+					assertTrue("No resolver found for variable '" + variable.getType() + "' in template '" + template.getName() + "'\n\n" + template.getPattern(), canHandle(context, variable));
+				}
+			}
+		}
+	}
+	
 	public void testJavaContribution() throws Exception {
-		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType javaContext= registry.getContextType(JavaContextType.ID_ALL);
-	
-		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(JavaContextType.ID_ALL);
-		
-		for (int i= 0; i < javaTemplates.length; i++) {
-			Template template= javaTemplates[i];
-			TemplateTranslator translator= new TemplateTranslator();
-			TemplateBuffer buffer= translator.translate(template);
-			TemplateVariable[] variables= buffer.getVariables();
-			for (int j= 0; j < variables.length; j++) {
-				TemplateVariable variable= variables[j];
-				if (!variable.getType().equals(variable.getName())) {
-					assertTrue("No resolver found for variable '" + variable.getType() + "' in template '" + template.getName() + "'\n\n" + template.getPattern(), canHandle(javaContext, variable));
-				}
-			}
-		}
+		checkContribution(JavaContextType.ID_ALL, JavaContextType.ID_ALL);
+		checkContribution(JavaContextType.ID_ALL, JavaContextType.ID_MEMBERS);
+		checkContribution(JavaContextType.ID_ALL, JavaContextType.ID_STATEMENTS);
+		checkContribution(JavaContextType.ID_MEMBERS, JavaContextType.ID_MEMBERS);
+		checkContribution(JavaContextType.ID_STATEMENTS, JavaContextType.ID_STATEMENTS);
 	}
-	
+
 	public void testJavaDocContribution() throws Exception {
-		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType javaContext= registry.getContextType(JavaDocContextType.ID);
-	
-		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(JavaDocContextType.ID);
-		
-		for (int i= 0; i < javaTemplates.length; i++) {
-			Template template= javaTemplates[i];
-			TemplateTranslator translator= new TemplateTranslator();
-			TemplateBuffer buffer= translator.translate(template);
-			TemplateVariable[] variables= buffer.getVariables();
-			for (int j= 0; j < variables.length; j++) {
-				TemplateVariable variable= variables[j];
-				if (!variable.getType().equals(variable.getName())) {
-					assertTrue("No resolver found for variable '" + variable.getType() + "' in template'" + template.getName() + "'\n\n" + template.getPattern(), canHandle(javaContext, variable));
-				}
-			}
-		}
+		checkContribution(JavaDocContextType.ID, JavaDocContextType.ID);
 	}
 	
-	public void testSWTContribution() throws Exception {
-		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType swtContext= registry.getContextType(SWTContextType.ID_ALL);
-	
-		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(SWTContextType.ID_ALL);
-		
-		for (int i= 0; i < javaTemplates.length; i++) {
-			Template template= javaTemplates[i];
-			TemplateTranslator translator= new TemplateTranslator();
-			TemplateBuffer buffer= translator.translate(template);
-			TemplateVariable[] variables= buffer.getVariables();
-			for (int j= 0; j < variables.length; j++) {
-				TemplateVariable variable= variables[j];
-				if (!variable.getType().equals(variable.getName())) {
-					assertTrue("No resolver found for variable '" + variable.getType() + "' in template'" + template.getName() + "'\n\n" + template.getPattern(), canHandle(swtContext, variable));
-				}
-			}
-		}
+	public void testSWTContributionAll() throws Exception {
+		checkContribution(SWTContextType.ID_ALL, SWTContextType.ID_ALL);
+		checkContribution(SWTContextType.ID_ALL, SWTContextType.ID_MEMBERS);
+		checkContribution(SWTContextType.ID_ALL, SWTContextType.ID_STATEMENTS);
+		checkContribution(SWTContextType.ID_MEMBERS, SWTContextType.ID_MEMBERS);
+		checkContribution(SWTContextType.ID_STATEMENTS, SWTContextType.ID_STATEMENTS);
 	}
 
 	private boolean canHandle(TemplateContextType context, TemplateVariable variable) {
