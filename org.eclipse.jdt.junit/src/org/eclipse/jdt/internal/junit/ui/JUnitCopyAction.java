@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,19 +16,20 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+
+import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionListenerAction;
 
 import org.eclipse.jdt.internal.junit.model.TestElement;
-
-import org.eclipse.jface.dialogs.MessageDialog;
 
 /**
  * Copies a test failure stack trace to the clipboard.
@@ -40,11 +41,6 @@ public class JUnitCopyAction extends SelectionListenerAction {
 
 	private TestElement fTestElement;
 
-	/**
-	 * Constructor for CopyTraceAction.
-	 * @param view 
-	 * @param clipboard 
-	 */
 	public JUnitCopyAction(FailureTrace view, Clipboard clipboard) {
 		super(JUnitMessages.CopyTrace_action_label);  
 		Assert.isNotNull(clipboard);

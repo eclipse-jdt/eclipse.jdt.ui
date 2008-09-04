@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -277,8 +277,8 @@ public class RemoteTestRunnerClient {
 	 * Start listening to a test run. Start a server connection that
 	 * the RemoteTestRunner can connect to.
 	 * 
-	 * @param listeners 
-	 * @param port 
+	 * @param listeners listeners to inform
+	 * @param port port on which the server socket will be opened 
 	 */
 	public synchronized void startListening(ITestRunListener2[] listeners, int port) {
 		fListeners= listeners;

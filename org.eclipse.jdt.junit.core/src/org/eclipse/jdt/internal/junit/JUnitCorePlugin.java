@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -32,9 +40,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -45,11 +50,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -206,9 +206,11 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * <code>useMissingImageDescriptor</code> decides if either the 'missing
 	 * image descriptor' is returned or <code>null</code>.
 	 * 
-	 * @param bundle
-	 * @param path
-	 * @param useMissingImageDescriptor
+	 * @param bundle a bundle
+	 * @param path path in the bundle
+	 * @param useMissingImageDescriptor if <code>true</code>, returns the shared image descriptor
+	 *            for a missing image. Otherwise, returns <code>null</code> if the image could not
+	 *            be found
 	 * @return an {@link ImageDescriptor}, or <code>null</code> iff there's
 	 *         no image at the given location and
 	 *         <code>useMissingImageDescriptor</code> is <code>true</code>
@@ -252,7 +254,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Initializes TestRun Listener extensions
-	 * @deprecated
+	 * @deprecated to avoid deprecation warning
 	 */
 	private void loadTestRunListeners() {
 		fLegacyTestRunListeners= new ArrayList();
@@ -297,7 +299,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	/**
 	 * @return an array of all TestRun listeners
-	 * @deprecated
+	 * @deprecated to avoid deprecation warnings
 	 */
 	public org.eclipse.jdt.junit.ITestRunListener[] getTestRunListeners() {
 		if (fLegacyTestRunListeners == null) {
@@ -355,7 +357,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * Adds a TestRun listener to the collection of listeners
 	 * @param newListener the listener to add
-	 * @deprecated
+	 * @deprecated to avoid deprecation warnings
 	 */
 	public void addTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
 		if (fLegacyTestRunListeners == null) 
@@ -372,7 +374,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * Removes a TestRun listener to the collection of listeners
 	 * @param newListener the listener to remove
-	 * @deprecated
+	 * @deprecated to avoid deprecation warnings
 	 */
 	public void removeTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
 		if (fLegacyTestRunListeners != null) 

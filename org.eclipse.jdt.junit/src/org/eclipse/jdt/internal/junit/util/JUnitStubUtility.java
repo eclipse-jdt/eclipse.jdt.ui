@@ -11,10 +11,10 @@
 
 package org.eclipse.jdt.internal.junit.util;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -102,7 +102,7 @@ public class JUnitStubUtility {
 	 * @param extraAnnotations the annotations to add
 	 * @param imports Imports required by the sub are added to the imports structure
 	 * @return The unformatted stub
-	 * @throws CoreException 
+	 * @throws CoreException if an error occurs
 	 */
 	public static String genStub(ICompilationUnit compilationUnit, String destTypeName, IMethod method, GenStubSettings settings, String extraAnnotations, ImportsManager imports) throws CoreException {
 		IType declaringtype= method.getDeclaringType();

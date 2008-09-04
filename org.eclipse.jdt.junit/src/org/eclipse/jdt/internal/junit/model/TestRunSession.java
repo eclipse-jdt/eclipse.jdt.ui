@@ -19,6 +19,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestElementContainer;
+import org.eclipse.jdt.junit.model.ITestRunSession;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
@@ -32,12 +36,6 @@ import org.eclipse.debug.core.ILaunchesListener2;
 
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-
-import org.eclipse.jdt.junit.model.ITestElement;
-import org.eclipse.jdt.junit.model.ITestElementContainer;
-import org.eclipse.jdt.junit.model.ITestRunSession;
-
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -45,6 +43,8 @@ import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 /**
  * A test run session holds all information about a test run, i.e.
@@ -126,7 +126,9 @@ public class TestRunSession implements ITestRunSession {
 	
 
 	/**
-	 * @param testRunName
+	 * Creates a test run session.
+	 * 
+	 * @param testRunName name of the test run
 	 * @param project may be <code>null</code>
 	 */
 	public TestRunSession(String testRunName, IJavaProject project) {
@@ -433,12 +435,14 @@ public class TestRunSession implements ITestRunSession {
 	}
 	
 	/**
-	 * @param testId 
-	 * @param className 
-	 * @param testName 
-	 * @param launchMode 
+	 * Reruns the given test method.
+	 *
+	 * @param testId test id
+	 * @param className test class name
+	 * @param testName test method name
+	 * @param launchMode launch mode, see {@link ILaunchManager}
 	 * @return <code>false</code> iff the rerun could not be started
-	 * @throws CoreException 
+	 * @throws CoreException if the launch fails
 	 */
 	public boolean rerunTest(String testId, String className, String testName, String launchMode) throws CoreException {
 		if (isKeptAlive()) {

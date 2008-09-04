@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -23,6 +21,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 
@@ -61,9 +61,9 @@ public class MethodStubsSelectionButtonGroup {
 
 	/**
 	 * Creates a group without border.
-	 * @param buttonsStyle
-	 * @param buttonNames
-	 * @param nColumns
+	 * @param buttonsStyle one of {@link SWT#RADIO}, {@link SWT#CHECK}, or {@link SWT#TOGGLE}
+	 * @param buttonNames names of the buttons
+	 * @param nColumns column count
 	 */
 	public MethodStubsSelectionButtonGroup(int buttonsStyle, String[] buttonNames, int nColumns) {
 		fEnabled= true;

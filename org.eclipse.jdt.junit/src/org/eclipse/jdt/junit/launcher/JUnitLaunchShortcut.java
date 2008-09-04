@@ -15,14 +15,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -58,14 +58,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -75,6 +67,14 @@ import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * The launch shortcut to launch JUnit tests.
@@ -251,10 +251,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * specified launch configurations. Return the chosen config, or
 	 * <code>null</code> if the user cancelled the dialog.
 	 * 
-	 * @param configList
-	 * @param mode
+	 * @param configList list of {@link ILaunchConfiguration}s
+	 * @param mode launch mode
 	 * @return ILaunchConfiguration
-	 * @throws InterruptedException
+	 * @throws InterruptedException if cancelled by the user
 	 */
 	private ILaunchConfiguration chooseConfiguration(List configList, String mode) throws InterruptedException {
 		IDebugModelPresentation labelProvider= DebugUITools.newDebugModelPresentation();
@@ -289,10 +289,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * The element type can only be of type {@link IJavaProject}, {@link IPackageFragmentRoot}, {@link IPackageFragment}, {@link IType} or {@link IMethod}.
 	 *  
 	 * Clients can extend this method (should call super) to configure additional attributes on the launch configuration working copy.
-	 * @param element 
+	 * @param element element to launch
 	 * 
 	 * @return a launch configuration working copy for the given element 
-	 * @throws CoreException 
+	 * @throws CoreException if creation failed
 	 */
 	protected ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement element) throws CoreException {
 		final String testName;

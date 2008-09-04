@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ public class PixelConverter {
 	/**
 	 * @param chars the height in chars
 	 * @return number of pixels
-	 * @see org.eclipse.jface.dialogs.DialogPage#convertHeightInCharsToPixels(int)
+	 * @see org.eclipse.jface.dialogs.Dialog#convertHeightInCharsToPixels(FontMetrics, int)
 	 */
 	public int convertHeightInCharsToPixels(int chars) {
 		return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
@@ -42,7 +42,7 @@ public class PixelConverter {
 	/**
 	 * @param chars the width in chars
 	 * @return number of pixels
-	 * @see org.eclipse.jface.dialogs.DialogPage#convertWidthInCharsToPixels(int)
+	 * @see org.eclipse.jface.dialogs.Dialog#convertWidthInCharsToPixels(FontMetrics, int)
 	 */
 	public int convertWidthInCharsToPixels(int chars) {
 		return Dialog.convertWidthInCharsToPixels(fFontMetrics, chars);

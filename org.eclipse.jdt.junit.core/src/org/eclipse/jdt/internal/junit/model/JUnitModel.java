@@ -32,12 +32,15 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -58,9 +61,6 @@ import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * Central registry for JUnit test runs.
@@ -191,7 +191,9 @@ public final class JUnitModel {
 		}
 	}
 
-	/** @deprecated */
+	/**
+	 * @deprecated to prevent deprecation warnings
+	 */
 	private static final class LegacyTestRunSessionListener implements ITestRunSessionListener {
 		private TestRunSession fActiveTestRunSession;
 		private ITestSessionListener fTestSessionListener;
@@ -437,7 +439,7 @@ public final class JUnitModel {
 	 * 
 	 * @param testRunSession the test run session
 	 * @param file the destination
-	 * @throws CoreException 
+	 * @throws CoreException if an error occurred
 	 */
 	public static void exportTestRunSession(TestRunSession testRunSession, File file) throws CoreException {
 		FileOutputStream out= null;
