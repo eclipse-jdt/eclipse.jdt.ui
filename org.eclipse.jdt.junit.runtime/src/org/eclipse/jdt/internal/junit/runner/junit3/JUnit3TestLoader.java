@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,6 +128,10 @@ public class JUnit3TestLoader implements ITestLoader {
 	 * test returned from setUpTest will be called. The purpose of this
 	 * mechanism is to enable tests which requires a set-up to be run
 	 * individually.
+	 * 
+	 * @param reloadedTestClass test class
+	 * @param reloadedTest test instance
+	 * @return the reloaded test, or the test wrapped with setUpTest(..) if available
 	 */
 	private Test setupTest(Class reloadedTestClass, Test reloadedTest) {
 		if (reloadedTestClass == null)
@@ -162,7 +166,8 @@ public class JUnit3TestLoader implements ITestLoader {
 	}
 
 	/**
-	 * Returns a test which will fail and log a warning message.
+	 * @param message warning message
+	 * @return a test which will fail and log a warning message.
 	 */
 	private Test warning(final String message) {
 		return new TestCase("warning") { //$NON-NLS-1$

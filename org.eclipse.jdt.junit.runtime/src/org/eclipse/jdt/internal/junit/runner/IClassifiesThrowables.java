@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,8 @@ public interface IClassifiesThrowables {
 	public abstract boolean isComparisonFailure(Throwable throwable);
 
 	/**
-	 * Returns the stack trace for the given throwable.
+	 * @param t a {@link Throwable}
+	 * @return the stack trace for the given {@link Throwable}.
 	 */
 	public abstract String getTrace(Throwable t);
 

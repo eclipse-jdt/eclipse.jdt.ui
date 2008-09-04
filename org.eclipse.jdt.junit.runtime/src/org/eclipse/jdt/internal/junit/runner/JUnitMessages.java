@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,9 @@ public class JUnitMessages {
 	/**
 	 * Gets a string from the resource bundle and formats it with the argument
 	 * 
-	 * @param key	the string used to get the bundle value, must not be null
+	 * @param key the string used to get the bundle value, must not be null
+	 * @param arg the single argument
+	 * @return the formatted string
 	 */
 	public static String getFormattedString(String key, Object arg) {
 		return MessageFormat.format(getString(key), new Object[] { arg });
@@ -35,6 +37,10 @@ public class JUnitMessages {
 
 	/**
 	 * Gets a string from the resource bundle and formats it with arguments
+	 * 
+	 * @param key the string used to get the bundle value, must not be null
+	 * @param args the arguments
+	 * @return the formatted string
 	 */	
 	public static String getFormattedString(String key, Object[] args) {
 		return MessageFormat.format(getString(key), args);

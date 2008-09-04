@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -272,6 +272,9 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Answers the hash code for the given key.
+	 * 
+	 * @param key key
+	 * @return hash code for key
 	 */
 	private int hashCode(Object key) {
 		if (comparer == null)
@@ -282,6 +285,11 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Compares two keys for equality.
+	 * 
+	 * @param a first key
+	 * @param b second key
+	 * 
+	 * @return <code>true</code> iff the keys are deemed equal
 	 */
 	private boolean keyEquals(Object a, Object b) {
 		if (comparer == null)

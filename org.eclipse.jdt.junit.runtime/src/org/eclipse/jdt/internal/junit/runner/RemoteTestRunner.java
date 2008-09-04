@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -180,8 +180,9 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 	/** 
 	 * The main entry point.
-	 * Parameters<pre>
-	 * -classnames: the name of the test suite class
+	 * 
+	 * @param args Parameters:
+	 * <pre>-classnames: the name of the test suite class
 	 * -testfilename: the name of a file containing classnames of test suites
 	 * -test: the test method name (format classname testname) 
 	 * -host: the host to connect to default local host 
@@ -205,6 +206,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	/**
 	 * Parse command line arguments. Hook for subclasses to process
 	 * additional arguments.
+	 * @param args the arguments
 	 */
 	protected void init(String[] args) {
 		defaultInit(args);		
@@ -213,6 +215,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	/**
 	 * The class loader to be used for loading tests.
 	 * Subclasses may override to use another class loader.
+	 * @return the class loader to lead test classes
 	 */
 	protected ClassLoader getTestClassLoader() {
 		return getClass().getClassLoader();
@@ -220,6 +223,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	
 	/**
 	 * Process the default arguments.
+	 * @param args arguments
 	 */
 	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
@@ -440,6 +444,9 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 	/**
 	 * Runs a set of tests.
+	 * @param testClassNames classes to be run
+	 * @param testName individual method to be run
+	 * @param execution executor
 	 */
 	public void runTests(String[] testClassNames, String testName, TestExecution execution) {
 		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, this);
@@ -485,6 +492,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	/**
 	 * Reruns a test as defined by the fully qualified class name and
 	 * the name of the test.
+	 * @param r rerun request
 	 */
 	public void rerunTest(RerunRequest r) {
 		final Class[] classes= loadClasses(new String[] { r.fRerunClassName });
@@ -542,6 +550,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	
 	/**
 	 * Connect to the remote test listener.
+	 * 
+	 * @return <code>true</code> if connection successful, <code>false</code> if failed
 	 */
 	protected boolean connect() {
 		if (fConsoleMode) {
