@@ -157,6 +157,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 
+
 public class PasteAction extends SelectionDispatchAction{
 
 	private final Clipboard fClipboard;
@@ -187,7 +188,7 @@ public class PasteAction extends SelectionDispatchAction{
 		// Moved condition checking to run (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=78450)
 	}
 
-	private Paster[] createEnabledPasters(TransferData[] availableDataTypes, Clipboard clipboard) throws JavaModelException {
+	private Paster[] createEnabledPasters(TransferData[] availableDataTypes, Clipboard clipboard) {
 		Paster paster;
 		Shell shell = getShell();
 		List result= new ArrayList(2);
@@ -237,11 +238,10 @@ public class PasteAction extends SelectionDispatchAction{
 
 	public void run(IStructuredSelection selection) {
 		Clipboard clipboard;
-		if (fClipboard != null) {
+		if (fClipboard != null)
 			clipboard= fClipboard;
-		} else {
+		else
 			clipboard= new Clipboard(getShell().getDisplay());
-		}
 		try {
 			TransferData[] availableTypes= clipboard.getAvailableTypes();
 			List elements= selection.toList();
@@ -250,21 +250,23 @@ public class PasteAction extends SelectionDispatchAction{
 			IWorkingSet[] workingSets= ReorgUtils.getWorkingSets(elements);
 			Paster[] pasters= createEnabledPasters(availableTypes, clipboard);
 			for (int i= 0; i < pasters.length; i++) {
-				if (pasters[i].canPasteOn(javaElements, resources, workingSets)) {
-					pasters[i].paste(javaElements, resources, workingSets, availableTypes);
-					return;// one is enough
+				try {
+					if (pasters[i].canPasteOn(javaElements, resources, workingSets)) {
+						pasters[i].paste(javaElements, resources, workingSets, availableTypes);
+						return;// one is enough
+					}
+				} catch (JavaModelException e) {
+					ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
+				} catch (InvocationTargetException e) {
+					ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
+				} catch (InterruptedException e) {
+					// OK
 				}
 			}
 			String msg= resources.length + javaElements.length + workingSets.length == 0
-					? ReorgMessages.PasteAction_cannot_no_selection
+			? ReorgMessages.PasteAction_cannot_no_selection
 					: ReorgMessages.PasteAction_cannot_selection;
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.PasteAction_name, msg);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
-		} catch (InterruptedException e) {
-			// OK
 		} finally {
 			if (fClipboard == null)
 				clipboard.dispose();
@@ -318,13 +320,13 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 
 		/**
-		 * Used to be called on selection change, but is only called on execution now
-		 * (before {@link #canPasteOn(IJavaElement[], IResource[], IWorkingSet[])}).
+		 * Used to be called on selection change, but is only called on execution now (before
+		 * {@link #canPasteOn(IJavaElement[], IResource[], IWorkingSet[])}).
+		 * 
 		 * @param availableTypes transfer types
 		 * @return whether the paste action can be enabled
-		 * @throws JavaModelException
 		 */
-		public abstract boolean canEnable(TransferData[] availableTypes)  throws JavaModelException;
+		public abstract boolean canEnable(TransferData[] availableTypes);
 		
 		/*
 		 * Only called if {@link #canEnable(TransferData[])} returns <code>true</code>.
@@ -1049,7 +1051,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 			workingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
 		}
-		public boolean canEnable(TransferData[] availableTypes) throws JavaModelException {
+		public boolean canEnable(TransferData[] availableTypes) {
 			return isAvailable(ResourceTransfer.getInstance(), availableTypes) ||
 				isAvailable(JavaElementTransfer.getInstance(), availableTypes);
 		}
@@ -1157,7 +1159,7 @@ public class PasteAction extends SelectionDispatchAction{
 			return target != null && canPasteFilesOn(getAsContainer(target)) && selectedWorkingSets.length == 0;
 		}
 
-		public boolean canEnable(TransferData[] availableDataTypes) throws JavaModelException {
+		public boolean canEnable(TransferData[] availableDataTypes) {
 			return isAvailable(FileTransfer.getInstance(), availableDataTypes);
 		}
 				
@@ -1267,7 +1269,7 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 		private TransferData[] fAvailableTypes;
 
-		public boolean canEnable(TransferData[] availableTypes) throws JavaModelException {
+		public boolean canEnable(TransferData[] availableTypes) {
 			fAvailableTypes= availableTypes;
 			return isAvailable(TypedSourceTransfer.getInstance(), availableTypes);
 		}
