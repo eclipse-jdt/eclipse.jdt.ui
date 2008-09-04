@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,6 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IExecutionListener;
-import org.eclipse.core.commands.NotHandledException;
-
-import org.eclipse.core.runtime.ListenerList;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -26,6 +19,13 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.VerifyEvent;
+
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IExecutionListener;
+import org.eclipse.core.commands.NotHandledException;
+
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.jface.text.ITextViewer;
 
@@ -161,7 +161,7 @@ public final class CompoundEditExitStrategy {
 		if (viewer == null)
 			throw new NullPointerException("editor"); //$NON-NLS-1$
 		fViewer= viewer;
-		addListeners(fViewer);
+		addListeners();
 	}
 	
 	/**
@@ -175,13 +175,13 @@ public final class CompoundEditExitStrategy {
 	 */
 	public void disarm() {
 		if (isInstalled()) {
-			removeListeners(fViewer);
+			removeListeners();
 			fViewer= null;
 		}
 	}
 
-	private void addListeners(ITextViewer viewer) {
-		fWidgetEventSource= viewer.getTextWidget();
+	private void addListeners() {
+		fWidgetEventSource= fViewer.getTextWidget();
 		if (fWidgetEventSource != null) {
 			fWidgetEventSource.addVerifyKeyListener(fEventListener);
 			fWidgetEventSource.addMouseListener(fEventListener);
@@ -193,7 +193,7 @@ public final class CompoundEditExitStrategy {
 			commandService.addExecutionListener(fEventListener);
 	}
 	
-	private void removeListeners(ITextViewer editor) {
+	private void removeListeners() {
 		ICommandService commandService = (ICommandService)PlatformUI.getWorkbench().getAdapter(ICommandService.class);
 		if (commandService != null)
 			commandService.removeExecutionListener(fEventListener);
