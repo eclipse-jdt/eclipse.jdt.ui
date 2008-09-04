@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,10 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -96,7 +96,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 
 		int nestingMode= NONE;
 		int nestingLevel= 0;
-
+		
 		int charCount= 0;
 		int offset= start;
 		while (offset < end) {
@@ -110,7 +110,11 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 							offset= getCommentEnd(document, offset + 1, end);
 						} else if (next == '/') {
 							// '//'-comment: nothing to do anymore on this line
-							offset= end;
+							int nextLine= document.getLineOfOffset(offset) + 1;
+							if (nextLine == document.getNumberOfLines())
+								offset= end;
+							else
+								offset= document.getLineOffset(nextLine);
 						}
 					}
 					break;
@@ -216,7 +220,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 		return charCount;
 	}
 
-    private boolean checkGenericsHeuristic(IDocument document, int end, int bound) throws BadLocationException {
+    private boolean checkGenericsHeuristic(IDocument document, int end, int bound) {
     	JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
     	return scanner.looksLikeClassInstanceCreationBackward(end, bound);
     }
