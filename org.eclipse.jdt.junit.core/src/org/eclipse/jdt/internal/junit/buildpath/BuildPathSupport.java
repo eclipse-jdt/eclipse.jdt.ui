@@ -77,7 +77,7 @@ public class BuildPathSupport {
 	}
 	
 	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription("org.junit", new VersionRange("[3.8.2,3.9)"), true);  //$NON-NLS-1$//$NON-NLS-2$
-	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.4.0,4.5.0)"), true); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.5.0,5.0.0)"), true); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	public static IPath getBundleLocation(JUnitPluginDescription pluginDesc) {
 		Bundle bundle= pluginDesc.getBundle();
