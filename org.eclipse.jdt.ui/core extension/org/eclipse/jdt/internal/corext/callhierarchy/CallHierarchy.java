@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,13 +177,13 @@ public class CallHierarchy {
         this.fSearchScope = searchScope;
     }
 
-    /**
-     * Checks whether the fully qualified name is ignored by the set filters.
-     *
-     * @param fullyQualifiedName
-     *
-     * @return True if the fully qualified name is ignored.
-     */
+	/**
+	 * Checks whether the fully qualified name is ignored by the set filters.
+	 * 
+	 * @param fullyQualifiedName the fully qualified name
+	 * 
+	 * @return <code>true</code> if the fully qualified name is ignored
+	 */
     public boolean isIgnored(String fullyQualifiedName) {
         if ((getIgnoreFilters() != null) && (getIgnoreFilters().length > 0)) {
             for (int i = 0; i < getIgnoreFilters().length; i++) {
@@ -263,11 +263,11 @@ public class CallHierarchy {
 	}
 
 	/**
-     * Parses the comma separated string into an array of StringMatcher objects
-     * @param listString the string to parse
-     *
-     * @return list
-     */
+	 * Parses the comma separated string into an array of {@link StringMatcher} objects.
+	 * 
+	 * @param listString the string to parse
+	 * @return an array of {@link StringMatcher} objects
+	 */
     private static StringMatcher[] parseList(String listString) {
         List list = new ArrayList(10);
         StringTokenizer tokenizer = new StringTokenizer(listString, ","); //$NON-NLS-1$
