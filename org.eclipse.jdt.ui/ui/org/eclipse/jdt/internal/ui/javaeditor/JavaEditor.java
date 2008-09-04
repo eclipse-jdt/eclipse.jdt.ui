@@ -251,8 +251,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * the selection provider is a post selection provider, post selection changed
 		 * events are the preferred choice, otherwise normal selection changed events
 		 * are requested.
-		 *
-		 * @param selectionProvider
+		 * 
+		 * @param selectionProvider the selection provider
 		 */
 		public void install(ISelectionProvider selectionProvider) {
 			if (selectionProvider == null)
@@ -297,16 +297,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void selectionChanged(SelectionChangedEvent event) {
 			// XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=56161
 			JavaEditor.this.selectionChanged();
-		}
-	}
-
-	/**
-	 * Updates the selection in the editor's widget with the selection of the outline page.
-	 */
-	class OutlineSelectionChangedListener  extends AbstractSelectionChangedListener {
-		public void selectionChanged(SelectionChangedEvent event) {
-			if (isJavaOutlinePageActive())
-				doSelectionChanged(event);
 		}
 	}
 
@@ -790,7 +780,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			ISourceViewer viewer= getSourceViewer();
 			int widget= -1;
 			int next= position;
-			while (next != BreakIterator.DONE && widget == -1) { // TODO: optimize
+			while (next != BreakIterator.DONE && widget == -1) { // XXX: optimize
 				next= fIterator.following(next);
 				if (next != BreakIterator.DONE)
 					widget= modelOffset2WidgetOffset(viewer, next);
@@ -984,7 +974,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			ISourceViewer viewer= getSourceViewer();
 			int widget= -1;
 			int previous= position;
-			while (previous != BreakIterator.DONE && widget == -1) { // TODO: optimize
+			while (previous != BreakIterator.DONE && widget == -1) { // XXX: optimize
 				previous= fIterator.preceding(previous);
 				if (previous != BreakIterator.DONE)
 					widget= modelOffset2WidgetOffset(viewer, previous);
@@ -1507,8 +1497,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private EditorSelectionChangedListener fEditorSelectionChangedListener;
-	/** The selection changed listener */
-	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener= new OutlineSelectionChangedListener();
 	/** The editor's bracket matcher */
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
 	/** This editor's encoding support */
@@ -1696,6 +1684,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.4
 	 */
 	private SelectionProvider fSelectionProvider= new JdtSelectionProvider();
+
+
 
 
 	/**
@@ -2037,7 +2027,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected JavaOutlinePage createOutlinePage() {
 		JavaOutlinePage page= new JavaOutlinePage(fOutlinerContextMenuId, this);
-		fOutlineSelectionChangedListener.install(page);
 		setOutlinePageInput(page, getEditorInput());
 		return page;
 	}
@@ -2047,7 +2036,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	public void outlinePageClosed() {
 		if (fOutlinePage != null) {
-			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 			fOutlinePage= null;
 			resetHighlightRange();
 		}
@@ -2072,9 +2060,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void synchronizeOutlinePage(ISourceReference element, boolean checkIfOutlinePageActive) {
 		if (fOutlinePage != null && element != null && !(checkIfOutlinePageActive && isJavaOutlinePageActive())) {
-			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 			fOutlinePage.select(element);
-			fOutlineSelectionChangedListener.install(fOutlinePage);
 		}
 	}
 
@@ -2349,19 +2335,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			// set highlight range
 			setSelection(reference, true);
 			// set outliner selection
-			if (fOutlinePage != null) {
-				fOutlineSelectionChangedListener.uninstall(fOutlinePage);
+			if (fOutlinePage != null)
 				fOutlinePage.select(reference);
-				fOutlineSelectionChangedListener.install(fOutlinePage);
-			}
 		}
 	}
 
-	protected void doSelectionChanged(SelectionChangedEvent event) {
+	protected void doSelectionChanged(ISelection selection) {
 
 		ISourceReference reference= null;
 
-		ISelection selection= event.getSelection();
 		Iterator iter= ((IStructuredSelection) selection).iterator();
 		while (iter.hasNext()) {
 			Object o= iter.next();
@@ -2414,11 +2396,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					}
 
 					setHighlightRange(range.getOffset(), range.getLength(), true);
-					if (fOutlinePage != null) {
-						fOutlineSelectionChangedListener.uninstall(fOutlinePage);
+					if (fOutlinePage != null)
 						fOutlinePage.select((ISourceReference) element);
-						fOutlineSelectionChangedListener.install(fOutlinePage);
-					}
 
 					return;
 				}

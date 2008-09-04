@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 75800: [call hierarchy] should allow searches for fields
@@ -17,17 +17,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -36,6 +35,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CallHierarchyUI {
-    private static final int DEFAULT_MAX_CALL_DEPTH= 10;    
+    private static final int DEFAULT_MAX_CALL_DEPTH= 10;
     private static final String PREF_MAX_CALL_DEPTH = "PREF_MAX_CALL_DEPTH"; //$NON-NLS-1$
 
     private static CallHierarchyUI fgInstance;
@@ -122,15 +122,16 @@ public class CallHierarchyUI {
         }
     }
 
-    /**
-     * Opens the element in the editor or shows an error dialog if that fails.
-     * @param element the element to open
-     * @param shell parent shell for error dialog
-     * @param title title for error dialog
-     * @return <code>true</code> iff no error occurred while trying to
-     *  open the editor, <code>false</code> iff an error dialog was raised.
-     */
-    public static boolean openInEditor(Object element, Shell shell, String title) {
+	/**
+	 * Opens the element in the editor or shows an error dialog if that fails.
+	 * 
+	 * @param element the element to open
+	 * @param shell parent shell for error dialog
+	 * @param activateOnOpen <code>true</code> if the editor should be activated
+	 * @return <code>true</code> iff no error occurred while trying to open the editor,
+	 *         <code>false</code> iff an error dialog was raised.
+	 */
+	public static boolean openInEditor(Object element, Shell shell, boolean activateOnOpen) {
         CallLocation callLocation= CallHierarchy.getCallLocation(element);
         
         try {
@@ -155,8 +156,6 @@ public class CallHierarchyUI {
 	            return true;
 	        }
 	
-            boolean activateOnOpen = OpenStrategy.activateOnOpen();
-
 			IEditorPart methodEditor = JavaUI.openInEditor(enclosingMember, activateOnOpen, false);
             if (methodEditor instanceof ITextEditor) {
                 ITextEditor editor = (ITextEditor) methodEditor;
@@ -166,10 +165,10 @@ public class CallHierarchyUI {
         } catch (JavaModelException e) {
             JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
                     IJavaStatusConstants.INTERNAL_ERROR,
-                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, e)); 
+                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, e));
 
-            ErrorDialog.openError(shell, title,
-                CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, 
+            ErrorDialog.openError(shell, CallHierarchyMessages.OpenLocationAction_error_title,
+                CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message,
                 e.getStatus());
             return false;
         } catch (PartInitException x) {
@@ -180,9 +179,9 @@ public class CallHierarchyUI {
         		name= ((MethodWrapper) element).getName();
         	else
         		name= "";  //$NON-NLS-1$
-            MessageDialog.openError(shell, title,
+            MessageDialog.openError(shell, CallHierarchyMessages.OpenLocationAction_error_title,
                 Messages.format(
-                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_messageArgs, 
+                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_messageArgs,
                     new String[] { name, x.getMessage() }));
             return false;
         }
@@ -206,9 +205,9 @@ public class CallHierarchyUI {
         
         IMember input= null;
         if (candidates.length > 1) {
-            String title= CallHierarchyMessages.CallHierarchyUI_selectionDialog_title;  
-            String message= CallHierarchyMessages.CallHierarchyUI_selectionDialog_message; 
-            input= (IMember) SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);         
+            String title= CallHierarchyMessages.CallHierarchyUI_selectionDialog_title;
+            String message= CallHierarchyMessages.CallHierarchyUI_selectionDialog_message;
+            input= (IMember) SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);
         } else if (candidates.length == 1) {
             input= candidates[0];
         }
@@ -230,23 +229,23 @@ public class CallHierarchyUI {
             result.setInputElements(input);
             return result;
         } catch (CoreException e) {
-            ExceptionHandler.handle(e, window.getShell(), 
-                CallHierarchyMessages.CallHierarchyUI_error_open_view, e.getMessage()); 
+            ExceptionHandler.handle(e, window.getShell(),
+                CallHierarchyMessages.CallHierarchyUI_error_open_view, e.getMessage());
         }
-        return null;        
+        return null;
     }
     
     /**
      * Converts an ISelection (containing MethodWrapper instances) to an ISelection
      * with the MethodWrapper's replaced by their corresponding IMembers. If the selection
      * contains elements which are not MethodWrapper instances or not already IMember instances
-     * they are discarded.  
+     * they are discarded.
      * @param selection The selection to convert.
      * @return An ISelection containing IMember's in place of MethodWrapper instances.
      */
     static ISelection convertSelection(ISelection selection) {
         if (selection.isEmpty()) {
-            return selection;   
+            return selection;
         }
         
         if (selection instanceof IStructuredSelection) {
@@ -268,6 +267,6 @@ public class CallHierarchyUI {
             }
             return new StructuredSelection(javaElements);
         }
-        return StructuredSelection.EMPTY; 
+        return StructuredSelection.EMPTY;
     }
 }

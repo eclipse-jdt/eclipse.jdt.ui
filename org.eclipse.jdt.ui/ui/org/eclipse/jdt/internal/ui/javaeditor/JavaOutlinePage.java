@@ -58,6 +58,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
@@ -520,26 +521,24 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		 */
 		public class ToggleLinkingAction extends AbstractToggleLinkingAction {
 
-			JavaOutlinePage fJavaOutlinePage;
-
 			/**
 			 * Constructs a new action.
-			 *
-			 * @param outlinePage the Java outline page
 			 */
-			public ToggleLinkingAction(JavaOutlinePage outlinePage) {
+			public ToggleLinkingAction() {
 				boolean isLinkingEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
 				setChecked(isLinkingEnabled);
-				fJavaOutlinePage= outlinePage;
+				fOpenAndLinkWithEditorHelper.setLinkWithEditor(isLinkingEnabled);
 			}
 
 			/**
 			 * Runs the action.
 			 */
 			public void run() {
-				PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, isChecked());
-				if (isChecked() && fEditor != null)
+				final boolean isChecked= isChecked();
+				PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, isChecked);
+				if (isChecked && fEditor != null)
 					fEditor.synchronizeOutlinePage(fEditor.computeHighlightRangeSourceReference(), false);
+				fOpenAndLinkWithEditorHelper.setLinkWithEditor(isChecked);
 			}
 
 		}
@@ -596,6 +595,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private CategoryFilterActionGroup fCategoryFilterActionGroup;
 	
 	private JdtViewerDropSupport fDropSupport;
+
+	/**
+	 * Helper to open and activate editors.
+	 * @since 3.5
+	 */
+	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
+
 
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -700,7 +706,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		IMenuManager viewMenuManager= actionBars.getMenuManager();
 		viewMenuManager.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
 
-		fToggleLinkingAction= new ToggleLinkingAction(this);
+		fToggleLinkingAction= new ToggleLinkingAction();
 		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
 		viewMenuManager.add(new ClassOnlyAction());
 		viewMenuManager.add(fToggleLinkingAction);
@@ -785,10 +791,31 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		// Custom filter group
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup("org.eclipse.jdt.ui.JavaOutlinePage", fOutlineViewer); //$NON-NLS-1$
 
+		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fOutlineViewer) {
+
+			protected void activate(ISelection selection) {
+				fEditor.doSelectionChanged(selection);
+				getSite().getPage().activate(fEditor);
+			}
+
+			protected void linkToEditor(ISelection selection) {
+				fEditor.doSelectionChanged(selection);
+
+			}
+
+			protected void open(ISelection selection, boolean activate) {
+				fEditor.doSelectionChanged(selection);
+				if (activate)
+					getSite().getPage().activate(fEditor);
+			}
+
+		};
+
 		registerToolbarActions(actionBars);
-		
-		IHandlerService handlerService= (IHandlerService) site.getService(IHandlerService.class);
+
+		IHandlerService handlerService= (IHandlerService)site.getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
+
 
 		fOutlineViewer.setInput(fInput);
 	}
@@ -850,6 +877,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fActionGroups.dispose();
 
 		fTogglePresentation.setEditor(null);
+		
+		if (fOpenAndLinkWithEditorHelper != null) {
+			fOpenAndLinkWithEditorHelper.dispose();
+			fOpenAndLinkWithEditorHelper= null;
+		}
 
 		fOutlineViewer= null;
 

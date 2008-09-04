@@ -16,14 +16,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.help.IContextProvider;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -33,7 +26,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.help.IContextProvider;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -46,13 +46,9 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
@@ -72,6 +68,7 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
@@ -80,6 +77,7 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.ISearchResultViewPart;
@@ -123,6 +121,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
@@ -200,6 +199,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				fProcessSelectionEvents= false;
 		}
 	};
+
+	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
 
 	public JavaBrowsingPart() {
 		super();
@@ -474,11 +475,19 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			getViewSite().getPage().removePartListener(fPartListener);
 			fViewer= null;
 		}
-		if (fActionGroups != null)
+		if (fActionGroups != null) {
 			fActionGroups.dispose();
+			fActionGroups= null;
+		}
 
 		if (fWorkingSetFilterActionGroup != null) {
 			fWorkingSetFilterActionGroup.dispose();
+			fWorkingSetFilterActionGroup= null;
+		}
+		
+		if (fOpenAndLinkWithEditorHelper != null) {
+			fOpenAndLinkWithEditorHelper.dispose();
+			fOpenAndLinkWithEditorHelper= null;
 		}
 
 		super.dispose();
@@ -954,32 +963,45 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * call super.
 	 */
 	protected void hookViewerListeners() {
-		fViewer.addPostSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
+
+
+		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fViewer) {
+			protected void activate(ISelection selection) {
+				try {
+					final Object selectedElement= SelectionUtil.getSingleElement(selection);
+					if (EditorUtility.isOpenInEditor(selectedElement) != null)
+						EditorUtility.openInEditor(selectedElement, true);
+				} catch (PartInitException ex) {
+					// Ignore if no editor input can be found
+				}
+			}
+
+			protected void linkToEditor(ISelection selection) {
 				if (!fProcessSelectionEvents)
 					return;
 
-				fPreviousSelectedElement= getSingleElementFromSelection(event.getSelection());
+				fPreviousSelectedElement= getSingleElementFromSelection(selection);
 
 				IWorkbenchPage page= getSite().getPage();
 				if (page == null)
 					return;
 
 				if (page.equals(JavaPlugin.getActivePage()) && JavaBrowsingPart.this.equals(page.getActivePart())) {
-					linkToEditor((IStructuredSelection)event.getSelection());
+					JavaBrowsingPart.this.linkToEditor(selection);
 				}
 			}
-		});
 
-		fViewer.addOpenListener(new IOpenListener() {
-			public void open(OpenEvent event) {
+			protected void open(ISelection selection, boolean activate) {
 				IAction open= fOpenEditorGroup.getOpenAction();
 				if (open.isEnabled()) {
 					open.run();
 					restoreSelection();
 				}
 			}
-		});
+
+		};
+		fOpenAndLinkWithEditorHelper.setLinkWithEditor(fLinkingEnabled);
+
 	}
 
 	void restoreSelection() {
@@ -1117,10 +1139,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * Links to editor (if option enabled)
 	 * @param selection the selection
 	 */
-	private void linkToEditor(IStructuredSelection selection) {
-		Object obj= selection.getFirstElement();
-
-		if (selection.size() == 1) {
+	private void linkToEditor(ISelection selection) {
+		Object obj= SelectionUtil.getSingleElement(selection);
+		if (obj != null) {
 			IEditorPart part= EditorUtility.isOpenInEditor(obj);
 			if (part != null) {
 				IWorkbenchPage page= getSite().getPage();
@@ -1319,6 +1340,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				setSelectionFromEditor(editor);
 			}
 		}
+		fOpenAndLinkWithEditorHelper.setLinkWithEditor(enabled);
 	}
 
 }

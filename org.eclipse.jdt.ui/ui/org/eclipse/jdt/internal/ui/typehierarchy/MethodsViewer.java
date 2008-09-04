@@ -24,13 +24,10 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.core.IMethod;
@@ -40,7 +37,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
-import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,8 +47,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
 /**
- * Method viewer shows a list of methods of a input type. 
- * Offers filter actions. 
+ * Method viewer shows a list of methods of a input type.
+ * Offers filter actions.
  * No dependency to the type hierarchy view
  */
 public class MethodsViewer extends ProblemTableViewer {
@@ -65,11 +61,10 @@ public class MethodsViewer extends ProblemTableViewer {
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 	
-	private OpenAction fOpen;
 	private ShowInheritedMembersAction fShowInheritedMembersAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	
-	public MethodsViewer(Composite parent, final TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
+	public MethodsViewer(Composite parent, final TypeHierarchyLifeCycle lifeCycle) {
 		super(new Table(parent, SWT.MULTI));
 		
 		addFilter(new SyntheticMembersFilter());
@@ -82,13 +77,6 @@ public class MethodsViewer extends ProblemTableViewer {
 		HierarchyViewerSorter sorter= new HierarchyViewerSorter(lifeCycle);
 		sorter.setSortByDefiningType(false);
 		setComparator(sorter);
-		
-		fOpen= new OpenAction(part.getSite());
-		addOpenListener(new IOpenListener() {
-			public void open(OpenEvent event) {
-				fOpen.run();
-			}
-		});
 		
 		fMemberFilterActionGroup= new MemberFilterActionGroup(this, "HierarchyMethodView", false, MemberFilterActionGroup.ALL_FILTERS & ~MemberFilterActionGroup.FILTER_LOCALTYPES); //$NON-NLS-1$
 		
@@ -124,14 +112,14 @@ public class MethodsViewer extends ProblemTableViewer {
 	public void showInheritedMethods(boolean on) {
 		if (on == isShowInheritedMethods()) {
 			return;
-		}		
+		}
 		try {
 			getTable().setRedraw(false);
 			showInheritedMethodsNoRedraw(on);
 			refresh();
 		} finally {
 			getTable().setRedraw(true);
-		}		
+		}
 	}
 
 	private void sortByDefiningTypeNoRedraw(boolean on) {
@@ -154,8 +142,8 @@ public class MethodsViewer extends ProblemTableViewer {
 			refresh();
 		} finally {
 			getTable().setRedraw(true);
-		}		
-	}	
+		}
+	}
 		
 	/*
 	 * @see Viewer#inputChanged(Object, Object)
@@ -167,7 +155,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	/**
 	 * Returns <code>true</code> if inherited methods are shown.
 	 * @return <code>true</code> if inherited methods are shown.
-	 */	
+	 */
 	public boolean isShowInheritedMethods() {
 		return ((MethodsContentProvider) getContentProvider()).isShowInheritedMethods();
 	}
@@ -175,10 +163,10 @@ public class MethodsViewer extends ProblemTableViewer {
 	/**
 	 * Returns <code>true</code> if defining types are shown.
 	 * @return <code>true</code> if defining types are shown.
-	 */	
+	 */
 	public boolean isShowDefiningTypes() {
 		return fLabelProvider.isShowDefiningType();
-	}	
+	}
 
 	/**
 	 * Saves the state of the filter actions
@@ -198,7 +186,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	/**
 	 * Restores the state of the filter actions
 	 * @param memento the memento
-	 */	
+	 */
 	public void restoreState(IMemento memento) {
 		fMemberFilterActionGroup.restoreState(memento);
 		getControl().setRedraw(false);
@@ -233,14 +221,14 @@ public class MethodsViewer extends ProblemTableViewer {
 		Menu menu= menuMgr.createContextMenu(getTable());
 		getTable().setMenu(menu);
 		viewSite.registerContextMenu(popupId, menuMgr, this);
-	}	
+	}
 		
 	
 	/**
 	 * Fills up the context menu with items for the method viewer
 	 * Should be called by the creator of the context menu
 	 * @param menu teh menu manager
-	 */	
+	 */
 	public void contributeToContextMenu(IMenuManager menu) {
 	}
 

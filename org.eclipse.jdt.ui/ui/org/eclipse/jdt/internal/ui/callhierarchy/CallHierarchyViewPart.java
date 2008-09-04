@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
+import org.eclipse.help.IContextProvider;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -41,7 +41,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.help.IContextProvider;
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -52,11 +52,10 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.DelegatingDragAdapter;
 import org.eclipse.jface.util.DelegatingDropAdapter;
-import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -72,6 +71,7 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
@@ -82,9 +82,9 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -116,6 +116,7 @@ import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -198,6 +199,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private boolean fShowCallDetails;
 	protected Composite fParent;
 	private IPartListener2 fPartListener;
+	/**
+	 * Helper to open and activate editors.
+	 * 
+	 * @since 3.5
+	 */
+	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
+
 
     public CallHierarchyViewPart() {
         super();
@@ -322,7 +330,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * called from SelectFieldModeAction.
-     * @param mode IJavaSearchConstants.{REFERENCES,WRITE_ACCESS,READ_ACCESS} 
+     * @param mode IJavaSearchConstants.{REFERENCES,WRITE_ACCESS,READ_ACCESS}
      */
     void setFieldMode(int mode) {
         if (fCurrentFieldMode != mode) {
@@ -389,7 +397,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(fSelectionProviderMediator));
 		
 		viewer.addDragSupport(ops, transfers, dragAdapter);
-	}	
+	}
             
     public void createPartControl(Composite parent) {
     	fParent= parent;
@@ -403,7 +411,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         // Page 2: Nothing selected
         fNoHierarchyShownLabel = new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
-        fNoHierarchyShownLabel.setText(CallHierarchyMessages.CallHierarchyViewPart_empty); //   
+        fNoHierarchyShownLabel.setText(CallHierarchyMessages.CallHierarchyViewPart_empty); //
 
         showPage(PAGE_EMPTY);
         
@@ -506,9 +514,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				return;
 			Point size= fParent.getSize();
 			if (size.x != 0 && size.y != 0) {
-				if (size.x > size.y) 
+				if (size.x > size.y)
 					setOrientation(VIEW_ORIENTATION_HORIZONTAL);
-				else 
+				else
 					setOrientation(VIEW_ORIENTATION_VERTICAL);
 			}
 		}
@@ -632,6 +640,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			getViewSite().getPage().removePartListener(fPartListener);
 			fPartListener= null;
 		}
+		
+		if (fOpenAndLinkWithEditorHelper != null) {
+			fOpenAndLinkWithEditorHelper.dispose();
+			fOpenAndLinkWithEditorHelper= null;
+		}
 
         super.dispose();
     }
@@ -687,9 +700,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
     }
 
-    /**
-     * @param selection
-     */
     private void methodSelectionChanged(ISelection selection) {
         if (selection instanceof IStructuredSelection && ((IStructuredSelection) selection).size() == 1) {
             Object selectedElement = ((IStructuredSelection) selection).getFirstElement();
@@ -831,7 +841,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fCallerRoots == null) {
             fCallerRoots = CallHierarchy.getDefault().getCallerRoots(fInputElements);
         	for (int i= 0; i < fCallerRoots.length; i++) {
-        		fCallerRoots[i].setFieldSearchMode(fCurrentFieldMode);					
+        		fCallerRoots[i].setFieldSearchMode(fCurrentFieldMode);
 			}
         }
 
@@ -853,9 +863,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fHistoryDropDownAction.setEnabled(true);
     }
 
-    /**
-     * @param parent
-     */
     private void createLocationViewer(Composite parent) {
         fLocationViewer= new LocationViewer(parent);
 
@@ -881,9 +888,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fCallHierarchyViewer.addSelectionChangedListener(this);
     }
 
-    /**
-     * @param menu
-     */
     protected void fillCallHierarchyViewerContextMenu(IMenuManager menu) {
         JavaPlugin.createStandardGroups(menu);
 
@@ -935,11 +939,28 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fRefreshAction = new RefreshAction(this);
 
         fOpenLocationAction = new OpenLocationAction(this, getSite());
-        fLocationViewer.addOpenListener(new IOpenListener() {
-                public void open(OpenEvent event) {
-                    fOpenLocationAction.run();
-                }
-            });
+		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fLocationViewer) {
+			protected void activate(ISelection selection) {
+				final Object selectedElement= SelectionUtil.getSingleElement(selection);
+				if (selectedElement != null)
+					CallHierarchyUI.openInEditor(selectedElement, getSite().getShell(), true);
+			}
+
+			protected void linkToEditor(ISelection selection) {
+				// not supported by this part
+			}
+
+			protected void open(ISelection selection, boolean activate) {
+				if (selection instanceof IStructuredSelection) {
+					for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+						boolean noError= CallHierarchyUI.openInEditor(iter.next(), getSite().getShell(), OpenStrategy.activateOnOpen());
+						if (!noError)
+							return;
+					}
+				}
+			}
+
+		};
         
         fLocationCopyAction= fLocationViewer.initCopyAction(getViewSite(), fClipboard);
         
@@ -968,10 +989,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 new SelectFieldModeAction(this, IJavaSearchConstants.WRITE_ACCESSES)
             };
         fActionGroups = new CompositeActionGroup(new ActionGroup[] {
-                    new OpenEditorActionGroup(this), 
+                    new OpenEditorActionGroup(this),
                     new OpenViewActionGroup(this),
                     new CCPActionGroup(this),
-                    new GenerateActionGroup(this), 
+                    new GenerateActionGroup(this),
                     new RefactorActionGroup(this),
                     new JavaSearchActionGroup(this),
                     fSearchScopeActions, fFiltersActionGroup
@@ -1024,7 +1045,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				fCallHierarchyViewer.setComparator(null);
 				fCallHierarchyViewer.setMethodWrappers(getCalleeRoots());
 			}
-			setContentDescription(computeContentDescription()); 
+			setContentDescription(computeContentDescription());
 		}
     }
 	
@@ -1123,16 +1144,17 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
     /**
-     * Cancels the caller/callee search jobs that are currently running.  
+     * Cancels the caller/callee search jobs that are currently running.
      */
     void cancelJobs() {
         fCallHierarchyViewer.cancelJobs();
     }
 
-    /**
-     * Sets the enablement state of the cancel button.
-     * @param enabled 
-     */
+	/**
+	 * Sets the enablement state of the cancel button.
+	 * 
+	 * @param enabled <code>true</code> if cancel should be enabled
+	 */
     void setCancelEnabled(boolean enabled) {
         fCancelSearchAction.setEnabled(enabled);
     }

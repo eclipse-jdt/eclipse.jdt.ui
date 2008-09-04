@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.ui.IWorkbenchPart;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -28,26 +26,26 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  * Used by the TypeHierarchyViewPart which has to provide a TypeHierarchyLifeCycle
  * on construction (shared type hierarchy)
  */
-public class TraditionalHierarchyViewer extends TypeHierarchyViewer {	
+public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	
-	public TraditionalHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
-		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), lifeCycle, part);
+	public TraditionalHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle) {
+		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), lifeCycle);
 	}
 	
 	/*
 	 * @see TypeHierarchyViewer#getTitle
-	 */	
+	 */
 	public String getTitle() {
 		if (isMethodFiltering()) {
-			return TypeHierarchyMessages.TraditionalHierarchyViewer_filtered_title; 
+			return TypeHierarchyMessages.TraditionalHierarchyViewer_filtered_title;
 		} else {
-			return TypeHierarchyMessages.TraditionalHierarchyViewer_title; 
+			return TypeHierarchyMessages.TraditionalHierarchyViewer_title;
 		}
 	}
 
 	/*
 	 * @see TypeHierarchyViewer#updateContent
-	 */		
+	 */
 	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
@@ -61,11 +59,11 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			expandToLevel(expandLevel);
 		}
 		getTree().setRedraw(true);
-	}	
+	}
 
 	/**
 	 * Content provider for the 'traditional' type hierarchy.
-	 */	
+	 */
 	public static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider {
 		
 			
@@ -133,7 +131,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				
 		/*
 		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
-		 */	
+		 */
 		protected final void getTypesInHierarchy(IType type, List res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
@@ -172,7 +170,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				// don't handle interfaces
 			}
 			return null;
-		}	
+		}
 			
 	}
 }

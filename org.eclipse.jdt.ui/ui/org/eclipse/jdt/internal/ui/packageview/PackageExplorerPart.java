@@ -18,6 +18,18 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.help.IContextProvider;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Widget;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -32,18 +44,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.help.IContextProvider;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -60,15 +60,11 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.ITreeViewerListener;
-import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreePath;
@@ -89,6 +85,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
@@ -99,7 +96,6 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
-
 import org.eclipse.ui.views.framelist.Frame;
 import org.eclipse.ui.views.framelist.FrameAction;
 import org.eclipse.ui.views.framelist.FrameList;
@@ -136,6 +132,7 @@ import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
@@ -196,9 +193,12 @@ public class PackageExplorerPart extends ViewPart
 	private Menu fContextMenu;
 	
 	private IMemento fMemento;
-	
-	private ISelection fLastOpenSelection;
-	private final ISelectionChangedListener fPostSelectionListener;
+
+	/**
+	 * Helper to open and activate editors.
+	 * @since 3.5
+	 */
+	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
 	
 	private String fWorkingSetLabel;
 	private IDialogSettings fDialogSettings;
@@ -236,6 +236,7 @@ public class PackageExplorerPart extends ViewPart
 				expandMainType(element);
 		}
 	};
+
 
 	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
 		// fix for 64372  Projects showing up in Package Explorer twice [package explorer]
@@ -426,11 +427,6 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	public PackageExplorerPart() {
-		fPostSelectionListener= new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				handlePostSelectionChanged(event);
-			}
-		};
 		
 		// exception: initialize from preference
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
@@ -539,9 +535,8 @@ public class PackageExplorerPart extends ViewPart
 		getSite().getPage().removePartListener(fLinkWithEditorListener); // always remove even if we didn't register
 		
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-		if (fViewer != null) {
+		if (fViewer != null)
 			fViewer.removeTreeListener(fExpansionListener);
-		}
 		
 		if (fActionSet != null)
 			fActionSet.dispose();
@@ -549,6 +544,12 @@ public class PackageExplorerPart extends ViewPart
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fFilterUpdater);
 		if (fWorkingSetModel != null)
 			fWorkingSetModel.dispose();
+
+		if (fOpenAndLinkWithEditorHelper != null) {
+			fOpenAndLinkWithEditorHelper.dispose();
+			fOpenAndLinkWithEditorHelper= null;
+		}
+
 		super.dispose();
 	}
 
@@ -589,21 +590,32 @@ public class PackageExplorerPart extends ViewPart
 		initFrameActions();
 		initKeyListener();
 			
-
-		fViewer.addPostSelectionChangedListener(fPostSelectionListener);
-		
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				fActionSet.handleDoubleClick(event);
 			}
 		});
-		
-		fViewer.addOpenListener(new IOpenListener() {
-			public void open(OpenEvent event) {
-				fActionSet.handleOpen(event);
-				fLastOpenSelection= event.getSelection();
+
+		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fViewer) {
+			protected void activate(ISelection selection) {
+				try {
+					final Object selectedElement= SelectionUtil.getSingleElement(selection);
+					if (EditorUtility.isOpenInEditor(selectedElement) != null)
+						EditorUtility.openInEditor(selectedElement, true);
+				} catch (PartInitException ex) {
+					// ignore if no editor input can be found
+				}
 			}
-		});
+
+			protected void linkToEditor(ISelection selection) {
+				PackageExplorerPart.this.linkToEditor(selection);
+			}
+
+			protected void open(ISelection selection, boolean activate) {
+				fActionSet.handleOpen(selection, activate);
+			}
+			
+		};
 
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
 		fViewer.addSelectionChangedListener(new StatusBarUpdater(slManager));
@@ -896,23 +908,7 @@ public class PackageExplorerPart extends ViewPart
 			fViewer.refresh(selectedElements[i]);
 		}
 	}
-	
-	/**
-	 * Handles post selection changed in viewer.
-	 * 
-	 * Links to editor (if option enabled).
-	 * @param event the selection eveny
-	 */
-	private void handlePostSelectionChanged(SelectionChangedEvent event) {
-		ISelection selection= event.getSelection();
-		// If the selection is the same as the one that triggered the last
-		// open event then do nothing. The editor already got revealed.
-		if (isLinkingEnabled() && !selection.equals(fLastOpenSelection)) {
-			linkToEditor((IStructuredSelection)selection);
-		}
-		fLastOpenSelection= null;
-	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.ISetSelectionTarget#selectReveal(org.eclipse.jface.viewers.ISelection)
 	 */
@@ -991,19 +987,14 @@ public class PackageExplorerPart extends ViewPart
 	public boolean isLinkingEnabled() {
 		return fLinkingEnabled;
 	}
-	
+
 	/**
 	 * Links to editor (if option enabled)
 	 * @param selection the selection
 	 */
-	private void linkToEditor(IStructuredSelection selection) {
-		// ignore selection changes if the package explorer is not the active part.
-		// In this case the selection change isn't triggered by a user.
-		if (!isActivePart())
-			return;
-		Object obj= selection.getFirstElement();
-
-		if (selection.size() == 1) {
+	private void linkToEditor(ISelection selection) {
+		Object obj= SelectionUtil.getSingleElement(selection);
+		if (obj != null) {
 			IEditorPart part= EditorUtility.isOpenInEditor(obj);
 			if (part != null) {
 				IWorkbenchPage page= getSite().getPage();
@@ -1014,10 +1005,6 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-	private boolean isActivePart() {
-		return this == getSite().getPage().getActivePart();
-	}
-	
 	public void saveState(IMemento memento) {
 		if (fViewer == null && fMemento != null) {
 			// part has not been created -> keep the old state
@@ -1149,20 +1136,15 @@ public class PackageExplorerPart extends ViewPart
 			if (fViewer.getSelection().equals(newSelection)) {
 				fViewer.reveal(element);
 			} else {
-				try {
-					fViewer.removePostSelectionChangedListener(fPostSelectionListener);
-					fViewer.setSelection(newSelection, true);
-	
-					while (element != null && fViewer.getSelection().isEmpty()) {
-						// Try to select parent in case element is filtered
-						element= getParent(element);
-						if (element != null) {
-							newSelection= new StructuredSelection(element);
-							fViewer.setSelection(newSelection, true);
-						}
+				fViewer.setSelection(newSelection, true);
+
+				while (element != null && fViewer.getSelection().isEmpty()) {
+					// Try to select parent in case element is filtered
+					element= getParent(element);
+					if (element != null) {
+						newSelection= new StructuredSelection(element);
+						fViewer.setSelection(newSelection, true);
 					}
-				} finally {
-					fViewer.addPostSelectionChangedListener(fPostSelectionListener);
 				}
 			}
 			return true;
@@ -1249,7 +1231,7 @@ public class PackageExplorerPart extends ViewPart
 	
 	void updateToolbar() {
 		IActionBars actionBars= getViewSite().getActionBars();
-		fActionSet.updateToolBar(actionBars.getToolBarManager()); 
+		fActionSet.updateToolBar(actionBars.getToolBarManager());
 	}
 	
 	/**
@@ -1287,7 +1269,7 @@ public class PackageExplorerPart extends ViewPart
 		
 		boolean refreshViewer= false;
 	
-		if (PreferenceConstants.SHOW_CU_CHILDREN.equals(event.getProperty())) {		
+		if (PreferenceConstants.SHOW_CU_CHILDREN.equals(event.getProperty())) {
 			boolean showCUChildren= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 			((StandardJavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
 			
@@ -1374,18 +1356,18 @@ public class PackageExplorerPart extends ViewPart
 			page.addPartListener(fLinkWithEditorListener);
 			
 			IEditorPart editor = page.getActiveEditor();
-			if (editor != null) {
+			if (editor != null)
 				editorActivated(editor);
-			}
 		} else {
 			page.removePartListener(fLinkWithEditorListener);
 		}
+		fOpenAndLinkWithEditorHelper.setLinkWithEditor(enabled);
 	}
 
 	/**
-	 * Returns the name for the given element.
-	 * Used as the name for the current frame.
-	 * @param element the elemeny
+	 * Returns the name for the given element. Used as the name for the current frame.
+	 * 
+	 * @param element the element
 	 * @return the name of the frame
 	 */
 	String getFrameName(Object element) {

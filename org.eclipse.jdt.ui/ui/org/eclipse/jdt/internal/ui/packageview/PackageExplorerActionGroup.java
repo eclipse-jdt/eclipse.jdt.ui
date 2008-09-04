@@ -12,12 +12,12 @@
 
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -29,9 +29,9 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 
@@ -46,7 +46,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.handlers.CollapseAllHandler;
 import org.eclipse.ui.handlers.IHandlerService;
-
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
 import org.eclipse.ui.views.framelist.Frame;
@@ -352,14 +351,17 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			}
 		}
 	}
-	
+
 	/**
-	 * Called by the open action
+	 * Called by Package Explorer.
+	 * 
 	 * @param event the open event
+	 * @param activate <code>true</code> if the opened editor should be activated
 	 */
-	/* package */ void handleOpen(OpenEvent event) {
+	/* package */void handleOpen(ISelection event, boolean activate) {
 		IAction openAction= fNavigateActionGroup.getOpenAction();
 		if (openAction != null && openAction.isEnabled()) {
+			// XXX: should use the given arguments instead of using org.eclipse.jface.util.OpenStrategy.activateOnOpen()
 			openAction.run();
 			return;
 		}

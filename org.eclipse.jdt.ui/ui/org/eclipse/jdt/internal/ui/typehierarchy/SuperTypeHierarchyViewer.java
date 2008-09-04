@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,6 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.ui.IWorkbenchPart;
-
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
@@ -26,24 +24,24 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  */
 public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 	
-	public SuperTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
-		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), lifeCycle, part);
+	public SuperTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle) {
+		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), lifeCycle);
 	}
 
 	/*
 	 * @see TypeHierarchyViewer#getTitle
-	 */	
+	 */
 	public String getTitle() {
 		if (isMethodFiltering()) {
-			return TypeHierarchyMessages.SuperTypeHierarchyViewer_filtered_title; 
+			return TypeHierarchyMessages.SuperTypeHierarchyViewer_filtered_title;
 		} else {
-			return TypeHierarchyMessages.SuperTypeHierarchyViewer_title; 
+			return TypeHierarchyMessages.SuperTypeHierarchyViewer_title;
 		}
 	}
 
 	/*
 	 * @see TypeHierarchyViewer#updateContent
-	 */	
+	 */
 	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
@@ -74,8 +72,8 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 		protected IType getParentType(IType type) {
 			// cant handle
 			return null;
-		}			
+		}
 		
-	}		
+	}
 
 }
