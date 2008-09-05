@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
-import java.io.IOException;
+
 import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -36,8 +38,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.BuildpathModifierAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     private IPath defaultOutputFolder;
@@ -118,8 +118,8 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         testProjectIsOnClasspath(true);
         
         // now create a child of this source folder and remove the project as root
-        outputFolderQuery= getOutputFolderQueryInternal(fProject.getPath()); // To be able to remove the project, we have to pretend that our 
-        // desired output location for the project is the project root itself, because the output location already changed when 
+        outputFolderQuery= getOutputFolderQueryInternal(fProject.getPath()); // To be able to remove the project, we have to pretend that our
+        // desired output location for the project is the project root itself, because the output location already changed when
         // executing adding to the buildpath (it is not possible to have a source folder if the output location is equal to the project folder).
         ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
@@ -362,7 +362,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         IPackageFragment fragment= parentRoot.getPackageFragment(fSubFolder);
         IClasspathEntry entry= parentRoot.getRawClasspathEntry();
         
-        int nrExclusions= entry.getExclusionPatterns().length;        
+        int nrExclusions= entry.getExclusionPatterns().length;
         assertFalse(contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
         
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(BuildpathModifierAction.ADD_SEL_SF_TO_BP, fragment, getOutputFolderQueryInternal(fProject.getPath()), null, null, null);
@@ -382,7 +382,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         IPackageFragment fragment= parentRoot.getPackageFragment(fSubFolder);
         IClasspathEntry entry= parentRoot.getRawClasspathEntry();
         
-        int nrExclusions= entry.getExclusionPatterns().length;        
+        int nrExclusions= entry.getExclusionPatterns().length;
         assertFalse(contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
         
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(BuildpathModifierAction.ADD_SEL_SF_TO_BP, fragment, getOutputFolderQueryToKeepProjAsRoot(), null, null, null);
@@ -397,7 +397,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     }
     
     // TODO refine + tests for project as root
-    public void testAddJarFileToCP() throws InvocationTargetException, InterruptedException, CoreException, IOException {
+	public void testAddJarFileToCP() throws InvocationTargetException, InterruptedException, CoreException {
         super.testAddJarFileToCP();
         testProjectIsOnClasspath(false);
     }
@@ -691,7 +691,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         testProjectIsOnClasspath(false);
     }
 
-    public void testRemoveJarFileFromCP() throws InvocationTargetException, InterruptedException, CoreException, IOException {
+	public void testRemoveJarFileFromCP() throws InvocationTargetException, InterruptedException, CoreException {
         super.testRemoveJarFileFromCP();
         testProjectIsOnClasspath(false);
     }
@@ -958,8 +958,8 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         // ... and remove project as root
         IPackageFragmentRoot root= createFragmentRootAndKeepProjAsRoot();
         IPath oldOutputPath= fProject.getPath();
-        CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject); 
-        CPListElementAttribute outputFolder= new CPListElementAttribute(elem, CPListElement.OUTPUT, 
+        CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject);
+        CPListElementAttribute outputFolder= new CPListElementAttribute(elem, CPListElement.OUTPUT,
                 elem.getAttribute(CPListElement.OUTPUT), true);
         
         final IPath editedOutputPath= oldOutputPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME) + "3");
@@ -975,7 +975,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
 
             public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return NewEmptyProjectWizardTest.this.getOutputFolderQueryInternal(defaultOutputFolder);
-            }         
+            }
         };
         outputFolder= (CPListElementAttribute)executeOperation(BuildpathModifierAction.EDIT_OUTPUT, outputFolder, null, query, null, null);
         root= fProject.findPackageFragmentRoot(root.getPath());
@@ -993,8 +993,8 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         // Editing of the output folder is cancelled
         IPackageFragmentRoot root= createFragmentRootAndKeepProjAsRoot();
         IPath oldOutputPath= fProject.getPath();
-        CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject); 
-        CPListElementAttribute outputFolder= new CPListElementAttribute(elem, CPListElement.OUTPUT, 
+        CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject);
+        CPListElementAttribute outputFolder= new CPListElementAttribute(elem, CPListElement.OUTPUT,
                 elem.getAttribute(CPListElement.OUTPUT), true);
         
         final IPath editedOutputPath= oldOutputPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME) + "3");
@@ -1025,7 +1025,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
                     }
                     
                 };
-            }         
+            }
         };
         outputFolder= (CPListElementAttribute)executeOperation(BuildpathModifierAction.EDIT_OUTPUT, outputFolder, null, query, null, null);
         assertTrue(outputFolder == null);
@@ -1056,7 +1056,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
 
           public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
               return getOutputFolderQueryInternal(defaultOutputFolder);
-          }      
+          }
       };
       CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(BuildpathModifierAction.EDIT_OUTPUT, attribute, null, query, null, null);
       
@@ -1080,7 +1080,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
 
             public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path2) throws JavaModelException {
                 return getOutputFolderQueryInternal(defaultOutputFolder);
-            }     
+            }
         };
         CPListElementAttribute attribute= (CPListElementAttribute)executeOperation(BuildpathModifierAction.CREATE_OUTPUT, root, null, query, null, null);
         
@@ -1100,7 +1100,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
 
             public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path2) throws JavaModelException {
                 return getOutputFolderQueryToKeepProjAsRoot();
-            }      
+            }
         };
         CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(BuildpathModifierAction.EDIT_OUTPUT, attribute, null, query, null, null);
         
@@ -1325,7 +1325,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         validateClasspath();
     }
     
-    protected IPackageFragmentRoot createFragmentRootAndKeepProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
+    protected IPackageFragmentRoot createFragmentRootAndKeepProjAsRoot() throws InvocationTargetException, InterruptedException {
         ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
@@ -1391,7 +1391,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         return root;
     }
     
-    protected ClasspathModifierQueries.OutputFolderQuery getOutputFolderQueryToKeepProjAsRoot() throws JavaModelException {
+    protected ClasspathModifierQueries.OutputFolderQuery getOutputFolderQueryToKeepProjAsRoot() {
         return new ClasspathModifierQueries.OutputFolderQuery(defaultOutputFolder) {
             public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                 return true;
