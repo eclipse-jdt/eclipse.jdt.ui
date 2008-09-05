@@ -103,7 +103,7 @@ public class NewProjectTestSetup extends TestSetup {
         return fWorkspaceProjectWithSrc;
     }
     
-    public IJavaProject getExternalProject() throws CoreException {
+    public IJavaProject getExternalProject() {
         return fExternalProject;
     }
     /* (non-Javadoc)
