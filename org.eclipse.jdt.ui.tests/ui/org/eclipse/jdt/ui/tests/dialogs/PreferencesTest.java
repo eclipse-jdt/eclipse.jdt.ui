@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -72,7 +71,7 @@ public class PreferencesTest extends TestCase {
 		return DialogCheck.getShell();
 	}
 	
-	public void assertDialog(Dialog dialog, Assert assertTrue) {
+	public void assertDialog(Dialog dialog) {
 		if (fIsInteractive) {
 			DialogCheck.assertDialog(dialog);
 		} else {
@@ -91,50 +90,50 @@ public class PreferencesTest extends TestCase {
 	
 	public void testJavaBasePrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.JavaBasePreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 	
 	public void testImportOrganizePrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 	
 	public void testCodeFormatterPrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 	
 	public void testClasspathVarPrefPage() throws Exception {
 		IPath path= ResourcesPlugin.getWorkspace().getRoot().getLocation();		
 		JavaCore.setClasspathVariable("DUMMY_VAR", path, null);
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		JavaCore.removeClasspathVariable("DUMMY_VAR", null);
 	}
 	
 	public void testJavaEditorPrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 	
 	public void testJavaCompilerPrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.CompilerPreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 	
 	public void testJavaDebugPrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.JavaDebugPreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 	
 	public void testRefactoringPrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.RefactoringPreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 	
 	public void testVMPrefPage() {
 		Dialog dialog = getPreferenceDialog("org.eclipse.jdt.ui.preferences.VMPreferencePage");
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 	}
 
 	public void testBuildPathPropPage() throws Exception {
@@ -145,7 +144,7 @@ public class PreferencesTest extends TestCase {
 		JavaProjectHelper.addRequiredProject(jproject, dep1);
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage", jproject);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		JavaProjectHelper.delete(jproject);
 		JavaProjectHelper.delete(dep1);
 	}
@@ -156,7 +155,7 @@ public class PreferencesTest extends TestCase {
 		assertTrue(root != null);
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1", root);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -167,7 +166,7 @@ public class PreferencesTest extends TestCase {
 		assertTrue(root != null);
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1", root);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 		JavaCore.removeClasspathVariable("VAR_LIB", null);
@@ -183,7 +182,7 @@ public class PreferencesTest extends TestCase {
 		cu.createType("public class DummyCompilationUnitWizard {\n\n}\n", null, true, null);	
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.InfoPage", cu);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}
@@ -196,7 +195,7 @@ public class PreferencesTest extends TestCase {
 		cu.createType("public class HelloWorld {\n\n}\n", null, true, null);	
 	
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage", cu);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}	
@@ -209,7 +208,7 @@ public class PreferencesTest extends TestCase {
 		cu.createType("public class HelloWorld {\npublic static void main(String[] args) {}\n}\n", null, true, null);	
 	
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.ExecutionArgsPage", cu);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}	
@@ -219,7 +218,7 @@ public class PreferencesTest extends TestCase {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.VMPropertyPage", jproject);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 	}	
@@ -230,7 +229,7 @@ public class PreferencesTest extends TestCase {
 		JavaProjectHelper.addRequiredProject(jproject, dep1);
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.launching.SourceLookupPage", jproject);
-		assertDialog(dialog, this);
+		assertDialog(dialog);
 		
 		JavaProjectHelper.delete(jproject);
 		JavaProjectHelper.delete(dep1);
