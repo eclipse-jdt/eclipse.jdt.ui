@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,9 +58,9 @@ public class WorkspaceScopeTest extends TestCase {
 		return createStandardProject(name, pkgName, true);
 	}
 	private IJavaProject createStandardProject(String name, String pkgName, boolean includeJRE) throws CoreException, JavaModelException {
-		IJavaProject project= JavaProjectHelper.createJavaProject(name, "bin"); //$NON-NLS-1$ //$NON-NLS-2$
+		IJavaProject project= JavaProjectHelper.createJavaProject(name, "bin"); //$NON-NLS-1$ 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(project, "src"); //$NON-NLS-1$
-		root.createPackageFragment(pkgName, true, null); //$NON-NLS-1$
+		root.createPackageFragment(pkgName, true, null); 
 		if (includeJRE) {
 			IClasspathEntry jreLib= JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"));  //$NON-NLS-1$
 			JavaProjectHelper.addToClasspath(project, jreLib);

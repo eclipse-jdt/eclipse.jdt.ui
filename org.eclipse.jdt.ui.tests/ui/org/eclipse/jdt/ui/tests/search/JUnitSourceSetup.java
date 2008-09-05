@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public class JUnitSourceSetup extends TestSetup {
 
 	protected void setUp() throws Exception {
 		SearchParticipantsExtensionPoint.debugSetInstance(fExtensionPoint);
-		fProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin"); //$NON-NLS-2$
+		fProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin"); 
 		IClasspathEntry jreLib= JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"));  //$NON-NLS-1$
 		JavaProjectHelper.addToClasspath(fProject, jreLib);
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
