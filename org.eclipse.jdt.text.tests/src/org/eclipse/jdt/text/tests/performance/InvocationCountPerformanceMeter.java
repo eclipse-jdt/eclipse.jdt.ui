@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,13 +40,13 @@ import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequest;
 
+import org.eclipse.jdi.Bootstrap;
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
-import org.eclipse.jdi.Bootstrap;
 
 /**
  * To use this performance meter add the following VM arguments:
@@ -372,7 +372,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	public void start() {
 		try {
 			String localhost = InetAddress.getLocalHost().getCanonicalHostName();
-			attach(localhost, PORT); //$NON-NLS-1$
+			attach(localhost, PORT);
 			
 			List requests= new ArrayList();
 			for (int i= 0; i < fMethods.length; i++)
@@ -443,14 +443,6 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		return new Sample(getScenarioName(), fStartTime, null, dataPoints);
 	}
 	
-	/**
-	 * Attaches to the given host and port.
-	 * 
-	 * @param host the host
-	 * @param port the port
-	 * @throws IOException
-	 * @throws IllegalConnectorArgumentsException
-	 */
 	private void attach(String host, int port) throws IOException, IllegalConnectorArgumentsException {
 		VirtualMachineManager manager= Bootstrap.virtualMachineManager();
 		List connectors= manager.attachingConnectors();
@@ -525,7 +517,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			/*
 			 * No need to let the test fail at this point since
 			 * next step is to disconnect from the VM.
-			 */ 
+			 */
 			System.out.println("VM unexpectedly disconnected"); //$NON-NLS-1$
 			x.printStackTrace();
 		}
