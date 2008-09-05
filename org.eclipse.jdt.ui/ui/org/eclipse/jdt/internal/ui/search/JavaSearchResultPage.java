@@ -12,13 +12,6 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
@@ -26,6 +19,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -49,14 +49,13 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ResourceTransfer;
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
-import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.IContextMenuConstants;
 import org.eclipse.search.ui.ISearchResultViewPart;
@@ -111,7 +110,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	        if (cat1 != cat2) {
 				return cat1 - cat2;
-			}	    	
+			}
 	        String name1= fLabelProvider.getText(e1);
 	        String name2= fLabelProvider.getText(e2);
 	        if (name1 == null)
@@ -170,19 +169,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 		
 	private void initSortActions() {
-		fSortByNameAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByName, this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER); 
-		fSortByPathAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByPath, this, SortingLabelProvider.SHOW_PATH); 
-		fSortByParentName= new SortAction(SearchMessages.JavaSearchResultPage_sortByParentName, this, SortingLabelProvider.SHOW_CONTAINER_ELEMENT); 
+		fSortByNameAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByName, this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER);
+		fSortByPathAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByPath, this, SortingLabelProvider.SHOW_PATH);
+		fSortByParentName= new SortAction(SearchMessages.JavaSearchResultPage_sortByParentName, this, SortingLabelProvider.SHOW_CONTAINER_ELEMENT);
 	}
 
 	private void initGroupingActions() {
-		fGroupProjectAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_project, SearchMessages.JavaSearchResultPage_groupby_project_tooltip, this, LevelTreeContentProvider.LEVEL_PROJECT); 
+		fGroupProjectAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_project, SearchMessages.JavaSearchResultPage_groupby_project_tooltip, this, LevelTreeContentProvider.LEVEL_PROJECT);
 		JavaPluginImages.setLocalImageDescriptors(fGroupProjectAction, "prj_mode.gif"); //$NON-NLS-1$
-		fGroupPackageAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_package, SearchMessages.JavaSearchResultPage_groupby_package_tooltip, this, LevelTreeContentProvider.LEVEL_PACKAGE); 
+		fGroupPackageAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_package, SearchMessages.JavaSearchResultPage_groupby_package_tooltip, this, LevelTreeContentProvider.LEVEL_PACKAGE);
 		JavaPluginImages.setLocalImageDescriptors(fGroupPackageAction, "package_mode.gif"); //$NON-NLS-1$
-		fGroupFileAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_file, SearchMessages.JavaSearchResultPage_groupby_file_tooltip, this, LevelTreeContentProvider.LEVEL_FILE); 
+		fGroupFileAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_file, SearchMessages.JavaSearchResultPage_groupby_file_tooltip, this, LevelTreeContentProvider.LEVEL_FILE);
 		JavaPluginImages.setLocalImageDescriptors(fGroupFileAction, "file_mode.gif"); //$NON-NLS-1$
-		fGroupTypeAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_type, SearchMessages.JavaSearchResultPage_groupby_type_tooltip, this, LevelTreeContentProvider.LEVEL_TYPE); 
+		fGroupTypeAction= new GroupAction(SearchMessages.JavaSearchResultPage_groupby_type, SearchMessages.JavaSearchResultPage_groupby_type_tooltip, this, LevelTreeContentProvider.LEVEL_TYPE);
 		JavaPluginImages.setLocalImageDescriptors(fGroupTypeAction, "type_mode.gif"); //$NON-NLS-1$
 	}
 
@@ -223,7 +222,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			IDE.gotoMarker(editor, marker);
 			marker.delete();
 		} catch (CoreException e) {
-			throw new PartInitException(SearchMessages.JavaSearchResultPage_error_marker, e); 
+			throw new PartInitException(SearchMessages.JavaSearchResultPage_error_marker, e);
 		}
 	}
 	
@@ -248,7 +247,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private void addSortActions(IMenuManager mgr) {
 		if (getLayout() != FLAG_LAYOUT_FLAT)
 			return;
-		MenuManager sortMenu= new MenuManager(SearchMessages.JavaSearchResultPage_sortBylabel); 
+		MenuManager sortMenu= new MenuManager(SearchMessages.JavaSearchResultPage_sortBylabel);
 		sortMenu.add(fSortByNameAction);
 		sortMenu.add(fSortByPathAction);
 		sortMenu.add(fSortByParentName);
@@ -315,7 +314,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
 		viewer.addDragSupport(ops, transfers, dragAdapter);
-	}	
+	}
 
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setUseHashlookup(true);
@@ -373,7 +372,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	/**
 	 * Precondition here: the viewer must be showing a tree with a LevelContentProvider.
-	 * @param grouping
+	 * 
+	 * @param grouping the grouping which must be one of the <code>LEVEL_*</code> constants from
+	 *            {@link LevelTreeContentProvider}
 	 */
 	void setGrouping(int grouping) {
 		fCurrentGrouping= grouping;
@@ -400,11 +401,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		int grouping= LevelTreeContentProvider.LEVEL_PACKAGE;
 		int elementLimit= DEFAULT_ELEMENT_LIMIT;
 		
-		try { 
+		try {
 			sortOrder= getSettings().getInt(KEY_SORTING);
 		} catch (NumberFormatException e) {
 		}
-		try { 
+		try {
 			grouping= getSettings().getInt(KEY_GROUPING);
 		} catch (NumberFormatException e) {
 		}
@@ -444,7 +445,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		int limit= getElementLimit().intValue();
 		if (limit != -1)
 			memento.putString(KEY_LIMIT_ENABLED, TRUE);
-		else 
+		else
 			memento.putString(KEY_LIMIT_ENABLED, FALSE);
 		memento.putInteger(KEY_LIMIT, limit);
 	}
@@ -462,12 +463,12 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		AbstractTextSearchResult input= getInput();
 		if (input != null && input.getActiveMatchFilters() != null && input.getActiveMatchFilters().length > 0) {
 			if (isQueryRunning()) {
-				String message= SearchMessages.JavaSearchResultPage_filtered_message; 
+				String message= SearchMessages.JavaSearchResultPage_filtered_message;
 				return Messages.format(message, new Object[] { label });
 			
 			} else {
 				int filteredOut= input.getMatchCount() - getFilteredMatchCount();
-				String message= SearchMessages.JavaSearchResultPage_filteredWithCount_message; 
+				String message= SearchMessages.JavaSearchResultPage_filteredWithCount_message;
 				return Messages.format(message, new Object[] { label, String.valueOf(filteredOut) });
 			}
 		}
@@ -537,14 +538,14 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	protected void handleOpen(OpenEvent event) {
 		Object firstElement= ((IStructuredSelection)event.getSelection()).getFirstElement();
-		if (firstElement instanceof ICompilationUnit || 
-				firstElement instanceof IClassFile || 
+		if (firstElement instanceof ICompilationUnit ||
+				firstElement instanceof IClassFile ||
 				firstElement instanceof IMember) {
 			if (getDisplayedMatchCount(firstElement) == 0) {
 				try {
 					fEditorOpener.openElement(firstElement);
 				} catch (CoreException e) {
-					ExceptionHandler.handle(e, getSite().getShell(), SearchMessages.JavaSearchResultPage_open_editor_error_title, SearchMessages.JavaSearchResultPage_open_editor_error_message); 
+					ExceptionHandler.handle(e, getSite().getShell(), SearchMessages.JavaSearchResultPage_open_editor_error_title, SearchMessages.JavaSearchResultPage_open_editor_error_message);
 				}
 				return;
 			}
@@ -557,5 +558,5 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		int limit= elementLimit.intValue();
 		getSettings().put(KEY_LIMIT, limit);
 		getSettings().put(KEY_LIMIT_ENABLED, limit != -1 ? TRUE : FALSE);
-	}	
+	}
 }
