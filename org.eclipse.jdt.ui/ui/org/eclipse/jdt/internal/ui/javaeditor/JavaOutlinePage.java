@@ -877,11 +877,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fActionGroups.dispose();
 
 		fTogglePresentation.setEditor(null);
-		
-		if (fOpenAndLinkWithEditorHelper != null) {
-			fOpenAndLinkWithEditorHelper.dispose();
-			fOpenAndLinkWithEditorHelper= null;
-		}
 
 		fOutlineViewer= null;
 

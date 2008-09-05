@@ -200,6 +200,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 	};
 
+	/**
+	 * Helper to open and activate editors.
+	 * 
+	 * @since 3.5
+	 */
 	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
 
 	public JavaBrowsingPart() {
@@ -483,11 +488,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (fWorkingSetFilterActionGroup != null) {
 			fWorkingSetFilterActionGroup.dispose();
 			fWorkingSetFilterActionGroup= null;
-		}
-		
-		if (fOpenAndLinkWithEditorHelper != null) {
-			fOpenAndLinkWithEditorHelper.dispose();
-			fOpenAndLinkWithEditorHelper= null;
 		}
 
 		super.dispose();

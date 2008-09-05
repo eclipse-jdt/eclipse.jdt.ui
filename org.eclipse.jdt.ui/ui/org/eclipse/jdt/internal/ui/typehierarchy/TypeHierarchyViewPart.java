@@ -239,12 +239,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private OpenAndLinkWithEditorHelper fTypeOpenAndLinkWithEditorHelper;
 
-	/**
-	 * Helper to open and activate editors.
-	 * 
-	 * @since 3.5
-	 */
-	private OpenAndLinkWithEditorHelper fMemberOpenAndLinkWithEditorHelper;
 	private OpenAction fOpenAction;
 
 	
@@ -616,16 +610,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (fWorkingSetActionGroup != null)
 			fWorkingSetActionGroup.dispose();
 		
-		if (fTypeOpenAndLinkWithEditorHelper != null) {
-			fTypeOpenAndLinkWithEditorHelper.dispose();
-			fTypeOpenAndLinkWithEditorHelper= null;
-		}
-
-		if (fMemberOpenAndLinkWithEditorHelper != null) {
-			fMemberOpenAndLinkWithEditorHelper.dispose();
-			fMemberOpenAndLinkWithEditorHelper= null;
-		}
-		
 		super.dispose();
 	}
 		
@@ -734,7 +718,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}, IContextMenuConstants.TARGET_ID_MEMBERS_VIEW, getSite());
 		fMethodsViewer.addPostSelectionChangedListener(fSelectionChangedListener);
 		
-		fMemberOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fMethodsViewer) {
+		new OpenAndLinkWithEditorHelper(fMethodsViewer) {
 			protected void activate(ISelection selection) {
 				try {
 					final Object selectedElement= SelectionUtil.getSingleElement(selection);

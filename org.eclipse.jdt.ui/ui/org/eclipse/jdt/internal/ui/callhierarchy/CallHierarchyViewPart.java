@@ -231,19 +231,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private boolean fShowCallDetails;
 	protected Composite fParent;
 	private IPartListener2 fPartListener;
-	/**
-	 * Helper for location viewer to open and activate editors.
-	 * 
-	 * @since 3.5
-	 */
-	private OpenAndLinkWithEditorHelper fLocationViewerOpenHelper;
-
-	/**
-	 * Helper for call hierarchy viewer to open and activate editors.
-	 * 
-	 * @since 3.5
-	 */
-	private OpenAndLinkWithEditorHelper fHierarchyViewerOpenHelper;
 
 
     public CallHierarchyViewPart() {
@@ -679,16 +666,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			getViewSite().getPage().removePartListener(fPartListener);
 			fPartListener= null;
 		}
-		
-		if (fLocationViewerOpenHelper != null) {
-			fLocationViewerOpenHelper.dispose();
-			fLocationViewerOpenHelper= null;
-		}
-		if (fHierarchyViewerOpenHelper != null) {
-			fHierarchyViewerOpenHelper.dispose();
-			fHierarchyViewerOpenHelper= null;
-		}
-
         super.dispose();
     }
 
@@ -981,8 +958,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void makeActions() {
         fRefreshAction = new RefreshAction(this);
 
-		fLocationViewerOpenHelper= new CallHierarchyOpenEditorHelper(fLocationViewer);
-		fHierarchyViewerOpenHelper= new CallHierarchyOpenEditorHelper(fCallHierarchyViewer);
+		new CallHierarchyOpenEditorHelper(fLocationViewer);
+		new CallHierarchyOpenEditorHelper(fCallHierarchyViewer);
         
 		fOpenLocationAction= new OpenLocationAction(this, getSite());
 		fLocationCopyAction= fLocationViewer.initCopyAction(getViewSite(), fClipboard);

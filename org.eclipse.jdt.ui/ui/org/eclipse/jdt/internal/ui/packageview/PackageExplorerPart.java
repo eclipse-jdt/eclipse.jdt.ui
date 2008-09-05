@@ -545,11 +545,6 @@ public class PackageExplorerPart extends ViewPart
 		if (fWorkingSetModel != null)
 			fWorkingSetModel.dispose();
 
-		if (fOpenAndLinkWithEditorHelper != null) {
-			fOpenAndLinkWithEditorHelper.dispose();
-			fOpenAndLinkWithEditorHelper= null;
-		}
-
 		super.dispose();
 	}
 
