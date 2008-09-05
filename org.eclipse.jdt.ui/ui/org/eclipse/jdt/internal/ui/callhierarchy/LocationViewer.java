@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -43,7 +43,7 @@ class LocationViewer extends TableViewer {
     private final String columnHeaders[] = {
         CallHierarchyMessages.LocationViewer_ColumnIcon_header,
         CallHierarchyMessages.LocationViewer_ColumnLine_header,
-        CallHierarchyMessages.LocationViewer_ColumnInfo_header}; 
+        CallHierarchyMessages.LocationViewer_ColumnInfo_header};
                                                 
     private ColumnLayoutData columnLayouts[] = {
         new ColumnPixelData(18, false, true),
@@ -63,6 +63,9 @@ class LocationViewer extends TableViewer {
 
     /**
      * Creates the table control.
+     * 
+     * @param parent the parent composite
+     * @return the table
      */
     private static Table createTable(Composite parent) {
         return new Table(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
@@ -81,7 +84,11 @@ class LocationViewer extends TableViewer {
     }
 
     /**
-     * Attaches a contextmenu listener to the tree
+     * Attaches a context menu listener to the tree.
+     * 
+     * @param menuListener the menu listener
+     * @param popupId  the id of the popup
+     * @param viewSite the part site
      */
     void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite) {
         MenuManager menuMgr= new MenuManager();
@@ -91,10 +98,14 @@ class LocationViewer extends TableViewer {
         getControl().setMenu(menu);
         viewSite.registerContextMenu(popupId, menuMgr, this);
     }
-    
-    /**
-     * Initializes and returns the Copy action for the location viewer.
-     */
+
+	/**
+	 * Initializes and returns the Copy action for the location viewer.
+	 * 
+	 * @param viewSite the view site
+	 * @param clipboard the clipboard
+	 * @return the copy action
+	 */
     LocationCopyAction initCopyAction(final IViewSite viewSite, final Clipboard clipboard) {
     	final LocationCopyAction copyAction= new LocationCopyAction(viewSite, clipboard, this);
     	

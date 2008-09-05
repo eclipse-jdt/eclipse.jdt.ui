@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -30,10 +30,10 @@ import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-
-import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 
 class FiltersDialog extends StatusDialog {
     private Label fNamesHelpText;
@@ -41,9 +41,7 @@ class FiltersDialog extends StatusDialog {
     private Text fNames;
     private Text fMaxCallDepth;
 
-    /**
-     * @param parentShell
-     */
+
     protected FiltersDialog(Shell parentShell) {
         super(parentShell);
     }
@@ -53,7 +51,7 @@ class FiltersDialog extends StatusDialog {
      */
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
-        newShell.setText(CallHierarchyMessages.FiltersDialog_filter); 
+        newShell.setText(CallHierarchyMessages.FiltersDialog_filter);
         PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
 
@@ -110,7 +108,7 @@ class FiltersDialog extends StatusDialog {
 
     private void createNamesArea(Composite parent) {
         fFilterOnNames = createCheckbox(parent,
-                CallHierarchyMessages.FiltersDialog_filterOnNames, true); 
+                CallHierarchyMessages.FiltersDialog_filterOnNames, true);
         
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
         fNames.setFont(parent.getFont());
@@ -126,7 +124,7 @@ class FiltersDialog extends StatusDialog {
         
         fNamesHelpText= new Label(parent, SWT.LEFT);
         fNamesHelpText.setFont(parent.getFont());
-        fNamesHelpText.setText(CallHierarchyMessages.FiltersDialog_filterOnNamesSubCaption); 
+        fNamesHelpText.setText(CallHierarchyMessages.FiltersDialog_filterOnNamesSubCaption);
     }
 
     /**
@@ -214,16 +212,16 @@ class FiltersDialog extends StatusDialog {
         try {
             int maxCallDepth= Integer.parseInt(text);
 
-            return (maxCallDepth >= 1 && maxCallDepth <= 99); 
+            return (maxCallDepth >= 1 && maxCallDepth <= 99);
         } catch (NumberFormatException e) {
             return false;
-        }           
+        }
     }
     
     private void validateInput() {
         StatusInfo status= new StatusInfo();
         if (!isMaxCallDepthValid()) {
-            status.setError(CallHierarchyMessages.FiltersDialog_messageMaxCallDepthInvalid); 
+            status.setError(CallHierarchyMessages.FiltersDialog_messageMaxCallDepthInvalid);
         }
         updateStatus(status);
     }

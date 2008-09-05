@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,14 +17,14 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class CopyCallHierarchyAction extends Action {
-    private static final char INDENTATION= '\t';  
+    private static final char INDENTATION= '\t';
     
     private CallHierarchyViewPart fView;
     private CallHierarchyViewer fViewer;
@@ -45,7 +45,7 @@ class CopyCallHierarchyAction extends Action {
 	private final Clipboard fClipboard;
 
 	public CopyCallHierarchyAction(CallHierarchyViewPart view, Clipboard clipboard, CallHierarchyViewer viewer) {
-		super(CallHierarchyMessages.CopyCallHierarchyAction_label);  
+		super(CallHierarchyMessages.CopyCallHierarchyAction_label);
 		Assert.isNotNull(clipboard);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_COPY_ACTION);
 		fView= view;
@@ -78,22 +78,23 @@ class CopyCallHierarchyAction extends Action {
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 		try{
 			fClipboard.setContents(
-				new String[]{ convertLineTerminators(buf.toString()) }, 
+				new String[]{ convertLineTerminators(buf.toString()) },
 				new Transfer[]{ plainTextTransfer });
 		}  catch (SWTError e){
-			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;
-			if (MessageDialog.openQuestion(fView.getViewSite().getShell(), CallHierarchyMessages.CopyCallHierarchyAction_problem, CallHierarchyMessages.CopyCallHierarchyAction_clipboard_busy))  
+			if (MessageDialog.openQuestion(fView.getViewSite().getShell(), CallHierarchyMessages.CopyCallHierarchyAction_problem, CallHierarchyMessages.CopyCallHierarchyAction_clipboard_busy))
 				run();
 		}
 	}
-	
+
 	/**
-     * Adds the specified TreeItem's text to the StringBuffer
-     * 
-     * @param item
-     * @param buf
-     */
+	 * Adds the specified {@link TreeItem}'s text to the StringBuffer.
+	 * 
+	 * @param item the tree item
+	 * @param indent the indent size
+	 * @param buf the string buffer
+	 */
     private void addCalls(TreeItem item, int indent, StringBuffer buf) {
         for (int i= 0; i < indent; i++) {
             buf.append(INDENTATION);
@@ -107,14 +108,14 @@ class CopyCallHierarchyAction extends Action {
             for (int i= 0; i < items.length; i++) {
                 addCalls(items[i], indent + 1, buf);
             }
-        }        
+        }
     }
 
     static String convertLineTerminators(String in) {
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter printWriter= new PrintWriter(stringWriter);
 		StringReader stringReader= new StringReader(in);
-		BufferedReader bufferedReader= new BufferedReader(stringReader);		
+		BufferedReader bufferedReader= new BufferedReader(stringReader);
 		try {
 			String line= bufferedReader.readLine();
 			while (line != null) {

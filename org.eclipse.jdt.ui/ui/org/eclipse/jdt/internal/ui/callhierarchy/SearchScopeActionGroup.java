@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *          (report 60714: Call Hierarchy: display search scope in view title)
@@ -110,7 +110,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	
 	private IWorkingSet[] getWorkingSets(String[] workingSetNames) {
 		if (workingSetNames == null) {
-			return null;   
+			return null;
 		}
 		Set workingSets= new HashSet(2);
 		for (int j= 0; j < workingSetNames.length; j++) {
@@ -125,7 +125,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	
 	/**
 	 * Sets the new search scope type.
-	 *  
+	 * 
 	 * @param newSelection New action which should be the checked one
 	 * @param ignoreUnchecked Ignores actions which are unchecked (necessary since both the old and the new action fires).
 	 */
@@ -174,7 +174,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	}
 	
 	public void fillContextMenu(IMenuManager menu) {
-		MenuManager javaSearchMM = new MenuManager(CallHierarchyMessages.SearchScopeActionGroup_searchScope, 
+		MenuManager javaSearchMM = new MenuManager(CallHierarchyMessages.SearchScopeActionGroup_searchScope,
 				IContextMenuConstants.GROUP_SEARCH);
 		javaSearchMM.setRemoveAllWhenShown(true);
 		
@@ -290,7 +290,7 @@ class SearchScopeActionGroup extends ActionGroup {
 					workingSetNames = new String[workingSetCount.intValue()];
 					for (int i = 0; i < workingSetCount.intValue(); i++) {
 						workingSetNames[i]= memento.getString(TAG_SELECTED_WORKING_SET+i);
-					}   
+					}
 				}
 			}
 			setSelected(getSearchScopeAction(scopeType.intValue(), workingSetNames), false);
@@ -299,11 +299,11 @@ class SearchScopeActionGroup extends ActionGroup {
 	
 	private SearchScopeAction getSearchScopeAction(int searchScopeType, String[] workingSetNames) {
 		switch (searchScopeType) {
-			case SEARCH_SCOPE_TYPE_WORKSPACE: 
+			case SEARCH_SCOPE_TYPE_WORKSPACE:
 				return fSearchScopeWorkspaceAction;
-			case SEARCH_SCOPE_TYPE_PROJECT: 
+			case SEARCH_SCOPE_TYPE_PROJECT:
 				return fSearchScopeProjectAction;
-			case SEARCH_SCOPE_TYPE_HIERARCHY: 
+			case SEARCH_SCOPE_TYPE_HIERARCHY:
 				return fSearchScopeHierarchyAction;
 			case SEARCH_SCOPE_TYPE_WORKING_SET:
 				IWorkingSet[] workingSets= getWorkingSets(workingSetNames);
@@ -323,13 +323,16 @@ class SearchScopeActionGroup extends ActionGroup {
 	}
 	
 	private String getScopeDescription(IWorkingSet[] workingSets) {
-		return Messages.format(CallHierarchyMessages.WorkingSetScope, new String[] {SearchUtil.toString(workingSets)}); 
+		return Messages.format(CallHierarchyMessages.WorkingSetScope, new String[] {SearchUtil.toString(workingSets)});
 	}
-	
+
 	/**
-	 * Determines whether the specified working sets correspond to the currently selected working sets.
-	 * @param workingSets
-	 * @return Returns true if the specified working sets correspond to the currently selected working sets
+	 * Determines whether the specified working sets correspond to the currently selected working
+	 * sets.
+	 * 
+	 * @param workingSets the array of working sets
+	 * @return <code>true</code> if the specified working sets correspond to the currently selected
+	 *         working sets
 	 */
 	private boolean isSelectedWorkingSet(IWorkingSet[] workingSets) {
 		if (fSelectedWorkingSetNames != null && fSelectedWorkingSetNames.length == workingSets.length) {
