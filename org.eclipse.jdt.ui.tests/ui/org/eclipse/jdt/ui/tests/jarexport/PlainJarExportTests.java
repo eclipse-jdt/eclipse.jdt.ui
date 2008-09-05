@@ -139,7 +139,7 @@ public class PlainJarExportTests extends TestCase {
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
 		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
 
-		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null); //$NON-NLS-1$
+		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null); 
 
 		data.setElements(new Object[] { fCU.getResource(), externalRoot });
 		data.setExportClassFiles(true);
