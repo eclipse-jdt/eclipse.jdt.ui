@@ -125,8 +125,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * and allows the user to double click an entry to go to the selected method.
  *
  */
-public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyViewPart,
-    ISelectionChangedListener {
+public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyViewPart, ISelectionChangedListener {
+
 	
 	private class CallHierarchySelectionProvider extends SelectionProviderMediator {
 		
@@ -146,6 +146,38 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		}
 	}
 	
+
+	/*
+	 * @since 3.5
+	 */
+	private final class CallHierarchyOpenEditorHelper extends OpenAndLinkWithEditorHelper {
+		public CallHierarchyOpenEditorHelper(StructuredViewer viewer) {
+			super(viewer);
+		}
+
+		protected void activate(ISelection selection) {
+			final Object selectedElement= SelectionUtil.getSingleElement(selection);
+			if (selectedElement != null)
+				CallHierarchyUI.openInEditor(selectedElement, getSite().getShell(), true);
+		}
+
+		protected void linkToEditor(ISelection selection) {
+			// not supported by this part
+		}
+
+		protected void open(ISelection selection, boolean activate) {
+			if (selection instanceof IStructuredSelection) {
+				for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+					boolean noError= CallHierarchyUI.openInEditor(iter.next(), getSite().getShell(), OpenStrategy.activateOnOpen());
+					if (!noError)
+						return;
+				}
+			}
+		}
+
+	}
+
+
     private static final String DIALOGSTORE_VIEWORIENTATION = "CallHierarchyViewPart.orientation"; //$NON-NLS-1$
     private static final String DIALOGSTORE_CALL_MODE = "CallHierarchyViewPart.call_mode"; //$NON-NLS-1$
     private static final String DIALOGSTORE_FIELD_MODE = "CallHierarchyViewPart.field_mode"; //$NON-NLS-1$
@@ -200,11 +232,18 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	protected Composite fParent;
 	private IPartListener2 fPartListener;
 	/**
-	 * Helper to open and activate editors.
+	 * Helper for location viewer to open and activate editors.
 	 * 
 	 * @since 3.5
 	 */
-	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
+	private OpenAndLinkWithEditorHelper fLocationViewerOpenHelper;
+
+	/**
+	 * Helper for call hierarchy viewer to open and activate editors.
+	 * 
+	 * @since 3.5
+	 */
+	private OpenAndLinkWithEditorHelper fHierarchyViewerOpenHelper;
 
 
     public CallHierarchyViewPart() {
@@ -641,9 +680,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			fPartListener= null;
 		}
 		
-		if (fOpenAndLinkWithEditorHelper != null) {
-			fOpenAndLinkWithEditorHelper.dispose();
-			fOpenAndLinkWithEditorHelper= null;
+		if (fLocationViewerOpenHelper != null) {
+			fLocationViewerOpenHelper.dispose();
+			fLocationViewerOpenHelper= null;
+		}
+		if (fHierarchyViewerOpenHelper != null) {
+			fHierarchyViewerOpenHelper.dispose();
+			fHierarchyViewerOpenHelper= null;
 		}
 
         super.dispose();
@@ -938,32 +981,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void makeActions() {
         fRefreshAction = new RefreshAction(this);
 
-        fOpenLocationAction = new OpenLocationAction(this, getSite());
-		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fLocationViewer) {
-			protected void activate(ISelection selection) {
-				final Object selectedElement= SelectionUtil.getSingleElement(selection);
-				if (selectedElement != null)
-					CallHierarchyUI.openInEditor(selectedElement, getSite().getShell(), true);
-			}
-
-			protected void linkToEditor(ISelection selection) {
-				// not supported by this part
-			}
-
-			protected void open(ISelection selection, boolean activate) {
-				if (selection instanceof IStructuredSelection) {
-					for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
-						boolean noError= CallHierarchyUI.openInEditor(iter.next(), getSite().getShell(), OpenStrategy.activateOnOpen());
-						if (!noError)
-							return;
-					}
-				}
-			}
-
-		};
+		fLocationViewerOpenHelper= new CallHierarchyOpenEditorHelper(fLocationViewer);
+		fHierarchyViewerOpenHelper= new CallHierarchyOpenEditorHelper(fCallHierarchyViewer);
         
-        fLocationCopyAction= fLocationViewer.initCopyAction(getViewSite(), fClipboard);
-        
+		fOpenLocationAction= new OpenLocationAction(this, getSite());
+		fLocationCopyAction= fLocationViewer.initCopyAction(getViewSite(), fClipboard);
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);
         fSearchScopeActions = new SearchScopeActionGroup(this, fDialogSettings);

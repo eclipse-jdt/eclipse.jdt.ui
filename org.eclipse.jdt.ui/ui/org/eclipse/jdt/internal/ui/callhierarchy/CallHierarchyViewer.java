@@ -11,10 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import java.util.Iterator;
-
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -23,34 +20,21 @@ import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.util.OpenStrategy;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 
 class CallHierarchyViewer extends TreeViewer {
-	
-    private CallHierarchyViewPart fPart;
 
-    private CallHierarchyContentProvider fContentProvider;
-    
-	/**
-	 * Helper to open and activate editors.
-	 * 
-	 * @since 3.5
-	 */
-	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
+	private CallHierarchyViewPart fPart;
+	private CallHierarchyContentProvider fContentProvider;
 
 
     /**
@@ -68,29 +52,6 @@ class CallHierarchyViewer extends TreeViewer {
         fContentProvider = new CallHierarchyContentProvider(fPart);
         setContentProvider(fContentProvider);
         setLabelProvider(new ColoringLabelProvider(new CallHierarchyLabelProvider()));
-
-		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(this) {
-			protected void activate(ISelection selection) {
-				final Object selectedElement= SelectionUtil.getSingleElement(selection);
-				if (selectedElement != null)
-					CallHierarchyUI.openInEditor(selectedElement, getPart().getSite().getShell(), true);
-			}
-
-			protected void linkToEditor(ISelection selection) {
-				// not supported by this part
-			}
-
-			protected void open(ISelection selection, boolean activate) {
-				if (selection instanceof IStructuredSelection) {
-					for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
-						boolean noError= CallHierarchyUI.openInEditor(iter.next(), getPart().getSite().getShell(), OpenStrategy.activateOnOpen());
-						if (!noError)
-							return;
-					}
-				}
-			}
-
-		};
 
 
         clearViewer();
@@ -161,15 +122,4 @@ class CallHierarchyViewer extends TreeViewer {
         fContentProvider.cancelJobs(fPart.getCurrentMethodWrappers());
     }
     
-    /*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
-	 * @since 3.5
-	 */
-	protected void handleDispose(DisposeEvent event) {
-		if (fOpenAndLinkWithEditorHelper != null) {
-			fOpenAndLinkWithEditorHelper.dispose();
-			fOpenAndLinkWithEditorHelper= null;
-		}
-		super.handleDispose(event);
-	}
 }
