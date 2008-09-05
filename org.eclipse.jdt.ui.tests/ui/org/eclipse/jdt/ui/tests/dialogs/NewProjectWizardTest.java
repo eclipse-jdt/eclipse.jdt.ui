@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -49,8 +50,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.BuildpathModifierAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class NewProjectWizardTest extends TestCase {
 	
@@ -252,7 +251,7 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(contains(new Path(folder.getName()), entry.getExclusionPatterns(), null));
         
         validateClasspath();
-    }    
+    }
     
     public void testAddPackageToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
@@ -261,7 +260,7 @@ public class NewProjectWizardTest extends TestCase {
         
         IClasspathEntry entry= root.getRawClasspathEntry();
         
-        int nrExclusions= entry.getExclusionPatterns().length;        
+        int nrExclusions= entry.getExclusionPatterns().length;
         assertFalse(contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
         
         addToClasspath(fragment);
@@ -316,8 +315,8 @@ public class NewProjectWizardTest extends TestCase {
     }
     
     public void testAddProjectToCP() throws CoreException, InvocationTargetException, InterruptedException {
-        // Situation: Project wich one source folder and one normal folder as 
-        // direct childs --> adding the project to the CP should convert the folder into 
+        // Situation: Project wich one source folder and one normal folder as
+        // direct childs --> adding the project to the CP should convert the folder into
         // a package and the .java file into a compilation unit
         IPath srcPath= new Path("src2");
         IPackageFragmentRoot root= addToClasspath(srcPath);
@@ -344,7 +343,7 @@ public class NewProjectWizardTest extends TestCase {
         validateClasspath();
     }
     
-    public void testAddJarFileToCP() throws InvocationTargetException, InterruptedException, CoreException, IOException {
+    public void testAddJarFileToCP() throws InvocationTargetException, InterruptedException, CoreException {
         IPath libraryPath= fProject.getPath().append("src2").append("archive.jar");
         testRemoveJarFileFromCP();
         IFile jarFile= fProject.getProject().getFile(libraryPath.removeFirstSegments(1));
@@ -543,7 +542,7 @@ public class NewProjectWizardTest extends TestCase {
         validateClasspath();
     }
 
-    public void testRemoveJarFileFromCP() throws InvocationTargetException, InterruptedException, CoreException, IOException {
+    public void testRemoveJarFileFromCP() throws InvocationTargetException, InterruptedException, CoreException {
         IPath srcPath= new Path("src2");
         IPackageFragmentRoot parentRoot= addToClasspath(srcPath);
         IPath libraryPath= parentRoot.getPath().append("archive.jar");
@@ -702,7 +701,7 @@ public class NewProjectWizardTest extends TestCase {
 
             public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return getOutputFolderQueryInternal(fProject.getOutputLocation());
-            }         
+            }
         };
         CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(BuildpathModifierAction.EDIT_OUTPUT, attribute, null, query, null, null);
         
@@ -718,7 +717,7 @@ public class NewProjectWizardTest extends TestCase {
         validateClasspath();
     }
     
-    public void testEditOutputFolderWithNullReturn() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {        
+    public void testEditOutputFolderWithNullReturn() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         CPListElementAttribute attribute= createOutputFolder(getOutputLocationQuery().getOutputLocation());
         IPackageFragmentRoot root= fProject.findPackageFragmentRoot(fProject.getPath().append(fNormalFolder));
         
@@ -736,7 +735,7 @@ public class NewProjectWizardTest extends TestCase {
 
             public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return NewProjectWizardTest.this.getOutputFolderQueryInternal(fProject.getOutputLocation());
-            }      
+            }
         };
         CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(BuildpathModifierAction.EDIT_OUTPUT, attribute, null, query, null, null);
         
@@ -891,7 +890,7 @@ public class NewProjectWizardTest extends TestCase {
     }
     
     public void testExcludeFileOnFolder() throws CoreException, InvocationTargetException, InterruptedException {
-        // Special case: there are 2 packages fSubFolder and fSubFolder2 where the fSubFolder2 is 
+        // Special case: there are 2 packages fSubFolder and fSubFolder2 where the fSubFolder2 is
         // included. Now we include the compilation unit from fSubFolder and then exlude it.
         // After inclusion, the returned object must be of type ICompilation unit,
         // after exclusion, the returned object must be of type IFile (because
@@ -1012,7 +1011,7 @@ public class NewProjectWizardTest extends TestCase {
     
     protected IPackageFragmentRoot addToClasspath(IPath path) throws CoreException, InvocationTargetException, InterruptedException {
         IPath[] paths= getPaths();
-        assertFalse(contains(path, paths, null));     
+        assertFalse(contains(path, paths, null));
         
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(BuildpathModifierAction.ADD_SEL_SF_TO_BP, getFolderHandle(path), getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
 
@@ -1089,15 +1088,15 @@ public class NewProjectWizardTest extends TestCase {
     protected StringBuffer getFileContent(String className, String packageHeader) {
         StringBuffer buf= new StringBuffer();
         buf.append(packageHeader);
-        buf.append("\n");   
+        buf.append("\n");
         buf.append("public class "+className+ " {\n");
         buf.append("    public void foo() {\n");
-        buf.append("    }\n");      
+        buf.append("    }\n");
         buf.append("}\n");
         return buf;
     }
     
-    public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQueryInternal(IPath desiredOutputLocation) throws JavaModelException{
+    public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQueryInternal(IPath desiredOutputLocation){
         return new ClasspathModifierQueries.OutputFolderQuery(desiredOutputLocation) {
             public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                 return true;
@@ -1140,7 +1139,7 @@ public class NewProjectWizardTest extends TestCase {
 
             public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return NewProjectWizardTest.this.getOutputFolderQueryInternal(fProject.getOutputLocation());
-            }         
+            }
         };
     }
     
@@ -1204,9 +1203,9 @@ public class NewProjectWizardTest extends TestCase {
         if (path == null)
             return false;
         try {
-            monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ComparePaths, paths.length); 
+            monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ComparePaths, paths.length);
             if (path.getFileExtension() == null)
-                path= new Path(completeName(path.toString())); //$NON-NLS-1$
+				path= new Path(completeName(path.toString()));
             for (int i=0; i < paths.length; i++) {
                 if (paths[i].equals(path))
                     return true;
@@ -1214,7 +1213,7 @@ public class NewProjectWizardTest extends TestCase {
             }
         } finally {
            monitor.done();
-       }            
+       }
        return false;
     }
     
