@@ -68,7 +68,6 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
-import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
@@ -332,7 +331,7 @@ public class JavadocView extends AbstractInfoView {
 	/** The text widget. */
 	private StyledText fText;
 	/** The information presenter. */
-	private DefaultInformationControl.IInformationPresenter fPresenter;
+	private HTMLTextPresenter fPresenter;
 	/** The text presentation. */
 	private final TextPresentation fPresentation= new TextPresentation();
 	/** The select all action */
@@ -932,7 +931,7 @@ public class JavadocView extends AbstractInfoView {
 			Rectangle size=  fText.getClientArea();
 
 			try {
-				javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.width, size.height);
+				javadocHtml= fPresenter.updatePresentation(fBrowser, javadocHtml, fPresentation, size.width, size.height);
 			} catch (IllegalArgumentException ex) {
 				// the javadoc might no longer be valid
 				return;
@@ -982,7 +981,7 @@ public class JavadocView extends AbstractInfoView {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
 				Reader reader;
 				try {
-					String content= JavadocContentAccess2.getHTMLContent(member, true, true);
+					String content= JavadocContentAccess2.getHTMLContent(member, true);
 					reader= content == null ? null : new StringReader(content);
 					
 					// Provide hint why there's no Javadoc
@@ -1013,7 +1012,7 @@ public class JavadocView extends AbstractInfoView {
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
-			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
 			}
 		}
@@ -1041,7 +1040,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @return a string containing the member's label
 	 */
 	private String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
-		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, LABEL_FLAGS));
+		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(member, LABEL_FLAGS));
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}
@@ -1348,13 +1347,14 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/**
-	 * Creates and returns the a formatted message for the given
+	 * Creates and returns a formatted message for the given
 	 * constant with its hex value.
 	 * <p>
 	 * XXX: Copied from {@link JavadocHover}.
 	 * </p>
-	 * @param constantValue
-	 * @param hexValue
+	 * 
+	 * @param constantValue the constant value
+	 * @param hexValue the hex value
 	 * @return a formatted string with constant and hex values
 	 * @since 3.4
 	 */

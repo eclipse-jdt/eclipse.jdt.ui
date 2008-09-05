@@ -35,14 +35,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
  * Links inside Javadoc hovers and Javadoc view.
- * <p>
- * <strong>This is work in progress.</strong>
- * </p>
  * 
  * @since 3.4
  */
@@ -92,10 +91,68 @@ public class JavaElementLinks {
 		void handleTextSet();
 	}
 
+	private static final class JavaElementLinkedLabelComposer extends JavaElementLabelComposer {
+		private final IJavaElement fElement;
+	
+		public JavaElementLinkedLabelComposer(IJavaElement member) {
+			fElement= member;
+		}
+	
+		public String getElementName(IJavaElement element) {
+			String elementName= element.getElementName();
+			if (fElement.equals(element)) { // linking to the member itself would be a no-op
+				return elementName;
+			}
+			if (elementName.length() == 0) { // anonymous
+				return elementName;
+			}
+			try {
+				String uri= createURI(JAVADOC_SCHEME, element);
+				return createLink(uri, elementName);
+			} catch (URISyntaxException e) {
+				JavaPlugin.log(e);
+				return elementName;
+			}
+		}
+	
+		private String createLink(String uri, String elementName) {
+			return "<a class='header' href='" + uri + ("'>" + elementName + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+	
+		protected String getGT() {
+			return "&gt;"; //$NON-NLS-1$
+		}
+	
+		protected String getLT() {
+			return "&lt;"; //$NON-NLS-1$
+		}
+	
+		protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
+			String typeName= super.getSimpleTypeName(enclosingElement, typeSig);
+			try {
+				String uri= createURI(JAVADOC_SCHEME, enclosingElement, typeName, null, null);
+				return createLink(uri, typeName);
+			} catch (URISyntaxException e) {
+				JavaPlugin.log(e);
+				return typeName;
+			}
+		}
+	}
+
 	public static final String OPEN_LINK_SCHEME= "eclipse-open"; //$NON-NLS-1$
 	public static final String JAVADOC_SCHEME= "eclipse-javadoc"; //$NON-NLS-1$
 	public static final String JAVADOC_VIEW_SCHEME= "eclipse-javadoc-view"; //$NON-NLS-1$
 	private static final char LINK_BRACKET_REPLACEMENT= '\u2603';
+	
+	/**
+	 * The link is composed of a number of segments, separated by LINK_SEPARATOR:
+	 * <p>
+	 * segments[0]: ""<br>
+	 * segments[1]: baseElementHandle<br>
+	 * segments[2]: typeName<br>
+	 * segments[3]: memberName<br>
+	 * segments[4...]: parameterTypeName (optional)
+	 */
 	private static final char LINK_SEPARATOR= '\u2602';
 
 	private JavaElementLinks() {
@@ -188,7 +245,7 @@ public class JavaElementLinks {
 	 * @param element the element
 	 * @return an {@link URI}, encoded as {@link URI#toASCIIString() ASCII} string, ready to be used
 	 *         as <code>href</code> attribute in an <code>&lt;a&gt;</code> tag
-	 * @throws URISyntaxException
+	 * @throws URISyntaxException if the arguments were invalid
 	 */
 	public static String createURI(String scheme, IJavaElement element) throws URISyntaxException {
 		return createURI(scheme, element, null, null, null);
@@ -206,7 +263,7 @@ public class JavaElementLinks {
 	 *            names, can be <code>null</code>
 	 * @return an {@link URI}, encoded as {@link URI#toASCIIString() ASCII} string, ready to be used
 	 *         as <code>href</code> attribute in an <code>&lt;a&gt;</code> tag
-	 * @throws URISyntaxException
+	 * @throws URISyntaxException if the arguments were invalid
 	 */
 	public static String createURI(String scheme, IJavaElement element, String refTypeName, String refMemberName, String[] refParameterTypes) throws URISyntaxException {
 		/*
@@ -217,20 +274,20 @@ public class JavaElementLinks {
 		ssp.append(LINK_SEPARATOR); // make sure first character is not a / (would be hierarchical URI)
 		
 		// replace '[' manually, since URI confuses it for an IPv6 address as per RFC 2732:
-		ssp.append(element.getHandleIdentifier().replace('[', LINK_BRACKET_REPLACEMENT)); // segment[1]
+		ssp.append(element.getHandleIdentifier().replace('[', LINK_BRACKET_REPLACEMENT)); // segments[1]
 
 		if (refTypeName != null) {
 			ssp.append(LINK_SEPARATOR);
-			ssp.append(refTypeName); // segment[2]
+			ssp.append(refTypeName); // segments[2]
 
 			if (refMemberName != null) {
 				ssp.append(LINK_SEPARATOR);
-				ssp.append(refMemberName); // segment[3]
+				ssp.append(refMemberName); // segments[3]
 
 				if (refParameterTypes != null) {
 					ssp.append(LINK_SEPARATOR);
 					for (int i= 0; i < refParameterTypes.length; i++) {
-						ssp.append(refParameterTypes[i]); // segment[4|5|..]
+						ssp.append(refParameterTypes[i]); // segments[4|5|..]
 						if (i != refParameterTypes.length - 1) {
 							ssp.append(LINK_SEPARATOR);
 						}
@@ -249,6 +306,17 @@ public class JavaElementLinks {
 		IJavaElement element= JavaCore.create(segments[1].replace(LINK_BRACKET_REPLACEMENT, '['));
 
 		if (segments.length > 2) {
+			String refTypeName= segments[2];
+			if (refTypeName.indexOf('.') == -1) {
+				try {
+					IJavaElement resolvedTypeVariable= resolveTypeVariable(element, refTypeName);
+					if (resolvedTypeVariable != null)
+						return resolvedTypeVariable;
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			}
+			
 			if (element instanceof ILocalVariable) {
 				element= element.getAncestor(IJavaElement.TYPE);
 			} else if (element instanceof ITypeParameter) {
@@ -258,7 +326,6 @@ public class JavaElementLinks {
 				element= ((IMember) element).getDeclaringType();
 			}
 			if (element instanceof IType) {
-				String refTypeName= segments[2];
 				try {
 					IType type= (IType) element;
 					if (refTypeName.length() > 0) {
@@ -319,6 +386,53 @@ public class JavaElementLinks {
 		return element;
 	}
 
+	private static IJavaElement resolveTypeVariable(IJavaElement baseElement, String typeVariableName) throws JavaModelException {
+		while (baseElement != null) {
+			switch (baseElement.getElementType()) {
+				case IJavaElement.METHOD:
+					IMethod method= (IMethod)baseElement;
+					ITypeParameter[] typeParameters= method.getTypeParameters();
+					for (int i= 0; i < typeParameters.length; i++) {
+						ITypeParameter typeParameter= typeParameters[i];
+						if (typeParameter.getElementName().equals(typeVariableName)) {
+							return typeParameter;
+						}
+					}
+					break;
+					
+				case IJavaElement.TYPE:
+					IType type= (IType)baseElement;
+					typeParameters= type.getTypeParameters();
+					for (int i= 0; i < typeParameters.length; i++) {
+						ITypeParameter typeParameter= typeParameters[i];
+						if (typeParameter.getElementName().equals(typeVariableName)) {
+							return typeParameter;
+						}
+					}
+					break;
+					
+				case IJavaElement.JAVA_MODEL:
+				case IJavaElement.JAVA_PROJECT:
+				case IJavaElement.PACKAGE_FRAGMENT:
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					
+				case IJavaElement.CLASS_FILE:
+				case IJavaElement.COMPILATION_UNIT:
+					
+				case IJavaElement.PACKAGE_DECLARATION:
+				case IJavaElement.IMPORT_CONTAINER:
+				case IJavaElement.IMPORT_DECLARATION:
+					return null;
+					
+				default:
+					break;
+			}
+			// look for type parameters in enclosing members: 
+			baseElement= baseElement.getParent();
+		}
+		return null;
+	}
+
 	private static IType resolveType(IType baseType, String refTypeName) throws JavaModelException {
 		if (refTypeName.length() == 0)
 			return baseType;
@@ -339,5 +453,18 @@ public class JavaElementLinks {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Returns the label for a Java element with the flags as defined by {@link JavaElementLabels}.
+	 * Referenced element names in the label (except the given element's name) are rendered as Javadoc links.
+	 * 
+	 * @param element the element to render
+	 * @param flags the rendering flags
+	 * @return the label of the Java element
+	 * @since 3.5
+	 */
+	public static String getElementLabel(IJavaElement element, long flags) {
+		return new JavaElementLinkedLabelComposer(element).getElementLabel(element, flags);
 	}
 }

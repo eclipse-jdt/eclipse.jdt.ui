@@ -18,12 +18,14 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
 
-import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
@@ -84,8 +86,6 @@ import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-
-import org.osgi.framework.Bundle;
 
 
 /**
@@ -479,8 +479,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}));
 	}
 	
-	/*
-	 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+	/**
+	 * @deprecated see {@link org.eclipse.jface.text.ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		JavadocBrowserInformationControlInput info= (JavadocBrowserInformationControlInput) getHoverInfo2(textViewer, hoverRegion);
@@ -549,7 +549,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				Reader reader;
 				try {
 //					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
-					String content= JavadocContentAccess2.getHTMLContent(member, true, true);
+					String content= JavadocContentAccess2.getHTMLContent(member, true);
 					reader= content == null ? null : new StringReader(content);
 					
 					// Provide hint why there's no Javadoc
@@ -606,12 +606,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	private static String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
-		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
-		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, flags));
-		if (member.getElementType() == IJavaElement.FIELD) {
+	private static String getInfoText(IJavaElement element, String constantValue, boolean allowImage) {
+		long flags= element.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
+		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(element, flags));
+		if (element.getElementType() == IJavaElement.FIELD) {
 			if (constantValue != null) {
-				IJavaProject javaProject= member.getJavaProject();
+				IJavaProject javaProject= element.getJavaProject();
 				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
 					label.append(' ');
 				label.append('=');
@@ -623,7 +623,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		
 		String imageName= null;
 		if (allowImage) {
-			URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(member);
+			URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
 			if (imageUrl != null) {
 				imageName= imageUrl.toExternalForm();
 			}
@@ -728,11 +728,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	/**
-	 * Creates and returns the a formatted message for the given
+	 * Creates and returns a formatted message for the given
 	 * constant with its hex value.
 	 * 
-	 * @param constantValue
-	 * @param hexValue
+	 * @param constantValue the constant value
+	 * @param hexValue the hex value
 	 * @return a formatted string with constant and hex values
 	 * @since 3.4
 	 */
@@ -818,19 +818,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			buf.append("margin-top: ").append(labelTop).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		buf.append("'>"); //$NON-NLS-1$
-		
-		for (int i= 0; i < label.length(); i++) {
-			char ch= label.charAt(i);
-			if (ch == '<') {
-				buf.append("&lt;"); //$NON-NLS-1$
-			} else if (ch == '>') {
-				buf.append("&gt;"); //$NON-NLS-1$
-			} else {
-				buf.append(ch);
-			}
-		}
-		
-		
+		buf.append(label);
 		buf.append("</div>"); //$NON-NLS-1$
 	}	
 	
