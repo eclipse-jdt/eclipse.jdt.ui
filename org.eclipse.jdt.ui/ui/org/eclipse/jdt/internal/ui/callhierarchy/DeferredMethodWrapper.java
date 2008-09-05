@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -14,10 +14,13 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.ui.progress.IElementCollector;
+
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
+import org.eclipse.ui.progress.IElementCollector;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter implements IDeferredWorkbenchAdapter {
     private final CallHierarchyContentProvider fProvider;
@@ -109,14 +112,4 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
         return this.fProvider.fetchChildren(((DeferredMethodWrapper) o).getMethodWrapper());
     }
 
-    /**
-     * Returns an object which is an instance of the given class associated
-     * with this object. Returns <code>null</code> if no such object can be
-     * found.
-     */
-    public Object getAdapter(Class adapter) {
-        if (adapter == IDeferredWorkbenchAdapter.class)
-            return this;
-        return null;
-    }
 }
