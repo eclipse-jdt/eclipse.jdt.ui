@@ -302,7 +302,7 @@ public class JavaElementImageProvider {
 					return JavaPluginImages.DESC_OBJS_JAVA_MODEL;
 
 				case IJavaElement.TYPE_PARAMETER:
-					return JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE;
+					return JavaPluginImages.DESC_OBJS_TYPEVARIABLE;
 					
 				case IJavaElement.ANNOTATION:
 					return JavaPluginImages.DESC_OBJS_ANNOTATION; 
