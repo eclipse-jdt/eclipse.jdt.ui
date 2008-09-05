@@ -352,10 +352,9 @@ public class JavaElementLabels {
 	public final static String DECL_STRING= JavaUIMessages.JavaElementLabels_declseparator_string;
 	/**
 	 * User-readable string for concatenating categories (e.g. " ").
-	 * XXX: to be made API post 3.2
-	 * @since 3.2
+	 * @since 3.5
 	 */
-	private final static String CATEGORY_SEPARATOR_STRING= JavaUIMessages.JavaElementLabels_category_separator_string;
+	public final static String CATEGORY_SEPARATOR_STRING= JavaUIMessages.JavaElementLabels_category_separator_string;
 	/**
 	 * User-readable string for ellipsis ("...").
 	 */
