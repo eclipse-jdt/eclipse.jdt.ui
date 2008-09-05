@@ -396,7 +396,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
 		assertTrue("lib not found", myInternalJar != null && myInternalJar.exists());//$NON-NLS-1$
 		
-		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, Path.fromOSString(myInternalJar.getPath()), null, null); //$NON-NLS-1$
+		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, Path.fromOSString(myInternalJar.getPath()), null, null); 
 		
 		fInternalPackDefault= fInternalJarRoot.getPackageFragment("");//$NON-NLS-1$
 		fInternalPack3= fInternalJarRoot.getPackageFragment("pack3");//$NON-NLS-1$

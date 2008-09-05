@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -297,7 +297,7 @@ public class ChkpiiTests extends TestCase {
 	}
 	
 	private int parseSummary(String aLine, String parseString) {
-		int index= aLine.indexOf(parseString); //$NON-NLS-1$
+		int index= aLine.indexOf(parseString); 
 		if (index == -1)
 			return -1;
 		
@@ -335,7 +335,7 @@ public class ChkpiiTests extends TestCase {
 	 */
 	public ChkpiiTests(String name) {
 		super(name);
-		fLogDirectoryName= getPluginDirectory() + "chkpiiResults" + File.separator; //$NON-NLS-1$ //$NON-NLS-2$
+		fLogDirectoryName= getPluginDirectory() + "chkpiiResults" + File.separator; //$NON-NLS-1$ 
 		new File(PROPERTIES.getOutputFile()).delete();
 		new File(HTML.getOutputFile()).delete();
 		new File(XML.getOutputFile()).delete();

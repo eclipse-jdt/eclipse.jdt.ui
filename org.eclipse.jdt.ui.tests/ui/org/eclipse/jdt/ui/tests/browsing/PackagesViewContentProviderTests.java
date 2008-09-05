@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -427,7 +427,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
 		assertTrue("lib not found", myInternalJar != null && myInternalJar.exists());//$NON-NLS-1$
 		
-		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, Path.fromOSString(myInternalJar.getPath()), null, null); //$NON-NLS-1$
+		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, Path.fromOSString(myInternalJar.getPath()), null, null); 
 		
 		fInternalPackDefault= fInternalJarRoot.getPackageFragment("");//$NON-NLS-1$
 		fInternalPack3= fInternalJarRoot.getPackageFragment("pack3");//$NON-NLS-1$
