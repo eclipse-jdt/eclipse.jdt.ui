@@ -390,12 +390,11 @@ public class JavaElementLabels {
 	
 	/**
 	 * Returns the label of the given object. The object must be of type {@link IJavaElement} or adapt to {@link IWorkbenchAdapter}.
-	 * If not, the empty string is returned.
+	 * If the element type is not known, the empty string is returned.
 	 * 
-	 * if the element type is not known.
-	 * @param obj Object to get the label from.
-	 * @param flags The rendering flags
-	 * @return Returns the label or the empty string if the object type is not supported.
+	 * @param obj object to get the label from
+	 * @param flags the rendering flags
+	 * @return the label or the empty string if the object type is not supported
 	 */
 	public static String getTextLabel(Object obj, long flags) {
 		return getStyledTextLabel(obj, flags).getString();
@@ -403,11 +402,11 @@ public class JavaElementLabels {
 	
 	/**
 	 * Returns the styled label of the given object. The object must be of type {@link IJavaElement} or adapt to {@link IWorkbenchAdapter}.
-	 * If not, the empty string is returned if the element type is not known.
+	 * If the element type is not known, the empty string is returned.
 	 * 
-	 * @param obj Object to get the label from.
-	 * @param flags The rendering flags
-	 * @return Returns the label or the empty string if the object type is not supported.
+	 * @param obj object to get the label from
+	 * @param flags the rendering flags
+	 * @return the label or the empty string if the object type is not supported
 	 * 
 	 * @since 3.4
 	 */
@@ -460,8 +459,8 @@ public class JavaElementLabels {
 	/**
 	 * Returns the label for a Java element with the flags as defined by this class.
 	 * 
-	 * @param element The element to render.
-	 * @param flags The rendering flags.
+	 * @param element the element to render
+	 * @param flags the rendering flags.
 	 * @return the label of the Java element
 	 */
 	public static String getElementLabel(IJavaElement element, long flags) {
@@ -471,8 +470,8 @@ public class JavaElementLabels {
 	/**
 	 * Returns the styled label for a Java element with the flags as defined by this class.
 	 * 
-	 * @param element The element to render.
-	 * @param flags The rendering flags.
+	 * @param element the element to render
+	 * @param flags the rendering flags.
 	 * @return the label of the Java element
 	 * 
 	 * @since 3.4
@@ -486,9 +485,9 @@ public class JavaElementLabels {
 	/**
 	 * Returns the label for a Java element with the flags as defined by this class.
 	 * 
-	 * @param element The element to render.
-	 * @param flags The rendering flags.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param element the element to render
+	 * @param flags the rendering flags.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getElementLabel(IJavaElement element, long flags, StringBuffer buf) {
 		buf.append(getElementLabel(element, flags));
@@ -497,9 +496,9 @@ public class JavaElementLabels {
 	/**
 	 * Returns the styled label for a Java element with the flags as defined by this class.
 	 * 
-	 * @param element The element to render.
-	 * @param flags The rendering flags.
-	 * @param result The buffer to append the resulting label to.
+	 * @param element the element to render
+	 * @param flags the rendering flags.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -571,9 +570,10 @@ public class JavaElementLabels {
 
 	/**
 	 * Appends the label for a method to a {@link StringBuffer}. Considers the M_* flags.
-	 * 	@param method The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'M_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * 
+	 * @param method the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'M_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -584,9 +584,10 @@ public class JavaElementLabels {
 	
 	/**
 	 * Appends the label for a method to a {@link StyledString}. Considers the M_* flags.
-	 * 	@param method The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'M_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * 
+	 * @param method the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'M_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -820,9 +821,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a field to a {@link StringBuffer}. Considers the F_* flags.
 	 * 
-	 * 	@param field The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param field the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'F_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -833,9 +834,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the style label for a field to a {@link StyledString}. Considers the F_* flags.
 	 * 
-	 * 	@param field The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param field the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'F_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -893,9 +894,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a local variable to a {@link StringBuffer}.
 	 * 
-	 * 	@param localVariable The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param localVariable the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'F_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -906,9 +907,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the styled label for a local variable to a {@link StyledString}.
 	 * 
-	 * 	@param localVariable The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param localVariable the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'F_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -945,9 +946,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a initializer to a {@link StringBuffer}. Considers the I_* flags.
 	 * 
-	 * 	@param initializer The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'I_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param initializer the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'I_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getInitializerLabel(IInitializer initializer, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -958,9 +959,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a initializer to a {@link StyledString}. Considers the I_* flags.
 	 * 
-	 * 	@param initializer The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'I_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param initializer the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'I_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -1063,9 +1064,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a type to a {@link StringBuffer}. Considers the T_* flags.
 	 * 
-	 * 	@param type The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'T_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param type the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'T_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getTypeLabel(IType type, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -1076,9 +1077,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a type to a {@link StyledString}. Considers the T_* flags.
 	 * 
-	 * 	@param type The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'T_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param type the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'T_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -1178,9 +1179,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a import container, import or package declaration to a {@link StringBuffer}. Considers the D_* flags.
 	 * 
-	 * 	@param declaration The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'D_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param declaration the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'D_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getDeclarationLabel(IJavaElement declaration, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -1191,9 +1192,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a import container, import or package declaration to a {@link StyledString}. Considers the D_* flags.
 	 * 
-	 * 	@param declaration The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'D_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param declaration the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'D_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -1227,9 +1228,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a class file to a {@link StringBuffer}. Considers the CF_* flags.
 	 * 
-	 * 	@param classFile The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'CF_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param classFile the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'CF_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getClassFileLabel(IClassFile classFile, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -1240,9 +1241,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a class file to a {@link StyledString}. Considers the CF_* flags.
 	 * 
-	 * 	@param classFile The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'CF_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param classFile the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'CF_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -1269,9 +1270,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a compilation unit to a {@link StringBuffer}. Considers the CU_* flags.
 	 * 
-	 * 	@param cu The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'CU_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param cu the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'CU_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getCompilationUnitLabel(ICompilationUnit cu, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -1282,9 +1283,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a compilation unit to a {@link StyledString}. Considers the CU_* flags.
 	 * 
-	 * 	@param cu The element to render.
-	 * @param flags The rendering flags. Flags with names starting with 'CU_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param cu the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'CU_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -1311,9 +1312,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a package fragment to a {@link StringBuffer}. Considers the P_* flags.
 	 * 
-	 * 	@param pack The element to render.
-	 * @param flags The rendering flags. Flags with names starting with P_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param pack the element to render
+	 * @param flags the rendering flags. Flags with names starting with P_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getPackageFragmentLabel(IPackageFragment pack, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -1324,9 +1325,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a package fragment to a {@link StyledString}. Considers the P_* flags.
 	 * 
-	 * 	@param pack The element to render.
-	 * @param flags The rendering flags. Flags with names starting with P_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param pack the element to render
+	 * @param flags the rendering flags. Flags with names starting with P_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -1379,9 +1380,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a package fragment root to a {@link StringBuffer}. Considers the ROOT_* flags.
 	 * 
-	 * 	@param root The element to render.
-	 * @param flags The rendering flags. Flags with names starting with ROOT_' are considered.
-	 * @param buf The buffer to append the resulting label to.
+	 * @param root the element to render
+	 * @param flags the rendering flags. Flags with names starting with ROOT_' are considered.
+	 * @param buf the buffer to append the resulting label to
 	 */
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		StyledString builder= new StyledString();
@@ -1392,9 +1393,9 @@ public class JavaElementLabels {
 	/**
 	 * Appends the label for a package fragment root to a {@link StyledString}. Considers the ROOT_* flags.
 	 * 
-	 * 	@param root The element to render.
-	 * @param flags The rendering flags. Flags with names starting with ROOT_' are considered.
-	 * @param result The buffer to append the resulting label to.
+	 * @param root the element to render
+	 * @param flags the rendering flags. Flags with names starting with ROOT_' are considered.
+	 * @param result the buffer to append the resulting label to
 	 * 
 	 * @since 3.4
 	 */
@@ -1543,12 +1544,12 @@ public class JavaElementLabels {
 	
 	/**
 	 * Returns <code>true</code> if the given package fragment root is
-	 * referenced. This means it is own by a different project but is referenced
+	 * referenced. This means that it is owned by a different project but is referenced
 	 * by the root's parent. Returns <code>false</code> if the given root
 	 * doesn't have an underlying resource.
 	 * 
 	 * @param root the package fragment root
-	 * @return returns <code>true</code> if the given package fragment root is referenced
+	 * @return <code>true</code> if the given package fragment root is referenced
 	 */
 	private static boolean isReferenced(IPackageFragmentRoot root) {
 		IResource resource= root.getResource();
@@ -1601,10 +1602,11 @@ public class JavaElementLabels {
 	
 	/**
 	 * Returns the label of a classpath container
-	 * @param containerPath The path of the container.
-	 * @param project The project the container is resolved in.
-	 * @return Returns the label of the classpath container
-	 * @throws JavaModelException Thrown when the resolving of the container failed.
+	 * 
+	 * @param containerPath the path of the container
+	 * @param project the project the container is resolved in
+	 * @return the label of the classpath container
+	 * @throws JavaModelException when the resolving of the container failed
 	 */
 	public static String getContainerEntryLabel(IPath containerPath, IJavaProject project) throws JavaModelException {
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, project);
@@ -1620,9 +1622,10 @@ public class JavaElementLabels {
 	
 	/**
 	 * Returns the styled label of a classpath container
-	 * @param containerPath The path of the container.
-	 * @param project The project the container is resolved in.
-	 * @return Returns the label of the classpath container
+	 * 
+	 * @param containerPath the path of the container
+	 * @param project the project the container is resolved in
+	 * @return the label of the classpath container
 	 * 
 	 * @since 3.4
 	 */
