@@ -25,6 +25,8 @@ import org.osgi.framework.Bundle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.OpenWindowListener;
+import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -534,6 +536,11 @@ public class JavadocView extends AbstractInfoView {
 			fBrowser= new Browser(parent, SWT.NONE);
 			fIsUsingBrowserWidget= true;
 			addLinkListener(fBrowser);
+			fBrowser.addOpenWindowListener(new OpenWindowListener() {
+				public void open(WindowEvent event) {
+					event.required= true; // Cancel opening of new windows
+				}
+			});
 			
 		} catch (SWTError er) {
 
