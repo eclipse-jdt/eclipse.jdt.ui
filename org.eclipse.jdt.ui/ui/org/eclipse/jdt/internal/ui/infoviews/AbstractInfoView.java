@@ -11,11 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
@@ -24,6 +19,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -49,12 +49,14 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.ViewPart;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -78,6 +80,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
 		| JavaElementLabels.USE_RESOLVED;
 	private final long LOCAL_VARIABLE_TITLE_FLAGS= TITLE_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
+	private final long TYPE_PARAMETER_TITLE_FLAGS= TITLE_FLAGS | JavaElementLabels.TP_POST_QUALIFIED;
 	
 	/** JavaElementLabels flags used for the tool tip text */
 	private static final long TOOLTIP_LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
@@ -665,6 +668,8 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		long flags;
 		if (inputElement instanceof ILocalVariable)
 			flags= LOCAL_VARIABLE_TITLE_FLAGS;
+		else if (inputElement instanceof ITypeParameter)
+			flags= TYPE_PARAMETER_TITLE_FLAGS;
 		else
 			flags= TITLE_FLAGS;
 

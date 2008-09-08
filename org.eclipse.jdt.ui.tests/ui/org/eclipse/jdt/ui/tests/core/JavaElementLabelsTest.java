@@ -20,8 +20,11 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -164,6 +167,89 @@ public class JavaElementLabelsTest extends CoreTests {
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH);
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(...).Local");
+	}
+	
+	public void testTypeParameterLabelType() throws Exception {
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("public class TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer>, NoBound> {\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("TypeParams.java", content, false, null);
+		
+		IType typeParams= (IType)cu.getElementAt(content.indexOf("TypeParams"));
+		ITypeParameter[] typeParameters= typeParams.getTypeParameters();
+		ITypeParameter q= typeParameters[0];
+		ITypeParameter element= typeParameters[1];
+		ITypeParameter nobound= typeParameters[2];
+		
+		String lab= JavaElementLabels.getTextLabel(q, 0);
+		assertEqualString(lab, "Q extends ArrayList<? extends Number>");
+		lab= JavaElementLabels.getTextLabel(q, JavaElementLabels.ALL_POST_QUALIFIED);
+		assertEqualString(lab, "Q extends ArrayList<? extends Number> - org.test.TypeParams");
+		
+		lab= JavaElementLabels.getTextLabel(element, 0);
+		assertEqualString(lab, "Element extends Map<String, Integer>");
+		lab= JavaElementLabels.getTextLabel(element, JavaElementLabels.DEFAULT_POST_QUALIFIED);
+		assertEqualString(lab, "Element extends Map<String, Integer> - org.test.TypeParams");
+		
+		lab= JavaElementLabels.getTextLabel(nobound, 0);
+		assertEqualString(lab, "NoBound");
+		lab= JavaElementLabels.getTextLabel(nobound, JavaElementLabels.TP_POST_QUALIFIED);
+		assertEqualString(lab, "NoBound - org.test.TypeParams");
+		
+		
+		IType al= (IType)cu.codeSelect(content.indexOf("ArrayList"), 0)[0];
+		ITypeParameter[] alTypeParameters= al.getTypeParameters();
+		ITypeParameter e= alTypeParameters[0];
+		
+		lab= JavaElementLabels.getTextLabel(e, 0);
+		assertEqualString(lab, "E"); // no " extends java.lang.Object"!
+		lab= JavaElementLabels.getTextLabel(e, JavaElementLabels.ALL_POST_QUALIFIED);
+		assertEqualString(lab, "E - java.util.ArrayList");
+	}
+	
+	public void testTypeParameterLabelMethod() throws Exception {
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("public class X {\n");
+		buf.append("    <Q extends ArrayList<? extends Number>, Element extends Map<String, Integer>, NoBound> Q method(Element e, NoBound n) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", content, false, null);
+		
+		IMethod method= (IMethod)cu.getElementAt(content.indexOf("method"));
+		ITypeParameter[] typeParameters= method.getTypeParameters();
+		ITypeParameter q= typeParameters[0];
+		ITypeParameter element= typeParameters[1];
+		ITypeParameter nobound= typeParameters[2];
+		
+		String lab= JavaElementLabels.getTextLabel(q, 0);
+		assertEqualString(lab, "Q extends ArrayList<? extends Number>");
+		lab= JavaElementLabels.getTextLabel(q, JavaElementLabels.ALL_POST_QUALIFIED);
+		assertEqualString(lab, "Q extends ArrayList<? extends Number> - org.test.X.method(Element, NoBound)");
+		
+		lab= JavaElementLabels.getTextLabel(element, 0);
+		assertEqualString(lab, "Element extends Map<String, Integer>");
+		lab= JavaElementLabels.getTextLabel(element, JavaElementLabels.DEFAULT_POST_QUALIFIED);
+		assertEqualString(lab, "Element extends Map<String, Integer> - org.test.X.method(Element, NoBound)");
+		
+		lab= JavaElementLabels.getTextLabel(nobound, 0);
+		assertEqualString(lab, "NoBound");
+		lab= JavaElementLabels.getTextLabel(nobound, JavaElementLabels.TP_POST_QUALIFIED);
+		assertEqualString(lab, "NoBound - org.test.X.method(Element, NoBound)");
 	}
 	
 	public void testTypeLabelAnonymous() throws Exception {

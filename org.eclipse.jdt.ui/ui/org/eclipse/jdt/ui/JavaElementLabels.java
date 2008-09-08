@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -152,19 +153,19 @@ public class JavaElementLabels {
 	
 	/**
 	 * Type names are fully qualified.
-	 * e.g. <code>java.util.Map.MapEntry</code>
+	 * e.g. <code>java.util.Map.Entry</code>
 	 */
 	public final static long T_FULLY_QUALIFIED= 1L << 18;
 	
 	/**
 	 * Type names are type container qualified.
-	 * e.g. <code>Map.MapEntry</code>
+	 * e.g. <code>Map.Entry</code>
 	 */
 	public final static long T_CONTAINER_QUALIFIED= 1L << 19;
 	
 	/**
 	 * Type names are post qualified.
-	 * e.g. <code>MapEntry - java.util.Map</code>
+	 * e.g. <code>Entry - java.util.Map</code>
 	 */
 	public final static long T_POST_QUALIFIED= 1L << 20;
 	
@@ -173,6 +174,14 @@ public class JavaElementLabels {
 	 * e.g. <code>Map&lt;S, T&gt;</code>
 	 */
 	public final static long T_TYPE_PARAMETERS= 1L << 21;
+	
+	/**
+	 * Type parameters are post qualified.
+	 * e.g. <code>K - java.util.Map.Entry</code>
+	 * 
+	 * @since 3.5
+	 */
+	public final static long TP_POST_QUALIFIED= 1L << 22;
 	
 	/**
 	 * Declarations (import container / declaration, package declaration) are qualified.
@@ -312,7 +321,7 @@ public class JavaElementLabels {
 	/**
 	 * Post qualify all elements
 	 */
-	public final static long ALL_POST_QUALIFIED= new Long(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED).longValue();
+	public final static long ALL_POST_QUALIFIED= new Long(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | TP_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED).longValue();
 
 	/**
 	 *  Default options (M_PARAMETER_TYPES,  M_APP_TYPE_PARAMETERS & T_TYPE_PARAMETERS enabled)
@@ -327,7 +336,7 @@ public class JavaElementLabels {
 	/**
 	 *  Default post qualify options (All except Root and Package)
 	 */
-	public final static long DEFAULT_POST_QUALIFIED= new Long(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED).longValue();
+	public final static long DEFAULT_POST_QUALIFIED= new Long(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | TP_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED).longValue();
 
 	/**
 	 * User-readable string for separating post qualified names (e.g. " - ").
@@ -633,6 +642,33 @@ public class JavaElementLabels {
 	 */
 	public static void getTypeLabel(IType type, long flags, StyledString result) {
 		new JavaElementLabelComposer(result).appendTypeLabel(type, flags);
+	}
+	
+	
+	/**
+	 * Appends the label for a type parameter to a {@link StringBuffer}. Considers the TP_* flags.
+	 * 
+	 * @param typeParameter the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'TP_' are considered.
+	 * @param buf the buffer to append the resulting label to
+	 * 
+	 * @since 3.5
+	 */
+	public static void getTypeParameterLabel(ITypeParameter typeParameter, long flags, StringBuffer buf) {
+		new JavaElementLabelComposer(buf).appendTypeParameterLabel(typeParameter, flags);
+	}
+	
+	/**
+	 * Appends the label for a type parameter to a {@link StyledString}. Considers the TP_* flags.
+	 * 
+	 * @param typeParameter the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'TP_' are considered.
+	 * @param result the buffer to append the resulting label to
+	 * 
+	 * @since 3.5
+	 */
+	public static void getTypeParameterLabel(ITypeParameter typeParameter, long flags, StyledString result) {
+		new JavaElementLabelComposer(result).appendTypeParameterLabel(typeParameter, flags);
 	}
 	
 	

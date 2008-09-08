@@ -241,9 +241,9 @@ public class JavaElementLabelComposer {
 			case IJavaElement.LOCAL_VARIABLE:
 				appendLocalVariableLabel((ILocalVariable) element, flags);
 				break;
-//			case IJavaElement.TYPE_PARAMETER: //TODO
-//				appendTypeParameterLabel((ITypeParameter) element, flags);
-//				break;
+			case IJavaElement.TYPE_PARAMETER:
+				appendTypeParameterLabel((ITypeParameter) element, flags);
+				break;
 			case IJavaElement.INITIALIZER:
 				appendInitializerLabel((IInitializer) element, flags);
 				break;
@@ -613,6 +613,63 @@ public class JavaElementLabelComposer {
 		}
 	}
 	
+	/**
+	 * Appends the styled label for a type parameter.
+	 * 
+	 * @param typeParameter the element to render
+	 * @param flags the rendering flags. Flags with names starting with 'T_' are considered.
+	 */
+	public void appendTypeParameterLabel(ITypeParameter typeParameter, long flags) {
+		try {
+			fBuffer.append(getElementName(typeParameter));
+			
+			// ITypeParameter#getSignature() would make things easier here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=246594
+			
+			IMember declaringMember= typeParameter.getDeclaringMember();
+			ITypeParameter[] params= null;
+			String[] paramSigs= null;
+			if (declaringMember instanceof IType) {
+				IType type= (IType)declaringMember;
+				params= type.getTypeParameters();
+				paramSigs= type.getTypeParameterSignatures();
+			} else if (declaringMember instanceof IMethod) {
+				IMethod method= (IMethod)declaringMember;
+				params= method.getTypeParameters();
+				paramSigs= method.getTypeParameterSignatures(); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=246594
+			}
+			if (params != null) {
+				for (int i= 0; i < params.length; i++) {
+					if (params[i].equals(typeParameter)) {
+						if (paramSigs.length > i) {
+							String paramSig= paramSigs[i];
+							String[] bounds= Signature.getTypeParameterBounds(paramSig);
+							if (bounds.length > 0) {
+								if (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0])) //$NON-NLS-1$
+									continue;
+								fBuffer.append(" extends "); //$NON-NLS-1$
+								for (int j= 0; j < bounds.length; j++) {
+									if (j > 0) {
+										fBuffer.append(JavaElementLabels.COMMA_STRING);
+									}
+									appendTypeSignatureLabel(typeParameter, bounds[j], flags);
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+			
+			// post qualification
+			if (getFlag(flags, JavaElementLabels.TP_POST_QUALIFIED)) {
+				fBuffer.append(JavaElementLabels.CONCAT_STRING);
+				appendElementLabel(declaringMember, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+			}
+			
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e); // NotExistsException will not reach this point
+		}
+	}
 	
 	/**
 	 * Appends the label for a initializer. Considers the I_* flags.

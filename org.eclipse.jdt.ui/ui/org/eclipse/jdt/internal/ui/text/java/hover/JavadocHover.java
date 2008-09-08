@@ -377,6 +377,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
 		| JavaElementLabels.USE_RESOLVED;
 	private static final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
+	private static final long TYPE_PARAMETER_FLAGS= LABEL_FLAGS | JavaElementLabels.TP_POST_QUALIFIED;
 
 	/**
 	 * The style sheet (css).
@@ -607,7 +608,18 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static String getInfoText(IJavaElement element, String constantValue, boolean allowImage) {
-		long flags= element.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
+		long flags;
+		switch (element.getElementType()) {
+			case IJavaElement.LOCAL_VARIABLE:
+				flags= LOCAL_VARIABLE_FLAGS;
+				break;
+			case IJavaElement.TYPE_PARAMETER:
+				flags= TYPE_PARAMETER_FLAGS;
+				break;
+			default:
+				flags= LABEL_FLAGS;
+				break;
+		}
 		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(element, flags));
 		if (element.getElementType() == IJavaElement.FIELD) {
 			if (constantValue != null) {

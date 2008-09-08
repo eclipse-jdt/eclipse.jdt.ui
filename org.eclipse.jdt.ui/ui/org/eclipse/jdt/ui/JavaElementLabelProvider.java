@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
-import org.eclipse.core.resources.IStorage;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledString;
@@ -205,7 +205,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 			fTextFlags |= JavaElementLabels.M_PARAMETER_TYPES;
 		}		
 		if (getFlag(SHOW_CONTAINER)) {
-			fTextFlags |= JavaElementLabels.P_POST_QUALIFIED | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
+			fTextFlags |= JavaElementLabels.P_POST_QUALIFIED | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.TP_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 		}
 		if (getFlag(SHOW_POSTIFIX_QUALIFICATION)) {
 			fTextFlags |= (JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED);
@@ -227,7 +227,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		}
 		if (getFlag(SHOW_POST_QUALIFIED)) {
 			fTextFlags |= (JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED 
-			| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED);
+			| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.TP_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED);
 		}		
 	}
 
