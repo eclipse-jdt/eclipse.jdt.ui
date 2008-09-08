@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -166,6 +167,9 @@ public class JavaElement extends JEAttribute {
 			addMethodChildren(result, (IMethod) fJavaElement);
 		if (fJavaElement instanceof IMember)
 			addMemberChildren(result, (IMember) fJavaElement);
+		
+		if (fJavaElement instanceof ITypeParameter)
+			addTypeParameterChildren(result, (ITypeParameter) fJavaElement);
 		
 		if (fJavaElement instanceof IAnnotation)
 			addAnnotationChildren(result, (IAnnotation) fJavaElement);
@@ -487,6 +491,16 @@ public class JavaElement extends JEAttribute {
 		} catch (JavaModelException e) {
 			result.add(new Error(this, "DEFAULT_VALUE", e));
 		}
+	}
+	
+	private void addTypeParameterChildren(ArrayList<JEAttribute> result, final ITypeParameter typeParameter) {
+		result.add(new JavaElement(this, "DECLARING MEMBER", typeParameter.getDeclaringMember()));
+		result.add(new JavaElementChildrenProperty(this, "BOUNDS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, typeParameter.getBounds());
+			}
+		});
 	}
 	
 	static JavaElement[] createJavaElements(JEAttribute parent, Object[] javaElements) {
