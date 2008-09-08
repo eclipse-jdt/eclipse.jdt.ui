@@ -119,7 +119,7 @@ public class BasicElementLabels {
 	 * @return the label for the Java element
 	 */
 	public static String getJavaElementName(String name) {
-		return Strings.markLTR(name, "<>()?,{}"); //$NON-NLS-1$
+		return Strings.markLTR(name, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 	
 	/**
@@ -129,7 +129,7 @@ public class BasicElementLabels {
 	 * @return the label for the Java code snippet
 	 */
 	public static String getJavaCodeString(String string) {
-		return Strings.markLTR(string, "<>()?,{}+-*!%="); //$NON-NLS-1$
+		return Strings.markLTR(string, "<>()?,{}+-*!%=^|&;[]~"); //$NON-NLS-1$
 	}
 	
 	/**

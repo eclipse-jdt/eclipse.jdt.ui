@@ -30,6 +30,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
 /**
@@ -278,7 +279,7 @@ public class CompletionProposalLabelProvider {
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
-		return Strings.markLTR(nameBuffer);
+		return Strings.markLTR(nameBuffer, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	/**
@@ -450,7 +451,7 @@ public class CompletionProposalLabelProvider {
 	/**
 	 * Returns whether the given string starts with "this.".
 	 * 
-	 * @param string
+	 * @param string string to test
 	 * @return <code>true</code> if the given string starts with "this."
 	 * @since 3.3
 	 */
@@ -481,7 +482,7 @@ public class CompletionProposalLabelProvider {
 			}
 		}
 
-		return buf;
+		return Strings.markLTR(buf, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	StyledString createPackageProposalLabel(CompletionProposal proposal) {

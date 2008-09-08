@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -94,7 +96,8 @@ public class JavaElementLinks {
 	private static final class JavaElementLinkedLabelComposer extends JavaElementLabelComposer {
 		private final IJavaElement fElement;
 	
-		public JavaElementLinkedLabelComposer(IJavaElement member) {
+		public JavaElementLinkedLabelComposer(IJavaElement member, StringBuffer buf) {
+			super(buf);
 			fElement= member;
 		}
 	
@@ -465,6 +468,13 @@ public class JavaElementLinks {
 	 * @since 3.5
 	 */
 	public static String getElementLabel(IJavaElement element, long flags) {
-		return new JavaElementLinkedLabelComposer(element).getElementLabel(element, flags);
+		StringBuffer buf= new StringBuffer();
+		
+		new JavaElementLinkedLabelComposer(element, buf).appendElementLabel(element, flags);
+		return Strings.markLTR(buf.toString(), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
+		
+//		new JavaElementLabelComposer(buf).appendElementLabel(element, flags);
+//		String string= buf.toString().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+//		return Strings.markLTR(string, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 }
