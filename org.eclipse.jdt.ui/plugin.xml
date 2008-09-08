@@ -5579,6 +5579,7 @@
 							<instanceof value="org.eclipse.core.resources.IProject" />
           					<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
 						</and>
+						<instanceof value="org.eclipse.core.resources.IResource" />
 						<instanceof value="org.eclipse.jdt.core.IJavaElement" />
 						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
 						<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
