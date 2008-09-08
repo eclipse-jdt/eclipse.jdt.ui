@@ -304,6 +304,8 @@ public final class SignatureUtil {
 					depth++;
 					break;
 				case Signature.C_GENERIC_END:
+					if (depth == 0)
+						return pos;
 					depth--;
 					break;
 				case Signature.C_SEMICOLON:
