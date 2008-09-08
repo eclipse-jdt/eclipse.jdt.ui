@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.LegacyActionTools;
@@ -19,8 +21,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
-
-import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
@@ -331,8 +331,8 @@ public class Strings {
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored.
 	 * @param lines the lines
-	 * @param tabWidth 
-	 * @param indentWidth 
+	 * @param tabWidth the size of one tab in space equivalents
+	 * @param indentWidth the size of the indent in space equivalents
 	 * 
 	 * @since 3.1
 	 */
@@ -360,8 +360,8 @@ public class Strings {
 	 * only consists out of white space it is ignored. If <code>
 	 * considerFirstLine</code> is false the first line will be ignored.
 	 * @param lines the lines
-	 * @param tabWidth 
-	 * @param indentWidth 
+	 * @param tabWidth the size of one tab in space equivalents
+	 * @param indentWidth the size of the indent in space equivalents
 	 * @param considerFirstLine If <code> considerFirstLine</code> is false the first line will be ignored.
 	 * @since 3.1
 	 */
@@ -444,16 +444,16 @@ public class Strings {
 	}
 	
 	/**
-	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
+	 * Change the indent of, possible multi-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)
 	 * @param code the code
-	 * @param codeIndentLevel
+	 * @param codeIndentLevel level of indentation
 	 * 
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
-	 * @param newIndent 
-	 * @param lineDelim 
+	 * @param newIndent new indent
+	 * @param lineDelim line delimiter
 	 * @return the changed code
 	 * @since 3.1
 	 */
@@ -466,11 +466,11 @@ public class Strings {
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)
 	 * @param code the code
-	 * @param codeIndentLevel 
-	 * @param tabWidth 
-	 * @param indentWidth 
-	 * @param newIndent 
-	 * @param lineDelim 
+	 * @param codeIndentLevel indent level
+	 * @param tabWidth the size of one tab in space equivalents
+	 * @param indentWidth the size of the indent in space equivalents
+	 * @param newIndent new indent
+	 * @param lineDelim line delimiter
 	 * @return the changed code
 	 * @since 3.1
 	 */
@@ -515,7 +515,7 @@ public class Strings {
 	 * Concatenate the given strings into one strings using the passed line delimiter as a
 	 * delimiter. No delimiter is added to the last line.
 	 * @param lines the lines
-	 * @param delimiter 
+	 * @param delimiter line delimiter
 	 * @return the concatenated lines
 	 */
 	public static String concatenate(String[] lines, String delimiter) {
