@@ -98,6 +98,7 @@ import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -1016,6 +1017,8 @@ public class LocalCorrectionsSubProcessor {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode instanceof SwitchCase && selectedNode.getParent() instanceof SwitchStatement) {
 			AST ast= selectedNode.getAST();
+			
+			// insert break:
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			ListRewrite listRewrite= rewrite.getListRewrite(selectedNode.getParent(), SwitchStatement.STATEMENTS_PROPERTY);
 			listRewrite.insertBefore(ast.newBreakStatement(), selectedNode, null);
@@ -1023,6 +1026,17 @@ public class LocalCorrectionsSubProcessor {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_insert_break_statement;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			proposals.add(proposal);
+			
+			// insert //$FALL-THROUGH$:
+			rewrite= ASTRewrite.create(ast);
+			rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
+			listRewrite= rewrite.getListRewrite(selectedNode.getParent(), SwitchStatement.STATEMENTS_PROPERTY);
+			listRewrite.insertBefore(rewrite.createStringPlaceholder("//$FALL-THROUGH$", ASTNode.EMPTY_STATEMENT), selectedNode, null); //$NON-NLS-1$
+			
+			label= CorrectionMessages.LocalCorrectionsSubProcessor_insert_fall_through;
+			image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 4, image);
 			proposals.add(proposal);
 		}
 	}

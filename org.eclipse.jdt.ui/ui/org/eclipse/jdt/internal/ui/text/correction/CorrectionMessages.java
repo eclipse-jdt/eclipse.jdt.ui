@@ -363,6 +363,7 @@ public final class CorrectionMessages extends NLS {
 	public static String CorrectionMarkerResolutionGenerator__multiFixErrorDialog_Titel;
 	public static String CorrectionMarkerResolutionGenerator_multiFixErrorDialog_description;
 	public static String LocalCorrectionsSubProcessor_insert_break_statement;
+	public static String LocalCorrectionsSubProcessor_insert_fall_through;
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
 	public static String SuppressWarningsSubProcessor_remove_annotation_label;
 }

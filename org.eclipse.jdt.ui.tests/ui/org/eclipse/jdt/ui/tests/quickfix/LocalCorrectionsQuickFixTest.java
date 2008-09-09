@@ -17,6 +17,9 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,16 +34,12 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
@@ -6514,9 +6513,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
@@ -6551,6 +6550,23 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[1]= buf.toString();
 
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public long foo(int i) {\n");
+		buf.append("        long time= 0;\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                time= System.currentTimeMillis();\n");
+		buf.append("            //$FALL-THROUGH$\n");
+		buf.append("            case 2:\n");
+		buf.append("                time= 3;\n");
+		buf.append("        }\n");
+		buf.append("        return time;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	
@@ -6580,9 +6596,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
@@ -6616,10 +6632,114 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public long foo(int i) {\n");
+		buf.append("        long time= 0;\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                time= System.currentTimeMillis();\n");
+		buf.append("            //$FALL-THROUGH$\n");
+		buf.append("            default:\n");
+		buf.append("                time= 3;\n");
+		buf.append("        }\n");
+		buf.append("        return time;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	
+	public void testSwitchCaseFallThrough3() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_FALLTHROUGH_CASE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public long foo(int i) {\n");
+		buf.append("        long time= 0;\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                time= System.currentTimeMillis();\n");
+		buf.append("                // fall through is OK\n");
+		buf.append("            default:\n");
+		buf.append("                time= 3;\n");
+		buf.append("        }\n");
+		buf.append("        return time;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+	
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+	
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public long foo(int i) {\n");
+		buf.append("        long time= 0;\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                time= System.currentTimeMillis();\n");
+		buf.append("                break;\n");
+		buf.append("            // fall through is OK\n");
+		buf.append("            default:\n");
+		buf.append("                time= 3;\n");
+		buf.append("        }\n");
+		buf.append("        return time;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+	
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"fallthrough\")\n");
+		buf.append("    public long foo(int i) {\n");
+		buf.append("        long time= 0;\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                time= System.currentTimeMillis();\n");
+		buf.append("                // fall through is OK\n");
+		buf.append("            default:\n");
+		buf.append("                time= 3;\n");
+		buf.append("        }\n");
+		buf.append("        return time;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public long foo(int i) {\n");
+		buf.append("        long time= 0;\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 1:\n");
+		buf.append("                time= System.currentTimeMillis();\n");
+		buf.append("                // fall through is OK\n");
+		buf.append("            //$FALL-THROUGH$\n");
+		buf.append("            default:\n");
+		buf.append("                time= 3;\n");
+		buf.append("        }\n");
+		buf.append("        return time;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 	public void testUnusedCode() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
