@@ -59,10 +59,9 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 		final Map newSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 
 		switch (version) {
-
 			case VERSION_1:
 				updateFrom1To2(oldSettings);
-
+				//$FALL-THROUGH$
 			default:
 				for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext();) {
 					final String key= (String) iter.next();
