@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,16 +11,20 @@
 package org.eclipse.core.indexsearch;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 /**
  * A <code>SearchEngine</code> searches for java elements following a search pattern.
@@ -66,7 +70,7 @@ public class SearchEngine {
 	 */
 	public static int CANCEL_IF_NOT_READY_TO_SEARCH = 0;
 	/**
-	 * The search operation waits for the underlying indexer to finish indexing 
+	 * The search operation waits for the underlying indexer to finish indexing
 	 * the workspace before starting the search.
 	 */
 	public static int WAIT_UNTIL_READY_TO_SEARCH = 1;
@@ -180,12 +184,11 @@ public class SearchEngine {
 	
 	private IIndex[] getIndexes(IIndexQuery search) {
 		IPath[] fIndexKeys= null; // cache of the keys for looking index up
-		if (fIndexKeys == null) {
-			ArrayList requiredIndexKeys= new ArrayList();
-			search.computePathsKeyingIndexFiles(requiredIndexKeys);
-			fIndexKeys= new IPath[requiredIndexKeys.size()];
-			requiredIndexKeys.toArray(fIndexKeys);
-		}
+		ArrayList requiredIndexKeys= new ArrayList();
+		search.computePathsKeyingIndexFiles(requiredIndexKeys);
+		fIndexKeys= new IPath[requiredIndexKeys.size()];
+		requiredIndexKeys.toArray(fIndexKeys);
+
 		// acquire the in-memory indexes on the fly
 		int length = fIndexKeys.length;
 		IIndex[] indexes = new IIndex[length];
