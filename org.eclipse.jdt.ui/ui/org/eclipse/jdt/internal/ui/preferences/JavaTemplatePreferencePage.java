@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,8 +29,8 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.templates.TemplatePreferencePage;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 
-public class JavaTemplatePreferencePage extends TemplatePreferencePage implements IWorkbenchPreferencePage {
+public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 
 	private TemplateVariableProcessor fTemplateProcessor;
 	
@@ -164,6 +164,6 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 
 		} else {
 			viewer.getDocument().set(""); //$NON-NLS-1$
-		}		
+		}
 	}
 }

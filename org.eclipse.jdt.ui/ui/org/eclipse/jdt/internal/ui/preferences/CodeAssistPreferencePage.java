@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  * 
  * @since 3.0
  */
-public class CodeAssistPreferencePage extends PropertyAndPreferencePage implements IWorkbenchPreferencePage {
+public class CodeAssistPreferencePage extends PropertyAndPreferencePage {
 
 	private CodeAssistConfigurationBlock fConfigurationBlock;
 
@@ -85,7 +84,7 @@ public class CodeAssistPreferencePage extends PropertyAndPreferencePage implemen
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
-		}	
+		}
 		return super.performOk();
 	}
 	

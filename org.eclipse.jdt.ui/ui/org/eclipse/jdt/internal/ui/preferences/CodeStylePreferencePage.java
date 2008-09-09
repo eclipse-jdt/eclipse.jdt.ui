@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
@@ -25,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /*
  * The page to configure the naming style options.
  */
-public class CodeStylePreferencePage extends PropertyAndPreferencePage implements IWorkbenchPreferencePage {
+public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"; //$NON-NLS-1$
@@ -37,7 +36,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 		//setDescription(PreferencesMessages.getString("CodeStylePreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.CodeStylePreferencePage_title);		 
+		setTitle(PreferencesMessages.CodeStylePreferencePage_title);
 	}
 
 	/*
@@ -109,7 +108,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
-		}	
+		}
 		return super.performOk();
 	}
 	
