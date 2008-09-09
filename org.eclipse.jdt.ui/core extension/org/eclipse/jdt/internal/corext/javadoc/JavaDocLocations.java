@@ -28,6 +28,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -79,12 +86,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 public class JavaDocLocations {
 	
 	private static final String JAR_PROTOCOL= "jar"; //$NON-NLS-1$
@@ -109,7 +110,7 @@ public class JavaDocLocations {
 			return;
 		}
 		
-		Job job= new Job(CorextMessages.JavaDocLocations_migratejob_name) { 
+		Job job= new Job(CorextMessages.JavaDocLocations_migratejob_name) {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
@@ -136,7 +137,7 @@ public class JavaDocLocations {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IJavaProject[] javaProjects= JavaCore.create(root).getJavaProjects();
 		try {
-			monitor.beginTask(CorextMessages.JavaDocLocations_migrate_operation, javaProjects.length); 
+			monitor.beginTask(CorextMessages.JavaDocLocations_migrate_operation, javaProjects.length);
 			for (int i= 0; i < javaProjects.length; i++) {
 				IJavaProject project= javaProjects[i];
 				String projectJavadoc= (String) oldLocationMap.get(project.getPath());
@@ -290,7 +291,7 @@ public class JavaDocLocations {
 		return null;
 	}
 
-	public static URL getJavadocBaseLocation(IJavaElement element) throws JavaModelException {	
+	public static URL getJavadocBaseLocation(IJavaElement element) throws JavaModelException {
 		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
 			return getProjectJavadocLocation((IJavaProject) element);
 		}
@@ -314,7 +315,7 @@ public class JavaDocLocations {
 			return getLibraryJavadocLocation(entry);
 		} else {
 			return getProjectJavadocLocation(root.getJavaProject());
-		}	
+		}
 	}
 	
 	private static IClasspathEntry getRealClasspathEntry(IJavaProject jproject, IPath containerPath, IPath libPath) throws JavaModelException {
@@ -337,7 +338,7 @@ public class JavaDocLocations {
 	
 	private static JavaUIException createException(Throwable t, String message) {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
-	}	
+	}
 	
 	private static Map/*<Path, String>*/ loadOldForCompatibility() {
 		HashMap resultingOldLocations= new HashMap();
@@ -391,7 +392,7 @@ public class JavaDocLocations {
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e); // log but ignore
-		}	
+		}
 		
 		// in 2.0, the Javadoc locations were stored as one big string in the persistent properties
 		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
@@ -399,7 +400,7 @@ public class JavaDocLocations {
 			final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
 			
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			String xmlString= root.getPersistentProperty(QUALIFIED_NAME); 
+			String xmlString= root.getPersistentProperty(QUALIFIED_NAME);
 			if (xmlString != null) { // only set when workspace is old
 				Reader reader= new StringReader(xmlString);
 				try {
@@ -427,11 +428,11 @@ public class JavaDocLocations {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			cpElement = parser.parse(inputSource).getDocumentElement();
 		} catch (SAXException e) {
-			throw createException(e, CorextMessages.JavaDocLocations_error_readXML); 
+			throw createException(e, CorextMessages.JavaDocLocations_error_readXML);
 		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.JavaDocLocations_error_readXML); 
+			throw createException(e, CorextMessages.JavaDocLocations_error_readXML);
 		} catch (IOException e) {
-			throw createException(e, CorextMessages.JavaDocLocations_error_readXML); 
+			throw createException(e, CorextMessages.JavaDocLocations_error_readXML);
 		}
 		
 		if (cpElement == null) return;
@@ -478,7 +479,7 @@ public class JavaDocLocations {
 				break;
 			case IJavaElement.IMPORT_CONTAINER :
 				element= element.getParent();
-				// fall through
+				//$FALL-THROUGH$
 			case IJavaElement.COMPILATION_UNIT :
 				IType mainType= ((ICompilationUnit) element).findPrimaryType();
 				if (mainType == null) {
@@ -542,7 +543,7 @@ public class JavaDocLocations {
 			JavaPlugin.log(e);
 		}
 		return null;
-	}	
+	}
 		
 	private static void appendPackageSummaryPath(IPackageFragment pack, StringBuffer buf) {
 		String packPath= pack.getElementName().replace('.', '/');
@@ -552,7 +553,7 @@ public class JavaDocLocations {
 	
 	private static void appendIndexPath(StringBuffer buf) {
 		buf.append("index.html"); //$NON-NLS-1$
-	}	
+	}
 	
 	private static void appendTypePath(IType type, StringBuffer buf) {
 		IPackageFragment pack= type.getPackageFragment();
@@ -562,7 +563,7 @@ public class JavaDocLocations {
 		buf.append('/');
 		buf.append(typePath);
 		buf.append(".html"); //$NON-NLS-1$
-	}		
+	}
 		
 	private static void appendFieldReference(IField field, StringBuffer buf) {
 		buf.append('#');
@@ -571,7 +572,7 @@ public class JavaDocLocations {
 	
 	private static void appendMethodReference(IMethod meth, StringBuffer buf) throws JavaModelException {
 		buf.append('#');
-		buf.append(meth.getElementName());	
+		buf.append(meth.getElementName());
 		
 		buf.append('(');
 		String[] params= meth.getParameterTypes();

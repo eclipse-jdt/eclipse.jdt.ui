@@ -140,6 +140,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 						}
 						break;
 					}
+					//$FALL-THROUGH$
 				case ']':
 					if (considerNesting) {
 						if (nestingMode == BRACKET)
@@ -147,6 +148,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 								nestingMode= NONE;
 						break;
 					}
+					//$FALL-THROUGH$
 				case '(':
 					if (considerNesting) {
 						if (nestingMode == ANGLE) {
@@ -160,6 +162,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 						}
 						break;
 					}
+					//$FALL-THROUGH$
 				case ')':
 					if (considerNesting) {
 						if (nestingMode == PAREN)
@@ -167,6 +170,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 								nestingMode= NONE;
 						break;
 					}
+					//$FALL-THROUGH$
 				case '{':
 					if (considerNesting) {
 						if (nestingMode == ANGLE) {
@@ -180,6 +184,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 						}
 						break;
 					}
+					//$FALL-THROUGH$
 				case '}':
 					if (considerNesting) {
 						if (nestingMode == BRACE)
@@ -187,6 +192,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 								nestingMode= NONE;
 						break;
 					}
+					//$FALL-THROUGH$
 				case '<':
 					if (considerNesting) {
 						if (nestingMode == ANGLE || nestingMode == NONE && checkGenericsHeuristic(document, offset - 1, start - 1)) {
@@ -195,6 +201,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 						}
 						break;
 					}
+					//$FALL-THROUGH$
 				case '>':
 					if (considerNesting) {
 						if (nestingMode == ANGLE)
@@ -202,7 +209,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 								nestingMode= NONE;
 						break;
 					}
-
+					//$FALL-THROUGH$
 				default:
 					if (nestingLevel != 0)
 						continue;
