@@ -38,7 +38,7 @@
 	<extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
 	  <renameParticipant
 	  	id="org.eclipse.jsp.renameParticipant.IType"
-	  	name="org.eclipse.jsp.renameParticipant.IType"
+	  	name="%renameParticipant.name"
 	  	class="org.eclipse.jsp.RenameTypeParticipant">
 	  	<enablement>
 	  	  <with variable="affectedNatures">
