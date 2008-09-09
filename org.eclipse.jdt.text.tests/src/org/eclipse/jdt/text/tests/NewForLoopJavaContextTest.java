@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -23,8 +25,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -52,34 +53,34 @@ public class NewForLoopJavaContextTest extends TestCase {
 
 	private static final String CU_PREFIX=
 		"package test;\n" +
-		"\n" + 
-		"import java.io.Serializable;\n" + 
-		"import java.util.Collection;\n" + 
-		"import java.util.List;\n" + 
-		"\n" + 
-		"public class A<E extends Number> {\n" + 
-		"	private static class Inner {\n" + 
-		"	}\n" + 
-		"	\n" + 
-		"	private static abstract class Inner2<E> implements Iterable<E> {\n" + 
-		"	}\n" + 
-		"	\n" + 
-		"	private static abstract class Inner3 implements Iterable<Serializable> {\n" + 
-		"	}\n" + 
-		"	\n" + 
-		"	private static abstract class Inner4<T> implements Iterable<String> {\n" + 
-		"	}\n" + 
-		"	\n" + 
-		"	private static abstract class Transi1<T extends Collection> implements Iterable<T> {\n" + 
-		"	}\n" + 
-		"	\n" + 
-		"	private static abstract class Transi2<T extends List> extends Transi1<T> {\n" + 
-		"	}\n" + 
+		"\n" +
+		"import java.io.Serializable;\n" +
+		"import java.util.Collection;\n" +
+		"import java.util.List;\n" +
+		"\n" +
+		"public class A<E extends Number> {\n" +
+		"	private static class Inner {\n" +
+		"	}\n" +
+		"	\n" +
+		"	private static abstract class Inner2<E> implements Iterable<E> {\n" +
+		"	}\n" +
+		"	\n" +
+		"	private static abstract class Inner3 implements Iterable<Serializable> {\n" +
+		"	}\n" +
+		"	\n" +
+		"	private static abstract class Inner4<T> implements Iterable<String> {\n" +
+		"	}\n" +
+		"	\n" +
+		"	private static abstract class Transi1<T extends Collection> implements Iterable<T> {\n" +
+		"	}\n" +
+		"	\n" +
+		"	private static abstract class Transi2<T extends List> extends Transi1<T> {\n" +
+		"	}\n" +
 		"	\n";
 	private static final String CU_POSTFIX=
-		" {\n" + 
-		"	\n" + 
-		"}\n" + 
+		" {\n" +
+		"	\n" +
+		"}\n" +
 		"}\n";
 	
 	public static Test suite() {
@@ -108,7 +109,7 @@ public class NewForLoopJavaContextTest extends TestCase {
 		IPackageFragmentRoot fragmentRoot= JavaProjectHelper.addSourceContainer(fProject, SRC);
 		IPackageFragment fragment= fragmentRoot.createPackageFragment("test", true, new NullProgressMonitor());
 		fCU= fragment.createCompilationUnit(CU_NAME, "", true, new NullProgressMonitor());
-		fCU.becomeWorkingCopy(null, null);
+		fCU.becomeWorkingCopy(null);
 	}
 
 	protected void tearDown() throws Exception {
@@ -138,16 +139,16 @@ public class NewForLoopJavaContextTest extends TestCase {
 	public void testArray() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Number[] array)");
 		assertEquals(
-				"	for (Number number : array) {\n" + 
-				"		\n" + 
+				"	for (Number number : array) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 	
 	public void testInnerArray() throws Exception {
 		String template= evaluateTemplateInMethod("void array(Inner[] array)");
 		assertEquals(
-				"	for (Inner inner : array) {\n" + 
-				"		\n" + 
+				"	for (Inner inner : array) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 	
@@ -155,80 +156,80 @@ public class NewForLoopJavaContextTest extends TestCase {
 	public void testSuperList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? super Number> list)");
 		assertEquals(
-				"	for (Object object : list) {\n" + 
-				"		\n" + 
+				"	for (Object object : list) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testSuperArrayList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? super Number[]> list)");
 		assertEquals(
-				"	for (Object object : list) {\n" + 
-				"		\n" + 
+				"	for (Object object : list) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testMultiList() throws Exception {
 		String template= evaluateTemplateInMethod("<T extends Comparable<T> & Iterable<? extends Number>> void method(List<T> list)");
 		assertEquals(
-				"	for (T t : list) {\n" + 
-				"		\n" + 
+				"	for (T t : list) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testInnerIterable() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner2<Number> inner)");
 		assertEquals(
-				"	for (Number number : inner) {\n" + 
-				"		\n" + 
+				"	for (Number number : inner) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testInnerIterable2() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner3 inner)");
 		assertEquals(
-				"	for (Serializable serializable : inner) {\n" + 
-				"		\n" + 
+				"	for (Serializable serializable : inner) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testInnerMixedParameters() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner4<Number> inner)");
 		assertEquals(
-				"	for (String string : inner) {\n" + 
-				"		\n" + 
+				"	for (String string : inner) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testGenericList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<E> list)");
 		assertEquals(
-				"	for (E e : list) {\n" + 
-				"		\n" + 
+				"	for (E e : list) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testWildcardList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Transi1<?> transi)");
 		assertEquals(
-				"	for (Collection collection : transi) {\n" + 
-				"		\n" + 
+				"	for (Collection collection : transi) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testConcreteList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<String> list)");
 		assertEquals(
-				"	for (String string : list) {\n" + 
-				"		\n" + 
+				"	for (String string : list) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 
 	public void testUpperboundList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? extends Number> list)");
 		assertEquals(
-				"	for (Number number : list) {\n" + 
-				"		\n" + 
+				"	for (Number number : list) {\n" +
+				"		\n" +
 				"	}", template);
 	}
 

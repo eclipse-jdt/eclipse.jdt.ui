@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,17 +11,18 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
-import org.eclipse.swt.widgets.Display;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.test.performance.Performance;
+
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.test.performance.Performance;
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
 
 public class DocumentLineDifferModificationTest extends AbstractDocumentLineDifferTest {
@@ -110,7 +111,7 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 		}
 	}
 	
-	private DocumentLineDiffer ensureInitialized(Document document) throws InterruptedException {
+	private DocumentLineDiffer ensureInitialized(Document document) {
 		final DocumentLineDiffer differ= new DocumentLineDiffer() {
 			/*
 			 * @see org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer#initialize()

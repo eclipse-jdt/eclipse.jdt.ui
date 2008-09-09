@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.swt.custom.StyleRange;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -28,6 +29,10 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.tests.TestTextViewer;
+
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -46,7 +51,8 @@ public class JavaColoringTest extends TestCase {
 	
 	protected void setUp() {
 		
-		fTextTools= new JavaTextTools(new PreferenceStore());
+		IPreferenceStore store= new PreferenceStore();
+		fTextTools= new JavaTextTools(store);
 		
 		fTextViewer= new TestTextViewer();
 		
@@ -55,16 +61,19 @@ public class JavaColoringTest extends TestCase {
 		partitioner.connect(fDocument);
 		fDocument.setDocumentPartitioner(partitioner);
 		
-		SourceViewerConfiguration conf= new JavaSourceViewerConfiguration(fTextTools, null);
+		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
+		IPreferenceStore combinedStore= new ChainedPreferenceStore(new IPreferenceStore[] { store, generalTextStore });
+
+		SourceViewerConfiguration conf= new JavaSourceViewerConfiguration(fTextTools.getColorManager(), combinedStore, null, null);
 		IPresentationReconciler reconciler= conf.getPresentationReconciler(fTextViewer);
 		reconciler.install(fTextViewer);
 		
 		System.out.print("------ next ---------\n");
 		
 	}
-	
+
 	public static Test suite() {
-		return new TestSuite(JavaColoringTest.class); 
+		return new TestSuite(JavaColoringTest.class);
 	}
 	
 	protected void tearDown () {
@@ -95,7 +104,7 @@ public class JavaColoringTest extends TestCase {
 			}
 		}
 		
-		return buf.toString();	
+		return buf.toString();
 	}
 	
 	public void testSimple() {
@@ -126,5 +135,5 @@ public class JavaColoringTest extends TestCase {
 		} catch (BadLocationException x) {
 			assertTrue(false);
 		}
-	}		
+	}
 }

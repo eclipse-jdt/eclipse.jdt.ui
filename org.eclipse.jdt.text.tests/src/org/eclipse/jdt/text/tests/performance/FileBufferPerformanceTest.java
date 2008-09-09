@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -27,8 +29,6 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.filebuffers.tests.ResourceHelper;
-
-import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**
@@ -77,7 +77,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	}
 
 	protected IPath createPath(IProject project) throws Exception {
-		IFolder folder= ResourceHelper.createFolder("project/folderA/folderB/");
+		IFolder folder= ResourceHelper.createFolder(project.getName() + "/folderA/folderB/");
 		IFile file= ResourceHelper.createFile(folder, "WorkspaceFile", "content");
 		return file.getFullPath();
 	}
@@ -138,7 +138,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		assertNull(fManager.getTextFileBuffer(fPath, LocationKind.IFILE));
 	}
 	
-	public void measureGetUnconnectedOld(PerformanceMeter meter) throws CoreException {
+	public void measureGetUnconnectedOld(PerformanceMeter meter) {
 		meter.start();
 		for (int i= 0; i < UNCONNECTED_REPEAT_COUNT; i++)
 			fManager.getTextFileBuffer(fPath, LocationKind.IFILE);
@@ -147,7 +147,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		assertNull(fManager.getTextFileBuffer(fPath, LocationKind.IFILE));
 	}
 	
-	public void measureGetUnconnectedOldNonExist(PerformanceMeter meter) throws CoreException {
+	public void measureGetUnconnectedOldNonExist(PerformanceMeter meter) {
 		meter.start();
 		for (int i= 0; i < UNCONNECTED_REPEAT_COUNT; i++)
 			fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE);

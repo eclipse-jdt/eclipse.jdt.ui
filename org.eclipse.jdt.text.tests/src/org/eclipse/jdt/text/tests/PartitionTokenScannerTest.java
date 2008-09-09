@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class PartitionTokenScannerTest extends TestCase {
 	private IPartitionTokenScanner fTestee;
 
 	public PartitionTokenScannerTest(String name) {
-		super(name);	
+		super(name);
 	}
 
 	protected void setUp() {
@@ -62,7 +62,7 @@ public class PartitionTokenScannerTest extends TestCase {
 
 			return new Document(buffer.toString());
 
-		} catch (IOException e) {			
+		} catch (IOException e) {
 		}
 		
 		return null;
@@ -194,7 +194,7 @@ public class PartitionTokenScannerTest extends TestCase {
 
 		IToken token;
 		do {
-			token= scanner.nextToken();			
+			token= scanner.nextToken();
 			scanner.getTokenOffset();
 			scanner.getTokenLength();
 
@@ -228,13 +228,16 @@ public class PartitionTokenScannerTest extends TestCase {
 			buffer.append(']');
 			
 		} catch (BadLocationException e) {
-		}	
+		}
 		
-		return buffer.toString();	
+		return buffer.toString();
 	}
 
 	/**
 	 * Escapes CR, LF and TAB in a string.
+	 * 
+	 * @param string the string to escape
+	 * @return the escaped string
 	 */
 	public static String escape(String string) {
 		final StringBuffer buffer= new StringBuffer();
@@ -253,15 +256,15 @@ public class PartitionTokenScannerTest extends TestCase {
 				
 			case '\n':
 				buffer.append("\\n");
-				break;			
+				break;
 			
-			default:	
+			default:
 				buffer.append(character);
 				break;
 			}
 		}
 		
-		return buffer.toString();	
+		return buffer.toString();
 	}
 	
 }

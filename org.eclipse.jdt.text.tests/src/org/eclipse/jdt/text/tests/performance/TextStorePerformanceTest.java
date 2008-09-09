@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,7 +59,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getLocalFingerprints()
 	 */
 	protected final Map getLocalFingerprints() {
-		return LOCAL_FINGERPRINTS;		
+		return LOCAL_FINGERPRINTS;
 	}
 
 	protected void setUp() throws Exception {
@@ -75,7 +75,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 
-	public void measureRepeatedReplace(PerformanceMeter meter) throws BadLocationException {
+	public void measureRepeatedReplace(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 		int OFFSET = 12;
 		int REPLACE_LENGTH = FAUST100.length();
@@ -85,7 +85,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 
-	public void measureTypingReplaceInLargeFile(PerformanceMeter meter) throws BadLocationException {
+	public void measureTypingReplaceInLargeFile(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 		int offset = 12;
 		meter.start();
@@ -95,7 +95,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 	
-	public void measureTypingReplaceInSmallFile(PerformanceMeter meter) throws BadLocationException {
+	public void measureTypingReplaceInSmallFile(PerformanceMeter meter) {
 		fTextStore.set(FAUST500);
 		int offset = 12;
 		meter.start();
@@ -105,7 +105,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 	
-	public void measureInsertAtStart(PerformanceMeter meter) throws BadLocationException {
+	public void measureInsertAtStart(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 		meter.start();
 		for (int times = 0; times < 1000; times++)
@@ -113,7 +113,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 
-	public void measureInsertAtEnd(PerformanceMeter meter) throws BadLocationException {
+	public void measureInsertAtEnd(PerformanceMeter meter) {
 		fTextStore.set("");
 		int offset = fTextStore.getLength();
 		int length = FAUST100.length();
@@ -125,7 +125,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 
-	public void measureDeleteInsert(PerformanceMeter meter) throws BadLocationException {
+	public void measureDeleteInsert(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 		int OFFSET = 12;
 		int REPLACE_LENGTH = 100;
@@ -139,7 +139,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 
-	public void measureRandomReplace(PerformanceMeter meter) throws BadLocationException {
+	public void measureRandomReplace(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 
 		Random rand = new Random(132498029834234L);
@@ -175,7 +175,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 
-	public void measureGetChar(PerformanceMeter meter) throws BadLocationException {
+	public void measureGetChar(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 		int length = fTextStore.getLength();
 		meter.start();
@@ -185,7 +185,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 		meter.stop();
 	}
 
-	public void measureGetAll(PerformanceMeter meter) throws BadLocationException {
+	public void measureGetAll(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 		int length = fTextStore.getLength();
 		meter.start();

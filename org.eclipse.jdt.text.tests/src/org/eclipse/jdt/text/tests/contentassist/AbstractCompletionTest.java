@@ -14,6 +14,10 @@ import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
@@ -33,7 +37,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -42,15 +45,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -182,16 +181,16 @@ public class AbstractCompletionTest extends TestCase {
 	protected void setTrigger(char trigger) {
 		fTrigger= trigger;
 	}
-	
+
 	/**
-	 * Creates a CU with a method containing <code>before</code>, then runs
-	 * code assist and applies the first proposal whose display name matches <code>selector</code>
-	 * and asserts that the method's body now has the content of <code>expected</code>.
+	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
+	 * the first proposal whose display name matches <code>selector</code> and asserts that the
+	 * method's body now has the content of <code>expected</code>.
 	 * 
+	 * @param before the contents of the javadoc line before code completion is run
 	 * @param expected the expected contents of the type javadoc line
-	 * @param javadocLine the contents of the javadoc line before code completion is run
 	 * @param selector the prefix to match a proposal with
-	 * @throws CoreException
+	 * @throws CoreException if asserting the proposal failed
 	 */
 	protected void assertMethodBodyProposal(String before, String selector, String expected) throws CoreException {
 		StringBuffer contents= new StringBuffer();
@@ -201,14 +200,14 @@ public class AbstractCompletionTest extends TestCase {
 
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
-	
+
 	/**
-	 * Creates a CU with a method containing <code>before</code>, then runs incremental code
-	 * assist and asserts that the method's body now has the content of <code>expected</code>.
+	 * Creates a CU with a method containing <code>before</code>, then runs incremental code assist
+	 * and asserts that the method's body now has the content of <code>expected</code>.
 	 * 
 	 * @param expected the expected contents of the type javadoc line
 	 * @param before the contents of the javadoc line before code completion is run
-	 * @throws CoreException
+	 * @throws CoreException if a failure happened during assertion
 	 */
 	protected void assertMethodBodyIncrementalCompletion(String before, String expected) throws CoreException {
 		StringBuffer contents= new StringBuffer();
@@ -218,35 +217,35 @@ public class AbstractCompletionTest extends TestCase {
 		
 		assertIncrementalCompletion(contents, preSelection, result, expectedSelection);
 	}
-	
+
 	/**
-	 * Creates a CU with a method containing <code>before</code>, then runs
-	 * code assist and applies the first proposal whose display name matches <code>selector</code>
-	 * and asserts that the method's body now has the content of <code>expected</code>.
+	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
+	 * the first proposal whose display name matches <code>selector</code> and asserts that the
+	 * method's body now has the content of <code>expected</code>.
 	 * 
+	 * @param before the contents of the javadoc line before code completion is run
 	 * @param expected the expected contents of the type javadoc line
-	 * @param javadocLine the contents of the javadoc line before code completion is run
 	 * @param selector the prefix to match a proposal with
-	 * @throws CoreException
+	 * @throws CoreException if asserting the proposal failed
 	 */
 	protected void assertMemberJavadocProposal(String before, String selector, String expected) throws CoreException {
 		StringBuffer contents= new StringBuffer();
-		IRegion preSelection= assembleMethodJavadocTestCUExtractSelection(contents, before, fBeforeImports);
+		IRegion preSelection= assembleMethodJavadocTestCUExtractSelection(contents, before);
 		StringBuffer result= new StringBuffer();
-		IRegion expectedSelection= assembleMethodJavadocTestCUExtractSelection(result, expected, fAfterImports);
+		IRegion expectedSelection= assembleMethodJavadocTestCUExtractSelection(result, expected);
 		
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
-	
+
 	/**
-	 * Creates a CU with a method containing <code>before</code>, then runs
-	 * code assist and applies the first proposal whose display name matches <code>selector</code>
-	 * and asserts that the method's body now has the content of <code>expected</code>.
+	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
+	 * the first proposal whose display name matches <code>selector</code> and asserts that the
+	 * method's body now has the content of <code>expected</code>.
 	 * 
+	 * @param before the contents of the javadoc line before code completion is run
 	 * @param expected the expected contents of the type javadoc line
-	 * @param javadocLine the contents of the javadoc line before code completion is run
 	 * @param selector the prefix to match a proposal with
-	 * @throws CoreException
+	 * @throws CoreException if asserting the proposal failed
 	 */
 	protected void assertTypeBodyProposal(String before, String selector, String expected) throws CoreException {
 		StringBuffer contents= new StringBuffer();
@@ -256,16 +255,16 @@ public class AbstractCompletionTest extends TestCase {
 		
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
-	
+
 	/**
-	 * Creates a CU with a method containing <code>before</code>, then runs
-	 * code assist and applies the first proposal whose display name matches <code>selector</code>
-	 * and asserts that the method's body now has the content of <code>expected</code>.
+	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
+	 * the first proposal whose display name matches <code>selector</code> and asserts that the
+	 * method's body now has the content of <code>expected</code>.
 	 * 
 	 * @param expected the expected contents of the type javadoc line
 	 * @param before the contents of the line where before code completion is run
 	 * @param selector the prefix to match a proposal with
-	 * @throws CoreException
+	 * @throws CoreException if asserting the proposal failed
 	 */
 	protected void assertTypeJavadocProposal(String before, String selector, String expected) throws CoreException {
 		StringBuffer contents= new StringBuffer();
@@ -275,14 +274,14 @@ public class AbstractCompletionTest extends TestCase {
 		
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
+
 	/**
-	 * Creates a CU with a method containing <code>before</code>, then runs
-	 * code assist and asserts that there is no proposal starting with selector.
+	 * Creates a CU with a method containing <code>before</code>, then runs code assist and asserts
+	 * that there is no proposal starting with selector.
 	 * 
-	 * @param expected the expected contents of the type javadoc line
-	 * @param javadocLine the contents of the javadoc line before code completion is run
+	 * @param before the contents of the javadoc line before code completion is run
 	 * @param selector the prefix to match a proposal with
-	 * @throws CoreException
+	 * @throws CoreException if a failure happened during assertion
 	 */
 	protected void assertNoMethodBodyProposals(String before, String selector) throws CoreException {
 		StringBuffer contents= new StringBuffer();
@@ -297,7 +296,7 @@ public class AbstractCompletionTest extends TestCase {
 		IDocument doc;
 		ITextSelection postSelection;
 		try {
-			ICompletionProposal proposal= findNonNullProposal(selector, fCU, preSelection);
+			ICompletionProposal proposal= findNonNullProposal(selector, preSelection);
 			doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 			apply(fEditor, doc, proposal, preSelection);
 			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
@@ -316,7 +315,7 @@ public class AbstractCompletionTest extends TestCase {
 		IDocument doc;
 		ITextSelection postSelection;
 		try {
-			incrementalAssist(fCU, preSelection);
+			incrementalAssist(preSelection);
 			doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 		} finally {
@@ -332,7 +331,7 @@ public class AbstractCompletionTest extends TestCase {
 		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		try {
-			assertNull(findNamedProposal(selector, fCU, preSelection));
+			assertNull(findNamedProposal(selector, preSelection));
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
 		}
@@ -426,7 +425,7 @@ public class AbstractCompletionTest extends TestCase {
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
 	}
 	
-	private IRegion assembleMethodJavadocTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
+	private IRegion assembleMethodJavadocTestCUExtractSelection(StringBuffer buffer, String javadocLine) {
 		String prefix= "package test1;\n" +
 				"\n" +
 				"public class Completion_" + getName() + "<T> {\n" +
@@ -453,14 +452,14 @@ public class AbstractCompletionTest extends TestCase {
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
 	}
 
-	private ICompletionProposal findNonNullProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
-		ICompletionProposal proposal= findNamedProposal(prefix, cu, selection);
+	private ICompletionProposal findNonNullProposal(String prefix, IRegion selection) {
+		ICompletionProposal proposal= findNamedProposal(prefix, selection);
 		assertNotNull("no proposal starting with \"" + prefix + "\"", proposal);
 		return proposal;
 	}
 	
-	private ICompletionProposal findNamedProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
-		ICompletionProposal[] proposals= collectProposals(cu, selection);
+	private ICompletionProposal findNamedProposal(String prefix, IRegion selection) {
+		ICompletionProposal[] proposals= collectProposals(selection);
 		
 		ICompletionProposal found= null;
 		for (int i= 0; i < proposals.length; i++) {
@@ -473,7 +472,7 @@ public class AbstractCompletionTest extends TestCase {
 		return found;
 	}
 
-	private ICompletionProposal[] collectProposals(ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
+	private ICompletionProposal[] collectProposals(IRegion selection) {
 		waitBeforeCoreCompletion();
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
@@ -483,7 +482,7 @@ public class AbstractCompletionTest extends TestCase {
 		return proposals;
 	}
 
-	private void incrementalAssist(ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
+	private void incrementalAssist(IRegion selection) {
 		waitBeforeCoreCompletion();
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.enableAutoInsert(true);

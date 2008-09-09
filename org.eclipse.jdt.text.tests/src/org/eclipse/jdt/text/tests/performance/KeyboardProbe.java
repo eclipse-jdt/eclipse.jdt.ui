@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,7 +97,7 @@ public class KeyboardProbe {
 	 * Returns a keybinding combo that will produce the wanted character. Note
 	 * that there may be more than one combo that can produce the wanted
 	 * binding, any one is returned. The last integer in the returned array is
-	 * a character that must be set to the Event.character field, any integers 
+	 * a character that must be set to the Event.character field, any integers
 	 * before are SWT constants describing modifier keys that must be pressed
 	 * to get the desired result.
 	 * 
@@ -209,7 +209,7 @@ public class KeyboardProbe {
 				System.out.println("second char was '" + content.charAt(1) + "'");
 		} else if (content.length() > 2) {
 			c= content.charAt(0);
-			if (TRACE) System.out.println("rest content was '" + content.substring(1) + "'");			
+			if (TRACE) System.out.println("rest content was '" + content.substring(1) + "'");
 		} else if (content.length() == 1) {
 			c= '\0';
 			if (TRACE && content.charAt(0) != FAKE_CHAR)
@@ -252,7 +252,7 @@ public class KeyboardProbe {
 		control.addListener(SWT.Modify, new Listener() {
 			
 			public void handleEvent(Event event) {
-				onModify(event);
+				onModify();
 			}
 		});
 	}
@@ -346,7 +346,7 @@ public class KeyboardProbe {
 		fShiftPressed= false;
 	}
 	
-	private void onModify(Event event) {
+	private void onModify() {
 		fTextContinue= true;
 	}
 	

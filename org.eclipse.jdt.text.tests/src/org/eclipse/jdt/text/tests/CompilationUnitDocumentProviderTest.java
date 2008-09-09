@@ -110,7 +110,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		IFolder folder= ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path("/P/src/testA/testB/"));
 		IPackageFragment frag= (IPackageFragment)JavaCore.create(folder);
 		ICompilationUnit cu= frag.getCompilationUnit("New.java");
-		cu.becomeWorkingCopy(null, null);
+		cu.becomeWorkingCopy(null);
 		IBuffer b= cu.getBuffer();
 		b.setContents(source);
 		cu.reconcile(ICompilationUnit.NO_AST, true, null, null);

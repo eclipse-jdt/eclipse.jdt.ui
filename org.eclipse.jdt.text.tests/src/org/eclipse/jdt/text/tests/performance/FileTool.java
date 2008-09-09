@@ -37,19 +37,16 @@ public class FileTool {
 	 * A buffer.
 	 */
 	private static byte[] fgBuffer = new byte[8192];
+
 	/**
-	 * Unzips the given zip file to the given destination directory
-	 * extracting only those entries the pass through the given
-	 * filter.
+	 * Unzips the given zip file to the given destination directory extracting only those entries
+	 * the pass through the given filter.
 	 * 
 	 * @param zipFile the zip file to unzip
 	 * @param dstDir the destination directory
+	 * @throws IOException if an I/O error occurs
 	 */
 	public static void unzip(ZipFile zipFile, File dstDir) throws IOException {
-		unzip(zipFile, dstDir, dstDir, 0);
-	}
-	
-	private static void unzip(ZipFile zipFile, File rootDstDir, File dstDir, int depth) throws IOException {
 	
 		Enumeration entries = zipFile.entries();
 	
@@ -105,12 +102,13 @@ public class FileTool {
 	public static String changeSeparator(String path, char oldSeparator, char newSeparator){
 		return path.replace(oldSeparator, newSeparator);
 	}
+
 	/**
-	 * Copies all bytes in the given source file to
-	 * the given destination file.
+	 * Copies all bytes in the given source file to the given destination file.
 	 * 
 	 * @param source the given source file
 	 * @param destination the given destination file
+	 * @throws IOException if an I/O error occurs
 	 */
 	public static void transferData(File source, File destination) throws IOException {
 		destination.getParentFile().mkdirs();
@@ -135,13 +133,14 @@ public class FileTool {
 			}
 		}
 	}
+
 	/**
-	 * Copies all bytes in the given source stream to
-	 * the given destination stream. Neither streams
+	 * Copies all bytes in the given source stream to the given destination stream. Neither streams
 	 * are closed.
 	 * 
 	 * @param source the given source stream
 	 * @param destination the given destination stream
+	 * @throws IOException if an I/O error occurs
 	 */
 	public static void transferData(InputStream source, OutputStream destination) throws IOException {
 		int bytesRead = 0;
@@ -158,6 +157,7 @@ public class FileTool {
 	 * 
 	 * @param src the given source file
 	 * @param dst the given destination file
+	 * @throws IOException if an I/O error occurs
 	 */
 	public static void copy(File src, File dst) throws IOException {
 		if(src.isDirectory()){

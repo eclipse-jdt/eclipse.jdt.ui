@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,11 @@ import java.util.zip.ZipFile;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -32,10 +37,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.runtime.Preferences;
 
 public class ResourceTestHelper {
 
@@ -133,7 +134,7 @@ public class ResourceTestHelper {
 		return FileTool.read(new InputStreamReader(getFile(src).getContents()));
 	}
 
-	public static void write(String dest, final String content) throws IOException, CoreException {
+	public static void write(String dest, final String content) throws CoreException {
 		InputStream stream= new InputStream() {
 			private Reader fReader= new StringReader(content);
 			public int read() throws IOException {

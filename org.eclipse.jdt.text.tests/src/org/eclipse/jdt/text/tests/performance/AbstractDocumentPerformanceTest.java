@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,7 +78,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getLocalFingerprints()
 	 */
 	protected final Map getLocalFingerprints() {
-		return LOCAL_FINGERPRINTS;		
+		return LOCAL_FINGERPRINTS;
 	}
 	
 	/*
@@ -229,7 +229,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		meter.stop();
 	}
 
-	public void measureGetLength(PerformanceMeter meter) throws BadLocationException {
+	public void measureGetLength(PerformanceMeter meter) {
 		fDocument.set(FAUST1);
 		int lines= fDocument.getNumberOfLines();
 		meter.start();
@@ -301,7 +301,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		meter.stop();
 	}
 	
-	public void measureGetNumberOfLines(PerformanceMeter meter) throws BadLocationException {
+	public void measureGetNumberOfLines(PerformanceMeter meter) {
 		fDocument.set(FAUST1);
 		int lines= fDocument.getNumberOfLines();
 		meter.start();

@@ -12,13 +12,15 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import org.eclipse.jdt.text.tests.performance.DisplayWaiter.Timeout;
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public abstract class ScrollEditorTest extends TextPerformanceTestCase {
@@ -130,8 +132,20 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		super.tearDown();
 	}
 
+	/**
+	 * Sets up the editor.
+	 * 
+	 * @param editor the editor
+	 * @throws Exception if setup fails
+	 */
 	protected void setUp(AbstractTextEditor editor) throws Exception { }
 
+	/**
+	 * Asserts the editor.
+	 * 
+	 * @param editor the editor
+	 * @throws Exception if something goes wrong during the assertion
+	 */
 	protected void assertEditor(AbstractTextEditor editor) throws Exception { }
 	
 	protected void measure(ScrollingMode mode) throws Exception {
@@ -156,7 +170,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			commitAllMeasurements();
 			if (mode.isPressAndHoldCombo()) {
 				// press&hold measurements depend on the system's typematic rate setting
-				// therefore, elapsed process (wall-clock) is not a good measurement - 
+				// therefore, elapsed process (wall-clock) is not a good measurement -
 				// use CPU_TIME instead
 				Performance.getDefault().assertPerformanceInRelativeBand(performanceMeter, Dimension.CPU_TIME, -100, 110);
 			} else {
@@ -194,7 +208,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 					// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 					SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO, false);
 					sleepAndRun(display);
-					// average for select & scroll is 30ms/line 
+					// average for select & scroll is 30ms/line
 					// - give it ten time as much to allow for GCs (300ms),
 					// check back every 10 lines == never wait longer than 3s.
 					if (j % 10 == 9)
@@ -267,7 +281,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 					// is eating our events -> restart the timer if the topindex
 					// was moved.
 					if (currentTopIndex > topIndex + 9) {
-						// average for select & scroll is 30ms/line 
+						// average for select & scroll is 30ms/line
 						// - give it ten time as much to allow for GCs (300ms),
 						// check back every 10 lines == never wait longer for a failure than 3s
 						timeout= waiter.restart(delay);

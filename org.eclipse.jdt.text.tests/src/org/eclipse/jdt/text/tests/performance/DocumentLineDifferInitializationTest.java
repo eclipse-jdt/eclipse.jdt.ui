@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.swt.widgets.Display;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
 
 public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDifferTest {
@@ -70,7 +71,7 @@ public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDi
 			measureInitialization(meter, document);
 	}
 
-	private void measureInitialization(PerformanceMeter meter, IDocument document) throws InterruptedException {
+	private void measureInitialization(PerformanceMeter meter, IDocument document) {
 		final DocumentLineDiffer differ= new DocumentLineDiffer();
 		setUpDiffer(differ);
 		DisplayHelper helper= new DisplayHelper() {
