@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,28 +20,34 @@ import java.util.logging.Logger;
 
 import junit.framework.Assert;
 
-import org.eclipse.core.filebuffers.tests.FileTool;
-import org.eclipse.core.filebuffers.tests.ResourceHelper;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.filebuffers.tests.FileTool;
+import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 import org.eclipse.text.tests.Accessor;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
@@ -49,22 +55,6 @@ import org.eclipse.jface.text.IWidgetTokenOwner;
 import org.eclipse.jface.text.reconciler.AbstractReconciler;
 import org.eclipse.jface.text.source.SourceViewer;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
-import org.eclipse.jdt.internal.ui.text.JavaReconciler;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.TypeNameRequestor;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -79,12 +69,27 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
+
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
 
 /**
@@ -95,8 +100,8 @@ public class EditorTestHelper {
 	private static class ImportOverwriteQuery implements IOverwriteQuery {
 		public String queryOverwrite(String file) {
 			return ALL;
-		}	
-	}		
+		}
+	}
 	private static class Requestor extends TypeNameRequestor {
 	}
 	
@@ -264,7 +269,7 @@ public class EditorTestHelper {
 		boolean interrupted= true;
 		while (interrupted) {
 			try {
-				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
 				interrupted= false;
 			} catch (InterruptedException e) {
 				interrupted= true;
@@ -274,7 +279,8 @@ public class EditorTestHelper {
 		Logger.global.finer("join indexer");
 		new SearchEngine().searchAllTypeNames(
 				null,
-				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
+				SearchPattern.R_EXACT_MATCH,
+				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent
 				SearchPattern.R_EXACT_MATCH,
 				IJavaSearchConstants.CLASS,
 				SearchEngine.createJavaSearchScope(new IJavaElement[0]),
@@ -309,7 +315,7 @@ public class EditorTestHelper {
 	}
 	
 	public static boolean allJobsQuiet() {
-		IJobManager jobManager= Platform.getJobManager();
+		IJobManager jobManager= Job.getJobManager();
 		Job[] jobs= jobManager.find(null);
 		for (int i= 0; i < jobs.length; i++) {
 			Job job= jobs[i];
@@ -478,7 +484,7 @@ public class EditorTestHelper {
 		return wasEnabled;
 	}
 	
-	public static void importFilesFromDirectory(File rootDir, IPath destPath, IProgressMonitor monitor) throws CoreException {		
+	public static void importFilesFromDirectory(File rootDir, IPath destPath, IProgressMonitor monitor) throws CoreException {
 		try {
 			IImportStructureProvider structureProvider= FileSystemStructureProvider.INSTANCE;
 			List files= new ArrayList(100);
@@ -489,7 +495,7 @@ public class EditorTestHelper {
 		} catch (Exception x) {
 			throw newCoreException(x);
 		}
-	}	
+	}
 	
 	private static CoreException newCoreException(Throwable x) {
 		return new CoreException(new Status(IStatus.ERROR, JdtTextTestPlugin.PLUGIN_ID, -1, "", x));
