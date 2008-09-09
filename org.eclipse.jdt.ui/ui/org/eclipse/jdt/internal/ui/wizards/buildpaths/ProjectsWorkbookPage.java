@@ -67,12 +67,12 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	public ProjectsWorkbookPage(ListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
 		fPageContainer= pageContainer;
-		fSWTControl= null;	
+		fSWTControl= null;
 		
 		String[] buttonLabels= new String[] {
-			NewWizardMessages.ProjectsWorkbookPage_projects_add_button, 
+			NewWizardMessages.ProjectsWorkbookPage_projects_add_button,
 			null,
-			NewWizardMessages.ProjectsWorkbookPage_projects_edit_button, 
+			NewWizardMessages.ProjectsWorkbookPage_projects_edit_button,
 			NewWizardMessages.ProjectsWorkbookPage_projects_remove_button
 		};
 		
@@ -80,7 +80,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		
 		fProjectsList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fProjectsList.setDialogFieldListener(adapter);
-		fProjectsList.setLabelText(NewWizardMessages.ProjectsWorkbookPage_projects_label); 
+		fProjectsList.setLabelText(NewWizardMessages.ProjectsWorkbookPage_projects_label);
 		
 		fProjectsList.enableButton(IDX_REMOVE, false);
 		fProjectsList.enableButton(IDX_EDIT, false);
@@ -115,7 +115,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 		fProjectsList.setElements(checkedProjects);
-	}		
+	}
 		
 	// -------- UI creation ---------
 		
@@ -147,7 +147,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				if (!projelements.remove(cpe)) {
 					cpelements.remove(i);
 					remove= true;
-				}	
+				}
 			}
 		}
 		for (int i= 0; i < projelements.size(); i++) {
@@ -167,7 +167,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 	/*
 	 * @see BuildPathBasePage#setSelection
-	 */	
+	 */
 	public void setSelection(List selElements, boolean expand) {
 		fProjectsList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
@@ -222,7 +222,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 		public boolean hasChildren(TreeListDialogField field, Object element) {
 			return getChildren(field, element).length > 0;
-		}		
+		}
 			
 		// ---------- IDialogFieldListener --------
 	
@@ -240,16 +240,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		switch (index) {
 		case IDX_ADDPROJECT: /* add project */
 			entries= addProjectDialog();
-			break;			
+			break;
 		case IDX_EDIT: /* edit */
 			editEntry();
 			return;
 		case IDX_REMOVE: /* remove */
 			removeEntry();
-			return;			
+			return;
 		}
 		if (entries != null) {
-			int nElementsChosen= entries.length;					
+			int nElementsChosen= entries.length;
 			// remove duplicates
 			List cplist= fProjectsList.getElements();
 			List elementsToAdd= new ArrayList(nElementsChosen);
@@ -323,7 +323,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 		return true;
-	}	
+	}
 
 	private boolean canEdit(List selElements) {
 		if (selElements.size() != 1) {
@@ -398,21 +398,11 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private CPListElement[] addProjectDialog() {
 		
 		try {
-			ArrayList selectable= new ArrayList();
-			selectable.addAll(Arrays.asList(fCurrJProject.getJavaModel().getJavaProjects()));
-			selectable.remove(fCurrJProject);
-			
-			List elements= fProjectsList.getElements();
-			for (int i= 0; i < elements.size(); i++) {
-				CPListElement curr= (CPListElement) elements.get(0);
-				IJavaProject proj= (IJavaProject) JavaCore.create(curr.getResource());
-				selectable.remove(proj);
-			}
-			Object[] selectArr= selectable.toArray();
+			Object[] selectArr= getNotYetRequiredProjects();
 			new JavaElementComparator().sort(null, selectArr);
 					
-			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ArrayContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message); 
-			dialog.setTitle(NewWizardMessages.ProjectsWorkbookPage_chooseProjects_title); 
+			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ArrayContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message);
+			dialog.setTitle(NewWizardMessages.ProjectsWorkbookPage_chooseProjects_title);
 			dialog.setHelpAvailable(false);
 			if (dialog.open() == Window.OK) {
 				Object[] result= dialog.getResult();
@@ -429,8 +419,23 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		return null;
 	}
 
+	private Object[] getNotYetRequiredProjects() throws JavaModelException {
+		ArrayList selectable= new ArrayList();
+		selectable.addAll(Arrays.asList(fCurrJProject.getJavaModel().getJavaProjects()));
+		selectable.remove(fCurrJProject);
+		
+		List elements= fProjectsList.getElements();
+		for (int i= 0; i < elements.size(); i++) {
+			CPListElement curr= (CPListElement)elements.get(i);
+			IJavaProject proj= (IJavaProject) JavaCore.create(curr.getResource());
+			selectable.remove(proj);
+		}
+		Object[] selectArr= selectable.toArray();
+		return selectArr;
+	}
+
 	/**
-	 * @param field the dialog field 
+	 * @param field the dialog field
 	 */
 	protected void projectPageDoubleClicked(TreeListDialogField field) {
 		List selection= fProjectsList.getSelectedElements();
@@ -447,11 +452,11 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 					removeEntry();
 				}
 			}
-		}	
+		}
 	}
 	
 	/**
-	 * @param field the dialog field 
+	 * @param field the dialog field
 	 */
 	private void projectPageDialogFieldChanged(DialogField field) {
 		if (fCurrJProject != null) {
@@ -461,15 +466,20 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 	
 	/**
-	 * @param field the dialog field 
+	 * @param field the dialog field
 	 */
 	private void projectPageSelectionChanged(DialogField field) {
 		List selElements= fProjectsList.getSelectedElements();
 		fProjectsList.enableButton(IDX_EDIT, canEdit(selElements));
 		fProjectsList.enableButton(IDX_REMOVE, canRemove(selElements));
 		
-		boolean noAttributes= containsOnlyTopLevelEntries(selElements);
-		fProjectsList.enableButton(IDX_ADDPROJECT, noAttributes);
+		boolean enabled;
+		try {
+			enabled= getNotYetRequiredProjects().length > 0;
+		} catch (JavaModelException ex) {
+			enabled= false;
+		}
+		fProjectsList.enableButton(IDX_ADDPROJECT, enabled);
 	}
 
 	/**
