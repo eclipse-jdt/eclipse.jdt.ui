@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -900,6 +900,7 @@ public final class JavaIndenter {
 				int pos= fPosition;
 				if (!skipScope())
 					fPosition= pos;
+				//$FALL-THROUGH$
 			case Symbols.TokenSEMICOLON:
 				// this is the 90% case: after a statement block
 				// the end of the previous statement / block previous.end
@@ -968,8 +969,8 @@ public final class JavaIndenter {
 				// restore
 				fPosition= offset;
 				fLine= line;
-				// else: fall through to default
 
+				return skipToPreviousListItemOrListStart();
 			case Symbols.TokenCOMMA:
 				// inside a list of some type
 				// easy if there is already a list item before with its own indentation - we just align
@@ -980,7 +981,6 @@ public final class JavaIndenter {
 				// if we are inside a continued expression, then either align with a previous line that has indentation
 				// or indent from the expression start line (either a scope introducer or the start of the expr).
 				return skipToPreviousListItemOrListStart();
-
 		}
 	}
 
@@ -1072,6 +1072,7 @@ public final class JavaIndenter {
 				case Symbols.TokenRPAREN:
 					if (isInBlock)
 						mayBeMethodBody= READ_PARENS;
+					//$FALL-THROUGH$
 				case Symbols.TokenRBRACKET:
 				case Symbols.TokenGREATERTHAN:
 					pos= fPreviousPos;
@@ -1290,6 +1291,7 @@ public final class JavaIndenter {
 					case Symbols.TokenIDENT:
 						if (!JavaHeuristicScanner.isGenericStarter(getTokenContent()))
 							break;
+						//$FALL-THROUGH$
 					case Symbols.TokenQUESTIONMARK:
 					case Symbols.TokenGREATERTHAN:
 						if (skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN))
@@ -1493,7 +1495,8 @@ public final class JavaIndenter {
 		nextToken();
 		switch (fToken) {
 			case Symbols.TokenRBRACE:
-				skipScope(); // and fall thru
+				skipScope();
+				//$FALL-THROUGH$
 			case Symbols.TokenSEMICOLON:
 				skipToStatementStart(false, false);
 				return fToken == Symbols.TokenDO;

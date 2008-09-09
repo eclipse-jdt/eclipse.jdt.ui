@@ -31,7 +31,7 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_1= 1; // < 20040113 (includes M6)
 	private static final int VERSION_2= 2; // before renaming almost all
 	private static final int VERSION_3= 3; // after renaming almost all
-	private static final int VERSION_4= 4; 
+	private static final int VERSION_4= 4;
 	private static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
 	private static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
 	private static final int VERSION_7= 7; // after moving comment formatter to JDT Core
@@ -71,34 +71,34 @@ public class ProfileVersioner implements IProfileVersioner {
 
 		case VERSION_1:
 			version1to2(oldSettings);
-			
+			//$FALL-THROUGH$
 		case VERSION_2:
 			version2to3(oldSettings);
-			
+			//$FALL-THROUGH$
 		case VERSION_3:
 		    version3to4(oldSettings);
-		    
+			//$FALL-THROUGH$
 		case VERSION_4:
-		    version4to5(oldSettings);
-		    
+			version4to5(oldSettings);
+			//$FALL-THROUGH$
 		case VERSION_5:
 		    version5to6(oldSettings);
-			
+		    //$FALL-THROUGH$
 		case VERSION_6:
 		    version6to7(oldSettings);
-		
+		    //$FALL-THROUGH$
 		case VERSION_7:
 		case VERSION_8:
 		case VERSION_9:
 		    version9to10(oldSettings);
-
+			//$FALL-THROUGH$
 		case VERSION_10 :
 			version10to11(oldSettings);
-					    
+			//$FALL-THROUGH$
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
 		        final String key= (String)iter.next();
-		        if (!newSettings.containsKey(key)) 
+		        if (!newSettings.containsKey(key))
 		            continue;
 		        
 		        final String value= (String)oldSettings.get(key);
@@ -121,35 +121,35 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 		
 	private static void version1to2(final Map oldSettings) {
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_WITHIN_MESSAGE_SEND,	
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_WITHIN_MESSAGE_SEND,
 			FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_MESSAGE_SEND,
 			FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_MESSAGE_SEND);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_AFTER_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			JavaCore.PLUGIN_ID + ".formatter.inset_space_between_empty_arguments", //$NON-NLS-1$
 			FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARGUMENTS);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_BEFORE_METHOD_DECLARATION_OPEN_PAREN,
 			FORMATTER_INSERT_SPACE_BEFORE_CONSTRUCTOR_DECLARATION_OPEN_PAREN);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_AFTER_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION);
 	}
 
 	public static int getVersionStatus(CustomProfile profile) {
 		final int version= profile.getVersion();
-		if (version < CURRENT_VERSION) 
+		if (version < CURRENT_VERSION)
 			return -1;
 		else if (version > CURRENT_VERSION)
 			return 1;
-		else 
+		else
 			return 0;
 	}
 	
@@ -157,12 +157,12 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static void mapOldValueRangeToNew(Map settings, String oldKey, String [] oldValues,
 		String newKey, String [] newValues) {
 
-		if (!settings.containsKey(oldKey)) 
+		if (!settings.containsKey(oldKey))
 			return;
 		
 		final String value= ((String)settings.get(oldKey));
 
-		if (value == null) 
+		if (value == null)
 			return;
 		
 		for (int i = 0; i < oldValues.length; i++) {
@@ -186,12 +186,12 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 
 	private static void checkAndReplace(Map settings, String oldKey, String [] newKeys) {
-		if (!settings.containsKey(oldKey)) 
+		if (!settings.containsKey(oldKey))
 			return;
 		
 		final String value= (String)settings.get(oldKey);
 
-		if (value == null) 
+		if (value == null)
 			return;
 		
 		for (int i = 0; i < newKeys.length; i++) {
@@ -200,12 +200,12 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 	
 	private static void checkAndReplaceBooleanWithINSERT(Map settings, String oldKey, String newKey) {
-		if (!settings.containsKey(oldKey)) 
+		if (!settings.containsKey(oldKey))
 			return;
 		
 		String value= (String)settings.get(oldKey);
 
-		if (value == null) 
+		if (value == null)
 			return;
 		
 		if (DefaultCodeFormatterConstants.TRUE.equals(value))
@@ -219,303 +219,303 @@ public class ProfileVersioner implements IProfileVersioner {
 	
 	private static void version2to3(Map oldSettings) {
 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_ARRAY_INITIALIZER_CONTINUATION_INDENTATION,
 			DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_AFTER_BLOCK_CLOSE_BRACE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_BRACE_IN_BLOCK);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_IN_CATCH_EXPRESSION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CATCH,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CATCH);
 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_IN_FOR_PARENS, 
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_FOR, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_IN_FOR_PARENS,
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_FOR,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_FOR);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_IN_IF_CONDITION, 
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_IF, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_IN_IF_CONDITION,
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_IF,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_IF);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_IN_SWITCH_CONDITION, 
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SWITCH, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_IN_SWITCH_CONDITION,
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SWITCH,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SWITCH);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_IN_SYNCHRONIZED_CONDITION, 
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SYNCHRONIZED, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_IN_SYNCHRONIZED_CONDITION,
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SYNCHRONIZED,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SYNCHRONIZED);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_IN_WHILE_CONDITION, 
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_WHILE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_IN_WHILE_CONDITION,
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_WHILE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_WHILE);
 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_ARGUMENTS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MESSAGESEND_ARGUMENTS,  
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MESSAGESEND_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_ARGUMENTS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_PARAMETERS);
 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_ARGUMENTS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_PARAMETERS);
 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_THROWS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_THROWS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_DECLARATION_THROWS);
 		
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_THROWS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_THROWS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_THROWS);
 		
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_MESSAGE_SEND, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_MESSAGE_SEND,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_MESSAGE_SEND, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_MESSAGE_SEND,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_ARGUMENTS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_PARAMETERS);
 		
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS);
 		
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_DECLARATION_THROWS);
 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 		    FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICITCONSTRUCTORCALL_ARGUMENTS,
-		    DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS);	 
+		    DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS);
 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 		    FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICITCONSTRUCTORCALL_ARGUMENTS,
-		    DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS);	 
+		    DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS);
 
 		
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MESSAGESEND_ARGUMENTS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MESSAGESEND_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS);
 			 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_DECLARATION_PARAMETERS);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_FIRST_ARGUMENT, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_FIRST_ARGUMENT,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_DECLARATION);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_MESSAGE_SEND, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_MESSAGE_SEND,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_ANONYMOUS_TYPE_OPEN_BRACE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_ANONYMOUS_TYPE_OPEN_BRACE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANONYMOUS_TYPE_DECLARATION);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_BLOCK_OPEN_BRACE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_BLOCK_OPEN_BRACE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_BLOCK);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_CATCH_EXPRESSION, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_CATCH_EXPRESSION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CATCH);
 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_BEFORE_METHOD_OPEN_BRACE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_METHOD_DECLARATION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_CONSTRUCTOR_DECLARATION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_CONSTRUCTOR_DECLARATION_OPEN_PAREN, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_CONSTRUCTOR_DECLARATION_OPEN_PAREN,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_FIRST_INITIALIZER, 
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER);	
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_FIRST_INITIALIZER,
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_FOR_PAREN, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_FOR_PAREN,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_FOR);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_IF_CONDITION, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_IF_CONDITION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_IF);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_MESSAGE_SEND, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_MESSAGE_SEND,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_DECLARATION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CONSTRUCTOR_DECLARATION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_METHOD_DECLARATION_OPEN_PAREN, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_METHOD_DECLARATION_OPEN_PAREN,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_DECLARATION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_SWITCH_CONDITION, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_SWITCH_CONDITION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SWITCH);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_SWITCH_OPEN_BRACE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_SWITCH_OPEN_BRACE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_SWITCH);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_SYNCHRONIZED_CONDITION, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_SYNCHRONIZED_CONDITION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SYNCHRONIZED);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_TYPE_OPEN_BRACE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_TYPE_OPEN_BRACE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_WHILE_CONDITION, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_WHILE_CONDITION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_REFERENCE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_REFERENCE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_BRACKET_IN_ARRAY_REFERENCE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACKET_IN_ARRAY_REFERENCE);
 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_DECLARATION,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_CONSTRUCTOR_DECLARATION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARRAY_INITIALIZER, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARRAY_INITIALIZER,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_BRACES_IN_ARRAY_INITIALIZER);
 			 
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_MESSAGESEND_ARGUMENTS, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_MESSAGESEND_ARGUMENTS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_FORMAT_GUARDIAN_CLAUSE_ON_ONE_LINE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_FORMAT_GUARDIAN_CLAUSE_ON_ONE_LINE,
 			DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_REFERENCE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_REFERENCE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_REFERENCE);
 			
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_TYPE_REFERENCE, 
+		checkAndReplace(oldSettings,
+			FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_TYPE_REFERENCE,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_TYPE_REFERENCE);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS,
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR); 
-
-		checkAndReplace(oldSettings, 
-			FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATORS,
-			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR); 
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR);
 
 		checkAndReplace(oldSettings,
-			FORMATTER_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT, 
+			FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATORS,
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR);
+
+		checkAndReplace(oldSettings,
+			FORMATTER_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION);
 		
-		checkAndReplace(oldSettings, 
-			FORMATTER_COMPACT_IF_ALIGNMENT, 
-			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF);
-		
-		checkAndReplace(oldSettings, 
-			FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT ,
-			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
-		
-		checkAndReplace(oldSettings, 
-			FORMATTER_QUALIFIED_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT ,
-			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION);
-		
-		checkAndReplace(oldSettings, 
-			FORMATTER_BINARY_EXPRESSION_ALIGNMENT,
-			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION);
-		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_COMPACT_IF_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
+			FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT ,
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
+		
+		checkAndReplace(oldSettings,
+			FORMATTER_QUALIFIED_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT ,
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION);
+		
+		checkAndReplace(oldSettings,
+			FORMATTER_BINARY_EXPRESSION_ALIGNMENT,
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION);
+		
+		checkAndReplace(oldSettings,
+			FORMATTER_COMPACT_IF_ALIGNMENT,
+			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF);
+		
+		checkAndReplace(oldSettings,
 			FORMATTER_CONDITIONAL_EXPRESSION_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_CONSTRUCTOR_DECLARATION,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_MESSAGE_SEND_SELECTOR_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_TYPE_DECLARATION_SUPERCLASS_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERCLASS_IN_TYPE_DECLARATION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_TYPE_DECLARATION_SUPERINTERFACES_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_TYPE_DECLARATION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_METHOD_THROWS_CLAUSE_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_THROWS_CLAUSE_IN_METHOD_DECLARATION,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_THROWS_CLAUSE_IN_CONSTRUCTOR_DECLARATION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_EXPLICIT_CONSTRUCTOR_ARGUMENTS_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL);
 
 		
-		mapOldValueRangeToNew(oldSettings, 
-			FORMATTER_TYPE_MEMBER_ALIGNMENT, new String [] {FORMATTER_NO_ALIGNMENT,	FORMATTER_MULTICOLUMN}, 
+		mapOldValueRangeToNew(oldSettings,
+			FORMATTER_TYPE_MEMBER_ALIGNMENT, new String [] {FORMATTER_NO_ALIGNMENT,	FORMATTER_MULTICOLUMN},
 			DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, new String [] {DefaultCodeFormatterConstants.FALSE, DefaultCodeFormatterConstants.TRUE});
 
 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_BLOCK_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_METHOD_DECLARATION_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			FORMATTER_TYPE_DECLARATION_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION);
 		
@@ -526,11 +526,11 @@ public class ProfileVersioner implements IProfileVersioner {
 	}
 	
 	private static void version3to4(Map oldSettings) {
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			"org.eclipse.jdt.core.align_type_members_on_columns", //$NON-NLS-1$
 			DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS);
 		
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			"org.eclipse.jdt.core.formatter.insert_space_after_comma__in_superinterfaces", //$NON-NLS-1$
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES);
 
@@ -538,7 +538,7 @@ public class ProfileVersioner implements IProfileVersioner {
 			"org.eclipse.jdt.core.formatter.insert_space_before_comma__in_superinterfaces", //$NON-NLS-1$
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES);
 
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 			"org.eclipse.jdt.core.formatter.insert_space_between_empty_arguments_in_method_invocation", //$NON-NLS-1$
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION);
 	}
@@ -564,34 +564,34 @@ public class ProfileVersioner implements IProfileVersioner {
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMAT, FORMATTER_COMMENT_FORMAT2);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHEADER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATSOURCE, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE);
-		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION); 
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS);
-		checkAndReplace(oldSettings, FORMATTER_COMMENT_LINELENGTH, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH); 
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_LINELENGTH, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEARBLANKLINES, FORMATTER_COMMENT_CLEAR_BLANK_LINES);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHTML, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML);
 		
-		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_NEWLINEFORPARAMETER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
-		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
+		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_NEWLINEFORPARAMETER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER);
+		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS);
 	}
 
 	private static void version9to10(Map oldSettings) {
-		duplicate(oldSettings, 
+		duplicate(oldSettings,
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION,
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION);
-		duplicate(oldSettings, 
+		duplicate(oldSettings,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ANNOTATION_DECLARATION_HEADER);
 	}
 
 	private static void version10to11(Map oldSettings) {
-		checkAndReplace(oldSettings, 
+		checkAndReplace(oldSettings,
 				FORMATTER_COMMENT_FORMAT2,
 				new String[] {
 					DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT,
 					DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT,
 					DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT
 				});
-		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEAR_BLANK_LINES, 
+		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEAR_BLANK_LINES,
 				new String[] {
 					DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT,
 					DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT,
@@ -674,31 +674,43 @@ public class ProfileVersioner implements IProfileVersioner {
     private static final String FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_NO_ALIGNMENT = "0";//$NON-NLS-1$
-    /** @deprecated */
+
+	/**
+	 * @deprecated Use multiple settings for each kind of comments. See
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT}
+	 *             and {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_LINE_COMMENT}.
+	 */
 	private static final String FORMATTER_COMMENT_FORMAT2= DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT;
-	/** @deprecated */
-	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES; 
+
+	/**
+	 * @deprecated Use
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT}
+	 *             and
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT}
+	 */
+	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES;
 
 	// Old comment formatter constants
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE} */
 	private static final String FORMATTER_COMMENT_FORMATSOURCE= PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION} */
 	private static final String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HEADER} */
 	private static final String FORMATTER_COMMENT_FORMATHEADER= PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_ROOT_TAGS} */
 	private static final String FORMATTER_COMMENT_INDENTROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT} */
 	private static final String FORMATTER_COMMENT_FORMAT= PreferenceConstants.FORMATTER_COMMENT_FORMAT;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER} */
 	private static final String FORMATTER_COMMENT_NEWLINEFORPARAMETER= PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS} */
 	private static final String FORMATTER_COMMENT_SEPARATEROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES} */
 	private static final String FORMATTER_COMMENT_CLEARBLANKLINES= PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_LINE_LENGTH} */
 	private static final String FORMATTER_COMMENT_LINELENGTH= PreferenceConstants.FORMATTER_COMMENT_LINELENGTH;
-	/** @deprecated */
+	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HTML} */
 	private static final String FORMATTER_COMMENT_FORMATHTML= PreferenceConstants.FORMATTER_COMMENT_FORMATHTML;
 	
  }
