@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -37,7 +36,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
  
 /**
- * A tree content provider for Java elements. It extends the 
+ * A tree content provider for Java elements. It extends the
  * StandardJavaElementContentProvider with support for listening to changes.
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -47,7 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @noextend This class is not intended to be subclassed by clients.
  */
-public class JavaElementContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
+public class JavaElementContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
 	
 	/** The tree viewer */
 	protected TreeViewer fViewer;
@@ -69,9 +68,9 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		super.inputChanged(viewer, oldInput, newInput);
 		fViewer= (TreeViewer)viewer;
 		if (oldInput == null && newInput != null) {
-			JavaCore.addElementChangedListener(this); 
+			JavaCore.addElementChangedListener(this);
 		} else if (oldInput != null && newInput == null) {
-			JavaCore.removeElementChangedListener(this); 
+			JavaCore.removeElementChangedListener(this);
 		}
 		fInput= newInput;
 	}
@@ -85,9 +84,9 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	 * Creates a new content provider for Java elements.
 	 * 
 	 * @param provideMembers if <code>true</code> members below compilation units
-	 * and class files are provided. 
+	 * and class files are provided.
 	 * @param provideWorkingCopy if <code>true</code> the element provider provides
-	 * working copies for members of compilation units which have an associated working 
+	 * working copies for members of compilation units which have an associated working
 	 * copy. Otherwise only original elements are provided.
 	 * 
 	 * @since 2.0
@@ -132,29 +131,29 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		}
 			 
 		// handle open and closing of a solution or project
-		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {			
+		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {
 			postRefresh(element);
 			return;
 		}
 
 		if (kind == IJavaElementDelta.REMOVED) {
-			Object parent= internalGetParent(element);			
+			Object parent= internalGetParent(element);
 			postRemove(element);
-			if (parent instanceof IPackageFragment) 
+			if (parent instanceof IPackageFragment)
 				updatePackageIcon((IPackageFragment)parent);
 			// we are filtering out empty subpackages, so we
-			// a package becomes empty we remove it from the viewer. 
+			// a package becomes empty we remove it from the viewer.
 			if (isPackageFragmentEmpty(element.getParent())) {
 				if (fViewer.testFindItem(parent) != null)
 					postRefresh(internalGetParent(parent));
-			}  
+			}
 			return;
 		}
 
-		if (kind == IJavaElementDelta.ADDED) { 
+		if (kind == IJavaElementDelta.ADDED) {
 			Object parent= internalGetParent(element);
 			// we are filtering out empty subpackages, so we
-			// have to handle additions to them specially. 
+			// have to handle additions to them specially.
 			if (parent instanceof IPackageFragment) {
 				Object grandparent= internalGetParent(parent);
 				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
@@ -167,9 +166,9 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 						postRefresh(grandparent);
 					else {
 						postRefresh(parent);
-					}	
+					}
 				}
-			} else {  
+			} else {
 				postAdd(parent, element);
 			}
 		}
@@ -189,7 +188,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			postRefresh(element);
 			
 		if (isClassPathChange(delta)) {
-			 // throw the towel and do a full refresh of the affected java project. 
+			 // throw the towel and do a full refresh of the affected java project.
 			postRefresh(element.getJavaProject());
 		}
 		
@@ -242,7 +241,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed())
 					fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
 			}
 		});
@@ -255,19 +254,19 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		int status= delta.getKind();
 		IResource resource= delta.getResource();
 		// filter out changes affecting the output folder
-		if (resource == null) 
+		if (resource == null)
 			return;
 			
 		// this could be optimized by handling all the added children in the parent
 		if ((status & IResourceDelta.REMOVED) != 0) {
-			if (parent instanceof IPackageFragment) 
+			if (parent instanceof IPackageFragment)
 				// refresh one level above to deal with empty package filtering properly
 				postRefresh(internalGetParent(parent));
-			else 
+			else
 				postRemove(resource);
 		}
 		if ((status & IResourceDelta.ADDED) != 0) {
-			if (parent instanceof IPackageFragment) 
+			if (parent instanceof IPackageFragment)
 				// refresh one level above to deal with empty package filtering properly
 				postRefresh(internalGetParent(parent));
 			else
@@ -290,7 +289,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed())
 					fViewer.refresh(root);
 			}
 		});
@@ -301,7 +300,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed())
 					fViewer.add(parent, element);
 			}
 		});
@@ -312,7 +311,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed())
 					fViewer.remove(element);
 			}
 		});
@@ -321,7 +320,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
-			ctrl.getDisplay().asyncExec(r); 
+			ctrl.getDisplay().asyncExec(r);
 		}
 	}
 }

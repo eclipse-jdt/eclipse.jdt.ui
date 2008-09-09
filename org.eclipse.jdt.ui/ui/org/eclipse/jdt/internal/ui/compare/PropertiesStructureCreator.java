@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,18 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.IOException;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -51,9 +46,9 @@ public class PropertiesStructureCreator extends StructureCreator {
 	 * The text range of a leg/value pair starts with an optional
 	 * comment and ends right after the value.
 	 */
-	static class PropertyNode extends DocumentRangeNode implements ITypedElement, IAdaptable {
+	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
 		
-		public PropertyNode(DocumentRangeNode parent, int type, String id, String value, IDocument doc, int start, int length) {
+		public PropertyNode(DocumentRangeNode parent, int type, String id, IDocument doc, int start, int length) {
 			super(parent, type, id, doc, start, length);
 			if (parent != null) {
 				parent.addChild(this);
@@ -91,7 +86,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 	}
 	
 	public String getName() {
-		return CompareMessages.PropertyCompareViewer_title; 
+		return CompareMessages.PropertyCompareViewer_title;
 	}
 	
 	protected IStructureComparator createStructureComparator(Object input,
@@ -113,10 +108,6 @@ public class PropertiesStructureCreator extends StructureCreator {
 		try {
 			monitor = beginWork(monitor);
 			parsePropertyFile(root, document, monitor);
-		} catch (IOException ex) {
-			if (sharedDocumentAdapter != null)
-				sharedDocumentAdapter.disconnect(input);
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, CompareMessages.PropertiesStructureCreator_error_occurred, ex));
 		} finally {
 			monitor.done();
 		}
@@ -161,14 +152,14 @@ public class PropertiesStructureCreator extends StructureCreator {
 		return null;
 	}
 			
-	private void parsePropertyFile(DocumentRangeNode root, IDocument doc, IProgressMonitor monitor) throws IOException {
+	private void parsePropertyFile(DocumentRangeNode root, IDocument doc, IProgressMonitor monitor) {
 		
 		int start= -1;
 		int lineStart= 0;
 		
 		int[] args= new int[2];
 		args[0]= 0;	// here we return the line number
-		args[1]= 0;	// and here the offset of the first character of the line 
+		args[1]= 0;	// and here the offset of the first character of the line
 		
 		for (;;) {
 			worked(monitor);
@@ -183,7 +174,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 			char firstChar= line.charAt(0);
 			if (firstChar == '#' || firstChar == '!') {
 				if (start < 0)	// comment belongs to next key/value pair
-					start= lineStart;	
+					start= lineStart;
 				continue;	// comment
 			}
 								
@@ -240,10 +231,6 @@ public class PropertiesStructureCreator extends StructureCreator {
  				if (start < 0)
 					start= lineStart;
     			
-	    		String value= ""; //$NON-NLS-1$
-				if (separatorPos < len)
-					value= convert(line.substring(valuePos, len));
-										    		
 	    		int length= args[1] - start;
 	    		
 				try {
@@ -258,7 +245,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 					// silently ignored
 				}
 	    		
-	     		new PropertyNode(root, 0, key, value, doc, start, length);
+				new PropertyNode(root, 0, key, doc, start, length);
  				start= -1;
    			}
 		}
@@ -302,7 +289,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 							v= (v << 4) + 10+(c - 'A');
 							break;
 						default:
-		             		throw new IllegalArgumentException(CompareMessages.PropertyCompareViewer_malformedEncoding); 
+		             		throw new IllegalArgumentException(CompareMessages.PropertyCompareViewer_malformedEncoding);
 		                }
 					}
 					buf.append((char)v);

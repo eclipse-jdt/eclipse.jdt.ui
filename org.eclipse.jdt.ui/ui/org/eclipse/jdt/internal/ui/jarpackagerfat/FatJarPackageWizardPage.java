@@ -85,11 +85,13 @@ import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
+
 /**
- * First page for the runnable jar export wizard
+ * First page for the runnable jar export wizard.
+ * 
  * @since 3.4
  */
-public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage implements Listener {
+public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	private abstract static class LaunchConfigurationElement {
 
@@ -154,7 +156,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 			}
 		}
 		
-	}	
+	}
 
 	private static final String PAGE_NAME= "FatJarPackageWizardPage"; //$NON-NLS-1$
 	private static final String STORE_LAUNCH_CONFIGURATION_SELECTION_NAME= PAGE_NAME + ".LAUNCH_CONFIGURATION_SELECTION_NAME"; //$NON-NLS-1$
@@ -263,7 +265,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		composite.setLayout(layout);
 		
 		fAntScriptSaveCheckbox= new Button(composite, SWT.CHECK | SWT.LEFT);
-		fAntScriptSaveCheckbox.setText(FatJarPackagerMessages.FatJarPackageWizardPage_saveAntScript_text); 
+		fAntScriptSaveCheckbox.setText(FatJarPackagerMessages.FatJarPackageWizardPage_saveAntScript_text);
 		fAntScriptSaveCheckbox.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				update();
@@ -278,7 +280,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		GridData gridData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 		gridData.horizontalIndent= 15;
 		fAntScriptLabel.setLayoutData(gridData);
-		fAntScriptLabel.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocation_text); 
+		fAntScriptLabel.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocation_text);
 
 		fAntScriptNamesCombo= new Combo(composite, SWT.SINGLE | SWT.BORDER);
 		SWTUtil.setDefaultVisibleItemCount(fAntScriptNamesCombo);
@@ -291,7 +293,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 		// ant script browse button
 		fAntScriptBrowseButton= new Button(composite, SWT.PUSH);
-		fAntScriptBrowseButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocationBrowse_text); 
+		fAntScriptBrowseButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocationBrowse_text);
 		fAntScriptBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(fAntScriptBrowseButton);
 		fAntScriptBrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -342,7 +344,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		String comboText= fAntScriptNamesCombo.getText();
 		IPath path= Path.fromOSString(comboText);
 		if (path.segmentCount() > 0 && ensureAntScriptFileIsValid(path.toFile()) && path.getFileExtension() == null)
-			path= path.addFileExtension(ANTSCRIPT_EXTENSION); 
+			path= path.addFileExtension(ANTSCRIPT_EXTENSION);
 		
 		fAntScriptLocation= path;
 	}
@@ -383,12 +385,12 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 			return true;
 
 		if (fAntScriptNamesCombo.getText().length() == 0) {
-			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationMissing); 
+			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationMissing);
 			return false;
 		}
 
 		if (fAntScriptLocation.toString().endsWith("/")) { //$NON-NLS-1$
-			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationIsDir); 
+			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationIsDir);
 			fAntScriptNamesCombo.setFocus();
 			return false;
 		}
@@ -409,13 +411,13 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	 */
 	private boolean ensureAntScriptFileIsValid(File antScriptFile) {
 		if (antScriptFile.exists() && antScriptFile.isDirectory() && fAntScriptNamesCombo.getText().length() > 0) {
-			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationIsDir); 
+			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationIsDir);
 			fAntScriptNamesCombo.setFocus();
 			return false;
 		}
 		if (antScriptFile.exists()) {
 			if (!antScriptFile.canWrite()) {
-				setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationUnwritable); 
+				setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationUnwritable);
 				fAntScriptNamesCombo.setFocus();
 				return false;
 			}
@@ -424,7 +426,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	}
 
 	/**
-	 * clear all previously set messages and error-messages 
+	 * clear all previously set messages and error-messages
 	 */
 	private void clearMessages() {
 		if (getErrorMessage() != null)
@@ -753,7 +755,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
-			// ANT SCRIPT SAVE 
+			// ANT SCRIPT SAVE
 			settings.put(STORE_ANTSCRIPT_SAVE, fAntScriptSaveCheckbox.getSelection());
 
 			// ANT SCRIPT LOCATION

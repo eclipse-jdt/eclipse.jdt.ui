@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * the current active Java editor.
  * 
  * <p>For performance reasons, not more than one AST should be kept in memory at a time. Therefore, clients must
- * not keep any references to the shared AST or its nodes or bindings. 
+ * not keep any references to the shared AST or its nodes or bindings.
  * </p>
  * <p>Clients can make the following assumptions about the AST:
  * <dl>
@@ -101,27 +101,25 @@ public final class SharedASTProvider {
 	 */
 	public static final WAIT_FLAG WAIT_NO= new WAIT_FLAG("don't wait"); //$NON-NLS-1$
 
-	
+
 	/**
-	 * Returns a compilation unit AST for the given Java element. If the element is the input of the active
-	 * Java editor, the AST is the shared AST.
+	 * Returns a compilation unit AST for the given Java element. If the element is the input of the
+	 * active Java editor, the AST is the shared AST.
 	 * <p>
 	 * Clients are not allowed to modify the AST and must not keep any references.
 	 * </p>
 	 * 
-	 * @param element
-	 * 			the {@link ITypeRoot}, must not be <code>null</code>
-	 * @param waitFlag
-	 * 			{@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
-	 * @param progressMonitor
-	 * 			the progress monitor or <code>null</code>
-	 * @return
-	 * 			the AST or <code>null</code>.
-	 *         <dl><li>if {@link #WAIT_NO} has been specified <code>null</code> is returned if the element is not 
-	 *         input of the current Java editor or no AST is available</li>
-	 *         <li>if {@link #WAIT_ACTIVE_ONLY} has been specified <code>null</code> is returned if the element is not 
-	 *         input of the current Java editor</li>
-	 *         	<li>if {@link #WAIT_YES} has been specified either the shared AST is returned or a new AST is created.</li>
+	 * @param element the {@link ITypeRoot}, must not be <code>null</code>
+	 * @param waitFlag {@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
+	 * @param progressMonitor the progress monitor or <code>null</code>
+	 * @return the AST or <code>null</code>.
+	 *         <dl>
+	 *         <li>if {@link #WAIT_NO} has been specified <code>null</code> is returned if the
+	 *         element is not input of the current Java editor or no AST is available</li>
+	 *         <li>if {@link #WAIT_ACTIVE_ONLY} has been specified <code>null</code> is returned if
+	 *         the element is not input of the current Java editor</li>
+	 *         <li>if {@link #WAIT_YES} has been specified either the shared AST is returned or a
+	 *         new AST is created.</li>
 	 *         </dl>
 	 */
 	public static CompilationUnit getAST(ITypeRoot element, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {

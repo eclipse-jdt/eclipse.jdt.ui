@@ -33,7 +33,6 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -72,7 +71,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  * 
  * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
  */
-public class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener, IPropertyChangeListener {
+public class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener, IPropertyChangeListener {
 	
 	protected static final int ORIGINAL= 0;
 	protected static final int PARENT= 1 << 0;
@@ -408,10 +407,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	// hierarchical packages
 	/**
 	 * Returns the hierarchical packages inside a given fragment or root.
-	 * @param parent The parent package fragment root
-	 * @param fragment The package to get the children for or 'null' to get the children of the root.
+	 * 
+	 * @param parent the parent package fragment root
+	 * @param fragment the package to get the children for or 'null' to get the children of the root
 	 * @param result Collection where the resulting elements are added
-	 * @throws JavaModelException
+	 * @throws JavaModelException if fetching the children fails
 	 */
 	private void getHierarchicalPackageChildren(IPackageFragmentRoot parent, IPackageFragment fragment, Collection result) throws JavaModelException {
 		IJavaElement[] children= parent.getChildren();

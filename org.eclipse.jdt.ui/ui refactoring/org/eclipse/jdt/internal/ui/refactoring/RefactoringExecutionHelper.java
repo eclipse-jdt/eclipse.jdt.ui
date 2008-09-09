@@ -12,6 +12,10 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,15 +28,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IThreadListener;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
@@ -44,6 +43,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+
+
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -115,13 +116,15 @@ public class RefactoringExecutionHelper {
 			return dialog.open() == IDialogConstants.CANCEL_ID;
 		}
 	}
-	
+
 	/**
-	 * @param refactoring
+	 * Creates a new refactoring execution helper.
+	 * 
+	 * @param refactoring the refactoring
 	 * @param stopSeverity a refactoring status constant from {@link RefactoringStatus}
 	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
-	 * @param parent
-	 * @param context
+	 * @param parent the parent shell
+	 * @param context the runnable context
 	 */
 	public RefactoringExecutionHelper(Refactoring refactoring, int stopSeverity, int saveMode, Shell parent, IRunnableContext context) {
 		super();
@@ -151,7 +154,7 @@ public class RefactoringExecutionHelper {
 	 * <strong>Use {@link #perform(boolean, boolean)} unless you know exactly what you are doing!</strong>
 	 * 
 	 * @param fork if set, the operation will be forked
-	 * @param forkChangeExecution if the change should not be executed in the UI thread: This may not work in any case 
+	 * @param forkChangeExecution if the change should not be executed in the UI thread: This may not work in any case
 	 * @param cancelable  if set, the operation will be cancelable
 	 * @throws InterruptedException thrown when the operation is cancelled
 	 * @throws InvocationTargetException thrown when the operation failed to execute
@@ -165,7 +168,7 @@ public class RefactoringExecutionHelper {
 		} else {
 			rule= ResourcesPlugin.getWorkspace().getRoot();
 		}
-		class OperationRunner extends WorkbenchRunnableAdapter implements IThreadListener {
+		class OperationRunner extends WorkbenchRunnableAdapter {
 			public OperationRunner(IWorkspaceRunnable runnable, ISchedulingRule schedulingRule) {
 				super(runnable, schedulingRule);
 			}
@@ -198,9 +201,9 @@ public class RefactoringExecutionHelper {
 				if (op.fPerformChangeOperation != null) {
 					RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
 					if (validationStatus != null && validationStatus.hasFatalError()) {
-						MessageDialog.openError(fParent, fRefactoring.getName(), 
+						MessageDialog.openError(fParent, fRefactoring.getName(),
 								Messages.format(
-										RefactoringMessages.RefactoringExecutionHelper_cannot_execute, 
+										RefactoringMessages.RefactoringExecutionHelper_cannot_execute,
 										validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
 						return;
 					}
@@ -229,5 +232,5 @@ public class RefactoringExecutionHelper {
 			manager.endRule(rule);
 			fRefactoring.setValidationContext(null);
 		}
-	}	
+	}
 }

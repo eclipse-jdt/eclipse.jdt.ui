@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
+
 /**
  * Type constraints model to hold all type constraints to replace type occurrences by a given supertype.
  * 
@@ -52,7 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 public final class SuperTypeConstraintsModel {
 
 	/** Customized implementation of a hash set */
-	private static class HashedSet extends AbstractSet implements Set {
+	private static class HashedSet extends AbstractSet {
 
 		/** The backing hash map */
 		private final Map fImplementation= new HashMap();
@@ -210,7 +211,7 @@ public final class SuperTypeConstraintsModel {
 	/**
 	 * Creates a new super type constraints model.
 	 * 
-	 * @param environment the type environment 
+	 * @param environment the type environment
 	 * @param subType the subtype to replace
 	 * @param superType the supertype replacement
 	 */

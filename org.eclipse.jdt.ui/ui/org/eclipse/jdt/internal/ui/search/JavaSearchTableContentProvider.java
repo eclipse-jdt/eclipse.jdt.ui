@@ -15,12 +15,11 @@ import java.util.Set;
 
 import org.eclipse.swt.widgets.Table;
 
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
-public class JavaSearchTableContentProvider extends JavaSearchContentProvider implements IStructuredContentProvider {
+public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 	public JavaSearchTableContentProvider(JavaSearchResultPage page) {
 		super(page);
 	}
@@ -63,7 +62,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider im
 						added.add(updatedElements[i]);
 						addLimit--;
 						addCount++;
-					}				
+					}
 				}
 			} else {
 				removed.add(updatedElements[i]);

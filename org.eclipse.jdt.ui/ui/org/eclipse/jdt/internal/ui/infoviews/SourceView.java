@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.ui.infoviews;
 
 import java.io.IOException;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
@@ -22,9 +20,10 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -45,6 +44,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 
 import org.eclipse.jdt.core.ICodeAssist;
@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
  *
  * @since 3.0
  */
-public class SourceView extends AbstractInfoView implements IMenuListener {
+public class SourceView extends AbstractInfoView {
 
 	/** Symbolic Java editor font name. */
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
@@ -331,12 +331,12 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	}
 
 	/**
-	 * Computes and returns the offset in the unclipped document
-	 * based on the given text selection from the clipped
-	 * document.
-	 *
-	 * @param textSelection
-	 * @return the offest in the unclipped document or <code>-1</code> if the offset cannot be computed
+	 * Computes and returns the offset in the unclipped document based on the given text selection
+	 * from the clipped document.
+	 * 
+	 * @param textSelection the text selection
+	 * @return the offset in the unclipped document or <code>-1</code> if the offset cannot be
+	 *         computed
 	 */
 	private int getOffsetInUnclippedDocument(ITextSelection textSelection) {
 		IDocument unclippedDocument= null;

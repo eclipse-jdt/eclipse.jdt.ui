@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -35,7 +34,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 
-public class OpenAndExpand extends SelectionDispatchAction implements IAction {
+public class OpenAndExpand extends SelectionDispatchAction {
 
 	private OpenAction fOpenAction;
 	private TreeViewer fViewer;
@@ -74,12 +73,12 @@ public class OpenAndExpand extends SelectionDispatchAction implements IAction {
 	}
 
 	public void run(Object[] elements) {
-		fOpenAction.run(elements);		
+		fOpenAction.run(elements);
 	}
 
 	public void runWithEvent(Event event) {
 		fOpenAction.runWithEvent(event);
-	} 
+	}
 	
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
 		fOpenAction.addPropertyChangeListener(listener);

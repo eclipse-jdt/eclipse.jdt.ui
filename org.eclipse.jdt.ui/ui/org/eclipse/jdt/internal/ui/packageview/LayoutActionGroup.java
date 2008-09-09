@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,7 @@ class LayoutActionGroup extends ActionGroup {
 	}
 }
 
-class LayoutAction extends Action implements IAction {
+class LayoutAction extends Action {
 
 	private boolean fIsFlatLayout;
 	private PackageExplorerPart fPackageExplorer;
@@ -75,11 +75,11 @@ class LayoutAction extends Action implements IAction {
 		fIsFlatLayout= flat;
 		fPackageExplorer= packageExplorer;
 		if (fIsFlatLayout) {
-			setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label); 
+			setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label);
 			JavaPluginImages.setLocalImageDescriptors(this, "flatLayout.gif"); //$NON-NLS-1$
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
 		} else {
-			setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);	  
+			setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);
 			JavaPluginImages.setLocalImageDescriptors(this, "hierarchicalLayout.gif"); //$NON-NLS-1$
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LAYOUT_HIERARCHICAL_ACTION);
 		}
@@ -95,7 +95,7 @@ class LayoutAction extends Action implements IAction {
 	}
 }
 
-class ShowLibrariesNodeAction extends Action implements IAction {
+class ShowLibrariesNodeAction extends Action {
 
 	private PackageExplorerPart fPackageExplorer;
 
