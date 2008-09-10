@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
 import org.osgi.framework.Bundle;
 
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -23,8 +31,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.PartInitException;
-
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -132,7 +138,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.ui.ide.application",
 			"org.eclipse.ui.navigator",
 			"org.eclipse.ui.navigator.resources",
-			"org.eclipse.ui.views.log",
 			"org.eclipse.ui.views.properties.tabbed",
 			"org.eclipse.ui.win32",
 			"org.eclipse.ui.workbench.compatibility",
@@ -187,40 +192,23 @@ public class PluginsNotLoadedTest extends TestCase {
 	}
 	
 	public static Test suite() {
-		// Use shorter list for suite as more stuff gets loaded upfront
-		NOT_LOADED_BUNDLES= new String[] {
-			"org.apache.ant",
-			"org.apache.commons.logging",
-			"org.apache.lucene",
-			"org.apache.lucene.analysis",
-			"org.eclipse.ant.core",
-			"org.eclipse.compare",
-			"org.eclipse.equinox.http.jetty",
-			"org.eclipse.equinox.http.servlet",
-			"org.eclipse.help.appserver",
-			"org.eclipse.help.base",
-			"org.eclipse.help.ui",
-			"org.eclipse.jdt.junit.runtime",
-			"org.eclipse.jdt.junit4.runtime",
-			"org.eclipse.search",
-			"org.eclipse.ui.cheatsheets",
-			"org.eclipse.ui.console",
-			"org.eclipse.ui.editors.tests",
-			"org.eclipse.ui.examples.javaeditor",
-			"org.eclipse.ui.ide.application",
-			"org.eclipse.ui.navigator",
-			"org.eclipse.ui.navigator.resources",
-			"org.eclipse.ui.views.properties.tabbed",
-			"org.eclipse.ui.workbench.compatibility",
-			"org.eclipse.update.core.linux",
-			"org.eclipse.update.core.win32",
-			"org.eclipse.update.ui",
-			"org.mortbay.jetty"
-		};
 		return setUpTest(new TestSuite(PluginsNotLoadedTest.class));
 	}
-	
-	
+
+	/**
+	 * If a test suite uses this test and has other tests that cause plug-ins to be loaded then
+	 * those need to be indicated here.
+	 * 
+	 * @param loadedPlugins plug-ins that are additionally loaded by the caller
+	 * @since 3.5
+	 */
+	public static void addLoadedPlugIns(String[] loadedPlugins) {
+		Assert.isLegal(loadedPlugins != null);
+		List l= new ArrayList(Arrays.asList(NOT_LOADED_BUNDLES));
+		l.removeAll(Arrays.asList(loadedPlugins));
+		NOT_LOADED_BUNDLES= (String[])l.toArray(new String[0]);
+	}
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.1

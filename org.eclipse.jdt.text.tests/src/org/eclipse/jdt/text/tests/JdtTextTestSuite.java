@@ -40,6 +40,13 @@ public class JdtTextTestSuite {
 //		suite.addTest(PartitionTokenScannerTest.suite());
 		suite.addTest(MarkOccurrenceTest.suite());
 		suite.addTest(PluginsNotLoadedTest.suite());
+		PluginsNotLoadedTest.addLoadedPlugIns(
+				new String[] {
+						"org.eclipse.core.filebuffers.tests",
+						"org.eclipse.core.variables",
+						"org.eclipse.jsch.core",
+						"org.eclipse.team.cvs.core"
+				});
 		suite.addTest(BracketInserterTest.suite());
 		suite.addTest(SpellingTestSuite.suite());
 		suite.addTest(SemanticHighlightingTest.suite());
