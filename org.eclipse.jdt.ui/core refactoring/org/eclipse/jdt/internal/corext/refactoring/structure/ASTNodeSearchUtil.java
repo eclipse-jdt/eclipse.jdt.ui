@@ -88,10 +88,10 @@ public class ASTNodeSearchUtil {
 			node= analyzer.getLastCoveringNode().getParent();
 		else if (node == null && analyzer.getLastCoveringNode() instanceof ConstructorInvocation)
 			node= analyzer.getLastCoveringNode().getParent();
-		
-		if (node == null)	
+
+		if (node == null)
 			return null;
-		
+
 		ASTNode parentNode= node.getParent();
 
 		if (parentNode instanceof MethodDeclaration){
@@ -99,7 +99,7 @@ public class ASTNodeSearchUtil {
 			if (!(node instanceof SimpleName)
 				&& md.isConstructor()
 			    && md.getBody() != null
-			    && md.getBody().statements().size() > 0 
+			    && md.getBody().statements().size() > 0
 			    &&(md.getBody().statements().get(0) instanceof ConstructorInvocation || md.getBody().statements().get(0) instanceof SuperConstructorInvocation)
 			    &&((ASTNode)md.getBody().statements().get(0)).getLength() == length + 1)
 			return (ASTNode)md.getBody().statements().get(0);
@@ -137,7 +137,7 @@ public class ASTNodeSearchUtil {
 			return  (VariableDeclarationFragment)node;
 		return (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
 	}
-		
+
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
 		return (FieldDeclaration) ASTNodes.getParent(getNameNode(iField, cuNode), FieldDeclaration.class);
 	}
@@ -172,18 +172,18 @@ public class ASTNodeSearchUtil {
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
 		return (TypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), TypeDeclaration.class);
 	}
-	
+
 	public static ClassInstanceCreation getClassInstanceCreationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
 		return (ClassInstanceCreation) ASTNodes.getParent(getNameNode(iType, cuNode), ClassInstanceCreation.class);
 	}
-	
+
 	public static List getBodyDeclarationList(IType iType, CompilationUnit cuNode) throws JavaModelException {
 		if (iType.isAnonymous())
 			return getClassInstanceCreationNode(iType, cuNode).getAnonymousClassDeclaration().bodyDeclarations();
 		else
 			return getAbstractTypeDeclarationNode(iType, cuNode).bodyDeclarations();
 	}
-	
+
 	//returns an array because of the import container, which does not represent 1 node but many
 	//for fields, it returns the whole declaration node
 	public static ASTNode[] getDeclarationNodes(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
@@ -237,7 +237,7 @@ public class ASTNodeSearchUtil {
 			return (Initializer) node.getParent();
 		return null;
 	}
-	
+
 	private static ASTNode findNode(ISourceRange range, CompilationUnit cuNode){
 		NodeFinder nodeFinder= new NodeFinder(range.getOffset(), range.getLength());
 		cuNode.accept(nodeFinder);
@@ -245,9 +245,9 @@ public class ASTNodeSearchUtil {
 		if (coveredNode != null)
 			return coveredNode;
 		else
-			return nodeFinder.getCoveringNode();		
+			return nodeFinder.getCoveringNode();
 	}
-	
+
 	public static ASTNode[] findNodes(SearchMatch[] searchResults, CompilationUnit cuNode) {
 		List result= new ArrayList(searchResults.length);
 		for (int i= 0; i < searchResults.length; i++) {

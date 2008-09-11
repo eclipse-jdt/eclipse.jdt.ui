@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -51,8 +53,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * This class is used to find references to constructors.
@@ -90,11 +90,11 @@ class ConstructorReferenceFinder {
 		if (pattern == null){
 			if (fConstructors.length != 0)
 				return new SearchResultGroup[0];
-			return getImplicitConstructorReferences(pm, owner, status);	
-		}	
+			return getImplicitConstructorReferences(pm, owner, status);
+		}
 		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, owner, scope, pm, status));
 	}
-	
+
 	//XXX this method is a workaround for jdt core bug 27236
 	private SearchResultGroup[] removeUnrealReferences(SearchResultGroup[] groups) {
 		List result= new ArrayList(groups.length);
@@ -116,7 +116,7 @@ class ConstructorReferenceFinder {
 		}
 		return (SearchResultGroup[]) result.toArray(new SearchResultGroup[result.size()]);
 	}
-	
+
 	//XXX this method is a workaround for jdt core bug 27236
 	private boolean isRealConstructorReferenceNode(ASTNode node){
 		String typeName= fConstructors[0].getDeclaringType().getElementName();
@@ -147,13 +147,13 @@ class ConstructorReferenceFinder {
 		}
 		return true;
 	}
-	
+
 	private IJavaSearchScope createSearchScope() throws JavaModelException{
 		if (fConstructors.length == 0)
 			return RefactoringScopeFactory.create(fType);
 		return RefactoringScopeFactory.create(getMostVisibleConstructor());
 	}
-	
+
 	private IMethod getMostVisibleConstructor() throws JavaModelException {
 		Assert.isTrue(fConstructors.length > 0);
 		IMethod candidate= fConstructors[0];
@@ -174,7 +174,7 @@ class ConstructorReferenceFinder {
 		pm.done();
 		return RefactoringSearchEngine.groupByCu((SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);
 	}
-		
+
 	//List of SearchResults
 	private List getImplicitConstructorReferencesInClassCreations(WorkingCopyOwner owner, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		//XXX workaround for jdt core bug 23112

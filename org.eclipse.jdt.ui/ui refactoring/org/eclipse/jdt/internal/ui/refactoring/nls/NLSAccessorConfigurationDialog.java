@@ -13,12 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridLayout;
@@ -27,6 +21,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -77,9 +77,9 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private StringDialogField fSubstitutionPattern;
 
 	private NLSRefactoring fRefactoring;
-	
+
 	private IStatus[] fStati;
-	
+
 	private static final int IDX_ACCESSOR_CLASS= 0;
 	private static final int IDX_ACCESSOR_PACKAGE= 1;
 	private static final int IDX_SUBST_PATTERN= 2;
@@ -99,45 +99,45 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			}
 		}
 	}
-	
-	
+
+
 	public NLSAccessorConfigurationDialog(Shell parent, NLSRefactoring refactoring) {
 		super(parent);
 		fRefactoring= refactoring;
 		fStati= new IStatus[] { StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS };
-		
-		setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_title); 
+
+		setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_title);
 
 		AccessorAdapter updateListener= new AccessorAdapter();
 
 		ICompilationUnit cu= refactoring.getCu();
 
-		fAccessorPackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.NLSAccessorConfigurationDialog_accessor_path, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_package, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_browse1, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_browse2, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_default_package, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_dialog_title, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_dialog_message, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_dialog_emtpyMessage, 
+		fAccessorPackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.NLSAccessorConfigurationDialog_accessor_path,
+				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_package,
+				NLSUIMessages.NLSAccessorConfigurationDialog_browse1,
+				NLSUIMessages.NLSAccessorConfigurationDialog_browse2,
+				NLSUIMessages.NLSAccessorConfigurationDialog_default_package,
+				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_dialog_title,
+				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_dialog_message,
+				NLSUIMessages.NLSAccessorConfigurationDialog_accessor_dialog_emtpyMessage,
 				cu, updateListener, refactoring.getAccessorClassPackage());
 
-		fAccessorClassName= createStringButtonField(NLSUIMessages.NLSAccessorConfigurationDialog_className, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_browse6, updateListener); 
-		fSubstitutionPattern= createStringField(NLSUIMessages.NLSAccessorConfigurationDialog_substitutionPattern, updateListener); 
+		fAccessorClassName= createStringButtonField(NLSUIMessages.NLSAccessorConfigurationDialog_className,
+				NLSUIMessages.NLSAccessorConfigurationDialog_browse6, updateListener);
+		fSubstitutionPattern= createStringField(NLSUIMessages.NLSAccessorConfigurationDialog_substitutionPattern, updateListener);
 
-		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.NLSAccessorConfigurationDialog_property_path, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_property_package, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_browse3, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_browse4, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_default_package, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_property_dialog_title, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_property_dialog_message, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_property_dialog_emptyMessage, 
+		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.NLSAccessorConfigurationDialog_property_path,
+				NLSUIMessages.NLSAccessorConfigurationDialog_property_package,
+				NLSUIMessages.NLSAccessorConfigurationDialog_browse3,
+				NLSUIMessages.NLSAccessorConfigurationDialog_browse4,
+				NLSUIMessages.NLSAccessorConfigurationDialog_default_package,
+				NLSUIMessages.NLSAccessorConfigurationDialog_property_dialog_title,
+				NLSUIMessages.NLSAccessorConfigurationDialog_property_dialog_message,
+				NLSUIMessages.NLSAccessorConfigurationDialog_property_dialog_emptyMessage,
 				cu, updateListener, fRefactoring.getResourceBundlePackage());
 
-		fResourceBundleFile= createStringButtonField(NLSUIMessages.NLSAccessorConfigurationDialog_property_file_name, 
-				NLSUIMessages.NLSAccessorConfigurationDialog_browse5, updateListener); 
+		fResourceBundleFile= createStringButtonField(NLSUIMessages.NLSAccessorConfigurationDialog_property_file_name,
+				NLSUIMessages.NLSAccessorConfigurationDialog_browse5, updateListener);
 
 		initFields();
 	}
@@ -193,24 +193,24 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 
 	private void createAccessorPart(Composite parent, final int nOfColumns, int textWidth) {
-		createLabel(parent, NLSUIMessages.NLSAccessorConfigurationDialog_resourceBundle_title, nOfColumns); 
+		createLabel(parent, NLSUIMessages.NLSAccessorConfigurationDialog_resourceBundle_title, nOfColumns);
 		fAccessorPackage.createControl(parent, nOfColumns, textWidth);
 
 		fAccessorClassName.doFillIntoGrid(parent, nOfColumns);
 		Text accessorClassText= fAccessorClassName.getTextControl(null);
 		LayoutUtil.setWidthHint(accessorClassText, convertWidthInCharsToPixels(60));
 		TextFieldNavigationHandler.install(accessorClassText);
-		
+
 		fSubstitutionPattern.doFillIntoGrid(parent, nOfColumns);
 		Text substitutionPatternText= fSubstitutionPattern.getTextControl(null);
 		LayoutUtil.setWidthHint(substitutionPatternText, convertWidthInCharsToPixels(60));
 		TextFieldNavigationHandler.install(substitutionPatternText);
-		
+
 		fSubstitutionPattern.setEnabled(!fRefactoring.isEclipseNLS());
 	}
 
 	private void createPropertyPart(Composite parent, final int nOfColumns, final int textWidth) {
-		createLabel(parent, NLSUIMessages.NLSAccessorConfigurationDialog_property_location, nOfColumns); 
+		createLabel(parent, NLSUIMessages.NLSAccessorConfigurationDialog_property_location, nOfColumns);
 		fResourceBundlePackage.createControl(parent, nOfColumns, textWidth);
 
 		fResourceBundleFile.doFillIntoGrid(parent, nOfColumns);
@@ -229,8 +229,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void browseForPropertyFile() {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_Property_File_Selection); 
-		dialog.setMessage(NLSUIMessages.NLSAccessorConfigurationDialog_Choose_the_property_file); 
+		dialog.setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_Property_File_Selection);
+		dialog.setMessage(NLSUIMessages.NLSAccessorConfigurationDialog_Choose_the_property_file);
 		dialog.setElements(createFileListInput());
 		dialog.setFilter('*' + NLSRefactoring.PROPERTY_FILE_EXT);
 		if (dialog.open() == Window.OK) {
@@ -243,13 +243,13 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	protected void browseForAccessorClass() {
 		IProgressService service= PlatformUI.getWorkbench().getProgressService();
 		IPackageFragmentRoot root= fAccessorPackage.getSelectedFragmentRoot();
-		
+
 		IJavaSearchScope scope= root != null ? SearchEngine.createJavaSearchScope(new IJavaElement[] { root }) : SearchEngine.createWorkspaceScope();
-		
-		FilteredTypesSelectionDialog  dialog= new FilteredTypesSelectionDialog (getShell(), false, 
+
+		FilteredTypesSelectionDialog  dialog= new FilteredTypesSelectionDialog (getShell(), false,
 			service, scope, IJavaSearchConstants.CLASS);
-		dialog.setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_Accessor_Selection); 
-		dialog.setMessage(NLSUIMessages.NLSAccessorConfigurationDialog_Choose_the_accessor_file); 
+		dialog.setTitle(NLSUIMessages.NLSAccessorConfigurationDialog_Accessor_Selection);
+		dialog.setMessage(NLSUIMessages.NLSAccessorConfigurationDialog_Choose_the_accessor_file);
 		dialog.setInitialPattern("*Messages"); //$NON-NLS-1$
 		if (dialog.open() == Window.OK) {
 			IType selectedType= (IType) dialog.getFirstResult();
@@ -277,7 +277,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			return result.toArray();
 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.NLSAccessorConfigurationDialog_externalizing, NLSUIMessages .NLSAccessorConfigurationDialog_exception); 
+			ExceptionHandler.handle(e, NLSUIMessages.NLSAccessorConfigurationDialog_externalizing, NLSUIMessages .NLSAccessorConfigurationDialog_exception);
 			return new Object[0];
 		}
 	}
@@ -301,7 +301,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 		validatePropertyFilename();
 		validatePropertyPackage();
-		
+
 		updateStatus(StatusUtil.getMostSevere(fStati));
 	}
 
@@ -315,7 +315,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		}
 
 		if (className.indexOf('.') != -1) {
-			setInvalid(IDX_ACCESSOR_CLASS, NLSUIMessages.NLSAccessorConfigurationDialog_no_dot); 
+			setInvalid(IDX_ACCESSOR_CLASS, NLSUIMessages.NLSAccessorConfigurationDialog_no_dot);
 			return;
 		}
 
@@ -325,12 +325,12 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void validatePropertyFilename() {
 		String fileName= fResourceBundleFile.getText();
 		if ((fileName == null) || (fileName.length() == 0)) {
-			setInvalid(IDX_BUNDLE_NAME, NLSUIMessages.NLSAccessorConfigurationDialog_enter_name); 
+			setInvalid(IDX_BUNDLE_NAME, NLSUIMessages.NLSAccessorConfigurationDialog_enter_name);
 			return;
 		}
 
 		if (!fileName.endsWith(NLSRefactoring.PROPERTY_FILE_EXT)) {
-			setInvalid(IDX_BUNDLE_NAME, Messages.format(NLSUIMessages.NLSAccessorConfigurationDialog_file_name_must_end, NLSRefactoring.PROPERTY_FILE_EXT)); 
+			setInvalid(IDX_BUNDLE_NAME, Messages.format(NLSUIMessages.NLSAccessorConfigurationDialog_file_name_must_end, NLSRefactoring.PROPERTY_FILE_EXT));
 			return;
 		}
 
@@ -338,19 +338,19 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	}
 
 	private void validatePropertyPackage() {
-		
+
 		IPackageFragmentRoot root= fResourceBundlePackage.getSelectedFragmentRoot();
 		if ((root == null) || !root.exists()) {
-			setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_property_package_root_invalid); 
+			setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_property_package_root_invalid);
 			return;
 		}
 
 		IPackageFragment fragment= fResourceBundlePackage.getSelected();
 		if ((fragment == null) || !fragment.exists()) {
-			setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_property_package_invalid); 
+			setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_property_package_invalid);
 			return;
 		}
-		
+
 		String pkgName= fragment.getElementName();
 
 		IStatus status= JavaConventionsUtil.validatePackageName(pkgName, root);
@@ -365,16 +365,16 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		try {
 			IJavaElement element= project.findElement(pkgPath);
 			if (element == null || !element.exists()) {
-				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_must_exist); 
+				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_must_exist);
 				return;
 			}
 			IPackageFragment fPkgFragment= (IPackageFragment) element;
 			if (!PackageBrowseAdapter.canAddPackage(fPkgFragment)) {
-				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_incorrect_package); 
+				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_incorrect_package);
 				return;
 			}
 			if (!PackageBrowseAdapter.canAddPackageRoot((IPackageFragmentRoot) fPkgFragment.getParent())) {
-				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_incorrect_package); 
+				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_incorrect_package);
 				return;
 			}
 		} catch (JavaModelException e) {
@@ -388,13 +388,13 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void checkPackageFragment() {
 		IPackageFragmentRoot root= fAccessorPackage.getSelectedFragmentRoot();
 		if ((root == null) || !root.exists()) {
-			setInvalid(IDX_ACCESSOR_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_accessor_package_root_invalid); 
+			setInvalid(IDX_ACCESSOR_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_accessor_package_root_invalid);
 			return;
 		}
 
 		IPackageFragment fragment= fAccessorPackage.getSelected();
 		if ((fragment == null) || !fragment.exists()) {
-			setInvalid(IDX_ACCESSOR_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_accessor_package_invalid); 
+			setInvalid(IDX_ACCESSOR_PACKAGE, NLSUIMessages.NLSAccessorConfigurationDialog_accessor_package_invalid);
 			return;
 		}
 		setValid(IDX_ACCESSOR_PACKAGE);
@@ -402,7 +402,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 	private void validateSubstitutionPattern() {
 		if ((fSubstitutionPattern.getText() == null) || (fSubstitutionPattern.getText().length() == 0)) {
-			setInvalid(IDX_SUBST_PATTERN, NLSUIMessages.NLSAccessorConfigurationDialog_substitution_pattern_missing); 
+			setInvalid(IDX_SUBST_PATTERN, NLSUIMessages.NLSAccessorConfigurationDialog_substitution_pattern_missing);
 		} else {
 			setValid(IDX_SUBST_PATTERN);
 		}
@@ -434,7 +434,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 		if (!fRefactoring.isEclipseNLS())
 			fRefactoring.setSubstitutionPattern(fSubstitutionPattern.getText());
-		
+
 		fRefactoring.setIsEclipseNLS(fRefactoring.detectIsEclipseNLS());
 	}
 

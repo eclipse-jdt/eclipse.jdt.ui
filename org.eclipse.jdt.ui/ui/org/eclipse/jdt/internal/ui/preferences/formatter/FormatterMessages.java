@@ -19,7 +19,7 @@ import org.eclipse.osgi.util.NLS;
  */
 final class FormatterMessages extends NLS {
 
-	private static final String BUNDLE_NAME= FormatterMessages.class.getName(); 
+	private static final String BUNDLE_NAME= FormatterMessages.class.getName();
 
 	private FormatterMessages() {
 		// Do not instantiate
@@ -307,7 +307,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_assignment_alignment;
 	public static String LineWrappingTabPage_binary_expression_wrap_operator;
 	public static String LineWrappingTabPage_binary_expression;
-	
+
 	public static String BlankLinesTabPage_preview_header;
 	public static String BlankLinesTabPage_compilation_unit_group_title;
 	public static String BlankLinesTabPage_compilation_unit_option_before_package;
@@ -343,9 +343,9 @@ final class FormatterMessages extends NLS {
 	public static String BracesTabPage_option_enum_declaration;
 	public static String BracesTabPage_option_enumconst_declaration;
 	public static String BracesTabPage_option_annotation_type_declaration;
-	
+
 	public static String CodingStyleConfigurationBlock_preview_title;
-	
+
 	public static String CommentsTabPage_group1_title;
 	public static String commentsTabPage_enable_javadoc_comment_formatting;
 	public static String CommentsTabPage_enable_line_comment_formatting;
@@ -377,7 +377,7 @@ final class FormatterMessages extends NLS {
 	public static String ControlStatementsTabPage_if_else_group_keep_else_on_same_line;
 	public static String ControlStatementsTabPage_if_else_group_keep_else_if_on_one_line;
 	public static String ControlStatementsTabPage_if_else_group_keep_guardian_clause_on_one_line;
-	
+
 	public static String IndentationTabPage_preview_header;
 	public static String IndentationTabPage_general_group_title;
 	public static String IndentationTabPage_general_group_option_tab_policy;
@@ -400,7 +400,7 @@ final class FormatterMessages extends NLS {
 	public static String IndentationTabPage_switch_group_option_indent_break_statements;
     public static String IndentationTabPage_indent_empty_lines;
 	public static String IndentationTabPage_use_tabs_only_for_leading_indentations;
-	
+
 	public static String ModifyDialog_tabpage_braces_title;
 	public static String ModifyDialog_tabpage_indentation_title;
 	public static String ModifyDialog_tabpage_whitespace_title;
@@ -432,18 +432,18 @@ final class FormatterMessages extends NLS {
 	public static String ProfileManager_default_profile_name;
 	public static String ProfileManager_eclipse_profile_name;
 	public static String ProfileManager_java_conventions_profile_name;
-	
+
 	public static String JavaPreview_formatter_exception;
 	public static String WhiteSpaceTabPage_sort_by_java_element;
 	public static String WhiteSpaceTabPage_sort_by_syntax_element;
-	
+
 	public static String AlreadyExistsDialog_message_profile_already_exists;
 	public static String AlreadyExistsDialog_message_profile_name_empty;
 	public static String AlreadyExistsDialog_dialog_title;
 	public static String AlreadyExistsDialog_dialog_label;
 	public static String AlreadyExistsDialog_rename_radio_button_desc;
 	public static String AlreadyExistsDialog_overwrite_radio_button_desc;
-	
+
 	public static String CodingStyleConfigurationBlock_save_profile_dialog_title;
 	public static String CodingStyleConfigurationBlock_save_profile_error_title;
 	public static String CodingStyleConfigurationBlock_save_profile_error_message;
@@ -464,21 +464,21 @@ final class FormatterMessages extends NLS {
 	public static String CodingStyleConfigurationBlock_error_serializing_xml_message;
 	public static String CodingStyleConfigurationBlock_delete_confirmation_title;
 	public static String CodingStyleConfigurationBlock_delete_confirmation_question;
-	
+
 	public static String CreateProfileDialog_status_message_profile_with_this_name_already_exists;
 	public static String CreateProfileDialog_status_message_profile_name_is_empty;
 	public static String CreateProfileDialog_dialog_title;
 	public static String CreateProfileDialog_profile_name_label_text;
 	public static String CreateProfileDialog_base_profile_label_text;
 	public static String CreateProfileDialog_open_edit_dialog_checkbox_text;
-	
+
 	public static String ModifyDialog_dialog_title;
 	public static String ModifyDialog_apply_button;
 	public static String ModifyDialogTabPage_preview_label_text;
-	
+
 	public static String ProfileManager_unmanaged_profile;
 	public static String ProfileManager_unmanaged_profile_with_name;
-	
+
 	public static String ModifyDialogTabPage_error_msg_values_text_unassigned;
 	public static String ModifyDialogTabPage_error_msg_values_items_text_unassigned;
 	public static String ModifyDialogTabPage_NumberPreference_error_invalid_key;

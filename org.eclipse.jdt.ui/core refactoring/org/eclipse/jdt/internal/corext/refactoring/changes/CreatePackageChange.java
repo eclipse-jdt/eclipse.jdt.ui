@@ -28,9 +28,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class CreatePackageChange extends ResourceChange {
-	
+
 	private IPackageFragment fPackageFragment;
-	
+
 	public CreatePackageChange(IPackageFragment pack) {
 		fPackageFragment= pack;
 	}
@@ -42,26 +42,26 @@ public class CreatePackageChange extends ResourceChange {
 		// redo change right now
 		return new RefactoringStatus();
 	}
-	
+
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.CreatePackageChange_Creating_package, 1); 
+			pm.beginTask(RefactoringCoreMessages.CreatePackageChange_Creating_package, 1);
 
 			if (fPackageFragment.exists()) {
-				return new NullChange();	
+				return new NullChange();
 			} else {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) fPackageFragment.getParent();
 				root.createPackageFragment(fPackageFragment.getElementName(), false, pm);
-				
-				return new DeleteResourceChange(fPackageFragment.getPath(), true); 
-			}		
+
+				return new DeleteResourceChange(fPackageFragment.getPath(), true);
+			}
 		} finally {
 			pm.done();
 		}
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.CreatePackageChange_Create_package; 
+		return RefactoringCoreMessages.CreatePackageChange_Create_package;
 	}
 
 	public Object getModifiedElement() {

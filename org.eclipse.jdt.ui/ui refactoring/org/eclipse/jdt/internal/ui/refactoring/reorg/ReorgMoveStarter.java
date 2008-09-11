@@ -12,11 +12,11 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 
@@ -47,7 +47,7 @@ public class ReorgMoveStarter {
 		Assert.isNotNull(moveProcessor);
 		fMoveProcessor= moveProcessor;
 	}
-	
+
 	public static ReorgMoveStarter create(IJavaElement[] javaElements, IResource[] resources, IReorgDestination destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
@@ -60,7 +60,7 @@ public class ReorgMoveStarter {
 			return null;
 		return new ReorgMoveStarter(processor);
 	}
-	
+
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 		Refactoring ref= new MoveRefactoring(fMoveProcessor);
 		if (fMoveProcessor.hasAllInputSet()) {
@@ -71,12 +71,12 @@ public class ReorgMoveStarter {
 		} else {
 			RefactoringWizard wizard= new ReorgMoveWizard(fMoveProcessor, ref);
 			/*
-			 * We want to get the shell from the refactoring dialog but it's not known at this point, 
+			 * We want to get the shell from the refactoring dialog but it's not known at this point,
 			 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 			 */
 			fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 			fMoveProcessor.setReorgQueries(new ReorgQueries(wizard));
-			new RefactoringStarter().activate(wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, fMoveProcessor.getSaveMode()); 
+			new RefactoringStarter().activate(wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, fMoveProcessor.getSaveMode());
 		}
 	}
 }

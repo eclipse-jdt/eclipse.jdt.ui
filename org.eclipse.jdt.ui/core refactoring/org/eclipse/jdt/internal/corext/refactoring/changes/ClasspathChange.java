@@ -32,18 +32,18 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class ClasspathChange extends ResourceChange {
-	
+
 	public static ClasspathChange addEntryChange(IJavaProject project, IClasspathEntry entryToAdd) throws JavaModelException {
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
 		IClasspathEntry[] newClasspath= new IClasspathEntry[rawClasspath.length + 1];
 		System.arraycopy(rawClasspath, 0, newClasspath, 0, rawClasspath.length);
 		newClasspath[rawClasspath.length]= entryToAdd;
-		
+
 		IPath outputLocation= project.getOutputLocation();
-		
+
 		return newChange(project, newClasspath, outputLocation);
 	}
-	
+
 	public static ClasspathChange removeEntryChange(IJavaProject project, IClasspathEntry entryToRemove) throws JavaModelException {
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
 		ArrayList newClasspath= new ArrayList();
@@ -55,10 +55,10 @@ public class ClasspathChange extends ResourceChange {
 		}
 		IClasspathEntry[] entries= (IClasspathEntry[]) newClasspath.toArray(new IClasspathEntry[newClasspath.size()]);
 		IPath outputLocation= project.getOutputLocation();
-		
+
 		return newChange(project, entries, outputLocation);
 	}
-	
+
 	public static ClasspathChange newChange(IJavaProject project, IClasspathEntry[] newClasspath, IPath outputLocation) {
 		if (!JavaConventions.validateClasspath(project, newClasspath, outputLocation).matches(IStatus.ERROR)) {
 			return new ClasspathChange(project, newClasspath, outputLocation);
@@ -74,17 +74,17 @@ public class ClasspathChange extends ResourceChange {
 		fProject= project;
 		fNewClasspath= newClasspath;
 		fOutputLocation= outputLocation;
-		
+
 		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
-	
+
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ClasspathChange_progress_message, 1);
 		try {
 			if (!JavaConventions.validateClasspath(fProject, fNewClasspath, fOutputLocation).matches(IStatus.ERROR)) {
 				IClasspathEntry[] oldClasspath= fProject.getRawClasspath();
 				IPath oldOutputLocation= fProject.getOutputLocation();
-				
+
 				fProject.setRawClasspath(fNewClasspath, fOutputLocation, new SubProgressMonitor(pm, 1));
 
 				return new ClasspathChange(fProject, oldClasspath, oldOutputLocation);
@@ -93,9 +93,9 @@ public class ClasspathChange extends ResourceChange {
 			}
 		} finally {
 			pm.done();
-		}		
+		}
 	}
-	
+
 	public String getName() {
 		return RefactoringCoreMessages.ClasspathChange_change_name;
 	}
@@ -103,7 +103,7 @@ public class ClasspathChange extends ResourceChange {
 	protected IResource getModifiedResource() {
 		return fProject.getResource();
 	}
-	
+
 	public Object getModifiedElement() {
 		return fProject;
 	}

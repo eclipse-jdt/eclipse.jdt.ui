@@ -16,21 +16,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 /**
  * A <code>TextChangeManager</code> manages associations between <code>ICompilationUnit</code>
  * or <code>IFile</code> and <code>TextChange</code> objects.
  */
 public class TextChangeManager {
-	
+
 	private Map/*<ICompilationUnit, TextChange>*/ fMap= new HashMap(10);
-	
+
 	private final boolean fKeepExecutedTextEdits;
-	
+
 	public TextChangeManager() {
 		this(false);
 	}
@@ -38,24 +39,24 @@ public class TextChangeManager {
 	public TextChangeManager(boolean keepExecutedTextEdits) {
 		fKeepExecutedTextEdits= keepExecutedTextEdits;
 	}
-	
+
 	/**
 	 * Adds an association between the given compilation unit and the passed
 	 * change to this manager.
-	 * 
+	 *
 	 * @param cu the compilation unit (key)
 	 * @param change the change associated with the compilation unit
 	 */
 	public void manage(ICompilationUnit cu, TextChange change) {
 		fMap.put(cu, change);
 	}
-	
+
 	/**
 	 * Returns the <code>TextChange</code> associated with the given compilation unit.
 	 * If the manager does not already manage an association it creates a one.
-	 * 
+	 *
 	 * @param cu the compilation unit for which the text buffer change is requested
-	 * @return the text change associated with the given compilation unit. 
+	 * @return the text change associated with the given compilation unit.
 	 */
 	public TextChange get(ICompilationUnit cu) {
 		TextChange result= (TextChange)fMap.get(cu);
@@ -66,21 +67,21 @@ public class TextChangeManager {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Removes the <tt>TextChange</tt> managed under the given key
 	 * <code>unit<code>.
-	 * 
+	 *
 	 * @param unit the key determining the <tt>TextChange</tt> to be removed.
 	 * @return the removed <tt>TextChange</tt>.
 	 */
 	public TextChange remove(ICompilationUnit unit) {
 		return (TextChange)fMap.remove(unit);
 	}
-	
+
 	/**
 	 * Returns all text changes managed by this instance.
-	 * 
+	 *
 	 * @return all text changes managed by this instance
 	 */
 	public TextChange[] getAllChanges(){
@@ -94,7 +95,7 @@ public class TextChangeManager {
 				return name1.compareTo(name2);
 			}
 		});
-		
+
 		TextChange[] textChanges= new TextChange[cus.length];
 		for (int i= 0; i < cus.length; i++) {
 			textChanges[i]= (TextChange) fMap.get(cus[i]);
@@ -104,13 +105,13 @@ public class TextChangeManager {
 
 	/**
 	 * Returns all compilation units managed by this instance.
-	 * 
+	 *
 	 * @return all compilation units managed by this instance
-	 */	
+	 */
 	public ICompilationUnit[] getAllCompilationUnits(){
 		return (ICompilationUnit[]) fMap.keySet().toArray(new ICompilationUnit[fMap.keySet().size()]);
 	}
-	
+
 	/**
 	 * Clears all associations between resources and text changes.
 	 */
@@ -120,10 +121,10 @@ public class TextChangeManager {
 
 	/**
 	 * Returns if any text changes are managed for the specified compilation unit.
-	 * 
+	 *
 	 * @param cu the compilation unit
 	 * @return <code>true</code> if any text changes are managed for the specified compilation unit and <code>false</code> otherwise
-	 */		
+	 */
 	public boolean containsChangesIn(ICompilationUnit cu){
 		return fMap.containsKey(cu);
 	}

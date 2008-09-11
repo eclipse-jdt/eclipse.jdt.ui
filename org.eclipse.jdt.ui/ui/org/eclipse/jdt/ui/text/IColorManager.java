@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.text;
 
 import org.eclipse.swt.graphics.Color;
+
 import org.eclipse.jface.text.source.ISharedTextColors;
 
 

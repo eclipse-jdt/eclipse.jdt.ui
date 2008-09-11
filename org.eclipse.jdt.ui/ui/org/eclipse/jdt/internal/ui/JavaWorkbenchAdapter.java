@@ -28,11 +28,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * An imlementation of the IWorkbenchAdapter for IJavaElements.
  */
 public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
-	
+
 	protected static final Object[] NO_CHILDREN= new Object[0];
-	
+
 	private JavaElementImageProvider fImageProvider;
-	
+
 	public JavaWorkbenchAdapter() {
 		fImageProvider= new JavaElementImageProvider();
 	}
@@ -43,7 +43,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 			try {
 				return ((IParent)je).getChildren();
 			} catch(JavaModelException e) {
-				JavaPlugin.log(e); 
+				JavaPlugin.log(e);
 			}
 		}
 		return NO_CHILDREN;
@@ -53,9 +53,9 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 		IJavaElement je= getJavaElement(element);
 		if (je != null)
 			return fImageProvider.getJavaImageDescriptor(je, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
-		
+
 		return null;
-		
+
 	}
 
 	public String getLabel(Object element) {
@@ -66,7 +66,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 		IJavaElement je= getJavaElement(element);
 		return je != null ? je.getParent() :  null;
 	}
-	
+
 	private IJavaElement getJavaElement(Object element) {
 		if (element instanceof IJavaElement)
 			return (IJavaElement)element;

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -19,6 +17,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -45,14 +45,14 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 public class DeleteWizard extends RefactoringWizard {
 
 	private final JavaDeleteProcessor fProcessor;
-	
+
 	public DeleteWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.DeleteWizard_1); 
+		setDefaultPageTitle(RefactoringMessages.DeleteWizard_1);
 		fProcessor= (JavaDeleteProcessor) refactoring.getAdapter(JavaDeleteProcessor.class);
 		fProcessor.setQueries(new ReorgQueries(this));
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
@@ -73,7 +73,7 @@ public class DeleteWizard extends RefactoringWizard {
 	public boolean needsProgressMonitor() {
 		return fProcessor.needsProgressMonitor();
 	}
-	
+
 	private static class DeleteInputPage extends MessageWizardPage {
 		private static final String PAGE_NAME= "DeleteInputPage"; //$NON-NLS-1$
 		private static final String DIALOG_SETTINGS_DELETE_SUB_PACKAGES= "deleteSubPackages"; //$NON-NLS-1$
@@ -101,8 +101,8 @@ public class DeleteWizard extends RefactoringWizard {
 					JavaPlugin.log(e);
 				setPageComplete(false);
 				if (e.isDoesNotExist())
-					return RefactoringMessages.DeleteWizard_12; 
-				return RefactoringMessages.DeleteWizard_2; 
+					return RefactoringMessages.DeleteWizard_12;
+				return RefactoringMessages.DeleteWizard_2;
 			}
 		}
 
@@ -117,7 +117,7 @@ public class DeleteWizard extends RefactoringWizard {
 		 * Adds the "delete subpackages" checkbox to the composite. Note that
 		 * this code assumes that the control of the parent is a Composite with
 		 * GridLayout and a horizontal span of 2.
-		 * 
+		 *
 		 * @see MessageWizardPage#createControl(Composite)
 		 */
 		private void addDeleteSubPackagesCheckBox() {
@@ -174,7 +174,7 @@ public class DeleteWizard extends RefactoringWizard {
 		protected boolean performFinish() {
 			return super.performFinish() || getDeleteProcessor().wasCanceled(); //close the dialog if canceled
 		}
-		
+
 		protected boolean saveSettings() {
 			if (getContainer() instanceof Dialog)
 				return ((Dialog) getContainer()).getReturnCode() == IDialogConstants.OK_ID;
@@ -192,21 +192,21 @@ public class DeleteWizard extends RefactoringWizard {
 			if (elements.length == 1) {
 				IJavaElement element= elements[0];
 				if (isDefaultPackageWithLinkedFiles(element))
-					return RefactoringMessages.DeleteWizard_3; 
+					return RefactoringMessages.DeleteWizard_3;
 
 				if (!isLinkedResource(element))
-					return RefactoringMessages.DeleteWizard_4; 
+					return RefactoringMessages.DeleteWizard_4;
 
 				if (isLinkedPackageOrPackageFragmentRoot(element))
 					//XXX workaround for jcore bugs 31998 and 31456 - linked packages or source folders cannot be deleted properly
-					return RefactoringMessages.DeleteWizard_6; 
-					
-				return RefactoringMessages.DeleteWizard_5; 
+					return RefactoringMessages.DeleteWizard_6;
+
+				return RefactoringMessages.DeleteWizard_5;
 			} else {
 				if (isLinked(getSelectedResources()[0])) //checked before that this will work
-					return RefactoringMessages.DeleteWizard_7; 
+					return RefactoringMessages.DeleteWizard_7;
 				else
-					return RefactoringMessages.DeleteWizard_8; 
+					return RefactoringMessages.DeleteWizard_8;
 			}
 		}
 
@@ -214,13 +214,13 @@ public class DeleteWizard extends RefactoringWizard {
 			IResource[] resources= getSelectedResources();
 			IJavaElement[] javaElements= getSelectedJavaElements();
 			if (!containsLinkedResources(resources, javaElements))
-				return RefactoringMessages.DeleteWizard_9; 
+				return RefactoringMessages.DeleteWizard_9;
 
 			if (!containsLinkedPackagesOrPackageFragmentRoots(javaElements))
-				return RefactoringMessages.DeleteWizard_10; 
+				return RefactoringMessages.DeleteWizard_10;
 
 			//XXX workaround for jcore bugs - linked packages or source folders cannot be deleted properly
-			return RefactoringMessages.DeleteWizard_11; 
+			return RefactoringMessages.DeleteWizard_11;
 		}
 
 		private static boolean isLinkedPackageOrPackageFragmentRoot(IJavaElement element) {
@@ -282,10 +282,10 @@ public class DeleteWizard extends RefactoringWizard {
 		private IResource[] getSelectedResources() {
 			return getDeleteProcessor().getResourcesToDelete();
 		}
-		
+
 		private JavaDeleteProcessor getDeleteProcessor() {
 			return fProcessor;
 		}
-		
+
 	}
 }

@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
  * A helper class to activate the UI of a refactoring
  */
 public class RefactoringStarter {
-	
+
 	private RefactoringStatus fStatus;
 
 	public boolean activate(RefactoringWizard wizard, Shell parent, String dialogTitle, int saveMode) {
@@ -46,11 +46,11 @@ public class RefactoringStarter {
 			return false; // User action got cancelled
 		}
 	}
-	
+
 	public RefactoringStatus getInitialConditionCheckingStatus() {
 		return fStatus;
 	}
-		
+
 	private boolean canActivate(RefactoringSaveHelper saveHelper, Shell shell) {
 		return saveHelper.saveEditors(shell);
 	}

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.util.zip.ZipFile;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,15 +22,13 @@ import org.eclipse.core.runtime.MultiStatus;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.ui.jarpackager.JarWriter3;
 
 /**
  * Jar builder for the plain jar exported. Does not export archives.
- * 
+ *
  * @since 3.4
  */
 public class PlainJarBuilder extends JarBuilder {

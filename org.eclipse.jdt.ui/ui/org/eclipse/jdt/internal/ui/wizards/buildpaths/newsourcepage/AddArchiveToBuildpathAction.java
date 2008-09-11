@@ -14,14 +14,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -56,21 +56,21 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 	public AddArchiveToBuildpathAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
-	
+
 	public AddArchiveToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
     }
-	
+
 	private AddArchiveToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.ADD_LIB_TO_BP);
-		
+
 		fContext= context;
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_label);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_EXTJAR);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -87,7 +87,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 		final IPath[] selected= BuildPathDialogAccess.chooseExternalJAREntries(shell);
 		if (selected == null)
 			return;
-		
+
 		try {
 			final IJavaProject javaProject= (IJavaProject)getSelectedElements().get(0);
             IStatus status= ClasspathModifier.checkAddExternalJarsPrecondition(selected, CPJavaProject.createFromExisting(javaProject));
@@ -99,7 +99,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
             } else if (status.getSeverity() == IStatus.WARNING) {
             	MessageDialog.openWarning(getShell(), NewWizardMessages.AddArchiveToBuildpathAction_InfoTitle, status.getMessage());
             }
-            
+
         	final IRunnableWithProgress runnable= new IRunnableWithProgress() {
         		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         			try {
@@ -124,12 +124,12 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
         } catch (InterruptedException e) {
         }
 	}
-	
+
 	private List addExternalJars(IPath[] jarPaths, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 
 			CPJavaProject cpProject= CPJavaProject.createFromExisting(project);
 			BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);

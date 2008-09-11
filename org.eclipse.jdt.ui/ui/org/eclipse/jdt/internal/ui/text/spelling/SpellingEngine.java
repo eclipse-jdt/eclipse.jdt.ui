@@ -42,7 +42,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 
 		/** Spelling problem collector */
 		private ISpellingProblemCollector fCollector;
-		
+
 		/**
 		 * The document.
 		 * @since 3.3
@@ -73,7 +73,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 			fProblemCount++;
 			fCollector.accept(new JavaSpellingProblem(event, fDocument));
 		}
-		
+
 		boolean isProblemsThresholdReached() {
 			return fProblemCount >= fProblemsThreshold;
 		}

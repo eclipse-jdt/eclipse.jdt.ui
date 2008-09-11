@@ -35,7 +35,7 @@ public abstract class ResizableDialog extends TrayDialog {
 	private static final String Y= "y"; //$NON-NLS-1$
 	private static final String WIDTH= "width"; //$NON-NLS-1$
 	private static final String HEIGHT= "height"; //$NON-NLS-1$
-	
+
 	protected ResourceBundle fBundle;
 	private Rectangle fNewBounds;
 	private IDialogSettings fSettings;
@@ -54,12 +54,12 @@ public abstract class ResizableDialog extends TrayDialog {
 		return true;
 	}
 
-	
+
 	protected Point getInitialSize() {
-		
+
 		int width= 0;
 		int height= 0;
-		
+
 		final Shell s= getShell();
 		if (s != null) {
 			s.addControlListener(
@@ -73,8 +73,8 @@ public abstract class ResizableDialog extends TrayDialog {
 				}
 			);
 		}
-		
-		IDialogSettings bounds= fSettings.getSection(DIALOG_BOUNDS_KEY); 
+
+		IDialogSettings bounds= fSettings.getSection(DIALOG_BOUNDS_KEY);
 		if (bounds == null) {
 			if (fBundle != null) {
 				width= JavaCompareUtilities.getInteger(fBundle, WIDTH, 0);
@@ -110,14 +110,14 @@ public abstract class ResizableDialog extends TrayDialog {
 			} catch (NumberFormatException e) {
 				height= 500;
 			}
-		}	
-	
+		}
+
 		return new Point(width, height);
 	}
-	
+
 	protected Point getInitialLocation(Point initialSize) {
 		Point loc= super.getInitialLocation(initialSize);
-		
+
 		IDialogSettings bounds= fSettings.getSection(DIALOG_BOUNDS_KEY);
 		if (bounds != null) {
 			try {
@@ -133,7 +133,7 @@ public abstract class ResizableDialog extends TrayDialog {
 		}
 		return loc;
 	}
-	
+
 	public boolean close() {
 		boolean closed= super.close();
 		if (closed && fNewBounds != null)

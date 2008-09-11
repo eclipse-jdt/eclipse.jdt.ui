@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.ui.texteditor.AddMarkerAction;
 import org.eclipse.ui.texteditor.ITextEditor;
 

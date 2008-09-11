@@ -49,29 +49,29 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 
 	public static final String ID= "ExceptionOccurrencesFinder"; //$NON-NLS-1$
-	
+
 	public static final String IS_EXCEPTION= "isException"; //$NON-NLS-1$
-	
+
 	private CompilationUnit fASTRoot;
 	private Name fSelectedName;
-	
+
 	private ITypeBinding fException;
 	private ASTNode fStart;
 	private List fResult;
 	private String fDescription;
-	
+
 	public ExceptionOccurrencesFinder() {
 		fResult= new ArrayList();
 	}
-	
+
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
-	
+
 	public String initialize(CompilationUnit root, ASTNode node) {
 		fASTRoot= root;
 		if (!(node instanceof Name)) {
-			return SearchMessages.ExceptionOccurrencesFinder_no_exception;  
+			return SearchMessages.ExceptionOccurrencesFinder_no_exception;
 		}
 		fSelectedName= ASTNodes.getTopMostName((Name)node);
 		ASTNode parent= fSelectedName.getParent();
@@ -98,7 +98,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		fDescription= Messages.format(SearchMessages.ExceptionOccurrencesFinder_occurrence_description, BasicElementLabels.getJavaElementName(fException.getName()));
 		return null;
 	}
-	
+
 	private MethodDeclaration resolveMethodDeclaration(ASTNode node) {
 		if (node instanceof MethodDeclaration)
 			return (MethodDeclaration)node;
@@ -109,7 +109,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			return (MethodDeclaration) doc.getParent();
 		return null;
 	}
-	
+
 	private boolean methodThrowsException(MethodDeclaration method, Name exception) {
 		ASTMatcher matcher = new ASTMatcher();
 		for (Iterator iter = method.thrownExceptions().iterator(); iter.hasNext();) {
@@ -119,7 +119,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return false;
 	}
-	
+
 	private void performSearch() {
 		fStart.accept(this);
 		if (fSelectedName != null) {
@@ -134,35 +134,35 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
-	
+
 	public int getSearchKind() {
 		return K_EXCEPTION_OCCURRENCE;
 	}
-	
-	
+
+
 	public CompilationUnit getASTRoot() {
 		return fASTRoot;
 	}
-		
+
 	public String getJobLabel() {
-		return SearchMessages.ExceptionOccurrencesFinder_searchfor ; 
+		return SearchMessages.ExceptionOccurrencesFinder_searchfor ;
 	}
-	
+
 	public String getElementName() {
 		if (fSelectedName != null) {
 			return ASTNodes.asString(fSelectedName);
 		}
 		return null;
 	}
-	
+
 	public String getUnformattedPluralLabel() {
 		return SearchMessages.ExceptionOccurrencesFinder_label_plural;
 	}
-	
+
 	public String getUnformattedSingularLabel() {
 		return SearchMessages.ExceptionOccurrencesFinder_label_singular;
 	}
-	
+
 	public boolean visit(AnonymousClassDeclaration node) {
 		return false;
 	}
@@ -174,7 +174,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(ClassInstanceCreation node) {
 		if (matches(node.resolveConstructorBinding())) {
 			Type type= node.getType();
@@ -182,7 +182,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(ConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
 			// mark 'this'
@@ -190,7 +190,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(MethodInvocation node) {
 		if (matches(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -198,7 +198,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(SuperConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
 			// mark 'super'
@@ -206,7 +206,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(SuperMethodInvocation node) {
 		if (matches(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -214,7 +214,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(ThrowStatement node) {
 		if (matches(node.getExpression().resolveTypeBinding())) {
 			// mark 'throw'
@@ -222,12 +222,12 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(TypeDeclarationStatement node) {
 		// don't dive into local type declarations.
 		return false;
 	}
-	
+
 	private boolean matches(IMethodBinding binding) {
 		if (binding == null)
 			return false;

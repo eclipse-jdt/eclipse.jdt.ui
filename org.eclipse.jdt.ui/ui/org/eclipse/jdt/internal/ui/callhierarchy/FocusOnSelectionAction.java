@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 75800: [call hierarchy] should allow searches for fields
@@ -42,7 +42,7 @@ class FocusOnSelectionAction extends Action {
 
 	public boolean canActionBeAdded() {
 		IMember[] members= getSelectedInputElements();
-		
+
 		if (members != null) {
 			if (members.length == 1) {
 				setText(Messages.format(CallHierarchyMessages.FocusOnSelectionAction_focusOn_text, BasicElementLabels.getJavaElementName(members[0].getElementName())));
@@ -50,7 +50,7 @@ class FocusOnSelectionAction extends Action {
 				setText(CallHierarchyMessages.FocusOnSelectionAction_focusOn_selected);
 			}
 			return true;
-			
+
 		} else {
 			return false;
 		}

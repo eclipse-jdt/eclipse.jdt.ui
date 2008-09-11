@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
 /**
  * Action to set the focus into the editor breadcrumb.
  * The breadcrumb is made visible if it is hidden.
- * 
+ *
  * @since 3.4
  */
 public class ShowInBreadcrumbAction extends Action {
@@ -50,7 +50,7 @@ public class ShowInBreadcrumbAction extends Action {
 	/**
 	 * Returns the preference key for the breadcrumb. The
 	 * value depends on the current perspective.
-	 * 
+	 *
 	 * @return the preference key or <code>null</code> if there's no perspective
 	 */
 	private String getPreferenceKey() {

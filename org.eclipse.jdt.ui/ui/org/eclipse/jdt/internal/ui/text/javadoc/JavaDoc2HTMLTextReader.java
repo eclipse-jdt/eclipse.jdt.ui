@@ -318,10 +318,10 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 				return "<code>" + substituteQualification(tagContent.substring(labelStart)) + "</code>";  //$NON-NLS-1$//$NON-NLS-2$
 			else
 				return substituteQualification(tagContent.substring(labelStart));
-			
+
 		} else if (TagElement.TAG_LITERAL.equals(tag)) {
 			return printLiteral(tagContent);
-			
+
 		} else if (TagElement.TAG_CODE.equals(tag)) {
 			return "<code>" + printLiteral(tagContent) + "</code>"; //$NON-NLS-1$//$NON-NLS-2$
 		}

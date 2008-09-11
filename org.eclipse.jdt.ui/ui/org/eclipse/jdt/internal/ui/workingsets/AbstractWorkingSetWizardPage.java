@@ -57,11 +57,11 @@ import org.eclipse.ui.dialogs.IWorkingSetPage;
  * right is used to show the working set content. Buttons to move content from right
  * to left and vice versa are available between the two viewers. A text field allows to
  * set/change the working sets name.
- * 
+ *
  * @since 3.1
  */
 public abstract class AbstractWorkingSetWizardPage extends WizardPage implements IWorkingSetPage {
-	
+
 	private final class AddedElementsFilter extends ViewerFilter {
 
 		/* (non-Javadoc)
@@ -70,14 +70,14 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			return !fSelectedElements.contains(element);
 		}
-		
+
 	}
-	
+
 	private Text fWorkingSetName;
 	private TreeViewer fTree;
 	private TableViewer fTable;
 	private ITreeContentProvider fTreeContentProvider;
-	
+
 	private boolean fFirstCheck;
 	private final HashSet fSelectedElements;
 	private IWorkingSet fWorkingSet;
@@ -88,16 +88,16 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		fSelectedElements= new HashSet();
 		fFirstCheck= true;
 	}
-	
+
 	/**
 	 * Returns the page id as specified in the extension point.
 	 * @return the page id
 	 */
 	protected abstract String getPageId();
-	
+
 	/**
 	 * Configure the tree viewer used on the left side of the dialog.
-	 * 
+	 *
 	 * Implementors must set:
 	 * <ul>
 	 * 	<li>The content provider</li>
@@ -110,14 +110,14 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	 *   <li>Any viewer filter</li>
 	 *   <li>The selection</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param tree the tree to configure
 	 */
 	protected abstract void configureTree(TreeViewer tree);
-	
+
 	/**
 	 * Configure the table viewer used on the right side of the dialog.
-	 * 
+	 *
 	 * Implementors must set:
 	 * <ul>
 	 *  <li>The label provider</li>
@@ -132,35 +132,35 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	 * 	<li>The viewers input</li>
 	 *  <li>Any viewer filter</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param table the table to configure
 	 */
 	protected abstract void configureTable(TableViewer table);
-	
+
 	/**
 	 * Returns the elements which are shown in the table initially. Return an empty
 	 * array if the table should be empty. The given working set is the working set
 	 * which will be configured by this dialog, or <b>null</b> if it does not yet
 	 * exist.
-	 * 
+	 *
 	 * @param workingSet the working set to configure or <b>null</b> if not yet exist
 	 * @return the elements to show in the table
 	 */
 	protected abstract Object[] getInitialWorkingSetElements(IWorkingSet workingSet);
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		
+
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		setControl(composite);
 
 		Label label= new Label(composite, SWT.WRAP);
-		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_name); 
+		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_name);
 		GridData gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_CENTER);
 		label.setLayoutData(gd);
 
@@ -173,7 +173,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 				}
 			}
 		);
-		
+
 		Composite leftCenterRightComposite= new Composite(composite, SWT.NONE);
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.heightHint= convertHeightInCharsToPixels(20);
@@ -182,7 +182,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		gridLayout.marginHeight= 0;
 		gridLayout.marginWidth= 0;
 		leftCenterRightComposite.setLayout(gridLayout);
-		
+
 		Composite leftComposite= new Composite(leftCenterRightComposite, SWT.NONE);
 		gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint= convertWidthInCharsToPixels(40);
@@ -191,14 +191,14 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		gridLayout.marginHeight= 0;
 		gridLayout.marginWidth= 0;
 		leftComposite.setLayout(gridLayout);
-		
+
 		Composite centerComposite = new Composite(leftCenterRightComposite, SWT.NONE);
 		gridLayout= new GridLayout(1, false);
 		gridLayout.marginHeight= 0;
 		gridLayout.marginWidth= 0;
 		centerComposite.setLayout(gridLayout);
 		centerComposite.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
-		
+
 		Composite rightComposite= new Composite(leftCenterRightComposite, SWT.NONE);
 		gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.widthHint= convertWidthInCharsToPixels(40);
@@ -207,22 +207,22 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		gridLayout.marginHeight= 0;
 		gridLayout.marginWidth= 0;
 		rightComposite.setLayout(gridLayout);
-		
+
 		createTree(leftComposite);
 		createTable(rightComposite);
-	
+
 		if (fWorkingSet != null)
 			fWorkingSetName.setText(fWorkingSet.getName());
 
 		initializeSelectedElements();
 		validateInput();
-		
+
 		fTable.setInput(fSelectedElements);
 		fTable.refresh(true);
 		fTree.refresh(true);
-				
+
 		createButtonBar(centerComposite);
-		
+
 		fWorkingSetName.setFocus();
 		fWorkingSetName.setSelection(0, fWorkingSetName.getText().length());
 
@@ -230,52 +230,52 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	}
 
 	private void createTree(Composite parent) {
-		
+
 		Label label= new Label(parent, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false));
 		label.setText(WorkingSetMessages.JavaWorkingSetPage_workspace_content);
-		
+
 		fTree= new TreeViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 		fTree.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		fTree.addFilter(new AddedElementsFilter());
 		fTree.setUseHashlookup(true);
-		
+
 		configureTree(fTree);
-		
+
 		fTreeContentProvider= (ITreeContentProvider) fTree.getContentProvider();
 	}
-	
+
 	private void createButtonBar(Composite parent) {
 		Label spacer= new Label(parent, SWT.NONE);
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
+
 		final Button addButton= new Button(parent, SWT.PUSH);
 		addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		addButton.setText(WorkingSetMessages.JavaWorkingSetPage_add_button);
 		addButton.setEnabled(!fTree.getSelection().isEmpty());
-		
+
 		final Button addAllButton= new Button(parent, SWT.PUSH);
 		addAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		addAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_addAll_button);
 		addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
-		
+
 		final Button removeButton= new Button(parent, SWT.PUSH);
 		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		removeButton.setText(WorkingSetMessages.JavaWorkingSetPage_remove_button);
 		removeButton.setEnabled(!fTable.getSelection().isEmpty());
-		
+
 		final Button removeAllButton= new Button(parent, SWT.PUSH);
 		removeAllButton.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		removeAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_removeAll_button);
 		removeAllButton.setEnabled(!fSelectedElements.isEmpty());
-		
+
 		fTree.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				addButton.setEnabled(!event.getSelection().isEmpty());
 			}
 		});
-		
+
 		addButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				addTreeSelection();
@@ -288,22 +288,22 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		fTree.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				addTreeSelection();
-				
+
 				removeAllButton.setEnabled(true);
 				addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
 			}
 		});
-		
+
 		fTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				removeButton.setEnabled(!event.getSelection().isEmpty());
 			}
 		});
-		
+
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				removeTableSelection();
-				
+
 				addAllButton.setEnabled(true);
 				removeAllButton.setEnabled(!fSelectedElements.isEmpty());
 			}
@@ -329,22 +329,22 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 				}
 				fTable.refresh();
 				fTree.refresh();
-				
+
 				addAllButton.setEnabled(false);
 				removeAllButton.setEnabled(true);
 			}
 		});
-		
+
 		removeAllButton.addSelectionListener(new SelectionAdapter() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 			 */
 			public void widgetSelected(SelectionEvent e) {
 				fSelectedElements.clear();
-				
+
 				fTable.refresh();
 				fTree.refresh();
-				
+
 				removeAllButton.setEnabled(false);
 				addAllButton.setEnabled(true);
 			}
@@ -443,7 +443,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	public void finish() {
 		String workingSetName= fWorkingSetName.getText();
 		HashSet elements= fSelectedElements;
-		
+
 		if (fWorkingSet == null) {
 			IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
 			fWorkingSet= workingSetManager.createWorkingSet(workingSetName, (IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
@@ -472,7 +472,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			}
 			closedProjectsToRemove.removeAll(closedProjectsToRetain);
 			elements.removeAll(closedProjectsToRemove);
-			
+
 			fWorkingSet.setName(workingSetName);
 			fWorkingSet.setElements((IAdaptable[]) elements.toArray(new IAdaptable[elements.size()]));
 		}

@@ -16,14 +16,13 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.CompletionProposal;
 
-
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 
 /**
  * Completions of inline tags such as &#x7b;&#x40;link &#x7d;. See {@link CompletionProposal#JAVADOC_INLINE_TAG}.
- * 
+ *
  * @since 3.2
  */
 public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletionProposal {
@@ -34,7 +33,7 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 		super(proposal, context);
 		Assert.isTrue(isInJavadoc());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
@@ -46,7 +45,7 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 //			return replacement.substring(0, replacement.length() - 1);
 		return replacement;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
@@ -57,7 +56,7 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 		boolean needsLinkedMode= true;
 		if (needsLinkedMode)
 			setCursorPosition(getCursorPosition() - 1); // before the closing curly brace
-		
+
 		super.apply(document, trigger, offset);
 
 		if (needsLinkedMode)

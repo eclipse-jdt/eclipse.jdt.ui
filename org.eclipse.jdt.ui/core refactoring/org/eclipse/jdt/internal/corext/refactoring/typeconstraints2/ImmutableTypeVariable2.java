@@ -39,10 +39,10 @@ public final class ImmutableTypeVariable2 extends ConstraintVariable2 {
 			return true;
 		if (other.getClass() != ImmutableTypeVariable2.class)
 			return false;
-		
+
 		return getType() == ((ImmutableTypeVariable2) other).getType();
 	}
-	
+
 	public String toString() {
 		return getType().getPrettySignature();
 	}

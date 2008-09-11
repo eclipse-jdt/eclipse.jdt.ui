@@ -24,13 +24,13 @@ import org.eclipse.jdt.core.IJavaElement;
  */
 class SealPackagesFilter  extends ViewerFilter {
 
-	private List fAllowedPackages;	
+	private List fAllowedPackages;
 
 	public SealPackagesFilter(List packages) {
 		fAllowedPackages= packages;
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
@@ -40,7 +40,7 @@ class SealPackagesFilter  extends ViewerFilter {
 			if (type == IJavaElement.JAVA_MODEL || type == IJavaElement.JAVA_PROJECT || type ==IJavaElement.PACKAGE_FRAGMENT_ROOT)
 				return true;
 			return (type == IJavaElement.PACKAGE_FRAGMENT && fAllowedPackages.contains(element));
-			
+
 		}
 		else
 			return false;

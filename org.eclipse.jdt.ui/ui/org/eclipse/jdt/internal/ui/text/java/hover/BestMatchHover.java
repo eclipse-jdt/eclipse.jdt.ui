@@ -115,16 +115,16 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
-		
+
 		checkTextHovers();
 		fBestHover= null;
-		
+
 		if (fInstantiatedTextHovers == null)
 			return null;
-		
+
 		for (Iterator iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
 			ITextHover hover= (ITextHover)iterator.next();
-			
+
 			if (hover instanceof ITextHoverExtension2) {
 				Object info= ((ITextHoverExtension2) hover).getHoverInfo2(textViewer, hoverRegion);
 				if (info != null) {
@@ -139,10 +139,10 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.0

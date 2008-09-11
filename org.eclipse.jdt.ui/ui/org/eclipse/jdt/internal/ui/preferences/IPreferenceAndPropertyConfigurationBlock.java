@@ -17,7 +17,7 @@ package org.eclipse.jdt.internal.ui.preferences;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 3.3
  */
 public interface IPreferenceAndPropertyConfigurationBlock extends IPreferenceConfigurationBlock {

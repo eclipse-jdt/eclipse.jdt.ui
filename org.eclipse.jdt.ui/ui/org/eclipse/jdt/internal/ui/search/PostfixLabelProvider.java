@@ -25,7 +25,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
-	
+
 	public PostfixLabelProvider(JavaSearchResultPage page) {
 		super(page);
 		fContentProvider= new LevelTreeContentProvider.FastJavaElementProvider();
@@ -37,15 +37,15 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 			return image;
 		return getParticipantImage(element);
 	}
-	
+
 	public String getText(Object element) {
 		String labelWithCounts= getLabelWithCounts(element, internalGetText(element));
 		return labelWithCounts + getQualification(element);
 	}
-	
+
 	private String getQualification(Object element) {
 		StringBuffer res= new StringBuffer();
-		
+
 		ITreeContentProvider provider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
 		Object visibleParent= provider.getParent(element);
 		Object realParent= fContentProvider.getParent(element);
@@ -71,7 +71,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 			return text;
 		return getParticipantText(element);
 	}
-	
+
 	private StyledString internalGetStyledText(Object element) {
 		StyledString text= super.getStyledText(element);
 		if (text != null && text.length() > 0)
@@ -92,7 +92,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		}
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */

@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
 
 public final class RenameLocalVariableWizard extends RenameRefactoringWizard {
 
 	public RenameLocalVariableWizard(Refactoring refactoring) {
 		super(
 				refactoring,
-				RefactoringMessages.RenameLocalVariableWizard_defaultPageTitle, 
-				RefactoringMessages.RenameTypeParameterWizard_inputPage_description, 
-				JavaPluginImages.DESC_WIZBAN_REFACTOR, IJavaHelpContextIds.RENAME_LOCAL_VARIABLE_WIZARD_PAGE); 
+				RefactoringMessages.RenameLocalVariableWizard_defaultPageTitle,
+				RefactoringMessages.RenameTypeParameterWizard_inputPage_description,
+				JavaPluginImages.DESC_WIZBAN_REFACTOR, IJavaHelpContextIds.RENAME_LOCAL_VARIABLE_WIZARD_PAGE);
 	}
 }

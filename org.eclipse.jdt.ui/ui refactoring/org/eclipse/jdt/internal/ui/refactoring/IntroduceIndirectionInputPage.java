@@ -59,7 +59,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 	 * The name of the intermediary method to be created.
 	 */
 	private Text fIntermediaryMethodName;
-	
+
 	private Combo fIntermediaryTypeName;
 	private static final int INTERMEDIARY_TYPE_COUNT= 10;
 	private static List fgIntermediaryTypes= new ArrayList(INTERMEDIARY_TYPE_COUNT);
@@ -78,15 +78,15 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		TextFieldNavigationHandler.install(textField);
 		return textField;
 	}
-	
+
 	private Combo createIntermediaryTypeCombo(Composite composite) {
 		final Combo textCombo= new Combo(composite, SWT.SINGLE | SWT.BORDER);
 		textCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		textCombo.setItems((String[]) fgIntermediaryTypes.toArray(new String[fgIntermediaryTypes.size()]));
 		textCombo.setVisibleItemCount(INTERMEDIARY_TYPE_COUNT);
-		
+
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false, true);
-		processor.setPackageFragment(getIntroduceIndirectionRefactoring().getInvocationPackage()); 
+		processor.setPackageFragment(getIntroduceIndirectionRefactoring().getInvocationPackage());
 		ControlContentAssistHelper.createComboContentAssistant(textCombo, processor);
 		TextFieldNavigationHandler.install(textCombo);
 		return textCombo;
@@ -136,7 +136,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		gd.horizontalSpan= 2;
 		gd.verticalIndent= 2;
 		enableReferencesCheckBox.setLayoutData(gd);
-		
+
 		fIntermediaryMethodName.setText(getIntroduceIndirectionRefactoring().getIntermediaryMethodName());
 		fIntermediaryTypeName.setText(getIntroduceIndirectionRefactoring().getIntermediaryClassName());
 
@@ -145,7 +145,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 				validateInput();
 			}
 		});
-		
+
 		enableReferencesCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				getIntroduceIndirectionRefactoring().setEnableUpdateReferences(enableReferencesCheckBox.getSelection());
@@ -157,7 +157,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 				validateInput();
 			}
 		});
-		
+
 		browseTypes.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				IType intermediaryType= chooseIntermediaryClass();
@@ -176,7 +176,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 			enableReferencesCheckBox.setEnabled(false);
 			getIntroduceIndirectionRefactoring().setEnableUpdateReferences(false);
 		}
-		
+
 		fIntermediaryMethodName.setFocus();
 		fIntermediaryMethodName.selectAll();
 		validateInput();
@@ -222,7 +222,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 			setMessage("", NONE); //$NON-NLS-1$
 		}
 	}
-	
+
 	protected boolean performFinish() {
 		storeIntermediaryTypeName();
 		return super.performFinish();

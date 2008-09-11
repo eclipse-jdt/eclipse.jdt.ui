@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -68,18 +68,18 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 /**
  * Surround a set of statements with a try/catch block.
- * 
+ *
  * Special case:
- * 
+ *
  * URL url= file.toURL();
- * 
+ *
  * In this case the variable declaration statement gets convert into a
- * declaration without initializer. So the body of the try/catch block 
- * only consists of new assignments. In this case we can't move the 
+ * declaration without initializer. So the body of the try/catch block
+ * only consists of new assignments. In this case we can't move the
  * selected nodes (e.g. the declaration) into the try block.
  */
 public class SurroundWithTryCatchRefactoring extends Refactoring {
-	
+
 	public static final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
 	public static final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
 
@@ -93,7 +93,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private ImportRewrite fImportRewrite;
 	private CodeScopeBuilder.Scope fScope;
 	private ASTNode[] fSelectedNodes;
-	
+
 	private LinkedProposalModel fLinkedProposalModel;
 
 	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection) {
@@ -105,11 +105,11 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection) {
 		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()));
 	}
-		
+
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length) {
 		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length));
 	}
-	
+
 	public LinkedProposalModel getLinkedProposalModel() {
 		return fLinkedProposalModel;
 	}
@@ -117,25 +117,25 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	public void setLeaveDirty(boolean leaveDirty) {
 		fLeaveDirty= leaveDirty;
 	}
-	
+
 	public boolean stopExecution() {
 		if (fAnalyzer == null)
 			return true;
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		return exceptions == null || exceptions.length == 0;
 	}
-	
+
 	/* non Java-doc
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.SurroundWithTryCatchRefactoring_name; 
+		return RefactoringCoreMessages.SurroundWithTryCatchRefactoring_name;
 	}
 
 	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		fRootNode= rootNode;
-			
+
 		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
 		fRootNode.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());
@@ -179,15 +179,15 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			fImportRewrite= StubUtility.createImportRewrite(fRootNode, true);
 
 			fLinkedProposalModel= new LinkedProposalModel();
-			
+
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
 				findScope(fSelection.getOffset(), fSelection.getLength());
 			fScope.setCursor(fSelection.getOffset());
-			
+
 			fSelectedNodes= fAnalyzer.getSelectedNodes();
-			
+
 			createTryCatchStatement(fCUnit.getBuffer(), fCUnit.findRecommendedLineSeparator());
-			
+
 			if (fImportRewrite.hasRecordedChanges()) {
 				TextEdit edit= fImportRewrite.rewriteImports(null);
 				root.addChild(edit);
@@ -201,11 +201,11 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
-	
+
 	private AST getAST() {
 		return fRootNode.getAST();
 	}
-	
+
 	private void createTryCatchStatement(org.eclipse.jdt.core.IBuffer buffer, String lineDelimiter) throws CoreException {
 		List result= new ArrayList(1);
 		TryStatement tryStatement= getAST().newTryStatement();
@@ -217,7 +217,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			tryStatement.catchClauses().add(catchClause);
 			SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
 			String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
-			
+
 			String name= fScope.createName(varName, false);
 			decl.setName(getAST().newSimpleName(name));
 			decl.setType(ASTNodeFactory.newType(getAST(), type));
@@ -289,8 +289,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 							expressionStatement= fRewriter.createGroupNode((ASTNode[])newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()]));
 						} else {
 							fRewriter.replace(
-								statement, 
-								fRewriter.createGroupNode((ASTNode[])newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()])), 
+								statement,
+								fRewriter.createGroupNode((ASTNode[])newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()])),
 								null);
 						}
 					} else {
@@ -320,7 +320,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			fRewriter.replace(fSelectedNodes[0], replacementNode, null);
 		} else {
 			ListRewrite source= fRewriter.getListRewrite(
-				fSelectedNodes[0].getParent(), 
+				fSelectedNodes[0].getParent(),
 				(ChildListPropertyDescriptor)fSelectedNodes[0].getLocationInParent());
 			ASTNode toMove= source.createMoveTarget(
 				fSelectedNodes[0], fSelectedNodes[fSelectedNodes.length - 1],
@@ -328,7 +328,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			statements.insertLast(toMove, null);
 		}
 	}
-	
+
 	private List getSpecialVariableDeclarationStatements() {
 		List result= new ArrayList(3);
 		VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
@@ -338,9 +338,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				result.add(parent);
 		}
 		return result;
-		
+
 	}
-	
+
 	private Statement getCatchBody(String type, String name, String lineSeparator) throws CoreException {
 		String s= StubUtility.getCatchBodyContent(fCUnit, type, name, fSelectedNodes[0], lineSeparator);
 		if (s == null) {

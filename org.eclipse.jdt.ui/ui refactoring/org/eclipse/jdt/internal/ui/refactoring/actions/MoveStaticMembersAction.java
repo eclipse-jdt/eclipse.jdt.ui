@@ -43,13 +43,13 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class MoveStaticMembersAction extends SelectionDispatchAction{
-	
+
 	private JavaEditor fEditor;
 
 	public MoveStaticMembersAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.RefactoringGroup_move_label);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 
 	public MoveStaticMembersAction(JavaEditor editor) {
@@ -57,7 +57,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-		
+
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(RefactoringAvailabilityTester.isMoveStaticMembersAvailable(getSelectedMembers(selection)));
@@ -72,7 +72,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
@@ -94,7 +94,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 			if (RefactoringAvailabilityTester.isMoveStaticMembersAvailable(members))
 				RefactoringExecutionStarter.startMoveStaticMembersRefactoring(members, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 
@@ -105,19 +105,19 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 				return;
 			IMember[] array= new IMember[]{member};
 			if (member != null && RefactoringAvailabilityTester.isMoveStaticMembersAvailable(array)){
-				RefactoringExecutionStarter.startMoveStaticMembersRefactoring(array, getShell());	
+				RefactoringExecutionStarter.startMoveStaticMembersRefactoring(array, getShell());
 			} else {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.MoveMembersAction_unavailable); 
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.MoveMembersAction_unavailable);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
-	
+
 	private static IMember[] getSelectedMembers(IStructuredSelection selection){
 		if (selection.isEmpty())
 			return null;
-		
+
 		for  (final Iterator iterator= selection.iterator(); iterator.hasNext(); ) {
 			if (! (iterator.next() instanceof IMember))
 				return null;

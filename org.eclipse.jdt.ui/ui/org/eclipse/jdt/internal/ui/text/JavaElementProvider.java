@@ -84,7 +84,7 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element != null)
 				return element;
-			
+
 			return EditorUtility.getEditorInputJavaElement(fEditor, false);
 		} catch (JavaModelException e) {
 			return null;

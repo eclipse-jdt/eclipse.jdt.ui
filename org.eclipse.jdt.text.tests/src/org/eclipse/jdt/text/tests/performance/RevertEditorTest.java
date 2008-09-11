@@ -11,27 +11,28 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.PartInitException;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public abstract class RevertEditorTest extends TextPerformanceTestCase {
-	
+
 	private static final int WARM_UP_RUNS= 10;
-	
+
 	private static final int MEASURED_RUNS= 5;
-	
+
 	private static final String REPLACE_TEXT= "XXX"; //$NON-NLS-1$
-	
+
 	private PerformanceMeter fPerformanceMeter;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		Performance performance= Performance.getDefault();
@@ -39,7 +40,7 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	protected void measureRevert(IFile file) throws PartInitException, BadLocationException {
 		int warmUpRuns= getWarmUpRuns();
 		int measuredRuns= getMeasuredRuns();
@@ -53,11 +54,11 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 				fPerformanceMeter.stop();
 			EditorTestHelper.runEventQueue(2000);
 		}
-		
+
 		fPerformanceMeter.commit();
 		assertPerformance(fPerformanceMeter);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fPerformanceMeter.dispose();

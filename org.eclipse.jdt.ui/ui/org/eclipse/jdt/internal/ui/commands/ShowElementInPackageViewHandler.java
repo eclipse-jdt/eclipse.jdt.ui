@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 /**
  * A command handler to show a java element in the package view.
- * 
+ *
  * @since 3.2
  */
 public class ShowElementInPackageViewHandler extends AbstractHandler {

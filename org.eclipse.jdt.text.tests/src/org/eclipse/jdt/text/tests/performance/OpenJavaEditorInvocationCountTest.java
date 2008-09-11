@@ -33,11 +33,11 @@ public class OpenJavaEditorInvocationCountTest extends OpenEditorTest {
 	private static final Class THIS= OpenJavaEditorInvocationCountTest.class;
 
 	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */

@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 /**
  * Creates a new monitoring create target queries.
- * 
+ *
  * @since 3.3
  */
 public final class MonitoringCreateTargetQueries implements ICreateTargetQueries {
@@ -23,7 +23,7 @@ public final class MonitoringCreateTargetQueries implements ICreateTargetQueries
 
 	/**
 	 * Creates a new monitoring create target queries.
-	 * 
+	 *
 	 * @param delegate
 	 *            the delegate
 	 * @param log
@@ -54,7 +54,7 @@ public final class MonitoringCreateTargetQueries implements ICreateTargetQueries
 
 	/**
 	 * Returns the create target execution log.
-	 * 
+	 *
 	 * @return the create target execution log
 	 */
 	public CreateTargetExecutionLog getCreateTargetExecutionLog() {
@@ -63,7 +63,7 @@ public final class MonitoringCreateTargetQueries implements ICreateTargetQueries
 
 	/**
 	 * Returns the delegate queries.
-	 * 
+	 *
 	 * @return the delegate queries
 	 */
 	public ICreateTargetQueries getDelegate() {

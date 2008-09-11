@@ -29,20 +29,20 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 public class ClasspathAttributeConfigurationDescriptors {
 
 	private static class Descriptor {
-	
+
 		private IConfigurationElement fConfigElement;
 		private ClasspathAttributeConfiguration fInstance;
-	
+
 		private static final String ATT_NAME = "attributeName"; //$NON-NLS-1$
-		private static final String ATT_CLASS = "class"; //$NON-NLS-1$	
-	
+		private static final String ATT_CLASS = "class"; //$NON-NLS-1$
+
 		public Descriptor(IConfigurationElement configElement) throws CoreException {
 			fConfigElement = configElement;
 			fInstance= null;
-	
+
 			String name = configElement.getAttribute(ATT_NAME);
 			String pageClassName = configElement.getAttribute(ATT_CLASS);
-	
+
 			if (name == null) {
 				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (missing attributeName)", null)); //$NON-NLS-1$
 			}
@@ -50,7 +50,7 @@ public class ClasspathAttributeConfigurationDescriptors {
 				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, "Invalid extension (missing class name): " + name, null)); //$NON-NLS-1$
 			}
 		}
-	
+
 		public ClasspathAttributeConfiguration getInstance() throws CoreException  {
 			if (fInstance == null) {
 				Object elem= CoreUtility.createExtension(fConfigElement, ATT_CLASS);
@@ -62,31 +62,31 @@ public class ClasspathAttributeConfigurationDescriptors {
 			}
 			return fInstance;
 		}
-		
+
 		public String getKey() {
 			return fConfigElement.getAttribute(ATT_NAME);
 		}
 	}
-	
+
 	private static final String ATT_EXTENSION = "classpathAttributeConfiguration"; //$NON-NLS-1$
-	
+
 	private HashMap fDescriptors;
-	
+
 	public ClasspathAttributeConfigurationDescriptors() {
 		fDescriptors= null;
 	}
-	
+
 	private HashMap getDescriptors() {
 		if (fDescriptors == null) {
 			fDescriptors= readExtensions();
 		}
 		return fDescriptors;
 	}
-	
+
 	public boolean containsKey(String attributeKey) {
 		return getDescriptors().containsKey(attributeKey);
 	}
-	
+
 	public ClasspathAttributeConfiguration get(final String attributeKey) {
 		final Descriptor desc= (Descriptor) getDescriptors().get(attributeKey);
 		if (desc == null) {
@@ -106,7 +106,7 @@ public class ClasspathAttributeConfigurationDescriptors {
 		});
 		return res[0];
 	}
-	
+
 	private static HashMap readExtensions() {
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		HashMap descriptors= new HashMap(elements.length * 2);

@@ -36,13 +36,13 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 /**
  * Inlines the value of a local variable at all places where a read reference
  * is used.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class InlineTempAction extends SelectionDispatchAction {
@@ -51,9 +51,9 @@ public class InlineTempAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public InlineTempAction(JavaEditor editor) {
@@ -61,26 +61,26 @@ public class InlineTempAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	/* package */ InlineTempAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.InlineTempAction_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
-	
+
 	//---- text selection ----------------------------------------------------------
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -90,15 +90,15 @@ public class InlineTempAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		RefactoringExecutionStarter.startInlineTempRefactoring(input, null, selection, getShell());	
+		RefactoringExecutionStarter.startInlineTempRefactoring(input, null, selection, getShell());
 	}
 
 	/*

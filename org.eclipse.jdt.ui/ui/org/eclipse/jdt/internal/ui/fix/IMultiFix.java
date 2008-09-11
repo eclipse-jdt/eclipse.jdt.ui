@@ -41,7 +41,7 @@ public interface IMultiFix extends ICleanUp {
 	 * <p>
 	 * <strong>This must be a fast operation, the result can be a guess.</strong>
 	 * </p>
-	 * 
+	 *
 	 * @param compilationUnit
 	 *            The compilation unit to fix not null
 	 * @param problem
@@ -53,7 +53,7 @@ public interface IMultiFix extends ICleanUp {
 	/**
 	 * Maximal number of problems this clean up will fix in compilation unit.
 	 * There may be less then the returned number but never more.
-	 * 
+	 *
 	 * @param compilationUnit
 	 *            The compilation unit to fix, not null
 	 * @return The maximal number of fixes or -1 if unknown.

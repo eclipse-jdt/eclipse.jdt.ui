@@ -24,15 +24,15 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 public class MarkerAdapterFactory implements IAdapterFactory {
 
 	private static Class[] PROPERTIES= new Class[0];
-	
+
 
 	private Object fSearchPageScoreComputer;
-	
+
 	public Class[] getAdapterList() {
 		updateLazyLoadedAdapters();
 		return PROPERTIES;
 	}
-	
+
 	public Object getAdapter(Object element, Class key) {
 		updateLazyLoadedAdapters();
 		if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key))
@@ -44,7 +44,7 @@ public class MarkerAdapterFactory implements IAdapterFactory {
 		if (fSearchPageScoreComputer == null && SearchUtil.isSearchPlugInActivated())
 			createSearchPageScoreComputer();
 	}
-	
+
 	private void createSearchPageScoreComputer() {
 		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
 		PROPERTIES= new Class[] {ISearchPageScoreComputer.class};

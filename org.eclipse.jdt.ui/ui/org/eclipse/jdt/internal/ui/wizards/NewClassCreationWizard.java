@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
 
@@ -27,23 +27,23 @@ public class NewClassCreationWizard extends NewElementWizard {
 
 	private NewClassWizardPage fPage;
     private boolean fOpenEditorOnFinish;
-	
+
 	public NewClassCreationWizard(NewClassWizardPage page, boolean openEditorOnFinish) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewClassCreationWizard_title);
-		
+
 		fPage= page;
 		fOpenEditorOnFinish= openEditorOnFinish;
 	}
-	
+
 	public NewClassCreationWizard() {
 		this(null, true);
 	}
-	
+
 	/*
 	 * @see Wizard#createPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
 		if (fPage == null) {
@@ -52,7 +52,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 		}
 		addPage(fPage);
 	}
-	
+
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#canRunForked()
 	 */
@@ -66,7 +66,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createType(monitor); // use the full progress monitor
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
@@ -80,7 +80,7 @@ public class NewClassCreationWizard extends NewElementWizard {
 				if (fOpenEditorOnFinish) {
 					openResource((IFile) resource);
 				}
-			}	
+			}
 		}
 		return res;
 	}

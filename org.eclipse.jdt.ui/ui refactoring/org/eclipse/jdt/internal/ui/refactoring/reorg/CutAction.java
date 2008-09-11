@@ -39,7 +39,7 @@ public class CutAction extends SelectionDispatchAction{
 
 	public CutAction(IWorkbenchSite site) {
 		super(site);
-		setText(ReorgMessages.CutAction_text); 
+		setText(ReorgMessages.CutAction_text);
 		fCopyToClipboardAction= new CopyToClipboardAction(site);
 
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
@@ -91,7 +91,7 @@ public class CutAction extends SelectionDispatchAction{
 		} catch (InterruptedException e) {
 			//OK
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 }

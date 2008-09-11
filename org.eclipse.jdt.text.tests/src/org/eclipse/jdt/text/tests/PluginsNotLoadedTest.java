@@ -41,11 +41,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * Tests whether the Java Editor forces the Search plug-in
  * to be loaded (which it should not).
- * 
+ *
  * @since 3.1
  */
 public class PluginsNotLoadedTest extends TestCase {
-	
+
 	private static String[] NOT_LOADED_BUNDLES= new String[] {
 			"org.apache.xerces",
 			"org.eclipse.jdt.astview",
@@ -183,14 +183,14 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.mortbay.jetty.source"
 		};
 
-	
+
 	private JavaEditor fEditor;
 
-	
+
 	public static Test setUpTest(Test someTest) {
 		return new JUnitProjectTestSetup(someTest);
 	}
-	
+
 	public static Test suite() {
 		return setUpTest(new TestSuite(PluginsNotLoadedTest.class));
 	}
@@ -198,7 +198,7 @@ public class PluginsNotLoadedTest extends TestCase {
 	/**
 	 * If a test suite uses this test and has other tests that cause plug-ins to be loaded then
 	 * those need to be indicated here.
-	 * 
+	 *
 	 * @param loadedPlugins plug-ins that are additionally loaded by the caller
 	 * @since 3.5
 	 */
@@ -218,7 +218,7 @@ public class PluginsNotLoadedTest extends TestCase {
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
@@ -227,7 +227,7 @@ public class PluginsNotLoadedTest extends TestCase {
 		EditorTestHelper.closeAllEditors();
 		fEditor= null;
 	}
-	
+
 	private JavaEditor openJavaEditor(IPath path) {
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 		assertTrue(file != null && file.exists());

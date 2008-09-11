@@ -33,11 +33,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaViewerFilter;
  * Working set filter for Java viewers.
  */
 public class WorkingSetFilter extends JavaViewerFilter {
-	
+
 	private static class WorkingSetCompareEntry {
 		private IPath fResourcePath;
 		private IJavaElement fJavaElement;
-		
+
 		public WorkingSetCompareEntry(IAdaptable a) {
 			if (a instanceof IJavaElement) {
 				init((IJavaElement) a);
@@ -65,7 +65,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 				}
 			}
 		}
-		
+
 		private void init(IResource resource) {
 			fJavaElement= JavaCore.create(resource);
 			fResourcePath= resource.getFullPath();
@@ -75,7 +75,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			fJavaElement= curr;
 			fResourcePath= curr.getPath();
 		}
-		
+
 		public boolean contains(WorkingSetCompareEntry element) {
 			if (fJavaElement != null && element.fJavaElement != null) {
 				IJavaElement other= element.fJavaElement;
@@ -87,7 +87,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 						}
 					}
 				}
-				
+
 				if (isAncestor(other, fJavaElement) || isAncestor(fJavaElement, other)) {
 					return true;
 				}
@@ -100,7 +100,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			}
 			return false;
 		}
-		
+
 		private boolean isAncestor(IJavaElement elem, IJavaElement parent) {
 			IJavaElement anc= elem.getAncestor(parent.getElementType());
 			if (parent.equals(anc)) {
@@ -115,28 +115,28 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			return false;
 		}
 	}
-	
+
 	private IWorkingSet fWorkingSet;
-	
+
 	private WorkingSetCompareEntry[] fCachedCompareEntries;
-	
+
 	public WorkingSetFilter() {
 		fWorkingSet= null;
 		fCachedCompareEntries= null;
 	}
-	
+
 	/**
 	 * Returns the working set which is used by this filter.
-	 * 
+	 *
 	 * @return the working set
 	 */
 	public IWorkingSet getWorkingSet() {
 		return fWorkingSet;
 	}
-		
+
 	/**
 	 * Sets this filter's working set.
-	 * 
+	 *
 	 * @param workingSet the working set
 	 */
 	public void setWorkingSet(IWorkingSet workingSet) {
@@ -154,7 +154,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	}
 
 	/**
-	 * Invoke when the content of the current working set changed. Clients are responsible to listen to changes and call this method. 
+	 * Invoke when the content of the current working set changed. Clients are responsible to listen to changes and call this method.
 	 */
 	public final void notifyWorkingSetContentChange() {
 		if (fWorkingSet != null) {
@@ -167,14 +167,14 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			fCachedCompareEntries= null;
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#freeFilter()
 	 */
 	protected void freeFilter() {
 		fCachedCompareEntries= null;
 	}
-	
+
 	/*
 	 * Overrides method from ViewerFilter.
 	 */
@@ -185,7 +185,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		if (element instanceof PackageFragmentRootContainer) {
 			return isEnclosing((PackageFragmentRootContainer)element);
 		}
-		
+
 		if (element instanceof IAdaptable)
 			return isEnclosing((IAdaptable)element);
 
@@ -212,7 +212,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		}
 		return false;
 	}
-	
+
 	private boolean isEnclosing(PackageFragmentRootContainer container) {
 		// check whether the containing package fragment roots are enclosed
 		IAdaptable[] roots= container.getChildren();
@@ -223,5 +223,5 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		}
 		return false;
 	}
-	
+
 }

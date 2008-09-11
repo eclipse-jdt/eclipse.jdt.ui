@@ -18,7 +18,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -41,14 +40,14 @@ public class JavadocLinkDialogLabelProvider extends LabelProvider {
 			String text= ref.getFullPath().lastSegment();
 			if (url != null) {
 				Object[] args= new Object[] { BasicElementLabels.getResourceName(text), BasicElementLabels.getURLPart(url.toExternalForm()) };
-				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_configuredentry, args); 
+				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_configuredentry, args);
 			} else {
-				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_notconfiguredentry, BasicElementLabels.getResourceName(text)); 
+				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_notconfiguredentry, BasicElementLabels.getResourceName(text));
 			}
 		}
 		return super.getText(element);
 	}
-	
+
 	public Image getImage(Object element) {
 		if (element instanceof JavadocLinkRef) {
 			JavadocLinkRef ref= (JavadocLinkRef) element;

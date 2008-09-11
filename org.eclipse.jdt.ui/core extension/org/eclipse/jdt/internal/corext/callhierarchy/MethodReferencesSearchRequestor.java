@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
@@ -37,7 +37,7 @@ class MethodReferencesSearchRequestor extends SearchRequestor {
         if (fRequireExactMatch && (match.getAccuracy() != SearchMatch.A_ACCURATE)) {
             return;
         }
-        
+
         if (match.isInsideDocComment()) {
             return;
         }

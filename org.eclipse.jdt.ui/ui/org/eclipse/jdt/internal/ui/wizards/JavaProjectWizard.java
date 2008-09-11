@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -52,7 +52,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	public JavaProjectWizard(NewJavaProjectWizardPageOne pageOne, NewJavaProjectWizardPageTwo pageTwo) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
+		setWindowTitle(NewWizardMessages.JavaProjectWizard_title);
 
 		fFirstPage= pageOne;
 		fSecondPage= pageTwo;
@@ -69,9 +69,9 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		if (fSecondPage == null)
 			fSecondPage= new NewJavaProjectWizardPageTwo(fFirstPage);
 		addPage(fSecondPage);
-		
+
 		fFirstPage.init(getSelection(), getActivePart());
-	}		
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
@@ -94,7 +94,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			}
 
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-			selectAndReveal(fSecondPage.getJavaProject().getProject());				
+			selectAndReveal(fSecondPage.getJavaProject().getProject());
 
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
@@ -107,7 +107,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		}
 		return res;
 	}
-	
+
 	private IWorkbenchPart getActivePart() {
 		IWorkbenchWindow activeWindow= getWorkbench().getActiveWorkbenchWindow();
 		if (activeWindow != null) {
@@ -120,10 +120,10 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	}
 
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
-		String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
-		String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
+		String title= NewWizardMessages.JavaProjectWizard_op_error_title;
+		String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;
 		ExceptionHandler.handle(e, getShell(), title, message);
-	}	
+	}
 
 	/*
 	 * Stores the configuration element for the wizard.  The config element will be used

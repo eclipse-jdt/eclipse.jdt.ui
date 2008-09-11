@@ -22,7 +22,7 @@ import org.eclipse.compare.IViewerCreator;
  * This indirection is necessary because only objects with a default
  * constructor can be created via an extension point
  * (this precludes Viewers).
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileViewerCreator implements IViewerCreator {

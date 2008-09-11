@@ -81,13 +81,13 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 	/**
 	 * Action to configure the problem severity of a compiler option.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static final class ConfigureProblemSeverityAction extends Action {
 
 		private static final String CONFIGURE_PROBLEM_SEVERITY_DIALOG_ID= "configure_problem_severity_dialog_id"; //$NON-NLS-1$
-		
+
 		private final IJavaProject fProject;
 		private final String fOptionId;
 		private final boolean fIsJavadocOption;
@@ -111,7 +111,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 			boolean showPropertyPage;
 
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			
+
 			if (! hasProjectSpecificOptions()) {
 				String message= Messages.format(
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_message,
@@ -121,7 +121,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_project,
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_workspace,
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_cancel };
-				
+
 				int result= OptionalMessageDialog.open(
 						CONFIGURE_PROBLEM_SEVERITY_DIALOG_ID, shell, JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_title, null, message, MessageDialog.QUESTION, buttons, 0,
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_checkBox_dontShowAgain);
@@ -138,7 +138,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 			} else {
 				showPropertyPage= true;
 			}
-			
+
 			Map data= new HashMap();
 			String pageId;
 			if (fIsJavadocOption) {
@@ -244,7 +244,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 			IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(input);
 			if (model == null)
 				return NO_PROPOSALS;
-			
+
 			ISourceViewer sourceViewer= null;
 			if (viewer instanceof ISourceViewer)
 				sourceViewer= (ISourceViewer) viewer;
@@ -274,7 +274,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 			super.fillToolBar(manager, infoControl);
 			if (!(annotation instanceof IJavaAnnotation))
 				return;
-			
+
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
 
 			String optionId= JavaCore.getOptionForConfigurableSeverity(javaAnnotation.getId());

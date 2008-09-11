@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVar
 public final class CollectionElementVariable2 extends ConstraintVariable2 {
 
 	public static final int NOT_DECLARED_TYPE_VARIABLE_INDEX= -1;
-	
+
 	private final ConstraintVariable2 fParentCv;
 	private final String fTypeVariableKey;
 	private final int fDeclarationTypeVariableIndex;
@@ -62,20 +62,20 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
 			return true;
 		if (other.getClass() != CollectionElementVariable2.class)
 			return false;
-		
+
 		CollectionElementVariable2 other2= (CollectionElementVariable2) other;
 		return fParentCv == other2.fParentCv
 				&& fTypeVariableKey.equals(other2.fTypeVariableKey);
 	}
-	
+
 	public int getDeclarationTypeVariableIndex() {
 		return fDeclarationTypeVariableIndex;
 	}
-	
+
 	public ConstraintVariable2 getParentConstraintVariable() {
 		return fParentCv;
 	}
-	
+
 	public ICompilationUnit getCompilationUnit() {
 		if (fParentCv instanceof ISourceConstraintVariable)
 			return ((ISourceConstraintVariable) fParentCv).getCompilationUnit();
@@ -84,7 +84,7 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
 //			//TODO: assert in constructor(s)
 //			return ((CollectionElementVariable2) fElementCv).getCompilationUnit();
 	}
-	
+
 	public String toString() {
 		return "Elem[" + fParentCv.toString() + ", " + fTypeVariableKey + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

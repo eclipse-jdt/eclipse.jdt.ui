@@ -37,7 +37,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * </li>
  * </ul>
  * </p>
- * 
+ *
  * @since 3.0
  */
 public interface IJavaFoldingStructureProvider {

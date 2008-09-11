@@ -16,10 +16,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -59,7 +59,7 @@ public class TemplateEngine {
 	 * The <code>JavaPlugin.getDefault().getTemplateContextRegistry()</code>
 	 * defines the supported context types.</p>
 	 *
-	 * @param contextType the context type 
+	 * @param contextType the context type
 	 */
 	public TemplateEngine(TemplateContextType contextType) {
 		Assert.isNotNull(contextType);
@@ -82,7 +82,7 @@ public class TemplateEngine {
 
 	/**
 	 * Returns the array of matching templates.
-	 * 
+	 *
 	 * @return the template proposals
 	 */
 	public TemplateProposal[] getResults() {
@@ -154,13 +154,13 @@ public class TemplateEngine {
 		else
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
 	 * Being completely selected means that all characters except the new line characters are
 	 * selected.
 	 *
-	 * @param viewer the text viewer 
+	 * @param viewer the text viewer
 	 * @return <code>true</code> if one or multiple lines are selected
 	 * @since 2.1
 	 */

@@ -13,9 +13,8 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.net.URL;
 
-import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
-
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
 
 /**
  * Dictionary for html tags.
@@ -56,7 +55,7 @@ public class HtmlTagDictionary extends AbstractSpellDictionary {
 		}
 		return true;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#stripNonLetters(java.lang.String)
 	 * @since 3.3

@@ -62,9 +62,9 @@ public class TypedSource {
 		Assert.isNotNull(source);
 		Assert.isTrue(canCreateForType(type));
 		fSource= source;
-		fType= type;				  
+		fType= type;
 	}
-	
+
 	public static TypedSource create(String source, int type) {
 		if (source == null || ! canCreateForType(type))
 			return null;
@@ -78,14 +78,14 @@ public class TypedSource {
 	public int getType() {
 		return fType;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object other) {
 		if (! (other instanceof TypedSource))
 			return false;
-		
+
 		TypedSource ts= (TypedSource)other;
 		return ts.getSource().equals(getSource()) && ts.getType() == getType();
 	}
@@ -98,7 +98,7 @@ public class TypedSource {
 	}
 
 	private static boolean canCreateForType(int type){
-		return 		type == IJavaElement.FIELD 
+		return 		type == IJavaElement.FIELD
 				|| 	type == IJavaElement.TYPE
 				|| 	type == IJavaElement.IMPORT_CONTAINER
 				|| 	type == IJavaElement.IMPORT_DECLARATION
@@ -106,8 +106,8 @@ public class TypedSource {
 				|| 	type == IJavaElement.METHOD
 				|| 	type == IJavaElement.PACKAGE_DECLARATION;
 	}
-	
-	
+
+
 	public static void sortByType(TypedSource[] typedSources){
 		Arrays.sort(typedSources, createTypeComparator());
 	}
@@ -129,18 +129,18 @@ public class TypedSource {
 				SourceTuple tuple= new SourceTuple(cu);
 				TypedSource[] ts= createTypedSources((IJavaElement) iterator.next(), tuple);
 				if (ts != null)
-					result.addAll(Arrays.asList(ts));				
+					result.addAll(Arrays.asList(ts));
 			}
 		}
-		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);		
+		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);
 	}
 
 	private static TypedSource[] createTypedSources(IJavaElement elem, SourceTuple tuple) throws CoreException {
 		if (! ReorgUtils.isInsideCompilationUnit(elem))
 			return null;
-		if (elem.getElementType() == IJavaElement.IMPORT_CONTAINER) 
+		if (elem.getElementType() == IJavaElement.IMPORT_CONTAINER)
 			return createTypedSourcesForImportContainer(tuple, (IImportContainer)elem);
-		else if (elem.getElementType() == IJavaElement.FIELD) 
+		else if (elem.getElementType() == IJavaElement.FIELD)
 			return new TypedSource[] {create(getFieldSource((IField)elem, tuple), elem.getElementType())};
 		return new TypedSource[] {create(getSourceOfDeclararationNode(elem, tuple.unit), elem.getElementType())};
 	}

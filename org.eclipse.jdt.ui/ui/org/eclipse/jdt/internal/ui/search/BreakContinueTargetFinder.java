@@ -45,13 +45,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * <p>
  * The target statement is a while, do, switch, for or a labeled statement.
  * Break is described in section 14.15 of the JLS3 and continue in section 14.16.</p>
- * 
+ *
  * @since 3.2
  */
 public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrencesFinder {
 
 	public static final String ID= "BreakContinueTargetFinder"; //$NON-NLS-1$
-	
+
 	private ASTNode fSelected;
 	private boolean fIsBreak;
 	private SimpleName fLabel;
@@ -69,7 +69,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
-	
+
 	/*
 	 * Initializes the finder. Returns error message or <code>null</code> if everything is OK.
 	 */
@@ -118,17 +118,17 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 			return cs.getLabel();
 		}
 	}
-		
+
 	/**
 	 * Returns the locations of all occurrences or <code>null</code> if no matches are found
-	 * 
+	 *
 	 * @return the locations of all occurrences or <code>null</code> if no matches are found
 	 */
 	public OccurrenceLocation[] getOccurrences() {
 		ASTNode targetNode= findTargetNode(fSelected);
 		if (!isEnclosingStatement(targetNode))
 			return null;
-		
+
 		List list= new ArrayList();
 		OccurrenceLocation location= getLocationForFirstToken(targetNode);
 		if (location != null) {

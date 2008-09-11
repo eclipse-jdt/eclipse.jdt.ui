@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.team.core.mapping.ISynchronizationContext;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -30,8 +32,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
-import org.eclipse.team.core.mapping.ISynchronizationContext;
-
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationCompareAdapter;
 
@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Java-aware synchronization compare adapter.
- * 
+ *
  * @since 3.2
  */
 public final class JavaSynchronizationCompareAdapter extends AbstractSynchronizationCompareAdapter {

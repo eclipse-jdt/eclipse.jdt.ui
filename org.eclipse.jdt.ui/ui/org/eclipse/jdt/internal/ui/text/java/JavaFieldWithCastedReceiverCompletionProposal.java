@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.StyledString;
 
@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 /**
  * Java completion proposal for {@link CompletionProposal#FIELD_REF_WITH_CASTED_RECEIVER}.
- * 
+ *
  * @since 3.4
  */
 public class JavaFieldWithCastedReceiverCompletionProposal extends JavaCompletionProposal {
@@ -35,7 +35,7 @@ public class JavaFieldWithCastedReceiverCompletionProposal extends JavaCompletio
 		Assert.isNotNull(proposal);
 		fProposal= proposal;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isPrefix(java.lang.String, java.lang.String)
 	 */

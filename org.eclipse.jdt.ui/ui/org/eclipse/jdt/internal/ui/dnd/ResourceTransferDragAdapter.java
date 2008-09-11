@@ -14,6 +14,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -21,12 +27,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSourceAdapter;
-import org.eclipse.swt.dnd.DragSourceEvent;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.TransferDragSourceListener;
@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * A drag adapter that transfers the current selection as </code>
- * IResource</code>. Only those elements in the selection are part 
+ * IResource</code>. Only those elements in the selection are part
  * of the transfer which can be converted into an <code>IResource
  * </code>.
  */
@@ -58,36 +58,36 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 	/**
 	 * Creates a new ResourceTransferDragAdapter for the given selection
 	 * provider.
-	 * 
+	 *
 	 * @param provider the selection provider to access the viewer's selection
 	 */
 	public ResourceTransferDragAdapter(ISelectionProvider provider) {
 		fProvider= provider;
 		Assert.isNotNull(fProvider);
 	}
-	
+
 	public Transfer getTransfer() {
 		return ResourceTransfer.getInstance();
 	}
-	
+
 	public void dragStart(DragSourceEvent event) {
 		event.doit= convertSelection().size() > 0;
 	}
-	
+
 	public void dragSetData(DragSourceEvent event) {
 		List resources= convertSelection();
 		event.data= resources.toArray(new IResource[resources.size()]);
 	}
-	
+
 	public void dragFinished(DragSourceEvent event) {
 		if (!event.doit)
 			return;
 
 		if (event.detail == DND.DROP_MOVE) {
 			handleFinishedDropMove(event);
-		}	
+		}
 	}
-	
+
 	private List convertSelection() {
 		ISelection s= fProvider.getSelection();
 		if (!(s instanceof IStructuredSelection))
@@ -108,12 +108,12 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		}
 		return result;
 	}
-	
+
 	private void handleFinishedDropMove(DragSourceEvent event) {
 		MultiStatus status= new MultiStatus(
-			JavaPlugin.getPluginId(), 
-			IJavaStatusConstants.INTERNAL_ERROR, 
-			JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_resource,  
+			JavaPlugin.getPluginId(),
+			IJavaStatusConstants.INTERNAL_ERROR,
+			JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_resource,
 			null);
 		List resources= convertSelection();
 		for (Iterator iter= resources.iterator(); iter.hasNext();) {
@@ -126,9 +126,9 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		}
 		if (status.getChildren().length > 0) {
 			Shell parent= SWTUtil.getShell(event.widget);
-			ErrorDialog error= new ErrorDialog(parent, 
-				JavaUIMessages.ResourceTransferDragAdapter_moving_resource,  
-				JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_files,  
+			ErrorDialog error= new ErrorDialog(parent,
+				JavaUIMessages.ResourceTransferDragAdapter_moving_resource,
+				JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_files,
 				status, IStatus.ERROR);
 			error.open();
 		}

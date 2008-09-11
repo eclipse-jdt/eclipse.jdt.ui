@@ -12,10 +12,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -25,6 +21,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
@@ -39,9 +39,9 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 /**
  * Wizard page for renaming a type (with similarly named elements)
- * 
+ *
  * @since 3.2
- * 
+ *
  */
 class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
@@ -139,7 +139,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	private ISimilarDeclarationUpdating getSimilarElementUpdating() {
 		return (ISimilarDeclarationUpdating) getRefactoring().getAdapter(ISimilarDeclarationUpdating.class);
 	}
-	
+
 	protected boolean performFinish() {
 		boolean returner= super.performFinish();
 		// check if we got deferred to the error page
@@ -154,7 +154,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	public IWizardPage getNextPage() {
 		RenameTypeWizard wizard= (RenameTypeWizard) getWizard();
 		IWizardPage nextPage;
-		
+
 		if (wizard.isRenameType()) {
 			final RenameTypeProcessor renameTypeProcessor= wizard.getRenameTypeProcessor();
 			try {
@@ -186,10 +186,10 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 			} else {
 				nextPage= computeSuccessorPage();
 			}
-			
+
 		} else
 			nextPage= computeSuccessorPage();
-		
+
 		nextPage.setPreviousPage(this);
 		return nextPage;
 	}

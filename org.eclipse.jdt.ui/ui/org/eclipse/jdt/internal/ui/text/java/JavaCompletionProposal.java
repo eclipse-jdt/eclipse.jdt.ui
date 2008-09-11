@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.StyledString;
 
@@ -26,7 +26,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided
 	 * information.
-	 * 
+	 *
 	 * @param replacementString the actual string to be inserted into the document
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
@@ -37,11 +37,11 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
 		this(replacementString, replacementOffset, replacementLength, image, new StyledString(displayString), relevance, false);
 	}
-	
+
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided
 	 * information.
-	 * 
+	 *
 	 * @param replacementString the actual string to be inserted into the document
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
@@ -52,11 +52,11 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance) {
 		this(replacementString, replacementOffset, replacementLength, image, displayString, relevance, false);
 	}
-	
+
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided
 	 * information.
-	 * 
+	 *
 	 * @param replacementString the actual string to be inserted into the document
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
@@ -69,11 +69,11 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance, boolean inJavadoc) {
 		this(replacementString, replacementOffset, replacementLength, image, displayString, relevance, inJavadoc, null);
 	}
-	
+
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided
 	 * information.
-	 * 
+	 *
 	 * @param replacementString the actual string to be inserted into the document
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
@@ -121,7 +121,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 		}
 		return isPrefix(prefix, word);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
 	 */

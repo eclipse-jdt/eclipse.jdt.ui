@@ -127,7 +127,7 @@ public class ASTFlattener extends GenericVisitor {
 	/**
 	 * Returns the string accumulated in the visit.
 	 *
-	 * @return the serialized 
+	 * @return the serialized
 	 */
 	public String getResult() {
 		return this.fBuffer.toString();
@@ -142,7 +142,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	public static String asString(ASTNode node) {
 		Assert.isTrue(node.getAST().apiLevel() == AST.JLS3);
-		
+
 		ASTFlattener flattener= new ASTFlattener();
 		node.accept(flattener);
 		return flattener.getResult();
@@ -153,11 +153,11 @@ public class ASTFlattener extends GenericVisitor {
 		Assert.isTrue(false, "No implementation to flatten node: " + node.toString()); //$NON-NLS-1$
 		return false;
 	}
-	
+
 	/**
 	 * Appends the text representation of the given modifier flags, followed by a single space.
 	 * Used for 3.0 modifiers and annotations.
-	 * 
+	 *
 	 * @param ext the list of modifier and annotation nodes
 	 * (element type: <code>IExtendedModifiers</code>)
 	 */
@@ -1425,7 +1425,7 @@ public class ASTFlattener extends GenericVisitor {
 					// enum constant declarations are separated by commas
 					this.fBuffer.append(", ");//$NON-NLS-1$
 				} else {
-					// semicolon separates last enum constant declaration from 
+					// semicolon separates last enum constant declaration from
 					// first class body declarations
 					this.fBuffer.append("; ");//$NON-NLS-1$
 				}

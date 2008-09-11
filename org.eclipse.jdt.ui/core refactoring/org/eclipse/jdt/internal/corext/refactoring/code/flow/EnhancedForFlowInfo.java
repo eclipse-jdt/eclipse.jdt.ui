@@ -17,20 +17,20 @@ class EnhancedForFlowInfo extends FlowInfo {
 			return;
 		mergeAccessModeSequential(info, context);
 	}
-	
+
 	public void mergeExpression(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
 		mergeAccessModeSequential(info, context);
 	}
-	
+
 	public void mergeAction(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
-		
+
 		info.mergeEmptyCondition(context);
-		
-		mergeSequential(info, context);		
+
+		mergeSequential(info, context);
 	}
 }
 

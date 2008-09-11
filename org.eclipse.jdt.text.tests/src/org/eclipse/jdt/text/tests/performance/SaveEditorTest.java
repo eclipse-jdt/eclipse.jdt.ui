@@ -13,6 +13,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -25,17 +26,17 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * @since 3.1
  */
 public abstract class SaveEditorTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= SaveEditorTest.class;
-	
+
 	private static final int WARM_UP_RUNS= 10;
-	
+
 	private static final int MEASURED_RUNS= 5;
-	
+
 	private static final String FILE_PREFIX= "StyledText";
-	
+
 	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/" + FILE_PREFIX;
-	
+
 	private static final String FILE_SUFFIX= ".java";
 
 	private AbstractTextEditor[] fEditors;
@@ -43,14 +44,14 @@ public abstract class SaveEditorTest extends TextPerformanceTestCase {
 	private static final int EDITORS= 10;
 
 	private boolean fWasAutobuilding;
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite(THIS.getName());
 		suite.addTest(SaveTextEditorTest.suite());
 		suite.addTest(SaveJavaEditorTest.suite());
 		return suite;
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
@@ -67,7 +68,7 @@ public abstract class SaveEditorTest extends TextPerformanceTestCase {
 
 	protected abstract String getEditorId();
 
-	protected void tearDown() throws Exception { 
+	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 		try {
@@ -78,14 +79,14 @@ public abstract class SaveEditorTest extends TextPerformanceTestCase {
 			EditorTestHelper.joinBackgroundActivities();
 		}
 	}
-	
+
 	public void test1() throws Exception {
 		measureRevert(getNullPerformanceMeter(), getWarmUpRuns());
 		measureRevert(createPerformanceMeter(), getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	protected void measureRevert(PerformanceMeter performanceMeter, int runs) throws Exception {
 		for (int i= 0; i < runs; i++) {
 			for (int j= 0; j < getNumberOfEditors(); j++)
@@ -100,7 +101,7 @@ public abstract class SaveEditorTest extends TextPerformanceTestCase {
 				assertFalse(fEditors[j].isDirty());
 		}
 	}
-	
+
 	private void dirtyEditor(ITextEditor editor) throws BadLocationException {
 		IDocument document= EditorTestHelper.getDocument(editor);
 		if (document.getLength() > 0 && document.getChar(0) == ' ')

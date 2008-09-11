@@ -20,7 +20,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 /**
  * Module for a JAR file which includes refactoring information to import.
- * 
+ *
  * @since 3.2
  */
 public final class JarImportData extends JarPackageData {
@@ -42,7 +42,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Returns the time stamp of the existing jar file.
-	 * 
+	 *
 	 * @return the time stamp, or <code>-1</code> if not available
 	 */
 	public long getExistingTimeStamp() {
@@ -51,7 +51,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Returns the package fragment root to update.
-	 * 
+	 *
 	 * @return the package fragment root, or <code>null</code>
 	 */
 	public IPackageFragmentRoot getPackageFragmentRoot() {
@@ -60,7 +60,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Returns the location of the new jar file.
-	 * 
+	 *
 	 * @return the location of the new jar file, or <code>null</code>
 	 */
 	public URI getRefactoringFileLocation() {
@@ -69,7 +69,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Returns the refactoring history.
-	 * 
+	 *
 	 * @return the refactoring history, or <code>null</code>
 	 */
 	public RefactoringHistory getRefactoringHistory() {
@@ -78,7 +78,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Should the jar file be renamed to the new file name?
-	 * 
+	 *
 	 * @return <code>true</code> if it should be renamed, <code>false</code>
 	 *         otherwise
 	 */
@@ -88,7 +88,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Sets the time stamp of the existing jar file.
-	 * 
+	 *
 	 * @param stamp
 	 *            the time stamp, or <code>-1</code> if not available
 	 */
@@ -101,7 +101,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Sets the package fragment root to update.
-	 * 
+	 *
 	 * @param root
 	 *            the package fragment root to set, or <code>null</code>
 	 */
@@ -111,7 +111,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Sets the location of the new jar file.
-	 * 
+	 *
 	 * @param uri
 	 *            the location of the new jar file, or <code>null</code>
 	 */
@@ -121,7 +121,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Sets the refactoring history.
-	 * 
+	 *
 	 * @param history
 	 *            the refactoring history to set, or <code>null</code>
 	 */
@@ -131,7 +131,7 @@ public final class JarImportData extends JarPackageData {
 
 	/**
 	 * Determines whether the jar file should be renamed.
-	 * 
+	 *
 	 * @param rename
 	 *            <code>true</code> to rename the jar file, <code>false</code>
 	 *            otherwise

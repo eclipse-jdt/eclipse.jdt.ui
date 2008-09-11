@@ -810,7 +810,7 @@ public final class JavaHeuristicScanner implements Symbols {
 		if (!contains(fCachedPartition, position)) {
 			Assert.isTrue(position >= 0);
 			Assert.isTrue(position <= fDocument.getLength());
-			
+
 			try {
 				fCachedPartition= TextUtilities.getPartition(fDocument, fPartitioning, position, false);
 			} catch (BadLocationException e) {
@@ -823,7 +823,7 @@ public final class JavaHeuristicScanner implements Symbols {
 
 	/**
 	 * Returns <code>true</code> if <code>region</code> contains <code>position</code>.
-	 * 
+	 *
 	 * @param region a region
 	 * @param position an offset
 	 * @return <code>true</code> if <code>region</code> contains <code>position</code>
@@ -872,29 +872,29 @@ public final class JavaHeuristicScanner implements Symbols {
 
 		return false;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the document, when scanned backwards from <code>start</code>
 	 * appears to contain a class instance creation, i.e. a possibly qualified name preceded by a
 	 * <code>new</code> keyword. The <code>start</code> must be at the end of the type name, and
 	 * before any generic signature or constructor parameter list. The heuristic will return
 	 * <code>true</code> if <code>start</code> is at the following positions (|):
-	 * 
+	 *
 	 * <pre>
 	 *  new java.util. ArrayList|&lt;String&gt;(10)
 	 *  new ArrayList |(10)
 	 *  new  / * comment  * / ArrayList |(10)
 	 * </pre>
-	 * 
+	 *
 	 * but not the following:
-	 * 
+	 *
 	 * <pre>
 	 *  new java.util. ArrayList&lt;String&gt;(10)|
 	 *  new java.util. ArrayList&lt;String&gt;|(10)
 	 *  new ArrayList (10)|
 	 *  ArrayList |(10)
 	 * </pre>
-	 * 
+	 *
 	 * @param start the position where the type name of the class instance creation supposedly ends
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with
 	 *        <code>bound</code> &lt; <code>start</code>, or <code>UNBOUND</code>

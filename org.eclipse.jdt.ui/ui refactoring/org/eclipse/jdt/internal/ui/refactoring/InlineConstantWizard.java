@@ -36,11 +36,11 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class InlineConstantWizard extends RefactoringWizard {
 
-	private static final String MESSAGE = RefactoringMessages.InlineConstantWizard_message; 
+	private static final String MESSAGE = RefactoringMessages.InlineConstantWizard_message;
 
 	public InlineConstantWizard(InlineConstantRefactoring ref) {
-		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
-		setDefaultPageTitle(RefactoringMessages.InlineConstantWizard_Inline_Constant); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		setDefaultPageTitle(RefactoringMessages.InlineConstantWizard_Inline_Constant);
 	}
 
 	/* non java-doc
@@ -49,22 +49,22 @@ public class InlineConstantWizard extends RefactoringWizard {
 	protected void addUserInputPages() {
 
 		String message= null;
-		int messageType= IMessageProvider.NONE;			
+		int messageType= IMessageProvider.NONE;
 		if(!getInlineConstantRefactoring().isInitializerAllStaticFinal()) {
-			message= RefactoringMessages.InlineConstantWizard_initializer_refers_to_fields; 
+			message= RefactoringMessages.InlineConstantWizard_initializer_refers_to_fields;
 			messageType= IMessageProvider.INFORMATION;
-		} else {	
+		} else {
 			message= MESSAGE;
 			messageType= IMessageProvider.NONE;
 		}
-		
+
 		addPage(new InlineConstantInputPage(message, messageType));
 	}
 
 	private InlineConstantRefactoring getInlineConstantRefactoring(){
 		return (InlineConstantRefactoring)getRefactoring();
 	}
-	
+
 	private static class InlineConstantInputPage extends UserInputWizardPage {
 
 		public static final String PAGE_NAME= "InlineConstantInputPage";//$NON-NLS-1$
@@ -74,7 +74,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 
 		private final int fOriginalMessageType;
 		private final String fOriginalMessage;
-	
+
 		public InlineConstantInputPage(String description, int messageType) {
 			super(PAGE_NAME);
 			fOriginalMessage= description;
@@ -87,7 +87,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 			fRefactoring= (InlineConstantRefactoring)getRefactoring();
 			fRefactoring.setReplaceAllReferences(fRefactoring.isDeclarationSelected());
 			fRefactoring.setRemoveDeclaration(true);
-			
+
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
 			GridLayout layout= new GridLayout();
@@ -96,15 +96,15 @@ public class InlineConstantWizard extends RefactoringWizard {
 
 			Label label= new Label(result, SWT.NONE);
 			String constantLabel= JavaElementLabels.getElementLabel(fRefactoring.getField(), JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
-			label.setText(Messages.format(RefactoringMessages.InlineConstantInputPage_Inline_constant, constantLabel)); 
+			label.setText(Messages.format(RefactoringMessages.InlineConstantInputPage_Inline_constant, constantLabel));
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 			Composite separator= new Composite(result, SWT.NONE);
 			separator.setLayoutData(new GridData(0, 0));
-			
+
 			final Button all= new Button(result, SWT.RADIO);
 			all.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			all.setText(RefactoringMessages.InlineConstantInputPage_All_references); 
+			all.setText(RefactoringMessages.InlineConstantInputPage_All_references);
 			all.setSelection(fRefactoring.getReplaceAllReferences());
 			all.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
@@ -117,7 +117,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalIndent= convertWidthInCharsToPixels(3);
 			fRemove.setLayoutData(gd);
-			fRemove.setText(RefactoringMessages.InlineConstantInputPage_Delete_constant); 
+			fRemove.setText(RefactoringMessages.InlineConstantInputPage_Delete_constant);
 			fRemove.setEnabled(all.getSelection());
 			fRemove.setSelection(fRefactoring.getRemoveDeclaration());
 			fRemove.addSelectionListener(new SelectionAdapter() {
@@ -126,10 +126,10 @@ public class InlineConstantWizard extends RefactoringWizard {
 				}
 			});
 
-		
+
 			final Button onlySelected= new Button(result, SWT.RADIO);
 			onlySelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			onlySelected.setText(RefactoringMessages.InlineConstantInputPage_Only_selected); 
+			onlySelected.setText(RefactoringMessages.InlineConstantInputPage_Only_selected);
 			onlySelected.setSelection(!fRefactoring.getReplaceAllReferences());
 			if (fRefactoring.isDeclarationSelected()) {
 				onlySelected.setEnabled(false);
@@ -143,9 +143,9 @@ public class InlineConstantWizard extends RefactoringWizard {
 					fRemove.setEnabled(false);
 				}
 			});
-			
+
 			Dialog.applyDialogFont(result);
-			
+
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_CONSTANT_WIZARD_PAGE);
 		}
 

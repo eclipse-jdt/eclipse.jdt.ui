@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder {
 
 	public static final String ID= "MethodExitsFinder"; //$NON-NLS-1$
-	
+
 	private MethodDeclaration fMethodDeclaration;
 	private List fResult;
 	private List fCatchedExceptions;
@@ -65,7 +65,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
-	
+
 	/**
 	 * @param root the AST root
 	 * @param node the selected node
@@ -73,15 +73,15 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	 */
 	public String initialize(CompilationUnit root, ASTNode node) {
 		fASTRoot= root;
-		
+
 		if (node instanceof ReturnStatement) {
 			fMethodDeclaration= (MethodDeclaration)ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
 			if (fMethodDeclaration == null)
 				return SearchMessages.MethodExitsFinder_no_return_type_selected;
 			return null;
-			
+
 		}
-		
+
 		Type type= null;
 		if (node instanceof Type) {
 			type= (Type)node;
@@ -92,10 +92,10 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 			}
 		}
 		if (type == null)
-			return SearchMessages.MethodExitsFinder_no_return_type_selected; 
+			return SearchMessages.MethodExitsFinder_no_return_type_selected;
 		type= ASTNodes.getTopMostType(type);
 		if (!(type.getParent() instanceof MethodDeclaration))
-			return SearchMessages.MethodExitsFinder_no_return_type_selected; 
+			return SearchMessages.MethodExitsFinder_no_return_type_selected;
 		fMethodDeclaration= (MethodDeclaration)type.getParent();
 
 		fExitDescription= Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_description, BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()));
@@ -120,9 +120,9 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 			return null;
 
 		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
-	}	
-	
-	
+	}
+
+
 	private void markReferences() {
 		fCatchedExceptions= new ArrayList();
 		boolean isVoid= true;
@@ -177,7 +177,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		fResult.add(new OccurrenceLocation(node.getStartPosition(), node.getLength(), 0, fExitDescription));
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(TryStatement node) {
 		int currentSize= fCatchedExceptions.size();
 		List catchClauses= node.catchClauses();
@@ -192,27 +192,27 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		for(int i= toRemove; i > 0; i--) {
 			fCatchedExceptions.remove(currentSize);
 		}
-		
+
 		// visit catch and finally
 		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
 			((CatchClause)iter.next()).accept(this);
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
-			
-		// return false. We have visited the body by ourselves.	
+
+		// return false. We have visited the body by ourselves.
 		return false;
 	}
-	
+
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (isExitPoint(exception)) {
 			// mark 'throw'
 			fResult.add(new OccurrenceLocation(node.getStartPosition(), 5, 0, fExitDescription));
-		}	
+		}
 		return true;
 	}
-	
+
 	public boolean visit(MethodInvocation node) {
 		if (isExitPoint(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -220,7 +220,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return true;
 	}
-	
+
 	public boolean visit(SuperMethodInvocation node) {
 		if (isExitPoint(node.resolveMethodBinding())) {
 			SimpleName name= node.getName();
@@ -228,7 +228,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return true;
 	}
-	
+
 	public boolean visit(ClassInstanceCreation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
 			Type name= node.getType();
@@ -236,7 +236,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return true;
 	}
-	
+
 	public boolean visit(ConstructorInvocation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
 			// mark 'this'
@@ -244,7 +244,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return true;
 	}
-	
+
 	public boolean visit(SuperConstructorInvocation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
 			// mark 'super'
@@ -252,13 +252,13 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return true;
 	}
-	
+
 	private boolean isExitPoint(ITypeBinding binding) {
 		if (binding == null)
 			return false;
 		return !isCatched(binding);
 	}
-	
+
 	private boolean isExitPoint(IMethodBinding binding) {
 		if (binding == null)
 			return false;
@@ -269,7 +269,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return false;
 	}
-	
+
 	private boolean isCatched(ITypeBinding binding) {
 		for (Iterator iter= fCatchedExceptions.iterator(); iter.hasNext();) {
 			ITypeBinding catchException= (ITypeBinding)iter.next();
@@ -278,12 +278,12 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return false;
 	}
-	
+
 	private boolean catches(ITypeBinding catchTypeBinding, ITypeBinding throwTypeBinding) {
 		while(throwTypeBinding != null) {
 			if (throwTypeBinding == catchTypeBinding)
 				return true;
-			throwTypeBinding= throwTypeBinding.getSuperclass();	
+			throwTypeBinding= throwTypeBinding.getSuperclass();
 		}
 		return false;
 	}

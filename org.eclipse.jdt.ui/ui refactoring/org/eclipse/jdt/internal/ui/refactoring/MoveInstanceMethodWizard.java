@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -26,6 +24,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -117,7 +117,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			control.setLayout(layout);
 
 			Label label= new Label(control, SWT.SINGLE);
-			label.setText(Messages.format(RefactoringMessages.MoveInstanceMethodPage_New_receiver, JavaElementLabels.getElementLabel(fProcessor.getMethod(), JavaElementLabels.ALL_DEFAULT | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_NAMES))); 
+			label.setText(Messages.format(RefactoringMessages.MoveInstanceMethodPage_New_receiver, JavaElementLabels.getElementLabel(fProcessor.getMethod(), JavaElementLabels.ALL_DEFAULT | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_NAMES)));
 
 			GridData data= new GridData();
 			data.horizontalSpan= 2;
@@ -132,11 +132,11 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			table.setLinesVisible(false);
 
 			TableColumn column= new TableColumn(table, SWT.NONE);
-			column.setText(RefactoringMessages.MoveInstanceMethodPage_Name); 
+			column.setText(RefactoringMessages.MoveInstanceMethodPage_Name);
 			column.setResizable(true);
 
 			column= new TableColumn(table, SWT.NONE);
-			column.setText(RefactoringMessages.MoveInstanceMethodPage_Type); 
+			column.setText(RefactoringMessages.MoveInstanceMethodPage_Type);
 			column.setResizable(true);
 
 			final TableViewer viewer= new TableViewer(table);
@@ -164,7 +164,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 							}
 						}
 						if (!success)
-							fTargetTypeStatus= RefactoringStatus.createWarningStatus(Messages.format(RefactoringMessages.MoveInstanceMethodPage_invalid_target, BasicElementLabels.getJavaElementName(target.getName()))); 
+							fTargetTypeStatus= RefactoringStatus.createWarningStatus(Messages.format(RefactoringMessages.MoveInstanceMethodPage_invalid_target, BasicElementLabels.getJavaElementName(target.getName())));
 						else
 							fTargetTypeStatus= new RefactoringStatus();
 						handleStatusChanged();
@@ -178,7 +178,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			composite.setLayoutData(data);
 
 			label= new Label(control, SWT.SINGLE);
-			label.setText(RefactoringMessages.MoveInstanceMethodPage_Method_name); 
+			label.setText(RefactoringMessages.MoveInstanceMethodPage_Method_name);
 			label.setLayoutData(new GridData());
 
 			fMethodNameField= new Text(control, SWT.SINGLE | SWT.BORDER);
@@ -196,7 +196,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			TextFieldNavigationHandler.install(fMethodNameField);
 
 			fTargetNameLabel= new Label(control, SWT.SINGLE);
-			fTargetNameLabel.setText(RefactoringMessages.MoveInstanceMethodPage_Target_name); 
+			fTargetNameLabel.setText(RefactoringMessages.MoveInstanceMethodPage_Target_name);
 			fTargetNameLabel.setLayoutData(new GridData());
 
 			fTargetNameField= new Text(control, SWT.SINGLE | SWT.BORDER);
@@ -204,7 +204,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			if (name != null && name.length() > 0)
 				fTargetNameField.setText(fProcessor.getTargetName());
 			else {
-				setPageComplete(RefactoringStatus.createInfoStatus(RefactoringCoreMessages.Checks_Choose_name)); 
+				setPageComplete(RefactoringStatus.createInfoStatus(RefactoringCoreMessages.Checks_Choose_name));
 				setPageComplete(false);
 			}
 			fTargetNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -226,7 +226,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			Composite delegateComposite= new Composite(control, SWT.NONE);
 			delegateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 			delegateComposite.setLayout(SWTUtil.newLayoutNoMargins(1));
-			
+
 			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(delegateComposite, getRefactoring(), false);
 			if (fLeaveDelegateCheckBox != null) {
 				fDeprecateDelegateCheckBox= new Button(delegateComposite, SWT.CHECK);
@@ -258,7 +258,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			Dialog.applyDialogFont(control);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
 		}
-		
+
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
@@ -281,7 +281,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 		/**
 		 * Handles the target changed event.
-		 * 
+		 *
 		 * @param target the changed target
 		 */
 		protected final void handleTargetChanged(final IVariableBinding target) {
@@ -333,14 +333,14 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 	/**
 	 * Creates a new move instance method wizard.
-	 * 
+	 *
 	 * @param processor the processor
 	 * @param refactoring the refactoring to host
 	 */
 	public MoveInstanceMethodWizard(MoveInstanceMethodProcessor processor, Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		fProcessor= processor;
-		setDefaultPageTitle(RefactoringMessages.MoveInstanceMethodWizard_Move_Method); 
+		setDefaultPageTitle(RefactoringMessages.MoveInstanceMethodWizard_Move_Method);
 	}
 
 	/*

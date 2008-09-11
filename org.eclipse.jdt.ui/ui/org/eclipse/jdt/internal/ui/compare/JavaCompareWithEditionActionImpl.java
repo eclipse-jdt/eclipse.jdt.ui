@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.eclipse.team.ui.TeamUI;
+import org.eclipse.team.ui.history.HistoryPageCompareEditorInput;
+
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -20,9 +23,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareUI;
 
-import org.eclipse.team.ui.TeamUI;
-import org.eclipse.team.ui.history.HistoryPageCompareEditorInput;
-
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -32,28 +32,28 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  * Provides "Replace from local history" for Java elements.
  */
 class JavaCompareWithEditionActionImpl extends JavaHistoryActionImpl {
-	
+
 	private static boolean USE_MODAL_COMPARE = false;
-	
+
 	JavaCompareWithEditionActionImpl() {
 		super(false);
-	}	
-	
+	}
+
 	public void run(ISelection selection) {
-				
+
 		IMember input= getEditionElement(selection);
 		if (input == null) {
 			MessageDialog.openInformation(getShell(), CompareMessages.CompareWithHistory_title, CompareMessages.CompareWithHistory_invalidSelectionMessage);
 			return;
 		}
-		
+
 		JavaElementHistoryPageSource pageSource = JavaElementHistoryPageSource.getInstance();
 		final IFile file= pageSource.getFile(input);
 		if (file == null) {
 			MessageDialog.openError(getShell(), CompareMessages.CompareWithHistory_title, CompareMessages.CompareWithHistory_internalErrorMessage);
 			return;
 		}
-		
+
 		if (USE_MODAL_COMPARE) {
 			CompareConfiguration cc = new CompareConfiguration();
 			cc.setLeftEditable(false);

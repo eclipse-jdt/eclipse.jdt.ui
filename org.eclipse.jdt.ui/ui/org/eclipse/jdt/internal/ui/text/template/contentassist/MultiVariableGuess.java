@@ -16,10 +16,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -197,7 +197,7 @@ public class MultiVariableGuess {
 			choices= variable.getChoices();
 		else
 			choices= variable.getChoices(master.getCurrentChoice());
-		
+
 		if (choices == null)
 			return null;
 
@@ -228,7 +228,7 @@ public class MultiVariableGuess {
 			return ret;
 		}
 	}
-	
+
 	private void updateSlaves(MultiVariable variable, IDocument document, Object oldChoice) {
 		Object choice= variable.getCurrentChoice();
 		if (!oldChoice.equals(choice)) {
@@ -273,7 +273,7 @@ public class MultiVariableGuess {
 			if (parent == slave)
 				throw new IllegalArgumentException("cycle detected"); //$NON-NLS-1$
 		}
-		
+
 		Set slaves= (Set) fDependencies.get(master);
 		if (slaves == null) {
 			slaves= new HashSet();

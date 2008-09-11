@@ -18,16 +18,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
@@ -46,6 +36,16 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -66,6 +66,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
@@ -123,7 +124,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		/**
 		 * Creates a source attachment form for a class file.
-		 * 
+		 *
 		 * @param file the class file
 		 */
 		public SourceAttachmentForm(IClassFile file) {
@@ -132,7 +133,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		/**
 		 * Returns the package fragment root of this file.
-		 * 
+		 *
 		 * @param file the class file
 		 * @return the package fragment root of the given class file
 		 */
@@ -147,7 +148,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		/**
 		 * Creates the control of the source attachment form.
-		 * 
+		 *
 		 * @param parent the parent composite
 		 * @return the creates source attachment form
 		 */
@@ -207,9 +208,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			fNoSourceTextWidget= createCodeView(fComposite);
 			data= new GridData(GridData.FILL_BOTH);
 			fNoSourceTextWidget.setLayoutData(data);
-			
+
 			updateCodeView(fNoSourceTextWidget, fFile);
-			
+
 			return fComposite;
 		}
 
@@ -492,7 +493,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	private CompositeActionGroup fContextMenuGroup;
 
 	private InputUpdater fInputUpdater= new InputUpdater();
-	
+
 	/**
 	 * The copy action used when there's attached source.
 	 * @since 3.3
@@ -507,12 +508,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/**
 	 * StyledText widget used to show the disassembled code.
 	 * if there's no source.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	private StyledText fNoSourceTextWidget;
 
-	
+
 	/**
 	 * Default constructor.
 	 */
@@ -672,7 +673,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			((ClassFileDocumentProvider) documentProvider).addInputChangeListener(this);
 
 		verifyInput(getEditorInput());
-		
+
 		final ITypeRoot inputElement= getInputJavaElement();
 
 		Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
@@ -697,7 +698,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		job.setPriority(Job.DECORATE);
 		job.setSystem(true);
 		job.schedule();
-		
+
 	}
 
 	/*
@@ -744,7 +745,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 	/**
 	 * Checks if the class file input has no source attached. If so, a source attachment form is shown.
-	 * 
+	 *
 	 * @param input the editor input
 	 * @throws JavaModelException if an exception occurs while accessing its corresponding resource
 	 */
@@ -755,9 +756,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 		IClassFile file= classFileEditorInput.getClassFile();
-		
+
 		IAction copyQualifiedName= getAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
-		
+
 		boolean wasUsingSourceCopyAction= fSourceCopyAction == getAction(ITextEditorActionConstants.COPY);
 
 		// show source attachment form if no source found
@@ -790,7 +791,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					public void widgetDefaultSelected(SelectionEvent e) {
 					}
 				});
-				
+
 				// Select All action for the no attached source case
 				final IAction selectAllAction= new Action() {
 					public void run() {
@@ -802,8 +803,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				setAction(ITextEditorActionConstants.SELECT_ALL, selectAllAction);
 				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
 				copyQualifiedName.setEnabled(false);
-				
-				
+
+
 			}
 
 		} else { // show source viewer
@@ -821,12 +822,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			copyQualifiedName.setEnabled(true);
 
 		}
-		
+
 		IAction currentCopyAction= getAction(ITextEditorActionConstants.COPY);
 		boolean isUsingSourceCopyAction=  fSourceCopyAction == currentCopyAction;
 		if (wasUsingSourceCopyAction != isUsingSourceCopyAction) {
 			IActionBars actionBars= getEditorSite().getActionBars();
-			
+
 			if (isUsingSourceCopyAction) {
 				createNavigationActions();
 			} else {
@@ -836,12 +837,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					setAction(entry.getActionId(), null);
 				}
 			}
-			
+
 			actionBars.setGlobalActionHandler(ITextEditorActionConstants.COPY, currentCopyAction);
 			actionBars.setGlobalActionHandler(ITextEditorActionConstants.SELECT_ALL, getAction(ITextEditorActionConstants.SELECT_ALL));
 			actionBars.updateActionBars();
 		}
-		
+
 	}
 
 	/*

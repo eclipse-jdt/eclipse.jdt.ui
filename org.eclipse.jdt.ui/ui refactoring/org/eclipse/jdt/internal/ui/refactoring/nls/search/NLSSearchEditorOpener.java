@@ -11,9 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.ui.search.JavaSearchEditorOpener;
 import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.ui.search.JavaSearchEditorOpener;
 
 /**
  */

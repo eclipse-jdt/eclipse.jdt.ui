@@ -32,7 +32,7 @@ public class MemberFilter extends ViewerFilter {
 	public static final int FILTER_STATIC= 2;
 	public static final int FILTER_FIELDS= 4;
 	public static final int FILTER_LOCALTYPES= 8;
-	
+
 	private int fFilterProperties;
 
 
@@ -46,7 +46,7 @@ public class MemberFilter extends ViewerFilter {
 	/**
 	 * Modifies filter and remove a property to filter for
 	 * @param filter the filter to remove
-	 */	
+	 */
 	public final void removeFilter(int filter) {
 		fFilterProperties &= (-1 ^ filter);
 	}
@@ -54,20 +54,20 @@ public class MemberFilter extends ViewerFilter {
 	 * Tests if a property is filtered
 	 * @param filter the filter to test
 	 * @return returns the result of the test
-	 */		
+	 */
 	public final boolean hasFilter(int filter) {
 		return (fFilterProperties & filter) != 0;
 	}
-	
+
 	/*
 	 * @see ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */		
+	 */
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		try {
 			if (element instanceof IMember) {
 				IMember member= (IMember) element;
 				int memberType= member.getElementType();
-				
+
 				if (hasFilter(FILTER_FIELDS) && memberType == IJavaElement.FIELD) {
 					return false;
 				}
@@ -75,7 +75,7 @@ public class MemberFilter extends ViewerFilter {
 				if (hasFilter(FILTER_LOCALTYPES) && memberType == IJavaElement.TYPE && isLocalType((IType) member)) {
 					return false;
 				}
-				
+
 				if (member.getElementName().startsWith("<")) { // filter out <clinit> //$NON-NLS-1$
 					return false;
 				}
@@ -86,32 +86,32 @@ public class MemberFilter extends ViewerFilter {
 				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterfaceOrAnnotation(member) && !isTopLevelType(member) && !isEnumConstant(member)) {
 					return false;
 				}
-			}			
+			}
 		} catch (JavaModelException e) {
 			// ignore
 		}
 		return true;
 	}
-	
+
 	private boolean isLocalType(IType type) {
 		IJavaElement parent= type.getParent();
 		return parent instanceof IMember && !(parent instanceof IType);
 	}
-	
+
 	private boolean isMemberInInterfaceOrAnnotation(IMember member) throws JavaModelException {
 		IType parent= member.getDeclaringType();
 		return parent != null && JavaModelUtil.isInterfaceOrAnnotation(parent);
 	}
-	
+
 	private boolean isFieldInInterfaceOrAnnotation(IMember member) throws JavaModelException {
 		return (member.getElementType() == IJavaElement.FIELD) && JavaModelUtil.isInterfaceOrAnnotation(member.getDeclaringType());
-	}	
-	
+	}
+
 	private boolean isTopLevelType(IMember member) {
 		IType parent= member.getDeclaringType();
 		return parent == null;
 	}
-	
+
 	private boolean isEnumConstant(IMember member) throws JavaModelException {
 		return (member.getElementType() == IJavaElement.FIELD) && ((IField)member).isEnumConstant();
 	}

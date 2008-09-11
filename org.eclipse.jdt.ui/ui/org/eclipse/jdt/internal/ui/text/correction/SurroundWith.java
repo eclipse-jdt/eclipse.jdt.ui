@@ -264,7 +264,7 @@ public abstract class SurroundWith {
 
 	/**
 	 * List of VariableDeclaration of variables which are read in <code>selectedNodes</code>.
-	 * 
+	 *
 	 * @param maxVariableId Maximum number of variable declarations block
 	 * @param selectedNodes The selectedNodes
 	 * @return	List of VariableDeclaration
@@ -290,7 +290,7 @@ public abstract class SurroundWith {
 
 	/**
 	 * List of VariableDeclarationFragments which are accessed after <code>startNode</code>.
-	 * 
+	 *
 	 * @param startNode The node after to inspect
 	 * @param maxVariableId The maximum number of variable declarations
 	 * @return List of VariableDeclarationFragments which can't be moved to the new block
@@ -359,13 +359,13 @@ public abstract class SurroundWith {
 	 * in <code>accessedAfter</code> are moved to the block if the variable declaration is
 	 * part of <code>toMove</code>. VariableDeclarations in <code>accessedInside</code> are
 	 * made final unless they are moved to <code>block</code>.
-	 * 
+	 *
 	 * i.e. (if <code>i</code> is element of <code>accessedAfter</code>):
 	 * <code>int i= 10;</code> ---> <code>int i;</code> and <code>{i= 10;}</code>
-	 * 
+	 *
 	 * Declarations with more then one fragments are splited if required. i.e.:
 	 * <code>int i,j,k;</code> ---> <code>int i,j; final int k;</code>
-	 * 
+	 *
 	 * @param toMove Nodes to be moved to block
 	 * @param statements List to move to.
 	 * @param accessedAfter VariableDeclarationFragments which can not be moved to block
@@ -437,7 +437,7 @@ public abstract class SurroundWith {
 	 * <code>splitOperator.needsSplit</code> returns <code>true</code>.
 	 * i.e.:
 	 * int i, j; ---> int i; int j; (if splitOperator.needsSplit(i, j) == true)
-	 * 
+	 *
 	 * @param statement The VariableDeclarationStatement to split
 	 * @param splitOperator The operator to use to split
 	 * @param rewrite The rewriter to use to generate new VariableDeclarationStatements.

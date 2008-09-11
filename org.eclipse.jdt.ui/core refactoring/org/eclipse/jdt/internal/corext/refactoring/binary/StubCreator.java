@@ -254,7 +254,7 @@ public class StubCreator {
 
 	/**
 	 * Appends a parameter name
-	 * 
+	 *
 	 * @param method the method
 	 * @param index the index of the parameter
 	 */
@@ -361,7 +361,7 @@ public class StubCreator {
 
 	/**
 	 * Creates and returns a stub for the given top-level type.
-	 * 
+	 *
 	 * @param topLevelType the top-level type
 	 * @param monitor the progress monitor, can be <code>null</code>
 	 * @return the source stub

@@ -17,6 +17,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.team.core.diff.FastDiffFilter;
+import org.eclipse.team.core.diff.IDiff;
+import org.eclipse.team.core.diff.IDiffChangeEvent;
+import org.eclipse.team.core.diff.IDiffTree;
+import org.eclipse.team.core.diff.IDiffVisitor;
+import org.eclipse.team.core.mapping.IResourceDiffTree;
+import org.eclipse.team.core.mapping.ISynchronizationContext;
+import org.eclipse.team.core.mapping.ISynchronizationScope;
+import org.eclipse.team.core.mapping.provider.ResourceDiffTree;
+
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -32,27 +47,12 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
-import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
-
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.navigator.IPipelinedTreeContentProvider;
 import org.eclipse.ui.navigator.PipelinedShapeModification;
 import org.eclipse.ui.navigator.PipelinedViewerUpdate;
-
-import org.eclipse.team.core.diff.FastDiffFilter;
-import org.eclipse.team.core.diff.IDiff;
-import org.eclipse.team.core.diff.IDiffChangeEvent;
-import org.eclipse.team.core.diff.IDiffTree;
-import org.eclipse.team.core.diff.IDiffVisitor;
-import org.eclipse.team.core.mapping.IResourceDiffTree;
-import org.eclipse.team.core.mapping.ISynchronizationContext;
-import org.eclipse.team.core.mapping.ISynchronizationScope;
-import org.eclipse.team.core.mapping.provider.ResourceDiffTree;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Java-aware synchronization content provider.
- * 
+ *
  * @since 3.2
  */
 public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider implements IPipelinedTreeContentProvider {
@@ -82,7 +82,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the diffs associated with the element.
-	 * 
+	 *
 	 * @param context
 	 *            the synchronization context
 	 * @param element
@@ -95,7 +95,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the resource mapping for the element.
-	 * 
+	 *
 	 * @param element
 	 *            the element to get the resource mapping
 	 * @return the resource mapping
@@ -114,7 +114,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the resource traversals for the element.
-	 * 
+	 *
 	 * @param element
 	 *            the element to get the resource traversals
 	 * @return the resource traversals
@@ -138,7 +138,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the java element associated with the project.
-	 * 
+	 *
 	 * @param project
 	 *            the project
 	 * @return the associated java element, or <code>null</code> if the
@@ -158,7 +158,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Converts the shape modification to use java elements.
-	 * 
+	 *
 	 * @param modification
 	 *            the shape modification to convert
 	 */
@@ -189,7 +189,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Converts the viewer update to use java elements.
-	 * 
+	 *
 	 * @param update
 	 *            the viewer update to convert
 	 * @return <code>true</code> if any elements have been converted,
@@ -226,7 +226,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * Returns all the existing projects that contain additions,
 	 * removals or deletions.
-	 * 
+	 *
 	 * @param event
 	 *            the event
 	 * @return the projects that contain changes
@@ -287,7 +287,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the filtered elements.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent element
 	 * @param children
@@ -316,9 +316,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 	/**
-	 * Returns the projects that used to have changes in the diff tree 
+	 * Returns the projects that used to have changes in the diff tree
 	 * but have been deleted from the workspace.
-	 * 
+	 *
 	 * @param event
 	 *            the event
 	 * @return the deleted projects
@@ -342,7 +342,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * this method is only invoked when the resource content provider is
 	 * disabled. In this case, we still want the Java projects to appear at the
 	 * root of the view.
-	 * 
+	 *
 	 * {@inheritDoc}
 	 */
 	public Object[] getElements(Object parent) {
@@ -354,7 +354,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the java project children in the current scope.
-	 * 
+	 *
 	 * @param context
 	 *            the synchronization context
 	 * @param parent
@@ -391,8 +391,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 						// Add any phantom resources that are visible
 						list.add(child);
 					}
-					
-					
+
+
 //					if (members[index] instanceof IFolder) {
 //						final IFolder folder= (IFolder) members[index];
 //						if (folder.getName().equals(NAME_REFACTORING_FOLDER)) {
@@ -405,7 +405,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //					}
 				}
 			}
-				
+
 		}
 		return list.toArray(new Object[list.size()]);
 	}
@@ -421,13 +421,13 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					found[0] = true;
 					return false;
 				}
-				
+
 				return true;
 			}}, IResource.DEPTH_INFINITE);
 		return found[0];
 	}
 
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -446,7 +446,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the package fragment children in the current scope.
-	 * 
+	 *
 	 * @param context
 	 *            the synchronization context
 	 * @param parent
@@ -488,7 +488,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the package fragment root children in the current scope.
-	 * 
+	 *
 	 * @param context
 	 *            the synchronization context
 	 * @param parent
@@ -635,7 +635,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the visible projects.
-	 * 
+	 *
 	 * @return the visible projects
 	 */
 	private Set getVisibleProjects() {
@@ -651,7 +651,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Handles a diff change event.
-	 * 
+	 *
 	 * @param event
 	 *            the event
 	 */
@@ -712,7 +712,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns whether the element has some children in the current scope.
-	 * 
+	 *
 	 * @param scope
 	 *            the synchronization scope
 	 * @param element
@@ -739,7 +739,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Has the java project visible changes?
-	 * 
+	 *
 	 * @param tree
 	 *            the diff tree
 	 * @param project
@@ -802,7 +802,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Executes the given runnable.
-	 * 
+	 *
 	 * @param runnable
 	 *            the runnable
 	 * @param control

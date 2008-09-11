@@ -15,23 +15,24 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
 public class RenameRefactoringWizard extends RefactoringWizard {
-	
+
 	private final String fInputPageDescription;
 	private final String fPageContextHelpId;
 	private final ImageDescriptor fInputPageImageDescriptor;
-	
+
 	// dialog settings constants:
-	
+
 	/**
 	 * Dialog settings key (value is of type boolean).
 	 */
@@ -44,7 +45,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 * Dialog settings key (value is of type String).
 	 */
 	public static final String QUALIFIED_NAMES_PATTERNS= "patterns"; //$NON-NLS-1$
-	
+
 	/**
 	 * Dialog settings key (value is of type boolean).
 	 */
@@ -54,12 +55,12 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 * @see RenamingNameSuggestor
 	 */
 	public static final String TYPE_SIMILAR_MATCH_STRATEGY= "updateSimilarElementsMatchStrategy"; //$NON-NLS-1$
-	
+
 	/**
 	 * Dialog settings key (value is of type boolean).
 	 */
 	public static final String PACKAGE_RENAME_SUBPACKAGES= "renameSubpackages"; //$NON-NLS-1$
-	
+
 	/**
 	 * Dialog settings key (value is of type boolean).
 	 */
@@ -68,9 +69,9 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 * Dialog settings key (value is of type boolean).
 	 */
 	public static final String FIELD_RENAME_SETTER= "renameSetter"; //$NON-NLS-1$
-	
-	
-	public RenameRefactoringWizard(Refactoring refactoring, String defaultPageTitle, String inputPageDescription, 
+
+
+	public RenameRefactoringWizard(Refactoring refactoring, String defaultPageTitle, String inputPageDescription,
 			ImageDescriptor inputPageImageDescriptor, String pageContextHelpId) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(defaultPageTitle);
@@ -82,7 +83,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
-	 */ 
+	 */
 	protected void addUserInputPages() {
 		String initialSetting= getNameUpdating().getCurrentElementName();
 		RenameInputWizardPage inputPage= createInputPage(fInputPageDescription, initialSetting);
@@ -91,20 +92,20 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	}
 
 	private INameUpdating getNameUpdating() {
-		return (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);	
+		return (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);
 	}
-	
+
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameInputWizardPage(message, fPageContextHelpId, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
-			}	
+			}
 		};
 	}
-	
+
 	/**
 	 * Sets a new name, validates the input, and returns the status.
-	 * 
+	 *
 	 * @param newName the new name
 	 * @return validation status
 	 */
@@ -116,6 +117,6 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		} catch (CoreException e){
 			JavaPlugin.log(e);
 			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.RenameRefactoringWizard_internal_error);
-		}	
+		}
 	}
 }

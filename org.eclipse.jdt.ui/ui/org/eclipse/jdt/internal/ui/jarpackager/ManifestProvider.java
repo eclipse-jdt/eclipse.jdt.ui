@@ -31,14 +31,14 @@ public class ManifestProvider implements IManifestProvider {
 	// Constants
 	private static final String SEALED_VALUE= "true"; //$NON-NLS-1$
 	private static final String UNSEALED_VALUE= "false"; //$NON-NLS-1$
-	
+
 	/**
 	 * Creates a manifest as defined by the <code>JarPackage</code>.
-	 * 
+	 *
 	 * @param	jarPackage	the JAR package specification
 	 * @return the manifest
-	 * @throws CoreException 
-	 */	
+	 * @throws CoreException
+	 */
 	public Manifest create(JarPackageData jarPackage) throws CoreException {
 		Assert.isNotNull(jarPackage);
 		if (jarPackage.isManifestGenerated())
@@ -53,10 +53,10 @@ public class ManifestProvider implements IManifestProvider {
 
 	/**
 	 * Creates a default manifest.
-	 * 
+	 *
 	 * @param manifestVersion	the version of the manifest
 	 * @return the manifest
-	 */	
+	 */
 	public Manifest createDefault(String manifestVersion) {
 		Manifest manifest= new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, manifestVersion);
@@ -65,7 +65,7 @@ public class ManifestProvider implements IManifestProvider {
 
 	/**
 	 * Hook for subclasses to add additional manifest entries.
-	 * 
+	 *
 	 * @param	manifest	the manifest to which the entries should be added
 	 * @param	jarPackage	the JAR package specification
 	 */
@@ -84,7 +84,7 @@ public class ManifestProvider implements IManifestProvider {
 	private void putVersion(Manifest manifest, JarPackageData jarPackage) {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, jarPackage.getManifestVersion());
 	}
-		
+
 	private void putSealing(Manifest manifest, JarPackageData jarPackage) {
 		if (jarPackage.isJarSealed()) {
 			manifest.getMainAttributes().put(Attributes.Name.SEALED, SEALED_VALUE);
@@ -107,12 +107,12 @@ public class ManifestProvider implements IManifestProvider {
 				}
 		}
 	}
-	
+
 	private void putMainClass(Manifest manifest, JarPackageData jarPackage) {
 		if (jarPackage.getManifestMainClass() != null && jarPackage.getManifestMainClass().getFullyQualifiedName().length() > 0)
 			manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, jarPackage.getManifestMainClass().getFullyQualifiedName());
 	}
-	
+
 	private String getInManifestFormat(IPackageFragment packageFragment) {
 		String name= packageFragment.getElementName();
 		return name.replace('.', '/') + '/';

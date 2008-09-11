@@ -13,11 +13,11 @@ package org.eclipse.jdt.internal.corext.fix;
 import org.eclipse.core.runtime.IStatus;
 
 /**
- * A <code>IFix</code> which can be used in a 
+ * A <code>IFix</code> which can be used in a
  * correction proposal environment. A proposal
  * will be shown to the user and if chosen the
  * fix is executed.
- * 
+ *
  * @since 3.4
  */
 public interface IProposableFix extends IFix {
@@ -35,7 +35,7 @@ public interface IProposableFix extends IFix {
 	 * <p>
 	 * Returns <b>null</b> if the default proposal info should be used.
 	 * </p>
-	 * 
+	 *
 	 * @return the additional information or <code>null</code>
 	 */
 	public String getAdditionalProposalInfo();
@@ -43,7 +43,7 @@ public interface IProposableFix extends IFix {
 	/**
 	 * A status informing about issues with this fix
 	 * or <b>null</b> if no issues.
-	 * 
+	 *
 	 * @return status to inform the user
 	 */
 	public IStatus getStatus();

@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -45,7 +46,7 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 		setButtonLabel(browseLabel);
 		setDialogFieldListener(this);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 	 */
@@ -75,7 +76,7 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 	/**
 	 * tries to build a packagefragmentroot out of a string and sets the string into this
 	 * packagefragmentroot.
-	 * 
+	 *
 	 * @param rootString
 	 */
 	private IPackageFragmentRoot getRootFromString(String rootString) {
@@ -93,7 +94,7 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 			IProject proj= res.getProject();
 			if (!proj.isOpen()) {
 				return null;
-			}				
+			}
 			IJavaProject jproject= JavaCore.create(proj);
 			IPackageFragmentRoot root= jproject.getPackageFragmentRoot(res);
 			if (root.exists()) {

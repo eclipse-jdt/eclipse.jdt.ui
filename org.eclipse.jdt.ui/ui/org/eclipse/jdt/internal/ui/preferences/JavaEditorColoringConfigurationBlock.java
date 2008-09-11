@@ -86,14 +86,14 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor hover preferences.
- * 
+ *
  * @since 2.1
  */
 class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
-	
+
 	/**
 	 * Item in the highlighting color list.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private static class HighlightingColorListItem {
@@ -114,7 +114,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		 * @since 3.1
 		 */
 		private String fUnderlineKey;
-		
+
 		/**
 		 * Initialize the item with the given values.
 		 * @param displayName the display name
@@ -132,21 +132,21 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			fStrikethroughKey= strikethroughKey;
 			fUnderlineKey= underlineKey;
 		}
-		
+
 		/**
 		 * @return the bold preference key
 		 */
 		public String getBoldKey() {
 			return fBoldKey;
 		}
-		
+
 		/**
 		 * @return the bold preference key
 		 */
 		public String getItalicKey() {
 			return fItalicKey;
 		}
-		
+
 		/**
 		 * @return the strikethrough preference key
 		 * @since 3.1
@@ -154,7 +154,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		public String getStrikethroughKey() {
 			return fStrikethroughKey;
 		}
-		
+
 		/**
 		 * @return the underline preference key
 		 * @since 3.1
@@ -162,14 +162,14 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		public String getUnderlineKey() {
 			return fUnderlineKey;
 		}
-		
+
 		/**
 		 * @return the color preference key
 		 */
 		public String getColorKey() {
 			return fColorKey;
 		}
-		
+
 		/**
 		 * @return the display name
 		 */
@@ -177,12 +177,12 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			return fDisplayName;
 		}
 	}
-	
+
 	private static class SemanticHighlightingColorListItem extends HighlightingColorListItem {
-	
+
 		/** Enablement preference key */
 		private final String fEnableKey;
-		
+
 		/**
 		 * Initialize the item with the given values.
 		 * @param displayName the display name
@@ -197,7 +197,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			super(displayName, colorKey, boldKey, italicKey, strikethroughKey, underlineKey);
 			fEnableKey= enableKey;
 		}
-	
+
 		/**
 		 * @return the enablement preference key
 		 */
@@ -208,7 +208,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Color list label provider.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class ColorListLabelProvider extends LabelProvider {
@@ -224,24 +224,24 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Color list content provider.
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private class ColorListContentProvider implements ITreeContentProvider {
-	
+
 		/*
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
 		public Object[] getElements(Object inputElement) {
 			return new String[] {fJavaCategory, fJavadocCategory, fCommentsCategory};
 		}
-	
+
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		public void dispose() {
 		}
-	
+
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
@@ -293,7 +293,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @since  3.1
 	 */
 	private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
-	
+
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	/**
 	 * The keys of the overlay store.
@@ -313,11 +313,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ PreferencesMessages.JavaEditorPreferencePage_strings, PreferenceConstants.EDITOR_STRING_COLOR },
 			{ PreferencesMessages.JavaEditorPreferencePage_others, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR },
 	};
-	
+
 	private final String fJavaCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_java;
 	private final String fJavadocCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_javadoc;
 	private final String fCommentsCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_comments;
-	
+
 	private ColorSelector fSyntaxForegroundColorEditor;
 	private Label fColorEditorLabel;
 	private Button fBoldCheckBox;
@@ -370,9 +370,9 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	public JavaEditorColoringConfigurationBlock(OverlayPreferenceStore store) {
 		super(store);
-		
+
 		fColorManager= new JavaColorManager(false);
-		
+
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
 			fListModel.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, fSyntaxColorListModel[i][1] + STRIKETHROUGH, fSyntaxColorListModel[i][1] + UNDERLINE));
 
@@ -388,14 +388,14 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 							SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlightings[i]),
 							SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i])
 					));
-		
+
 		store.addKeys(createOverlayStoreKeys());
 	}
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		
+
 		ArrayList overlayKeys= new ArrayList();
-		
+
 		for (int i= 0, n= fListModel.size(); i < n; i++) {
 			HighlightingColorListItem item= (HighlightingColorListItem) fListModel.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
@@ -403,11 +403,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getStrikethroughKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getUnderlineKey()));
-			
+
 			if (item instanceof SemanticHighlightingColorListItem)
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ((SemanticHighlightingColorListItem) item).getEnableKey()));
 		}
-		
+
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
@@ -415,7 +415,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Creates page for hover preferences.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
@@ -425,13 +425,13 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
 		scrolled.setExpandVertical(true);
-		
+
 		Control control= createSyntaxPage(scrolled);
-		
+
 		scrolled.setContent(control);
 		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolled.setMinSize(size.x, size.y);
-		
+
 		return scrolled;
 	}
 
@@ -443,7 +443,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * <p>
 	 * Clients may call this framework method, but should not override it.
 	 * </p>
-	 * 
+	 *
 	 * @param chars the number of characters
 	 * @return the number of pixels
 	 */
@@ -462,7 +462,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * <p>
 	 * Clients may call this framework method, but should not override it.
 	 * </p>
-	 * 
+	 *
 	 * @param chars the number of characters
 	 * @return the number of pixels
 	 */
@@ -472,17 +472,17 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
             return 0;
         return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
     }
-    
+
 	public void initialize() {
 		super.initialize();
-		
+
 		fTreeViewer.setInput(fListModel);
 		fTreeViewer.setSelection(new StructuredSelection(fJavaCategory));
 	}
 
 	public void performDefaults() {
 		super.performDefaults();
-		
+
 		handleSyntaxColorListSelection();
 
 		uninstallSemanticHighlighting();
@@ -497,7 +497,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	public void dispose() {
 		uninstallSemanticHighlighting();
 		fColorManager.dispose();
-		
+
 		super.dispose();
 	}
 
@@ -540,9 +540,9 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			fEnableCheckbox.setSelection(true);
 		}
 	}
-	
+
 	private Control createSyntaxPage(final Composite parent) {
-		
+
 		Composite colorComposite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -559,19 +559,19 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
 //		link.setToolTipText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link_tooltip);
-		
+
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
 		gridData.horizontalSpan= 2;
 		link.setLayoutData(gridData);
 
 		addFiller(colorComposite, 1);
-		
+
 		Label label;
 		label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.JavaEditorPreferencePage_coloring_element);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	
+
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
@@ -580,7 +580,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		editorComposite.setLayout(layout);
 		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		editorComposite.setLayoutData(gd);
-	
+
 		fTreeViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
 		fTreeViewer.setLabelProvider(new ColorListLabelProvider());
 		fTreeViewer.setContentProvider(new ColorListContentProvider());
@@ -610,10 +610,10 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		if (vBar != null)
 			maxWidth += vBar.getSize().x * 3; // scrollbars and tree indentation guess
 		gd.widthHint= maxWidth;
-		
+
 		fTreeViewer.getControl().setLayoutData(gd);
 		installDoubleClickListener();
-						
+
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -621,69 +621,69 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		layout.numColumns= 2;
 		stylesComposite.setLayout(layout);
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
 		fEnableCheckbox.setText(PreferencesMessages.JavaEditorPreferencePage_enable);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
 		fEnableCheckbox.setLayoutData(gd);
-		
+
 		fColorEditorLabel= new Label(stylesComposite, SWT.LEFT);
 		fColorEditorLabel.setText(PreferencesMessages.JavaEditorPreferencePage_color);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		fColorEditorLabel.setLayoutData(gd);
-	
+
 		fSyntaxForegroundColorEditor= new ColorSelector(stylesComposite);
 		Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		foregroundColorButton.setLayoutData(gd);
-		
+
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fBoldCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_bold);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
-		
+
 		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fItalicCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_italic);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
-		
+
 		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fStrikethroughCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_strikethrough);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fStrikethroughCheckBox.setLayoutData(gd);
-		
+
 		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fUnderlineCheckBox.setText(PreferencesMessages.JavaEditorPreferencePage_underline);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fUnderlineCheckBox.setLayoutData(gd);
-		
+
 		label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.JavaEditorPreferencePage_preview);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Control previewer= createPreviewer(colorComposite);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(20);
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
-		
+
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}
 		});
-		
+
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -693,7 +693,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				PreferenceConverter.setValue(getPreferenceStore(), item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
 			}
 		});
-	
+
 		fBoldCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -703,7 +703,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				getPreferenceStore().setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
 			}
 		});
-				
+
 		fItalicCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -722,7 +722,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				getPreferenceStore().setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
 			}
 		});
-		
+
 		fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -732,7 +732,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				getPreferenceStore().setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
 			}
 		});
-				
+
 		fEnableCheckbox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -754,16 +754,16 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				}
 			}
 		});
-		
+
 		colorComposite.layout(false);
-				
+
 		return colorComposite;
 	}
-	
+
 	/**
 	 * Installs a double-click listener which allows
 	 * to expand and collapse tree items.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private void installDoubleClickListener() {
@@ -790,7 +790,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	}
 
 	private Control createPreviewer(Composite parent) {
-		
+
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
@@ -801,29 +801,29 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);
-		
+
 		fPreviewViewer.setEditable(false);
 		Cursor arrowCursor= fPreviewViewer.getTextWidget().getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
 		fPreviewViewer.getTextWidget().setCursor(arrowCursor);
 		fPreviewViewer.getTextWidget().setCaret(null);
-		
+
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewViewer.setDocument(document);
-	
+
 		installSemanticHighlighting();
-		
-		
+
+
 		return fPreviewViewer.getControl();
 	}
 
 
 	private Preferences createTemporaryCorePreferenceStore() {
 		Preferences result= new Preferences();
-		
+
 		result.setValue(COMPILER_TASK_TAGS, "TASK,TODO"); //$NON-NLS-1$
-		
+
 		return result;
 	}
 
@@ -852,7 +852,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Install Semantic Highlighting on the previewer
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private void installSemanticHighlighting() {
@@ -865,7 +865,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Uninstall Semantic Highlighting from the previewer
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	private void uninstallSemanticHighlighting() {
@@ -878,7 +878,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Create the hard coded previewer ranges
-	 * 
+	 *
 	 * @return the hard coded previewer ranges
 	 * @since 3.0
 	 */
@@ -914,7 +914,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Create a highlighted range on the previewers document with the given line, column, length and key.
-	 * 
+	 *
 	 * @param line the line
 	 * @param column the column
 	 * @param length the length
@@ -936,7 +936,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Returns the current highlighting color list item.
-	 * 
+	 *
 	 * @return the current highlighting color list item
 	 * @since 3.0
 	 */
@@ -954,7 +954,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * <p>
 	 * This method must be called before any of the dialog unit based conversion methods are called.
 	 * </p>
-	 * 
+	 *
 	 * @param testControl a control from which to obtain the current font
 	 */
     private void initializeDialogUnits(Control testControl) {

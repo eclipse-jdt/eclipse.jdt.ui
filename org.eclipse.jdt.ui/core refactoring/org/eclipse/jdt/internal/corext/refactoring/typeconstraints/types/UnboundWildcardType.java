@@ -19,11 +19,11 @@ public final class UnboundWildcardType extends WildcardType {
 	public int getKind() {
 		return UNBOUND_WILDCARD_TYPE;
 	}
-	
+
 	public TType getErasure() {
 		return getEnvironment().getJavaLangObject();
 	}
-	
+
 	protected boolean doCanAssignTo(TType lhs) {
 		switch(lhs.getKind()) {
 			case STANDARD_TYPE:
@@ -39,7 +39,7 @@ public final class UnboundWildcardType extends WildcardType {
 				return false;
 		}
 	}
-	
+
 	protected boolean checkTypeArgument(TType rhs) {
 		switch(rhs.getKind()) {
 			case ARRAY_TYPE:
@@ -47,7 +47,7 @@ public final class UnboundWildcardType extends WildcardType {
 			case PARAMETERIZED_TYPE:
 			case RAW_TYPE:
 			case UNBOUND_WILDCARD_TYPE:
-			case EXTENDS_WILDCARD_TYPE: 
+			case EXTENDS_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE:
 			case TYPE_VARIABLE:
 			case CAPTURE_TYPE:
@@ -56,16 +56,16 @@ public final class UnboundWildcardType extends WildcardType {
 				return false;
 		}
 	}
-	
+
 	protected boolean checkAssignmentBound(TType rhs) {
 		// unbound equals ? extends Object.
 		return rhs.isNullType();
 	}
-	
+
 	public String getName() {
 		return "?"; //$NON-NLS-1$
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		return getName();
 	}

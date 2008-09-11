@@ -49,11 +49,11 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Implementation of {@link JavaElementLabels}.
- * 
+ *
  * @since 3.5
  */
 public class JavaElementLabelComposer {
-	
+
 	/**
 	 * An adapter for buffer supported by the label composer.
 	 */
@@ -61,7 +61,7 @@ public class JavaElementLabelComposer {
 
 		/**
 		 * Appends the string representation of the given character to the buffer.
-		 * 
+		 *
 		 * @param ch the character to append
 		 * @return a reference to this object
 		 */
@@ -69,15 +69,15 @@ public class JavaElementLabelComposer {
 
 		/**
 		 * Appends the given string to the buffer.
-		 * 
+		 *
 		 * @param string the string to append
 		 * @return a reference to this object
 		 */
 		public abstract FlexibleBuffer append(String string);
-		
+
 		/**
 		 * Returns the length of the the buffer.
-		 * 
+		 *
 		 * @return the length of the current string
 		 */
 		public abstract int length();
@@ -85,24 +85,24 @@ public class JavaElementLabelComposer {
 		/**
 		 * Sets a styler to use for the given source range. The range must be subrange of actual
 		 * string of this buffer. Stylers previously set for that range will be overwritten.
-		 * 
+		 *
 		 * @param offset the start offset of the range
 		 * @param length the length of the range
 		 * @param styler the styler to set
-		 * 
+		 *
 		 * @throws StringIndexOutOfBoundsException if <code>start</code> is less than zero, or if
 		 *             offset plus length is greater than the length of this object.
 		 */
 		public abstract void setStyle(int offset, int length, Styler styler);
 	}
-	
+
 	public static class FlexibleStringBuffer extends FlexibleBuffer {
 		private final StringBuffer fStringBuffer;
 
 		public FlexibleStringBuffer(StringBuffer stringBuffer) {
 			fStringBuffer= stringBuffer;
 		}
-		
+
 		public FlexibleBuffer append(char ch) {
 			fStringBuffer.append(ch);
 			return this;
@@ -120,24 +120,24 @@ public class JavaElementLabelComposer {
 		public void setStyle(int offset, int length, Styler styler) {
 			// no style
 		}
-		
+
 		public String toString() {
 			return fStringBuffer.toString();
 		}
 	}
-	
+
 	public static class FlexibleStyledString extends FlexibleBuffer {
 		private final StyledString fStyledString;
 
 		public FlexibleStyledString(StyledString stringBuffer) {
 			fStyledString= stringBuffer;
 		}
-		
+
 		public FlexibleBuffer append(char ch) {
 			fStyledString.append(ch);
 			return this;
 		}
-		
+
 		public FlexibleBuffer append(String string) {
 			fStyledString.append(string);
 			return this;
@@ -150,7 +150,7 @@ public class JavaElementLabelComposer {
 		public void setStyle(int offset, int length, Styler styler) {
 			fStyledString.setStyle(offset, length, styler);
 		}
-		
+
 		public String toString() {
 			return fStyledString.toString();
 		}
@@ -160,18 +160,18 @@ public class JavaElementLabelComposer {
 	/**
 	 * Additional delimiters used in this class, for use in {@link Strings#markLTR(String, String)}
 	 * or {@link Strings#markLTR(StyledString, String)}.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	public static final String ADDITIONAL_DELIMITERS= "<>(),?{} "; //$NON-NLS-1$
 
 	private final static long QUALIFIER_FLAGS= JavaElementLabels.P_COMPRESSED | JavaElementLabels.USE_RESOLVED;
-	
+
 	private static final Styler QUALIFIER_STYLE= StyledString.QUALIFIER_STYLER;
 	private static final Styler COUNTER_STYLE= StyledString.COUNTER_STYLER;
 	private static final Styler DECORATIONS_STYLE= StyledString.DECORATIONS_STYLER;
-	
-	
+
+
 	/*
 	 * Package name compression
 	 */
@@ -186,19 +186,19 @@ public class JavaElementLabelComposer {
 	private static final boolean getFlag(long flags, long flag) {
 		return (flags & flag) != 0;
 	}
-	
+
 	/**
 	 * Creates a new java element composer based on the given buffer.
-	 * 
+	 *
 	 * @param buffer the buffer
 	 */
 	public JavaElementLabelComposer(FlexibleBuffer buffer) {
 		fBuffer= buffer;
 	}
-	
+
 	/**
 	 * Creates a new java element composer based on the given buffer.
-	 * 
+	 *
 	 * @param buffer the buffer
 	 */
 	public JavaElementLabelComposer(StyledString buffer) {
@@ -207,30 +207,30 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Creates a new java element composer based on the given buffer.
-	 * 
+	 *
 	 * @param buffer the buffer
 	 */
 	public JavaElementLabelComposer(StringBuffer buffer) {
 		this(new FlexibleStringBuffer(buffer));
 	}
-	
+
 	/**
 	 * Appends the label for a Java element with the flags as defined by this class.
-	 * 
+	 *
 	 * @param element the element to render
 	 * @param flags the rendering flags.
 	 */
 	public void appendElementLabel(IJavaElement element, long flags) {
 		int type= element.getElementType();
 		IPackageFragmentRoot root= null;
-		
+
 		if (type != IJavaElement.JAVA_MODEL && type != IJavaElement.JAVA_PROJECT && type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 			root= JavaModelUtil.getPackageFragmentRoot(element);
 		if (root != null && getFlag(flags, JavaElementLabels.PREPEND_ROOT_PATH)) {
 			appendPackageFragmentRootLabel(root, JavaElementLabels.ROOT_QUALIFIED);
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
 		}
-		
+
 		switch (type) {
 			case IJavaElement.METHOD:
 				appendMethodLabel((IMethod) element, flags);
@@ -274,24 +274,24 @@ public class JavaElementLabelComposer {
 			default:
 				fBuffer.append(element.getElementName());
 		}
-		
+
 		if (root != null && getFlag(flags, JavaElementLabels.APPEND_ROOT_PATH)) {
 			int offset= fBuffer.length();
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
 			appendPackageFragmentRootLabel(root, JavaElementLabels.ROOT_QUALIFIED);
-			
+
 			if (getFlag(flags, JavaElementLabels.COLORIZE)) {
 				fBuffer.setStyle(offset, fBuffer.length() - offset, QUALIFIER_STYLE);
 			}
-			
+
 		}
 	}
 
-	
+
 
 	/**
 	 * Appends the label for a method. Considers the M_* flags.
-	 * 
+	 *
 	 * @param method the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'M_' are considered.
 	 */
@@ -299,7 +299,7 @@ public class JavaElementLabelComposer {
 		try {
 			BindingKey resolvedKey= getFlag(flags, JavaElementLabels.USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
 			String resolvedSig= (resolvedKey != null) ? resolvedKey.toSignature() : null;
-			
+
 			// type parameters
 			if (getFlag(flags, JavaElementLabels.M_PRE_TYPE_PARAMETERS)) {
 				if (resolvedKey != null) {
@@ -324,22 +324,22 @@ public class JavaElementLabelComposer {
 					}
 				}
 			}
-			
+
 			// return type
 			if (getFlag(flags, JavaElementLabels.M_PRE_RETURNTYPE) && method.exists() && !method.isConstructor()) {
 				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
 				appendTypeSignatureLabel(method, returnTypeSig, flags);
 				fBuffer.append(' ');
 			}
-			
+
 			// qualification
 			if (getFlag(flags, JavaElementLabels.M_FULLY_QUALIFIED)) {
 				appendTypeLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 				fBuffer.append('.');
 			}
-				
+
 			fBuffer.append(getElementName(method));
-			
+
 			// parameters
 			fBuffer.append('(');
 			if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES)) {
@@ -376,7 +376,7 @@ public class JavaElementLabelComposer {
 						}
 					}
 				}
-				
+
 				for (int i= 0; i < nParams; i++) {
 					if (i > 0) {
 						fBuffer.append(JavaElementLabels.COMMA_STRING);
@@ -407,7 +407,7 @@ public class JavaElementLabelComposer {
 				}
 			}
 			fBuffer.append(')');
-					
+
 			if (getFlag(flags, JavaElementLabels.M_EXCEPTIONS)) {
 				String[] types;
 				if (resolvedKey != null) {
@@ -425,8 +425,8 @@ public class JavaElementLabelComposer {
 					}
 				}
 			}
-			
-			
+
+
 			if (getFlag(flags, JavaElementLabels.M_APP_TYPE_PARAMETERS)) {
 				int offset= fBuffer.length();
 				if (resolvedKey != null) {
@@ -454,7 +454,7 @@ public class JavaElementLabelComposer {
 					fBuffer.setStyle(offset, fBuffer.length() - offset, DECORATIONS_STYLE);
 				}
 			}
-			
+
 			if (getFlag(flags, JavaElementLabels.M_APP_RETURNTYPE) && method.exists() && !method.isConstructor()) {
 				int offset= fBuffer.length();
 				fBuffer.append(JavaElementLabels.DECL_STRING);
@@ -468,7 +468,7 @@ public class JavaElementLabelComposer {
 			// category
 			if (getFlag(flags, JavaElementLabels.M_CATEGORY) && method.exists())
 				appendCategoryLabel(method, flags);
-			
+
 			// post qualification
 			if (getFlag(flags, JavaElementLabels.M_POST_QUALIFIED)) {
 				int offset= fBuffer.length();
@@ -478,12 +478,12 @@ public class JavaElementLabelComposer {
 					fBuffer.setStyle(offset, fBuffer.length() - offset, QUALIFIER_STYLE);
 				}
 			}
-			
+
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
 		}
 	}
-	
+
 	private void appendCategoryLabel(IMember member, long flags) throws JavaModelException {
 		String[] categories= member.getCategories();
 		if (categories.length > 0) {
@@ -501,10 +501,10 @@ public class JavaElementLabelComposer {
 			}
 		}
 	}
-			
+
 	/**
 	 * Appends labels for type parameters from type binding array.
-	 * 
+	 *
 	 * @param typeParameters the type parameters
 	 * @param flags flags with render options
 	 */
@@ -520,16 +520,16 @@ public class JavaElementLabelComposer {
 			fBuffer.append(getGT());
 		}
 	}
-	
+
 	/**
 	 * Appends the style label for a field. Considers the F_* flags.
-	 * 
+	 *
 	 * @param field the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'F_' are considered.
 	 */
 	public void appendFieldLabel(IField field, long flags) {
 		try {
-			
+
 			if (getFlag(flags, JavaElementLabels.F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				if (getFlag(flags, JavaElementLabels.USE_RESOLVED) && field.isResolved()) {
 					appendTypeSignatureLabel(field, new BindingKey(field.getKey()).toSignature(), flags);
@@ -538,14 +538,14 @@ public class JavaElementLabelComposer {
 				}
 				fBuffer.append(' ');
 			}
-			
+
 			// qualification
 			if (getFlag(flags, JavaElementLabels.F_FULLY_QUALIFIED)) {
 				appendTypeLabel(field.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 				fBuffer.append('.');
 			}
 			fBuffer.append(getElementName(field));
-			
+
 			if (getFlag(flags, JavaElementLabels.F_APP_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				int offset= fBuffer.length();
 				fBuffer.append(JavaElementLabels.DECL_STRING);
@@ -577,10 +577,10 @@ public class JavaElementLabelComposer {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
 		}
 	}
-	
+
 	/**
 	 * Appends the styled label for a local variable.
-	 * 
+	 *
 	 * @param localVariable the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'F_' are considered.
 	 */
@@ -589,14 +589,14 @@ public class JavaElementLabelComposer {
 			appendTypeSignatureLabel(localVariable, localVariable.getTypeSignature(), flags);
 			fBuffer.append(' ');
 		}
-		
+
 		if (getFlag(flags, JavaElementLabels.F_FULLY_QUALIFIED)) {
 			appendElementLabel(localVariable.getParent(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 			fBuffer.append('.');
 		}
-		
+
 		fBuffer.append(getElementName(localVariable));
-		
+
 		if (getFlag(flags, JavaElementLabels.F_APP_TYPE_SIGNATURE)) {
 			int offset= fBuffer.length();
 			fBuffer.append(JavaElementLabels.DECL_STRING);
@@ -605,26 +605,26 @@ public class JavaElementLabelComposer {
 				fBuffer.setStyle(offset, fBuffer.length() - offset, DECORATIONS_STYLE);
 			}
 		}
-		
+
 		// post qualification
 		if (getFlag(flags, JavaElementLabels.F_POST_QUALIFIED)) {
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
 			appendElementLabel(localVariable.getParent(), JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 		}
 	}
-	
+
 	/**
 	 * Appends the styled label for a type parameter.
-	 * 
+	 *
 	 * @param typeParameter the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'T_' are considered.
 	 */
 	public void appendTypeParameterLabel(ITypeParameter typeParameter, long flags) {
 		try {
 			fBuffer.append(getElementName(typeParameter));
-			
+
 			// ITypeParameter#getSignature() would make things easier here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=246594
-			
+
 			IMember declaringMember= typeParameter.getDeclaringMember();
 			ITypeParameter[] params= null;
 			String[] paramSigs= null;
@@ -659,21 +659,21 @@ public class JavaElementLabelComposer {
 					}
 				}
 			}
-			
+
 			// post qualification
 			if (getFlag(flags, JavaElementLabels.TP_POST_QUALIFIED)) {
 				fBuffer.append(JavaElementLabels.CONCAT_STRING);
 				appendElementLabel(declaringMember, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
 			}
-			
+
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
 		}
 	}
-	
+
 	/**
 	 * Appends the label for a initializer. Considers the I_* flags.
-	 * 
+	 *
 	 * @param initializer the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'I_' are considered.
 	 */
@@ -695,7 +695,7 @@ public class JavaElementLabelComposer {
 			}
 		}
 	}
-	
+
 	protected void appendTypeSignatureLabel(IJavaElement enclosingElement, String typeSig, long flags) {
 		int sigKind= Signature.getTypeSignatureKind(typeSig);
 		switch (sigKind) {
@@ -711,7 +711,7 @@ public class JavaElementLabelComposer {
 			case Signature.CLASS_TYPE_SIGNATURE:
 				String baseType= getSimpleTypeName(enclosingElement, Signature.getTypeErasure(typeSig));
 				fBuffer.append(baseType);
-				
+
 				String[] typeArguments= Signature.getTypeArguments(typeSig);
 				appendTypeArgumentSignaturesLabel(enclosingElement, typeArguments, flags);
 				break;
@@ -742,7 +742,7 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Returns the simple name of the given type signature.
-	 * 
+	 *
 	 * @param enclosingElement the enclosing element in which to resolve the signature
 	 * @param typeSig a {@link Signature#CLASS_TYPE_SIGNATURE} or {@link Signature#TYPE_VARIABLE_SIGNATURE}
 	 * @return the simple name of the given type signature
@@ -750,7 +750,7 @@ public class JavaElementLabelComposer {
 	protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
 		return Signature.getSimpleName(Signature.toString(typeSig));
 	}
-	
+
 	private void appendTypeArgumentSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
 		if (typeArgsSig.length > 0) {
 			fBuffer.append(getLT());
@@ -766,7 +766,7 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Appends labels for type parameters from a signature.
-	 * 
+	 *
 	 * @param typeParamSigs the type parameter signature
 	 * @param flags flags with render options
 	 */
@@ -785,16 +785,16 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Returns the string for rendering the '<code>&lt;</code>' character.
-	 * 
+	 *
 	 * @return the string for rendering '<code>&lt;</code>'
 	 */
 	protected String getLT() {
 		return "<"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Returns the string for rendering the '<code>&gt;</code>' character.
-	 * 
+	 *
 	 * @return the string for rendering '<code>&gt;</code>'
 	 */
 	protected String getGT() {
@@ -803,12 +803,12 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Appends the label for a type. Considers the T_* flags.
-	 * 
+	 *
 	 * @param type the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'T_' are considered.
 	 */
 	public void appendTypeLabel(IType type, long flags) {
-		
+
 		if (getFlag(flags, JavaElementLabels.T_FULLY_QUALIFIED)) {
 			IPackageFragment pack= type.getPackageFragment();
 			if (!pack.isDefaultPackage()) {
@@ -828,7 +828,7 @@ public class JavaElementLabelComposer {
 				fBuffer.append('.');
 			}
 		}
-		
+
 		String typeName= getElementName(type);
 		if (typeName.length() == 0) { // anonymous
 			try {
@@ -868,7 +868,7 @@ public class JavaElementLabelComposer {
 				}
 			}
 		}
-		
+
 		// category
 		if (getFlag(flags, JavaElementLabels.T_CATEGORY) && type.exists()) {
 			try {
@@ -901,18 +901,18 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Returns the string for rendering the {@link IJavaElement#getElementName() element name} of the given element.
-	 * 
+	 *
 	 * @param element the element to render
 	 * @return the string for rendering the element name
 	 */
 	protected String getElementName(IJavaElement element) {
 		return element.getElementName();
 	}
-	
-	
+
+
 	/**
 	 * Appends the label for a import container, import or package declaration. Considers the D_* flags.
-	 * 
+	 *
 	 * @param declaration the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'D_' are considered.
 	 */
@@ -942,10 +942,10 @@ public class JavaElementLabelComposer {
 			}
 		}
 	}
-	
+
 	/**
 	 * Appends the label for a class file. Considers the CF_* flags.
-	 * 
+	 *
 	 * @param classFile the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'CF_' are considered.
 	 */
@@ -958,7 +958,7 @@ public class JavaElementLabelComposer {
 			}
 		}
 		fBuffer.append(classFile.getElementName());
-		
+
 		if (getFlag(flags, JavaElementLabels.CF_POST_QUALIFIED)) {
 			int offset= fBuffer.length();
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
@@ -971,7 +971,7 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Appends the label for a compilation unit. Considers the CU_* flags.
-	 * 
+	 *
 	 * @param cu the element to render
 	 * @param flags the rendering flags. Flags with names starting with 'CU_' are considered.
 	 */
@@ -984,7 +984,7 @@ public class JavaElementLabelComposer {
 			}
 		}
 		fBuffer.append(cu.getElementName());
-		
+
 		if (getFlag(flags, JavaElementLabels.CU_POST_QUALIFIED)) {
 			int offset= fBuffer.length();
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
@@ -997,7 +997,7 @@ public class JavaElementLabelComposer {
 
 	/**
 	 * Appends the label for a package fragment. Considers the P_* flags.
-	 * 
+	 *
 	 * @param pack the element to render
 	 * @param flags the rendering flags. Flags with names starting with P_' are considered.
 	 */
@@ -1022,7 +1022,7 @@ public class JavaElementLabelComposer {
 			}
 		}
 	}
-	
+
 	private void appendCompressedPackageFragment(IPackageFragment pack) {
 		refreshPackageNamePattern();
 		if (fgPkgNameLength < 0) {
@@ -1045,11 +1045,11 @@ public class JavaElementLabelComposer {
 		}
 		fBuffer.append(name.substring(start));
 	}
-	
+
 
 	/**
 	 * Appends the label for a package fragment root. Considers the ROOT_* flags.
-	 * 
+	 *
 	 * @param root the element to render
 	 * @param flags the rendering flags. Flags with names starting with ROOT_' are considered.
 	 */
@@ -1062,7 +1062,7 @@ public class JavaElementLabelComposer {
 		else
 			appendFolderLabel(root, flags);
 	}
-	
+
 	private void appendArchiveLabel(IPackageFragmentRoot root, long flags) {
 		boolean external= root.isExternal();
 		if (external)
@@ -1070,13 +1070,13 @@ public class JavaElementLabelComposer {
 		else
 			appendInternalArchiveLabel(root, flags);
 	}
-	
+
 	private boolean appendVariableLabel(IPackageFragmentRoot root, long flags) {
 		try {
 			IClasspathEntry rawEntry= root.getRawClasspathEntry();
 			if (rawEntry != null && rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 				IPath path= rawEntry.getPath().makeRelative();
-				
+
 				if (getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED)) {
 					int segements= path.segmentCount();
 					if (segements > 0) {
@@ -1101,7 +1101,7 @@ public class JavaElementLabelComposer {
 					fBuffer.append(root.getPath().toOSString());
 				else
 					fBuffer.append(root.getPath().makeRelative().toString());
-				
+
 				if (getFlag(flags, JavaElementLabels.COLORIZE)) {
 					fBuffer.setStyle(offset, fBuffer.length() - offset, QUALIFIER_STYLE);
 				}
@@ -1166,7 +1166,7 @@ public class JavaElementLabelComposer {
 			appendExternalArchiveLabel(root, flags);
 			return;
 		}
-		
+
 		boolean rootQualified= getFlag(flags, JavaElementLabels.ROOT_QUALIFIED);
 		boolean referencedQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
 		if (rootQualified) {
@@ -1179,7 +1179,7 @@ public class JavaElementLabelComposer {
 			} else {
 				fBuffer.append(projectRelativePath.toString());
 			}
-				
+
 			int offset= fBuffer.length();
 			if (referencedQualified) {
 				fBuffer.append(JavaElementLabels.CONCAT_STRING);
@@ -1195,13 +1195,13 @@ public class JavaElementLabelComposer {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the given package fragment root is
 	 * referenced. This means it is own by a different project but is referenced
 	 * by the root's parent. Returns <code>false</code> if the given root
 	 * doesn't have an underlying resource.
-	 * 
+	 *
 	 * @param root the package fragment root
 	 * @return returns <code>true</code> if the given package fragment root is referenced
 	 */
@@ -1246,12 +1246,12 @@ public class JavaElementLabelComposer {
 		fgPkgNamePrefix= pattern;
 		fgPkgNameLength= pattern.length();
 	}
-	
+
 	private String getPkgNamePatternForPackagesView() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES))
 			return ""; //$NON-NLS-1$
 		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 	}
-	
+
 }

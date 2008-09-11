@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Tests the automatic bracket insertion feature of the CUEditor. Also tests
  * linked mode along the way.
- * 
+ *
  * @since 3.1
  */
 public class NewForLoopJavaContextTest extends TestCase {
@@ -82,11 +82,11 @@ public class NewForLoopJavaContextTest extends TestCase {
 		"	\n" +
 		"}\n" +
 		"}\n";
-	
+
 	public static Test suite() {
 		return new TestSuite(NewForLoopJavaContextTest.class);
 	}
-	
+
 	private IJavaProject fProject;
 	private ICompilationUnit fCU;
 
@@ -101,7 +101,7 @@ public class NewForLoopJavaContextTest extends TestCase {
 		}
 		setUpProject(JavaCore.VERSION_1_5);
 	}
-	
+
 	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
 		fProject= JavaProjectHelper.createJavaProject(PROJECT, "bin");
 		JavaProjectHelper.addRTJar(fProject);
@@ -119,23 +119,23 @@ public class NewForLoopJavaContextTest extends TestCase {
 			JavaCore.setOptions(JavaCore.getDefaultOptions());
 		}
 	}
-	
+
 	private Template getTemplate(String id) {
 		TemplateStore store= JavaPlugin.getDefault().getTemplateStore();
 		return store.getTemplateData(id).getTemplate();
 	}
-	
+
 	private Template getForLoop() {
 		return getTemplate("org.eclipse.jdt.ui.templates.for_iterable");
 	}
-	
+
 	private String evaluateTemplateInMethod(String signature) throws BadLocationException, TemplateException, CoreException {
 		fCU.getBuffer().setContents(CU_PREFIX + signature + CU_POSTFIX);
 		int offset= CU_PREFIX.length() + signature.length() + 3;
 		fCU.reconcile(ICompilationUnit.NO_AST, false, null, null);
 		return JavaContext.evaluateTemplate(getForLoop(), fCU, offset);
 	}
-	
+
 	public void testArray() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Number[] array)");
 		assertEquals(
@@ -143,7 +143,7 @@ public class NewForLoopJavaContextTest extends TestCase {
 				"		\n" +
 				"	}", template);
 	}
-	
+
 	public void testInnerArray() throws Exception {
 		String template= evaluateTemplateInMethod("void array(Inner[] array)");
 		assertEquals(
@@ -151,7 +151,7 @@ public class NewForLoopJavaContextTest extends TestCase {
 				"		\n" +
 				"	}", template);
 	}
-	
+
 
 	public void testSuperList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? super Number> list)");

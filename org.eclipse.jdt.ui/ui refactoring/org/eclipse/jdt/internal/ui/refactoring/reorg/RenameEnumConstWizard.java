@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 public final class RenameEnumConstWizard extends RenameRefactoringWizard {
 
 	public RenameEnumConstWizard(Refactoring refactoring) {
-		super(refactoring, RefactoringMessages.RenameEnumConstWizard_defaultPageTitle, RefactoringMessages.RenameEnumConstWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE); 
+		super(refactoring, RefactoringMessages.RenameEnumConstWizard_defaultPageTitle, RefactoringMessages.RenameEnumConstWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);
 	}
 
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {

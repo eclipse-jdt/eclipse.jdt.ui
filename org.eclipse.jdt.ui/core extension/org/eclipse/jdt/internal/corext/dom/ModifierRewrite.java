@@ -37,9 +37,9 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  *
  */
 public class ModifierRewrite {
-	
+
 	public static final int VISIBILITY_MODIFIERS= Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED;
-	
+
 	private ListRewrite fModifierRewrite;
 	private AST fAst;
 
@@ -83,15 +83,15 @@ public class ModifierRewrite {
 	public ListRewrite getModifierRewrite() {
 		return fModifierRewrite;
 	}
-	
+
 	public void setModifiers(int modfiers, TextEditGroup editGroup) {
 		internalSetModifiers(modfiers, -1, editGroup);
 	}
-	
+
 	public void setModifiers(int included, int excluded, TextEditGroup editGroup) {
 		internalSetModifiers(included, included | excluded, editGroup);
 	}
-	
+
 	public void setVisibility(int visibilityFlags, TextEditGroup editGroup) {
 		internalSetModifiers(visibilityFlags, VISIBILITY_MODIFIERS, editGroup);
 	}
@@ -102,17 +102,17 @@ public class ModifierRewrite {
 		if (originalList.isEmpty()) {
 			return;
 		}
-		
+
 		ASTNode copy= modifierList.createCopyTarget((ASTNode) originalList.get(0), (ASTNode) originalList.get(originalList.size() - 1));
 		if (copy != null) {
 			fModifierRewrite.insertLast(copy, editGroup);
 		}
 	}
-	
+
 	public void copyAllAnnotations(ASTNode otherDecl, TextEditGroup editGroup) {
 		ListRewrite modifierList= evaluateListRewrite(fModifierRewrite.getASTRewrite(), otherDecl);
 		List originalList= modifierList.getOriginalList();
-		
+
 		for (Iterator iterator= originalList.iterator(); iterator.hasNext();) {
 			IExtendedModifier modifier= (IExtendedModifier) iterator.next();
 			if (modifier.isAnnotation()) {
@@ -120,11 +120,11 @@ public class ModifierRewrite {
 			}
 		}
 	}
-	
+
 	private void internalSetModifiers(int modfiers, int consideredFlags, TextEditGroup editGroup) {
 		// remove modifiers
 		int newModifiers= modfiers & consideredFlags;
-		
+
 		List originalList= fModifierRewrite.getOriginalList();
 		for (int i= 0; i < originalList.size(); i++) {
 			ASTNode curr= (ASTNode) originalList.get(i);
@@ -138,7 +138,7 @@ public class ModifierRewrite {
 				}
 			}
 		}
-		
+
 		// find last annotation
 		IExtendedModifier lastAnnotation= null;
 		List extendedList= fModifierRewrite.getRewrittenList();
@@ -147,7 +147,7 @@ public class ModifierRewrite {
 			if (curr.isAnnotation())
 				lastAnnotation= curr;
 		}
-		
+
 		// add modifiers
 		List newNodes= ASTNodeFactory.newModifiers(fAst, newModifiers);
 		for (int i= 0; i < newNodes.size(); i++) {

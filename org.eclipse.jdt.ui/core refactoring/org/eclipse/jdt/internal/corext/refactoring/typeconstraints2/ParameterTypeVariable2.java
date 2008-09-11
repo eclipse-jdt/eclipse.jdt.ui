@@ -26,7 +26,7 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 	private final int fParameterIndex;
 	private final String fKey;
 	private ICompilationUnit fCompilationUnit;
-	
+
 	public ParameterTypeVariable2(TType type, int index, IMethodBinding binding) {
 		super(type);
 		Assert.isNotNull(binding);
@@ -34,11 +34,11 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 		fParameterIndex= index;
 		fKey= binding.getKey();
 	}
-	
+
 	public void setCompilationUnit(ICompilationUnit cu) {
 		fCompilationUnit= cu;
 	}
-	
+
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
@@ -46,7 +46,7 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 	public int getParameterIndex() {
 		return fParameterIndex;
 	}
-	
+
 	public String getKey() {
 		return fKey;
 	}
@@ -66,7 +66,7 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 			return true;
 		if (other.getClass() != ParameterTypeVariable2.class)
 			return false;
-		
+
 		ParameterTypeVariable2 other2= (ParameterTypeVariable2) other;
 		return getParameterIndex() == other2.getParameterIndex()
 				&& getKey().equals(other2.getKey());

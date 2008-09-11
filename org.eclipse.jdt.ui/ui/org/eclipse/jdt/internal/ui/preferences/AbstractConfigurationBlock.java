@@ -18,9 +18,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -35,10 +32,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -52,24 +51,24 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor typing preferences.
- * 
+ *
  * @since 3.1
  */
 abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	/**
 	 * Use as follows:
-	 * 
+	 *
 	 * <pre>
 	 * SectionManager manager= new SectionManager();
 	 * Composite composite= manager.createSectionComposite(parent);
-	 * 
+	 *
 	 * Composite xSection= manager.createSection("section X"));
 	 * xSection.setLayout(new FillLayout());
 	 * new Button(xSection, SWT.PUSH); // add controls to section..
-	 * 
+	 *
 	 * [...]
-	 * 
+	 *
 	 * return composite; // return main composite
 	 * </pre>
 	 */
@@ -134,7 +133,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				section.addExpansionListener(fListener);
 			makeScrollableCompositeAware(section);
 		}
-		
+
 		/**
 		 * Creates a new composite that can contain a set of expandable
 		 * sections. A <code>ScrolledPageComposite</code> is created and a new
@@ -147,7 +146,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		 * The receiver keeps a reference to the inner body composite, so that
 		 * new sections can be added via <code>createSection</code>.
 		 * </p>
-		 * 
+		 *
 		 * @param parent the parent composite
 		 * @return the newly created composite
 		 */
@@ -162,17 +161,17 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				composite= new ScrolledPageContent(parent);
 				fBody= ((ScrolledPageContent) composite).getBody();
 			}
-			
+
 			fBody.setLayout(new GridLayout());
-			
+
 			return composite;
 		}
-		
+
 		/**
 		 * Creates an expandable section within the parent created previously by
-		 * calling <code>createSectionComposite</code>. Controls can be added 
+		 * calling <code>createSectionComposite</code>. Controls can be added
 		 * directly to the returned composite, which has no layout initially.
-		 * 
+		 *
 		 * @param label the display name of the section
 		 * @return a composite within the expandable section
 		 */
@@ -185,7 +184,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			String last= null;
 			if (fLastOpenKey != null && fDialogSettingsStore != null)
 				last= fDialogSettingsStore.getString(fLastOpenKey);
-			
+
 			if (fFirstChild == excomposite && !__NONE.equals(last) || label.equals(last)) {
 				excomposite.setExpanded(true);
 				if (fFirstChild != excomposite)
@@ -194,20 +193,20 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				excomposite.setExpanded(false);
 			}
 			excomposite.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
-			
+
 			updateSectionStyle(excomposite);
 			manage(excomposite);
-			
+
 			Composite contents= new Composite(excomposite, SWT.NONE);
 			excomposite.setClient(contents);
-			
+
 			return contents;
 		}
 	}
 
 	protected static final int INDENT= 20;
 	private OverlayPreferenceStore fStore;
-	
+
 	private Map fCheckBoxes= new HashMap();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
 		public void widgetDefaultSelected(SelectionEvent e) {
@@ -217,8 +216,8 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
 		}
 	};
-	
-	
+
+
 	private Map fTextFields= new HashMap();
 	private ModifyListener fTextFieldListener= new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
@@ -233,15 +232,15 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			numberFieldChanged((Text) e.widget);
 		}
 	};
-	
+
 	/**
 	 * List of master/slave listeners when there's a dependency.
-	 * 
+	 *
 	 * @see #createDependency(Button, Control)
 	 * @since 3.0
 	 */
 	private ArrayList fMasterSlaveListeners= new ArrayList();
-	
+
 	private StatusInfo fStatus;
 	private final PreferencePage fMainPage;
 
@@ -250,7 +249,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		fStore= store;
 		fMainPage= null;
 	}
-	
+
 	public AbstractConfigurationBlock(OverlayPreferenceStore store, PreferencePage mainPreferencePage) {
 		Assert.isNotNull(store);
 		Assert.isNotNull(mainPreferencePage);
@@ -283,22 +282,22 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	protected void updateSectionStyle(ExpandableComposite excomposite) {
 		excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 	}
-	
+
 	private void makeScrollableCompositeAware(Control control) {
 		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(control);
 		if (parentScrolledComposite != null) {
 			parentScrolledComposite.adaptChild(control);
 		}
 	}
-	
+
 	private boolean isNestedInScrolledComposite(Composite parent) {
 		return getParentScrolledComposite(parent) != null;
 	}
-	
-	protected Button addCheckBox(Composite parent, String label, String key, int indentation) {		
+
+	protected Button addCheckBox(Composite parent, String label, String key, int indentation) {
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(label);
-		
+
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= indentation;
 		gd.horizontalSpan= 2;
@@ -307,7 +306,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		makeScrollableCompositeAware(checkBox);
 
 		fCheckBoxes.put(checkBox, key);
-		
+
 		return checkBox;
 	}
 
@@ -316,7 +315,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	 *  - first element is of type <code>Label</code>
 	 *  - second element is of type <code>Text</code>
 	 * Use <code>getLabelControl</code> and <code>getTextControl</code> to get the 2 controls.
-	 * 
+	 *
 	 * @param composite 	the parent composite
 	 * @param label			the text field's label
 	 * @param key			the preference key
@@ -326,16 +325,16 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	 * @return the controls added
 	 */
 	protected Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
-		
+
 		PixelConverter pixelConverter= new PixelConverter(composite);
-		
+
 		Label labelControl= new Label(composite, SWT.NONE);
 		labelControl.setText(label);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= indentation;
 		labelControl.setLayoutData(gd);
-		
-		Text textControl= new Text(composite, SWT.BORDER | SWT.SINGLE);		
+
+		Text textControl= new Text(composite, SWT.BORDER | SWT.SINGLE);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.widthHint= pixelConverter.convertWidthInCharsToPixels(textLimit + 1);
 		textControl.setLayoutData(gd);
@@ -347,14 +346,14 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		} else {
 			textControl.addModifyListener(fTextFieldListener);
 		}
-			
+
 		return new Control[]{labelControl, textControl};
 	}
 
 	protected void createDependency(final Button master, final Control slave) {
 		createDependency(master, new Control[] {slave});
 	}
-	
+
 	protected void createDependency(final Button master, final Control[] slaves) {
 		Assert.isTrue(slaves.length > 0);
 		indent(slaves[0]);
@@ -381,28 +380,28 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	}
 
 	private void initializeFields() {
-		
+
 		Iterator iter= fCheckBoxes.keySet().iterator();
 		while (iter.hasNext()) {
 			Button b= (Button) iter.next();
 			String key= (String) fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}
-		
+
 		iter= fTextFields.keySet().iterator();
 		while (iter.hasNext()) {
 			Text t= (Text) iter.next();
 			String key= (String) fTextFields.get(t);
 			t.setText(fStore.getString(key));
 		}
-		
+
         // Update slaves
         iter= fMasterSlaveListeners.iterator();
         while (iter.hasNext()) {
             SelectionListener listener= (SelectionListener)iter.next();
             listener.widgetSelected(null);
         }
-     
+
         updateStatus(new StatusInfo());
 	}
 
@@ -425,7 +424,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	 */
 	public void dispose() {
 	}
-	
+
 	private void numberFieldChanged(Text textControl) {
 		String number= textControl.getText();
 		IStatus status= validatePositiveNumber(number);
@@ -433,18 +432,18 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			fStore.setValue((String) fTextFields.get(textControl), number);
 		updateStatus(status);
 	}
-	
+
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(PreferencesMessages.JavaEditorPreferencePage_empty_input); 
+			status.setError(PreferencesMessages.JavaEditorPreferencePage_empty_input);
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value < 0)
-					status.setError(Messages.format(PreferencesMessages.JavaEditorPreferencePage_invalid_input, number)); 
+					status.setError(Messages.format(PreferencesMessages.JavaEditorPreferencePage_invalid_input, number));
 			} catch (NumberFormatException e) {
-				status.setError(Messages.format(PreferencesMessages.JavaEditorPreferencePage_invalid_input, number)); 
+				status.setError(Messages.format(PreferencesMessages.JavaEditorPreferencePage_invalid_input, number));
 			}
 		}
 		return status;
@@ -456,7 +455,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		fMainPage.setValid(status.isOK());
 		StatusUtil.applyToStatusLine(fMainPage, status);
 	}
-	
+
 	protected final OverlayPreferenceStore getPreferenceStore() {
 		return fStore;
 	}

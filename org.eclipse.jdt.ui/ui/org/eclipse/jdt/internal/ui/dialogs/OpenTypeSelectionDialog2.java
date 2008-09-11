@@ -41,12 +41,12 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2"; //$NON-NLS-1$
 	private static final String WIDTH= "width"; //$NON-NLS-1$
 	private static final String HEIGHT= "height"; //$NON-NLS-1$
-	
+
 	public OpenTypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
 		this(parent, multi, context, scope, elementKinds, null);
 	}
-	
-	public OpenTypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, 
+
+	public OpenTypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context,
 			IJavaSearchScope scope, int elementKinds, TypeSelectionExtension extension) {
 		super(parent, multi, context, scope, elementKinds, extension);
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
@@ -58,7 +58,7 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 			fSettings.put(HEIGHT, 320);
 		}
 	}
-	
+
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.OPEN_TYPE_DIALOG);
@@ -75,7 +75,7 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 		}
 		return result;
 	}
-	
+
 	protected Point getInitialLocation(Point initialSize) {
 		Point result= super.getInitialLocation(initialSize);
 		if (fLocation != null) {
@@ -84,26 +84,26 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 			Rectangle display= getShell().getDisplay().getClientArea();
 			int xe= result.x + initialSize.x;
 			if (xe > display.width) {
-				result.x-= xe - display.width; 
+				result.x-= xe - display.width;
 			}
 			int ye= result.y + initialSize.y;
 			if (ye > display.height) {
-				result.y-= ye - display.height; 
+				result.y-= ye - display.height;
 			}
 		}
 		return result;
 	}
-	
+
 	protected Control createDialogArea(Composite parent) {
 		readSettings();
 		return super.createDialogArea(parent);
 	}
-	
+
 	public boolean close() {
 		writeSettings();
 		return super.close();
 	}
-	
+
 	/**
 	 * Initializes itself from the dialog settings with the same state
 	 * as at the previous invocation.
@@ -137,5 +137,5 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 		Point size= getShell().getSize();
 		fSettings.put("width", size.x); //$NON-NLS-1$
 		fSettings.put("height", size.y); //$NON-NLS-1$
-	}	
+	}
 }

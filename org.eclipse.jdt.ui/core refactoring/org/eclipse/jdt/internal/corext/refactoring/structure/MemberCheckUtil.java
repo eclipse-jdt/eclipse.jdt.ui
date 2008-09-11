@@ -33,12 +33,12 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 class MemberCheckUtil {
-	
+
 	private MemberCheckUtil(){
 		//static only
 	}
-	
-	public static RefactoringStatus checkMembersInDestinationType(IMember[] members, IType destinationType) throws JavaModelException {	
+
+	public static RefactoringStatus checkMembersInDestinationType(IMember[] members, IType destinationType) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < members.length; i++) {
 			if (members[i].getElementType() == IJavaElement.METHOD)
@@ -48,7 +48,7 @@ class MemberCheckUtil {
 			else if (members[i].getElementType() == IJavaElement.TYPE)
 				checkTypeInType(destinationType, result, (IType)members[i]);
 		}
-		return result;	
+		return result;
 	}
 
 	private static void checkMethodInType(IType destinationType, RefactoringStatus result, IMethod method) throws JavaModelException {
@@ -56,7 +56,7 @@ class MemberCheckUtil {
 		IMethod found= findMethod(method, destinationTypeMethods);
 		if (found != null){
 			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), found.getSourceRange());
-			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_signature_exists, 
+			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_signature_exists,
 					new String[]{ BasicElementLabels.getJavaElementName(method.getElementName()), getQualifiedLabel(destinationType)});
 			result.addError(message, context);
 		} else {
@@ -66,25 +66,25 @@ class MemberCheckUtil {
 						 new String[]{ BasicElementLabels.getJavaElementName(method.getElementName()), getQualifiedLabel(destinationType)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), similar.getSourceRange());
 				result.addWarning(message, context);
-			}										
-		}	
+			}
+		}
 	}
-	
+
 	private static void checkFieldInType(IType destinationType, RefactoringStatus result, IField field) throws JavaModelException {
-		IField destinationTypeField= destinationType.getField(field.getElementName());	
+		IField destinationTypeField= destinationType.getField(field.getElementName());
 		if (! destinationTypeField.exists())
 			return;
-		String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_field_exists, 
+		String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_field_exists,
 				new String[]{ BasicElementLabels.getJavaElementName(field.getElementName()), getQualifiedLabel(destinationType)});
 		RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeField.getSourceRange());
 		result.addError(message, context);
 	}
-	
+
 	private static void checkTypeInType(IType destinationType, RefactoringStatus result, IType type) throws JavaModelException {
 		String typeName= type.getElementName();
 		IType destinationTypeType= destinationType.getType(typeName);
 		if (destinationTypeType.exists()){
-			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict0,  
+			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict0,
 					new String[]{ BasicElementLabels.getJavaElementName(typeName), getQualifiedLabel(destinationType)});
 			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeType.getNameRange());
 			result.addError(message, context);
@@ -109,13 +109,13 @@ class MemberCheckUtil {
 		for (int i= 0; i < enclosedTypes.length; i++) {
 			IType enclosedType= enclosedTypes[i];
 			if (destinationType.getElementName().equals(enclosedType.getElementName())){
-				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict3, 
+				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict3,
 						new String[] { getQualifiedLabel(enclosedType), getQualifiedLabel(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, enclosedType.getElementName())){
-				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict4,  
+				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict4,
 						new String[] { getQualifiedLabel(enclosedType), getQualifiedLabel(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
@@ -126,7 +126,7 @@ class MemberCheckUtil {
 	private static String getQualifiedLabel(IType enclosedType) {
 		return BasicElementLabels.getJavaElementName(enclosedType.getFullyQualifiedName('.'));
 	}
-	
+
 	private static IType[] getAllEnclosedTypes(IType type) throws JavaModelException {
 		List result= new ArrayList(2);
 		IType[] directlyEnclosed= type.getTypes();
@@ -147,14 +147,14 @@ class MemberCheckUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Finds a method in a list of methods. Compares methods by signature
 	 * (only SimpleNames of types), and not by the declaring type.
 	 * @param method the method to find
 	 * @param allMethods the methods to look at
 	 * @return The found method or <code>null</code>, if nothing found
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public static IMethod findMethod(IMethod method, IMethod[] allMethods) throws JavaModelException {
 		String name= method.getElementName();

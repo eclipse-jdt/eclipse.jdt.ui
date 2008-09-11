@@ -58,7 +58,7 @@ public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJa
 
 		return true;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#stripNonLetters(java.lang.String)
 	 * @since 3.3

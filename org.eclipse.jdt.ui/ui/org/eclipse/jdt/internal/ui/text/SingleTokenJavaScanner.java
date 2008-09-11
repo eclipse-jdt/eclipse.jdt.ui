@@ -13,7 +13,9 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 import java.util.List;
+
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.ui.text.IColorManager;
 
 

@@ -40,9 +40,9 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
+import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
-import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 
 
 /**
@@ -334,13 +334,13 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			}
 			if (i < INTERFACE.length())
 				return false;
-			
+
 			if (fWordDetector.isWordPart((char) ch))
 				return false;
-			
+
 			if (ch != ICharacterScanner.EOF)
 				scanner.unread();
-			
+
 			return true;
 		}
 
@@ -357,7 +357,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
 		public void setSourceVersion(String version) {
-			fIsVersionMatch= fVersion.compareTo(version) <= 0; 
+			fIsVersionMatch= fVersion.compareTo(version) <= 0;
 		}
 
 	}
@@ -481,7 +481,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for keyword 'return'.
 		CombinedWordRule.WordMatcher returnWordRule= new CombinedWordRule.WordMatcher();
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD_RETURN);
-		returnWordRule.addWord(RETURN, token);  
+		returnWordRule.addWord(RETURN, token);
 		combinedWordRule.addWordMatcher(returnWordRule);
 
 		// Add word rule for keywords, types, and constants.
@@ -501,7 +501,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		setDefaultReturnToken(getToken(IJavaColorConstants.JAVA_DEFAULT));
 		return rules;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getBoldKey(java.lang.String)
 	 */
@@ -510,7 +510,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			return ANNOTATION_BASE_KEY + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
 		return super.getBoldKey(colorKey);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getItalicKey(java.lang.String)
 	 */
@@ -519,7 +519,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			return ANNOTATION_BASE_KEY + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
 		return super.getItalicKey(colorKey);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getStrikethroughKey(java.lang.String)
 	 */
@@ -528,7 +528,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			return ANNOTATION_BASE_KEY + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
 		return super.getStrikethroughKey(colorKey);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#getUnderlineKey(java.lang.String)
 	 */

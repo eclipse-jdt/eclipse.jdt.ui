@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * The {@link SharedASTProvider} provides access to the {@link CompilationUnit AST root} used by
  * the current active Java editor.
- * 
+ *
  * <p>For performance reasons, not more than one AST should be kept in memory at a time. Therefore, clients must
  * not keep any references to the shared AST or its nodes or bindings.
  * </p>
@@ -43,17 +43,17 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * The returned AST is shared. It is marked as {@link ASTNode#PROTECT} and must not be modified. Clients are advised to use
  * the non-modifying {@link ASTRewrite} to get update scripts.
  * </p>
- * 
+ *
  * <p>
  * This class is not intended to be subclassed or instantiated by clients.
  * </p>
- * 
+ *
  * @since 3.4
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public final class SharedASTProvider {
-	
+
 	/**
 	 * Wait flag class.
 	 */
@@ -108,7 +108,7 @@ public final class SharedASTProvider {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must not keep any references.
 	 * </p>
-	 * 
+	 *
 	 * @param element the {@link ITypeRoot}, must not be <code>null</code>
 	 * @param waitFlag {@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor the progress monitor or <code>null</code>

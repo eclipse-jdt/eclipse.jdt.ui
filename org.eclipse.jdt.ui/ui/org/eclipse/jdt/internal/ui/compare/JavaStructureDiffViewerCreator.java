@@ -14,7 +14,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.compare.*;
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.IViewerCreator;
 
 /**
  * A factory object for the <code>JavaStructureDiffViewer</code>.
@@ -23,7 +24,7 @@ import org.eclipse.compare.*;
  * (this precludes Viewers).
  */
 public class JavaStructureDiffViewerCreator implements IViewerCreator {
-	
+
 	public Viewer createViewer(Composite parent, CompareConfiguration cc) {
 		return new JavaStructureDiffViewer(parent, cc);
 	}

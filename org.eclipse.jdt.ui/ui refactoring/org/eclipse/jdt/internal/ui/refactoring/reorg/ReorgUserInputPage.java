@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -51,7 +51,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 			| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	private TreeViewer fViewer;
 	public ReorgUserInputPage(String pageName) {
-		super(pageName);			
+		super(pageName);
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -61,12 +61,12 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		Composite result= new Composite(parent, SWT.NONE);
 		setControl(result);
 		result.setLayout(new GridLayout());
-		
+
 		Object initialSelection= getInitiallySelectedElement();
 		verifyDestination(initialSelection, true);
 
 		addLabel(result);
-		
+
 		fViewer= createViewer(result);
 		fViewer.setSelection(new StructuredSelection(initialSelection), true);
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener(){
@@ -76,7 +76,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		});
 		Dialog.applyDialogFont(result);
 	}
-	
+
 	protected Control addLabel(Composite parent) {
 		Label label= new Label(parent, SWT.WRAP);
 		String text;
@@ -85,15 +85,15 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 
 		if (resources == 0 && javaElements == 1) {
 			text= Messages.format(
-					ReorgMessages.ReorgUserInputPage_choose_destination_single, 
+					ReorgMessages.ReorgUserInputPage_choose_destination_single,
 					JavaElementLabels.getElementLabel(getJavaElements()[0], LABEL_FLAGS));
 		} else if (resources == 1 && javaElements == 0) {
 			text= Messages.format(
-					ReorgMessages.ReorgUserInputPage_choose_destination_single, 
+					ReorgMessages.ReorgUserInputPage_choose_destination_single,
 					BasicElementLabels.getResourceName(getResources()[0]));
 		} else {
 			text= Messages.format(
-					ReorgMessages.ReorgUserInputPage_choose_destination_multi, 
+					ReorgMessages.ReorgUserInputPage_choose_destination_multi,
 					String.valueOf(resources + javaElements));
 		}
 
@@ -103,7 +103,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		label.setLayoutData(data);
 		return label;
 	}
-	
+
 	private void viewerSelectionChanged(SelectionChangedEvent event) {
 		ISelection selection= event.getSelection();
 		if (!(selection instanceof IStructuredSelection))
@@ -111,22 +111,22 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		IStructuredSelection ss= (IStructuredSelection)selection;
 		verifyDestination(ss.getFirstElement(), false);
 	}
-	
+
 	protected abstract Object getInitiallySelectedElement();
-	
-	/** 
-	 * Set and verify destination 
-	 * @param selected 
+
+	/**
+	 * Set and verify destination
+	 * @param selected
 	 * @return the resulting status
 	 * @throws JavaModelException
 	 */
 	protected abstract RefactoringStatus verifyDestination(Object selected) throws JavaModelException;
-	
+
 	protected abstract IResource[] getResources();
 	protected abstract IJavaElement[] getJavaElements();
 
 	protected abstract IReorgDestinationValidator getDestinationValidator();
-	
+
 	private final void verifyDestination(Object selected, boolean initialVerification) {
 		try {
 			RefactoringStatus status= verifyDestination(selected);
@@ -138,7 +138,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 			JavaPlugin.log(e);
 			setPageComplete(false);
 		}
-	}		
+	}
 
 	private TreeViewer createViewer(Composite parent) {
 		TreeViewer treeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
@@ -152,7 +152,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;
 	}
-	
+
 	protected TreeViewer getTreeViewer() {
 		return fViewer;
 	}

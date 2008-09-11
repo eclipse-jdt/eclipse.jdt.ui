@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
@@ -48,7 +48,7 @@ public class CompilationUnitPreview extends JavaPreview {
             return;
         }
         fPreviewDocument.set(fPreviewText);
-		
+
 		fSourceViewer.setRedraw(false);
 		final IFormattingContext context = new JavaFormattingContext();
 		try {
@@ -61,15 +61,15 @@ public class CompilationUnitPreview extends JavaPreview {
 			} else
 				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
 		} catch (Exception e) {
-			final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
-				FormatterMessages.JavaPreview_formatter_exception, e); 
+			final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR,
+				FormatterMessages.JavaPreview_formatter_exception, e);
 			JavaPlugin.log(status);
 		} finally {
 		    context.dispose();
 		    fSourceViewer.setRedraw(true);
 		}
     }
-    
+
     public void setPreviewText(String previewText) {
 //        if (previewText == null) throw new IllegalArgumentException();
         fPreviewText= previewText;

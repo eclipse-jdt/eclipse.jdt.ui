@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.source.IVerticalRuler;
 
 import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.MarkerRulerAction;
 

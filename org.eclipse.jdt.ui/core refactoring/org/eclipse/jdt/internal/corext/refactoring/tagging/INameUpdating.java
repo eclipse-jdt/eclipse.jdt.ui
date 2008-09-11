@@ -18,13 +18,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * Represents processors in the JDT space that rename elements.
  */
 public interface INameUpdating {
-	
+
 	/**
 	 * Sets new name for the entity that this refactoring is working on.
 	 * @param newName the new name
 	 */
 	public void setNewElementName(String newName);
-	
+
 	/**
 	 * Get the name for the entity that this refactoring is working on.
 	 * @return returns the new name
@@ -36,7 +36,7 @@ public interface INameUpdating {
 	 * @return returns the current name
 	 */
 	public String getCurrentElementName();
-	
+
 	/**
 	 * Gets the original elements. Since an <code>INameUpdating</code> only renames one element,
 	 * this method must return an array containing exactly one element.
@@ -44,13 +44,13 @@ public interface INameUpdating {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
 	public Object[] getElements();
-	
+
 	/**
 	 * Gets the element after renaming, or <code>null</code> if not available.
 	 * @return returns the new element or <code>null</code>
-	 * 
+	 *
 	 * @throws CoreException thrown when the new element could not be evaluated
-	 */	
+	 */
 	public Object getNewElement() throws CoreException;
 
 	/**

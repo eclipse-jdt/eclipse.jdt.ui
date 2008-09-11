@@ -14,10 +14,10 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 public abstract class CallHierarchyVisitor {
     public void preVisit(MethodWrapper methodWrapper) {
     }
-    
+
     public void postVisit(MethodWrapper methodWrapper) {
     }
-    
+
     public boolean visit(MethodWrapper methodWrapper) {
         return true;
     }

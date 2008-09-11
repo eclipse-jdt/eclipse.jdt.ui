@@ -34,7 +34,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	private final static String VISIBILITY= JavaCore.CODEASSIST_VISIBILITY_CHECK;
 	private final static String ENABLED= "enabled"; //$NON-NLS-1$
 	private final static String DISABLED= "disabled"; //$NON-NLS-1$
-	
+
 	private IContextInformationValidator fValidator;
 	protected final IEditorPart fEditor;
 

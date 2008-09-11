@@ -16,11 +16,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 public class TypeEquivalenceSet {
-	
+
 	private ConstraintVariable2[] fVariables;
 	private ITypeSet fTypeEstimate;
-	
-	
+
+
 	public TypeEquivalenceSet(ConstraintVariable2 first, ConstraintVariable2 second) {
 		fVariables= new ConstraintVariable2[] {first, second };
 	}
@@ -33,14 +33,14 @@ public class TypeEquivalenceSet {
 		for (int i= 0; i < fVariables.length; i++)
 			if (fVariables[i] == variable)
 				return;
-		
+
 		int length= fVariables.length;
 		ConstraintVariable2[] newElements= new ConstraintVariable2[length + 1];
 		System.arraycopy(fVariables, 0, newElements, 0, length);
 		newElements[length]= variable;
 		fVariables= newElements;
 	}
-	
+
 	public ConstraintVariable2[] getContributingVariables() {
 		return fVariables;
 	}
@@ -51,7 +51,7 @@ public class TypeEquivalenceSet {
 			result.addAll(Arrays.asList(fVariables));
 			result.addAll(Arrays.asList(variables));
 			fVariables= (ConstraintVariable2[]) result.toArray(new ConstraintVariable2[result.size()]);
-			
+
 		} else {
 			List elements= Arrays.asList(fVariables);
 			ArrayList result= new ArrayList(fVariables.length + variables.length);
@@ -63,17 +63,17 @@ public class TypeEquivalenceSet {
 			}
 			fVariables= (ConstraintVariable2[]) result.toArray(new ConstraintVariable2[result.size()]);
 		}
-		
+
 	}
 
 	public void setTypeEstimate(ITypeSet estimate) {
 		fTypeEstimate= estimate;
 	}
-	
+
 	public ITypeSet getTypeEstimate() {
 		return fTypeEstimate;
 	}
-	
+
 	public String toString() {
 		StringBuffer result= new StringBuffer();
 		if (fVariables.length > 0)

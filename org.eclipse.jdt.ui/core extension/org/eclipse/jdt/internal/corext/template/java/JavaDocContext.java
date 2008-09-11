@@ -45,7 +45,7 @@ public class JavaDocContext extends CompilationUnitContext {
 
 	/**
 	 * Creates a javadoc template context.
-	 * 
+	 *
 	 * @param type the context type.
 	 * @param document the document.
 	 * @param completionOffset the completion offset within the document.
@@ -58,7 +58,7 @@ public class JavaDocContext extends CompilationUnitContext {
 
 	/**
 	 * Creates a javadoc template context.
-	 * 
+	 *
 	 * @param type the context type.
 	 * @param document the document.
 	 * @param completionPosition the position defining the completion offset and length
@@ -68,13 +68,13 @@ public class JavaDocContext extends CompilationUnitContext {
 	public JavaDocContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		super(type, document, completionPosition, compilationUnit);
 	}
-	
+
 	/*
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
 	public boolean canEvaluate(Template template) {
 		String key= getKey();
-		
+
 		if (fForceEvaluation)
 			return true;
 
@@ -89,22 +89,22 @@ public class JavaDocContext extends CompilationUnitContext {
 	public int getStart() {
 		if (fIsManaged && getCompletionLength() > 0)
 			return super.getStart();
-		
+
 		try {
 			IDocument document= getDocument();
 
 			if (getCompletionLength() == 0) {
 				int start= getCompletionOffset();
-		
+
 				if ((start != 0) && (document.getChar(start - 1) == HTML_TAG_END))
 					start--;
-		
+
 				while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
 					start--;
-				
+
 				if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
 					start--;
-		
+
 				// include html and javadoc tags
 				if ((start != 0) && (
 					(document.getChar(start - 1) == HTML_TAG_BEGIN) ||
@@ -112,25 +112,25 @@ public class JavaDocContext extends CompilationUnitContext {
 				{
 					start--;
 				}
-		
+
 				return start;
-				
+
 			}
 
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
-			
+
 			while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
 				start--;
-			
+
 			while (start != end && Character.isWhitespace(document.getChar(start)))
 				start++;
-			
+
 			if (start == end)
 				start= getCompletionOffset();
-			
+
 			return start;
-			
+
 
 		} catch (BadLocationException e) {
 			return getCompletionOffset();
@@ -141,7 +141,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getEnd()
 	 */
 	public int getEnd() {
-		
+
 		if (fIsManaged || getCompletionLength() == 0)
 			return super.getEnd();
 
@@ -150,10 +150,10 @@ public class JavaDocContext extends CompilationUnitContext {
 
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
-			
+
 			while (start != end && Character.isWhitespace(document.getChar(end - 1)))
 				end--;
-			
+
 			return end;
 
 		} catch (BadLocationException e) {
@@ -177,7 +177,7 @@ public class JavaDocContext extends CompilationUnitContext {
 			return start <= end
 				? document.get(start, end - start)
 				: ""; //$NON-NLS-1$
-			
+
 		} catch (BadLocationException e) {
 			return super.getKey();
 		}
@@ -191,20 +191,20 @@ public class JavaDocContext extends CompilationUnitContext {
 		TemplateBuffer buffer= translator.translate(template);
 
 		getContextType().resolve(buffer, this);
-		
+
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
 
 		IJavaProject project= getJavaProject();
 		JavaFormatter formatter= new JavaFormatter(TextUtilities.getDefaultLineDelimiter(getDocument()), getIndentation(), useCodeFormatter, project);
 		formatter.format(buffer, this);
-			
+
 		return buffer;
 	}
 
 	/**
 	 * Returns the indentation level at the position of code completion.
-	 * 
+	 *
 	 * @return the indentation level at the position of the code completion
 	 */
 	private int getIndentation() {

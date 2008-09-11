@@ -196,7 +196,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 						Position position= new Position(name.getStartPosition(), name.getLength());
 
 						annotationMap.put(
-								new OverrideIndicator(isImplements, text, binding.getKey()), 
+								new OverrideIndicator(isImplements, text, binding.getKey()),
 								position);
 
 					}

@@ -38,41 +38,41 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Action to run the self encapsulate field refactoring. 
+ * Action to run the self encapsulate field refactoring.
  * <p>
  * Action is applicable to selections containing elements of type
  * <code>IField</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
-	
+
 	/**
-	 * Creates a new <code>SelfEncapsulateFieldAction</code>. The action requires 
+	 * Creates a new <code>SelfEncapsulateFieldAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public SelfEncapsulateFieldAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.SelfEncapsulateFieldAction_label); 
+		setText(ActionMessages.SelfEncapsulateFieldAction_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELF_ENCAPSULATE_ACTION);
 	}
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public SelfEncapsulateFieldAction(JavaEditor editor) {
@@ -80,20 +80,20 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	//---- text selection -------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -106,21 +106,21 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			setEnabled(false);//no UI
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor); 
+			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length != 1 || !(elements[0] instanceof IField)) {
-				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable); 
+				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable);
 				return;
 			}
 			IField field= (IField)elements[0];
 
 			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) {
-				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable); 
+				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable);
 				return;
 			}
 			run(field);
@@ -129,7 +129,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			return;
 		}
 	}
-	
+
 	//---- structured selection -------------------------------------------------
 
 	/* (non-Javadoc)
@@ -145,7 +145,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			setEnabled(false);//no UI
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
@@ -155,12 +155,12 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(selection))
 				run((IField) selection.getFirstElement());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
-	
+
 	//---- private helpers --------------------------------------------------------
-	
+
 	/*
 	 * Should be private. But got shipped in this state in 2.0 so changing this is a
 	 * breaking API change.

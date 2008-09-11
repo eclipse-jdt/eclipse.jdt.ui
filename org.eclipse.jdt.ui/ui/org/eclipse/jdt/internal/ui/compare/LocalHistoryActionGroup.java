@@ -15,8 +15,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 
-import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionGroup;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
@@ -28,42 +29,42 @@ public class LocalHistoryActionGroup extends ActionGroup {
 	private JavaHistoryAction fReplaceWithPrevious;
 	private JavaHistoryAction fReplaceWith;
 	private JavaHistoryAction fAddFrom;
-	
+
 	public LocalHistoryActionGroup(CompilationUnitEditor editor, String groupName) {
 		Assert.isNotNull(groupName);
 		fGroupName= groupName;
 		fCompareWith= new JavaCompareWithEditionAction();
 		fCompareWith.init(editor,
-			CompareMessages.LocalHistoryActionGroup_action_compare_with, 
-			CompareMessages.LocalHistoryActionGroup_action_compare_with_title, 
-			CompareMessages.LocalHistoryActionGroup_action_compare_with_message); 
+			CompareMessages.LocalHistoryActionGroup_action_compare_with,
+			CompareMessages.LocalHistoryActionGroup_action_compare_with_title,
+			CompareMessages.LocalHistoryActionGroup_action_compare_with_message);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fCompareWith, IJavaHelpContextIds.COMPARE_WITH_HISTORY_ACTION);
 
 		fReplaceWithPrevious= new JavaReplaceWithPreviousEditionAction();
-		fReplaceWithPrevious.init(editor, 
-			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous, 
-			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous_title, 
-			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous_message); 
+		fReplaceWithPrevious.init(editor,
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous,
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous_title,
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_previous_message);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fReplaceWithPrevious, IJavaHelpContextIds.REPLACE_WITH_PREVIOUS_FROM_HISTORY_ACTION);
-		
+
 		fReplaceWith= new JavaReplaceWithEditionAction();
 		fReplaceWith.init(editor,
-			CompareMessages.LocalHistoryActionGroup_action_replace_with, 
-			CompareMessages.LocalHistoryActionGroup_action_replace_with_title, 
-			CompareMessages.LocalHistoryActionGroup_action_replace_with_message); 
+			CompareMessages.LocalHistoryActionGroup_action_replace_with,
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_title,
+			CompareMessages.LocalHistoryActionGroup_action_replace_with_message);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fReplaceWith, IJavaHelpContextIds.REPLACE_WITH_HISTORY_ACTION);
 
 		fAddFrom= new JavaAddElementFromHistory();
-		fAddFrom.init(editor, 
-			CompareMessages.LocalHistoryActionGroup_action_add, 
-			CompareMessages.LocalHistoryActionGroup_action_add_title, 
-			CompareMessages.LocalHistoryActionGroup_action_add_message); 
+		fAddFrom.init(editor,
+			CompareMessages.LocalHistoryActionGroup_action_add,
+			CompareMessages.LocalHistoryActionGroup_action_add_title,
+			CompareMessages.LocalHistoryActionGroup_action_add_message);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(fAddFrom, IJavaHelpContextIds.ADD_FROM_HISTORY_ACTION);
 	}
 
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		IMenuManager localMenu= new MenuManager(CompareMessages.LocalHistoryActionGroup_menu_local_history); 
+		IMenuManager localMenu= new MenuManager(CompareMessages.LocalHistoryActionGroup_menu_local_history);
 		int added= 0;
 		added+= addAction(localMenu, fCompareWith);
 		added+= addAction(localMenu, fReplaceWithPrevious);
@@ -72,7 +73,7 @@ public class LocalHistoryActionGroup extends ActionGroup {
 		if (added > 0)
 			menu.appendToGroup(fGroupName, localMenu);
 	}
-	
+
 	private int addAction(IMenuManager menu, JavaHistoryAction action) {
 		action.update();
 		if (action.isEnabled()) {

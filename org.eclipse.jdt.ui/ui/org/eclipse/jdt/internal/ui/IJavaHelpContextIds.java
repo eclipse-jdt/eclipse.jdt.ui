@@ -20,7 +20,7 @@ import org.eclipse.jdt.ui.JavaUI;
  * This interface contains constants only; it is not intended to be implemented
  * or extended.
  * </p>
- * 
+ *
  */
 public interface IJavaHelpContextIds {
 	public static final String PREFIX= JavaUI.ID_PLUGIN + '.';
@@ -42,7 +42,7 @@ public interface IJavaHelpContextIds {
 	public static final String FILTER_FIELDS_ACTION= 											PREFIX + "filter_fields_action"; //$NON-NLS-1$
 	public static final String FILTER_STATIC_ACTION= 											PREFIX + "filter_static_action"; //$NON-NLS-1$
 	public static final String FILTER_LOCALTYPES_ACTION=											PREFIX + "filter_localtypes_action"; //$NON-NLS-1$
-	
+
 	public static final String SHOW_INHERITED_ACTION= 										PREFIX + "show_inherited_action"; //$NON-NLS-1$
 	public static final String SHOW_SUPERTYPES= 												PREFIX + "show_supertypes_action"; //$NON-NLS-1$
 	public static final String SHOW_SUBTYPES= 													PREFIX + "show_subtypes_action"; //$NON-NLS-1$
@@ -98,13 +98,13 @@ public interface IJavaHelpContextIds {
 
 	public static final String OPEN_TYPE_ACTION= 												PREFIX + "open_type_action"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_IN_HIERARCHY_ACTION= 							PREFIX + "open_type_in_hierarchy_action"; //$NON-NLS-1$
-	
-	
+
+
 	/**
 	 * @since 3.0
 	 */
 	public static final String CONFIG_CONTAINER_ACTION= 									PREFIX + "org.eclipse.jdt.ui.config_container_action"; //$NON-NLS-1$
-	
+
 	public static final String ADD_JAVADOC_STUB_ACTION= 									PREFIX + "add_javadoc_stub_action"; //$NON-NLS-1$
 	public static final String ADD_TASK_ACTION= 												PREFIX + "add_task_action"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_STRINGS_ACTION= 								PREFIX + "externalize_strings_action"; //$NON-NLS-1$
@@ -119,7 +119,7 @@ public interface IJavaHelpContextIds {
 	 * @since 3.2
 	 */
 	public static final String INTRODUCE_INDIRECTION_ACTION= 								PREFIX + "introduce_indirection_action"; //$NON-NLS-1$
-	
+
 	public static final String EXTRACT_INTERFACE_ACTION= 									PREFIX + "extract_interface_action"; //$NON-NLS-1$
 	public static final String CHANGE_TYPE_ACTION= 											PREFIX + "change_type_action"; //$NON-NLS-1$
 	public static final String MOVE_INNER_TO_TOP_ACTION= 									PREFIX + "move_inner_to_top_level_action"; //$NON-NLS-1$
@@ -241,14 +241,14 @@ public interface IJavaHelpContextIds {
 	public static final String MULTI_MAIN_TYPE_SELECTION_DIALOG= PREFIX + "multi_main_type_selection_dialog_context"; //$NON-NLS-1$
 	public static final String MULTI_TYPE_SELECTION_DIALOG= PREFIX + "multi_type_selection_dialog_context"; //$NON-NLS-1$
 	public static final String SUPER_INTERFACE_SELECTION_DIALOG= PREFIX + "super_interface_selection_dialog_context"; //$NON-NLS-1$
-	
+
 	public static final String OVERRIDE_TREE_SELECTION_DIALOG= PREFIX + "override_tree_selection_dialog_context"; //$NON-NLS-1$
 	public static final String ADD_GETTER_SETTER_SELECTION_DIALOG= PREFIX + "add_getter_setter_selection_dialog_context"; //$NON-NLS-1$
 	public static final String ADD_DELEGATE_METHODS_SELECTION_DIALOG= PREFIX + "add_delegate_methods_selection_dialog_context"; //$NON-NLS-1$
 	public static final String GENERATE_HASHCODE_EQUALS_SELECTION_DIALOG= PREFIX + "hash_code_equals_tree_selection_dialog_context"; //$NON-NLS-1$
 	public static final String GENERATE_CONSTRUCTOR_USING_FIELDS_SELECTION_DIALOG= PREFIX + "generate_constructor_using_fields_selection_dialog_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_DIALOG= PREFIX + "add_unimplemented_constructors_dialog_context"; //$NON-NLS-1$
-	
+
 	public static final String MOVE_DESTINATION_DIALOG= PREFIX + "move_destination_dialog_context"; //$NON-NLS-1$
 	public static final String CHOOSE_VARIABLE_DIALOG= PREFIX + "choose_variable_dialog_context"; //$NON-NLS-1$
 	public static final String EDIT_TEMPLATE_DIALOG= PREFIX + "edit_template_dialog_context"; //$NON-NLS-1$
@@ -266,14 +266,14 @@ public interface IJavaHelpContextIds {
 	public static final String JAVA_EDITOR= PREFIX + "java_editor_context"; //$NON-NLS-1$
 	public static final String JAVA_EDITOR_BREADCRUMB= PREFIX + "java_editor_breadcrumb_context"; //$NON-NLS-1$;
 	public static final String GOTO_RESOURCE_DIALOG= PREFIX + "goto_resource_dialog";  //$NON-NLS-1$
-	
+
 	public static final String COMPARE_DIALOG= PREFIX + "compare_dialog_context"; //$NON-NLS-1$
 	public static final String ADD_ELEMENT_FROM_HISTORY_DIALOG= PREFIX + "add_element_from_history_dialog_context"; //$NON-NLS-1$
 	public static final String COMPARE_ELEMENT_WITH_HISTORY_DIALOG= PREFIX + "compare_element_with_history_dialog_context"; //$NON-NLS-1$
 	public static final String REPLACE_ELEMENT_WITH_HISTORY_DIALOG= PREFIX + "replace_element_with_history_dialog_context"; //$NON-NLS-1$
-	
+
 	public static final String SORT_MEMBERS_DIALOG= PREFIX + "sort_members_dialog_context"; //$NON-NLS-1$
-	
+
 	// view parts
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
 	public static final String PACKAGES_VIEW= PREFIX + "package_view_context"; //$NON-NLS-1$
@@ -294,7 +294,7 @@ public interface IJavaHelpContextIds {
 	 * @since 3.0
 	 */
 	public static final String CP_USERLIBRARIES_PREFERENCE_PAGE= 		PREFIX + "cp_userlibraries_preference_page_context"; //$NON-NLS-1$
-	
+
 	public static final String CODEFORMATTER_PREFERENCE_PAGE= 	PREFIX + "codeformatter_preference_page_context"; //$NON-NLS-1$
 	public static final String CLEAN_UP_PREFERENCE_PAGE= PREFIX + "clean_up_preference_page_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_PROPERTY_PAGE=	PREFIX + "source_attachment_property_page_context"; //$NON-NLS-1$
@@ -321,18 +321,18 @@ public interface IJavaHelpContextIds {
 	public static final String JAVADOC_PROBLEMS_PREFERENCE_PAGE= PREFIX + "javadoc_problems_preference_page_context"; //$NON-NLS-1$
 	public static final String PROBLEM_SEVERITIES_PREFERENCE_PAGE= PREFIX + "problem_severities_preference_page_context"; //$NON-NLS-1$
 	public static final String TODOTASK_PREFERENCE_PAGE= PREFIX + "tasktags_preference_page_context"; //$NON-NLS-1$
-	
+
 	public static final String TEMPLATE_PREFERENCE_PAGE= PREFIX + "template_preference_page_context"; //$NON-NLS-1$
 	public static final String NEW_JAVA_PROJECT_PREFERENCE_PAGE= PREFIX + "new_java_project_preference_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_CONFIGURATION_PROPERTY_PAGE= PREFIX + "javadoc_configuration_property_page_context"; //$NON-NLS-1$
 	public static final String JAVA_ELEMENT_INFO_PAGE= PREFIX + "java_element_info_page_context"; //$NON-NLS-1$
-		
+
 	// Wizard pages
 	public static final String NEW_JAVAPROJECT_WIZARD_PAGE= PREFIX + "new_javaproject_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_PACKAGE_WIZARD_PAGE= PREFIX + "new_package_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_CLASS_WIZARD_PAGE= PREFIX + "new_class_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_INTERFACE_WIZARD_PAGE= PREFIX + "new_interface_wizard_page_context"; //$NON-NLS-1$
-	
+
 	// since 3.1
 	public static final String NEW_ENUM_WIZARD_PAGE= PREFIX + "new_enum_wizard_page_context"; //$NON-NLS-1$
 	// since 3.1
@@ -363,7 +363,7 @@ public interface IJavaHelpContextIds {
 	// same help for all refactoring preview pages
 	// *** Don't delete this constants and the doc since it is still used in refactoring
 	public static final String REFACTORING_PREVIEW_WIZARD_PAGE= PREFIX + "refactoring_preview_wizard_page_context"; //$NON-NLS-1$
-	
+
 	public static final String RENAME_PARAMS_WIZARD_PAGE= 						PREFIX + "rename_params_wizard_page"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_WIZARD_KEYVALUE_PAGE= 				PREFIX + "externalize_wizard_keyvalue_page_context"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_WIZARD_PROPERTIES_FILE_PAGE= 	PREFIX + "externalize_wizard_properties_file_page_context"; //$NON-NLS-1$
@@ -377,7 +377,7 @@ public interface IJavaHelpContextIds {
 	 * @since 3.2
 	 */
 	public static final String INTRODUCE_INDIRECTION_WIZARD_PAGE= 							PREFIX + "introduce_indirection_wizard_page_context"; //$NON-NLS-1$
-	
+
 	public static final String PROMOTE_TEMP_TO_FIELD_WIZARD_PAGE= 					PREFIX + "promote_temp_to_field_page_context"; //$NON-NLS-1$
 	public static final String CONVERT_ANONYMOUS_TO_NESTED_WIZARD_PAGE= 				PREFIX + "convert_anonymous_to_nested_page_context"; //$NON-NLS-1$
 	public static final String MODIFY_PARAMETERS_WIZARD_PAGE= 				PREFIX + "modify_parameters_wizard_page_context"; //$NON-NLS-1$
@@ -404,18 +404,18 @@ public interface IJavaHelpContextIds {
 	public static final String INLINE_METHOD_WIZARD_PAGE=				PREFIX + "inline_method_wizard_page_context"; //$NON-NLS-1$
 	public static final String INLINE_CONSTANT_WIZARD_PAGE=				PREFIX + "inline_constant_wizard_page_context"; //$NON-NLS-1$
 	public static final String SELECT_CLEAN_UPS_PAGE= 					PREFIX + "select_clean_ups_wizard_page_context"; //$NON-NLS-1$
-	
+
 	public static final String INFER_TYPE_ARGUMENTS_WIZARD_PAGE= PREFIX + "infer_type_arguments_wizard_page_context"; //$NON-NLS-1$
 	public static final String CHANGE_TYPE_WIZARD_PAGE= PREFIX + "change_type_wizard_page_context"; //$NON-NLS-1$
 	public static final String INLINE_TEMP_WIZARD_PAGE= PREFIX + "inline_temp_wizard_page_context"; //$NON-NLS-1$
-	
+
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_BLOCK= PREFIX + "source_attachment_context"; //$NON-NLS-1$
-	
+
 	// Custom Filters
 	public static final String CUSTOM_FILTERS_DIALOG= PREFIX + "open_custom_filters_dialog_context"; //$NON-NLS-1$
-    
+
     // Call Hierarchy
     public static final String CALL_HIERARCHY_VIEW= PREFIX + "call_hierarchy_view_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_FILTERS_DIALOG= PREFIX + "call_hierarchy_filters_dialog_context"; //$NON-NLS-1$

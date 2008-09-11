@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Refactoring contribution for the inline method refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class InlineMethodRefactoringContribution extends JavaRefactoringContribution {

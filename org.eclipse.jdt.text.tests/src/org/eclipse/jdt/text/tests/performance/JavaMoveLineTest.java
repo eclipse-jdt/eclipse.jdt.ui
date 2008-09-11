@@ -16,13 +16,13 @@ import junit.framework.TestSuite;
 
 /**
  * Measures the time to move a line within a large file in the Java editor.
- * 
+ *
  * @since 3.1
  */
 public class JavaMoveLineTest extends MoveLineTest {
 
 	private static final Class THIS= JavaMoveLineTest.class;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}

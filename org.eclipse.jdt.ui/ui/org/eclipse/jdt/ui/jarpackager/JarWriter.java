@@ -25,6 +25,8 @@ import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -35,8 +37,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -46,12 +46,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Creates a JAR file for the given JAR package data.
- * 
+ *
  * Clients may subclass.
- * 
+ *
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 2.0
- * 
+ *
  * @deprecated use {@link org.eclipse.jdt.ui.jarpackager.JarWriter3 JarWriter3} instead.
  */
 public class JarWriter {
@@ -59,7 +59,7 @@ public class JarWriter {
 	private JarPackageData fJarPackage;
 
 	private Set fDirectories= new HashSet();
-	
+
 	/**
 	 * Creates an instance which is used to create a JAR based
 	 * on the given JarPackage.
@@ -92,7 +92,7 @@ public class JarWriter {
 			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 		}
 	}
-	
+
 	/**
 	 * Closes the archive and does all required cleanup.
 	 *
@@ -109,7 +109,7 @@ public class JarWriter {
 				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 			}
 	}
-	
+
 	/**
 	 * Writes the passed resource to the current archive.
 	 *
@@ -156,13 +156,13 @@ public class JarWriter {
 			// Ensure full path is visible
 			String message= null;
 			if (ex.getLocalizedMessage() != null)
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {  BasicElementLabels.getPathLabel(resource.getFullPath(), false), ex.getLocalizedMessage()}); 
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {  BasicElementLabels.getPathLabel(resource.getFullPath(), false), ex.getLocalizedMessage()});
 			else
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(resource.getFullPath(), false)); 
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(resource.getFullPath(), false));
 			throw JarPackagerUtil.createCoreException(message, ex);
-		}					
+		}
 	}
-	
+
 	/**
 	 * Creates a new JarEntry with the passed path and contents, and writes it
 	 * to the current archive.
@@ -184,11 +184,11 @@ public class JarWriter {
 			checksumCalculator.update(contents);
 			newEntry.setCrc(checksumCalculator.getValue());
 		}
-		
+
 		// Set modification time
 		newEntry.setTime(lastModified);
 
-		try {		
+		try {
 			fJarOutputStream.putNextEntry(newEntry);
 			fJarOutputStream.write(contents);
 		} finally  {
@@ -201,14 +201,14 @@ public class JarWriter {
 			// fJarOutputStream.closeEntry();
 		}
 	}
-	
+
 	/**
 	 * Add the directory entries for the given path to the jar.
-	 * 
+	 *
 	 * @param destinationPath the path to add
-	 * @param correspondingFile the corresponding file in the file system 
+	 * @param correspondingFile the corresponding file in the file system
 	 *  or <code>null</code> if it doesn't exist
-	 * @throws IOException if an I/O error has occurred  
+	 * @throws IOException if an I/O error has occurred
 	 */
 	private void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
@@ -221,20 +221,20 @@ public class JarWriter {
 
 			if (correspondingFile != null)
 				correspondingFile= correspondingFile.getParentFile();
-			long timeStamp= correspondingFile != null && correspondingFile.exists() 
-				? correspondingFile.lastModified() 
+			long timeStamp= correspondingFile != null && correspondingFile.exists()
+				? correspondingFile.lastModified()
 				: System.currentTimeMillis();
-				
+
 			JarEntry newEntry= new JarEntry(path);
 			newEntry.setMethod(ZipEntry.STORED);
 			newEntry.setSize(0);
 			newEntry.setCrc(0);
 			newEntry.setTime(timeStamp);
 			directories.add(newEntry);
-			
+
 			lastSlash= path.lastIndexOf('/', lastSlash - 1);
 		}
-			
+
 		for(int i= directories.size() - 1; i >= 0; --i) {
 			fJarOutputStream.putNextEntry((JarEntry)directories.get(i));
 		}
@@ -244,7 +244,7 @@ public class JarWriter {
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR
 	 * then a dialog will ask the user again.
-	 * 
+	 *
 	 * @param	parent	the parent for the dialog,
 	 * 			or <code>null</code> if no dialog should be presented
 	 * @return	<code>true</code> if it is OK to create the JAR
@@ -258,7 +258,7 @@ public class JarWriter {
 				return true;
 			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fJarPackage.getAbsoluteJarLocation(), true);
 		}
-					
+
 		// Test if directory exists
 		String path= file.getAbsolutePath();
 		int separatorIndex = path.lastIndexOf(File.separator);

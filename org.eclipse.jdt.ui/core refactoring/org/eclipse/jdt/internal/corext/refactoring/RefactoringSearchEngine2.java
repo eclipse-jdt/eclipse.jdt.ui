@@ -52,13 +52,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Helper class to use the search engine in refactorings.
- * 
+ *
  * TODO:
  * - is inefficient: uses sets instead of lists, creates useless intermediate collections
  * - destroys locality by doing multiple passes over result sets instead of processing results in a pipeline
  * - does not allow users to modify search matches
  * - generates boilerplate error messages and has no way to configure them
- * 
+ *
  * @since 3.1
  */
 public final class RefactoringSearchEngine2 {
@@ -90,7 +90,7 @@ public final class RefactoringSearchEngine2 {
 						fCollectedUnits.add(element);
 				}
 				if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
-					fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, BasicElementLabels.getResourceName(accepted.getResource())), null, null, RefactoringStatusEntry.NO_CODE); 
+					fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, BasicElementLabels.getResourceName(accepted.getResource())), null, null, RefactoringStatusEntry.NO_CODE);
 					fInaccurateMatches.add(accepted);
 				}
 			}
@@ -153,14 +153,14 @@ public final class RefactoringSearchEngine2 {
 						if (!(element instanceof ICompilationUnit)) {
 							final IProject project= resource.getProject();
 							if (!fGrouping)
-								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_ungrouped, BasicElementLabels.getResourceName(project)), null, null, RefactoringStatusEntry.NO_CODE); 
+								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_ungrouped, BasicElementLabels.getResourceName(project)), null, null, RefactoringStatusEntry.NO_CODE);
 							else if (!fBinaryResources.contains(resource))
-								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_grouped, BasicElementLabels.getResourceName(project)), null, null, RefactoringStatusEntry.NO_CODE); 
+								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_grouped, BasicElementLabels.getResourceName(project)), null, null, RefactoringStatusEntry.NO_CODE);
 							fBinaryResources.add(resource);
 						}
 					}
 					if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
-						fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, BasicElementLabels.getResourceName(resource)), null, null, RefactoringStatusEntry.NO_CODE); 
+						fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, BasicElementLabels.getResourceName(resource)), null, null, RefactoringStatusEntry.NO_CODE);
 						fInaccurateMatches.add(accepted);
 					}
 				}
@@ -228,7 +228,7 @@ public final class RefactoringSearchEngine2 {
 
 	/** The working copies */
 	private ICompilationUnit[] fWorkingCopies= {};
-	
+
 	/**
 	 * Creates a new refactoring search engine.
 	 */
@@ -238,7 +238,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Creates a new refactoring search engine.
-	 * 
+	 *
 	 * @param pattern the search pattern
 	 */
 	public RefactoringSearchEngine2(final SearchPattern pattern) {
@@ -258,7 +258,7 @@ public final class RefactoringSearchEngine2 {
 	 * Returns the affected compilation units of the previous search queries.
 	 * <p>
 	 * In order to retrieve the compilation units, grouping by resource must have been enabled before searching.
-	 * 
+	 *
 	 * @return the compilation units of the previous queries
 	 */
 	public final ICompilationUnit[] getAffectedCompilationUnits() {
@@ -282,7 +282,7 @@ public final class RefactoringSearchEngine2 {
 	 * Returns the affected java projects of the previous search queries.
 	 * <p>
 	 * In order to retrieve the java projects, grouping by resource must have been enabled before searching.
-	 * 
+	 *
 	 * @return the java projects of the previous queries (element type: <code>&ltIJavaProject, Collection&ltSearchResultGroup&gt&gt</code>)
 	 */
 	public final Map getAffectedProjects() {
@@ -327,7 +327,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Returns the refactoring search collector.
-	 * 
+	 *
 	 * @return the refactoring search collector
 	 */
 	private RefactoringSearchCollector getCollector() {
@@ -344,7 +344,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Returns the found search matches in grouped by their containing resource.
-	 * 
+	 *
 	 * @return the found search matches
 	 */
 	private SearchResultGroup[] getGroupedMatches() {
@@ -380,7 +380,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Returns the search pattern currently used for searching.
-	 * 
+	 *
 	 * @return the search pattern
 	 */
 	public final SearchPattern getPattern() {
@@ -395,7 +395,7 @@ public final class RefactoringSearchEngine2 {
 	 * <li>If the search granularity is {@link #GRANULARITY_COMPILATION_UNIT}, the results are elements of type {@link ICompilationUnit}.</li>
 	 * <li>If grouping by resource is enabled, the results are elements of type {@link SearchResultGroup}, otherwise the elements are of type {@link SearchMatch}.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @return the results of the previous queries
 	 */
 	public final Object[] getResults() {
@@ -411,7 +411,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Returns the search matches filtered by their accuracy.
-	 * 
+	 *
 	 * @return the filtered search matches
 	 */
 	private Collection getSearchMatches() {
@@ -432,7 +432,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Returns the refactoring status of this search engine.
-	 * 
+	 *
 	 * @return the refactoring status
 	 */
 	public final RefactoringStatus getStatus() {
@@ -441,7 +441,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Returns the found search matches in no particular order.
-	 * 
+	 *
 	 * @return the found search matches
 	 */
 	private SearchMatch[] getUngroupedMatches() {
@@ -464,7 +464,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Performs the search according to the specified pattern.
-	 * 
+	 *
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
@@ -474,7 +474,7 @@ public final class RefactoringSearchEngine2 {
 			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_occurrences); 
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_occurrences);
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)
@@ -492,7 +492,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Performs the search of referenced fields.
-	 * 
+	 *
 	 * @param element the java element whose referenced fields have to be found
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
@@ -503,7 +503,7 @@ public final class RefactoringSearchEngine2 {
 			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_fields); 
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_fields);
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)
@@ -521,7 +521,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Performs the search of referenced methods.
-	 * 
+	 *
 	 * @param element the java element whose referenced methods have to be found
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
@@ -532,7 +532,7 @@ public final class RefactoringSearchEngine2 {
 			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_methods); 
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_methods);
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)
@@ -550,7 +550,7 @@ public final class RefactoringSearchEngine2 {
 
 	/**
 	 * Performs the search of referenced types.
-	 * 
+	 *
 	 * @param element the java element whose referenced types have to be found
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
@@ -561,7 +561,7 @@ public final class RefactoringSearchEngine2 {
 			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_types); 
+			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_types);
 			try {
 				SearchEngine engine= null;
 				if (fOwner != null)
@@ -581,7 +581,7 @@ public final class RefactoringSearchEngine2 {
 	 * Determines how search matches are filtered.
 	 * <p>
 	 * This method must be called before start searching. The default is to filter inaccurate matches only.
-	 * 
+	 *
 	 * @param inaccurate <code>true</code> to filter inaccurate matches, <code>false</code> otherwise
 	 * @param binary <code>true</code> to filter binary matches, <code>false</code> otherwise
 	 */
@@ -594,7 +594,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the granularity to use during the searches.
 	 * <p>
 	 * This method must be called before start searching. The default is a granularity of {@link #GRANULARITY_SEARCH_MATCH}.
-	 * 
+	 *
 	 * @param granularity The granularity to use. Must be one of the <code>GRANULARITY_XXX</code> constants.
 	 */
 	public final void setGranularity(final int granularity) {
@@ -606,7 +606,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the working copies to take precedence during the searches.
 	 * <p>
 	 * This method must be called before start searching. The default is to use no working copies
-	 * 
+	 *
 	 * @param copies the working copies to use
 	 */
 	public final void setWorkingCopies(final ICompilationUnit[] copies) {
@@ -619,7 +619,7 @@ public final class RefactoringSearchEngine2 {
 	 * Determines how search matches are grouped.
 	 * <p>
 	 * This method must be called before start searching. The default is to group by containing resource.
-	 * 
+	 *
 	 * @param grouping <code>true</code> to group matches by their containing resource, <code>false</code> otherwise
 	 */
 	public final void setGrouping(final boolean grouping) {
@@ -630,7 +630,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the disjunction of search patterns to be used during search.
 	 * <p>
 	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
-	 * 
+	 *
 	 * @param first the first search pattern to set
 	 * @param second the second search pattern to set
 	 */
@@ -644,7 +644,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the working copy owner to use during search.
 	 * <p>
 	 * This method must be called before start searching. The default is to use no working copy owner.
-	 * 
+	 *
 	 * @param owner the working copy owner to use, or <code>null</code> to use none
 	 */
 	public final void setOwner(final WorkingCopyOwner owner) {
@@ -655,7 +655,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the search pattern to be used during search.
 	 * <p>
 	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
-	 * 
+	 *
 	 * @param elements the set of elements
 	 * @param limitTo determines the nature of the expected matches. This is a combination of {@link org.eclipse.jdt.core.search.IJavaSearchConstants}.
 	 */
@@ -675,7 +675,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the search pattern to be used during search.
 	 * <p>
 	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
-	 * 
+	 *
 	 * @param pattern the search pattern to set
 	 */
 	public final void setPattern(final SearchPattern pattern) {
@@ -687,7 +687,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the search requestor for this search engine.
 	 * <p>
 	 * This method must be called before start searching. The default is a non-filtering search requestor.
-	 * 
+	 *
 	 * @param requestor the search requestor to set
 	 */
 	public final void setRequestor(final IRefactoringSearchRequestor requestor) {
@@ -699,7 +699,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the search scope for this search engine.
 	 * <p>
 	 * This method must be called before start searching. The default is the entire workspace as search scope.
-	 * 
+	 *
 	 * @param scope the search scope to set
 	 */
 	public final void setScope(final IJavaSearchScope scope) {
@@ -711,7 +711,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the severity of the generated status entries.
 	 * <p>
 	 * This method must be called before start searching. The default is a severity of {@link RefactoringStatus#OK}.
-	 * 
+	 *
 	 * @param severity the severity to set
 	 */
 	public final void setSeverity(final int severity) {
@@ -723,7 +723,7 @@ public final class RefactoringSearchEngine2 {
 	 * Sets the refactoring status for this search engine.
 	 * <p>
 	 * This method must be called before start searching. The default is an empty status with status {@link RefactoringStatus#OK}.
-	 * 
+	 *
 	 * @param status the refactoring status to set
 	 */
 	public final void setStatus(final RefactoringStatus status) {

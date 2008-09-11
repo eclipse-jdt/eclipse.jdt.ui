@@ -20,9 +20,9 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class UserInterfaceManager {
-	
+
 	private Map fMap= new HashMap();
-	
+
 	private static class Tuple {
 		private Class starter;
 		private Class wizard;
@@ -31,12 +31,12 @@ public class UserInterfaceManager {
 			wizard= w;
 		}
 	}
-	
+
 	protected void put(Class processor, Class starter, Class wizard) {
 		fMap.put(processor, new Tuple(starter, wizard));
 	}
 
-	
+
 	public UserInterfaceStarter getStarter(Refactoring refactoring) {
 		RefactoringProcessor processor= (RefactoringProcessor)refactoring.getAdapter(RefactoringProcessor.class);
 		if (processor == null)

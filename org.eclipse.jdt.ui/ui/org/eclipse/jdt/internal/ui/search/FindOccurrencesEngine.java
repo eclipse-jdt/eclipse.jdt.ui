@@ -24,15 +24,15 @@ public final class FindOccurrencesEngine {
 	public static FindOccurrencesEngine create(IOccurrencesFinder finder) {
 		return new FindOccurrencesEngine(finder);
 	}
-	
+
 	private IOccurrencesFinder fFinder;
-		
+
 	private FindOccurrencesEngine(IOccurrencesFinder finder) {
 		if (finder == null)
 			throw new IllegalArgumentException();
 		fFinder= finder;
 	}
-	
+
 	private String run(CompilationUnit astRoot, int offset, int length) {
 		String message= fFinder.initialize(astRoot, offset, length);
 		if (message != null)
@@ -41,19 +41,19 @@ public final class FindOccurrencesEngine {
 		performNewSearch(fFinder, astRoot.getTypeRoot());
 		return null;
 	}
-	
+
 	public String run(ITypeRoot input, int offset, int length) throws JavaModelException {
 		if (input.getSourceRange() == null) {
-			return SearchMessages.FindOccurrencesEngine_noSource_text; 
+			return SearchMessages.FindOccurrencesEngine_noSource_text;
 		}
-		
+
 		final CompilationUnit root= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_YES, null);
 		if (root == null) {
-			return SearchMessages.FindOccurrencesEngine_cannotParse_text; 
+			return SearchMessages.FindOccurrencesEngine_cannotParse_text;
 		}
 		return run(root, offset, length);
 	}
-	
+
 	private void performNewSearch(IOccurrencesFinder finder, ITypeRoot element) {
 		NewSearchUI.runQueryInBackground(new OccurrencesSearchQuery(finder, element));
 	}

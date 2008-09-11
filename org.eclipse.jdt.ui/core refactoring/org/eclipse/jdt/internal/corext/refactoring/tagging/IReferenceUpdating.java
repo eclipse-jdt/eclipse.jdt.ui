@@ -21,14 +21,14 @@ public interface IReferenceUpdating {
 	 * If <code>canUpdateReferences</code> returns <code>true</code>, then this method is used to
 	 * inform the refactoring object whether references should be updated.
 	 * This call can be ignored if  <code>canUpdateReferences</code> returns <code>false</code>.
-	 */	
+	 */
 	public void setUpdateReferences(boolean update);
 
 	/**
 	 * If <code>canUpdateReferences</code> returns <code>true</code>, then this method is used to
 	 * ask the refactoring object whether references should be updated.
 	 * This call can be ignored if  <code>canUpdateReferences</code> returns <code>false</code>.
-	 */		
+	 */
 	public boolean getUpdateReferences();
 
 }

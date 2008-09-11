@@ -85,11 +85,11 @@ public final class ConstraintCollector extends ASTVisitor {
 
 	private final ConstraintCreator fCreator;
 	private final Set fConstraints;
-	
+
 	public ConstraintCollector() {
 		this(new FullConstraintCreator());
 	}
-	
+
 	public ConstraintCollector(ConstraintCreator creator) {
 		Assert.isNotNull(creator);
 		fCreator= creator;
@@ -99,7 +99,7 @@ public final class ConstraintCollector extends ASTVisitor {
 	private void add(ITypeConstraint[] constraints){
 		fConstraints.addAll(Arrays.asList(constraints));
 	}
-	
+
 	public void clear(){
 		fConstraints.clear();
 	}
@@ -107,9 +107,9 @@ public final class ConstraintCollector extends ASTVisitor {
 	public ITypeConstraint[] getConstraints(){
 		return (ITypeConstraint[]) fConstraints.toArray(new ITypeConstraint[fConstraints.size()]);
 	}
-	
+
 	//------------------------- visit methods -------------------------//
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
 	 */
@@ -117,7 +117,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayAccess)
 	 */
@@ -125,7 +125,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayCreation)
 	 */
@@ -133,7 +133,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayInitializer)
 	 */
@@ -141,7 +141,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayType)
 	 */
@@ -149,7 +149,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AssertStatement)
 	 */
@@ -157,7 +157,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Assignment)
 	 */
@@ -165,7 +165,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Block)
 	 */
@@ -173,7 +173,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BooleanLiteral)
 	 */
@@ -181,7 +181,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BreakStatement)
 	 */
@@ -189,7 +189,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CastExpression)
 	 */
@@ -197,7 +197,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CatchClause)
 	 */
@@ -205,7 +205,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CharacterLiteral)
 	 */
@@ -213,7 +213,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
 	 */
@@ -221,7 +221,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
@@ -229,7 +229,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConditionalExpression)
 	 */
@@ -237,7 +237,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 	 */
@@ -245,7 +245,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ContinueStatement)
 	 */
@@ -253,7 +253,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.DoStatement)
 	 */
@@ -261,7 +261,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.EmptyStatement)
 	 */
@@ -269,7 +269,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ExpressionStatement)
 	 */
@@ -277,7 +277,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.FieldAccess)
 	 */
@@ -285,7 +285,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.FieldDeclaration)
 	 */
@@ -293,7 +293,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 	 */
@@ -301,7 +301,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
 	 */
@@ -309,7 +309,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ImportDeclaration)
 	 */
@@ -317,7 +317,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.InfixExpression)
 	 */
@@ -325,7 +325,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Initializer)
 	 */
@@ -333,7 +333,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.InstanceofExpression)
 	 */
@@ -341,7 +341,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Javadoc)
 	 */
@@ -349,7 +349,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.LabeledStatement)
 	 */
@@ -357,7 +357,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
@@ -365,7 +365,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */
@@ -373,7 +373,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NullLiteral)
 	 */
@@ -381,7 +381,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NumberLiteral)
 	 */
@@ -389,7 +389,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PackageDeclaration)
 	 */
@@ -397,7 +397,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ParenthesizedExpression)
 	 */
@@ -405,7 +405,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PostfixExpression)
 	 */
@@ -413,7 +413,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PrefixExpression)
 	 */
@@ -421,7 +421,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.PrimitiveType)
 	 */
@@ -429,7 +429,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.QualifiedName)
 	 */
@@ -437,7 +437,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ReturnStatement)
 	 */
@@ -445,7 +445,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
 	 */
@@ -453,7 +453,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleType)
 	 */
@@ -461,7 +461,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
 	 */
@@ -469,7 +469,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.StringLiteral)
 	 */
@@ -477,7 +477,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperConstructorInvocation)
 	 */
@@ -485,7 +485,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperFieldAccess)
 	 */
@@ -493,7 +493,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperMethodInvocation)
 	 */
@@ -501,7 +501,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SwitchCase)
 	 */
@@ -509,7 +509,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SwitchStatement)
 	 */
@@ -517,7 +517,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SynchronizedStatement)
 	 */
@@ -525,7 +525,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ThisExpression)
 	 */
@@ -533,7 +533,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ThrowStatement)
 	 */
@@ -541,7 +541,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TryStatement)
 	 */
@@ -549,17 +549,17 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeDeclaration)
 	 */
 	public boolean visit(TypeDeclaration node) {
 		add(fCreator.create(node));
 		return true;
-		
+
 		// TODO account for enums and annotations
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeDeclarationStatement)
 	 */
@@ -567,7 +567,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeLiteral)
 	 */
@@ -575,7 +575,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationExpression)
 	 */
@@ -583,7 +583,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationFragment)
 	 */
@@ -591,7 +591,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationStatement)
 	 */
@@ -599,7 +599,7 @@ public final class ConstraintCollector extends ASTVisitor {
 		add(fCreator.create(node));
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.WhileStatement)
 	 */

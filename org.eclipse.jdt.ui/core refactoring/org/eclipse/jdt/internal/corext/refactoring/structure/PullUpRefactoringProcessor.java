@@ -24,15 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -136,7 +136,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Refactoring processor for the pull up refactoring.
- * 
+ *
  * @since 3.2
  */
 public class PullUpRefactoringProcessor extends HierarchyProcessor {
@@ -166,7 +166,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 		/**
 		 * Creates a new pull up ast node mapper.
-		 * 
+		 *
 		 * @param sourceRewriter
 		 *            the source compilation unit rewrite to use
 		 * @param targetRewriter
@@ -374,7 +374,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Creates a new pull up refactoring processor.
-	 * 
+	 *
 	 * @param members
 	 *            the members to pull up
 	 * @param settings
@@ -386,7 +386,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Creates a new pull up processor from refactoring arguments.
-	 * 
+	 *
 	 * @param arguments
 	 *            the refactoring arguments
 	 * @param status
@@ -400,7 +400,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Creates a new pull up refactoring processor.
-	 * 
+	 *
 	 * @param members
 	 *            the members to pull up, or <code>null</code> if invoked by
 	 *            scripting
@@ -433,7 +433,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		SubProgressMonitor sub= null;
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, 6);
-			
+
 			final IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[] { member}, fOwner, new SubProgressMonitor(monitor, 1));
 			sub= new SubProgressMonitor(monitor, 1);
 			boolean isStatic= false;
@@ -747,7 +747,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			fCompilationUnitRewrites= new HashMap(3);
 			result.merge(checkProjectCompliance(getCompilationUnitRewrite(fCompilationUnitRewrites, getDeclaringType().getCompilationUnit()), getDestinationType(), fMembersToMove));
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), result);
-			
+
 			Checks.addModifiedFilesToChecker(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), context);
 
 			return result;
@@ -798,7 +798,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					member= pullables[index];
 					final String[] unmapped= TypeVariableUtil.getUnmappedVariables(mapping, declaring, member);
 					length= unmapped.length;
-					
+
 					String superClassLabel= BasicElementLabels.getJavaElementName(declaring.getSuperclassName());
 					switch (length) {
 						case 0:
@@ -1307,7 +1307,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		if (fDeletedMethods.length == 0 || getDestinationType().isInterface()) {
 			modifiers&= ~Flags.AccFinal;
 		}
-		
+
 		if (oldMethod.isVarargs())
 			modifiers&= ~Flags.AccVarargs;
 		copyAnnotations(oldMethod, newMethod);
@@ -1357,7 +1357,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Creates a working copy layer if necessary.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to use
 	 * @return a status describing the outcome of the operation
@@ -1922,7 +1922,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Sets the methods to declare abstract.
-	 * 
+	 *
 	 * @param methods
 	 *            the methods to declare abstract
 	 */
@@ -1934,7 +1934,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	/**
 	 * Determines whether to create method stubs for non-implemented abstract
 	 * methods.
-	 * 
+	 *
 	 * @param create
 	 *            <code>true</code> to create stubs, <code>false</code>
 	 *            otherwise
@@ -1945,7 +1945,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Sets the methods to delete
-	 * 
+	 *
 	 * @param methods
 	 *            the methods to delete
 	 */
@@ -1956,7 +1956,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Sets the destination type.
-	 * 
+	 *
 	 * @param type
 	 *            the destination type
 	 */
@@ -1969,7 +1969,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Sets the members to move.
-	 * 
+	 *
 	 * @param members
 	 *            the members to move
 	 */

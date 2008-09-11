@@ -40,21 +40,21 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionS
 
 
 public class PropertiesStructureCreator extends StructureCreator {
-	
+
 	/**
 	 * A PropertyNode represents a key/value pair of a Java property file.
 	 * The text range of a leg/value pair starts with an optional
 	 * comment and ends right after the value.
 	 */
 	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
-		
+
 		public PropertyNode(DocumentRangeNode parent, int type, String id, IDocument doc, int start, int length) {
 			super(parent, type, id, doc, start, length);
 			if (parent != null) {
 				parent.addChild(this);
 			}
 		}
-							
+
 		/* (non Java doc)
 		 * see ITypedElement#getName
 		 */
@@ -68,7 +68,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		public String getType() {
 			return "properties2"; //$NON-NLS-1$
 		}
-		
+
 		/* (non Java doc)
 		 * see ITypedElement#getImage
 		 */
@@ -76,23 +76,23 @@ public class PropertiesStructureCreator extends StructureCreator {
 			return CompareUI.getImage(getType());
 		}
 	}
-	
+
 	private static final String WHITESPACE= " \t\r\n\f"; //$NON-NLS-1$
 	private static final String SEPARATORS= "=:"; //$NON-NLS-1$
 	private static final String SEPARATORS2= SEPARATORS + WHITESPACE;
-			
+
 
 	public PropertiesStructureCreator() {
 	}
-	
+
 	public String getName() {
 		return CompareMessages.PropertyCompareViewer_title;
 	}
-	
+
 	protected IStructureComparator createStructureComparator(Object input,
 			IDocument document, ISharedDocumentAdapter sharedDocumentAdapter,
 			IProgressMonitor monitor) throws CoreException {
-		
+
 		final boolean isEditable;
 		if (input instanceof IEditableContent)
 			isEditable= ((IEditableContent) input).isEditable();
@@ -104,21 +104,21 @@ public class PropertiesStructureCreator extends StructureCreator {
 				return isEditable;
 			}
 		};
-				
+
 		try {
 			monitor = beginWork(monitor);
 			parsePropertyFile(root, document, monitor);
 		} finally {
 			monitor.done();
 		}
-		
+
 		return root;
 	}
-		
+
 	public IStructureComparator locate(Object path, Object source) {
 		return null;
 	}
-	
+
 	public String getContents(Object node, boolean ignoreWhitespace) {
 		if (node instanceof IStreamContentAccessor) {
 			IStreamContentAccessor sca= (IStreamContentAccessor) node;
@@ -130,54 +130,54 @@ public class PropertiesStructureCreator extends StructureCreator {
 		}
 		return null;
 	}
-	
+
 	private String readLine(int[] args, IDocument doc) {
 		int line= args[0]++;
 		try {
 			IRegion region= doc.getLineInformation(line);
 			int start= region.getOffset();
 			int length= region.getLength();
-			
+
 			try {
 				region= doc.getLineInformation(line+1);
 				args[1]= region.getOffset();
 			} catch (BadLocationException ex) {
 				args[1]= doc.getLength();
 			}
-			
+
 			return doc.get(start, length);
 		} catch (BadLocationException ex) {
 			// silently ignored
 		}
 		return null;
 	}
-			
+
 	private void parsePropertyFile(DocumentRangeNode root, IDocument doc, IProgressMonitor monitor) {
-		
+
 		int start= -1;
 		int lineStart= 0;
-		
+
 		int[] args= new int[2];
 		args[0]= 0;	// here we return the line number
 		args[1]= 0;	// and here the offset of the first character of the line
-		
+
 		for (;;) {
 			worked(monitor);
 			lineStart= args[1];	// start of current line
             String line= readLine(args, doc);
 			if (line == null)
 				return;
-				
+
 			if (line.length() <= 0)
 				continue;	// empty line
-				
+
 			char firstChar= line.charAt(0);
 			if (firstChar == '#' || firstChar == '!') {
 				if (start < 0)	// comment belongs to next key/value pair
 					start= lineStart;
 				continue;	// comment
 			}
-								
+
 			// find continuation lines
 			while (needNextLine(line)) {
 				String nextLine= readLine(args, doc);
@@ -191,7 +191,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 				nextLine= nextLine.substring(startPos, nextLine.length());
 				line= line2 + nextLine;
 			}
-			
+
     		// key start
     		int len= line.length();
     		int keyPos= 0;
@@ -199,7 +199,7 @@ public class PropertiesStructureCreator extends StructureCreator {
        			if (WHITESPACE.indexOf(line.charAt(keyPos)) == -1)
             		break;
     		}
-    		
+
     		// key/value separator
     		int separatorPos;
     		for (separatorPos= keyPos; separatorPos < len; separatorPos++) {
@@ -224,15 +224,15 @@ public class PropertiesStructureCreator extends StructureCreator {
             		break;
         		valuePos++;
     		}
-    
+
     		String key= convert(line.substring(keyPos, separatorPos));
     		if (key.length() > 0) {
-    					
+
  				if (start < 0)
 					start= lineStart;
-    			
+
 	    		int length= args[1] - start;
-	    		
+
 				try {
 					String s= doc.get(start, length);
 					for (int i= s.length()-1; i >= 0; i--) {
@@ -244,7 +244,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 				} catch (BadLocationException e) {
 					// silently ignored
 				}
-	    		
+
 				new PropertyNode(root, 0, key, doc, start, length);
  				start= -1;
    			}
@@ -266,7 +266,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		int l= s.length();
 		StringBuffer buf= new StringBuffer(l);
 		int i= 0;
-		
+
 		while (i < l) {
 			char c= s.charAt(i++);
 			if (c == '\\') {
@@ -319,11 +319,11 @@ public class PropertiesStructureCreator extends StructureCreator {
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 	}
-	
+
 	protected String getDocumentPartitioning() {
 		return IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING;
 	}
-	
+
 	private void worked(IProgressMonitor monitor) {
 		if (monitor.isCanceled())
 			throw new OperationCanceledException();
@@ -335,5 +335,5 @@ public class PropertiesStructureCreator extends StructureCreator {
 			return new NullProgressMonitor();
 		return new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN);
 	}
-	
+
 }

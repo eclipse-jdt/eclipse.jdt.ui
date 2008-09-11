@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Extends the DocumentRangeNode with method signature information.
  */
 class JavaNode extends DocumentRangeNode implements ITypedElement {
-	
+
 	public static final int CU= 0;
 	public static final int PACKAGE= 1;
 	public static final int IMPORT_CONTAINER= 2;
@@ -55,8 +55,8 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	public JavaNode(JavaNode parent, int type, String name, int start, int length) {
 		super(parent, type, JavaCompareUtilities.buildID(type, name), parent.getDocument(), start, length);
 		parent.addChild(this);
-	}	
-	
+	}
+
 	/**
 	 * Creates a JavaNode for a CU. It represents the root of a
 	 * JavaNode tree, so its parent is null.
@@ -64,12 +64,12 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	 */
 	public JavaNode(IDocument document) {
 		super(CU, JavaCompareUtilities.buildID(CU, "root"), document, 0, document.getLength()); //$NON-NLS-1$
-	}	
+	}
 
 	public String getInitializerCount() {
 		return Integer.toString(fInitializerCount++);
 	}
-	
+
 	/**
 	 * Extracts the method name from the signature.
 	 * Used for smart matching.
@@ -81,7 +81,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 			return id.substring(1, pos);
 		return id.substring(1);
 	}
-	
+
 	/**
 	 * Extracts the method's arguments name the signature.
 	 * Used for smart matching.
@@ -93,42 +93,42 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 			return id.substring(pos+1);
 		return id.substring(1);
 	}
-	
+
 	/**
 	 * Returns a name which is presented in the UI.
 	 * @see ITypedElement#getName()
 	 */
 	public String getName() {
-		
+
 		switch (getTypeCode()) {
 		case INIT:
-			return CompareMessages.JavaNode_initializer; 
+			return CompareMessages.JavaNode_initializer;
 		case IMPORT_CONTAINER:
-			return CompareMessages.JavaNode_importDeclarations; 
+			return CompareMessages.JavaNode_importDeclarations;
 		case CU:
-			return CompareMessages.JavaNode_compilationUnit; 
+			return CompareMessages.JavaNode_compilationUnit;
 		case PACKAGE:
-			return CompareMessages.JavaNode_packageDeclaration; 
+			return CompareMessages.JavaNode_packageDeclaration;
 		}
 		return getId().substring(1);	// we strip away the type character
 	}
-	
+
 	/*
 	 * @see ITypedElement#getType()
 	 */
 	public String getType() {
 		return "java2"; //$NON-NLS-1$
 	}
-		
+
 	/**
 	 * Returns a shared image for this Java element.
 	 *
 	 * see ITypedInput.getImage
 	 */
 	public Image getImage() {
-						
+
 		ImageDescriptor id= null;
-					
+
 		switch (getTypeCode()) {
 		case CU:
 			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.COMPILATION_UNIT);
@@ -157,7 +157,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 			break;
 		case FIELD:
 			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.FIELD);
-			break;					
+			break;
 		case ENUM:
 			id= JavaCompareUtilities.getEnumImageDescriptor();
 			break;
@@ -167,7 +167,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		}
 		return JavaPlugin.getImageDescriptorRegistry().get(id);
 	}
-	
+
 	/*
 	 * @see java.lang.Object#toString()
 	 */

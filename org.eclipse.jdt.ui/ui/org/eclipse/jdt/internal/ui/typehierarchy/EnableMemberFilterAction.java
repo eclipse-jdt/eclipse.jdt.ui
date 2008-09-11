@@ -26,25 +26,25 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class EnableMemberFilterAction extends Action {
 
-	private ITypeHierarchyViewPart fView;	
-	
+	private ITypeHierarchyViewPart fView;
+
 	public EnableMemberFilterAction(ITypeHierarchyViewPart v, boolean initValue) {
-		super(TypeHierarchyMessages.EnableMemberFilterAction_label); 
-		setDescription(TypeHierarchyMessages.EnableMemberFilterAction_description); 
-		setToolTipText(TypeHierarchyMessages.EnableMemberFilterAction_tooltip); 
-		
+		super(TypeHierarchyMessages.EnableMemberFilterAction_label);
+		setDescription(TypeHierarchyMessages.EnableMemberFilterAction_description);
+		setToolTipText(TypeHierarchyMessages.EnableMemberFilterAction_tooltip);
+
 		JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
 
 		fView= v;
 		setChecked(initValue);
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ENABLE_METHODFILTER_ACTION);
-		
+
 	}
 
 	/*
 	 * @see Action#actionPerformed
-	 */		
+	 */
 	public void run() {
 		BusyIndicator.showWhile(fView.getSite().getShell().getDisplay(), new Runnable() {
 			public void run() {

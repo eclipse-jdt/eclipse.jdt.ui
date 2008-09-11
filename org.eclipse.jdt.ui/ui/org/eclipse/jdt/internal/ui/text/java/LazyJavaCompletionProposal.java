@@ -12,9 +12,9 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.StyledString;
 
@@ -34,12 +34,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
-	
+
 	protected static final String LPAREN= "("; //$NON-NLS-1$
 	protected static final String RPAREN= ")"; //$NON-NLS-1$
 	protected static final String COMMA= ","; //$NON-NLS-1$
 	protected static final String SPACE= " "; //$NON-NLS-1$
-	
+
 	protected static final class FormatterPrefs {
 		/* Methods & constructors */
 		public final boolean beforeOpeningParen;
@@ -48,14 +48,14 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		public final boolean afterComma;
 		public final boolean beforeClosingParen;
 		public final boolean inEmptyList;
-		
+
 		/* type parameters */
 		public final boolean beforeOpeningBracket;
 		public final boolean afterOpeningBracket;
 		public final boolean beforeTypeArgumentComma;
 		public final boolean afterTypeArgumentComma;
 		public final boolean beforeClosingBracket;
-	
+
 		FormatterPrefs(IJavaProject project) {
 			beforeOpeningParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, false);
 			afterOpeningParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, false);
@@ -63,14 +63,14 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			afterComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, true);
 			beforeClosingParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION, false);
 			inEmptyList= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, false);
-			
+
 			beforeOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
 			afterOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
 			beforeTypeArgumentComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, false);
 			afterTypeArgumentComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, true);
 			beforeClosingBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
 		}
-	
+
 		protected final boolean getCoreOption(IJavaProject project, String key, boolean def) {
 			String option= getCoreOption(project, key);
 			if (JavaCore.INSERT.equals(option))
@@ -79,7 +79,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 				return false;
 			return def;
 		}
-	
+
 		protected final String getCoreOption(IJavaProject project, String key) {
 			if (project == null)
 				return JavaCore.getOption(key);
@@ -105,7 +105,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 */
 	protected final CompletionProposal fProposal;
 	protected int fContextInformationPosition;
-	
+
 	public LazyJavaCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(context);
 		Assert.isNotNull(proposal);
@@ -113,7 +113,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		Assert.isNotNull(context.getCoreContext());
 		fProposal= proposal;
 	}
-	
+
 	protected CompletionProposal getProposal() {
 		return fProposal;
 	}
@@ -126,7 +126,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			setTriggerCharacters(computeTriggerCharacters());
 		return super.getTriggerCharacters();
 	}
-	
+
 	protected char[] computeTriggerCharacters() {
 		return new char[0];
 	}
@@ -175,7 +175,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		fCursorPositionComputed= true;
 		super.setCursorPosition(cursorPosition);
 	}
-	
+
 	protected final int getCursorPosition() {
 		if (!fCursorPositionComputed)
 			setCursorPosition(computeCursorPosition());
@@ -214,7 +214,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		fContextInformationComputed= true;
 		super.setContextInformation(contextInformation);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getStyledDisplayString()
 	 * @since 3.4
@@ -224,18 +224,18 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			setStyledDisplayString(computeDisplayString());
 		return super.getStyledDisplayString();
 	}
-	
+
 	public String getDisplayString() {
 		if (!fDisplayStringComputed)
 			setStyledDisplayString(computeDisplayString());
 		return super.getDisplayString();
 	}
-	
+
 	protected final void setDisplayString(String string) {
 		fDisplayStringComputed= true;
 		super.setDisplayString(string);
 	}
-	
+
 	public void setStyledDisplayString(StyledString text) {
 		fDisplayStringComputed= true;
 		super.setStyledDisplayString(text);
@@ -348,7 +348,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	protected boolean isValidPrefix(String prefix) {
 		if (super.isValidPrefix(prefix))
 			return true;
-		
+
 		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE) {
 			// static imports - includes package & type name
 			StringBuffer buf= new StringBuffer();
@@ -357,10 +357,10 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			buf.append(getDisplayString());
 			return isPrefix(prefix, buf.toString());
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Gets the proposal's relevance.
 	 * @return Returns a int
@@ -408,7 +408,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 				return baseRelevance;
 		}
 	}
-	
+
 	public final String getSortString() {
 		if (!fSortStringComputed)
 			setSortString(computeSortString());
@@ -434,7 +434,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 
 	/**
 	 * Overrides the default context information position. Ignored if set to zero.
-	 * 
+	 *
 	 * @param contextInformationPosition the replaced position.
 	 */
 	public void setContextInformationPosition(int contextInformationPosition) {

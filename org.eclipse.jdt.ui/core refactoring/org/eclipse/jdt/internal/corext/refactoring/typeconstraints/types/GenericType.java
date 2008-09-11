@@ -17,9 +17,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public final class GenericType extends HierarchyType {
-	
+
 	private TypeVariable[] fTypeParameters;
-	
+
 	protected GenericType(TypeEnvironment environment) {
 		super(environment);
 	}
@@ -34,38 +34,38 @@ public final class GenericType extends HierarchyType {
 			fTypeParameters[i]= (TypeVariable) environment.create(typeParameters[i]);
 		}
 	}
-	
+
 	public int getKind() {
 		return GENERIC_TYPE;
 	}
-	
+
 	public TypeVariable[] getTypeParameters() {
 		return (TypeVariable[]) fTypeParameters.clone();
 	}
-	
+
 	public boolean doEquals(TType type) {
 		return getJavaElementType().equals(((GenericType)type).getJavaElementType());
 	}
-	
+
 	public int hashCode() {
 		return getJavaElementType().hashCode();
 	}
-	
+
 	protected boolean doCanAssignTo(TType type) {
 		return false;
 	}
-	
+
 	protected boolean isTypeEquivalentTo(TType other) {
 		int otherElementType= other.getKind();
 		if (otherElementType == RAW_TYPE || otherElementType == PARAMETERIZED_TYPE)
 			return getErasure().isTypeEquivalentTo(other.getErasure());
 		return super.isTypeEquivalentTo(other);
 	}
-	
+
 	public String getName() {
 		return getJavaElementType().getElementName();
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
 		result.append("<"); //$NON-NLS-1$

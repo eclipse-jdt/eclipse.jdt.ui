@@ -24,7 +24,7 @@ public final class NullType extends TType {
 	public TType[] getSubTypes() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	protected boolean doEquals(TType type) {
 		return true;
 	}
@@ -32,11 +32,11 @@ public final class NullType extends TType {
 	public String getName() {
 		return "null";  //$NON-NLS-1$
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		return getName();
 	}
-	
+
 	protected boolean doCanAssignTo(TType lhs) {
 		int kind= lhs.getKind();
 		return kind != PRIMITIVE_TYPE && kind != VOID_TYPE;

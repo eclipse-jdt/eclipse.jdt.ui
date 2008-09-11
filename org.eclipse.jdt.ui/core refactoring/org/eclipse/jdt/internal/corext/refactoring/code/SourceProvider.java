@@ -10,9 +10,9 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       o bug "inline method - doesn't handle implicit cast" (see
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
- *       o inline call that is used in a field initializer 
+ *       o inline call that is used in a field initializer
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
- *       o inline call a field initializer: could detect self reference 
+ *       o inline call a field initializer: could detect self reference
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=44417)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
@@ -22,14 +22,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditProcessor;
 import org.eclipse.text.edits.UndoEdit;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -96,13 +96,13 @@ public class SourceProvider {
 	private boolean fReturnValueNeedsLocalVariable;
 	private List fReturnExpressions;
 	private IDocument fSource;
-	
+
 	private static final int EXPRESSION_MODE= 1;
 	private static final int STATEMENT_MODE= 2;
 	private static final int RETURN_STATEMENT_MODE= 3;
 	private int fMarkerMode;
-	
-	
+
+
 	private class ReturnAnalyzer extends ASTVisitor {
 		public boolean visit(ReturnStatement node) {
 			Expression expression= node.getExpression();
@@ -131,12 +131,12 @@ public class SourceProvider {
 		fReturnValueNeedsLocalVariable= true;
 		fReturnExpressions= new ArrayList();
 	}
-	
+
 	/**
 	 * TODO: unit's source does not match contents of source document and declaration node.
 	 * @param typeRoot the type root
 	 * @param source document contining the content of the type root
-	 * @param declaration 
+	 * @param declaration
 	 */
 	public SourceProvider(ITypeRoot typeRoot, IDocument source, MethodDeclaration declaration) {
 		this(typeRoot, declaration);
@@ -146,7 +146,7 @@ public class SourceProvider {
 	public RefactoringStatus checkActivation() throws JavaModelException {
 		return fAnalyzer.checkActivation();
 	}
-	
+
 	public void initialize() throws JavaModelException {
 		fDocument= fSource == null ? new Document(fTypeRoot.getBuffer().getContents()) : fSource;
 		fAnalyzer.initialize();
@@ -174,7 +174,7 @@ public class SourceProvider {
 		}
 		public boolean visit(SimpleName node) {
 			if(!fResult) {
-				fResult= Bindings.equals(fBinding, node.resolveBinding()); 
+				fResult= Bindings.equals(fBinding, node.resolveBinding());
 			}
 			return false;
 		}
@@ -182,7 +182,7 @@ public class SourceProvider {
 
 	/**
 	 * Checks whether variable is referenced by the method declaration or not.
-	 * 
+	 *
 	 * @param binding binding of variable to check.
 	 * @return <code>true</code> if variable is referenced by the method, otherwise <code>false</code>
 	 */
@@ -196,48 +196,48 @@ public class SourceProvider {
 		IMethodBinding binding= fDeclaration.resolveBinding();
 		return binding.getReturnType() != fDeclaration.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 	}
-	
+
 	// returns true if the declaration has a vararg and
 	// the body contains an array access to the vararg
 	public boolean hasArrayAccess() {
 		return fAnalyzer.hasArrayAccess();
 	}
-	
+
 	public boolean hasSuperMethodInvocation() {
 		return fAnalyzer.hasSuperMethodInvocation();
 	}
-	
+
 	public boolean mustEvaluateReturnedExpression() {
 		return fMustEvalReturnedExpression;
 	}
-	
+
 	public boolean returnValueNeedsLocalVariable() {
 		return fReturnValueNeedsLocalVariable;
 	}
-	
+
 	public int getNumberOfStatements() {
 		return fDeclaration.getBody().statements().size();
 	}
-	
+
 	public boolean isSimpleFunction() {
 		List statements= fDeclaration.getBody().statements();
 		if (statements.size() != 1)
 			return false;
 		return statements.get(0) instanceof ReturnStatement;
 	}
-	
+
 	public boolean isLastStatementReturn() {
 		List statements= fDeclaration.getBody().statements();
 		if (statements.size() == 0)
 			return false;
 		return statements.get(statements.size() - 1) instanceof ReturnStatement;
 	}
-	
+
 	public boolean isDangligIf() {
 		List statements= fDeclaration.getBody().statements();
 		if (statements.size() != 1)
 			return false;
-		
+
 		ASTNode p= (ASTNode) statements.get(0);
 
 		while (true) {
@@ -268,23 +268,23 @@ public class SourceProvider {
 			}
 		}
 	}
-	
+
 	public MethodDeclaration getDeclaration() {
 		return fDeclaration;
 	}
-	
+
 	public String getMethodName() {
 		return fDeclaration.getName().getIdentifier();
 	}
-	
+
 	public ITypeBinding getReturnType() {
 		return fDeclaration.resolveBinding().getReturnType();
 	}
-	
+
 	public List getReturnExpressions() {
 		return fReturnExpressions;
 	}
-	
+
 	public boolean returnTypeMatchesReturnExpressions() {
 		ITypeBinding returnType= getReturnType();
 		for (Iterator iter= fReturnExpressions.iterator(); iter.hasNext();) {
@@ -294,16 +294,16 @@ public class SourceProvider {
 		}
 		return true;
 	}
-	
+
 	public ParameterData getParameterData(int index) {
 		SingleVariableDeclaration decl= (SingleVariableDeclaration)fDeclaration.parameters().get(index);
 		return (ParameterData)decl.getProperty(ParameterData.PROPERTY);
 	}
-	
+
 	public ITypeRoot getTypeRoot() {
 		return fTypeRoot;
 	}
-	
+
 	public boolean needsReturnedExpressionParenthesis() {
 		ASTNode last= getLastStatement();
 		if (last instanceof ReturnStatement) {
@@ -311,7 +311,7 @@ public class SourceProvider {
 		}
 		return false;
 	}
-	
+
 	public boolean returnsConditionalExpression() {
 		ASTNode last= getLastStatement();
 		if (last instanceof ReturnStatement) {
@@ -319,25 +319,25 @@ public class SourceProvider {
 		}
 		return false;
 	}
-	
+
 	public int getReceiversToBeUpdated() {
 		return fAnalyzer.getImplicitReceivers().size();
 	}
-	
+
 	public boolean isVarargs() {
 		return fDeclaration.isVarargs();
 	}
-	
+
 	public int getVarargIndex() {
 		return fDeclaration.parameters().size() - 1;
 	}
-	
+
 	public TextEdit getDeleteEdit() {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		rewriter.remove(fDeclaration, null);
 		return rewriter.rewriteAST(fDocument, fTypeRoot.getJavaProject().getOptions(true));
 	}
-	
+
 	public String[] getCodeBlocks(CallContext context) {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		replaceParameterWithExpression(rewriter, context.arguments);
@@ -347,7 +347,7 @@ public class SourceProvider {
 		updateStaticReferences(rewriter, context);
 		updateTypeVariables(rewriter, context);
 		updateMethodTypeVariable(rewriter, context);
-		
+
 		List ranges= null;
 		if (hasReturnValue()) {
 			if (context.callMode == ASTNode.RETURN_STATEMENT) {
@@ -386,7 +386,7 @@ public class SourceProvider {
 		}
 		MultiTextEdit root= new MultiTextEdit(0, fDocument.getLength());
 		root.addChildren(markers);
-		
+
 		try {
 			TextEditProcessor processor= new TextEditProcessor(fDocument, root, TextEdit.CREATE_UNDO | TextEdit.UPDATE_REGIONS);
 			UndoEdit undo= processor.performEdits();
@@ -431,7 +431,7 @@ public class SourceProvider {
 			}
 		}
 	}
-	
+
 	private void updateImplicitReceivers(ASTRewrite rewriter, CallContext context) {
 		if (context.receiver == null)
 			return;
@@ -446,12 +446,12 @@ public class SourceProvider {
 				rewriter.set(inst, ClassInstanceCreation.EXPRESSION_PROPERTY, createReceiver(rewriter, context, inst.resolveConstructorBinding()), null);
 			} else if (node instanceof ThisExpression) {
 				rewriter.replace(node, rewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
-			} else if (node instanceof FieldAccess) { 
+			} else if (node instanceof FieldAccess) {
 				final FieldAccess access= (FieldAccess)node;
 				rewriter.set(access, FieldAccess.EXPRESSION_PROPERTY, createReceiver(rewriter, context, access.resolveFieldBinding()), null);
 			} else if (node instanceof SimpleName && ((SimpleName)node).resolveBinding() instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)((SimpleName)node).resolveBinding();
-				if (vb.isField()) { 
+				if (vb.isField()) {
 					Expression receiver= createReceiver(rewriter, context, vb);
 					if (receiver != null) {
 						FieldAccess access= node.getAST().newFieldAccess();
@@ -464,7 +464,7 @@ public class SourceProvider {
 			}
 		}
 	}
-	
+
 	private void updateTypeReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
 		for (Iterator iter= fAnalyzer.getTypesToImport().iterator(); iter.hasNext();) {
@@ -485,7 +485,7 @@ public class SourceProvider {
 			}
 		}
 	}
-	
+
 	private void updateStaticReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
 		for (Iterator iter= fAnalyzer.getStaticsToImport().iterator(); iter.hasNext();) {
@@ -498,7 +498,7 @@ public class SourceProvider {
 				}
 			}
 		}
-		
+
 	}
 
 	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IMethodBinding method) {
@@ -507,14 +507,14 @@ public class SourceProvider {
 			return null;
 		return (Expression)rewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
 	}
-	
+
 	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IVariableBinding field) {
 		String receiver= getReceiver(context, field.getModifiers());
 		if (receiver == null)
 			return null;
 		return (Expression)rewriter.createStringPlaceholder(receiver, ASTNode.SIMPLE_NAME);
 	}
-	
+
 	private String getReceiver(CallContext context, int modifiers) {
 		String receiver= context.receiver;
 		ITypeBinding invocationType= ASTNodes.getEnclosingType(context.invocation);
@@ -535,7 +535,7 @@ public class SourceProvider {
 			return;
 		rewriteReferences(rewriter, type.getTypeArguments(), fAnalyzer.getTypeParameterReferences());
 	}
-	
+
 	private void updateMethodTypeVariable(ASTRewrite rewriter, CallContext context) {
 		IMethodBinding method= Invocations.resolveBinding(context.invocation);
 		if (method == null)
@@ -557,7 +557,7 @@ public class SourceProvider {
 			}
 		}
 	}
-	
+
 	private ASTNode getLastStatement() {
 		List statements= fDeclaration.getBody().statements();
 		if (statements.isEmpty())
@@ -622,7 +622,7 @@ public class SourceProvider {
 		}
 		return result;
 	}
-	
+
 	private IRegion createRange(List statements, int end) {
 		ASTNode first= (ASTNode)statements.get(0);
 		ASTNode root= first.getRoot();
@@ -641,7 +641,7 @@ public class SourceProvider {
 			return range;
 		}
 	}
-	
+
 	private String[] getBlocks(RangeMarker[] markers) throws BadLocationException {
 		String[] result= new String[markers.length];
 		for (int i= 0; i < markers.length; i++) {
@@ -666,7 +666,7 @@ public class SourceProvider {
 		int nodeType= statement.getNodeType();
 		if (nodeType == ASTNode.IF_STATEMENT) {
 			IfStatement ifStatement= (IfStatement) statement;
-			return !(ifStatement.getThenStatement() instanceof Block) 
+			return !(ifStatement.getThenStatement() instanceof Block)
 				&& !(ifStatement.getElseStatement() instanceof Block);
 		} else if (nodeType == ASTNode.FOR_STATEMENT) {
 			return !(((ForStatement)statement).getBody() instanceof Block);

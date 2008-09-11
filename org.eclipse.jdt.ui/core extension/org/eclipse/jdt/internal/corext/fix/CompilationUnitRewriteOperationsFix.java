@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
@@ -58,7 +58,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 			return null;
 		}
 	}
-	
+
 	private final CompilationUnitRewriteOperation[] fOperations;
 	private final CompilationUnit fCompilationUnit;
 	private final LinkedProposalModel fLinkedProposalModel;
@@ -92,13 +92,13 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 	 */
 	public CompilationUnitChange createChange() throws CoreException {
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite((ICompilationUnit)fCompilationUnit.getJavaElement(), fCompilationUnit);
-	
+
 		fLinkedProposalModel.clear();
 		for (int i= 0; i < fOperations.length; i++) {
 			CompilationUnitRewriteOperation operation= fOperations[i];
 			operation.rewriteAST(cuRewrite, fLinkedProposalModel);
 		}
-		
+
 		CompilationUnitChange result= cuRewrite.createChange(getDisplayString(), true, null);
 		if (result == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CompilationUnitRewriteOperationsFix_nullChangeError, getDisplayString())));

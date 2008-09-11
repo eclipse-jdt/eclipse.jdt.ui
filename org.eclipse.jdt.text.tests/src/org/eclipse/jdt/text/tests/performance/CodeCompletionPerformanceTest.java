@@ -56,7 +56,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	private static final String SOURCE_FOLDER= "src";
 	private static final String PACKAGE= "test1";
 	private static final String CU_NAME= "Completion.java";
-	
+
 
 	private static final Class THIS= CodeCompletionPerformanceTest.class;
 
@@ -76,7 +76,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	private static final int WARM_UP_RUNS= 10;
 	private static final int MEASURED_RUNS= 10;
-	
+
 	private static final int ACC_COMPLETION= 150;
 	private static final int ACC_APPLICATION= 20;
 	private static final int ACC_PARAMETER_APPLICATION= 20;
@@ -93,7 +93,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		
+
 		fJProject1= JavaProjectHelper.createJavaProject(PROJECT, "bin");
 		JavaProjectHelper.addRTJar(fJProject1);
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
@@ -111,7 +111,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
-		
+
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, SOURCE_FOLDER);
 		IPackageFragment fragment= fSourceFolder.createPackageFragment(PACKAGE, false, null);
 		fContents= "package test1;\n" +
@@ -129,20 +129,20 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 		String str= "//here";
 		fCodeAssistOffset= fContents.indexOf(str);
-		
+
 		// create dummy editor to apply the proposals in
 		IFolder folder= fJProject1.getProject().getFolder("tmp");
 		folder.create(true, true, null);
 		IFile file2= folder.getFile(CU_NAME);
 		ByteArrayInputStream stream= new ByteArrayInputStream(fContents.getBytes());
 		file2.create(stream, true, null);
-		
+
 		fEditor= (CompilationUnitEditor) EditorTestHelper.openInEditor(file2, EditorTestHelper.COMPILATION_UNIT_EDITOR_ID, true);
 		fEditor.getViewer().getDocument().set(fContents);
 
 		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}
-	
+
 	private IJavaCompletionProposal[] codeComplete(CompletionProposalCollector collector) throws JavaModelException {
 		collector.setReplacementLength(0);
 
@@ -161,7 +161,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
 
 		JavaProjectHelper.delete(fJProject1);
-		
+
 		super.tearDown();
 	}
 
@@ -172,7 +172,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	public void testApplicationNoParamters() throws Exception {
 		measureApplicationNoParameters(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeter();
@@ -180,32 +180,32 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	private void measureCompletionNoParameters(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
-				
+
 				CompletionProposalCollector collector= createCollector();
 				codeComplete(collector);
-				
+
 			}
 			meter.stop();
 		}
 	}
-	
+
 	private void measureApplicationNoParameters(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
 			CompletionProposalCollector collector= createCollector();
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
-			
+
 			meter.start();
 			for (int accumulated= 0; accumulated < ACC_APPLICATION; accumulated++) {
-				
+
 				applyProposal(proposals[0]);
 				applyProposal(proposals[2]);
 				applyProposal(proposals[9]);
-				
+
 			}
 			meter.stop();
 		}
@@ -216,7 +216,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		collector.setInvocationContext(createContext());
 		return collector;
 	}
-	
+
 	public void testCompletionWithParamterNames() throws Exception {
 		measureCompletionWithParamterNames(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal computation", Dimension.ELAPSED_PROCESS);
@@ -224,17 +224,17 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	private void measureCompletionWithParamterNames(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
-			
+
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
 				CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
 				collector.setIgnored(CompletionProposal.METHOD_REF, false);
 				codeComplete(collector);
 			}
-			
+
 			meter.stop();
 		}
 	}
@@ -246,25 +246,25 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	private void measureApplicationWithParamterNames(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
 			CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
 			collector.setIgnored(CompletionProposal.METHOD_REF, false);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
-			
+
 			meter.start();
-			
+
 			for (int accumulated= 0; accumulated < ACC_APPLICATION; accumulated++) {
 				applyProposal(proposals[0]);
 				applyProposal(proposals[2]);
 				applyProposal(proposals[9]);
 			}
-			
+
 			meter.stop();
 		}
 	}
-	
+
 	public void testCompletionWithParamterGuesses() throws Exception {
 		measureCompletionWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal computation (param guessing)", Dimension.ELAPSED_PROCESS);
@@ -272,20 +272,20 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	private void measureCompletionWithParamterGuesses(PerformanceMeter meter, final int runs) throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
-		
+
 		for (int run= 0; run < runs; run++) {
 			meter.start();
-			
+
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
 				CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
 				collector.setIgnored(CompletionProposal.METHOD_REF, false);
 				codeComplete(collector);
 			}
-			
+
 			meter.stop();
 		}
 
@@ -298,29 +298,29 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	private void measureApplicationWithParamterGuesses(PerformanceMeter meter, final int runs) throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
-		
+
 		for (int run= 0; run < runs; run++) {
 			CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
 			collector.setIgnored(CompletionProposal.METHOD_REF, false);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
-			
+
 			meter.start();
-			
+
 			for (int accumulated= 0; accumulated < ACC_PARAMETER_APPLICATION; accumulated++) {
 				applyProposal(proposals[0]);
 				applyProposal(proposals[2]);
 				applyProposal(proposals[9]);
 			}
-			
+
 			meter.stop();
 		}
-		
+
 	}
-	
+
 	public void testCompletionWithParamterGuesses2() throws Exception {
 		createTypeHierarchy();
 
@@ -330,10 +330,10 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	private void createTypeHierarchy() throws JavaModelException {
 		IPackageFragment fragment= fSourceFolder.createPackageFragment("test2", false, null);
-		
+
 		String parent= "HashMap";
 		String content= null;
 
@@ -356,7 +356,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			fCU= fragment.createCompilationUnit(cu + ".java", content, false, null);
 			parent= cu;
 		}
-		
+
 		String str= "//here";
 		fContents= content;
 		fCodeAssistOffset= content.indexOf(str);
@@ -366,14 +366,14 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	public void testApplicationWithParamterGuesses2() throws Exception {
 		createTypeHierarchy();
-		
+
 		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
 		measureApplicationWithParamterGuesses(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	private void applyProposal(IJavaCompletionProposal proposal) {
 		ISourceViewer viewer= fEditor.getViewer();
 		viewer.getDocument().set(fContents);
@@ -385,7 +385,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			proposal.apply(viewer.getDocument());
 		}
 	}
-	
+
 	private JavaContentAssistInvocationContext createContext() {
 		return new JavaContentAssistInvocationContext(fEditor.getViewer(), fCodeAssistOffset, fEditor);
 	}

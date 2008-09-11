@@ -16,17 +16,17 @@ import junit.framework.TestSuite;
 
 /**
  * Measure the time spent while scrolling with error annotations in the Java editor.
- * 
+ *
  * @since 3.1
  */
 public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEditorTest {
-	
+
 	private static final Class THIS= ScrollAnnotatedJavaEditorTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	public static Test setUpTest(Test someTest) {
 		return new PerformanceTestSetup(someTest);
 	}
@@ -34,7 +34,7 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	/**
 	 * Measure the time spent while scrolling page wise with error
 	 * annotations in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorPageWise() throws Exception {
@@ -44,17 +44,17 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	/**
 	 * Measure the time spent while scrolling line wise with error
 	 * annotations in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseMoveCaret1() throws Exception {
 		measure(LINE_WISE);
 	}
-	
+
 	/**
 	 * Measure the time spent while scrolling and selecting line wise with
 	 * error annotations in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseSelect1() throws Exception {
@@ -64,7 +64,7 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret with error annotations in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWise1() throws Exception {

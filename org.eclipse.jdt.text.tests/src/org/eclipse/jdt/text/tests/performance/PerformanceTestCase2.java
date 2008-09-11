@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -32,7 +33,7 @@ public class PerformanceTestCase2 extends TestCase {
 
 	private String fBaseScenarioId;
 	private List fPerformanceMeters;
-	
+
 
 	public PerformanceTestCase2() {
 		super();
@@ -41,15 +42,15 @@ public class PerformanceTestCase2 extends TestCase {
 	public PerformanceTestCase2(String name) {
 		super(name);
 	}
-	
+
 	protected int getWarmUpRuns() {
 		return 20;
 	}
-	
+
 	protected int getMeasuredRuns() {
 		return 20;
 	}
-	
+
 	protected void runTest() throws Throwable {
 		assertNotNull(getName());
 		Method runMethod= null;
@@ -72,13 +73,13 @@ public class PerformanceTestCase2 extends TestCase {
 			Object[] args= { nullMeter };
 			for (int i= 0; i < warmUpRuns; i++)
 				runMethod.invoke(this, args);
-			
+
 			int measuredRuns= getMeasuredRuns();
 			PerformanceMeter meter= createPerformanceMeter();
 			args[0]= meter;
 			for (int i= 0; i < measuredRuns; i++)
 				runMethod.invoke(this, args);
-			
+
 			commitAllMeasurements();
 			assertAllPerformance();
 		}
@@ -91,11 +92,11 @@ public class PerformanceTestCase2 extends TestCase {
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * Returns the base scenario id for this test which has the default
 	 * scenario id as its default.
-	 * 
+	 *
 	 * @return the base scenario id
 	 */
 	protected final String getBaseScenarioId() {
@@ -107,7 +108,7 @@ public class PerformanceTestCase2 extends TestCase {
 	/**
 	 * Create a performance meter with the given scenario id. The
 	 * performance meter will be disposed on {@link #tearDown()}.
-	 * 
+	 *
 	 * @param scenarioId the scenario id
 	 * @return the created performance meter
 	 */
@@ -116,10 +117,10 @@ public class PerformanceTestCase2 extends TestCase {
 		addPerformanceMeter(performanceMeter);
 		return performanceMeter;
 	}
-	
+
 	/**
 	 * Add the given performance meter to the managed performance meters.
-	 * 
+	 *
 	 * @param performanceMeter the performance meter
 	 */
 	private void addPerformanceMeter(PerformanceMeter performanceMeter) {
@@ -127,7 +128,7 @@ public class PerformanceTestCase2 extends TestCase {
 			fPerformanceMeters= new ArrayList();
 		fPerformanceMeters.add(performanceMeter);
 	}
-	
+
 	/**
 	 * Commits the measurements captured by all performance meters created
 	 * through one of this class' factory methods.
@@ -137,11 +138,11 @@ public class PerformanceTestCase2 extends TestCase {
 			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
 				((PerformanceMeter) iter.next()).commit();
 	}
-	
+
 	/**
 	 * Asserts default properties of the measurements captured by the given
 	 * performance meter.
-	 * 
+	 *
 	 * @param performanceMeter the performance meter
 	 * @throws RuntimeException if the properties do not hold
 	 */
@@ -153,7 +154,7 @@ public class PerformanceTestCase2 extends TestCase {
 	 * Asserts default properties of the measurements captured by all
 	 * performance meters created through one of this class' factory
 	 * methods.
-	 * 
+	 *
 	 * @throws RuntimeException if the properties do not hold
 	 */
 	protected final void assertAllPerformance() {
@@ -161,42 +162,42 @@ public class PerformanceTestCase2 extends TestCase {
 			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
 				assertPerformance((PerformanceMeter) iter.next());
 	}
-	
+
 	/**
 	 * Create a performance meter with the base scenario id. The
 	 * performance meter will be disposed on {@link #tearDown()}.
-	 * 
+	 *
 	 * @return the created performance meter
 	 */
 	protected final PerformanceMeter createPerformanceMeter() {
 		PerformanceMeter perfMeter= internalCreatePerformanceMeter(getBaseScenarioId());
-		String localFingerprintName= (String)getLocalFingerprints().get(getName()); 
+		String localFingerprintName= (String)getLocalFingerprints().get(getName());
 		if (localFingerprintName != null)
 			Performance.getDefault().tagAsSummary(perfMeter, localFingerprintName, Dimension.ELAPSED_PROCESS);
-		
-		String comment= (String)getDegradationComments().get(getName()); 
+
+		String comment= (String)getDegradationComments().get(getName());
 		if (comment != null)
 			Performance.getDefault().setComment(perfMeter, Performance.EXPLAINS_DEGRADATION_COMMENT, comment);
-		
+
 		return perfMeter;
 	}
 
 	/**
 	 * Returns a map with local fingerprints.
-	 * 
+	 *
 	 * @return the map with local fingerprints ( test name -> short name)
 	 */
 	protected Map getLocalFingerprints() {
-		return Collections.EMPTY_MAP;		
+		return Collections.EMPTY_MAP;
 	}
-	
+
 	/**
 	 * Returns a map with degradation comments.
-	 * 
+	 *
 	 * @return the map with degradation comments ( test name -> comment)
 	 */
 	protected Map getDegradationComments() {
-		return Collections.EMPTY_MAP;		
+		return Collections.EMPTY_MAP;
 	}
 
 }

@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -22,70 +24,68 @@ import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 
-import org.osgi.service.prefs.BackingStoreException;
-
 /**
- * 
+ *
  */
 public class PreferencesAccess {
-	
+
 	public static PreferencesAccess getOriginalPreferences() {
 		return new PreferencesAccess();
 	}
-	
+
 	public static PreferencesAccess getWorkingCopyPreferences(IWorkingCopyManager workingCopyManager) {
 		return new WorkingCopyPreferencesAccess(workingCopyManager);
 	}
-		
+
 	private PreferencesAccess() {
 		// can only extends in this file
 	}
-	
+
 	public IScopeContext getDefaultScope() {
 		return new DefaultScope();
 	}
-	
+
 	public IScopeContext getInstanceScope() {
 		return new InstanceScope();
 	}
-	
+
 	public IScopeContext getProjectScope(IProject project) {
 		return new ProjectScope(project);
 	}
-	
+
 	/**
 	 * Applies the changes
-	 * 
+	 *
 	 * @throws BackingStoreException thrown when the changes could not be applied
 	 */
 	public void applyChanges() throws BackingStoreException {
 	}
-	
-	
+
+
 	private static class WorkingCopyPreferencesAccess extends PreferencesAccess {
-		
+
 		private final IWorkingCopyManager fWorkingCopyManager;
 
 		private WorkingCopyPreferencesAccess(IWorkingCopyManager workingCopyManager) {
 			fWorkingCopyManager= workingCopyManager;
 		}
-		
+
 		private final IScopeContext getWorkingCopyScopeContext(IScopeContext original) {
 			return new WorkingCopyScopeContext(fWorkingCopyManager, original);
 		}
-		
+
 		public IScopeContext getDefaultScope() {
 			return getWorkingCopyScopeContext(super.getDefaultScope());
 		}
-		
+
 		public IScopeContext getInstanceScope() {
 			return getWorkingCopyScopeContext(super.getInstanceScope());
 		}
-		
+
 		public IScopeContext getProjectScope(IProject project) {
 			return getWorkingCopyScopeContext(super.getProjectScope(project));
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.preferences.PreferencesAccess#applyChanges()
 		 */
@@ -93,16 +93,16 @@ public class PreferencesAccess {
 			fWorkingCopyManager.applyChanges();
 		}
 	}
-	
-	
+
+
 	private static class WorkingCopyScopeContext implements IScopeContext {
-		
+
 		private final IWorkingCopyManager fWorkingCopyManager;
 		private final IScopeContext fOriginal;
 
 		public WorkingCopyScopeContext(IWorkingCopyManager workingCopyManager, IScopeContext original) {
 			fWorkingCopyManager= workingCopyManager;
-			fOriginal= original;	
+			fOriginal= original;
 		}
 
 		/* (non-Javadoc)

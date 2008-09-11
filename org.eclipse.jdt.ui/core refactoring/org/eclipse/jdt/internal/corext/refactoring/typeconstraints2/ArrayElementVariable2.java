@@ -16,12 +16,12 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayTy
 public final class ArrayElementVariable2 extends ConstraintVariable2 {
 
 	private final ConstraintVariable2 fParentCv;
-	
+
 	public ArrayElementVariable2(ConstraintVariable2 parentCv) {
 		super(((ArrayType) parentCv.getType()).getComponentType());
 		fParentCv= parentCv;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -37,7 +37,7 @@ public final class ArrayElementVariable2 extends ConstraintVariable2 {
 			return true;
 		if (other.getClass() != ArrayElementVariable2.class)
 			return false;
-		
+
 		ArrayElementVariable2 other2= (ArrayElementVariable2) other;
 		return fParentCv == other2.fParentCv;
 	}

@@ -16,13 +16,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -65,7 +65,7 @@ public class JavaFormatter {
 	/** The java partitioner */
 	private boolean fUseCodeFormatter;
 	private final IJavaProject fProject;
-	
+
 	/**
 	 * Wraps a {@link TemplateBuffer} and tracks the variable offsets while changes to the buffer
 	 * occur. Whitespace variables are also tracked.
@@ -75,10 +75,10 @@ public class JavaFormatter {
 		private Document fDocument;
 		private final TemplateBuffer fBuffer;
 		private List fPositions;
-		
+
 		/**
 		 * Creates a new tracker.
-		 * 
+		 *
 		 * @param buffer the buffer to track
 		 * @throws MalformedTreeException
 		 * @throws BadLocationException
@@ -92,7 +92,7 @@ public class JavaFormatter {
 			fDocument.addPositionUpdater(new ExclusivePositionUpdater(CATEGORY));
 			fPositions= createRangeMarkers(fBuffer.getVariables(), fDocument);
 		}
-		
+
 		/**
 		 * Installs a java partitioner with <code>document</code>.
 		 *
@@ -111,18 +111,18 @@ public class JavaFormatter {
 			partitioner.connect(document);
 			document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
 		}
-		
+
 		/**
 		 * Returns the document with the buffer contents. Whitespace variables are decorated with
 		 * comments.
-		 * 
+		 *
 		 * @return the buffer document
 		 */
 		public IDocument getDocument() {
 			checkState();
 			return fDocument;
 		}
-		
+
 		private void checkState() {
 			if (fDocument == null)
 				throw new IllegalStateException();
@@ -130,7 +130,7 @@ public class JavaFormatter {
 
 		/**
 		 * Restores any decorated regions and updates the buffer's variable offsets.
-		 * 
+		 *
 		 * @return the buffer.
 		 * @throws MalformedTreeException
 		 * @throws BadLocationException
@@ -145,20 +145,20 @@ public class JavaFormatter {
 			}
 			fBuffer.setContent(fDocument.get(), variables);
 			fDocument= null;
-			
+
 			return fBuffer;
 		}
-		
+
 		private List createRangeMarkers(TemplateVariable[] variables, IDocument document) throws MalformedTreeException, BadLocationException {
 			Map markerToOriginal= new HashMap();
-			
+
 			MultiTextEdit root= new MultiTextEdit(0, document.getLength());
 			List edits= new ArrayList();
 			boolean hasModifications= false;
 			for (int i= 0; i != variables.length; i++) {
 				final TemplateVariable variable= variables[i];
 				int[] offsets= variable.getOffsets();
-				
+
 				String value= variable.getDefaultValue();
 				if (isWhitespaceVariable(value)) {
 					// replace whitespace positions with unformattable comments
@@ -178,12 +178,12 @@ public class JavaFormatter {
 					}
 				}
 			}
-			
+
 			if (hasModifications) {
 				// update the document and convert the replaces to markers
 				root.apply(document, TextEdit.UPDATE_REGIONS);
 			}
-			
+
 			List positions= new ArrayList();
 			for (Iterator it= edits.iterator(); it.hasNext();) {
 				TextEdit edit= (TextEdit) it.next();
@@ -196,17 +196,17 @@ public class JavaFormatter {
 					Assert.isTrue(false);
 				}
 			}
-			
+
 			return positions;
 		}
-		
+
 		private boolean isWhitespaceVariable(String value) {
 			int length= value.length();
 			return length == 0 || Character.isWhitespace(value.charAt(0)) || Character.isWhitespace(value.charAt(length - 1));
 		}
-		
+
 		private void removeRangeMarkers(List positions, IDocument document, TemplateVariable[] variables) throws MalformedTreeException, BadLocationException, BadPositionCategoryException {
-			
+
 			// revert previous changes
 			for (Iterator it= positions.iterator(); it.hasNext();) {
 				TypedPosition position= (TypedPosition) it.next();
@@ -219,7 +219,7 @@ public class JavaFormatter {
 				}
 				document.addPosition(position);
 			}
-			
+
 			Iterator it= positions.iterator();
 			for (int i= 0; i != variables.length; i++) {
 				TemplateVariable variable= variables[i];
@@ -228,7 +228,7 @@ public class JavaFormatter {
 				for (int j= 0; j != offsets.length; j++)
 					offsets[j]= ((Position) it.next()).getOffset();
 
-				variable.setOffsets(offsets);   
+				variable.setOffsets(offsets);
 			}
 
 		}
@@ -236,7 +236,7 @@ public class JavaFormatter {
 
 	/**
 	 * Creates a JavaFormatter with the target line delimiter.
-	 * 
+	 *
 	 * @param lineDelimiter the line delimiter to use
 	 * @param initialIndentLevel the initial indentation level
 	 * @param useCodeFormatter <code>true</code> if the core code formatter should be used
@@ -259,12 +259,12 @@ public class JavaFormatter {
 		try {
 			VariableTracker tracker= new VariableTracker(buffer);
 			IDocument document= tracker.getDocument();
-			
+
 			internalFormat(document, context);
 			convertLineDelimiters(document);
 			if (!isReplacedAreaEmpty(context))
 				trimStart(document);
-			
+
 			tracker.updateBuffer();
 		} catch (MalformedTreeException e) {
 			throw new BadLocationException();
@@ -305,7 +305,7 @@ public class JavaFormatter {
 		int i= 0;
 		while ((i != document.getLength()) && Character.isWhitespace(document.getChar(i)))
 			i++;
-		
+
 		document.replace(0, i, ""); //$NON-NLS-1$
 	}
 
@@ -321,7 +321,7 @@ public class JavaFormatter {
 					//only if we are at the beginning of the line
 					if (lineOffset != dtc.getStart())
 						return false;
-					
+
 					//Does the selection only contain whitespace characters?
 					if (document.get(dtc.getStart(), dtc.getEnd() - dtc.getStart()).trim().length() == 0)
 						return true;
@@ -338,7 +338,7 @@ public class JavaFormatter {
 		Map options;
 		IJavaProject project= context.getJavaProject();
 		if (project != null)
-			options= project.getOptions(true); 
+			options= project.getOptions(true);
 		else
 			options= JavaCore.getOptions();
 
@@ -353,13 +353,13 @@ public class JavaFormatter {
 			throw new BadLocationException(); // fall back to indenting
 
 		edit.apply(doc, TextEdit.UPDATE_REGIONS);
-	}	
+	}
 
 	private void indent(IDocument document) throws BadLocationException, MalformedTreeException {
 		// first line
 		int offset= document.getLineOffset(0);
 		document.replace(offset, 0, CodeFormatterUtil.createIndentString(fInitialIndentLevel, fProject));
-		
+
 		// following lines
 		int lineCount= document.getNumberOfLines();
 		IndentUtil.indentLines(document, new LineRange(1, lineCount - 1), fProject, null);

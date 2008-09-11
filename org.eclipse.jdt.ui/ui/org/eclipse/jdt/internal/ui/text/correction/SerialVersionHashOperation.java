@@ -20,6 +20,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -28,17 +31,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Proposal for a hashed serial version id.
- * 
+ *
  * @since 3.1
  */
 public final class SerialVersionHashOperation extends AbstractSerialVersionOperation {
@@ -118,7 +118,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		int mod= getClassModifiers(cfReader);
 //		System.out.println(Integer.toHexString(mod) + ' ' + Flags.toString(mod));
 
-		int classModifiers= mod & (Flags.AccPublic | Flags.AccFinal | Flags.AccInterface | Flags.AccAbstract); 
+		int classModifiers= mod & (Flags.AccPublic | Flags.AccFinal | Flags.AccInterface | Flags.AccAbstract);
 
 		doos.writeInt(classModifiers); // class modifiers
 		char[][] interfaces= getSortedInterfacesNames(cfReader);
@@ -287,7 +287,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	/**
 	 * Displays an appropriate error message for a specific problem.
-	 * 
+	 *
 	 * @param message
 	 *            The message to display
 	 */
@@ -309,7 +309,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	/**
 	 * Displays an appropriate error message for a specific problem.
-	 * 
+	 *
 	 * @param throwable
 	 *            the throwable object to display
 	 */
@@ -319,7 +319,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	/**
 	 * Displays a dialog with a question as message.
-	 * 
+	 *
 	 * @param title
 	 *            The title to display
 	 * @param message
@@ -353,7 +353,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 	/**
 	 * {@inheritDoc}
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	protected boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException {
 		Assert.isNotNull(fragment);

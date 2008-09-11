@@ -27,6 +27,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -38,25 +39,25 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 /**
  * Action group that adds the search for references actions to a
  * context menu and the global menu bar.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ReferencesSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.group_references; 
+	private static final String MENU_TEXT= SearchMessages.group_references;
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
 	private IActionBars fActionBars;
-	
+
 	private String fGroupId;
-	
+
 	private FindReferencesAction fFindReferencesAction;
 	private FindReferencesInProjectAction fFindReferencesInProjectAction;
 	private FindReferencesInHierarchyAction fFindReferencesInHierarchyAction;
@@ -66,7 +67,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	 * Creates a new <code>ReferencesSearchGroup</code>. The group requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the view part that owns this action group
 	 */
 	public ReferencesSearchGroup(IWorkbenchSite site) {
@@ -75,13 +76,13 @@ public class ReferencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Creates a new <code>ReferencesSearchGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public ReferencesSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
@@ -112,7 +113,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ReferencesSearchGroup(JavaEditor editor) {
@@ -132,7 +133,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(fEditor);
 		fFindReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_HIERARCHY);
 		fEditor.setAction("SearchReferencesInHierarchy", fFindReferencesInHierarchyAction); //$NON-NLS-1$
-		
+
 		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(fEditor);
 		fFindReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKING_SET);
 		fEditor.setAction("SearchReferencesInWorkingSet", fFindReferencesInWorkingSetAction); //$NON-NLS-1$
@@ -147,13 +148,13 @@ public class ReferencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @return the menu label
 	 */
 	protected String getName() {
 		return MENU_TEXT;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -164,13 +165,13 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		updateGlobalActionHandlers();
 	}
 
-	
+
 	private void addAction(IAction action, IMenuManager manager) {
 		if (action.isEnabled()) {
 			manager.add(action);
 		}
 	}
-	
+
 	private void addWorkingSetAction(IWorkingSet[] workingSets, IMenuManager manager) {
 		FindAction action;
 		if (fEditor != null)
@@ -180,8 +181,8 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		action.update(getContext().getSelection());
 		addAction(action, manager);
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
@@ -190,9 +191,9 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		addAction(fFindReferencesAction, javaSearchMM);
 		addAction(fFindReferencesInProjectAction, javaSearchMM);
 		addAction(fFindReferencesInHierarchyAction, javaSearchMM);
-		
+
 		javaSearchMM.add(new Separator());
-		
+
 		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			addWorkingSetAction((IWorkingSet[]) iter.next(), javaSearchMM);
@@ -202,8 +203,8 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		if (!javaSearchMM.isEmpty())
 			manager.appendToGroup(fGroupId, javaSearchMM);
 	}
-	
-	/* 
+
+	/*
 	 * Overrides method declared in ActionGroup
 	 */
 	public void dispose() {

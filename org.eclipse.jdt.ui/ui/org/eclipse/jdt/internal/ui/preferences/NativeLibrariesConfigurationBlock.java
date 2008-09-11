@@ -10,6 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -21,15 +30,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -38,7 +38,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -65,7 +64,7 @@ public class NativeLibrariesConfigurationBlock {
 			doFieldChanged(field);
 		}
 	}
-	
+
 	private StringDialogField fPathField;
 	private SelectionButtonDialogField fBrowseWorkspace;
 	private SelectionButtonDialogField fBrowseExternal;
@@ -73,25 +72,25 @@ public class NativeLibrariesConfigurationBlock {
 	private Shell fShell;
 	private final IStatusChangeListener fListener;
 	private final String fOrginalValue;
-	
+
 	public NativeLibrariesConfigurationBlock(IStatusChangeListener listener, Shell parent, String nativeLibPath, IClasspathEntry parentEntry) {
 		fListener= listener;
 		fEntry= parentEntry;
-		
+
 		NativeLibrariesAdapter adapter= new NativeLibrariesAdapter();
-		
+
 		fPathField= new StringDialogField();
 		fPathField.setLabelText(NewWizardMessages.NativeLibrariesDialog_location_label);
 		fPathField.setDialogFieldListener(adapter);
-		
+
 		fBrowseWorkspace= new SelectionButtonDialogField(SWT.PUSH);
 		fBrowseWorkspace.setLabelText(NewWizardMessages.NativeLibrariesDialog_workspace_browse);
 		fBrowseWorkspace.setDialogFieldListener(adapter);
-		
+
 		fBrowseExternal= new SelectionButtonDialogField(SWT.PUSH);
 		fBrowseExternal.setLabelText(NewWizardMessages.NativeLibrariesDialog_external_browse);
 		fBrowseExternal.setDialogFieldListener(adapter);
-	
+
 		if (nativeLibPath != null) {
 			fPathField.setText(Path.fromPortableString(nativeLibPath).toString());
 			fOrginalValue= nativeLibPath;
@@ -99,21 +98,21 @@ public class NativeLibrariesConfigurationBlock {
 			fOrginalValue= ""; //$NON-NLS-1$
 		}
 	}
-	
+
 	public Control createContents(Composite parent) {
 		fShell= parent.getShell();
-		
+
 		Composite inner= new Composite(parent, SWT.NONE);
 		inner.setFont(parent.getFont());
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		int nColumns= 3;
-		
+
 		GridLayout layout= new GridLayout(nColumns, false);
 		layout.marginWidth= 0;
 		layout.marginWidth= 0;
 		inner.setLayout(layout);
-		
+
 		PixelConverter converter= new PixelConverter(parent);
 
 		Label desc= new Label(inner, SWT.WRAP);
@@ -122,21 +121,21 @@ public class NativeLibrariesConfigurationBlock {
 		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, false, false, 3, 1);
 		gridData.widthHint= converter.convertWidthInCharsToPixels(80);
 		desc.setLayoutData(gridData);
-		
+
 		fPathField.doFillIntoGrid(inner, 2);
 		LayoutUtil.setHorizontalGrabbing(fPathField.getTextControl(null));
 		LayoutUtil.setWidthHint(fPathField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
-		
+
 		fBrowseExternal.doFillIntoGrid(inner, 1);
-		
+
 		DialogField.createEmptySpace(inner, 2);
 		fBrowseWorkspace.doFillIntoGrid(inner, 1);
-		
+
 		fPathField.setFocus();
-		
+
 		return parent;
 	}
-	
+
 	public String getNativeLibraryPath() {
 		String val= fPathField.getText();
 		if (val.length() == 0) {
@@ -144,7 +143,7 @@ public class NativeLibrariesConfigurationBlock {
 		}
 		return new Path(val).toPortableString();
 	}
-	
+
 	final void doFieldChanged(DialogField field) {
 		if (field == fBrowseExternal) {
 			String res= chooseExternal();
@@ -170,12 +169,12 @@ public class NativeLibrariesConfigurationBlock {
 		Path path= new Path(val);
 		if (path.isAbsolute()) {
 			if (!path.toFile().isDirectory()) {
-				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_external_not_existing); 
+				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_external_not_existing);
 				return status;
 			}
 		} else {
 			if (!(ResourcesPlugin.getWorkspace().getRoot().findMember(path) instanceof IContainer)) {
-				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_internal_not_existing); 
+				status.setWarning(NewWizardMessages.NativeLibrariesDialog_error_internal_not_existing);
 				return status;
 			}
 		}
@@ -189,7 +188,7 @@ public class NativeLibrariesConfigurationBlock {
 		} else {
 			currPath= currPath.removeLastSegments(1);
 		}
-	
+
 		DirectoryDialog dialog= new DirectoryDialog(fShell);
 		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_external_message);
 		dialog.setText(NewWizardMessages.NativeLibrariesDialog_extfiledialog_text);
@@ -200,13 +199,13 @@ public class NativeLibrariesConfigurationBlock {
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Opens a dialog to choose an internal file.
-	 */	
+	 */
 	private String chooseInternal() {
 		String initSelection= fPathField.getText();
-		
+
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
@@ -227,8 +226,8 @@ public class NativeLibrariesConfigurationBlock {
 		dialog.setValidator(validator);
 		dialog.addFilter(filter);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
-		dialog.setTitle(NewWizardMessages.NativeLibrariesDialog_intfiledialog_title); 
-		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_intfiledialog_message); 
+		dialog.setTitle(NewWizardMessages.NativeLibrariesDialog_intfiledialog_title);
+		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_intfiledialog_message);
 		dialog.setInput(root);
 		dialog.setInitialSelection(initSel);
 		dialog.setHelpAvailable(false);

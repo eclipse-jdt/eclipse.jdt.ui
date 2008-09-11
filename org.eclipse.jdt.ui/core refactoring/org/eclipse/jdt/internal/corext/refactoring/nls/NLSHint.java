@@ -16,6 +16,8 @@ import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -28,8 +30,6 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Region;
-
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -53,7 +53,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
  * - accessor class name, resource bundle name
  */
 public class NLSHint {
-	
+
 	private String fAccessorName;
 	private IPackageFragment fAccessorPackage;
 	private String fResourceBundleName;
@@ -63,19 +63,19 @@ public class NLSHint {
 	public NLSHint(ICompilationUnit cu, CompilationUnit astRoot) {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(astRoot);
-		
+
 		IPackageFragment cuPackage= (IPackageFragment) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 
 		fAccessorName= NLSRefactoring.DEFAULT_ACCESSOR_CLASSNAME;
 		fAccessorPackage= cuPackage;
 		fResourceBundleName= NLSRefactoring.DEFAULT_PROPERTY_FILENAME + NLSRefactoring.PROPERTY_FILE_EXT;
 		fResourceBundlePackage= cuPackage;
-		
+
 		IJavaProject project= cu.getJavaProject();
 		NLSLine[] lines= createRawLines(cu);
-		
+
 		AccessorClassReference accessClassRef= findFirstAccessorReference(lines, astRoot);
-		
+
 		if (accessClassRef == null) {
 			// Look for Eclipse NLS approach
 			List eclipseNLSLines= new ArrayList();
@@ -91,31 +91,31 @@ public class NLSHint {
 					lines[i+rawLinesLength]= (NLSLine)eclipseNLSLines.get(i);
 			}
 		}
-		
+
 		Properties props= null;
 		if (accessClassRef != null)
 			props= NLSHintHelper.getProperties(project, accessClassRef);
-		
+
 		if (props == null)
 			props= new Properties();
-		
+
 		fSubstitutions= createSubstitutions(lines, props, astRoot);
-		
+
 		if (accessClassRef != null) {
 			fAccessorName= accessClassRef.getName();
 			ITypeBinding accessorClassBinding= accessClassRef.getBinding();
-			
+
 			try {
 				IPackageFragment accessorPack= NLSHintHelper.getPackageOfAccessorClass(project, accessorClassBinding);
 				if (accessorPack != null) {
 					fAccessorPackage= accessorPack;
 				}
-				
+
 				String fullBundleName= accessClassRef.getResourceBundleName();
 				if (fullBundleName != null) {
 					fResourceBundleName= Signature.getSimpleName(fullBundleName) + NLSRefactoring.PROPERTY_FILE_EXT;
 					String packName= Signature.getQualifier(fullBundleName);
-					
+
 					IPackageFragment pack= NLSHintHelper.getResourceBundlePackage(project, packName, fResourceBundleName);
 					if (pack != null) {
 						fResourceBundlePackage= pack;
@@ -125,14 +125,14 @@ public class NLSHint {
 			}
 		}
 	}
-	
+
 	private AccessorClassReference createEclipseNLSLines(final IDocument document, CompilationUnit astRoot, List nlsLines) {
-		
+
 		final AccessorClassReference[] firstAccessor= new AccessorClassReference[1];
 		final SortedMap lineToNLSLine= new TreeMap();
-		
+
 		astRoot.accept(new ASTVisitor() {
-			
+
 			private ICompilationUnit fCache_CU;
 			private CompilationUnit fCache_AST;
 
@@ -153,12 +153,12 @@ public class NLSHint {
 							lineToNLSLine.put(line, nlsLine);
 						}
 						SimpleName name= node.getName();
-						NLSElement element= new NLSElement(node.getName().getIdentifier(), name.getStartPosition(), 
+						NLSElement element= new NLSElement(node.getName().getIdentifier(), name.getStartPosition(),
 				                name.getLength(), nlsLine.size() - 1, true);
 						nlsLine.add(element);
 						String bundleName;
 						try {
-							ICompilationUnit bundleCU= (ICompilationUnit)type.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT); 
+							ICompilationUnit bundleCU= (ICompilationUnit)type.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT);
 							if (fCache_CU == null || !fCache_CU.equals(bundleCU) || fCache_AST == null) {
 								fCache_CU= bundleCU;
 								if (fCache_CU != null)
@@ -171,20 +171,20 @@ public class NLSHint {
 							return true; // ignore this accessor and continue
 						}
 						element.setAccessorClassReference(new AccessorClassReference(type, bundleName, new Region(node.getStartPosition(), node.getLength())));
-						
+
 						if (firstAccessor[0] == null)
 							firstAccessor[0]= element.getAccessorClassReference();
-						
+
 					}
 				}
 				return true;
 			}
 		});
-		
+
 		nlsLines.addAll(lineToNLSLine.values());
 		return firstAccessor[0];
 	}
-	
+
 	private IDocument getDocument(ICompilationUnit cu) {
 		IPath path= cu.getPath();
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
@@ -193,7 +193,7 @@ public class NLSHint {
 		} catch (CoreException e) {
 			return null;
 		}
-		
+
 		try {
 			ITextFileBuffer buffer= manager.getTextFileBuffer(path, LocationKind.NORMALIZE);
 			if (buffer != null)
@@ -210,7 +210,7 @@ public class NLSHint {
 
 	private NLSSubstitution[] createSubstitutions(NLSLine[] lines, Properties props, CompilationUnit astRoot) {
 		List result= new ArrayList();
-		
+
 		for (int i= 0; i < lines.length; i++) {
 			NLSElement[] elements= lines[i].getElements();
 			for (int j= 0; j < elements.length; j++) {
@@ -218,7 +218,7 @@ public class NLSHint {
 				if (nlsElement.hasTag()) {
 					AccessorClassReference accessorClassReference= NLSHintHelper.getAccessorClassReference(astRoot, nlsElement);
 					if (accessorClassReference == null) {
-						// no accessor class => not translated				        
+						// no accessor class => not translated
 						result.add(new NLSSubstitution(NLSSubstitution.IGNORED, stripQuotes(nlsElement.getValue()), nlsElement));
 					} else {
 						String key= stripQuotes(nlsElement.getValue());
@@ -235,7 +235,7 @@ public class NLSHint {
 		}
 		return (NLSSubstitution[]) result.toArray(new NLSSubstitution[result.size()]);
 	}
-	
+
 	private static AccessorClassReference findFirstAccessorReference(NLSLine[] lines, CompilationUnit astRoot) {
 		for (int i= 0; i < lines.length; i++) {
 			NLSElement[] elements= lines[i].getElements();
@@ -249,7 +249,7 @@ public class NLSHint {
 				}
 			}
 		}
-		
+
 		// try to find a access with missing //non-nls tag (bug 75155)
 		for (int i= 0; i < lines.length; i++) {
 			NLSElement[] elements= lines[i].getElements();
@@ -279,12 +279,12 @@ public class NLSHint {
 			return new NLSLine[0];
 		}
 	}
-	
+
 
 	public String getAccessorClassName() {
 		return fAccessorName;
 	}
-	
+
 //	public boolean isEclipseNLS() {
 //		return fIsEclipseNLS;
 //	}

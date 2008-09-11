@@ -13,12 +13,12 @@ package org.eclipse.jdt.internal.ui.dnd;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -58,7 +58,7 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	 */
 	public void dragStart(DragSourceEvent event) {
 		fEditorInputDatas= new ArrayList();
-		
+
 		ISelection selection= fProvider.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) selection;

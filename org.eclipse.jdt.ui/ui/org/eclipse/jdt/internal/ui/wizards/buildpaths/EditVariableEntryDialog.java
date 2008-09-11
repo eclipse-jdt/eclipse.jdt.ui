@@ -14,10 +14,6 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.graphics.Point;
@@ -26,6 +22,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.window.Window;
@@ -51,11 +51,11 @@ public class EditVariableEntryDialog extends StatusDialog {
 	/**
 	 * The path to which the archive variable points.
 	 * Null if invalid path or not resolvable. Must not exist.
-	 */	
+	 */
 	private IPath fFileVariablePath;
-	
+
 	private IStatus fNameStatus;
-	
+
 	private Set fExistingEntries;
 	private VariablePathDialogField fFileNameField;
 	private CLabel fFullPathResolvedLabel;
@@ -63,8 +63,8 @@ public class EditVariableEntryDialog extends StatusDialog {
 
 	public EditVariableEntryDialog(Shell parent, IPath initialEntry, IPath[] existingEntries) {
 		super(parent);
-		setTitle(NewWizardMessages.EditVariableEntryDialog_title); 
-		
+		setTitle(NewWizardMessages.EditVariableEntryDialog_title);
+
 		fExistingEntries= new HashSet();
 		if (existingEntries != null) {
 			for (int i = 0; i < existingEntries.length; i++) {
@@ -74,14 +74,14 @@ public class EditVariableEntryDialog extends StatusDialog {
 				}
 			}
 		}
-		
+
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
-		
+
 		fFileNameField= new VariablePathDialogField(adapter);
 		fFileNameField.setDialogFieldListener(adapter);
-		fFileNameField.setLabelText(NewWizardMessages.EditVariableEntryDialog_filename_varlabel); 
-		fFileNameField.setButtonLabel(NewWizardMessages.EditVariableEntryDialog_filename_external_varbutton); 
-		fFileNameField.setVariableButtonLabel(NewWizardMessages.EditVariableEntryDialog_filename_variable_button); 
+		fFileNameField.setLabelText(NewWizardMessages.EditVariableEntryDialog_filename_varlabel);
+		fFileNameField.setButtonLabel(NewWizardMessages.EditVariableEntryDialog_filename_external_varbutton);
+		fFileNameField.setVariableButtonLabel(NewWizardMessages.EditVariableEntryDialog_filename_variable_button);
 		String initialString= initialEntry != null ? initialEntry.toString() : ""; //$NON-NLS-1$
 		fFileNameField.setText(initialString);
 	}
@@ -97,7 +97,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	public IPath getPath() {
 		return Path.fromOSString(fFileNameField.getText());
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
@@ -105,77 +105,77 @@ public class EditVariableEntryDialog extends StatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 		Composite composite= (Composite) super.createDialogArea(parent);
-		
+
 		GridLayout layout= (GridLayout) composite.getLayout();
-		layout.numColumns= 3;		
-		
+		layout.numColumns= 3;
+
 		int widthHint= convertWidthInCharsToPixels(50);
-		
+
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 3;
-					
+
 		// archive name field
 		fFileNameField.doFillIntoGrid(composite, 4);
 		LayoutUtil.setHorizontalSpan(fFileNameField.getLabelControl(null), 3);
 		LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
 		LayoutUtil.setHorizontalGrabbing(fFileNameField.getTextControl(null));
-		
+
 		// label that shows the resolved path for variable jars
-		//DialogField.createEmptySpace(composite, 1);	
+		//DialogField.createEmptySpace(composite, 1);
 		fFullPathResolvedLabel= new CLabel(composite, SWT.LEFT);
 		fFullPathResolvedLabel.setText(getResolvedLabelString());
 		fFullPathResolvedLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		DialogField.createEmptySpace(composite, 2);			
-		
-	
+		DialogField.createEmptySpace(composite, 2);
+
+
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
-				
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
-		applyDialogFont(composite);		
+		applyDialogFont(composite);
 		return composite;
 	}
 
 	private class SourceAttachmentAdapter implements IStringButtonAdapter, IDialogFieldListener {
-		
+
 		// -------- IStringButtonAdapter --------
 		public void changeControlPressed(DialogField field) {
-			attachmentChangeControlPressed(field);			
+			attachmentChangeControlPressed(field);
 		}
-		
+
 		// ---------- IDialogFieldListener --------
 		public void dialogFieldChanged(DialogField field) {
 			attachmentDialogFieldChanged(field);
 		}
 	}
-	
+
 	private void attachmentChangeControlPressed(DialogField field) {
 		if (field == fFileNameField) {
 			IPath jarFilePath= chooseExtJarFile();
 			if (jarFilePath != null) {
 				fFileNameField.setText(jarFilePath.toString());
 			}
-		}	
+		}
 	}
-	
+
 	// ---------- IDialogFieldListener --------
 
 	private void attachmentDialogFieldChanged(DialogField field) {
 		if (field == fFileNameField) {
 			fNameStatus= updateFileNameStatus();
-		} 
+		}
 		doStatusLineUpdate();
-	}		
+	}
 
 
 	private IPath chooseExtJarFile() {
 		IPath currPath= getPath();
 		IPath resolvedPath= getResolvedPath(currPath);
 		File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
-		
+
 		String currVariable= currPath.segment(0);
 		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, false, true);
-		dialog.setTitle(NewWizardMessages.EditVariableEntryDialog_extvardialog_title); 
-		dialog.setMessage(NewWizardMessages.EditVariableEntryDialog_extvardialog_description); 
+		dialog.setTitle(NewWizardMessages.EditVariableEntryDialog_extvardialog_title);
+		dialog.setMessage(NewWizardMessages.EditVariableEntryDialog_extvardialog_description);
 		dialog.setInput(fFileVariablePath.toFile());
 		dialog.setInitialSelection(initialSelection);
 		if (dialog.open() == Window.OK) {
@@ -185,7 +185,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		}
 		return null;
 	}
-	
+
 	private IPath getResolvedPath(IPath path) {
 		if (path != null) {
 			String varName= path.segment(0);
@@ -197,13 +197,13 @@ public class EditVariableEntryDialog extends StatusDialog {
 			}
 		}
 		return null;
-	}		
-		
+	}
+
 	/**
 	 * Takes a path and replaces the beginning with a variable name
 	 * (if the beginning matches with the variables value).
-	 * 
-	 * @param path the path 
+	 *
+	 * @param path the path
 	 * @param varName the variable name
 	 * @return the modified path
 	 */
@@ -214,7 +214,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		if (path.isEmpty()) {
 			return new Path(varName);
 		}
-		
+
 		IPath varPath= JavaCore.getClasspathVariable(varName);
 		if (varPath != null) {
 			if (varPath.isPrefixOf(path)) {
@@ -227,18 +227,18 @@ public class EditVariableEntryDialog extends StatusDialog {
 		}
 		return new Path(varName).append(path);
 	}
-	
+
 	private IStatus updateFileNameStatus() {
 		StatusInfo status= new StatusInfo();
 		fFileVariablePath= null;
-		
+
 		String fileName= fFileNameField.getText();
 		if (fileName.length() == 0) {
 			status.setError(NewWizardMessages.EditVariableEntryDialog_filename_empty);
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(fileName)) {
-				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_notvalid); 
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_notvalid);
 				return status;
 			}
 			IPath filePath= Path.fromOSString(fileName);
@@ -246,34 +246,34 @@ public class EditVariableEntryDialog extends StatusDialog {
 
 
 			if (filePath.getDevice() != null) {
-				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_deviceinpath); 
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_deviceinpath);
 				return status;
 			}
 			String varName= filePath.segment(0);
 			if (varName == null) {
-				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_notvalid); 
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_notvalid);
 				return status;
 			}
 			fFileVariablePath= JavaCore.getClasspathVariable(varName);
 			if (fFileVariablePath == null) {
-				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_varnotexists); 
+				status.setError(NewWizardMessages.EditVariableEntryDialog_filename_error_varnotexists);
 				return status;
 			}
-			
+
 			String deprecationMessage= BuildPathSupport.getDeprecationMessage(varName);
-			
+
 			resolvedPath= fFileVariablePath.append(filePath.removeFirstSegments(1));
 			if (resolvedPath.isEmpty()) {
 				String message= NewWizardMessages.EditVariableEntryDialog_filename_warning_varempty;
 				if (deprecationMessage != null) {
 					message= deprecationMessage + "\n" + message; //$NON-NLS-1$
 				}
-				status.setWarning(message); 
+				status.setWarning(message);
 				return status;
 			}
 			File file= resolvedPath.toFile();
-			if (!file.exists()) {				
-				String message= Messages.format(NewWizardMessages.EditVariableEntryDialog_filename_error_filenotexists, BasicElementLabels.getPathLabel(resolvedPath, true)); 
+			if (!file.exists()) {
+				String message= Messages.format(NewWizardMessages.EditVariableEntryDialog_filename_error_filenotexists, BasicElementLabels.getPathLabel(resolvedPath, true));
 				if (deprecationMessage != null) {
 					message= deprecationMessage + "\n" + message; //$NON-NLS-1$
 					status.setWarning(message);
@@ -283,48 +283,48 @@ public class EditVariableEntryDialog extends StatusDialog {
 				return status;
 			}
 			if (deprecationMessage != null) {
-				status.setWarning(deprecationMessage); 
+				status.setWarning(deprecationMessage);
 				return status;
 			}
 		}
 		return status;
 	}
-	
+
 	private String getResolvedLabelString() {
 		IPath resolvedPath= getResolvedPath(getPath());
 		if (resolvedPath != null) {
 			return BasicElementLabels.getPathLabel(resolvedPath, true);
 		}
 		return ""; //$NON-NLS-1$
-	}	
-	
+	}
+
 	private boolean canBrowseFileName() {
 		// to browse with a variable JAR, the variable name must point to a directory
 		if (fFileVariablePath != null) {
 			return fFileVariablePath.toFile().isDirectory();
 		}
 		return false;
-	}	
-	
+	}
+
 	private void doStatusLineUpdate() {
 		fFileNameField.enableButton(canBrowseFileName());
-		
+
 		// set the resolved path for variable jars
 		if (fFullPathResolvedLabel != null) {
 			fFullPathResolvedLabel.setText(getResolvedLabelString());
 		}
-		
+
 		IStatus status= fNameStatus;
 		if (!status.matches(IStatus.ERROR)) {
 			IPath path= getPath();
 			if (fExistingEntries.contains(path)) {
-				String message= NewWizardMessages.EditVariableEntryDialog_filename_error_alreadyexists; 
+				String message= NewWizardMessages.EditVariableEntryDialog_filename_error_alreadyexists;
 				status= new StatusInfo(IStatus.ERROR, message);
 			}
 		}
 		updateStatus(status);
 	}
-	
+
 	/*
 	 * overridden to ensure full message is visible
 	 * @see org.eclipse.jface.dialogs.StatusDialog#updateStatus(org.eclipse.core.runtime.IStatus)

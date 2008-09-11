@@ -26,6 +26,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
 
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -73,10 +74,10 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 	public void run() {
 		if (fStore.getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return;
-		
+
 		runWithEvent(null);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.action.IAction#runWithEvent(org.eclipse.swt.widgets.Event)
 	 * @since 3.2

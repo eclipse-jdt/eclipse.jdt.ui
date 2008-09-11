@@ -25,6 +25,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
+
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -47,50 +48,50 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Action to find all occurrences of a compilation unit member (e.g.
- * fields, methods, types, and local variables) in a file. 
+ * fields, methods, types, and local variables) in a file.
  * <p>
  * Action is applicable to selections containing elements of type
  * <tt>IMember</tt>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindOccurrencesInFileAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
 	private IActionBars fActionBars;
-	
+
 	/**
-	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action requires 
+	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action requires
 	 * that the selection provided by the view part's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the part providing context information for this action
 	 */
 	public FindOccurrencesInFileAction(IViewPart part) {
 		this(part.getSite());
 	}
-	
+
 	/**
-	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action requires 
+	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action requires
 	 * that the selection provided by the page's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param page the page providing context information for this action
 	 */
 	public FindOccurrencesInFileAction(Page page) {
 		this(page.getSite());
 	}
- 	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindOccurrencesInFileAction(JavaEditor editor) {
@@ -98,39 +99,39 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(getEditorInput(editor) != null);
 	}
-	
+
 	/**
-	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>FindOccurrencesInFileAction</code>. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 * @since 3.1
 	 */
 	public FindOccurrencesInFileAction(IWorkbenchSite site) {
 		super(site);
-		
+
 		if (site instanceof IViewSite)
 			fActionBars= ((IViewSite)site).getActionBars();
 		else if (site instanceof IEditorSite)
 			fActionBars= ((IEditorSite)site).getActionBars();
 		else if (site instanceof IPageSite)
 			fActionBars= ((IPageSite)site).getActionBars();
-		
-		setText(SearchMessages.Search_FindOccurrencesInFile_label); 
-		setToolTipText(SearchMessages.Search_FindOccurrencesInFile_tooltip); 
+
+		setText(SearchMessages.Search_FindOccurrencesInFile_label);
+		setToolTipText(SearchMessages.Search_FindOccurrencesInFile_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_OCCURRENCES_IN_FILE_ACTION);
 	}
-	
+
 	//---- Structured Selection -------------------------------------------------------------
-	
+
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getMember(selection) != null);
 	}
-	
+
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
@@ -146,7 +147,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 			} catch (JavaModelException ex) {
 				return null;
 			}
-			
+
 			IClassFile file= member.getClassFile();
 			if (file != null) {
 				try {
@@ -160,7 +161,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		}
 		return null;
 	}
-	
+
 	public void run(IStructuredSelection selection) {
 		IMember member= getMember(selection);
 		if (!ActionUtil.isProcessable(getShell(), member))
@@ -175,7 +176,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	private static void showMessage(Shell shell, IActionBars actionBars, String msg) {
 		if (actionBars != null) {
 			IStatusLineManager statusLine= actionBars.getStatusLineManager();
@@ -184,9 +185,9 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		}
 		shell.getDisplay().beep();
 	}
-	
+
 	//---- Text Selection ----------------------------------------------------------------------
-	
+
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
@@ -197,7 +198,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -226,11 +227,11 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	private static ITypeRoot getEditorInput(JavaEditor editor) {
 		return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 	}
-		
+
 	private static void showMessage(Shell shell, JavaEditor editor, String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
-		if (statusLine != null) 
-			statusLine.setMessage(true, msg, null); 
+		if (statusLine != null)
+			statusLine.setMessage(true, msg, null);
 		shell.getDisplay().beep();
 	}
 }

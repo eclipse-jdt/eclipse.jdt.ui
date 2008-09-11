@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.Assert;
 
 
 /**
@@ -26,16 +26,16 @@ import org.eclipse.swt.widgets.Label;
  * from the creation time of the widgets.
  * - support for automated layouting.
  * - enable / disable, set focus a concept of the base class.
- * 
+ *
  * DialogField have a label.
- */ 
+ */
 public class DialogField {
 
 	private Label fLabel;
 	protected String fLabelText;
-	
+
 	private IDialogFieldListener fDialogFieldListener;
-	
+
 	private boolean fEnabled;
 
 	public DialogField() {
@@ -43,7 +43,7 @@ public class DialogField {
 		fLabel= null;
 		fLabelText= ""; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Sets the label of the dialog field.
 	 */
@@ -53,27 +53,27 @@ public class DialogField {
 			fLabel.setText(labeltext);
 		}
 	}
-		
+
 	// ------ change listener
-	
+
 	/**
 	 * Defines the listener for this dialog field.
-	 */	
+	 */
 	public final void setDialogFieldListener(IDialogFieldListener listener) {
 		fDialogFieldListener= listener;
 	}
 
 	/**
 	 * Programatical invocation of a dialog field change.
-	 */		
+	 */
 	public void dialogFieldChanged() {
 		if (fDialogFieldListener != null) {
 			fDialogFieldListener.dialogFieldChanged(this);
 		}
-	}	
-	
+	}
+
 	// ------- focus management
-	
+
 	/**
 	 * Tries to set the focus to the dialog field.
 	 * Returns <code>true</code> if the dialog field can take focus.
@@ -85,7 +85,7 @@ public class DialogField {
 
 	/**
 	 * Posts <code>setFocus</code> to the display event queue.
-	 */	
+	 */
 	public void postSetFocusOnDialogField(Display display) {
 		if (display != null) {
 			display.asyncExec(
@@ -96,10 +96,10 @@ public class DialogField {
 				}
 			);
 		}
-	}		
-	
+	}
+
 	// ------- layout helpers
-	
+
 	/**
 	 * Creates all controls of the dialog field and fills it to a composite.
 	 * The composite is assumed to have <code>MGridLayout</code> as
@@ -109,48 +109,48 @@ public class DialogField {
 	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
-		
+
 		Label label= getLabelControl(parent);
 		label.setLayoutData(gridDataForLabel(nColumns));
-		
+
 		return new Control[] { label };
 	}
-	
+
 	/**
 	 * Returns the number of columns of the dialog field.
 	 * 	To be reimplemented by dialog field implementors.
 	 */
 	public int getNumberOfControls() {
-		return 1;	
-	}	
-	
+		return 1;
+	}
+
 	protected static GridData gridDataForLabel(int span) {
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= span;
 		return gd;
 	}
-	
+
 	// ------- ui creation
 
 	/**
 	 * Creates or returns the created label widget.
 	 * @param parent The parent composite or <code>null</code> if the widget has
 	 * already been created.
-	 */			
+	 */
 	public Label getLabelControl(Composite parent) {
 		if (fLabel == null) {
 			assertCompositeNotNull(parent);
-			
+
 			fLabel= new Label(parent, SWT.LEFT | SWT.WRAP);
 			fLabel.setFont(parent.getFont());
-			fLabel.setEnabled(fEnabled);		
+			fLabel.setEnabled(fEnabled);
 			if (fLabelText != null && !"".equals(fLabelText)) { //$NON-NLS-1$
 				fLabel.setText(fLabelText);
 			} else {
 				// XXX: to avoid a 16 pixel wide empty label - revisit
 				fLabel.setText("."); //$NON-NLS-1$
 				fLabel.setVisible(false);
-			}			
+			}
 		}
 		return fLabel;
 	}
@@ -158,7 +158,7 @@ public class DialogField {
 	/**
 	 * Creates a spacer control.
 	 * @param parent The parent composite
-	 */		
+	 */
 	public static Control createEmptySpace(Composite parent) {
 		return createEmptySpace(parent, 1);
 	}
@@ -168,7 +168,7 @@ public class DialogField {
 	 * The composite is assumed to have <code>MGridLayout</code> as
 	 * layout.
 	 * @param parent The parent composite
-	 */			
+	 */
 	public static Control createEmptySpace(Composite parent, int span) {
 		Label label= new Label(parent, SWT.LEFT);
 		GridData gd= new GridData();
@@ -181,16 +181,16 @@ public class DialogField {
 		label.setLayoutData(gd);
 		return label;
 	}
-	
+
 	/**
 	 * Tests is the control is not <code>null</code> and not disposed.
 	*/
 	protected final boolean isOkToUse(Control control) {
 		return (control != null) && (Display.getCurrent() != null) && !control.isDisposed();
 	}
-	
+
 	// --------- enable / disable management
-	
+
 	/**
 	 * Sets the enable state of the dialog field.
 	 */
@@ -200,7 +200,7 @@ public class DialogField {
 			updateEnableState();
 		}
 	}
-	
+
 	/**
 	 * Called when the enable state changed.
 	 * To be extended by dialog field implementors.
@@ -210,7 +210,7 @@ public class DialogField {
 			fLabel.setEnabled(fEnabled);
 		}
 	}
-	
+
 	/**
 	 * Brings the UI in sync with the model. Only needed when model was changed
 	 * in different thread whil UI was lready created.
@@ -221,7 +221,7 @@ public class DialogField {
 
 	/**
 	 * Gets the enable state of the dialog field.
-	 */	
+	 */
 	public final boolean isEnabled() {
 		return fEnabled;
 	}
@@ -229,12 +229,12 @@ public class DialogField {
 	protected final void assertCompositeNotNull(Composite comp) {
 		Assert.isNotNull(comp, "uncreated control requested with composite null"); //$NON-NLS-1$
 	}
-	
+
 	protected final void assertEnoughColumns(int nColumns) {
 		Assert.isTrue(nColumns >= getNumberOfControls(), "given number of columns is too small"); //$NON-NLS-1$
 	}
-	
-	
 
-	
+
+
+
 }

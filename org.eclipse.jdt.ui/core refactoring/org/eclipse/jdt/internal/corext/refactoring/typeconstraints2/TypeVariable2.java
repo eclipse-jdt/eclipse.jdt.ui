@@ -31,18 +31,18 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 		Assert.isNotNull(range);
 		fRange= range;
 	}
-	
+
 	public CompilationUnitRange getRange() {
 		return fRange;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
 		return getRange().hashCode() ^ getType().hashCode();
 	}
-	
+
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -52,7 +52,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 			return true;
 		if (other.getClass() != TypeVariable2.class)
 			return false;
-		
+
 		TypeVariable2 otherTypeVariable= (TypeVariable2) other;
 		return getRange().equals(otherTypeVariable.getRange())
 				&& getType() == otherTypeVariable.getType();
@@ -65,7 +65,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 	public ICompilationUnit getCompilationUnit() {
 		return fRange.getCompilationUnit();
 	}
-	
+
 	public String toString() {
 		return super.toString() + " [" + fRange.getSourceRange().getOffset() + '+' + fRange.getSourceRange().getLength() + ']'; //$NON-NLS-1$
 	}

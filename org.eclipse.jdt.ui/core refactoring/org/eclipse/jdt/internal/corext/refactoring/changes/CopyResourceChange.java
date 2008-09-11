@@ -35,39 +35,39 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class CopyResourceChange extends ResourceChange {
-	
+
 	private final INewNameQuery fNewNameQuery;
 	private final IResource fSource;
 	private final IContainer fTarget;
 
-	
+
 	public CopyResourceChange(IResource res, IContainer dest, INewNameQuery newNameQuery) {
-		Assert.isTrue(res instanceof IFile || res instanceof IFolder);	
+		Assert.isTrue(res instanceof IFile || res instanceof IFolder);
 		Assert.isTrue(dest instanceof IProject || dest instanceof IFolder);
-		
+
 		fNewNameQuery= newNameQuery;
 		fSource= res;
 		fTarget= dest;
-		
+
 		// Copy resource change isn't undoable and isn't used
 		// as a redo/undo change right now.
 		setValidationMethod(SAVE_IF_DIRTY);
 	}
-			
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.Change#getName()
 	 */
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.CopyResourceString_copy, new String[] { BasicElementLabels.getPathLabel(getResource().getFullPath(), false), BasicElementLabels.getResourceName(getDestination()) });
 	}
-	
+
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		try{
 			pm.beginTask(getName(), 2);
-			
+
 			String newName= getNewResourceName();
 			IResource resource= getResource();
 			boolean performReorg= deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
@@ -105,20 +105,20 @@ public class CopyResourceChange extends ResourceChange {
 
 		IResource resource= getResource();
 		Assert.isNotNull(resource);
-			
+
 		if (ReorgUtils.areEqualInWorkspaceOrOnDisk(resource, current))
 			return false;
-		
+
 		if (current instanceof IFile)
 			((IFile)current).delete(false, true, new SubProgressMonitor(pm, 1));
 		else if (current instanceof IFolder)
 			((IFolder)current).delete(false, true, new SubProgressMonitor(pm, 1));
-		else 
+		else
 			Assert.isTrue(false);
-			
-		return true;	
+
+		return true;
 	}
-	
+
 
 	private String getNewResourceName() throws OperationCanceledException {
 		if (fNewNameQuery == null)
@@ -128,23 +128,23 @@ public class CopyResourceChange extends ResourceChange {
 			return getResource().getName();
 		return name;
 	}
-	
+
 	protected IResource getModifiedResource() {
 		return getResource();
 	}
-	
+
 	private IResource getResource() {
 		return fSource;
 	}
-	
+
 	private IContainer getDestination() {
-		return fTarget;	
+		return fTarget;
 	}
 
 	private int getReorgFlags() {
 		return IResource.KEEP_HISTORY | IResource.SHALLOW;
 	}
-	
+
 	private void markAsExecuted(IResource resource) {
 		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
 		if (log != null) {

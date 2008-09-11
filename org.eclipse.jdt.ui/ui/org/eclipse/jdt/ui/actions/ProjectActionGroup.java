@@ -45,13 +45,13 @@ import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 
 /**
  * Adds actions to open and close a project to the global menu bar.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ProjectActionGroup extends ActionGroup {
@@ -61,7 +61,7 @@ public class ProjectActionGroup extends ActionGroup {
 	private OpenProjectAction fOpenAction;
 	private CloseResourceAction fCloseAction;
 	private CloseResourceAction fCloseUnrelatedAction;
-	
+
 	private ISelectionChangedListener fSelectionChangedListener;
 
 
@@ -69,7 +69,7 @@ public class ProjectActionGroup extends ActionGroup {
 	 * Creates a new <code>ProjectActionGroup</code>. The group requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 */
 	public ProjectActionGroup(IViewPart part) {
@@ -80,23 +80,23 @@ public class ProjectActionGroup extends ActionGroup {
 	 * Creates a new <code>ProjectActionGroup</code>. The group requires
 	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param selectionProvider the selection provider used instead of the
 	 *  page selection provider.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public ProjectActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
 		fSelectionProvider= selectionProvider;
 		ISelection selection= selectionProvider.getSelection();
-		
+
 		fCloseAction= new CloseResourceAction(site);
 		fCloseAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_PROJECT);
-		
+
 		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(site);
 		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_UNRELATED_PROJECTS);
-		
+
 		fOpenAction= new OpenProjectAction(site);
 		fOpenAction.setActionDefinitionId(IWorkbenchCommandIds.OPEN_PROJECT);
 		if (selection instanceof IStructuredSelection) {
@@ -105,7 +105,7 @@ public class ProjectActionGroup extends ActionGroup {
 			fCloseAction.selectionChanged(s);
 			fCloseUnrelatedAction.selectionChanged(s);
 		}
-		
+
 		fSelectionChangedListener= new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection s= event.getSelection();
@@ -121,7 +121,7 @@ public class ProjectActionGroup extends ActionGroup {
 		workspace.addResourceChangeListener(fCloseAction);
 		workspace.addResourceChangeListener(fCloseUnrelatedAction);
 	}
-	
+
 	protected void performSelectionChanged(IStructuredSelection structuredSelection) {
 		Object[] array= structuredSelection.toArray();
 		ArrayList openProjects= new ArrayList();
@@ -132,7 +132,7 @@ public class ProjectActionGroup extends ActionGroup {
 		fCloseAction.selectionChanged(sel);
 		fCloseUnrelatedAction.selectionChanged(sel);
 	}
-	
+
 	private int CLOSED_PROJECTS_SELECTED= 1;
 	private int NON_PROJECT_SELECTED= 2;
 
@@ -161,7 +161,7 @@ public class ProjectActionGroup extends ActionGroup {
 		}
 		return status;
 	}
-		
+
 	private boolean hasClosedProjectsInWorkspace() {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
@@ -170,7 +170,7 @@ public class ProjectActionGroup extends ActionGroup {
 		}
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -180,7 +180,7 @@ public class ProjectActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_UNRELATED_PROJECTS.getId(), fCloseUnrelatedAction);
 		actionBars.setGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId(), fOpenAction);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -193,12 +193,12 @@ public class ProjectActionGroup extends ActionGroup {
 		if (fCloseUnrelatedAction.isEnabled() && areOnlyProjectsSelected(fCloseUnrelatedAction.getStructuredSelection()))
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fCloseUnrelatedAction);
 	}
-	
+
 	/**
 	 * Returns the open project action contained in this project action group.
-	 * 
+	 *
 	 * @return returns the open project action
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	public OpenProjectAction getOpenProjectAction() {
@@ -208,7 +208,7 @@ public class ProjectActionGroup extends ActionGroup {
 	private boolean areOnlyProjectsSelected(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
-		
+
 		Iterator iter= selection.iterator();
 		while (iter.hasNext()) {
 			Object obj= iter.next();
@@ -226,7 +226,7 @@ public class ProjectActionGroup extends ActionGroup {
 	public void dispose() {
 		fSelectionProvider.removeSelectionChangedListener(fSelectionChangedListener);
 		fSelectionProvider= null;
-		
+
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(fOpenAction);
 		workspace.removeResourceChangeListener(fCloseAction);

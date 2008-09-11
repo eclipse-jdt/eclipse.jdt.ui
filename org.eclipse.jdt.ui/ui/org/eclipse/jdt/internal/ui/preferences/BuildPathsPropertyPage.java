@@ -53,29 +53,29 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
  * Property page for configuring the Java build path
  */
 public class BuildPathsPropertyPage extends PropertyPage implements IStatusChangeListener {
-	
+
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
-		
+
 	private static final String PAGE_SETTINGS= "BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final String INDEX= "pageIndex"; //$NON-NLS-1$
 
 	public static final Object DATA_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
-	
+
 	public static final Object DATA_REVEAL_ENTRY= "select_classpath_entry"; //$NON-NLS-1$
 	public static final Object DATA_REVEAL_ATTRIBUTE_KEY= "select_classpath_attribute_key"; //$NON-NLS-1$
-	
+
 	public static final Object DATA_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
-		
+
 	private BuildPathsBlock fBuildPathsBlock;
 	private boolean fBlockOnApply= false;
-	
+
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		// ensure the page has no special buttons
 		noDefaultAndApplyButton();
-		
+
 		IProject project= getProject();
 		Control result;
 		if (project == null || !isJavaProject(project)) {
@@ -88,7 +88,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		Dialog.applyDialogFont(result);
 		return result;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -96,7 +96,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.BUILD_PATH_PROPERTY_PAGE);
 	}
-	
+
 	private IDialogSettings getSettings() {
 		IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();
 		IDialogSettings pageSettings= javaSettings.getSection(PAGE_SETTINGS);
@@ -106,7 +106,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		}
 		return pageSettings;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
@@ -139,8 +139,8 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		}
 		super.setVisible(visible);
 	}
-	
-	
+
+
 	/*
 	 * Content for valid projects.
 	 */
@@ -150,7 +150,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		if (container instanceof IWorkbenchPreferenceContainer) {
 			pageContainer= (IWorkbenchPreferenceContainer) container;
 		}
-		
+
 		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), this, getSettings().getInt(INDEX), false, pageContainer);
 		fBuildPathsBlock.init(JavaCore.create(project), null, null);
 		return fBuildPathsBlock.createControl(parent);
@@ -162,7 +162,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	private Control createWithoutJava(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
 		label.setText(PreferencesMessages.BuildPathsPropertyPage_no_java_project_message);
-		
+
 		fBuildPathsBlock= null;
 		setValid(true);
 		return label;
@@ -174,17 +174,17 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	private Control createForClosedProject(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
 		label.setText(PreferencesMessages.BuildPathsPropertyPage_closed_project_message);
-		
+
 		fBuildPathsBlock= null;
 		setValid(true);
 		return label;
 	}
-	
+
 	private IProject getProject() {
         IAdaptable adaptable= getElement();
 		return adaptable == null ? null : (IProject)adaptable.getAdapter(IProject.class);
 	}
-	
+
 	private boolean isJavaProject(IProject proj) {
 		try {
 			return proj.hasNature(JavaCore.NATURE_ID);
@@ -193,7 +193,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see IPreferencePage#performOk
 	 */
@@ -223,7 +223,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		}
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IStatusChangeListener#statusChanged
 	 */
@@ -231,7 +231,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */

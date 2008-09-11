@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
 /**
  * Fields filter.
- * 
+ *
  * @since 3.0
  */
 public class FieldsFilter extends MemberFilter {

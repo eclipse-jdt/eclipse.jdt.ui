@@ -33,13 +33,13 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
  *   ? => any character
  *   * => any string
  * </p>
- * 
+ *
  * @since 2.0
  */
 public class NamePatternFilter extends ViewerFilter {
 	private String[] fPatterns;
 	private StringMatcher[] fMatchers;
-	
+
 	/**
 	 * Return the currently configured StringMatchers.
 	 * @return returns the matchers
@@ -47,7 +47,7 @@ public class NamePatternFilter extends ViewerFilter {
 	private StringMatcher[] getMatchers() {
 		return fMatchers;
 	}
-	
+
 	/**
 	 * Gets the patterns for the receiver.
 	 * @return returns the patterns to be filtered for
@@ -55,8 +55,8 @@ public class NamePatternFilter extends ViewerFilter {
 	public String[] getPatterns() {
 		return fPatterns;
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * Method declared on ViewerFilter.
 	 */
@@ -89,7 +89,7 @@ public class NamePatternFilter extends ViewerFilter {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Sets the patterns to filter out for the receiver.
 	 * <p>

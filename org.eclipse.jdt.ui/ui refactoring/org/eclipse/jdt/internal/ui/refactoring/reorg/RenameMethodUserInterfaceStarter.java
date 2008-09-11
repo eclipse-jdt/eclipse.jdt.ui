@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter {
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter#activate(org.eclipse.jdt.internal.corext.refactoring.base.Refactoring, org.eclipse.swt.widgets.Shell)
 	 */
@@ -44,22 +44,22 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 					String message= null;
 					if (method.getDeclaringType().isInterface()) {
 						message= Messages.format(
-							RefactoringCoreMessages.MethodChecks_implements, 
+							RefactoringCoreMessages.MethodChecks_implements,
 							new String[]{
-								JavaElementUtil.createMethodSignature(method), 
+								JavaElementUtil.createMethodSignature(method),
 								JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 					} else {
 						message= Messages.format(
-							RefactoringCoreMessages.MethodChecks_overrides, 
+							RefactoringCoreMessages.MethodChecks_overrides,
 							new String[]{
-								JavaElementUtil.createMethodSignature(method), 
+								JavaElementUtil.createMethodSignature(method),
 								JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 					}
 					message= Messages.format(
-						ReorgMessages.RenameMethodUserInterfaceStarter_message,  
+						ReorgMessages.RenameMethodUserInterfaceStarter_message,
 						message);
-					if (!MessageDialog.openQuestion(parent, 
-							ReorgMessages.RenameMethodUserInterfaceStarter_name,  
+					if (!MessageDialog.openQuestion(parent,
+							ReorgMessages.RenameMethodUserInterfaceStarter_name,
 							message)) {
 						return false;
 					}

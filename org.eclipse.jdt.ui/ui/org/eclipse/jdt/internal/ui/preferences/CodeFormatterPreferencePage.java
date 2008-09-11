@@ -26,12 +26,12 @@ public class CodeFormatterPreferencePage extends ProfilePreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage"; //$NON-NLS-1$
-	
-	public CodeFormatterPreferencePage() {		
+
+	public CodeFormatterPreferencePage() {
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.CodeFormatterPreferencePage_title);		 
+		setTitle(PreferencesMessages.CodeFormatterPreferencePage_title);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.ProfilePreferencePage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -50,7 +50,7 @@ public class CodeFormatterPreferencePage extends ProfilePreferencePage {
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */

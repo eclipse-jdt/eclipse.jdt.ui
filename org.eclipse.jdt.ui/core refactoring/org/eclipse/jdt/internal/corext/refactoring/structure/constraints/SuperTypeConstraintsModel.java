@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 /**
  * Type constraints model to hold all type constraints to replace type occurrences by a given supertype.
- * 
+ *
  * @since 3.1
  */
 public final class SuperTypeConstraintsModel {
@@ -67,7 +67,7 @@ public final class SuperTypeConstraintsModel {
 
 		/**
 		 * Attempts to add the specified object to this set.
-		 * 
+		 *
 		 * @param object the object to add
 		 * @return An already existing object considered equal to the specified one, or the newly added object
 		 */
@@ -130,7 +130,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Returns the usage of the specified constraint variable.
-	 * 
+	 *
 	 * @param variable the constraint variable
 	 * @return the usage of the constraint variable (element type: <code>ITypeConstraint2</code>)
 	 */
@@ -146,7 +146,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Is the type represented by the specified binding a constrained type?
-	 * 
+	 *
 	 * @param binding the binding to check, or <code>null</code>
 	 * @return <code>true</code> if it is constrained, <code>false</code> otherwise
 	 */
@@ -156,7 +156,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Sets the usage of the specified constraint variable.
-	 * 
+	 *
 	 * @param variable the constraint variable
 	 * @param constraint the type constraint
 	 */
@@ -210,7 +210,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a new super type constraints model.
-	 * 
+	 *
 	 * @param environment the type environment
 	 * @param subType the subtype to replace
 	 * @param superType the supertype replacement
@@ -230,7 +230,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a cast variable.
-	 * 
+	 *
 	 * @param expression the cast expression
 	 * @param variable the associated constraint variable
 	 * @return the created cast variable
@@ -249,7 +249,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a conditional type constraint.
-	 * 
+	 *
 	 * @param expressionVariable the expression type constraint variable
 	 * @param thenVariable the then type constraint variable
 	 * @param elseVariable the else type constraint variable
@@ -266,7 +266,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a subtype constraint.
-	 * 
+	 *
 	 * @param descendant the descendant type constraint variable
 	 * @param ancestor the ancestor type constraint variable
 	 */
@@ -285,7 +285,7 @@ public final class SuperTypeConstraintsModel {
 	 * <p>
 	 * A declaring type variable stands for a type where something has been declared.
 	 * </p>
-	 * 
+	 *
 	 * @param type the type binding
 	 * @return the created declaring type variable
 	 */
@@ -298,7 +298,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates an equality constraint.
-	 * 
+	 *
 	 * @param left the left typeconstraint variable
 	 * @param right the right typeconstraint variable
 	 */
@@ -333,7 +333,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates an exception variable.
-	 * 
+	 *
 	 * @param name the name of the thrown exception
 	 * @return the created exception variable
 	 */
@@ -346,7 +346,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates an immutable type variable.
-	 * 
+	 *
 	 * @param type the type binding
 	 * @return the created plain type variable
 	 */
@@ -363,7 +363,7 @@ public final class SuperTypeConstraintsModel {
 	 * <p>
 	 * An independant type variable stands for an arbitrary type.
 	 * </p>
-	 * 
+	 *
 	 * @param type the type binding
 	 * @return the created independant type variable
 	 */
@@ -377,7 +377,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a new method parameter variable.
-	 * 
+	 *
 	 * @param method the method binding
 	 * @param index the index of the parameter
 	 * @return the created method parameter variable
@@ -401,7 +401,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a new return type variable.
-	 * 
+	 *
 	 * @param method the method binding
 	 * @return the created return type variable
 	 */
@@ -425,7 +425,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a subtype constraint.
-	 * 
+	 *
 	 * @param descendant the descendant type constraint variable
 	 * @param ancestor the ancestor type constraint variable
 	 */
@@ -440,7 +440,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a new TType for the corresponding binding.
-	 * 
+	 *
 	 * @param binding The type binding
 	 * @return The corresponding TType
 	 */
@@ -456,7 +456,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a type variable.
-	 * 
+	 *
 	 * @param type the type binding
 	 * @param range the compilation unit range
 	 * @return the created type variable
@@ -471,7 +471,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a type variable.
-	 * 
+	 *
 	 * @param type the type
 	 * @return the created type variable
 	 */
@@ -488,7 +488,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a variable type variable.
-	 * 
+	 *
 	 * @param binding the variable binding
 	 * @return the created variable variable
 	 */
@@ -525,7 +525,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Returns the cast variables of this model.
-	 * 
+	 *
 	 * @return the cast variables (element type: <code>CastVariable2</code>)
 	 */
 	public final Collection getCastVariables() {
@@ -534,7 +534,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Returns the compliance level to use.
-	 * 
+	 *
 	 * @return the compliance level
 	 */
 	public final int getCompliance() {
@@ -543,7 +543,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Returns the constraint variables of this model.
-	 * 
+	 *
 	 * @return the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
 	public final Collection getConstraintVariables() {
@@ -552,7 +552,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Returns the subtype to be replaced.
-	 * 
+	 *
 	 * @return the subtype to be replaced
 	 */
 	public final TType getSubType() {
@@ -561,7 +561,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Returns the supertype as replacement.
-	 * 
+	 *
 	 * @return the supertype as replacement
 	 */
 	public final TType getSuperType() {
@@ -570,7 +570,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Returns the type constraints of this model.
-	 * 
+	 *
 	 * @return the type constraints (element type: <code>ITypeConstraint2</code>)
 	 */
 	public final Collection getTypeConstraints() {
@@ -579,7 +579,7 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Sets the compliance level to use.
-	 * 
+	 *
 	 * @param level the compliance level to use. The argument must be one of the <code>AST.JLSx</code> constants.
 	 */
 	public final void setCompliance(final int level) {

@@ -21,7 +21,7 @@ import org.eclipse.search.ui.text.Match;
  * </p>
  *
  * @since 3.0
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ISearchRequestor {

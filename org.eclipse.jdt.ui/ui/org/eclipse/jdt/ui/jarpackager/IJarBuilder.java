@@ -13,14 +13,14 @@ package org.eclipse.jdt.ui.jarpackager;
 
 import java.util.zip.ZipFile;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.MultiStatus;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.widgets.Shell;
 
 /**
  * A JAR builder can be used to add elements to a
@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Shell;
  *				<li>Write a file to the JAR to build</li>
  *			</ul>
  * </li>
- * 
+ *
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.4
  */
@@ -55,21 +55,21 @@ public interface IJarBuilder {
 
 	/**
 	 * Returns the unique id of this builder
-	 * 
+	 *
 	 * @return the unique id of this builder
 	 */
 	public String getId();
 
 	/**
 	 * Returns the manifest provider to build the manifest
-	 * 
+	 *
 	 * @return the manifest provider to build the manifest
 	 */
 	public IManifestProvider getManifestProvider();
 
 	/**
 	 * Called when building of the JAR starts
-	 * 
+	 *
 	 * @param jarPackage
 	 *        the package to build
 	 * @param shell
@@ -82,7 +82,7 @@ public interface IJarBuilder {
 
 	/**
 	 * Add the given resource to the archive at the given path
-	 * 
+	 *
 	 * @param resource
 	 *        the file to be written
 	 * @param destinationPath
@@ -94,7 +94,7 @@ public interface IJarBuilder {
 
 	/**
 	 * Add the given archive to the archive which is about to be build
-	 * 
+	 *
 	 * @param archive
 	 *        the archive to add
 	 * @param monitor
@@ -104,7 +104,7 @@ public interface IJarBuilder {
 
 	/**
 	 * Called when building of the JAR finished.
-	 * 
+	 *
 	 * @throws CoreException
 	 *        thrown when the JAR could not be closed
 	 */

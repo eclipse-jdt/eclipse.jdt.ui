@@ -21,15 +21,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -129,42 +129,42 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * Length of the selected text area.
 	 */
 	private int fSelectionLength;
-	
+
 	/**
 	 * Offset of the effective selection
 	 */
 	private int fEffectiveSelectionStart;
-	
+
 	/**
 	 * Length of the effective selection
 	 */
 	private int fEffectiveSelectionLength;
-	
+
 	/**
 	 * ICompilationUnit containing the selection.
 	 */
 	private ICompilationUnit fCu;
-	
+
 	/**
 	 * If the selection corresponds to a method parameter/return type, this field stores
-	 * a reference to its IMethodBinding, otherwise this field remains null. Used during 
+	 * a reference to its IMethodBinding, otherwise this field remains null. Used during
 	 * search for references in other CUs, and for determining the ConstraintVariable
 	 * that corresponds to the selection
 	 */
 	private IMethodBinding fMethodBinding;
-	
+
 	/**
 	 * If the selection corresponds to a method parameter, this field stores the parameter
 	 * index (0 = first parameter for static methods, 0 = this for nonstatic methods). The
 	 * value -1 is stored in the field if the selection corresponds to a method return type.
 	 */
 	private int fParamIndex;
-	
+
 	/**
 	 * The name of the selected parameter, or <code>null</code>.
 	 */
 	private String fParamName;
-	
+
 	/**
 	 * If the selection corresponds to a field, this field stores a reference to its IVariableBinding,
 	 * otherwise this field remains null. Used during search for references in other CUs.
@@ -188,7 +188,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * the selected ASTNode.
 	 */
 	private final Collection/*<IType>*/ fValidTypes;
-	
+
 	/**
 	 * The type constraints that are related to the selected ASTNode.
 	 */
@@ -203,18 +203,18 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * The name of the new type of the selected declaration.
 	 */
 	private String fSelectedTypeName;
-	
+
 	/**
 	 * The new type of the selected declaration.
 	 */
 	private ITypeBinding fSelectedType;
-	
+
 	/**
 	 * Organizes SearchResults by CompilationUnit
 	 */
 	private Map/*<ICompilationUnit,SearchResultGroup>*/ fCuToSearchResultGroup= new HashMap();
-	
-	
+
+
 	/**
 	 * ITypeBinding for java.lang.Object
 	 */
@@ -223,7 +223,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public ITypeBinding getObject(){
 		return fObject;
 	}
-	
+
 	/**
 	 * Control debugging output.
 	 */
@@ -254,12 +254,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 		fEffectiveSelectionStart= selectionStart;
 		fEffectiveSelectionLength= selectionLength;
-		
+
 		fCu= cu;
 
 		if (selectedType != null)
 			fSelectedTypeName= selectedType;
-		
+
 		fConstraintCache= new HashMap();
 		fValidTypes= new HashSet();
 	}
@@ -269,7 +269,7 @@ public class ChangeTypeRefactoring extends Refactoring {
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
     }
-	
+
 	// ------------------------------------------------------------------------------------------------- //
 
 	/*
@@ -277,7 +277,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fCu == null || !fCu.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_invalidSelection); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_invalidSelection);
 		return checkSelection(new SubProgressMonitor(pm, 1));
 	}
 
@@ -287,7 +287,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		fSelectionBinding= ExpressionVariable.resolveBinding(exp);
 		setOriginalType(exp.resolveTypeBinding());
 	}
-	
+
 	/**
 	 * Check if the right type of AST Node is selected. Create the TypeHierarchy needed to
 	 * bring up the wizard.
@@ -320,7 +320,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 							&& ! Bindings.equals(v2.getBinding(), fSelectionTypeBinding)) {
 						if (PRINT_STATS) fNrFiltered++;
 						return true;
-					}		
+					}
 					return super.filter(v1, v2, o);
 				}
 			};
@@ -332,48 +332,48 @@ public class ChangeTypeRefactoring extends Refactoring {
 				}
 				return RefactoringStatus.createFatalErrorStatus(selectionValid);
 			}
-			
+
 			if (fMethodBinding != null) {
 				IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
 				if (selectedMethod == null){
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_insideLocalTypesNotSupported); 
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_insideLocalTypesNotSupported);
 				}
 			}
 
 			pm.worked(1);
 
 			RefactoringStatus result= new RefactoringStatus();
-			
+
 			if (DEBUG){
 				System.out.println("fSelectionTypeBinding: " + fSelectionTypeBinding.getName()); //$NON-NLS-1$
 			}
-			
+
 			// produce error message if array or primitive type is selected
 			if (fSelectionTypeBinding.isArray()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported);
 			}
 			if (fSelectionTypeBinding.isPrimitive()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_primitivesNotSupported); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_primitivesNotSupported);
 			}
 			if (checkOverriddenBinaryMethods())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnBinary); 
-			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnBinary);
+
 			if (fSelectionTypeBinding.isLocal()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_localTypesNotSupported); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_localTypesNotSupported);
 			}
-			
+
 			if (fFieldBinding != null && fFieldBinding.getDeclaringClass().isLocal()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_insideLocalTypesNotSupported); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_insideLocalTypesNotSupported);
 			}
-			
+
 			if (fSelectionTypeBinding.isTypeVariable()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_typeParametersNotSupported); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_typeParametersNotSupported);
 			}
-			
+
 			if (fSelectionTypeBinding.isEnum()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_enumsNotSupported); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_enumsNotSupported);
 			}
-			
+
 			pm.worked(1);
 
 			if (fSelectedType != null){ // if invoked from unit test, compute valid types here
@@ -384,7 +384,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
-	
+
 	private boolean checkOverriddenBinaryMethods() {
 		if (fMethodBinding != null){
 			Set declaringSupertypes= getDeclaringSuperTypes(fMethodBinding);
@@ -397,10 +397,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 					return true;
 				}
 			}
-		}	
+		}
 		return false;
 	}
-	
+
 	// copied from FullConstraintCreator
 	private static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
 		  if (methodBinding.getDeclaringClass().equals(type))
@@ -418,8 +418,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 				result.add(type);
 		}
 		return result;
-	}	
-	
+	}
+
 	/**
 	 * Do the actual work of computing allowable types. Invoked by the wizard when
 	 * "compute" button is pressed
@@ -427,53 +427,53 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @return the valid types
 	 */
 	public Collection/*<IType>*/ computeValidTypes(IProgressMonitor pm) {
-		
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_checking_preconditions, 100); 
+
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_checking_preconditions, 100);
 
 		try {
 			fCv= findConstraintVariableForSelectedNode(new SubProgressMonitor(pm, 3));
 			if (DEBUG) System.out.println("selected CV: " + fCv +  //$NON-NLS-1$
 										  " (" + fCv.getClass().getName() +  //$NON-NLS-1$
 										  ")");  //$NON-NLS-1$
-			
+
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			fRelevantVars= findRelevantConstraintVars(fCv, new SubProgressMonitor(pm, 50));
-			
+
 			if (DEBUG)
 				printCollection("relevant vars:", fRelevantVars); //$NON-NLS-1$
-	
+
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			fRelevantConstraints= findRelevantConstraints(fRelevantVars, new SubProgressMonitor(pm, 30));
-		
+
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			fValidTypes.addAll(computeValidTypes(fSelectionTypeBinding, fRelevantVars, 
+			fValidTypes.addAll(computeValidTypes(fSelectionTypeBinding, fRelevantVars,
 												 fRelevantConstraints, new SubProgressMonitor(pm, 20)));
-	
+
 			if (DEBUG)
 				printCollection("valid types:", getValidTypeNames()); //$NON-NLS-1$
 		} catch (CoreException e) {
-			JavaPlugin.logErrorMessage("Error occurred during computation of valid types: " + e.toString()); //$NON-NLS-1$ 
+			JavaPlugin.logErrorMessage("Error occurred during computation of valid types: " + e.toString()); //$NON-NLS-1$
 			fValidTypes.clear(); // error occurred during computation of valid types
 		}
-		
+
 		pm.done();
-		
+
 		return fValidTypes;
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_checking_preconditions, 1); 
-			
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_checking_preconditions, 1);
+
 		RefactoringStatus result= Checks.validateModifiesFiles(
 			ResourceUtil.getFiles(fAffectedUnits), getValidationContext());
-		
+
 		pm.done();
 		return result;
 	}
@@ -521,9 +521,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/**
 	 * Apply all changes related to a single ICompilationUnit
 	 * @param icu the compilation unit
-	 * @param vars 
-	 * @param unitChange 
-	 * @throws CoreException 
+	 * @param vars
+	 * @param unitChange
+	 * @throws CoreException
 	 */
 	private void addAllChangesFor(ICompilationUnit icu, Set vars, CompilationUnitChange unitChange) throws CoreException {
 		CompilationUnit	unit= new RefactoringASTParser(AST.JLS3).parse(icu, false);
@@ -541,13 +541,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return new SourceRange(node.getStartPosition(),node.getLength());
 		}
 	}
-	
-	private void updateCu(CompilationUnit unit, Set vars, CompilationUnitChange unitChange, 
+
+	private void updateCu(CompilationUnit unit, Set vars, CompilationUnitChange unitChange,
 		ASTRewrite unitRewriter, String typeName) throws JavaModelException {
-		
+
         // use custom SourceRangeComputer to avoid losing comments
 		unitRewriter.setTargetSourceRangeComputer(new SourceRangeComputer());
-		
+
 		for (Iterator it=vars.iterator(); it.hasNext(); ){
 			ConstraintVariable cv = (ConstraintVariable)it.next();
 			ASTNode decl= findDeclaration(unit, cv);
@@ -559,44 +559,44 @@ public class ChangeTypeRefactoring extends Refactoring {
 			} else if (decl instanceof ParameterizedType){
 				updateType(unit, getType(decl), unitChange, unitRewriter, typeName);
 			}
-		}	
+		}
 	}
 
-	private void updateType(CompilationUnit cu, Type oldType, CompilationUnitChange unitChange, 
+	private void updateType(CompilationUnit cu, Type oldType, CompilationUnitChange unitChange,
 							ASTRewrite unitRewriter, String typeName) {
-		
+
 		String oldName= fSelectionTypeBinding.getName();
 		String[] keys= { BasicElementLabels.getJavaElementName(oldName), BasicElementLabels.getJavaElementName(typeName)};
 		String description= Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_typeChange, keys);
-		TextEditGroup gd= new TextEditGroup(description); 
+		TextEditGroup gd= new TextEditGroup(description);
 		AST	ast= cu.getAST();
-		
+
 		ASTNode nodeToReplace= oldType;
 		if (fSelectionTypeBinding.isParameterizedType() && !fSelectionTypeBinding.isRawType()){
 			if (oldType.isSimpleType()){
 				nodeToReplace= oldType.getParent();
 			}
-		}               
-			                   				                   
+		}
+
 	    //TODO handle types other than simple & parameterized (e.g., arrays)
 		Assert.isTrue(fSelectedType.isClass() || fSelectedType.isInterface());
-		
+
 		Type newType= null;
 		if (!fSelectedType.isParameterizedType()){
 			newType= ast.newSimpleType(ASTNodeFactory.newName(ast, typeName));
 		} else {
 			newType= createParameterizedType(ast, fSelectedType);
-		} 
-		
+		}
+
 		unitRewriter.replace(nodeToReplace, newType, gd);
 		unitChange.addTextEditGroup(gd);
-	}	
-	
+	}
+
 	/**
 	 * Creates the appropriate ParameterizedType node. Recursion is needed to
 	 * handle the nested case (e.g., Vector<Vector<String>>).
-	 * @param ast 
-	 * @param typeBinding 
+	 * @param ast
+	 * @param typeBinding
 	 * @return the created type
 	 */
 	private Type createParameterizedType(AST ast, ITypeBinding typeBinding){
@@ -617,15 +617,15 @@ public class ChangeTypeRefactoring extends Refactoring {
 			}
 		}
 	}
-	
-	
-	
+
+
+
 	private void groupChangesByCompilationUnit(Map relevantVarsByUnit) {
 		for (Iterator it= fRelevantVars.iterator(); it.hasNext();) {
 			ConstraintVariable cv= (ConstraintVariable) it.next();
 			if (!(cv instanceof ExpressionVariable) && !(cv instanceof ReturnTypeVariable)){
 				continue;
-			} 
+			}
 			ICompilationUnit icu = null;
 			if (cv instanceof ExpressionVariable) {
 				ExpressionVariable ev = (ExpressionVariable)cv;
@@ -648,7 +648,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			IField f= (IField) fFieldBinding.getJavaElement();
 			return ASTNodeSearchUtil.getFieldDeclarationNode(f, root);
 		}
-		
+
 		if (cv instanceof ExpressionVariable){
 			for (Iterator iter= fAllConstraints.iterator(); iter.hasNext();) {
 				ITypeConstraint constraint= (ITypeConstraint) iter.next();
@@ -671,7 +671,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		return null;
 	}
-	
+
 	private static Type getType(ASTNode node) {
 		switch(node.getNodeType()){
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
@@ -694,7 +694,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.ChangeTypeRefactoring_name; 
+		return RefactoringCoreMessages.ChangeTypeRefactoring_name;
 	}
 
 	// ------------------------------------------------------------------------------------------------- //
@@ -706,27 +706,27 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @param node the node
 	 * @return  A non-null String containing an error message
 	 * is returned if the ChangeTypeRefactoring refactoring cannot be applied to the selected ASTNode.
-	 * A return value of null indicates a valid selection.  
+	 * A return value of null indicates a valid selection.
 	 */
 	private String determineSelection(ASTNode node) {
 		if (node == null) {
-			return RefactoringCoreMessages.ChangeTypeRefactoring_invalidSelection; 
+			return RefactoringCoreMessages.ChangeTypeRefactoring_invalidSelection;
 		} else {
-			
+
 			if (DEBUG) System.out.println("node nodeType= " + node.getClass().getName()); //$NON-NLS-1$
 			if (DEBUG) System.out.println("parent nodeType= " + node.getParent().getClass().getName()); //$NON-NLS-1$
 			if (DEBUG) System.out.println("GrandParent nodeType= " + node.getParent().getParent().getClass().getName()); //$NON-NLS-1$
-			
+
 			ASTNode parent= node.getParent();
 			ASTNode grandParent= parent.getParent();
 			if (grandParent == null)
 				return nodeTypeNotSupported();
-			
+
 			// adjustment needed if part of a parameterized type is selected
 			if (grandParent.getNodeType() == ASTNode.PARAMETERIZED_TYPE){
 				node= grandParent;
 			}
-			
+
 			// adjustment needed if part of a qualified name is selected
 			ASTNode current= null;
 			if (node.getNodeType() == ASTNode.QUALIFIED_NAME){
@@ -737,7 +737,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				if (current.getNodeType() != ASTNode.SIMPLE_TYPE){
 					return nodeTypeNotSupported();
 				}
-				node= current.getParent(); 
+				node= current.getParent();
 			} else if (parent.getNodeType() == ASTNode.QUALIFIED_NAME){
 				current= parent;
 				while (current.getNodeType() == ASTNode.QUALIFIED_NAME){
@@ -746,9 +746,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 				if (current.getNodeType() != ASTNode.SIMPLE_TYPE){
 					return nodeTypeNotSupported();
 				}
-				node= current.getParent(); 
+				node= current.getParent();
 			}
-			
+
 			fObject= node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			switch (node.getNodeType()) {
 				case ASTNode.SIMPLE_NAME :
@@ -771,12 +771,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @return the message
 	 */
 	private static String nodeTypeNotSupported() {
-		return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType; 
+		return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType;
 	}
 
 	/**
 	  * The selection corresponds to a SingleVariableDeclaration
-	 * @param svd 
+	 * @param svd
 	 * @return the message
 	  */
 	private String singleVariableDeclarationSelected(SingleVariableDeclaration svd) {
@@ -809,7 +809,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * The selection corresponds to a VariableDeclarationStatement
 	 * @param vds the name
@@ -817,7 +817,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private String variableDeclarationStatementSelected(VariableDeclarationStatement vds) {
 		if (vds.fragments().size() != 1) {
-			return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
+			return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported;
 		} else {
 			VariableDeclarationFragment elem= (VariableDeclarationFragment) vds.fragments().iterator().next();
 			SimpleName name= elem.getName();
@@ -833,7 +833,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private String fieldDeclarationSelected(FieldDeclaration fieldDeclaration) {
 		if (fieldDeclaration.fragments().size() != 1) {
-			return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
+			return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported;
 		} else {
 			VariableDeclarationFragment elem= (VariableDeclarationFragment) fieldDeclaration.fragments().iterator().next();
 			fFieldBinding= elem.resolveBinding();
@@ -851,29 +851,29 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private String simpleNameSelected(SimpleName simpleName) {
 		ASTNode parent= simpleName.getParent();
 		ASTNode grandParent= parent.getParent();
-			
+
 		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 			VariableDeclarationStatement vds= (VariableDeclarationStatement)parent;
 			if (vds.fragments().size() > 1){
-				return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
-			}	
+				return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported;
+			}
 		} else if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			if (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 				VariableDeclarationStatement vds= (VariableDeclarationStatement)grandParent;
 				if (vds.fragments().size() > 1) {
-					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
-				}	
+					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported;
+				}
 				setSelectionRanges(simpleName);
 			} else if (grandParent.getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) {
 				VariableDeclarationExpression vde= (VariableDeclarationExpression)grandParent;
 				if (vde.fragments().size() > 1) {
-					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
-				}	
+					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported;
+				}
 				setSelectionRanges(simpleName);
 			} else if (grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
 				FieldDeclaration fd= (FieldDeclaration)grandParent;
 				if (fd.fragments().size() > 1){
-					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported; 
+					return RefactoringCoreMessages.ChangeTypeRefactoring_multiDeclarationsNotSupported;
 				}
 				VariableDeclarationFragment fragment = (VariableDeclarationFragment)parent;
 				fFieldBinding= fragment.resolveBinding();
@@ -909,11 +909,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 			fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
 			setOriginalType(fMethodBinding.getReturnType());
 			fParamIndex= -1;
-		} else if (parent.getNodeType() == ASTNode.METHOD_DECLARATION && 
+		} else if (parent.getNodeType() == ASTNode.METHOD_DECLARATION &&
 				grandParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
 			MethodDeclaration methodDeclaration= (MethodDeclaration)parent;
 			if (methodDeclaration.getName().equals(simpleName) || methodDeclaration.thrownExceptions().contains(simpleName)){
-				return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType; 
+				return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType;
 			}
 			fMethodBinding= ((MethodDeclaration)parent).resolveBinding();
 			fParamIndex= -1;
@@ -925,16 +925,16 @@ public class ChangeTypeRefactoring extends Refactoring {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment)decl;
 			SimpleName name = fragment.getName();
 			setSelectionRanges(name);
-		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
+		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE &&
 				grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
 			return fieldDeclarationSelected((FieldDeclaration) grandParent);
-		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
+		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE &&
 				grandParent.getNodeType() == ASTNode.ARRAY_TYPE){
-			return RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported; 
+			return RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported;
 		} else if (parent.getNodeType() == ASTNode.QUALIFIED_NAME){
 			setSelectionRanges(simpleName);
 		} else {
-			return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType; 
+			return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType;
 		}
 		return null;
 	}
@@ -945,24 +945,24 @@ public class ChangeTypeRefactoring extends Refactoring {
     //  (2) finding all ConstraintVariables "related" to (1) via overriding, method calls, field access
     //  (3) find all ITypeConstraints of interest that mention ConstraintVariables in (2)
     //  (4) determining all ITypes for which the ITypeConstraints in (3) are satisfied
- 
+
 	/**
 	 * Find a ConstraintVariable that corresponds to the selected ASTNode.
-	 * @param pm 
+	 * @param pm
 	 * @return the ConstraintVariable
 	 */
 	private ConstraintVariable findConstraintVariableForSelectedNode(IProgressMonitor pm) {
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 100);  
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 100);
 		ICompilationUnit[] cus= { fCu }; // only search in CU containing selection
-		
+
 		if (DEBUG){
 			System.out.println("Effective selection: " + fEffectiveSelectionStart + "/" + fEffectiveSelectionLength); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 		Collection/*<ITypeConstraint>*/ allConstraints= getConstraints(cus, new SubProgressMonitor(pm, 50));
-		
+
 		IProgressMonitor subMonitor= new SubProgressMonitor(pm, 50);
-		subMonitor.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allConstraints.size());  
+		subMonitor.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allConstraints.size());
 		for (Iterator it= allConstraints.iterator(); it.hasNext(); ) {
 			subMonitor.worked(1);
 			ITypeConstraint tc= (ITypeConstraint)it.next();
@@ -976,7 +976,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		subMonitor.done();
 		pm.done();
-		Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_noMatchingConstraintVariable); 
+		Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_noMatchingConstraintVariable);
 		return null;
 	}
 
@@ -1001,22 +1001,22 @@ public class ChangeTypeRefactoring extends Refactoring {
 				fParamIndex == -1){
 				return true;
 			}
-		}		
+		}
 		return false;
 	}
-		
+
 	/**
 	 * Determine the set of constraint variables related to the selected
 	 * expression. In addition to the expression itself, this consists of
 	 * any expression that is defines-equal to it, and any expression equal
-	 * to it. 
-	 * @param cv 
-	 * @param pm 
+	 * to it.
+	 * @param cv
+	 * @param pm
 	 * @return the constraint variables
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	private Collection/*<ConstraintVariable>*/ findRelevantConstraintVars(ConstraintVariable cv, IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 150); 
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 150);
 		Collection/*<ConstraintVariable>*/ result= new HashSet();
 		result.add(cv);
 		ICompilationUnit[] cus= collectAffectedUnits(new SubProgressMonitor(pm, 50));
@@ -1024,9 +1024,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 		List/*<ConstraintVariable>*/ workList= new ArrayList(result);
 		while(! workList.isEmpty()){
-			
+
 			pm.worked(10);
-			
+
 			ConstraintVariable first= (ConstraintVariable)workList.remove(0);
 			for (Iterator iter= allConstraints.iterator(); iter.hasNext();) {
 				pm.worked(1);
@@ -1043,13 +1043,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 					if (! result.contains(match)){
 						workList.add(match);
 						result.add(match);
-					}	
-				}	
+					}
+				}
 			}
 		}
-		
+
 		pm.done();
-		
+
 		return result;
 	}
 	private static ConstraintVariable match(ConstraintVariable matchee, ConstraintVariable left, ConstraintVariable right) {
@@ -1062,20 +1062,20 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 	/**
 	 * Select the type constraints that involve the selected ASTNode.
-	 * @param relevantConstraintVars 
-	 * @param pm 
+	 * @param relevantConstraintVars
+	 * @param pm
 	 * @return the result
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
-	private Collection/*<ITypeConstraint>*/ findRelevantConstraints(Collection/*<ConstraintVariable>*/ relevantConstraintVars, 
+	private Collection/*<ITypeConstraint>*/ findRelevantConstraints(Collection/*<ConstraintVariable>*/ relevantConstraintVars,
 																	IProgressMonitor pm) throws CoreException {
 
 		ICompilationUnit[] cus= collectAffectedUnits(new SubProgressMonitor(pm, 100));
-		
+
 		fAllConstraints= getConstraints(cus, new SubProgressMonitor(pm, 900));
-		
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 1000 + fAllConstraints.size()); 
-		
+
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 1000 + fAllConstraints.size());
+
 
 		if (DEBUG) printCollection("type constraints: ", fAllConstraints); //$NON-NLS-1$
 		Collection/*<ITypeConstraint>*/ result= new ArrayList();
@@ -1085,7 +1085,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				SimpleTypeConstraint stc= (SimpleTypeConstraint) tc;
 				if (stc.isDefinesConstraint() || stc.isEqualsConstraint())
 					continue;
-				if (stc.getLeft().equals(stc.getRight())) 
+				if (stc.getLeft().equals(stc.getRight()))
 					continue;
 				if (isNull(stc.getLeft()))
 					continue;
@@ -1108,7 +1108,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		pm.done();
 		return result;
 	}
-	
+
 	/**
 	 * Finds the declaration of the ASTNode in a given AST at a specified offset and with a specified length
 	 * @param root the AST
@@ -1121,8 +1121,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		Assert.isTrue(node instanceof SimpleName, String.valueOf(node.getNodeType()));
 		Assert.isTrue(root instanceof CompilationUnit, String.valueOf(root.getNodeType()));
 		return ((CompilationUnit)root).findDeclaringNode(((SimpleName)node).resolveBinding());
-	}	
-	
+	}
+
 	// For debugging
 	static String print(Collection/*<ITypeBinding>*/ types){
 		if (types.isEmpty())
@@ -1140,59 +1140,59 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return result;
 	}
 
-	
+
 	/**
 	 * Determines the set of types for which a set of type constraints is satisfied.
-	 * @param originalType 
-	 * @param relevantVars 
-	 * @param relevantConstraints 
-	 * @param pm 
+	 * @param originalType
+	 * @param relevantVars
+	 * @param relevantConstraints
+	 * @param pm
 	 * @return the valid types
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
-	private Collection/*<ITypeBinding>*/ computeValidTypes(ITypeBinding originalType, 
+	private Collection/*<ITypeBinding>*/ computeValidTypes(ITypeBinding originalType,
 													Collection/*<ConstraintVariable>*/ relevantVars,
 													Collection/*<ITypeConstraint>*/ relevantConstraints,
 													IProgressMonitor pm) throws JavaModelException {
-		
+
 		Collection/*<ITypeBinding>*/ result= new HashSet();
 
 		Collection/*<ITypeBinding>*/ allTypes = new HashSet/*<IType>*/();
-		allTypes.addAll(getAllSuperTypes(originalType)); 
-		
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allTypes.size()); 
+		allTypes.addAll(getAllSuperTypes(originalType));
+
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allTypes.size());
 
 		for (Iterator/*<ITypeBinding>*/ it= allTypes.iterator(); it.hasNext(); ) {
 			ITypeBinding type= (ITypeBinding)it.next();
 			if (isValid(type, relevantVars, relevantConstraints, new SubProgressMonitor(pm, 1))) {
 				result.add(type);
 			}
-		} 		
+		}
 		// "changing" to the original type is a no-op
 		result.remove(originalType);
 
 		// TODO: remove all types that are not visible --- need to check visibility in the CUs for
 		//       all relevant constraint variables
-		
+
 		pm.done();
-		
+
 		return result;
 	}
 
 	/**
 	 * Determines if a given type satisfies a set of type constraints.
-	 * @param type 
-	 * @param relevantVars 
-	 * @param constraints 
-	 * @param pm 
+	 * @param type
+	 * @param relevantVars
+	 * @param constraints
+	 * @param pm
 	 * @return <code>true</code> if a the type satisfies a set of type constraints.
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	private boolean isValid(ITypeBinding type,
-						    Collection/*<ConstraintVariable>*/ relevantVars, 
+						    Collection/*<ConstraintVariable>*/ relevantVars,
 						    Collection/*<ITypeConstraint>*/ constraints,
 							IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, constraints.size()); 
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, constraints.size());
 		for (Iterator it= constraints.iterator(); it.hasNext(); ) {
 			ITypeConstraint tc= (ITypeConstraint)it.next();
 			if (tc instanceof SimpleTypeConstraint) {
@@ -1201,14 +1201,14 @@ public class ChangeTypeRefactoring extends Refactoring {
 			} else if (tc instanceof CompositeOrTypeConstraint) {
 				if (!(isValidOrConstraint(type,  relevantVars, (CompositeOrTypeConstraint) tc)))
 					return false;
-			} 
+			}
 			pm.worked(1);
 		}
 		pm.done();
 		return true;
 	}
-	
-	private boolean isValidSimpleConstraint(ITypeBinding type, 
+
+	private boolean isValidSimpleConstraint(ITypeBinding type,
 											Collection/*<ConstraintVariable>*/ relevantVars,
 											SimpleTypeConstraint stc){
 		if (relevantVars.contains(stc.getLeft())) { // upper bound
@@ -1218,8 +1218,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		return true;
 	}
-	
-	private boolean isValidOrConstraint(ITypeBinding type, 
+
+	private boolean isValidOrConstraint(ITypeBinding type,
 										Collection/*<ConstraintVariable>*/ relevantVars,
 										CompositeOrTypeConstraint cotc){
 		ITypeConstraint[] components= cotc.getConstraints();
@@ -1233,24 +1233,24 @@ public class ChangeTypeRefactoring extends Refactoring {
 					if (isSubTypeOf(findType(sc.getLeft()), type))
 						return true;
 				}
-			} 
+			}
 		}
 		return false;
 	}
-	
-	
+
+
 	private ITypeBinding findType(ConstraintVariable cv) {
 		return cv.getBinding();
 	}
 
 	/**
 	 * Gather constraints associated with a set of compilation units.
-	 * @param referringCus 
-	 * @param pm 
+	 * @param referringCus
+	 * @param pm
 	 * @return the constraints
 	 */
 	private Collection/*<ITypeConstraint>*/ getConstraints(ICompilationUnit[] referringCus, IProgressMonitor pm) {
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, referringCus.length); 
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, referringCus.length);
 		Collection/*<ITypeConstraint>*/ result= new ArrayList();
 		for (int i= 0; i < referringCus.length; i++) {
 			result.addAll(getConstraints(referringCus[i]));
@@ -1265,10 +1265,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private List/*<ITypeConstraint>*/ getConstraints(ICompilationUnit unit) {
 		if (fConstraintCache.containsKey(unit))
 			return (List) fConstraintCache.get(unit);
-		
+
 		CompilationUnit cu= ASTCreator.createAST(unit, null);
-		
-		// only generate type constraints for relevant MethodDeclaration subtrees 
+
+		// only generate type constraints for relevant MethodDeclaration subtrees
 		if (fMethodBinding != null && fCuToSearchResultGroup.containsKey(unit)){
 			SearchResultGroup group= (SearchResultGroup) fCuToSearchResultGroup.get(unit);
 			ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cu);
@@ -1291,15 +1291,15 @@ public class ChangeTypeRefactoring extends Refactoring {
 		fConstraintCache.put(unit, constraints);
 		return constraints;
 	}
-	
+
 	/**
 	 * update a CompilationUnit's imports after changing the type of declarations
 	 * @param astRoot the AST
 	 * @param rootEdit the resulting edit
 	 * @return the type name to use
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
-	private String updateImports(CompilationUnit astRoot, MultiTextEdit rootEdit) throws CoreException{	
+	private String updateImports(CompilationUnit astRoot, MultiTextEdit rootEdit) throws CoreException{
 		ImportRewrite rewrite= StubUtility.createImportRewrite(astRoot, true);
 		String typeName= rewrite.addImport(fSelectedType.getQualifiedName());
 		rootEdit.addChild(rewrite.rewriteImports(null));
@@ -1316,16 +1316,16 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public Collection/*<IType>*/ getValidTypes() {
 		return fValidTypes;
 	}
-	
+
 	public ITypeBinding getOriginalType(){
 		return fSelectionTypeBinding;
 	}
-	
+
 	private void setOriginalType(ITypeBinding originalType){
 		fSelectionTypeBinding= originalType;
 		fSelectedType= findSuperTypeByName(originalType, fSelectedTypeName);
 	}
-	
+
 	public String getTarget() {
 		String typeName= fSelectionTypeBinding == null ? "" : fSelectionTypeBinding.getName() + " ";  //$NON-NLS-1$//$NON-NLS-2$
 		if (fFieldBinding != null) {
@@ -1342,7 +1342,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return typeName;
 		}
 	}
-	
+
 	/**
 	 * Returns the Collection<String> of names of types that can be given to the selected declaration.
 	 * (used in tests only)
@@ -1361,7 +1361,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/**
 	 * Find the ASTNode for the given source text selection, if it is a type
 	 * declaration, or null otherwise.
-	 * @param unit The compilation unit in which the selection was made 
+	 * @param unit The compilation unit in which the selection was made
 	 * @param offset
 	 * @param length
 	 * @return ASTNode
@@ -1378,15 +1378,15 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * method calls, field accesses.
 	 * @param pm the monitor
 	 * @return the affected units
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	private ICompilationUnit[] collectAffectedUnits(IProgressMonitor pm) throws CoreException {
 		// BUG: currently, no type constraints are generated for methods that are related
 		// but that do not override each other. As a result, we may miss certain relevant
 		// variables
-		
-		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 100); 
-		
+
+		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 100);
+
 		if (fAffectedUnits != null) {
 			if (DEBUG) printCollection("affected units: ", Arrays.asList(fAffectedUnits)); //$NON-NLS-1$
 			pm.worked(100);
@@ -1394,17 +1394,17 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		if (fMethodBinding != null) {
 			if (fMethodBinding != null) {
-				
-				
+
+
 				IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
 				if (selectedMethod == null) {
 					// can't happen since we checked it up front in check initial conditions
-					Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method); 
+					Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method);
 				}
-				
+
 				// the following code fragment appears to be the source of a memory leak, when
 				// GT is repeatedly applied
-						
+
 				IMethod root= selectedMethod;
 				if (! root.getDeclaringType().isInterface() && MethodChecks.isVirtual(root)) {
 					final SubProgressMonitor subMonitor= new SubProgressMonitor(pm, 5);
@@ -1414,7 +1414,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				}
 
 				// end code fragment
-				
+
 				IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(
 						root, new SubProgressMonitor(pm, 15), null);
 				SearchPattern pattern= RefactoringSearchEngine.createOrPattern(
@@ -1424,7 +1424,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				// might start from the wrong project.
 				IJavaSearchScope scope= RefactoringScopeFactory.create(selectedMethod);
 				CollectingSearchRequestor csr= new CollectingSearchRequestor();
-				
+
 				SearchResultGroup[] groups= RefactoringSearchEngine.search(
 					pattern,
 					null,
@@ -1432,14 +1432,14 @@ public class ChangeTypeRefactoring extends Refactoring {
 					csr,
 					new SubProgressMonitor(pm, 80),
 					new RefactoringStatus()); //TODO: deal with errors from non-CU matches
-				
+
 				fAffectedUnits= getCus(groups);
 			}
 		} else if (fFieldBinding != null) {
 			IField iField= (IField) fFieldBinding.getJavaElement();
 			if (iField == null) {
 				// can't happen since we checked it up front in check initial conditions
-				Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_filed); 
+				Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_filed);
 			}
 			SearchPattern pattern= SearchPattern.createPattern(
 					iField, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
@@ -1460,20 +1460,20 @@ public class ChangeTypeRefactoring extends Refactoring {
 				System.out.println("  affected CU: " + fAffectedUnits[i].getElementName()); //$NON-NLS-1$
 			}
 		}
-		pm.done();	
+		pm.done();
 		return fAffectedUnits;
 	}
 
 	public void setSelectedType(ITypeBinding type){
 		fSelectedType= type;
 	}
-	
+
 	//	-------------------------------------------------------------------------------------------- //
 	// TODO The following utility methods should probably be moved to another class
 
 	/**
 	 * Determines if a constraint variable corresponds to the constant "null".
-	 * @param cv 
+	 * @param cv
 	 * @return <code>true</code> if the constraint variable corresponds to the constant "null".
 	 */
 	private static boolean isNull(ConstraintVariable cv) {
@@ -1493,7 +1493,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 	/**
 	 * Returns the compilation units that contain the search results.
-	 * @param groups 
+	 * @param groups
 	 * @return the CUs
 	 */
 	private ICompilationUnit[] getCus(SearchResultGroup[] groups) {
@@ -1508,11 +1508,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
-    
+
     /**
 	 * This always includes the type itself. It will include type
 	 * Object for any type other than Object
-     * @param type 
+     * @param type
      * @return the super types
 	 */
 	public Set/*<ITypeBinding>*/ getAllSuperTypes(ITypeBinding type){
@@ -1520,7 +1520,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		result.add(type);
 		if (type.getSuperclass() != null){
 			result.addAll(getAllSuperTypes(type.getSuperclass()));
-		}	
+		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i=0; i < interfaces.length; i++){
 			result.addAll(getAllSuperTypes(interfaces[i]));
@@ -1528,9 +1528,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if ((type != fObject) && !contains(result, fObject)){
 			result.add(fObject);
 		}
-		return result;		
+		return result;
 	}
-	
+
     private ITypeBinding findSuperTypeByName(ITypeBinding type, String superTypeName){
     	Set/*<ITypeBinding>*/ superTypes= getAllSuperTypes(type);
     	for (Iterator/*<ITypeBinding>*/ it= superTypes.iterator(); it.hasNext(); ){
@@ -1541,17 +1541,17 @@ public class ChangeTypeRefactoring extends Refactoring {
     	}
     	return null;
     }
-	
+
 	public boolean isSubTypeOf(ITypeBinding type1, ITypeBinding type2){
-		
+
 		// to ensure that, e.g., Comparable<String> is considered a subtype of raw Comparable
 		if (type1.isParameterizedType() && type1.getTypeDeclaration().isEqualTo(type2.getTypeDeclaration())){
-			return true; 
+			return true;
 		}
 		Set superTypes= getAllSuperTypes(type1);
 		return contains(superTypes, type2);
 	}
-	
+
 	private static boolean contains(Collection/*<ITypeBinding>*/ c, ITypeBinding binding){
 		for (Iterator/*<ITypeBinding>*/ it=c.iterator(); it.hasNext(); ){
 			ITypeBinding b = (ITypeBinding)it.next();

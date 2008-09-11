@@ -11,9 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -26,11 +26,11 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 
+import org.eclipse.jdt.ui.wizards.NewPackageWizardPage;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard;
-
-import org.eclipse.jdt.ui.wizards.NewPackageWizardPage;
 
 public class CreateTargetQueries implements ICreateTargetQueries {
 
@@ -41,7 +41,7 @@ public class CreateTargetQueries implements ICreateTargetQueries {
 		fWizard= wizard;
 		fShell= null;
 	}
-	
+
 	public CreateTargetQueries(Shell shell) {
 		fShell = shell;
 		fWizard= null;
@@ -56,27 +56,27 @@ public class CreateTargetQueries implements ICreateTargetQueries {
 		else
 			return JavaPlugin.getActiveWorkbenchShell();
 	}
-	
+
 	public ICreateTargetQuery createNewPackageQuery() {
 		return new ICreateTargetQuery() {
 			public Object getCreatedTarget(Object selection) {
 				IWorkbenchWizard packageCreationWizard= new NewPackageCreationWizard();
-				
+
 				IWizardPage[] pages= openNewElementWizard(packageCreationWizard, getShell(), selection);
-				
+
 				NewPackageWizardPage page= (NewPackageWizardPage) pages[0];
 				return page.getNewPackageFragment();
 			}
-			
+
 			public String getNewButtonLabel() {
 				return ReorgMessages.ReorgMoveWizard_newPackage;
 			}
 		};
 	}
-	
+
 	private IWizardPage[] openNewElementWizard(IWorkbenchWizard wizard, Shell shell, Object selection) {
 		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(selection));
-		
+
 		WizardDialog dialog= new WizardDialog(shell, wizard);
 		PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
 		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));

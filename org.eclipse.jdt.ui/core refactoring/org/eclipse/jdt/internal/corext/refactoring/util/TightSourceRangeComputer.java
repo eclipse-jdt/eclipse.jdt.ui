@@ -21,10 +21,10 @@ import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
 public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 	private HashSet/*<ASTNode>*/ fTightSourceRangeNodes= new HashSet();
-	
+
 	public void addTightSourceNode(ASTNode reference) {
 		fTightSourceRangeNodes.add(reference);
-		
+
 	    List properties= reference.structuralPropertiesForType();
 	    for (Iterator iterator= properties.iterator(); iterator.hasNext();) {
 	        StructuralPropertyDescriptor descriptor= (StructuralPropertyDescriptor)iterator.next();
@@ -39,7 +39,7 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 	                ASTNode child= (ASTNode)iterator2.next();
 	                if (isExtending(child, reference)) {
 		        		addTightSourceNode(child);
-		        	}	                
+		        	}
                 }
 	        }
         }
@@ -52,15 +52,15 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 			return super.computeSourceRange(node); // see bug 85850
 		}
 	}
-	
+
 	private boolean isExtending(ASTNode child, ASTNode parent) {
 	    SourceRange extendedRange= super.computeSourceRange(child);
-	    
+
 	    int parentStart= parent.getStartPosition();
 		int extendedStart= extendedRange.getStartPosition();
 		if (parentStart > extendedStart)
 			return true;
-		
+
 		int parentEnd= parentStart + parent.getLength();
 		int extendedEnd= extendedStart + extendedRange.getLength();
 		if (parentEnd < extendedEnd)

@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.tagging;
 /**
  * Interface for refactorings which are able to create
  * appropriate delegates for the refactored elements.
- * 
+ *
  * @since 3.2
  *
  */
@@ -39,7 +39,7 @@ public interface IDelegateUpdating {
 	/**
 	 * Returns the title of the preference to update delegates in the user
 	 * interface.
-	 * 
+	 *
 	 * @param plural
 	 *            <code>true</code> if several delegates are created,
 	 *            <code>false</code> otherwise
@@ -55,7 +55,7 @@ public interface IDelegateUpdating {
 	 * returns <code>false</code>.
 	 */
 	public boolean getDeprecateDelegates();
-	
+
 	/**
 	 * If <code>canEnableDelegateUpdating</code> returns
 	 * <code>true</code>, then this method may be called to set whether
@@ -64,7 +64,7 @@ public interface IDelegateUpdating {
 	 * returns <code>false</code>.
 	 */
 	public void setDelegateUpdating(boolean updating);
-	
+
 	/**
 	 * If <code>canEnableDelegateUpdating</code> returns
 	 * <code>true</code>, then this method may be called to set whether

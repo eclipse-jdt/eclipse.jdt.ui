@@ -29,9 +29,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 
-/** 
+/**
  * The JarEntryEditorInputFactory is used to save and recreate {@link JarEntryEditorInput}s.
- * 
+ *
  * @see IMemento
  * @see IElementFactory
  */
@@ -42,7 +42,7 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 	private static final String KEY_PATH= "path"; //$NON-NLS-1$
 
 	/**
-	 * Public constructor for extension point.  
+	 * Public constructor for extension point.
 	 */
 	public JarEntryEditorInputFactory() {
 	}
@@ -51,7 +51,7 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 	 * @see org.eclipse.ui.IElementFactory#createElement(org.eclipse.ui.IMemento)
 	 */
 	public IAdaptable createElement(IMemento memento) {
-	
+
 		String rootIdentifier= memento.getString(KEY_ELEMENT);
 		String pathIdentifier= memento.getString(KEY_PATH);
 		if (rootIdentifier != null && pathIdentifier != null) {

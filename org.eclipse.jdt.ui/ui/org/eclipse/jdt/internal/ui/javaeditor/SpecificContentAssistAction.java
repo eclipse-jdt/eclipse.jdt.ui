@@ -24,6 +24,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -35,7 +36,7 @@ import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
 /**
  * Action to run content assist on a specific proposal category.
- * 
+ *
  * @since 3.2
  */
 final class SpecificContentAssistAction extends Action implements IUpdate {
@@ -51,10 +52,10 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 	 * The editor.
 	 */
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Creates a new action for a certain proposal category.
-	 * 
+	 *
 	 * @param category
 	 */
 	public SpecificContentAssistAction(CompletionProposalCategory category) {
@@ -71,9 +72,9 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 		ITextEditor editor= getActiveEditor();
 		if (editor == null)
 			return;
-		
+
 		fExecutor.invokeContentAssist(editor, fCategory.getId());
-		
+
 		return;
 	}
 
@@ -83,7 +84,7 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 
 	/**
 	 * Sets the active editor part.
-	 * 
+	 *
 	 * @param part the editor, possibly <code>null</code>
 	 */
 	public void setActiveEditor(IEditorPart part) {
@@ -95,7 +96,7 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 		fEditor= editor;
 		setEnabled(computeEnablement(fEditor));
 	}
-	
+
 	private boolean computeEnablement(ITextEditor editor) {
 		if (editor == null)
 			return false;
@@ -103,7 +104,7 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 		boolean hasContentAssist= target != null && target.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
 		if (!hasContentAssist)
 			return false;
-		
+
 		ISelection selection= editor.getSelectionProvider().getSelection();
 		return isValidSelection(selection);
 	}
@@ -111,7 +112,7 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
     /**
 	 * Computes the partition type at the selection start and checks whether the proposal category
 	 * has any computers for this partition.
-	 * 
+	 *
 	 * @param selection the selection
 	 * @return <code>true</code> if there are any computers for the selection
 	 */
@@ -119,27 +120,27 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
     	if (!(selection instanceof ITextSelection))
     		return false;
     	int offset= ((ITextSelection) selection).getOffset();
-    	
+
     	IDocument document= getDocument();
     	if (document == null)
     		return false;
-    	
+
     	String contentType;
     	try {
 	        contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
         } catch (BadLocationException x) {
         	return false;
         }
-        
+
         return fCategory.hasComputers(contentType);
     }
-    
+
 	private IDocument getDocument() {
 		Assert.isTrue(fEditor != null);
 	    IDocumentProvider provider= fEditor.getDocumentProvider();
 	    if (provider == null)
 	    	return null;
-	    
+
 		IDocument document= provider.getDocument(fEditor.getEditorInput());
 	    return document;
     }

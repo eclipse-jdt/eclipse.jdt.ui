@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 /**
  * Contributes the following actions to the menu on behalf of the JDT content
  * extension.
- * 
+ *
  * <ul>
  * <li>{@link CommonLayoutActionGroup}. Contributes the "Package Presentation>" submenu in the View's drop down menu (not right-click).</li>
  * </ul>
@@ -40,7 +40,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 	private static final int FLAT_LAYOUT= 0x2;
 
-	private static final String TAG_LAYOUT= "org.eclipse.jdt.internal.ui.navigator.layout"; //$NON-NLS-1$ 
+	private static final String TAG_LAYOUT= "org.eclipse.jdt.internal.ui.navigator.layout"; //$NON-NLS-1$
 
 	private IExtensionStateModel fStateModel;
 
@@ -69,7 +69,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 						else
 							if (wasDisabled(isCurrentlyActive))
 								fLayoutActionGroup.unfillActionBars(fActionBars);
-						// else no change 
+						// else no change
 					}
 					fEnabled= isCurrentlyActive;
 				}

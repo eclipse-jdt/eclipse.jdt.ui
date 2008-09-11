@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 /**
  * Refactoring contribution for the move refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class MoveRefactoringContribution extends JavaRefactoringContribution {
@@ -45,7 +45,7 @@ public final class MoveRefactoringContribution extends JavaRefactoringContributi
 	public RefactoringDescriptor createDescriptor() {
 		return new MoveDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new MoveDescriptor(project, description, comment, arguments, flags);
 	}

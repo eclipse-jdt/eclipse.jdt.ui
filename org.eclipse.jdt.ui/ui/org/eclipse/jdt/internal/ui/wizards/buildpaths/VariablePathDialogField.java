@@ -11,9 +11,6 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -24,6 +21,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -50,8 +50,8 @@ public class VariablePathDialogField extends StringButtonDialogField {
 
 		public ChooseVariableDialog(Shell parent, String variableSelection) {
 			super(parent);
-			
-			setTitle(NewWizardMessages.VariablePathDialogField_variabledialog_title); 
+
+			setTitle(NewWizardMessages.VariablePathDialogField_variabledialog_title);
 			fVariableBlock= new VariableBlock(false, variableSelection);
 		}
 
@@ -62,11 +62,11 @@ public class VariablePathDialogField extends StringButtonDialogField {
 			GridData data= new GridData(GridData.FILL_BOTH);
 			data.widthHint= convertWidthInCharsToPixels(80);
 			data.heightHint= convertHeightInCharsToPixels(15);
-			control.setLayoutData(data);			
-			
+			control.setLayoutData(data);
+
 			fVariableBlock.addDoubleClickListener(this);
 			fVariableBlock.addSelectionChangedListener(this);
-			applyDialogFont(composite);		
+			applyDialogFont(composite);
 			return composite;
 		}
 
@@ -96,7 +96,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 				okPressed();
 			}
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 		 */

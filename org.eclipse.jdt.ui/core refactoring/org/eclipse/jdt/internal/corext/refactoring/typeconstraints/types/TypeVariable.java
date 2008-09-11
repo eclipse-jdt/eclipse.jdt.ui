@@ -18,9 +18,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public final class TypeVariable extends AbstractTypeVariable {
-	
+
 	private ITypeParameter fJavaTypeParameter;
-	
+
 	protected TypeVariable(TypeEnvironment environment) {
 		super(environment);
 	}
@@ -31,30 +31,30 @@ public final class TypeVariable extends AbstractTypeVariable {
 		fJavaTypeParameter= javaTypeParameter;
 		super.initialize(binding);
 	}
-	
+
 	public int getKind() {
 		return TYPE_VARIABLE;
 	}
-	
+
 	public boolean doEquals(TType type) {
 		return fJavaTypeParameter.equals(((TypeVariable)type).fJavaTypeParameter);
 	}
-	
+
 	public int hashCode() {
 		return fJavaTypeParameter.hashCode();
 	}
-	
+
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
-			case NULL_TYPE: 
+			case NULL_TYPE:
 			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE:
-				
+
 			case ARRAY_TYPE: return false;
-			
+
 			case GENERIC_TYPE: return false;
-			
-			case STANDARD_TYPE: 
+
+			case STANDARD_TYPE:
 			case PARAMETERIZED_TYPE:
 			case RAW_TYPE:
 				return canAssignOneBoundTo(lhs);
@@ -63,15 +63,15 @@ public final class TypeVariable extends AbstractTypeVariable {
 			case EXTENDS_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE:
 				return ((WildcardType)lhs).checkAssignmentBound(this);
-				
-			case TYPE_VARIABLE: 
+
+			case TYPE_VARIABLE:
 				return doExtends((TypeVariable)lhs);
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
 		}
 		return false;
 	}
-	
+
 	private boolean doExtends(TypeVariable other) {
 		for (int i= 0; i < fBounds.length; i++) {
 			TType bound= fBounds[i];
@@ -80,15 +80,15 @@ public final class TypeVariable extends AbstractTypeVariable {
 		}
 		return false;
 	}
-	
+
 	public String getName() {
 		return fJavaTypeParameter.getElementName();
 	}
-	
+
 	public String getPrettySignature() {
 		if (fBounds.length == 1 && fBounds[0].isJavaLangObject())
 			return fJavaTypeParameter.getElementName(); // don't print the trivial bound
-		
+
 		StringBuffer result= new StringBuffer(fJavaTypeParameter.getElementName());
 		if (fBounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$
@@ -100,7 +100,7 @@ public final class TypeVariable extends AbstractTypeVariable {
 		}
 		return result.toString();
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		return fJavaTypeParameter.getElementName();
 	}

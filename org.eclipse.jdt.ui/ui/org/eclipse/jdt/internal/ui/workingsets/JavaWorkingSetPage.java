@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rodrigo Kumpera <kumpera AT gmail.com> - bug 95232
- * 
+ *
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
@@ -56,14 +56,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * Workspace elements can be added/removed from a tree into
  * a list.
  * </p>
- * 
+ *
  * @since 2.0
  */
 public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 
 	final private static String PAGE_TITLE= WorkingSetMessages.JavaWorkingSetPage_title;
 	final private static String PAGE_ID= "javaWorkingSetPage"; //$NON-NLS-1$
-	
+
 	private IStructuredSelection fInitialSelection;
 
 	/**
@@ -79,21 +79,21 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				fInitialSelection= (IStructuredSelection)selection;
 		}
 	}
-	
+
 	public void setInitialSelection(IStructuredSelection selection) {
 		fInitialSelection= selection;
 	}
-	
+
 	protected String getPageId() {
 		return "org.eclipse.jdt.ui.JavaWorkingSetPage"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		
+
 		// Set help for the page
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.JAVA_WORKING_SET_PAGE);
 	}
@@ -103,27 +103,27 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	 */
 	protected void configureTree(TreeViewer tree) {
 		tree.setContentProvider(new JavaWorkingSetPageContentProvider());
-		
+
 		AppearanceAwareLabelProvider javaElementLabelProvider=
 			new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
-		
+
 		tree.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
 		tree.setComparator(new JavaElementComparator());
 		tree.addFilter(new EmptyInnerPackageFilter());
-		
+
 		tree.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
-		
+
 		if (getSelection() == null)
 			return;
-		
+
 		Object[] selection= getInitialTreeSelection();
 		if (selection.length > 0) {
 			try {
 				tree.getTree().setRedraw(false);
-				
+
 				for (int i= 0; i < selection.length; i++) {
 					tree.expandToLevel(selection[i], 0);
 				}
@@ -133,7 +133,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 			}
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -143,11 +143,11 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				| JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.P_POST_QUALIFIED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
-			
+
 		table.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
 		table.setComparator(new JavaElementComparator());
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -156,12 +156,12 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		if (workingSet == null) {
 			if (fInitialSelection == null)
 				return new Object[0];
-			
+
 			elements= fInitialSelection.toArray();
 		} else {
 			elements= workingSet.getElements();
 		}
-		
+
 		// Use closed project for elements in closed project and remove PackageFragmentRootContainer elements
 		int deletedElements= 0;
 		for (int i= 0; i < elements.length; i++) {
@@ -185,7 +185,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 					elements[i]= jProject.getProject();
 			}
 		}
-		
+
 		if (deletedElements == 0)
 			return elements;
 
@@ -200,15 +200,15 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 			public void run() {
 				IStructuredSelection selection= fInitialSelection;
 				if (selection == null) {
-				
+
 					IWorkbenchPage page= JavaPlugin.getActivePage();
 					if (page == null)
 						return;
-					
+
 					IWorkbenchPart part= page.getActivePart();
 					if (part == null)
 						return;
-					
+
 					try {
 						selection= SelectionConverter.getStructuredSelection(part);
 					} catch (JavaModelException e) {
@@ -227,10 +227,10 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				result[0]= elements;
 			}
 		});
-		
+
 		if (result[0] == null)
 			return new Object[0];
-		
+
 		return result[0];
 	}
 }

@@ -61,7 +61,7 @@ public class ImportRemover {
 	private final IJavaProject fProject;
 
 	private List/* <ASTNode> */fRemovedNodes= new ArrayList();
-	
+
 	private List/* <ImportDeclaration> */fInlinedStaticImports= new ArrayList();
 
 	private final CompilationUnit fRoot;
@@ -105,7 +105,7 @@ public class ImportRemover {
 	public IBinding[] getImportsToRemove() {
 		ArrayList/* <SimpleName> */importNames= new ArrayList();
 		ArrayList/* <SimpleName> */staticNames= new ArrayList();
-		
+
 		ImportReferencesCollector.collect(fRoot, fProject, null, importNames, staticNames);
 
 		List/* <SimpleName> */removedRefs= new ArrayList();
@@ -213,11 +213,11 @@ public class ImportRemover {
 		if (binding instanceof IVariableBinding) {
 			ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
 			fAddedStaticImports.add(new StaticImportData(Bindings.getRawQualifiedName(declaringType), binding.getName(), true));
-			
+
 		} else if (binding instanceof IMethodBinding) {
 			ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
 			fAddedStaticImports.add(new StaticImportData(Bindings.getRawQualifiedName(declaringType), binding.getName(), false));
-			
+
 		} else {
 			throw new IllegalArgumentException(binding.toString());
 		}
@@ -227,7 +227,7 @@ public class ImportRemover {
 		fRemovedNodes.add(removed);
 	}
 
-	
+
 	public void applyRemoves(ImportRewrite importRewrite) {
 		IBinding[] bindings= getImportsToRemove();
 		for (int i= 0; i < bindings.length; i++) {

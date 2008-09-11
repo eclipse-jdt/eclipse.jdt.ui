@@ -94,11 +94,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * <p>
  * The action is applicable to structured selections containing elements of type
  * {@link org.eclipse.jdt.core.IType}.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction {
@@ -116,7 +116,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	private IVariableBinding[] fCandidateFields;
 
 	private class HashCodeEqualsInfo {
-		
+
 		public boolean foundHashCode= false;
 
 		public boolean foundEquals= false;
@@ -129,9 +129,9 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
-	 * 
+	 *
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public GenerateHashCodeEqualsAction(final CompilationUnitEditor editor) {
@@ -146,7 +146,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	 * The action requires that the selection provided by the site's selection
 	 * provider is of type
 	 * {@link org.eclipse.jface.viewers.IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the workbench site providing context information for this
 	 *            action
 	 */
@@ -160,7 +160,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 	/**
 	 * Can this action be enabled on the specified selection?
-	 * 
+	 *
 	 * @param selection the selection to test
 	 * @return <code>true</code> if it can be enabled, <code>false</code>
 	 *         otherwise
@@ -182,7 +182,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 	/**
 	 * Returns the single selected type from the specified selection.
-	 * 
+	 *
 	 * @param selection the selection
 	 * @return a single selected type, or <code>null</code>
 	 * @throws JavaModelException if the kind of the selection cannot be
@@ -272,7 +272,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 	/**
 	 * Runs the action.
-	 * 
+	 *
 	 * @param shell the shell to use
 	 * @param type the type to generate stubs for
 	 * @throws CoreException if an error occurs
@@ -359,11 +359,11 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 			if (target != null)
 				target.beginCompoundChange();
 			try {
-				
+
 				final GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedBindings, fUnit, dialog
 						.getElementPosition(), settings, dialog.isUseInstanceOf(), regenerate, true, false);
 				operation.setUseBlocksForThen(useBlocks(type.getJavaProject()));
-				
+
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null)
 					context= new BusyIndicatorRunnableContext();
@@ -380,15 +380,15 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 		}
 		notifyResult(dialogResult == Window.OK);
 	}
-	
+
 	private boolean useBlocks(IJavaProject project) {
 		if (CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, project))) {
 			return CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, project));
 		}
 		return false;
 	}
-	
-	
+
+
 	private static RefactoringStatusContext createRefactoringStatusContext(IJavaElement element) {
 		if (element instanceof IMember) {
 			return JavaStatusContext.create((IMember) element);
@@ -450,7 +450,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 		if (someType.isTypeVariable()) {
 			someType= someType.getErasure();
 		}
-		
+
 		IMethodBinding[] declaredMethods= someType.getDeclaredMethods();
 
 		for (int i= 0; i < declaredMethods.length; i++) {

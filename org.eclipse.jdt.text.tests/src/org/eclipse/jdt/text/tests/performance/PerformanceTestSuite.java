@@ -22,7 +22,7 @@ public class PerformanceTestSuite extends TestSuite {
 	public static Test suite() {
 		return new PerformanceTestSetup(new PerformanceTestSuite());
 	}
-	
+
 	public PerformanceTestSuite() {
 //		addTest(ActivateJavaEditorTest.suite()); disabled, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=233955
 		addTest(RevertTextEditorTest.suite());
@@ -32,10 +32,10 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(UndoJavaEditorTest.suite());
 		addTest(OpenQuickOutlineTest.suite());
 		addTest(OpenJavaContentAssistTest.suite());
-		
+
 		// This test is currently disabled because the results vary too much.
 //		addTest(JavaSmartPasteTest.suite());
-		
+
 		addTest(ActivateTextEditorTest.suite());
 		addTest(SaveTextEditorTest.suite());
 		addTest(SaveJavaEditorTest.suite());

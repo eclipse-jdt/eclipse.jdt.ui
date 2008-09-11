@@ -43,19 +43,19 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class IntroduceFactoryAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public IntroduceFactoryAction(JavaEditor editor) {
@@ -68,19 +68,19 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 	 * Creates a new <code>IntroduceFactoryAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public IntroduceFactoryAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.IntroduceFactoryAction_label); 
-		setToolTipText(RefactoringMessages.IntroduceFactoryAction_tooltipText); 
-		setDescription(RefactoringMessages.IntroduceFactoryAction_description); 
+		setText(RefactoringMessages.IntroduceFactoryAction_label);
+		setToolTipText(RefactoringMessages.IntroduceFactoryAction_tooltipText);
+		setDescription(RefactoringMessages.IntroduceFactoryAction_description);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INTRODUCE_FACTORY_ACTION);
 	}
-	
+
 	//---- structured selection --------------------------------------------------
-	
+
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
@@ -108,13 +108,13 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 				RefactoringExecutionStarter.startIntroduceFactoryRefactoring(method.getCompilationUnit(), new TextSelection(range.getOffset(), range.getLength()), getShell());
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.IntroduceFactoryAction_dialog_title, RefactoringMessages.IntroduceFactoryAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.IntroduceFactoryAction_dialog_title, RefactoringMessages.IntroduceFactoryAction_exception);
 		}
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
@@ -122,7 +122,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {

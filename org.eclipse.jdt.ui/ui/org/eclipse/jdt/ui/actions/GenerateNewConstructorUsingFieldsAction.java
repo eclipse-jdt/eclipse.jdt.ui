@@ -82,13 +82,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * <p>
  * The action is applicable to structured selections containing elements of type
  * <code>IType</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAction {
@@ -98,9 +98,9 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this
 	 * constructor.
-	 * 
+	 *
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public GenerateNewConstructorUsingFieldsAction(CompilationUnitEditor editor) {
@@ -113,7 +113,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	 * Creates a new <code>GenerateConstructorUsingFieldsAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public GenerateNewConstructorUsingFieldsAction(IWorkbenchSite site) {
@@ -351,7 +351,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			notifyResult(false);
 			return;
 		}
-		
+
 		ArrayList fields= new ArrayList();
 		IField[] allFields= type.getFields();
 		for (int i= 0; i < allFields.length; i++) {

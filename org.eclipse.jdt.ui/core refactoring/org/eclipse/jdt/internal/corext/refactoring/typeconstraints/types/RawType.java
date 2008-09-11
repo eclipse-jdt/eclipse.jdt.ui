@@ -17,9 +17,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public final class RawType extends HierarchyType {
-	
+
 	private HierarchyType fTypeDeclaration;
-	
+
 	protected RawType(TypeEnvironment environment) {
 		super(environment);
 	}
@@ -30,50 +30,50 @@ public final class RawType extends HierarchyType {
 		TypeEnvironment environment= getEnvironment();
 		fTypeDeclaration= (HierarchyType)environment.create(binding.getTypeDeclaration());
 	}
-	
+
 	public int getKind() {
 		return RAW_TYPE;
 	}
-	
+
 	public boolean doEquals(TType type) {
 		return getJavaElementType().equals(((RawType)type).getJavaElementType());
 	}
-	
+
 	public int hashCode() {
 		return getJavaElementType().hashCode();
 	}
-	
+
 	public TType getTypeDeclaration() {
 		return fTypeDeclaration;
 	}
-	
+
 	public TType getErasure() {
 		return fTypeDeclaration;
 	}
-	
+
 	/*package*/ HierarchyType getHierarchyType() {
 		return fTypeDeclaration;
 	}
-	
+
 	protected boolean doCanAssignTo(TType lhs) {
 		int targetType= lhs.getKind();
 		switch (targetType) {
 			case NULL_TYPE: return false;
 			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE: return false;
-			
+
 			case ARRAY_TYPE: return false;
-			
-			case STANDARD_TYPE: return canAssignToStandardType((StandardType)lhs); 
+
+			case STANDARD_TYPE: return canAssignToStandardType((StandardType)lhs);
 			case GENERIC_TYPE: return false;
 			case PARAMETERIZED_TYPE: return isSubType((ParameterizedType)lhs);
 			case RAW_TYPE: return isSubType((HierarchyType)lhs);
-			
+
 			case UNBOUND_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE:
-			case EXTENDS_WILDCARD_TYPE: 
+			case EXTENDS_WILDCARD_TYPE:
 				return ((WildcardType)lhs).checkAssignmentBound(this);
-			
+
 			case TYPE_VARIABLE: return false;
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
@@ -91,7 +91,7 @@ public final class RawType extends HierarchyType {
 	public String getName() {
 		return getJavaElementType().getElementName();
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		return getJavaElementType().getFullyQualifiedName('.');
 	}

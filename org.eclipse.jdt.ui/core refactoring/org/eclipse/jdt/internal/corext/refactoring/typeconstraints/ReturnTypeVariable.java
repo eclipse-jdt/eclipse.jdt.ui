@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class ReturnTypeVariable extends ConstraintVariable{
-	
+
 	private final IMethodBinding fMethodBinding;
 
 	public ReturnTypeVariable(ReturnStatement returnStatement) {
@@ -32,7 +32,7 @@ public class ReturnTypeVariable extends ConstraintVariable{
 		super(methodBinding.getReturnType());
 		fMethodBinding= methodBinding;
 	}
-	
+
 	public static MethodDeclaration getMethod(ReturnStatement returnStatement) {
 		return (MethodDeclaration)ASTNodes.getParent(returnStatement, MethodDeclaration.class);
 	}
@@ -43,7 +43,7 @@ public class ReturnTypeVariable extends ConstraintVariable{
 	public String toString() {
 		return "[" + Bindings.asString(fMethodBinding) + "]_returnType"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public IMethodBinding getMethodBinding() {
 		return fMethodBinding;
 	}

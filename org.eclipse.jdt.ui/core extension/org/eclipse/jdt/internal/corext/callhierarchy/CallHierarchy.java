@@ -106,7 +106,7 @@ public class CallHierarchy {
     public MethodWrapper[] getCalleeRoots(IMember[] members) {
     	return getRoots(members, false);
     }
-    
+
 	private MethodWrapper[] getRoots(IMember[] members, boolean callers) {
 		ArrayList roots= new ArrayList();
     	for (int i= 0; i < members.length; i++) {
@@ -179,9 +179,9 @@ public class CallHierarchy {
 
 	/**
 	 * Checks whether the fully qualified name is ignored by the set filters.
-	 * 
+	 *
 	 * @param fullyQualifiedName the fully qualified name
-	 * 
+	 *
 	 * @return <code>true</code> if the fully qualified name is ignored
 	 */
     public boolean isIgnored(String fullyQualifiedName) {
@@ -207,7 +207,7 @@ public class CallHierarchy {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
         settings.setValue(PREF_USE_FILTERS, filterEnabled);
     }
-    
+
     /**
      * Returns the current filters as a string.
      * @return returns the filters
@@ -264,7 +264,7 @@ public class CallHierarchy {
 
 	/**
 	 * Parses the comma separated string into an array of {@link StringMatcher} objects.
-	 * 
+	 *
 	 * @param listString the string to parse
 	 * @return an array of {@link StringMatcher} objects
 	 */
@@ -279,7 +279,7 @@ public class CallHierarchy {
 
         return (StringMatcher[]) list.toArray(new StringMatcher[list.size()]);
     }
-    
+
     static CompilationUnit getCompilationUnitNode(IMember member, boolean resolveBindings) {
     	ITypeRoot typeRoot= member.getTypeRoot();
         try {
@@ -294,11 +294,11 @@ public class CallHierarchy {
         }
         return null;
     }
-    
+
     public static boolean isPossibleInputElement(Object element){
     	if (! (element instanceof IMember))
     		return false;
-    	
+
     	if (element instanceof IType) {
 			IType type= (IType) element;
 			try {
@@ -307,7 +307,7 @@ public class CallHierarchy {
 				return false;
 			}
 		}
-    	
+
     	return true;
     }
 }

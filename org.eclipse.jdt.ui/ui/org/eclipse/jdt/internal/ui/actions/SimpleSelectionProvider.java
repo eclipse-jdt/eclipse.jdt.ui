@@ -23,14 +23,14 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
  * A simple default implementation of a {@link ISelectionProvider}. It stores
  * the selection and notifies all selection change listeners when the selection
  * is set.
- * 
+ *
  * Instances of this class can be used as special selection provider
  * for {@link SelectionDispatchAction}s
- * 
+ *
  * @since 3.4
  */
 public class SimpleSelectionProvider implements ISelectionProvider {
-	
+
 	private final ListenerList fSelectionChangedListeners;
 	private ISelection fSelection;
 
@@ -59,14 +59,14 @@ public class SimpleSelectionProvider implements ISelectionProvider {
 			((ISelectionChangedListener) listeners[i]).selectionChanged(new SelectionChangedEvent(this, selection));
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		fSelectionChangedListeners.remove(listener);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */

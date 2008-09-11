@@ -42,16 +42,16 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		public SmartSemicolon() {
 			super("");
 		}
-		
+
 		public static int computeCharacterPosition(IDocument document, ITextSelection line, int offset, char character, String partitioning) {
 			return SmartSemicolonAutoEditStrategy.computeCharacterPosition(document, line, offset, character, partitioning);
 		}
 	}
-	
+
 	public static Test suite() {
 		return new TestSuite(SmartSemicolonAutoEditStrategyTest.class);
 	}
-	
+
 	private FastPartitioner fPartitioner;
 
 	private static final char SEMI= ';';
@@ -70,8 +70,8 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 			IDocument.DEFAULT_CONTENT_TYPE
 		};
 		fPartitioner= new FastPartitioner(new FastJavaPartitionScanner(), types);
-		fPartitioner.connect(fDocument); 
-		fDocument.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, fPartitioner); 
+		fPartitioner.connect(fDocument);
+		fDocument.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, fPartitioner);
 	}
 
 	private void verifySemicolonPosition(int caret, int expected) throws BadLocationException {
@@ -80,7 +80,7 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		int pos= SmartSemicolon.computeCharacterPosition(fDocument, selection, caret, SEMI, IJavaPartitions.JAVA_PARTITIONING);
 		Assert.assertEquals(expected, pos);
 	}
-	
+
 	private void verifyBracePosition(int caret, int expected) throws BadLocationException {
 		IRegion region= fDocument.getLineInformation(0);
 		ITextSelection selection= new TextSelection(fDocument, region.getOffset(), region.getLength());
@@ -88,14 +88,14 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		if (pos == -1) pos= caret;
 		Assert.assertEquals(expected, pos);
 	}
-	
+
 	/* semicolon tests */
-	
+
 	public void testGoToEOL() throws BadLocationException {
 		fDocument.set("public void foobar()");
 		verifySemicolonPosition(5, 20);
 	}
-	
+
 	public void testGoToExisting() throws BadLocationException {
 		if (true) {
 			System.out.println("testGoToExisting disabled - unwanted functionality");
@@ -104,22 +104,22 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		fDocument.set("public void; foobar()");
 		verifySemicolonPosition(5, 11);
 	}
-	
+
 	public void testFor() throws BadLocationException {
 		fDocument.set("for (int i= 0)");
 		verifySemicolonPosition(13, -1);
 	}
-	
+
 	public void testWithExistingBefore() throws BadLocationException {
 		fDocument.set("public void; foobar()");
 		verifySemicolonPosition(12, 21);
 	}
-	
+
 	public void testWithExistingBeforeWithComment() throws BadLocationException {
 		fDocument.set("public void; foobar() // comment\r\n ");
 		verifySemicolonPosition(12, 21);
 	}
-	
+
 	public void testWithExistingAtInsertPosition() throws BadLocationException {
 		if (true) {
 			System.out.println("testWithExistingAtInsertPosition disabled - existing characters handled by framework");
@@ -138,7 +138,7 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		fDocument.set("private string foo= \"foobar\" /* comment */   \r\n");
 		verifySemicolonPosition(12, 28);
 	}
-	
+
 	public void testBlockComment() throws BadLocationException {
 		fDocument.set("doStuff(arg1 /* comment */, args)  ");
 		verifySemicolonPosition(5, 33);
@@ -168,9 +168,9 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		fDocument.set("void foobar(int param) {}");
 		verifySemicolonPosition(24, 24);
 	}
-	
+
 	/* brace tests */
-	
+
 	public void testBraceClassDef() throws BadLocationException {
 		fDocument.set("public static final class Main ");
 		verifyBracePosition(31, 31);
@@ -185,7 +185,7 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		fDocument.set("void bla(int p1, int p2) // comment");
 		verifyBracePosition(12, 24);
 	}
-	
+
 	public void testBraceIf() throws BadLocationException {
 		fDocument.set("if (condition && condition()) // comment");
 		verifyBracePosition(12, 29);
@@ -217,17 +217,17 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		verifyBracePosition(4, 4);
 		verifyBracePosition(5, 5);
 	}
-	
+
 	public void testBraceAnonymousClassDef() throws BadLocationException {
 		fDocument.set("this.addListener(blu, new Listener(), bla)");
 		verifyBracePosition(34, 36);
 	}
-	
+
 	public void testBraceAnonymousClassDef2() throws BadLocationException {
 		fDocument.set("this.addListener(blu, \"new\", Listener(), bla)");
 		verifyBracePosition(41, 41);
 	}
-	
+
 	public void testBraceIfAnonymousClassDef() throws BadLocationException {
 		fDocument.set("  if addListener(blu, new Listener(), bla)");
 		verifyBracePosition(34, 36);
@@ -239,11 +239,11 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		verifyBracePosition(20, 45);
 		verifyBracePosition(39, 45);
 	}
-	
+
 	public void testBraceAnonymousClassInstantiation() throws BadLocationException {
 		fDocument.set("  Object object=new Object();");
 		verifyBracePosition(27, 28);
 		verifyBracePosition(28, 28);
 	}
-	
+
 }

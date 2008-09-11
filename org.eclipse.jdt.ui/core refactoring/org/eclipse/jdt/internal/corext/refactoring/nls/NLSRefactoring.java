@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -28,7 +30,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -53,10 +54,10 @@ public class NLSRefactoring extends Refactoring {
 	public static final String BUNDLE_NAME= "BUNDLE_NAME"; //$NON-NLS-1$
 	public static final String PROPERTY_FILE_EXT= ".properties"; //$NON-NLS-1$
 	public static final String DEFAULT_ACCESSOR_CLASSNAME= "Messages"; //$NON-NLS-1$
-	
+
 	public static final String KEY= "${key}"; //$NON-NLS-1$
 	public static final String DEFAULT_SUBST_PATTERN= "getString(" + KEY + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-	
+
 	public static final String DEFAULT_PROPERTY_FILENAME= "messages"; //$NON-NLS-1$
 
 	//private IPath fPropertyFilePath;
@@ -69,12 +70,12 @@ public class NLSRefactoring extends Refactoring {
 	private String fSubstitutionPattern;
 	private ICompilationUnit fCu;
 	private NLSSubstitution[] fSubstitutions;
-	
+
 	private String fPrefix;
-	
+
 	/**
 	 * <code>true</code> if the standard resource bundle mechanism
-	 * is used and <code>false</code> NLSing is done the Eclipse way. 
+	 * is used and <code>false</code> NLSing is done the Eclipse way.
 	 */
 	private boolean fIsEclipseNLS;
 
@@ -92,7 +93,7 @@ public class NLSRefactoring extends Refactoring {
 		setResourceBundleName(nlsHint.getResourceBundleName());
 		setResourceBundlePackage(nlsHint.getResourceBundlePackage());
 		setSubstitutionPattern(DEFAULT_SUBST_PATTERN);
-		
+
 		String cuName= fCu.getElementName();
 		if (fIsEclipseNLS)
 			setPrefix(cuName.substring(0, cuName.length() - 5) + "_"); // A.java -> A_ //$NON-NLS-1$
@@ -108,7 +109,7 @@ public class NLSRefactoring extends Refactoring {
 
 	/**
 	 * no validation is done
-	 * 
+	 *
 	 * @param pattern
 	 *            Example: "Messages.getString(${key})". Must not be
 	 *            <code>null</code>. should (but does not have to) contain
@@ -152,7 +153,7 @@ public class NLSRefactoring extends Refactoring {
 		checkParameters();
 		try {
 
-			pm.beginTask(NLSMessages.NLSRefactoring_checking, 5); 
+			pm.beginTask(NLSMessages.NLSRefactoring_checking, 5);
 
 			RefactoringStatus result= new RefactoringStatus();
 
@@ -183,7 +184,7 @@ public class NLSRefactoring extends Refactoring {
 				throw new OperationCanceledException();
 
 			if (!propertyFileExists() && willModifyPropertyFile()) {
-				String msg= Messages.format(NLSMessages.NLSRefactoring_will_be_created, BasicElementLabels.getPathLabel(getPropertyFilePath(), false)); 
+				String msg= Messages.format(NLSMessages.NLSRefactoring_will_be_created, BasicElementLabels.getPathLabel(getPropertyFilePath(), false));
 				result.addInfo(msg);
 			}
 			pm.worked(1);
@@ -257,14 +258,14 @@ public class NLSRefactoring extends Refactoring {
 				files.add(file);
 			}
 		}
-		
+
 		if (willModifyAccessorClass()) {
 			IFile file= getAccessorClassFileHandle();
 			if (file.exists()) {
 				files.add(file);
 			}
 		}
-		
+
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
 
@@ -275,11 +276,11 @@ public class NLSRefactoring extends Refactoring {
 	public IPath getPropertyFilePath() {
 		return fResourceBundlePackage.getPath().append(fResourceBundleName);
 	}
-	
+
 	public IFile getAccessorClassFileHandle() {
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(getAccessorClassFilePath());
 	}
-	
+
 	public IPath getAccessorClassFilePath() {
 		return getAccessorCUPath();
 	}
@@ -300,7 +301,7 @@ public class NLSRefactoring extends Refactoring {
 			return null;
 
 		RefactoringStatus result= new RefactoringStatus();
-		result.addFatalError(NLSMessages.NLSRefactoring_nothing_to_do); 
+		result.addFatalError(NLSMessages.NLSRefactoring_nothing_to_do);
 		return result;
 	}
 
@@ -312,12 +313,12 @@ public class NLSRefactoring extends Refactoring {
 		String pattern= getSubstitutionPattern();
 
 		RefactoringStatus result= new RefactoringStatus();
-		if (pattern.trim().length() == 0) {// 
-			result.addError(NLSMessages.NLSRefactoring_pattern_empty); 
+		if (pattern.trim().length() == 0) {//
+			result.addError(NLSMessages.NLSRefactoring_pattern_empty);
 		}
 
 		if (pattern.indexOf(KEY) == -1) {
-			String msg= Messages.format(NLSMessages.NLSRefactoring_pattern_does_not_contain, KEY); 
+			String msg= Messages.format(NLSMessages.NLSRefactoring_pattern_does_not_contain, KEY);
 			result.addWarning(msg);
 		}
 
@@ -345,22 +346,22 @@ public class NLSRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 
 		if (key == null)
-			result.addFatalError(NLSMessages.NLSRefactoring_null); 
+			result.addFatalError(NLSMessages.NLSRefactoring_null);
 
 		if (key.startsWith("!") || key.startsWith("#")) { //$NON-NLS-1$ //$NON-NLS-2$
 			RefactoringStatusContext context= new JavaStringStatusContext(key, new SourceRange(0, 0));
-			result.addWarning(NLSMessages.NLSRefactoring_warning, context); 
+			result.addWarning(NLSMessages.NLSRefactoring_warning, context);
 		}
 
 		if ("".equals(key.trim())) //$NON-NLS-1$
-			result.addFatalError(NLSMessages.NLSRefactoring_empty); 
+			result.addFatalError(NLSMessages.NLSRefactoring_empty);
 
 		final String[] UNWANTED_STRINGS= {" ", ":", "\"", "\\", "'", "?", "="}; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		//feature in resource bundle - does not work properly if keys have ":"
 		for (int i= 0; i < UNWANTED_STRINGS.length; i++) {
 			if (key.indexOf(UNWANTED_STRINGS[i]) != -1) {
 				String[] args= {key, UNWANTED_STRINGS[i]};
-				String msg= Messages.format(NLSMessages.NLSRefactoring_should_not_contain, args); 
+				String msg= Messages.format(NLSMessages.NLSRefactoring_should_not_contain, args);
 				result.addError(msg);
 			}
 		}
@@ -404,7 +405,7 @@ public class NLSRefactoring extends Refactoring {
 		}
 		return false;
 	}
-	
+
 	private boolean willModifyAccessorClass() {
 		if (!isEclipseNLS())
 			return false;
@@ -438,7 +439,7 @@ public class NLSRefactoring extends Refactoring {
 	public String getPrefix() {
 		return fPrefix;
 	}
-	
+
 	public void setPrefix(String prefix) {
 		fPrefix= prefix;
 		if (fSubstitutions != null) {
@@ -456,14 +457,14 @@ public class NLSRefactoring extends Refactoring {
 		Assert.isNotNull(packageFragment);
 		fAccessorClassPackage= packageFragment;
 	}
-	
+
 	/**
 	 * Sets whether the Eclipse NLSing mechanism or
 	 * standard resource bundle mechanism is used.
-	 * 
+	 *
 	 * @param isEclipseNLS	<code>true</code> if NLSing is done the Eclipse way
 	 * 						and <code>false</code> if the standard resource bundle mechanism is used
-	 * @since 3.1 
+	 * @since 3.1
 	 */
 	public void setIsEclipseNLS(boolean isEclipseNLS) {
 		fIsEclipseNLS= isEclipseNLS;
@@ -482,13 +483,13 @@ public class NLSRefactoring extends Refactoring {
 	public IPackageFragment getAccessorClassPackage() {
 		return fAccessorClassPackage;
 	}
-	
+
 	/**
 	 * Computes whether the Eclipse NLSing mechanism is used.
-	 * 
+	 *
 	 * @return		<code>true</code> if NLSing is done the Eclipse way
 	 * 				and <code>false</code> if the standard resource bundle mechanism is used
-	 * @since 3.1 
+	 * @since 3.1
 	 */
 	public boolean detectIsEclipseNLS() {
 		if (getAccessorClassPackage() != null) {
@@ -508,14 +509,14 @@ public class NLSRefactoring extends Refactoring {
 		}
 		return fIsEclipseNLS;
 	}
-	
+
 	/**
 	 * Returns whether the Eclipse NLSing mechanism or
 	 * the standard resource bundle mechanism is used.
-	 * 
+	 *
 	 * @return		<code>true</code> if NLSing is done the Eclipse way
 	 * 				and <code>false</code> if the standard resource bundle mechanism is used
-	 * @since 3.1 
+	 * @since 3.1
 	 */
 	public boolean isEclipseNLS() {
 		return fIsEclipseNLS;

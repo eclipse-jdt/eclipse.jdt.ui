@@ -147,7 +147,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		
+
 		final StringBuffer buf= new StringBuffer();
 
 		try {

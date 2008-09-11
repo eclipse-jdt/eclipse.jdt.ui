@@ -17,9 +17,9 @@ import org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor;
 
 
 public class TypeInfoRequestorAdapter implements ITypeInfoRequestor {
-	
+
 	private TypeNameMatch fMatch;
-	
+
 	public void setMatch(TypeNameMatch type) {
 		fMatch= type;
 	}

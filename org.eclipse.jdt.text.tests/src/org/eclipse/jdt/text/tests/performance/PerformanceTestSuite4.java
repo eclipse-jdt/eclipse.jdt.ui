@@ -23,7 +23,7 @@ public class PerformanceTestSuite4 extends TestSuite {
 		// exclude PerformanceTestSetup because this suite measures startup performance
 		return new PerformanceTestSuite4();
 	}
-	
+
 	public PerformanceTestSuite4() {
 		addTest(OpenJavaEditorStartupTest.suiteForMeasurement());
 		addTest(new OpenTextEditorStartupTest.Setup(EmptyTestCase.suite(), true, false)); // the actual test runs in its own workbench (see test.xml)

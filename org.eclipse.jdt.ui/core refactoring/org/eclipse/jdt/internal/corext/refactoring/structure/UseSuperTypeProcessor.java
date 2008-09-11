@@ -81,7 +81,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/**
 	 * Finds the type with the given fully qualified name (generic type
 	 * parameters included) in the hierarchy.
-	 * 
+	 *
 	 * @param type
 	 *            The hierarchy type to find the super type in
 	 * @param name
@@ -122,7 +122,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Creates a new super type processor.
-	 * 
+	 *
 	 * @param subType
 	 *            the subtype to replace its occurrences
 	 */
@@ -134,7 +134,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Creates a new super type processor.
-	 * 
+	 *
 	 * @param subType
 	 *            the subtype to replace its occurrences
 	 * @param superType
@@ -149,7 +149,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Creates a new super type processor from refactoring arguments.
-	 * 
+	 *
 	 * @param arguments
 	 *            the refactoring arguments
 	 * @param status
@@ -247,7 +247,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Creates the text change manager for this processor.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param status
@@ -327,7 +327,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/**
 	 * Returns the number of files that are affected from the last change
 	 * generation.
-	 * 
+	 *
 	 * @return The number of files which are affected
 	 */
 	public final int getChanges() {
@@ -357,7 +357,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Returns the subtype to be replaced.
-	 * 
+	 *
 	 * @return The subtype to be replaced
 	 */
 	public final IType getSubType() {
@@ -366,7 +366,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Returns the supertype as replacement.
-	 * 
+	 *
 	 * @return The supertype as replacement
 	 */
 	public final IType getSuperType() {
@@ -461,7 +461,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Sets the supertype as replacement.
-	 * 
+	 *
 	 * @param type
 	 *            The supertype to set
 	 */

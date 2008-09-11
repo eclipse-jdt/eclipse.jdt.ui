@@ -27,7 +27,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 	public RenameResourceAction(IWorkbenchSite site) {
 		super(site);
 	}
-	
+
 	public void selectionChanged(IStructuredSelection selection) {
 		IResource element= getResource(selection);
 		if (element == null)

@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAction {
-	
+
 	private final HintTextGroup fProvider;
 
 	public CreateLinkedSourceFolderAction2(HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
@@ -30,7 +30,7 @@ public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAct
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleFolderCreation(((StructuredSelection)selection).toList());
-	    
+
 	    super.selectAndReveal(selection);
 	}
 }

@@ -82,7 +82,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 /**
   */
 public class CodeTemplateBlock extends OptionsConfigurationBlock {
-	
+
 	private class CodeTemplateAdapter extends ViewerComparator implements ITreeListAdapter, IDialogFieldListener {
 
 		private final Object[] NO_CHILDREN= new Object[0];
@@ -90,12 +90,12 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		public void customButtonPressed(TreeListDialogField field, int index) {
 			doButtonPressed(index, field.getSelectedElements());
 		}
-			
+
 		public void selectionChanged(TreeListDialogField field) {
 			List selected= field.getSelectedElements();
 			field.enableButton(IDX_EDIT, canEdit(selected));
 			field.enableButton(IDX_EXPORT, !selected.isEmpty());
-			
+
 			updateSourceViewerInput(selected);
 		}
 
@@ -136,7 +136,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		public void keyPressed(TreeListDialogField field, KeyEvent event) {
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
 		 */
@@ -146,10 +146,10 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			} else if (element == CODE_NODE) {
 				return 2;
 			}
-			
+
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
 			String id= data.getId();
-			
+
 			if (CodeTemplateContextType.NEWTYPE_ID.equals(id)) {
 				return 101;
 			} else if (CodeTemplateContextType.CLASSBODY_ID.equals(id)) {
@@ -194,7 +194,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	private static class CodeTemplateLabelProvider extends LabelProvider {
-	
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 		 */
@@ -254,45 +254,45 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			return data.getTemplate().getDescription();
 		}
 	}
-	
+
 	private static final Key PREF_GENERATE_COMMENTS= getJDTUIKey(PreferenceConstants.CODEGEN_ADD_COMMENTS);
-	
+
 	private static Key[] getAllKeys() {
 		return new Key[] {
 			PREF_GENERATE_COMMENTS
 		};
 	}
-	
+
 	private final static int IDX_EDIT= 0;
 	private final static int IDX_IMPORT= 2;
 	private final static int IDX_EXPORT= 3;
 	private final static int IDX_EXPORTALL= 4;
-	
+
 	protected final static Object COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node;
 	protected final static Object CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node;
 
 	private TreeListDialogField fCodeTemplateTree;
 	private SelectionButtonDialogField fGenerateComments;
-	
+
 	protected ProjectTemplateStore fTemplateStore;
-	
+
 	private PixelConverter fPixelConverter;
 	private SourceViewer fPatternViewer;
 
 	private TemplateVariableProcessor fTemplateProcessor;
-	
+
 	public CodeTemplateBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getAllKeys(), container);
-		
+
 		fTemplateStore= new ProjectTemplateStore(project);
 		try {
 			fTemplateStore.load();
 		} catch (IOException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		fTemplateProcessor= new TemplateVariableProcessor();
-		
+
 		CodeTemplateAdapter adapter= new CodeTemplateAdapter();
 
 		String[] buttonLabels= new String[] {
@@ -310,16 +310,16 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		fCodeTemplateTree.enableButton(IDX_EXPORT, false);
 		fCodeTemplateTree.enableButton(IDX_EDIT, false);
-		
+
 		fCodeTemplateTree.addElement(COMMENT_NODE);
 		fCodeTemplateTree.addElement(CODE_NODE);
 
 		fCodeTemplateTree.selectFirstElement();
-		
+
 		fGenerateComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
 		fGenerateComments.setDialogFieldListener(adapter);
 		fGenerateComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label);
-		
+
 		updateControls();
 	}
 
@@ -330,13 +330,13 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	public boolean hasProjectSpecificOptions(IProject project) {
 		if (super.hasProjectSpecificOptions(project))
 			return true;
-		
+
 		if (project != null) {
 			return ProjectTemplateStore.hasProjectSpecificTempates(project);
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
 	 * @since 3.5
@@ -345,46 +345,46 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		fCodeTemplateTree.setEnabled(enable); // need to set because super implementation only updates controls
 		super.useProjectSpecificSettings(enable);
 	}
-	
+
 	protected Control createContents(Composite parent) {
 		fPixelConverter=  new PixelConverter(parent);
 
 		setShell(parent.getShell());
-		
+
 		Composite composite=  new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		
+
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		composite.setLayout(layout);
-		
+
 		fCodeTemplateTree.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fCodeTemplateTree.getLabelControl(null), 2);
 		LayoutUtil.setHorizontalGrabbing(fCodeTemplateTree.getTreeControl(null));
-		
+
 		fPatternViewer= createViewer(composite, 2);
-		
+
 		fGenerateComments.doFillIntoGrid(composite, 2);
-		
+
 		return composite;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
 	 */
 	protected void updateControls() {
 		fGenerateComments.setSelection(getBooleanValue(PREF_GENERATE_COMMENTS));
 	}
-		
+
 	private SourceViewer createViewer(Composite parent, int nColumns) {
 		Label label= new Label(parent, SWT.NONE);
 		label.setText(PreferencesMessages.CodeTemplateBlock_preview);
 		GridData data= new GridData();
 		data.horizontalSpan= nColumns;
 		label.setLayoutData(data);
-		
+
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
@@ -392,27 +392,27 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, store);
 		CodeTemplateSourceViewerConfiguration configuration= new CodeTemplateSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
 		viewer.configure(configuration);
-		
+
 		viewer.setEditable(false);
 		Cursor arrowCursor= viewer.getTextWidget().getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
 		viewer.getTextWidget().setCursor(arrowCursor);
 		viewer.getTextWidget().setCaret(null);
-		
+
 		viewer.setDocument(document);
-	
+
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(viewer, configuration, store);
-		
+
 		Control control= viewer.getControl();
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
 		data.horizontalSpan= nColumns;
 		data.heightHint= fPixelConverter.convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
-		
+
 		return viewer;
 	}
-	
+
 	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
 		ArrayList res=  new ArrayList();
 		TemplatePersistenceData[] templates= fTemplateStore.getTemplateData();
@@ -424,11 +424,11 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		}
 		return (TemplatePersistenceData[]) res.toArray(new TemplatePersistenceData[res.size()]);
 	}
-	
+
 	protected static boolean canEdit(List selected) {
 		return selected.size() == 1 && (selected.get(0) instanceof TemplatePersistenceData);
 	}
-	
+
 	protected void updateSourceViewerInput(List selection) {
 		if (fPatternViewer == null || fPatternViewer.getTextWidget().isDisposed()) {
 			return;
@@ -443,7 +443,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			fPatternViewer.getDocument().set(""); //$NON-NLS-1$
 		}
 	}
-		
+
 	protected void doButtonPressed(int buttonIndex, List selected) {
 		if (buttonIndex == IDX_EDIT) {
 			edit((TemplatePersistenceData) selected.get(0));
@@ -455,7 +455,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			import_();
 		}
 	}
-	
+
 	private void edit(TemplatePersistenceData data) {
 		Template newTemplate= new Template(data.getTemplate());
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, JavaPlugin.getDefault().getCodeTemplateContextRegistry());
@@ -466,16 +466,16 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			fCodeTemplateTree.selectElements(new StructuredSelection(data));
 		}
 	}
-		
+
 	private void import_() {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(PreferencesMessages.CodeTemplateBlock_import_title);
 		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_import_extension});
 		String path= dialog.open();
-		
+
 		if (path == null)
 			return;
-		
+
 		try {
 			TemplateReaderWriter reader= new TemplateReaderWriter();
 			File file= new File(path);
@@ -504,7 +504,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		}
 
 	}
-	
+
 	private void updateTemplate(TemplatePersistenceData data) {
 		TemplatePersistenceData[] datas= fTemplateStore.getTemplateData();
 		for (int i= 0; i < datas.length; i++) {
@@ -515,11 +515,11 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			}
 		}
 	}
-	
+
 	private void exportAll() {
 		export(fTemplateStore.getTemplateData());
 	}
-	
+
 	private void export(List selected) {
 		Set datas= new HashSet();
 		for (int i= 0; i < selected.size(); i++) {
@@ -533,7 +533,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		}
 		export((TemplatePersistenceData[]) datas.toArray(new TemplatePersistenceData[datas.size()]));
 	}
-	
+
 	private void export(TemplatePersistenceData[] templates) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(Messages.format(PreferencesMessages.CodeTemplateBlock_export_title, String.valueOf(templates.length)));
@@ -543,7 +543,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		if (path == null)
 			return;
-		
+
 		File file= new File(path);
 
 		if (file.isHidden()) {
@@ -552,7 +552,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
-		
+
 		if (file.exists() && !file.canWrite()) {
 			String title= PreferencesMessages.CodeTemplateBlock_export_error_title;
 			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_canNotWrite, BasicElementLabels.getPathLabel(file));
@@ -578,7 +578,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				openWriteErrorDialog();
 			}
 		}
-		
+
 	}
 
 	private boolean confirmOverwrite(File file) {
@@ -592,15 +592,15 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		// refresh
 		fCodeTemplateTree.refresh();
-		
+
 		super.performDefaults();
 	}
-	
+
 	public boolean performOk(boolean enabled) {
 		boolean res= super.performOk();
 		if (!res)
 			return false;
-		
+
 		if (fProject != null) {
 			TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
 			for (int i= 0; i < templateData.length; i++) {
@@ -615,7 +615,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		}
 		return true;
 	}
-	
+
 	public void performCancel() {
 		try {
 			fTemplateStore.revertChanges();
@@ -623,10 +623,10 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			openReadErrorDialog(e);
 		}
 	}
-	
+
 	private void openReadErrorDialog(Exception e) {
 		String title= PreferencesMessages.CodeTemplateBlock_error_read_title;
-		
+
 		String message= e.getLocalizedMessage();
 		if (message != null)
 			message= Messages.format(PreferencesMessages.CodeTemplateBlock_error_parse_message, message);
@@ -634,7 +634,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			message= PreferencesMessages.CodeTemplateBlock_error_read_message;
 		MessageDialog.openError(getShell(), title, message);
 	}
-	
+
 	private void openWriteErrorDialog() {
 		String title= PreferencesMessages.CodeTemplateBlock_error_write_title;
 		String message= PreferencesMessages.CodeTemplateBlock_error_write_message;

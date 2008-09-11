@@ -11,11 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -29,11 +29,11 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 /**
  * Handles Java editor font changes for Java source preview viewers.
- * 
+ *
  * @since 3.0
  */
 public class JavaSourcePreviewerUpdater {
-	
+
 	/**
 	 * Creates a Java source preview updater for the given viewer, configuration and preference store.
 	 *

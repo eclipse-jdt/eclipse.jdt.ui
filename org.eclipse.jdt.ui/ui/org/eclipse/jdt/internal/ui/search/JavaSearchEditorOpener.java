@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 
 public class JavaSearchEditorOpener {
-	
+
 	private IEditorReference fReusedEditor;
 
 	public IEditorPart openElement(Object element) throws PartInitException {
@@ -40,13 +40,13 @@ public class JavaSearchEditorOpener {
 			editor= showWithReuse(element, wbPage);
 		else
 			editor= showWithoutReuse(element);
-		
+
 		if (element instanceof IJavaElement)
 			EditorUtility.revealInEditor(editor, (IJavaElement) element);
-		
+
 		return editor;
 	}
-		
+
 	public IEditorPart openMatch(Match match) throws PartInitException {
 		Object element= getElementToOpen(match);
 		return openElement(element);

@@ -53,11 +53,11 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class RenameJavaElementAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
-	
+
 	public RenameJavaElementAction(IWorkbenchSite site) {
 		super(site);
 	}
-	
+
 	public RenameJavaElementAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
@@ -81,13 +81,13 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}
 		setEnabled(false);
 	}
-	
+
 	private static boolean canEnable(IStructuredSelection selection) throws CoreException {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
 		return isRenameAvailable(element);
-	} 
+	}
 
 	private static IJavaElement getJavaElement(IStructuredSelection selection) {
 		if (selection.size() != 1)
@@ -97,18 +97,18 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			return null;
 		return (IJavaElement)first;
 	}
-	
+
 	public void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return;
 		try {
-			run(element, false);	
+			run(element, false);
 		} catch (CoreException e){
-			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
-		}	
+			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);
+		}
 	}
-	
+
 	//---- text selection ------------------------------------------------------------
 
 	public void selectionChanged(ITextSelection selection) {
@@ -138,7 +138,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 				activeLinkedMode.cancel();
 			}
 		}
-		
+
 		try {
 			IJavaElement element= getJavaElementFromEditor();
 			if (element != null && isRenameAvailable(element)) {
@@ -151,11 +151,11 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}
 		MessageDialog.openInformation(getShell(), RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_not_available);
 	}
-	
+
 	public boolean canRunInEditor() {
 		if (RenameLinkedMode.getActiveLinkedMode() != null)
 			return true;
-		
+
 		try {
 			IJavaElement element= getJavaElementFromEditor();
 			if (element == null)
@@ -170,24 +170,24 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}
 		return false;
 	}
-	
+
 	private IJavaElement getJavaElementFromEditor() throws JavaModelException {
-		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor); 
+		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 		if (elements == null || elements.length != 1)
 			return null;
 		return elements[0];
 	}
-	
+
 	//---- helper methods -------------------------------------------------------------------
 
 	private void run(IJavaElement element, boolean lightweight) throws CoreException {
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (! ActionUtil.isEditable(fEditor, getShell(), element))
-			return;		
+			return;
 		//XXX workaround bug 31998
 		if (ActionUtil.mustDisableJavaModelAction(getShell(), element))
 			return;
-		
+
 		if (lightweight && fEditor instanceof CompilationUnitEditor && ! (element instanceof IPackageFragment)) {
 			new RenameLinkedMode(element, (CompilationUnitEditor) fEditor).start();
 		} else {

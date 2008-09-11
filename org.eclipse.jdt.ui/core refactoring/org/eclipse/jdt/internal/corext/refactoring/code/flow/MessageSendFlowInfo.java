@@ -18,19 +18,19 @@ class MessageSendFlowInfo extends FlowInfo {
 	public MessageSendFlowInfo() {
 		super(NO_RETURN);
 	}
-	
+
 	public void mergeArgument(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
 		mergeSequential(info, context);
 	}
-	
+
 	public void mergeReceiver(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
 		mergeSequential(info, context);
 	}
-	
+
 	public void mergeExceptions(IMethodBinding binding, FlowContext context) {
 		if (binding == null)
 			return;

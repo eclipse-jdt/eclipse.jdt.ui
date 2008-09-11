@@ -141,7 +141,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		if (fCategoryFilterActionGroup != null)
 			fCategoryFilterActionGroup.setInput(getCategoryFilterActionGroupInput());
 	}
-	
+
 	private IJavaElement[] getCategoryFilterActionGroupInput() {
 		Object input= getInput();
 		if (input instanceof IJavaElement)

@@ -44,12 +44,12 @@ class LocationViewer extends TableViewer {
         CallHierarchyMessages.LocationViewer_ColumnIcon_header,
         CallHierarchyMessages.LocationViewer_ColumnLine_header,
         CallHierarchyMessages.LocationViewer_ColumnInfo_header};
-                                                
+
     private ColumnLayoutData columnLayouts[] = {
         new ColumnPixelData(18, false, true),
         new ColumnWeightData(60),
         new ColumnWeightData(300)};
-    
+
 
     LocationViewer(Composite parent) {
         super(createTable(parent));
@@ -63,14 +63,14 @@ class LocationViewer extends TableViewer {
 
     /**
      * Creates the table control.
-     * 
+     *
      * @param parent the parent composite
      * @return the table
      */
     private static Table createTable(Composite parent) {
         return new Table(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
     }
-    
+
     private void createColumns() {
         TableLayout layout = new TableLayout();
         getTable().setLayout(layout);
@@ -85,7 +85,7 @@ class LocationViewer extends TableViewer {
 
     /**
      * Attaches a context menu listener to the tree.
-     * 
+     *
      * @param menuListener the menu listener
      * @param popupId  the id of the popup
      * @param viewSite the part site
@@ -101,14 +101,14 @@ class LocationViewer extends TableViewer {
 
 	/**
 	 * Initializes and returns the Copy action for the location viewer.
-	 * 
+	 *
 	 * @param viewSite the view site
 	 * @param clipboard the clipboard
 	 * @return the copy action
 	 */
     LocationCopyAction initCopyAction(final IViewSite viewSite, final Clipboard clipboard) {
     	final LocationCopyAction copyAction= new LocationCopyAction(viewSite, clipboard, this);
-    	
+
         getTable().addFocusListener(new FocusListener() {
         	IAction fViewCopyHandler;
 			public void focusLost(FocusEvent e) {
@@ -119,7 +119,7 @@ class LocationViewer extends TableViewer {
 					fViewCopyHandler= null;
 				}
 			}
-			
+
 			public void focusGained(FocusEvent e) {
 				IActionBars actionBars= viewSite.getActionBars();
 				fViewCopyHandler= actionBars.getGlobalActionHandler(ActionFactory.COPY.getId());
@@ -127,12 +127,12 @@ class LocationViewer extends TableViewer {
 				actionBars.updateActionBars();
 			}
 		});
-        
+
         return copyAction;
     }
 
     /**
-     * 
+     *
      */
     void clearViewer() {
         setInput(""); //$NON-NLS-1$

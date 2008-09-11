@@ -28,13 +28,13 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements IPropertyChangeListener, IPropertyListener {
 
-	public final static long DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_TYPES |  
+	public final static long DEFAULT_TEXTFLAGS= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_TYPES |
 		JavaElementLabels.M_APP_TYPE_PARAMETERS | JavaElementLabels.M_APP_RETURNTYPE  | JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED;
 	public final static int DEFAULT_IMAGEFLAGS= JavaElementImageProvider.OVERLAY_ICONS;
-	
+
 	private long fTextFlagMask;
 	private int fImageFlagMask;
-	
+
 	/**
 	 * Constructor for AppearanceAwareLabelProvider.
 	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
@@ -49,11 +49,11 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 
 	/**
 	 * Creates a labelProvider with DEFAULT_TEXTFLAGS and DEFAULT_IMAGEFLAGS
-	 */	
+	 */
 	public AppearanceAwareLabelProvider() {
 		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 	}
-	
+
 	private void initMasks() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		fTextFlagMask= -1;
@@ -69,7 +69,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_CATEGORY)) {
 			fTextFlagMask ^= JavaElementLabels.ALL_CATEGORY;
 		}
-		
+
 		fImageFlagMask= -1;
 	}
 
@@ -86,9 +86,9 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);
-		}		
+		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IPropertyListener#propertyChanged(java.lang.Object, int)
 	 */

@@ -59,13 +59,13 @@ import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
  * <p>
  * Action is applicable to selections containing resources and Java
  * elements down to compilation units.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class RefreshAction extends SelectionDispatchAction {
@@ -78,18 +78,18 @@ public class RefreshAction extends SelectionDispatchAction {
 		public WrappedWorkbenchRefreshAction(IShellProvider provider) {
 			super(provider);
 		}
-		
+
 		protected List getSelectedResources() {
 			List selectedResources= super.getSelectedResources();
 			if (!getStructuredSelection().isEmpty() && selectedResources.size() == 1 && selectedResources.get(0) instanceof IWorkspaceRoot) {
 				selectedResources= Collections.EMPTY_LIST; // Refresh action refreshes root when it can't find any resources in selection
 			}
-			
+
 			ArrayList allResources= new ArrayList(selectedResources);
 			addWorkingSetResources(allResources);
 			return allResources;
-		} 
-		
+		}
+
 		private void addWorkingSetResources(List selectedResources) {
 			Object[] elements= getStructuredSelection().toArray();
 			for (int i= 0; i < elements.length; i++) {
@@ -105,14 +105,14 @@ public class RefreshAction extends SelectionDispatchAction {
 				}
 			}
 		}
-		
+
 		public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 			try {
 				final IStatus[] errorStatus= new IStatus[] { Status.OK_STATUS };
 				createOperation(errorStatus).run(monitor);
 				if (errorStatus[0].matches(IStatus.ERROR)) {
 					throw new CoreException(errorStatus[0]);
-				}				
+				}
 			} catch (InvocationTargetException e) {
 				Throwable targetException= e.getTargetException();
 				if (targetException instanceof CoreException)
@@ -123,22 +123,22 @@ public class RefreshAction extends SelectionDispatchAction {
 			}
 		}
 	}
-	
+
 	/**
 	 * Creates a new <code>RefreshAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public RefreshAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.RefreshAction_label); 
-		setToolTipText(ActionMessages.RefreshAction_toolTip); 
+		setText(ActionMessages.RefreshAction_label);
+		setToolTipText(ActionMessages.RefreshAction_toolTip);
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
@@ -154,7 +154,7 @@ public class RefreshAction extends SelectionDispatchAction {
 			if (element instanceof IWorkingSet) {
 				// don't inspect working sets any deeper.
 			} else if (element instanceof IPackageFragmentRoot) {
-				// on internal folders/JARs we do a normal refresh, and Java archive refresh on external 
+				// on internal folders/JARs we do a normal refresh, and Java archive refresh on external
 			} else if (element instanceof PackageFragmentRootContainer) {
 				// too expensive to look at children. assume we can refresh
 			} else if (element instanceof IAdaptable) { // test for IAdaptable last (types before are IAdaptable as well)
@@ -163,7 +163,7 @@ public class RefreshAction extends SelectionDispatchAction {
 					return false;
 				if (resource.getType() == IResource.PROJECT && !((IProject)resource).isOpen())
 					return false;
-			} else {				
+			} else {
 				return false;
 			}
 		}
@@ -181,16 +181,16 @@ public class RefreshAction extends SelectionDispatchAction {
 		};
 		new WorkbenchRunnableAdapter(operation).runAsUserJob(ActionMessages.RefreshAction_refresh_operation_label, null);
 	}
-	
+
 	private void performRefresh(IStructuredSelection selection, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		monitor.beginTask(ActionMessages.RefreshAction_progressMessage, 2);
-		
+
 		WrappedWorkbenchRefreshAction workbenchAction= new WrappedWorkbenchRefreshAction(getSite());
 		workbenchAction.selectionChanged(selection);
 		workbenchAction.run(new SubProgressMonitor(monitor, 1));
 		refreshJavaElements(selection, new SubProgressMonitor(monitor, 1));
 	}
-	
+
 	private void refreshJavaElements(IStructuredSelection selection, IProgressMonitor monitor) throws JavaModelException {
 		Object[] selectedElements= selection.toArray();
 		ArrayList javaElements= new ArrayList();
@@ -207,7 +207,7 @@ public class RefreshAction extends SelectionDispatchAction {
 					if (adapted != null) {
 						javaElements.add(adapted);
 					}
-				}				
+				}
 			} else if (curr instanceof IAdaptable) {
 				Object adapted= ((IAdaptable) curr).getAdapter(IJavaElement.class);
 				if (adapted != null) {

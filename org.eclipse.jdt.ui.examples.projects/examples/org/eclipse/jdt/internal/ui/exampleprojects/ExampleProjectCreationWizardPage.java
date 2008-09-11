@@ -10,13 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.exampleprojects;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -26,6 +19,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -33,30 +34,30 @@ import org.eclipse.jface.wizard.WizardPage;
 public class ExampleProjectCreationWizardPage extends WizardPage {
 
 	private IStatus fCurrStatus;
-	
+
 	private boolean fPageVisible;
-	
+
 	private IConfigurationElement fConfigurationElement;
-	
+
 	private String fNameLabel;
 	private String fProjectName;
-	
+
 	private Text fTextControl;
-	
+
 	public ExampleProjectCreationWizardPage(int pageNumber, IConfigurationElement elem) {
 		super("page" + pageNumber); //$NON-NLS-1$
 		fCurrStatus= createStatus(IStatus.OK, ""); //$NON-NLS-1$
-		
+
 		fConfigurationElement= elem;
-		
+
 		setTitle(getAttribute(elem, "pagetitle")); //$NON-NLS-1$
 		setDescription(getAttribute(elem, "pagedescription")); //$NON-NLS-1$
-		
+
 		fNameLabel= getAttribute(elem, "label"); //$NON-NLS-1$
 		fProjectName= getAttribute(elem, "name");		 //$NON-NLS-1$
-		
+
 	}
-	
+
 	private String getAttribute(IConfigurationElement elem, String tag) {
 		String res= elem.getAttribute(tag);
 		if (res == null) {
@@ -64,7 +65,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		}
 		return res;
 	}
-	
+
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
@@ -73,11 +74,11 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		GridLayout gd= new GridLayout();
 		gd.numColumns= 2;
 		composite.setLayout(gd);
-		
+
 		Label label= new Label(composite, SWT.LEFT);
 		label.setText(fNameLabel);
 		label.setLayoutData(new GridData());
-		
+
 		fTextControl= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fTextControl.setText(fProjectName);
 		fTextControl.setSelection(fProjectName.length());
@@ -89,12 +90,12 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 			}
 		});
 		fTextControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		fTextControl.setFocus();
-		
+
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
-		
+
 		validateText(fProjectName);
 	}
 
@@ -103,15 +104,15 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		IStatus status= workspace.validateName(text, IResource.PROJECT);
 		if (status.isOK()) {
 			if (workspace.getRoot().getProject(text).exists()) {
-				status= createStatus(IStatus.ERROR, ExampleProjectMessages.ExampleProjectCreationWizardPage_error_alreadyexists); 
+				status= createStatus(IStatus.ERROR, ExampleProjectMessages.ExampleProjectCreationWizardPage_error_alreadyexists);
 			}
-		}	
+		}
 		updateStatus(status);
-		
+
 		fProjectName= text;
-	}	
-	
-	
+	}
+
+
 	/*
 	 * @see WizardPage#becomesVisible
 	 */
@@ -122,9 +123,9 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		if (visible && fCurrStatus.matches(IStatus.ERROR)) {
 			// keep the error state, but remove the message
 			fCurrStatus= createStatus(IStatus.ERROR, ""); //$NON-NLS-1$
-		} 
+		}
 		updateStatus(fCurrStatus);
-	}	
+	}
 
 	/*
 	 * Updates the status line and the ok button depending on the status
@@ -154,12 +155,12 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		page.setErrorMessage(errorMessage);
 		page.setMessage(warningMessage);
 	}
-	
-	
+
+
 	private static IStatus createStatus(int severity, String message) {
 		return new Status(severity, ExampleProjectsPlugin.getPluginId(), severity, message, null);
 	}
-	
+
 	/**
 	 * @return Returns the name entered by the user
 	 */

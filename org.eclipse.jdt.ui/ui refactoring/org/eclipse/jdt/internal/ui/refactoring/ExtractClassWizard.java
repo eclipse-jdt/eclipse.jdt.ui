@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -26,6 +24,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -435,7 +435,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 				public void doSetValue(Field pi, String string) {
 					pi.setNewFieldName(string);
 				}
-				
+
 				protected boolean canEdit(Object element) {
 					if (element instanceof Field) {
 						Field field= (Field) element;

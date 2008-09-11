@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,6 +19,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -51,37 +51,37 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 public class IntroduceParameterWizard extends RefactoringWizard {
 
 	public IntroduceParameterWizard(IntroduceParameterRefactoring ref) {
-		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
-		setDefaultPageTitle(RefactoringMessages.IntroduceParameterWizard_defaultPageTitle); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		setDefaultPageTitle(RefactoringMessages.IntroduceParameterWizard_defaultPageTitle);
 	}
 
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
-	 */ 
+	 */
 	protected void addUserInputPages(){
 		addPage(new IntroduceParameterInputPage(getIntroduceParameterRefactoring().guessParameterNames()));
 	}
-	
+
 	private IntroduceParameterRefactoring getIntroduceParameterRefactoring(){
 		return (IntroduceParameterRefactoring)getRefactoring();
 	}
-	
+
 	private static class IntroduceParameterInputPage extends UserInputWizardPage {
 
-		private static final String DESCRIPTION = RefactoringMessages.IntroduceParameterInputPage_description; 
+		private static final String DESCRIPTION = RefactoringMessages.IntroduceParameterInputPage_description;
 		public static final String PAGE_NAME= "IntroduceParameterInputPage";//$NON-NLS-1$
 		private String[] fParamNameProposals;
-		
+
 		private JavaSourceViewer fSignaturePreview;
 		private Document fSignaturePreviewDocument;
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
-    
+
 		public IntroduceParameterInputPage(String[] tempNameProposals) {
 			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
 			Assert.isNotNull(tempNameProposals);
-			fParamNameProposals= tempNameProposals; 
+			fParamNameProposals= tempNameProposals;
 			fSignaturePreviewDocument= new Document();
 		}
 
@@ -94,7 +94,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			setControl(result);
 			GridLayout layout= new GridLayout();
 			result.setLayout(layout);
-			
+
 			createParameterTableControl(result);
 			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(result, getRefactoring(), false);
 			if (fLeaveDelegateCheckBox != null) {
@@ -122,14 +122,14 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			Label sep= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
 			sep.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 			createSignaturePreview(result);
-			
+
 			update(false);
 			Dialog.applyDialogFont(result);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_PARAMETER_WIZARD_PAGE);
 		}
 
 		private ChangeParametersControl createParameterTableControl(Composite composite) {
-			String labelText= RefactoringMessages.IntroduceParameterWizard_parameters; 
+			String labelText= RefactoringMessages.IntroduceParameterWizard_parameters;
 			ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
 					update(true);
@@ -152,11 +152,11 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			super.dispose();
 		}
-	
+
 		private void createSignaturePreview(Composite composite) {
 			Label previewLabel= new Label(composite, SWT.NONE);
-			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview); 
-			
+			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview);
+
 			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
 			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
@@ -164,7 +164,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
 			fSignaturePreview.setDocument(fSignaturePreviewDocument);
 			fSignaturePreview.setEditable(false);
-			
+
 			//Layouting problems with wrapped text: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
 			Control signaturePreviewControl= fSignaturePreview.getControl();
 			PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
@@ -173,7 +173,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
 			signaturePreviewControl.setLayoutData(gdata);
 		}
-		
+
 		private void update(boolean displayErrorMessage){
 			updateStatus(displayErrorMessage);
 			updateSignaturePreview();
@@ -184,7 +184,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			if (displayErrorMessage) {
 				setPageComplete(nameCheck);
 			} else {
-				setErrorMessage(null);	
+				setErrorMessage(null);
 				setPageComplete(true);
 			}
 		}
@@ -192,13 +192,13 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try{
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(getIntroduceParameterRefactoring().getMethodSignaturePreview()); 
+				fSignaturePreviewDocument.set(getIntroduceParameterRefactoring().getMethodSignaturePreview());
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterWizard_defaultPageTitle, RefactoringMessages.ChangeSignatureInputPage_exception); 
-			}	
+				ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterWizard_defaultPageTitle, RefactoringMessages.ChangeSignatureInputPage_exception);
+			}
 		}
-	
+
 	}
 }
 

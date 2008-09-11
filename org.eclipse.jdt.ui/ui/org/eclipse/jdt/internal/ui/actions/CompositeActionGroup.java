@@ -21,10 +21,10 @@ import org.eclipse.ui.actions.ActionGroup;
 public class CompositeActionGroup extends ActionGroup {
 
 	private ActionGroup[] fGroups;
-	
+
 	public CompositeActionGroup() {
 	}
-	
+
 	public CompositeActionGroup(ActionGroup[] groups) {
 		setGroups(groups);
 	}
@@ -32,15 +32,15 @@ public class CompositeActionGroup extends ActionGroup {
 	protected void setGroups(ActionGroup[] groups) {
 		Assert.isTrue(fGroups == null);
 		Assert.isNotNull(groups);
-		fGroups= groups;		
+		fGroups= groups;
 	}
-		
+
 	public ActionGroup get(int index) {
 		if (fGroups == null)
 			return null;
 		return fGroups[index];
 	}
-	
+
 	public void addGroup(ActionGroup group) {
 		if (fGroups == null) {
 			fGroups= new ActionGroup[] { group };
@@ -51,7 +51,7 @@ public class CompositeActionGroup extends ActionGroup {
 			fGroups= newGroups;
 		}
 	}
-	
+
 	public void dispose() {
 		super.dispose();
 		if (fGroups == null)

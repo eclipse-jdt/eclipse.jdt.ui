@@ -32,8 +32,8 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 public class JavaPartitionerExtensionTest extends TestCase {
-	
-	
+
+
 	class PartitioningListener implements IDocumentPartitioningListener, IDocumentPartitioningListenerExtension {
 		/*
 		 * @see IDocumentPartitioningListener#documentPartitioningChanged(IDocument)
@@ -50,39 +50,39 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fChangedDocumentPartitioning= region;
 		}
 	}
-	
+
 	private JavaTextTools fTextTools;
 	private Document fDocument;
 	protected boolean fDocumentPartitioningChanged;
 	protected IRegion fChangedDocumentPartitioning;
-	
-	
+
+
 	public JavaPartitionerExtensionTest(String name) {
 		super(name);
 	}
-	
+
 	protected void setUp() {
 
 		fTextTools= new JavaTextTools(new PreferenceStore());
-		
+
 		fDocument= new Document();
 		IDocumentPartitioner partitioner= fTextTools.createDocumentPartitioner();
 		partitioner.connect(fDocument);
 		fDocument.setDocumentPartitioner(partitioner);
-		
+
 		fDocumentPartitioningChanged= false;
 		fChangedDocumentPartitioning= null;
 		fDocument.addDocumentPartitioningListener(new PartitioningListener());
 	}
-	
+
 	public static Test suite() {
-		return new TestSuite(JavaPartitionerExtensionTest.class); 
+		return new TestSuite(JavaPartitionerExtensionTest.class);
 	}
-	
+
 	protected void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;
-		
+
 		IDocumentPartitioner partitioner= fDocument.getDocumentPartitioner();
 		partitioner.disconnect();
 		fDocument= null;
@@ -92,28 +92,28 @@ public class JavaPartitionerExtensionTest extends TestCase {
 	protected String print(ITypedRegion r) {
 		return r != null ? "[" + r.getOffset() + "," + r.getLength() + "," + r.getType() + "]" : "null";
 	}
-	
+
 	protected String print(IRegion r) {
 		return r != null ? "[" + r.getOffset() + "," + r.getLength() + "]" : "null";
-	}	
-	
+	}
+
 	protected void check(int offset, int length) {
 		assertTrue(fDocumentPartitioningChanged);
 		assertNotNull(fChangedDocumentPartitioning);
 		assertTrue(fChangedDocumentPartitioning.getOffset() == offset);
 		assertTrue(fChangedDocumentPartitioning.getLength() == length);
-		
+
 		fDocumentPartitioningChanged= false;
 		fChangedDocumentPartitioning= null;
 	}
-	
+
 	protected void check() {
 		assertTrue(!fDocumentPartitioningChanged);
 		assertTrue(fChangedDocumentPartitioning == null);
 	}
-	
+
 	public void testConvertPartition() {
-		
+
 		try {
 			fDocument.set("/*xxx*/");
 			check(0, 7);
@@ -122,10 +122,10 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		} catch (BadLocationException x) {
 			assertTrue(false);
 		}
-	}	
-	
+	}
+
 	public void testTransformPartition() {
-		
+
 		try {
 			fDocument.set("/*\nx\nx\nx\n*/");
 			check(0, 11);
@@ -135,9 +135,9 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			assertTrue(false);
 		}
 	}
-	
+
 	public void testToggleMultiPartition() {
-		
+
 		try {
 			fDocument.set("/*\nCode version 1\n/*/\nCode version 2\n//*/");
 			check(0, 41);
@@ -147,7 +147,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			assertTrue(false);
 		}
 	}
-	
+
 	public void testSplitPartition() {
 		try {
 			fDocument.set("class X {}");
@@ -158,7 +158,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			assertTrue(false);
 		}
 	}
-	
+
 	public void testShortenDocument() {
 		try {
 			fDocument.set("class x {\n/***/\n}");
@@ -169,7 +169,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			assertTrue(false);
 		}
 	}
-	
+
 	public void testDeletePartition() {
 		try {
 			fDocument.set("class x {\n/***/\n}");
@@ -180,7 +180,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			assertTrue(false);
 		}
 	}
-	
+
 	public void testDeletePartition2() {
 		try {
 			fDocument.set("class x {\n/***/\n}");
@@ -190,5 +190,5 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		} catch (BadLocationException x) {
 			assertTrue(false);
 		}
-	}	
+	}
 }

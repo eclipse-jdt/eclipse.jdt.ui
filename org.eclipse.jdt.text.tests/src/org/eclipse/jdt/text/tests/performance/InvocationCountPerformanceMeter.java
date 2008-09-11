@@ -55,36 +55,36 @@ import org.eclipse.test.internal.performance.data.Scalar;
  * Because the performance meter uses the VM's debugging facility, it cannot be
  * debugged itself. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
  * could be used while debugging clients.
- * 
+ *
  * @since 3.1
  */
 public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
-	
+
 	/**
 	 * An event reader that continuously reads and handles events coming
 	 * from the VM.
 	 */
 	public class EventReader implements Runnable {
-		
+
 		/** Event queue */
 		private EventQueue fEventQueue;
-		
+
 		/** Background thread */
 		private Thread fThread;
-		
+
 		/** <code>true</code> if the reader should stop */
 		private boolean fIsStopping= false;
-		
+
 		/**
 		 * Creates a new event reader that will read from the given
 		 * event queue.
-		 * 
+		 *
 		 * @param queue the event queue
 		 */
 		public EventReader(EventQueue queue) {
 			fEventQueue= queue;
 		}
-		
+
 		/**
 		 * Start the thread that reads events.
 		 */
@@ -100,7 +100,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 				}
 			}
 		}
-		
+
 		/**
 		 * Tells the reader loop that it should stop.
 		 */
@@ -116,7 +116,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 				}
 			}
 		}
-		
+
 		/**
 		 * Continuously reads and handles events that are coming from
 		 * the event queue.
@@ -140,7 +140,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 								return;
 							}
 						}
-						
+
 						EventIterator iterator= eventSet.eventIterator();
 						while (iterator.hasNext()) {
 							Event event= iterator.nextEvent();
@@ -151,7 +151,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 								System.out.println("VM unexpectedly died"); //$NON-NLS-1$
 							}
 						}
-						
+
 						eventSet.resume();
 					} catch (InterruptedException x) {
 						if (fIsStopping)
@@ -189,7 +189,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 		/**
 		 * Handles the given breakpoint event.
-		 * 
+		 *
 		 * @param event the breakpoint event
 		 */
 		private void handleBreakpointEvent(BreakpointEvent event) {
@@ -206,18 +206,18 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 				}
 		}
 	}
-	
+
 	/**
 	 * Invocation count results.
 	 */
 	public static class Results {
-		
+
 		/** The result map */
 		private Map fResultsMap= new HashMap();
-		
+
 		/**
 		 * Updates the results for the given pair of keys.
-		 * 
+		 *
 		 * @param key1 the first key
 		 * @param key2 the second key
 		 */
@@ -237,14 +237,14 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			}
 			results.put(key2, new Integer(value + 1));
 		}
-		
+
 		/**
 		 * Clears the results.
 		 */
 		public void clear() {
 			fResultsMap.clear();
 		}
-		
+
 		/**
 		 * Prints the results.
 		 */
@@ -252,10 +252,10 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			for (Iterator iter= fResultsMap.keySet().iterator(); iter.hasNext();)
 				print(iter.next());
 		}
-		
+
 		/**
 		 * Prints the results for the given first key.
-		 * 
+		 *
 		 * @param key1 the first key
 		 */
 		public void print(Object key1) {
@@ -267,13 +267,13 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			}
 		}
 	}
-	
+
 	/** System property that specifies the debugging port */
 	public static final String DEBUG_PORT_PROPERTY= "eclipse.perf.debugPort"; //$NON-NLS-1$
-	
+
 	/** Default debugging port when the system property cannot be interpreted as an integer */
 	public static final int DEBUG_PORT_DEFAULT= 7777;
-	
+
 	/**
 	 * Debugging port
 	 * <p>
@@ -285,31 +285,31 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * </p>
 	 */
 	private static final int PORT= intValueOf(System.getProperty(DEBUG_PORT_PROPERTY), DEBUG_PORT_DEFAULT);
-	
+
 	/** Empty array of methods */
 	private static final java.lang.reflect.Method[] NO_METHODS= new java.lang.reflect.Method[0];
-	
+
 	/** Empty array of constructors */
 	private static final Constructor[] NO_CONSTRUCTORS= new Constructor[0];
-	
+
 	/** Results */
 	private Results fResults= new Results();
-	
+
 	/** Virtual machine */
 	private VirtualMachine fVM;
-	
+
 	/** Event reader */
 	private EventReader fEventReader;
-	
+
 	/** Methods from which to count the invocations */
 	private java.lang.reflect.Method[] fMethods;
 
 	/** Constructors from which to count the invocations */
 	private Constructor[] fConstructors;
-	
+
 	/** Timestamp */
 	private long fStartTime;
-	
+
 	/** Total number of invocations */
 	private long fInvocationCount;
 
@@ -321,14 +321,14 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/** <code>true</code> iff additional information should be collected per instance */
 	private boolean fCollectInstanceResults= true;
-	
+
 	/** Timeout after which the event reader aborts when no event occurred, <code>-1</code> for infinite */
 	private long fTimeout= -1;
-	
+
 	/**
 	 * Initialize the performance meter to count the number of invocation of
 	 * the given methods and constructors.
-	 * 
+	 *
 	 * @param scenarioId the scenario id
 	 * @param methods the methods
 	 * @param constructors the constructors
@@ -336,28 +336,28 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods, Constructor[] constructors) {
 		super(scenarioId);
 		Assert.assertNotNull("Could not create performance meter: check the command line arguments (see InvocationCountPerformanceMeter for details)", System.getProperty(DEBUG_PORT_PROPERTY));
-		
+
 		fMethods= methods;
 		fConstructors= constructors;
 		fStartTime= System.currentTimeMillis();
 		fVerbose= PerformanceTestPlugin.getDBLocation() == null || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null;
 	}
-	
+
 	/**
 	 * Initialize the performance meter to count the number of invocation of
 	 * the given methods.
-	 * 
+	 *
 	 * @param scenarioId the scenario id
 	 * @param methods the methods
 	 */
 	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods) {
 		this(scenarioId, methods, NO_CONSTRUCTORS);
 	}
-	
+
 	/**
 	 * Initialize the performance meter to count the number of invocation of
 	 * the given constructors.
-	 * 
+	 *
 	 * @param scenarioId the scenario id
 	 * @param constructors the constructors
 	 */
@@ -365,7 +365,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		this(scenarioId, NO_METHODS, constructors);
 		fCollectInstanceResults= false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#start()
 	 */
@@ -373,14 +373,14 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		try {
 			String localhost = InetAddress.getLocalHost().getCanonicalHostName();
 			attach(localhost, PORT);
-			
+
 			List requests= new ArrayList();
 			for (int i= 0; i < fMethods.length; i++)
 				requests.add(createBreakpointRequest(fMethods[i]));
 			for (int i= 0; i < fConstructors.length; i++)
 				requests.add(createBreakpointRequest(fConstructors[i]));
 			fBreakpointRequests= (BreakpointRequest[]) requests.toArray(new BreakpointRequest[requests.size()]);
-			
+
 			fEventReader= new EventReader(fVM.eventQueue());
 			fEventReader.start();
 		} catch (IOException x) {
@@ -391,7 +391,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			Assert.assertNotNull("Could not start performance meter, hints:\n1) check the command line arguments (see InvocationCountPerformanceMeter for details)\n2) use a different port number", fEventReader);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
@@ -400,13 +400,13 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			fEventReader.stop();
 			fEventReader= null;
 		}
-		
+
 		if (fVM != null) {
 			deleteBreakpointRequests();
 			detach();
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
 	 */
@@ -420,7 +420,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			System.out.println();
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
 	 */
@@ -432,7 +432,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		fMethods= null;
 		fConstructors= null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#getSample()
 	 */
@@ -442,18 +442,18 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		DataPoint[] dataPoints= new DataPoint[] { new DataPoint(AFTER, map) };
 		return new Sample(getScenarioName(), fStartTime, null, dataPoints);
 	}
-	
+
 	private void attach(String host, int port) throws IOException, IllegalConnectorArgumentsException {
 		VirtualMachineManager manager= Bootstrap.virtualMachineManager();
 		List connectors= manager.attachingConnectors();
 		AttachingConnector connector= (AttachingConnector) connectors.get(0);
 		Map args= connector.defaultArguments();
-		
+
 		((Connector.Argument) args.get("port")).setValue(String.valueOf(port)); //$NON-NLS-1$
 		((Connector.Argument) args.get("hostname")).setValue(host); //$NON-NLS-1$
 		fVM= connector.attach(args);
 	}
-	
+
 	/**
 	 * Detaches from the VM.
 	 */
@@ -461,30 +461,30 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		fVM.dispose();
 		fVM= null;
 	}
-	
+
 	/**
 	 * Creates a breakpoint request on entry of the given method.
-	 * 
+	 *
 	 * @param method the method
 	 * @return the breakpoint request
 	 */
 	private BreakpointRequest createBreakpointRequest(java.lang.reflect.Method method) {
 		return createBreakpointRequest(getMethod(method.getDeclaringClass().getName(), method.getName(), getJNISignature(method)));
 	}
-	
+
 	/**
 	 * Creates a breakpoint request on entry of the given constructor.
-	 * 
+	 *
 	 * @param constructor the method
 	 * @return the breakpoint request
 	 */
 	private BreakpointRequest createBreakpointRequest(Constructor constructor) {
 		return createBreakpointRequest(getMethod(constructor.getDeclaringClass().getName(), "<init>", getJNISignature(constructor)));
 	}
-	
+
 	/**
 	 * Creates a breakpoint request on entry of the given method.
-	 * 
+	 *
 	 * @param method the method
 	 * @return the breakpoint request
 	 */
@@ -496,7 +496,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	/**
 	 * Returns the JDI method for the given class, name and signature.
-	 * 
+	 *
 	 * @param className fully-qualified class name
 	 * @param name method name
 	 * @param signature JNI-style signature
@@ -506,7 +506,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		ClassType type= (ClassType) fVM.classesByName(className).get(0);
 		return type.concreteMethodByName(name, signature);
 	}
-	
+
 	/**
 	 * Deletes all breakpoint requests.
 	 */
@@ -522,33 +522,33 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			x.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Returns the JNI-style signature of the given method. See
 	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param method the method
 	 * @return the JNI style signature
 	 */
 	private String getJNISignature(java.lang.reflect.Method method) {
 		return getJNISignature(method.getParameterTypes()) + getJNISignature(method.getReturnType());
 	}
-	
+
 	/**
 	 * Returns the JNI-style signature of the given constructor. See
 	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param constructor the constructor
 	 * @return the JNI style signature
 	 */
 	private String getJNISignature(Constructor constructor) {
 		return getJNISignature(constructor.getParameterTypes()) + "V";
 	}
-	
+
 	/**
 	 * Returns the JNI-style signature of the given parameter types. See
 	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param paramTypes the parameter types
 	 * @return the JNI style signature
 	 */
@@ -564,24 +564,24 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/**
 	 * Returns the JNI-style signature of the given class. See
 	 * http://java.sun.com/j2se/1.4.2/docs/guide/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param clazz the class
 	 * @return the JNI style signature
 	 */
 	private String getJNISignature(Class clazz) {
 		String qualifiedName= getName(clazz);
 		StringBuffer signature= new StringBuffer();
-		
+
 		int index= qualifiedName.indexOf('[') + 1;
 		while (index > 0) {
 			index= qualifiedName.indexOf('[', index) + 1;
 			signature.append('[');
 		}
-		
+
 		int nameEndOffset= qualifiedName.indexOf('[');
 		if (nameEndOffset < 0)
 			nameEndOffset= qualifiedName.length();
-		
+
 		// Check for primitive types
 		String name= qualifiedName.substring(0, nameEndOffset);
 		if (name.equals("byte")) { //$NON-NLS-1$
@@ -612,17 +612,17 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			signature.append('V');
 			return signature.toString();
 		}
-		
+
 		// Class type
 		signature.append('L');
 		signature.append(name.replace('.','/'));
 		signature.append(';');
 		return signature.toString();
 	}
-	
+
 	/**
 	 * Returns the given class' name
-	 * 
+	 *
 	 * @param clazz the class
 	 * @return the name
 	 */
@@ -631,12 +631,12 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			return getName(clazz.getComponentType()) + "[]"; //$NON-NLS-1$
 		return clazz.getName();
 	}
-	
+
 	/**
 	 * Returns the integer value of the given string unless the string
 	 * cannot be interpreted as such, in this case the given default is
 	 * returned.
-	 * 
+	 *
 	 * @param stringValue the string to be interpreted as integer
 	 * @param defaultValue the default integer value
 	 * @return the integer value
@@ -650,7 +650,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		}
 		return defaultValue;
 	}
-	
+
 	/**
 	 * Returns the timeout after which the event reader aborts when no event
 	 * occurred, <code>-1</code> for infinite.
@@ -660,21 +660,21 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * <p>
 	 * For debugging purposes.
 	 * </p>
-	 * 
+	 *
 	 * @return the timeout after which the event reader aborts when no event
 	 *         occurred, <code>-1</code> for infinite
 	 */
 	public long getTimeout() {
 		return fTimeout;
 	}
-	
+
 	/**
 	 * Sets the timeout after which the event reader aborts when no event
 	 * occurred, <code>-1</code> for infinite.
 	 * <p>
 	 * For debugging purposes.
 	 * </p>
-	 * 
+	 *
 	 * @param timeout the timeout after which the event reader aborts when
 	 *                no event occurred, <code>-1</code> for infinite
 	 */

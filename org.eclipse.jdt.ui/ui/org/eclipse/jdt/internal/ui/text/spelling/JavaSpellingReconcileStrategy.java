@@ -21,6 +21,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
@@ -41,7 +42,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
  */
 public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 
-	
+
 	/**
 	 * Spelling problem collector that forwards {@link SpellingProblem}s as
 	 * {@link IProblem}s to the {@link IProblemRequestor}.
@@ -92,7 +93,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 		}
 	}
 
-	
+
 	/** The id of the problem */
 	public static final int SPELLING_PROBLEM_ID= 0x80000000;
 
@@ -105,7 +106,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	/** The problem requester. */
 	private IProblemRequestor fRequestor;
 
-	
+
 	/**
 	 * Creates a new comment reconcile strategy.
 	 *
@@ -124,7 +125,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 		if (fRequestor != null && isSpellingEnabled())
 			super.reconcile(region);
 	}
-	
+
 	private boolean isSpellingEnabled() {
 		return EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED);
 	}
@@ -136,7 +137,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 	protected ISpellingProblemCollector createSpellingProblemCollector() {
 		return new SpellingProblemCollector();
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#getContentType()
 	 * @since 3.3
@@ -160,7 +161,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 		IAnnotationModel model= getAnnotationModel();
 		fRequestor= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy#getAnnotationModel()
 	 * @since 3.3

@@ -29,13 +29,13 @@ import org.eclipse.core.filebuffers.manipulation.FileBufferOperationRunner;
 
 /**
  * Measures the time to convert line delimiters of a project.
- * 
+ *
  * @since 3.1
  */
 public class ConvertLineDelimitersProjectTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= ConvertLineDelimitersProjectTest.class;
-	
+
 	private static final int WARM_UP_RUNS= 5;
 
 	private static final int MEASURED_RUNS= 5;
@@ -45,9 +45,9 @@ public class ConvertLineDelimitersProjectTest extends TextPerformanceTestCase {
 		new ConvertLineDelimitersOperation("\n"),
 		new ConvertLineDelimitersOperation("\r\n"),
 	};
-	
+
 	private int fOperationIndex= 0;
-	
+
 	public static Test suite() {
 		return new DisableAutoBuildTestSetup(new TextPluginTestSetup(new TestSuite(THIS)));
 	}
@@ -60,7 +60,7 @@ public class ConvertLineDelimitersProjectTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to convert line delimiters of a project.
-	 * 
+	 *
 	 * @throws Exception if measure fails
 	 */
 	public void test() throws Exception {

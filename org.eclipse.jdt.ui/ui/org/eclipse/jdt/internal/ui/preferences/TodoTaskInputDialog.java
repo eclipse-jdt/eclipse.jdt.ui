@@ -38,21 +38,21 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * Dialog to enter a na new task tag
  */
 public class TodoTaskInputDialog extends StatusDialog {
-	
+
 	private class CompilerTodoTaskInputAdapter implements IDialogFieldListener {
 		public void dialogFieldChanged(DialogField field) {
 			doValidation();
-		}			
+		}
 	}
-	
+
 	private StringDialogField fNameDialogField;
 	private ComboDialogField fPriorityDialogField;
-	
+
 	private List fExistingNames;
-		
+
 	public TodoTaskInputDialog(Shell parent, TodoTask task, List existingEntries) {
 		super(parent);
-		
+
 		fExistingNames= new ArrayList(existingEntries.size());
 		for (int i= 0; i < existingEntries.size(); i++) {
 			TodoTask curr= (TodoTask) existingEntries.get(i);
@@ -60,29 +60,29 @@ public class TodoTaskInputDialog extends StatusDialog {
 				fExistingNames.add(curr.name);
 			}
 		}
-		
+
 		if (task == null) {
-			setTitle(PreferencesMessages.TodoTaskInputDialog_new_title); 
+			setTitle(PreferencesMessages.TodoTaskInputDialog_new_title);
 		} else {
-			setTitle(PreferencesMessages.TodoTaskInputDialog_edit_title); 
+			setTitle(PreferencesMessages.TodoTaskInputDialog_edit_title);
 		}
 
 		CompilerTodoTaskInputAdapter adapter= new CompilerTodoTaskInputAdapter();
 
 		fNameDialogField= new StringDialogField();
-		fNameDialogField.setLabelText(PreferencesMessages.TodoTaskInputDialog_name_label); 
+		fNameDialogField.setLabelText(PreferencesMessages.TodoTaskInputDialog_name_label);
 		fNameDialogField.setDialogFieldListener(adapter);
-		
+
 		fNameDialogField.setText((task != null) ? task.name : ""); //$NON-NLS-1$
-		
+
 		String[] items= new String[] {
-			PreferencesMessages.TodoTaskInputDialog_priority_high, 
-			PreferencesMessages.TodoTaskInputDialog_priority_normal, 
+			PreferencesMessages.TodoTaskInputDialog_priority_high,
+			PreferencesMessages.TodoTaskInputDialog_priority_normal,
 			PreferencesMessages.TodoTaskInputDialog_priority_low
 		};
-		
+
 		fPriorityDialogField= new ComboDialogField(SWT.READ_ONLY);
-		fPriorityDialogField.setLabelText(PreferencesMessages.TodoTaskInputDialog_priority_label); 
+		fPriorityDialogField.setLabelText(PreferencesMessages.TodoTaskInputDialog_priority_label);
 		fPriorityDialogField.setItems(items);
 		if (task != null) {
 			if (JavaCore.COMPILER_TASK_PRIORITY_HIGH.equals(task.priority)) {
@@ -96,7 +96,7 @@ public class TodoTaskInputDialog extends StatusDialog {
 			fPriorityDialogField.selectItem(1);
 		}
 	}
-	
+
 	public TodoTask getResult() {
 		TodoTask task= new TodoTask();
 		task.name= fNameDialogField.getText().trim();
@@ -109,48 +109,48 @@ public class TodoTaskInputDialog extends StatusDialog {
 				break;
 			default :
 					task.priority= JavaCore.COMPILER_TASK_PRIORITY_LOW;
-				break;				
+				break;
 		}
 		return task;
 	}
-	
+
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-		
+
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		inner.setLayout(layout);
-		
+
 		fNameDialogField.doFillIntoGrid(inner, 2);
 		fPriorityDialogField.doFillIntoGrid(inner, 2);
-		
+
 		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
 		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), convertWidthInCharsToPixels(45));
-		
+
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
-		
-		applyDialogFont(composite);		
-		
+
+		applyDialogFont(composite);
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.TASK_TAG_INPUT_DIALOG);
-		
+
 		return composite;
 	}
-		
+
 	private void doValidation() {
 		StatusInfo status= new StatusInfo();
 		String newText= fNameDialogField.getText();
 		if (newText.length() == 0) {
-			status.setError(PreferencesMessages.TodoTaskInputDialog_error_enterName); 
+			status.setError(PreferencesMessages.TodoTaskInputDialog_error_enterName);
 		} else {
 			if (newText.indexOf(',') != -1) {
-				status.setError(PreferencesMessages.TodoTaskInputDialog_error_comma); 
+				status.setError(PreferencesMessages.TodoTaskInputDialog_error_comma);
 			} else if (fExistingNames.contains(newText)) {
-				status.setError(PreferencesMessages.TodoTaskInputDialog_error_entryExists); 
+				status.setError(PreferencesMessages.TodoTaskInputDialog_error_entryExists);
 			} else if (Character.isWhitespace(newText.charAt(0)) ||  Character.isWhitespace(newText.charAt(newText.length() - 1))) {
-				status.setError(PreferencesMessages.TodoTaskInputDialog_error_noSpace); 
+				status.setError(PreferencesMessages.TodoTaskInputDialog_error_noSpace);
 			}
 		}
 		updateStatus(status);

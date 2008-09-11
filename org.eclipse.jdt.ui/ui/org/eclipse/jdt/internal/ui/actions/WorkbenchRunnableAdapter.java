@@ -32,15 +32,15 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * An <code>IRunnableWithProgress</code> that adapts and  <code>IWorkspaceRunnable</code>
- * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code> 
+ * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code>
  * thrown by the adapted runnable are caught and re-thrown as a <code>InterruptedException</code>.
  */
 public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadListener {
-	
+
 	private boolean fTransfer= false;
 	private IWorkspaceRunnable fWorkspaceRunnable;
 	private ISchedulingRule fRule;
-	
+
 	/**
 	 * Runs a workspace runnable with the workspace lock.
 	 * @param runnable the runnable
@@ -48,7 +48,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
 		this(runnable, ResourcesPlugin.getWorkspace().getRoot());
 	}
-	
+
 	/**
 	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
 	 * @param runnable the runnable
@@ -58,12 +58,12 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 		fWorkspaceRunnable= runnable;
 		fRule= rule;
 	}
-	
+
 	/**
 	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
 	 * @param runnable the runnable
 	 * @param rule the scheduling rule
-	 * @param transfer <code>true</code> if the rule is to be transfered 
+	 * @param transfer <code>true</code> if the rule is to be transfered
 	 *  to the model context thread. Otherwise <code>false</code>
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule, boolean transfer) {
@@ -71,7 +71,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 		fRule= rule;
 		fTransfer= transfer;
 	}
-	
+
 	public ISchedulingRule getSchedulingRule() {
 		return fRule;
 	}
@@ -96,9 +96,9 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 			throw new InvocationTargetException(e);
 		}
 	}
-	
+
 	public void runAsUserJob(String name, final Object jobFamiliy) {
-		Job job = new Job(name){ 
+		Job job = new Job(name){
 			/* (non-Javadoc)
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 */
@@ -124,9 +124,9 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 			}
 		};
 		job.setRule(fRule);
-		job.setUser(true); 
+		job.setUser(true);
 		job.schedule();
-		
+
 		// TODO: should block until user pressed 'to background'
 	}
 }

@@ -31,30 +31,30 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 
 public class RenamePackageWizard extends RenameRefactoringWizard {
-	
+
 	public RenamePackageWizard(Refactoring refactoring) {
-		super(refactoring, 
-			RefactoringMessages.RenamePackageWizard_defaultPageTitle, 
-			RefactoringMessages.RenamePackageWizard_inputPage_description, 
+		super(refactoring,
+			RefactoringMessages.RenamePackageWizard_defaultPageTitle,
+			RefactoringMessages.RenamePackageWizard_inputPage_description,
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_PACKAGE,
 			IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE);
 	}
-	
+
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenamePackageInputWizardPage(message, IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
-			}	
+			}
 		};
 	}
 
 	private static class RenamePackageInputWizardPage extends RenameInputWizardPage {
-		
+
 		private Button fRenameSubpackages;
 		public RenamePackageInputWizardPage(String message, String contextHelpId, String initialValue) {
 			super(message, contextHelpId, true, initialValue);
 		}
-	
+
 		protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
 			fRenameSubpackages.setText(RefactoringMessages.RenamePackageWizard_rename_subpackages);
@@ -65,7 +65,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			fRenameSubpackages.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					getRenamePackageProcessor().setRenameSubpackages(fRenameSubpackages.getSelection());
-					
+
 					RefactoringStatus status= validateTextField(getText());
 					if (status == null)
 						status= new RefactoringStatus();
@@ -73,18 +73,18 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 				}
 			});
 			layouter.perform(fRenameSubpackages);
-			
+
 			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			layouter.perform(separator);
 		}
-		
+
 		public void dispose() {
 			if (saveSettings() && fRenameSubpackages.isEnabled())
 				saveBooleanSetting(RenameRefactoringWizard.PACKAGE_RENAME_SUBPACKAGES, fRenameSubpackages);
 			super.dispose();
 		}
-		
+
 		private RenamePackageProcessor getRenamePackageProcessor() {
 			return (RenamePackageProcessor) ((RenameRefactoring) getRefactoring()).getProcessor();
 		}

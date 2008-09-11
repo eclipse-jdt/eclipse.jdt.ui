@@ -80,7 +80,7 @@ public class CallHierarchyUI {
      */
     public int getMaxCallDepth() {
         int maxCallDepth;
-        
+
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
         maxCallDepth = settings.getInt(PREF_MAX_CALL_DEPTH);
         if (maxCallDepth < 1 || maxCallDepth > 99) {
@@ -94,7 +94,7 @@ public class CallHierarchyUI {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
         settings.setValue(PREF_MAX_CALL_DEPTH, maxCallDepth);
     }
-    
+
     public static void jumpToMember(IJavaElement element) {
         if (element != null) {
             try {
@@ -124,7 +124,7 @@ public class CallHierarchyUI {
 
 	/**
 	 * Opens the element in the editor or shows an error dialog if that fails.
-	 * 
+	 *
 	 * @param element the element to open
 	 * @param shell parent shell for error dialog
 	 * @param activateOnOpen <code>true</code> if the editor should be activated
@@ -133,12 +133,12 @@ public class CallHierarchyUI {
 	 */
 	public static boolean openInEditor(Object element, Shell shell, boolean activateOnOpen) {
         CallLocation callLocation= CallHierarchy.getCallLocation(element);
-        
+
         try {
 	        IMember enclosingMember;
 	        int selectionStart;
 			int selectionLength;
-			
+
 	        if (callLocation != null) {
 				enclosingMember= callLocation.getMember();
 				selectionStart= callLocation.getStart();
@@ -155,7 +155,7 @@ public class CallHierarchyUI {
 	        } else {
 	            return true;
 	        }
-	
+
 			IEditorPart methodEditor = JavaUI.openInEditor(enclosingMember, activateOnOpen, false);
             if (methodEditor instanceof ITextEditor) {
                 ITextEditor editor = (ITextEditor) methodEditor;
@@ -202,7 +202,7 @@ public class CallHierarchyUI {
 
     public static CallHierarchyViewPart openSelectionDialog(IMember[] candidates, IWorkbenchWindow window) {
         Assert.isTrue(candidates != null);
-        
+
         IMember input= null;
         if (candidates.length > 1) {
             String title= CallHierarchyMessages.CallHierarchyUI_selectionDialog_title;
@@ -213,10 +213,10 @@ public class CallHierarchyUI {
         }
         if (input == null)
             return openView(new IMember[] {}, window);
-            
+
         return openView(new IMember[] { input }, window);
     }
-    
+
     public static CallHierarchyViewPart openView(IMember[] input, IWorkbenchWindow window) {
     	if (input.length == 0) {
 			MessageDialog.openInformation(window.getShell(), CallHierarchyMessages.CallHierarchyUI_selectionDialog_title,
@@ -234,7 +234,7 @@ public class CallHierarchyUI {
         }
         return null;
     }
-    
+
     /**
      * Converts an ISelection (containing MethodWrapper instances) to an ISelection
      * with the MethodWrapper's replaced by their corresponding IMembers. If the selection
@@ -247,7 +247,7 @@ public class CallHierarchyUI {
         if (selection.isEmpty()) {
             return selection;
         }
-        
+
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection structuredSelection= (IStructuredSelection) selection;
             List javaElements= new ArrayList();

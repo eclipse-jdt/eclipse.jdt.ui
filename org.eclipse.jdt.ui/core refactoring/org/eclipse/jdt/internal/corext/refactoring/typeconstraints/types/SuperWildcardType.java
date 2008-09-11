@@ -19,11 +19,11 @@ public final class SuperWildcardType extends WildcardType {
 	public TType getErasure() {
 		return getEnvironment().getJavaLangObject();
 	}
-	
+
 	public int getKind() {
 		return SUPER_WILDCARD_TYPE;
 	}
-	
+
 	protected boolean doCanAssignTo(TType lhs) {
 		switch(lhs.getKind()) {
 			case STANDARD_TYPE:
@@ -32,18 +32,18 @@ public final class SuperWildcardType extends WildcardType {
 				return true;
 			case EXTENDS_WILDCARD_TYPE:
 				return ((ExtendsWildcardType)lhs).getBound().isJavaLangObject();
-			case SUPER_WILDCARD_TYPE: 
+			case SUPER_WILDCARD_TYPE:
 				return ((SuperWildcardType)lhs).getBound().canAssignTo(this.getBound());
-			case TYPE_VARIABLE: 
+			case TYPE_VARIABLE:
 				return ((TypeVariable)lhs).isUnbounded();
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
-				
+
 			default:
 				return false;
 		}
 	}
-	
+
 	protected boolean checkTypeArgument(TType rhs) {
 		switch(rhs.getKind()) {
 			case ARRAY_TYPE:
@@ -51,36 +51,36 @@ public final class SuperWildcardType extends WildcardType {
 			case PARAMETERIZED_TYPE:
 			case RAW_TYPE:
 				return getBound().canAssignTo(rhs);
-				
+
 			case UNBOUND_WILDCARD_TYPE:
 				return false;
-			case EXTENDS_WILDCARD_TYPE: 
+			case EXTENDS_WILDCARD_TYPE:
 				return false;
 			case SUPER_WILDCARD_TYPE:
 				return getBound().canAssignTo(((SuperWildcardType)rhs).getBound());
-				
+
 			case TYPE_VARIABLE:
 				return getBound().canAssignTo(rhs);
-				
+
 			case CAPTURE_TYPE:
 				return checkTypeArgument(((CaptureType)rhs).getWildcard());
-				
+
 			default:
 				return false;
 		}
 	}
-	
+
 	protected boolean checkAssignmentBound(TType rhs) {
 		// ? super Number is a set of all super types of number including
 		// Number. So I can only assign objects which are a subtype of
 		// Number.
 		return rhs.canAssignTo(getBound());
 	}
-	
+
 	public String getName() {
 		return internalGetName("super"); //$NON-NLS-1$
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		return internalGetPrettySignature("super"); //$NON-NLS-1$
 	}

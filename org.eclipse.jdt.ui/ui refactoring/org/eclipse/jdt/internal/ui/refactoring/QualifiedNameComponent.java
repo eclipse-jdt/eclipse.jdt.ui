@@ -37,29 +37,29 @@ public class QualifiedNameComponent extends Composite {
 		layout.numColumns= 2;
 		setLayout(layout);
 		Label label= new Label(this, SWT.NONE);
-		label.setText(RefactoringMessages.QualifiedNameComponent_patterns_label); 
+		label.setText(RefactoringMessages.QualifiedNameComponent_patterns_label);
 		fPatterns= new Text(this, SWT.BORDER);
 		fPatterns.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		label= new Label(this, SWT.NONE);
-		label.setText(RefactoringMessages.QualifiedNameComponent_patterns_description);  
+		label.setText(RefactoringMessages.QualifiedNameComponent_patterns_description);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan=2;
 		label.setLayoutData(gd);
 		String text= refactoring.getFilePatterns();
-		if (text == null) 
+		if (text == null)
 			text= settings.get(RenameRefactoringWizard.QUALIFIED_NAMES_PATTERNS);
 		if (text == null || text.length() == 0)
 			text= "*"; //$NON-NLS-1$
 		fPatterns.setText(text);
 		refactoring.setFilePatterns(text);
-		
+
 		fPatterns.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				refactoring.setFilePatterns(fPatterns.getText());
 			}
 		});
 	}
-	
+
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		Control[] children= getChildren();
@@ -67,7 +67,7 @@ public class QualifiedNameComponent extends Composite {
 			children[i].setEnabled(enabled);
 		}
 	}
-	
+
 	public void savePatterns(IDialogSettings settings) {
 		settings.put(RenameRefactoringWizard.QUALIFIED_NAMES_PATTERNS, fPatterns.getText());
 	}

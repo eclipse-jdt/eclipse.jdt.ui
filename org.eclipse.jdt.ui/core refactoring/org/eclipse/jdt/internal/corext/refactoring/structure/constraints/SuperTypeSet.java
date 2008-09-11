@@ -61,7 +61,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 
 		/**
 		 * Creates a new super type singleton set.
-		 * 
+		 *
 		 * @param type the type
 		 */
 		private SuperTypeSingletonSet(final TType type) {
@@ -145,7 +145,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 
 		/**
 		 * Creates a new super type tuple.
-		 * 
+		 *
 		 * @param subType the sub type
 		 * @param superType the super type
 		 */
@@ -245,7 +245,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 
 	/**
 	 * Creates a new type set.
-	 * 
+	 *
 	 * @param type the type to contain, or <code>null</code>
 	 * @return the type set, or the universe if <code>type</code> is <code>null</code>
 	 */
@@ -257,7 +257,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 
 	/**
 	 * Creates a new type set.
-	 * 
+	 *
 	 * @param subType the sub type
 	 * @param superType the super type
 	 * @return the type set, or the universe if <code>type</code> is <code>null</code>
@@ -270,7 +270,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 
 	/**
 	 * Returns the empty set.
-	 * 
+	 *
 	 * @return the empty set
 	 */
 	public static ITypeSet getEmpty() {
@@ -279,7 +279,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 
 	/**
 	 * Returns the universe set.
-	 * 
+	 *
 	 * @return the universe set
 	 */
 	public static ITypeSet getUniverse() {

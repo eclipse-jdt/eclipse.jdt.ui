@@ -91,7 +91,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		ASTNode node= NodeFinder.perform(ast, hoverRegion.getOffset(), hoverRegion.getLength());
 		if (!(node instanceof StringLiteral) && !(node instanceof SimpleName))
 			return null;
-		
+
 		if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY)
 			return null;
 
@@ -123,7 +123,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		}
 		if (identifier == null)
 			return null;
-		
+
 		String value= properties.getProperty(identifier, null);
 		if (value != null)
 			value= HTMLPrinter.convertToHTMLContent(value);

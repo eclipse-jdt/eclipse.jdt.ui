@@ -23,29 +23,29 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
  * It only decorates package fragments which are not covered by the
  * <code>ProblemsLabelDecorator</code>.
  * </p>
- * 
- * @see org.eclipse.jdt.ui.ProblemsLabelDecorator 
+ *
+ * @see org.eclipse.jdt.ui.ProblemsLabelDecorator
  * @since 2.1
  */
 public class TreeHierarchyLayoutProblemsDecorator extends ProblemsLabelDecorator {
 
 	private boolean fIsFlatLayout;
-	
+
 	public TreeHierarchyLayoutProblemsDecorator() {
 		this(false);
 	}
-	
+
 	public TreeHierarchyLayoutProblemsDecorator(boolean isFlatLayout) {
 		super(null);
 		fIsFlatLayout= isFlatLayout;
 	}
-	
+
 	protected int computePackageAdornmentFlags(IPackageFragment fragment) {
 		if (!fIsFlatLayout && !fragment.isDefaultPackage()) {
 			return super.computeAdornmentFlags(fragment.getResource());
 		}
 		return super.computeAdornmentFlags(fragment);
-	}		
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.ProblemsLabelDecorator#computeAdornmentFlags(java.lang.Object)
@@ -68,7 +68,7 @@ public class TreeHierarchyLayoutProblemsDecorator extends ProblemsLabelDecorator
 		}
 		return super.computeAdornmentFlags(element);
 	}
-	
+
 	public void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
 	}

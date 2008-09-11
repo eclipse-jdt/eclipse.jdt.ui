@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import org.eclipse.text.edits.ReplaceEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -29,12 +27,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.ui.ide.undo.ResourceDescription;
 
@@ -60,22 +60,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
-	
+
 	private final String fHandle;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
 
-	public DeletePackageFragmentRootChange(IPackageFragmentRoot root, boolean isExecuteChange, 
+	public DeletePackageFragmentRootChange(IPackageFragmentRoot root, boolean isExecuteChange,
 			IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		Assert.isNotNull(root);
 		Assert.isTrue(! root.isExternal());
 		fHandle= root.getHandleIdentifier();
 		fUpdateClasspathQuery= updateClasspathQuery;
-		
+
 		if (isExecuteChange) {
 			// don't check for read-only resources since we already
 			// prompt the user via a dialog to confirm deletion of
 			// read only resource. The change is currently not used
-			// as 
+			// as
 			setValidationMethod(VALIDATE_NOT_DIRTY);
 		} else {
 			setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
@@ -84,35 +84,35 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
 	public String getName() {
 		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
-		return Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_delete, rootName); 
+		return Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_delete, rootName);
 	}
 
 	public Object getModifiedElement() {
 		return getRoot();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
 	 */
 	protected IResource getModifiedResource() {
 		return getRoot().getResource();
 	}
-	
+
 	private IPackageFragmentRoot getRoot(){
 		return (IPackageFragmentRoot)JavaCore.create(fHandle);
 	}
-	
+
 	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
 			return new NullChange();
 		int resourceUpdateFlags= IResource.KEEP_HISTORY;
 		int jCoreUpdateFlags= IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH | IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;
-		
+
 		pm.beginTask("", 2); //$NON-NLS-1$
 		IPackageFragmentRoot root= getRoot();
 		IResource rootResource= root.getResource();
 		CompositeChange result= new CompositeChange(getName());
-		
+
 		ResourceDescription rootDescription = ResourceDescription.fromResource(rootResource);
 		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(root);
 		HashMap/*<IFile, String>*/ classpathFilesContents= new HashMap();
@@ -123,9 +123,9 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 				classpathFilesContents.put(classpathFile, getFileContents(classpathFile));
 			}
 		}
-		
+
 		root.delete(resourceUpdateFlags, jCoreUpdateFlags, new SubProgressMonitor(pm, 1));
-		
+
 		rootDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
 		for (Iterator iterator= classpathFilesContents.entrySet().iterator(); iterator.hasNext();) {
 			Entry entry= (Entry) iterator.next();
@@ -137,7 +137,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 			result.add(classpathUndo);
 		}
 		result.add(new UndoDeleteResourceChange(rootDescription));
-		
+
 		pm.done();
 		return result;
 	}
@@ -152,7 +152,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 			manager.disconnect(path, LocationKind.IFILE, new NullProgressMonitor());
 		}
 	}
-	
+
 	private static int getFileLength(IFile file) throws CoreException {
 		// Cannot use file buffers here, since they are not yet in sync at this point.
 		InputStream contents= file.getContents();

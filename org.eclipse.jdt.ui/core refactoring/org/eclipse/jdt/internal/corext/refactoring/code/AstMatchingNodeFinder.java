@@ -100,40 +100,40 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-import org.eclipse.jdt.internal.corext.dom.*;
+import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 
 class AstMatchingNodeFinder {
-	
+
 	private AstMatchingNodeFinder(){
 	}
-	
+
 	public static ASTNode[] findMatchingNodes(ASTNode scope, ASTNode node){
 		Visitor visitor= new Visitor(node);
 		scope.accept(visitor);
 		return visitor.getMatchingNodes();
 	}
-	
+
 	private static class Visitor extends ASTVisitor{
-		
+
 		Collection fFound;
 		ASTMatcher fMatcher;
 		ASTNode fNodeToMatch;
-		
+
 		Visitor(ASTNode nodeToMatch){
 			fNodeToMatch= nodeToMatch;
 			fFound= new ArrayList();
 			fMatcher= new JdtASTMatcher();
 		}
-		
+
 		ASTNode[] getMatchingNodes(){
 			return (ASTNode[]) fFound.toArray(new ASTNode[fFound.size()]);
 		}
-		
+
 		private boolean matches(ASTNode node){
 			fFound.add(node);
 			return false;
 		}
-		
+
 		public boolean visit(AnonymousClassDeclaration node) {
 			if (node.subtreeMatch(fMatcher, fNodeToMatch))
 				return matches(node);

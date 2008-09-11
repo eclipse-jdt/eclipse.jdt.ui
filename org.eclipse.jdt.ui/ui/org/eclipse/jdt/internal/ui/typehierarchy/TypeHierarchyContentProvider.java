@@ -39,17 +39,17 @@ import org.eclipse.jdt.ui.IWorkingCopyProvider;
  */
 public abstract class TypeHierarchyContentProvider implements ITreeContentProvider, IWorkingCopyProvider {
 	protected static final Object[] NO_ELEMENTS= new Object[0];
-	
+
 	protected TypeHierarchyLifeCycle fTypeHierarchy;
 	protected IMember[] fMemberFilter;
-	
+
 	protected TreeViewer fViewer;
 
 	private ViewerFilter fWorkingSetFilter;
 	private MethodOverrideTester fMethodOverrideTester;
 	private ITypeHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
-	
-	
+
+
 	public TypeHierarchyContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fTypeHierarchy= lifecycle;
 		fMemberFilter= null;
@@ -64,7 +64,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		};
 		lifecycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 	}
-	
+
 	/**
 	 * Sets members to filter the hierarchy for. Set to <code>null</code> to disable member filtering.
 	 * When member filtering is enabled, the hierarchy contains only types that contain
@@ -74,21 +74,21 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 */
 	public final void setMemberFilter(IMember[] memberFilter) {
 		fMemberFilter= memberFilter;
-	}	
+	}
 
 	private boolean initializeMethodOverrideTester(IMethod filterMethod, IType typeToFindIn) {
 		IType filterType= filterMethod.getDeclaringType();
 		ITypeHierarchy hierarchy= fTypeHierarchy.getHierarchy();
-		
+
 		boolean filterOverrides= JavaModelUtil.isSuperType(hierarchy, typeToFindIn, filterType);
 		IType focusType= filterOverrides ? filterType : typeToFindIn;
-		
+
 		if (fMethodOverrideTester == null || !fMethodOverrideTester.getFocusType().equals(focusType)) {
 			fMethodOverrideTester= new MethodOverrideTester(focusType, hierarchy);
 		}
 		return filterOverrides;
 	}
-	
+
 	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List children) throws JavaModelException {
 		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
 		IMethod[] methods= typeToFindIn.getMethods();
@@ -99,7 +99,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			}
 		}
 	}
-	
+
 	private boolean hasCompatibleMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
 		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
 		IMethod[] methods= typeToFindIn.getMethods();
@@ -110,7 +110,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return false;
 	}
-	
+
 	private boolean isCompatibleMethod(IMethod filterMethod, IMethod method, boolean filterOverrides) throws JavaModelException {
 		if (filterOverrides) {
 			return fMethodOverrideTester.isSubsignature(filterMethod, method);
@@ -126,7 +126,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	public IMember[] getMemberFilter() {
 		return fMemberFilter;
 	}
-	
+
 	/**
 	 * Sets a filter representing a working set or <code>null</code> if working sets are disabled.
 	 * @param filter the filter
@@ -134,24 +134,24 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	public void setWorkingSetFilter(ViewerFilter filter) {
 		fWorkingSetFilter= filter;
 	}
-		
-	
+
+
 	protected final ITypeHierarchy getHierarchy() {
 		return fTypeHierarchy.getHierarchy();
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see IReconciled#providesWorkingCopies()
 	 */
 	public boolean providesWorkingCopies() {
 		return true;
-	}		
-	
-	
+	}
+
+
 	/*
 	 * Called for the root element
-	 * @see IStructuredContentProvider#getElements	 
+	 * @see IStructuredContentProvider#getElements
 	 */
 	public Object[] getElements(Object parent) {
 		ArrayList types= new ArrayList();
@@ -168,7 +168,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return types.toArray();
 	}
-	
+
 	protected void getRootTypes(List res) {
 		ITypeHierarchy hierarchy= getHierarchy();
 		if (hierarchy != null) {
@@ -179,33 +179,33 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			// opened on a region: dont show
 		}
 	}
-	
+
 	/**
 	 * Hook to overwrite. Filter will be applied on the returned types
 	 * @param type the type
 	 * @param res all types in the hierarchy of the given type
-	 */	
+	 */
 	protected abstract void getTypesInHierarchy(IType type, List res);
-	
+
 	/**
 	 * Hook to overwrite. Return null if parent is ambiguous.
 	 * @param type the type
 	 * @return the parent type
-	 */	
-	protected abstract IType getParentType(IType type);	
-	
-	
+	 */
+	protected abstract IType getParentType(IType type);
+
+
 	private boolean isInScope(IType type) {
 		if (fWorkingSetFilter != null && !fWorkingSetFilter.select(null, null, type)) {
 			return false;
 		}
-		
+
 		IJavaElement input= fTypeHierarchy.getInputElement();
 		int inputType= input.getElementType();
 		if (inputType ==  IJavaElement.TYPE) {
 			return true;
 		}
-		
+
 		IJavaElement parent= type.getAncestor(input.getElementType());
 		if (inputType == IJavaElement.PACKAGE_FRAGMENT) {
 			if (parent == null || parent.getElementName().equals(input.getElementName())) {
@@ -216,23 +216,23 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return false;
 	}
-	
+
 	/*
 	 * Called for the tree children.
 	 * @see ITreeContentProvider#getChildren
-	 */	
+	 */
 	public Object[] getChildren(Object element) {
 		if (element instanceof IType) {
 			try {
 				IType type= (IType)element;
-	
+
 				List children= new ArrayList();
 				if (fMemberFilter != null) {
 					addFilteredMemberChildren(type, children);
 				}
-	
+
 				addTypeChildren(type, children);
-				
+
 				return children.toArray();
 			} catch (JavaModelException e) {
 				// ignore
@@ -240,7 +240,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return NO_ELEMENTS;
 	}
-	
+
 	/*
 	 * @see ITreeContentProvider#hasChildren
 	 */
@@ -251,11 +251,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				return hasTypeChildren(type) || (fMemberFilter != null && hasMemberFilterChildren(type));
 			} catch (JavaModelException e) {
 				return false;
-			}			
+			}
 		}
 		return false;
-	}	
-	
+	}
+
 	private void addFilteredMemberChildren(IType parent, List children) throws JavaModelException {
 		for (int i= 0; i < fMemberFilter.length; i++) {
 			IMember member= fMemberFilter[i];
@@ -266,9 +266,9 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			} else if (member instanceof IMethod) {
 				addCompatibleMethods((IMethod) member, parent, children);
 			}
-		}		
+		}
 	}
-		
+
 	private void addTypeChildren(IType type, List children) throws JavaModelException {
 		ArrayList types= new ArrayList();
 		getTypesInHierarchy(type, types);
@@ -280,7 +280,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			}
 		}
 	}
-	
+
 	protected final boolean isInTree(IType type) throws JavaModelException {
 		if (isInScope(type)) {
 			if (fMemberFilter != null) {
@@ -291,7 +291,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return hasTypeChildren(type);
 	}
-	
+
 	private boolean hasMemberFilterChildren(IType type) throws JavaModelException {
 		for (int i= 0; i < fMemberFilter.length; i++) {
 			IMember member= fMemberFilter[i];
@@ -305,7 +305,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return false;
 	}
-		
+
 	private boolean hasTypeChildren(IType type) throws JavaModelException {
 		ArrayList types= new ArrayList();
 		getTypesInHierarchy(type, types);
@@ -318,7 +318,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see IContentProvider#inputChanged
 	 */
@@ -326,15 +326,15 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		Assert.isTrue(part instanceof TreeViewer);
 		fViewer= (TreeViewer)part;
 	}
-	
+
 	/*
 	 * @see IContentProvider#dispose
-	 */	
+	 */
 	public void dispose() {
 		fTypeHierarchy.removeChangedListener(fTypeHierarchyLifeCycleListener);
-		
+
 	}
-	
+
 	/*
 	 * @see ITreeContentProvider#getParent
 	 */
@@ -348,15 +348,15 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return null;
 	}
-	
+
 	protected final boolean isAnonymous(IType type) {
 		return type.getElementName().length() == 0;
 	}
-	
+
 	protected final boolean isAnonymousFromInterface(IType type) {
 		return isAnonymous(type) && fTypeHierarchy.getHierarchy().getSuperInterfaces(type).length != 0;
 	}
-	
+
 	protected final boolean isObject(IType type) {
 		return "Object".equals(type.getElementName()) && type.getDeclaringType() == null && "java.lang".equals(type.getPackageFragment().getElementName());  //$NON-NLS-1$//$NON-NLS-2$
 	}
@@ -364,5 +364,5 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 
 
 
-	
+
 }

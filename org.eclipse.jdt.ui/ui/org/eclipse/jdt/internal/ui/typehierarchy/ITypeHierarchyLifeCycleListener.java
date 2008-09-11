@@ -18,9 +18,9 @@ import org.eclipse.jdt.core.IType;
  * type hierarchy
  */
 public interface ITypeHierarchyLifeCycleListener {
-	
+
 	/**
-	 * A Java element changed. 
+	 * A Java element changed.
 	 * @param typeHierarchyProvider the type hierarchy that changed
 	 * @param changedTypes the types that changed or <code>null</code> if the full hierarchy changed
 	 */

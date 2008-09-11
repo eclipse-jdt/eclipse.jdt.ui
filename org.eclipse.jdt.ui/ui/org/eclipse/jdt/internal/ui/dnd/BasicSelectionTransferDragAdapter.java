@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -24,9 +24,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 public class BasicSelectionTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
-	
+
 	private ISelectionProvider fProvider;
-	
+
 	public BasicSelectionTransferDragAdapter(ISelectionProvider provider) {
 		Assert.isNotNull(provider);
 		fProvider= provider;
@@ -38,7 +38,7 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}
-	
+
 	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart
 	 */
@@ -48,13 +48,13 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 		LocalSelectionTransfer.getInstance().setSelectionSetTime(event.time & 0xFFFFFFFFL);
 		event.doit= isDragable(selection);
 	}
-	
+
 	/**
 	 * Checks if the elements contained in the given selection can
 	 * be dragged.
 	 * <p>
 	 * Subclasses may override.
-	 * 
+	 *
 	 * @param selection containing the elements to be dragged
 	 */
 	protected boolean isDragable(ISelection selection) {
@@ -64,7 +64,7 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 
 	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData
-	 */		
+	 */
 	public void dragSetData(DragSourceEvent event) {
 		// For consistency set the data to the selection even though
 		// the selection is provided by the LocalSelectionTransfer
@@ -75,11 +75,11 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 
 	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished
-	 */	
+	 */
 	public void dragFinished(DragSourceEvent event) {
 		// Make sure we don't have to do any remaining work
 		Assert.isTrue(event.detail != DND.DROP_MOVE);
 		LocalSelectionTransfer.getInstance().setSelection(null);
 		LocalSelectionTransfer.getInstance().setSelectionSetTime(0);
-	}	
+	}
 }

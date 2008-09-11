@@ -12,14 +12,14 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -49,14 +49,14 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
  * Dialog to enter a new entry in the type filter preference page.
  */
 public class TypeFilterInputDialog extends StatusDialog {
-	
+
 	private class TypeFilterInputAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		/*
 		 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
 			doValidation();
-		}			
+		}
 		/*
 		 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 		 */
@@ -64,61 +64,61 @@ public class TypeFilterInputDialog extends StatusDialog {
 			doButtonPressed();
 		}
 	}
-	
+
 	private StringButtonDialogField fNameDialogField;
 	private List fExistingEntries;
-		
+
 	public TypeFilterInputDialog(Shell parent, List existingEntries) {
 		super(parent);
-		
+
 		fExistingEntries= existingEntries;
-		
-		setTitle(PreferencesMessages.TypeFilterInputDialog_title); 
+
+		setTitle(PreferencesMessages.TypeFilterInputDialog_title);
 
 		TypeFilterInputAdapter adapter= new TypeFilterInputAdapter();
 
 		fNameDialogField= new StringButtonDialogField(adapter);
-		fNameDialogField.setLabelText(PreferencesMessages.TypeFilterInputDialog_message); 
-		fNameDialogField.setButtonLabel(PreferencesMessages.TypeFilterInputDialog_browse_button); 
+		fNameDialogField.setLabelText(PreferencesMessages.TypeFilterInputDialog_message);
+		fNameDialogField.setButtonLabel(PreferencesMessages.TypeFilterInputDialog_browse_button);
 		fNameDialogField.setDialogFieldListener(adapter);
-		
+
 		fNameDialogField.setText("");		 //$NON-NLS-1$
 	}
-	
+
 	public void setInitialString(String input) {
 		Assert.isNotNull(input);
 		fNameDialogField.setText(input);
 	}
-	
+
 	public Object getResult() {
 		return fNameDialogField.getText();
 	}
-	
+
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-		
+
 		Composite inner= new Composite(composite, SWT.NONE);
 		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, 0, 0);
-		
+
 		int fieldWidthHint= convertWidthInCharsToPixels(60);
 		Text text= fNameDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, fieldWidthHint);
 		LayoutUtil.setHorizontalGrabbing(text);
 		TextFieldNavigationHandler.install(text);
-		
+
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
-		
-		applyDialogFont(composite);		
+
+		applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	private void doButtonPressed() {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 		int flags= PackageSelectionDialog.F_SHOW_PARENTS | PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE | PackageSelectionDialog.F_REMOVE_DUPLICATES;
 		PackageSelectionDialog dialog = new PackageSelectionDialog(getShell(), context, flags , scope);
-		dialog.setTitle(PreferencesMessages.TypeFilterInputDialog_choosepackage_label); 
-		dialog.setMessage(PreferencesMessages.TypeFilterInputDialog_choosepackage_description); 
+		dialog.setTitle(PreferencesMessages.TypeFilterInputDialog_choosepackage_label);
+		dialog.setMessage(PreferencesMessages.TypeFilterInputDialog_choosepackage_description);
 		dialog.setMultipleSelection(false);
 		dialog.setFilter(fNameDialogField.getText());
 		if (dialog.open() == IDialogConstants.OK_ID) {
@@ -126,20 +126,20 @@ public class TypeFilterInputDialog extends StatusDialog {
 			fNameDialogField.setText(res.getElementName() + "*"); //$NON-NLS-1$
 		}
 	}
-	
+
 	private void doValidation() {
 		StatusInfo status= new StatusInfo();
 		String newText= fNameDialogField.getText();
 		if (newText.length() == 0) {
-			status.setError(PreferencesMessages.TypeFilterInputDialog_error_enterName); 
+			status.setError(PreferencesMessages.TypeFilterInputDialog_error_enterName);
 		} else {
 			newText= newText.replace('*', 'X').replace('?', 'Y');
 			IStatus val= JavaConventions.validatePackageName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 			if (val.matches(IStatus.ERROR)) {
-				status.setError(Messages.format(PreferencesMessages.TypeFilterInputDialog_error_invalidName, val.getMessage())); 
+				status.setError(Messages.format(PreferencesMessages.TypeFilterInputDialog_error_invalidName, val.getMessage()));
 			} else {
 				if (fExistingEntries.contains(newText)) {
-					status.setError(PreferencesMessages.TypeFilterInputDialog_error_entryExists); 
+					status.setError(PreferencesMessages.TypeFilterInputDialog_error_entryExists);
 				}
 			}
 		}

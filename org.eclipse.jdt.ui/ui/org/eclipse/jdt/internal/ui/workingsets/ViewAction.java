@@ -25,7 +25,7 @@ public class ViewAction extends Action {
 		fActionGroup= group;
 		fMode= mode;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

@@ -27,7 +27,7 @@ public class ASTCreator {
 	private ASTCreator() {
 		//private
 	}
-	
+
 	public static CompilationUnit createAST(ICompilationUnit cu, WorkingCopyOwner workingCopyOwner) {
 		CompilationUnit cuNode= getCuNode(workingCopyOwner, cu);
 		cuNode.setProperty(CU_PROPERTY, cu);

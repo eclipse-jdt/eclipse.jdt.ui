@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 /**
  * Resolves to either a simple type name and an import or a fully qualified
  * type name if a conflicting import exists.
- * 
+ *
  * @since 3.4
  */
 public class TypeResolver extends TemplateVariableResolver {
@@ -34,7 +34,7 @@ public class TypeResolver extends TemplateVariableResolver {
 	public TypeResolver() {
 		this("java.lang.Object"); //$NON-NLS-1$
 	}
-	
+
 	TypeResolver(String defaultType) {
 		fDefaultType= defaultType;
 	}
@@ -49,7 +49,7 @@ public class TypeResolver extends TemplateVariableResolver {
 			param= fDefaultType;
 		else
 			param= (String) params.get(0);
-		
+
 		JavaContext jc= (JavaContext) context;
 		MultiVariable mv= (MultiVariable) variable;
 

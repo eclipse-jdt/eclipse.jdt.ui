@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
@@ -18,15 +20,13 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jdt.core.JavaCore;
 
 
 public class FilterUpdater implements IResourceChangeListener {
 
 	private ProblemTreeViewer fViewer;
-	
+
 	public FilterUpdater(ProblemTreeViewer viewer) {
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
@@ -63,7 +63,7 @@ public class FilterUpdater implements IResourceChangeListener {
 			}
 		}
 	}
-	
+
 	private boolean needsRefiltering(IProject project) {
 		try {
 			Object element= project;
@@ -72,7 +72,7 @@ public class FilterUpdater implements IResourceChangeListener {
 			}
 			boolean inView= fViewer.testFindItem(element) != null;
 			boolean afterFilter= !fViewer.isFiltered(element, fViewer.getInput());
-			
+
 			return inView != afterFilter;
 		} catch (CoreException e) {
 			return true;

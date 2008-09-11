@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 public interface ICreateTargetQuery {
 	/**
 	 * Creates and returns a new target.
-	 * 
+	 *
 	 * @param selection the current destination
 	 * @return the newly created target
 	 */

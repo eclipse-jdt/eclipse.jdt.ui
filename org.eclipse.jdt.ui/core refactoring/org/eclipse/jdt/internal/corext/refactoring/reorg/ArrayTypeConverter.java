@@ -29,7 +29,7 @@ class ArrayTypeConverter {
 		List l= Arrays.asList(objects);
 		return (IFile[]) l.toArray(new IFile[l.size()]);
 	}
-		
+
 	static IFolder[] toFolderArray(Object[] objects){
 		List l= Arrays.asList(objects);
 		return (IFolder[]) l.toArray(new IFolder[l.size()]);
@@ -39,12 +39,12 @@ class ArrayTypeConverter {
 		List l= Arrays.asList(objects);
 		return (ICompilationUnit[]) l.toArray(new ICompilationUnit[l.size()]);
 	}
-	
+
 	static IPackageFragmentRoot[] toPackageFragmentRootArray(Object[] objects){
 		List l= Arrays.asList(objects);
 		return (IPackageFragmentRoot[]) l.toArray(new IPackageFragmentRoot[l.size()]);
 	}
-	
+
 	static IPackageFragment[] toPackageArray(Object[] objects){
 		List l= Arrays.asList(objects);
 		return (IPackageFragment[]) l.toArray(new IPackageFragment[l.size()]);

@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
@@ -28,6 +28,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 

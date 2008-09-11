@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
  * Handler to be used to run a quick fix or assist by keyboard shortcut
  */
 public class CorrectionCommandHandler extends AbstractHandler {
-		
+
 	private final JavaEditor fEditor;
 	private final String fId;
 	private final boolean fIsAssist;
@@ -79,7 +79,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		}
 		return null;
 	}
-	
+
 	private ICompletionProposal findCorrection(String id, boolean isAssist, ITextSelection selection, ICompilationUnit cu, IAnnotationModel model) {
 		AssistContext context= new AssistContext(cu, selection.getOffset(), selection.getLength());
 		Collection proposals= new ArrayList(10);
@@ -90,7 +90,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 			JavaCorrectionProcessor.collectAssists(context, new ProblemLocation[0], proposals);
 		} else {
 			try {
-				boolean goToClosest= selection.getLength() == 0; 
+				boolean goToClosest= selection.getLength() == 0;
 				Annotation[] annotations= getAnnotations(selection.getOffset(), goToClosest);
 				JavaCorrectionProcessor.collectProposals(context, model, annotations, true, false, proposals);
 			} catch (BadLocationException e) {
@@ -113,7 +113,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		JavaCorrectionAssistant.collectQuickFixableAnnotations(fEditor, offset, goToClosest, resultingAnnotations);
 		return (Annotation[]) resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
 	}
-	
+
 	private ICompletionProposal getLocalRenameProposal(IInvocationContext context) {
 		ASTNode node= context.getCoveringNode();
 		if (node instanceof SimpleName) {
@@ -125,8 +125,8 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	private IDocument getDocument() {
 		return JavaUI.getDocumentProvider().getDocument(fEditor.getEditorInput());
 	}
-	
-	
+
+
 	private void invokeProposal(ICompletionProposal proposal, int offset) {
 		if (proposal instanceof ICompletionProposalExtension2) {
 			ITextViewer viewer= fEditor.getViewer();
@@ -146,7 +146,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 			proposal.apply(document);
 		}
 	}
-	
+
 	public static String getShortCutString(String proposalId) {
 		if (proposalId != null) {
 			IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
@@ -159,5 +159,5 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		}
 		return null;
 	}
-	
+
 }

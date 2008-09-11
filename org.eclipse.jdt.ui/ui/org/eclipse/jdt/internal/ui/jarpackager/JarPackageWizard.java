@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * dialog.open();
  * </pre>
  * During the call to <code>open</code>, the wizard dialog is presented to the
- * user. When the user hits Finish, the user-selected workspace resources 
+ * user. When the user hits Finish, the user-selected workspace resources
  * are exported to the user-specified zip file, the dialog closes, and the call
  * to <code>open</code> returns.
  * </p>
@@ -120,10 +120,10 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 				selectedElements.add(openable);
 		}
 	}
-	
+
 	private static boolean isInArchiveOrExternal(IJavaElement element) {
 		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
-		return root != null && (root.isArchive() || root.isExternal()); 
+		return root != null && (root.isArchive() || root.isExternal());
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 
 	/**
 	 * Exports the JAR package.
-	 * 
+	 *
 	 * @param op the op
 	 * @return a boolean indicating success or failure
 	 */
@@ -198,7 +198,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 * Java projects are OK - Source package fragments and source packages
 	 * fragement roots are ok - Java elements below a CU are converted to their
 	 * CU - all other input elements are ignored
-	 * 
+	 *
 	 * @return a valid structured selection based on the current selection
 	 */
 	protected IStructuredSelection getValidSelection() {
@@ -236,7 +236,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 
 	/**
 	 * Initializes this wizard from the given JAR package description.
-	 * 
+	 *
 	 * @param workbench
 	 *            the workbench which launched this wizard
 	 * @param jarPackage

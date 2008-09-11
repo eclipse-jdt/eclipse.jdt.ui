@@ -37,18 +37,18 @@ import org.eclipse.jdt.core.IJavaElement;
  * on <code>getSelection</code> and <code>setSelection</code>. The default strategy
  * used to adapt the elements of the selection to {@link IJavaElement} or a {@link IResource},
  * but implementors can override this behavior.
- *   
+ *
  * @since 3.2
  */
 public class ConvertingSelectionProvider implements ISelectionProvider {
 
 	private final ISelectionProvider fProvider;
 	private SelectionChangedListener fListener;
-	
+
 	private class SelectionChangedListener implements ISelectionChangedListener {
-		
+
 		ListenerList fListeners= new ListenerList();
-		
+
 		public void selectionChanged(SelectionChangedEvent event) {
 			ISelection selection= convertFrom(event.getSelection());
 			SelectionChangedEvent newEvent= new SelectionChangedEvent(ConvertingSelectionProvider.this, selection);
@@ -67,26 +67,26 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 			return fListeners.isEmpty();
 		}
 	}
-	
+
 	/**
 	 * Creates a {@link ConvertingSelectionProvider} to convert from a given selection provider
 	 * using the default mechanism.
-	 * 
+	 *
 	 * @param provider the provider to covert from and to
 	 */
 	public ConvertingSelectionProvider(ISelectionProvider provider) {
 		Assert.isNotNull(provider);
 		fProvider= provider;
 	}
-	
+
 	/**
 	 * Converts the given original viewer selection into a new
 	 * selection. The default behavior adapts the elements in the selection
 	 * first to {@link IJavaElement} then to {@link IResource}.
-	 * Implementors want to override this method. 
-	 * 
+	 * Implementors want to override this method.
+	 *
 	 * @param viewerSelection the original viewer selection
-	 * 
+	 *
 	 * @return the new selection to be used
 	 */
 	public ISelection convertFrom(ISelection viewerSelection) {
@@ -125,17 +125,17 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 
 	/**
 	 * Converts a selection to a viewer selection. The default implementation does not convert
-	 * the selection. Implementors want to override this behavior. 
-	 * 
+	 * the selection. Implementors want to override this behavior.
+	 *
 	 * @param selection the selection to convert
-	 * 
+	 *
 	 * @return a viewer selection
 	 */
 	public ISelection convertTo(ISelection selection) {
 		return selection;
 	}
-	
-	
+
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -149,7 +149,7 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 	public final void setSelection(ISelection selection) {
 		fProvider.setSelection(convertTo(selection));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -160,7 +160,7 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 		}
 		fListener.addListener(listener);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

@@ -15,19 +15,19 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
+import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.progress.IProgressConstants;
+
 import org.eclipse.ui.texteditor.templates.TemplatesView;
 
-import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.search.ui.NewSearchUI;
-
-import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
-		
+
 	/**
 	 * Constructs a new Java hierarchy layout engine.
 	 */
@@ -37,14 +37,14 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 
 	public void createInitialLayout(IPageLayout layout) {
  		String editorArea = layout.getEditorArea();
-		
+
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
 		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
 		folder.addPlaceholder(IPageLayout.ID_OUTLINE);
 		folder.addPlaceholder(JavaUI.ID_PACKAGES);
 		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
 		folder.addPlaceholder(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
-		
+
 		IPlaceholderFolderLayout outputfolder= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
 		outputfolder.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
@@ -53,17 +53,17 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		outputfolder.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
 		outputfolder.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
-		
+
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ELEMENT_CREATION_ACTION_SET);
-		
+
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
 
 		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);
-		
+
 		// views - debugging
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 
@@ -75,7 +75,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
 		layout.addShowViewShortcut(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
 		layout.addShowViewShortcut(TemplatesView.ID);
-		
+
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewClassCreationWizard"); //$NON-NLS-1$

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 206949: [call hierarchy] filter field accesses (only write or only read)
@@ -50,7 +50,7 @@ class CallerMethodWrapper extends MethodWrapper {
     }
 
     protected String getTaskName() {
-        return CallHierarchyMessages.CallerMethodWrapper_taskname; 
+        return CallHierarchyMessages.CallerMethodWrapper_taskname;
     }
 
     /* (non-Javadoc)
@@ -69,7 +69,7 @@ class CallerMethodWrapper extends MethodWrapper {
 			return getLevel() == 1;
 		return member instanceof IMethod || member instanceof IType;
 	}
-	
+
 	/**
 	 * @return The result of the search for children
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
@@ -91,9 +91,9 @@ class CallerMethodWrapper extends MethodWrapper {
 			}
 			if (type != null) {
 				if (! type.isAnonymous()) {
-					pattern= SearchPattern.createPattern(type.getFullyQualifiedName('.'), 
-							IJavaSearchConstants.CONSTRUCTOR, 
-							IJavaSearchConstants.REFERENCES, 
+					pattern= SearchPattern.createPattern(type.getFullyQualifiedName('.'),
+							IJavaSearchConstants.CONSTRUCTOR,
+							IJavaSearchConstants.REFERENCES,
 							SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 				} else {
 					CallSearchResultCollector resultCollector= new CallSearchResultCollector();
@@ -117,7 +117,7 @@ class CallerMethodWrapper extends MethodWrapper {
 			if (pattern == null) { // e.g. for initializers
 				return new HashMap(0);
 			}
-			
+
 			SearchEngine searchEngine= new SearchEngine();
 			MethodReferencesSearchRequestor searchRequestor= new MethodReferencesSearchRequestor();
 			IJavaSearchScope defaultSearchScope= getSearchScope();
@@ -126,7 +126,7 @@ class CallerMethodWrapper extends MethodWrapper {
 			searchEngine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, searchScope, searchRequestor,
 					monitor);
 			return searchRequestor.getCallers();
-			
+
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return new HashMap(0);
@@ -136,7 +136,7 @@ class CallerMethodWrapper extends MethodWrapper {
 	private IJavaSearchScope getAccurateSearchScope(IJavaSearchScope defaultSearchScope, IMember member) throws JavaModelException {
 		if (! JdtFlags.isPrivate(member))
 			return defaultSearchScope;
-		
+
 		if (member.getCompilationUnit() != null) {
 			return SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getCompilationUnit() });
 		} else if (member.getClassFile() != null) {

@@ -20,6 +20,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
  * not or if the classpath of the referencing projects is to be updated.
  */
 public interface IPackageFragmentRootManipulationQuery {
-	
+
 	public boolean confirmManipulation(IPackageFragmentRoot root, IJavaProject[] referencingProjects);
 }

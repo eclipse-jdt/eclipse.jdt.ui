@@ -307,7 +307,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	private boolean fCreateAsTopLevel= true;
 
 	private ParameterInfo fParameterObjectReference;
-	
+
 	private List/*<Change>*/ fOtherChanges;
 
 	public IntroduceParameterObjectProcessor(IntroduceParameterObjectDescriptor descriptor) throws JavaModelException {
@@ -488,12 +488,12 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		changes.addAll(fOtherChanges);
 		return (Change[]) changes.toArray(new Change[changes.size()]);
 	}
-		
+
 	protected void clearManagers() {
 		super.clearManagers();
 		fOtherChanges= new ArrayList();
 	}
-	
+
 	public String getProcessorName() {
 		return RefactoringCoreMessages.IntroduceParameterObjectRefactoring_refactoring_name;
 	}
@@ -597,7 +597,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 
 	/**
 	 * Checks if the given parameter info has been selected for field creation
-	 * 
+	 *
 	 * @param pi parameter info
 	 * @return true if the given parameter info has been selected for field
 	 *         creation
@@ -711,7 +711,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	public ICompilationUnit getCompilationUnit() {
 		return getBaseCuRewrite().getCu();
 	}
-	
+
 	protected int getDescriptorFlags() {
 		return super.getDescriptorFlags() | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 	}

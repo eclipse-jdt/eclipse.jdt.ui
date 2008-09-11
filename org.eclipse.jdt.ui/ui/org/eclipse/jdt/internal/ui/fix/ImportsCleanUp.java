@@ -29,14 +29,14 @@ import org.eclipse.jdt.internal.corext.fix.ImportsFix;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ImportsCleanUp extends AbstractCleanUp {
-	
+
 	private CodeGenerationSettings fCodeGeneratorSettings;
 	private RefactoringStatus fStatus;
 
 	public ImportsCleanUp(Map options) {
 		super(options);
     }
-	
+
 	public ImportsCleanUp() {
 		super();
     }
@@ -56,7 +56,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
     	CompilationUnit compilationUnit= context.getAST();
     	if (compilationUnit == null)
     		return null;
-    	
+
 		return ImportsFix.createCleanUp(compilationUnit, fCodeGeneratorSettings,
 				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS), fStatus);
 	}
@@ -65,15 +65,15 @@ public class ImportsCleanUp extends AbstractCleanUp {
      * {@inheritDoc}
      */
     public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-    	
+
 		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
     		fCodeGeneratorSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
     		fStatus= new RefactoringStatus();
 		}
-		
+
 		return super.checkPreConditions(project, compilationUnits, monitor);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -96,7 +96,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
     public String[] getDescriptions() {
     	if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
     		return new String[] {MultiFixMessages.ImportsCleanUp_OrganizeImports_Description};
-    		
+
 	    return null;
     }
 
@@ -105,13 +105,13 @@ public class ImportsCleanUp extends AbstractCleanUp {
      */
     public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
 			buf.append("import org.model.Engine;\n"); //$NON-NLS-1$
 		} else {
 			buf.append("import org.model.*;\n"); //$NON-NLS-1$
 		}
-		
+
 		return buf.toString();
     }
 

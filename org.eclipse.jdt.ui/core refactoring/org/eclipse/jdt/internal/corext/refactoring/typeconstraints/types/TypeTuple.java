@@ -20,7 +20,7 @@ public class TypeTuple {
 		fFirst= first;
 		fSecond= second;
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -29,7 +29,7 @@ public class TypeTuple {
 		TypeTuple other= (TypeTuple)obj;
 		return fFirst.equals(other.fFirst) && fSecond.equals(other.fSecond);
 	}
-	
+
 	public int hashCode() {
 		return fFirst.hashCode() << 16 + fSecond.hashCode();
 	}

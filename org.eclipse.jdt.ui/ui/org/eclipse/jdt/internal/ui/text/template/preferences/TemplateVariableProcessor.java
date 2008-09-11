@@ -47,8 +47,8 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 
 	/**
 	 * Sets the context type.
-	 * 
-	 * @param contextType the context type 
+	 *
+	 * @param contextType the context type
 	 */
 	public void setContextType(TemplateContextType contextType) {
 		fContextType= contextType;
@@ -56,7 +56,7 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 
 	/**
 	 * Gets the context type.
-	 * 
+	 *
 	 * @return the context type
 	 */
 	public TemplateContextType getContextType() {
@@ -119,7 +119,7 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 
 		while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))
 			start--;
-		
+
 		if (start >= 1 && string.charAt(start - 1) == ':') {
 			start--;
 			while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))

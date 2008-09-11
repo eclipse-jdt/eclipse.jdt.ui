@@ -14,6 +14,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.DocumentRewriteSession;
@@ -24,13 +25,14 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.internal.texteditor.quickdiff.compare.rangedifferencer.RangeDifference;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
 /**
  * Measures the number of created {@link RangeDifference}
  * while QuickDiff is initializing with lots of changes in a large file.
- * 
+ *
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
@@ -41,11 +43,11 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	private static final String FILE= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/TableTree.java";
 
 	private AbstractTextEditor fEditor;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
@@ -76,7 +78,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	/**
 	 * Measures the number of created {@link RangeDifference}
 	 * while QuickDiff is initializing with lots of changes in a large file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test() throws Exception {
@@ -89,13 +91,13 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
-		
+
 	}
 }

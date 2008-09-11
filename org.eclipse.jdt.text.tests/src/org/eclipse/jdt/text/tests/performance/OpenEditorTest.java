@@ -16,17 +16,18 @@ import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.ui.PartInitException;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
 public abstract class OpenEditorTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= OpenEditorTest.class;
 
 	public OpenEditorTest() {
@@ -43,7 +44,7 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 		suite.addTest(OpenTextEditorTest.suite());
 		return suite;
 	}
-	
+
 	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter, boolean closeEach) throws PartInitException {
 		for (int i= 0, n= files.length; i < n; i++) {
 			performanceMeter.start();
@@ -69,7 +70,7 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 		Arrays.fill(files, ResourceTestHelper.findFile(file));
 		return files;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.TextPerformanceTestCase#createPerformanceMeter()
 	 * @since 3.4

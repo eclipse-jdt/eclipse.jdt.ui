@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 
 /**
  * Refactoring contribution for the extract method refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractMethodRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class ExtractMethodRefactoringContribution extends JavaRefactoringC
 	public RefactoringDescriptor createDescriptor() {
 		return new ExtractMethodDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ExtractMethodDescriptor(project, description, comment, arguments, flags);
 	}

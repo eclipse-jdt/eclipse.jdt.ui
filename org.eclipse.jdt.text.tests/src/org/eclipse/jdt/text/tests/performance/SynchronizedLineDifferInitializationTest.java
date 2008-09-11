@@ -20,7 +20,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ISynchronizable;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class SynchronizedLineDifferInitializationTest extends DocumentLineDifferInitializationTest {
@@ -35,7 +35,7 @@ public class SynchronizedLineDifferInitializationTest extends DocumentLineDiffer
 	protected IDocument createDocument(String contents) {
 		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null, LocationKind.IFILE);
 		if (document instanceof ISynchronizable)
-			((ISynchronizable)document).setLockObject(new Object());		
+			((ISynchronizable)document).setLockObject(new Object());
 		document.set(contents);
 		return document;
 	}

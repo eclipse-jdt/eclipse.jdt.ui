@@ -12,17 +12,17 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
@@ -73,7 +73,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 	private ILocalVariable fLocalVariable;
 	private ICompilationUnit fCu;
-	
+
 	//the following fields are set or modified after the construction
 	private boolean fUpdateReferences;
 	private String fCurrentName;
@@ -81,14 +81,14 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private CompilationUnit fCompilationUnitNode;
 	private VariableDeclaration fTempDeclarationNode;
 	private CompilationUnitChange fChange;
-	
+
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
 	private TextChangeManager fChangeManager;
 	private RenameAnalyzeUtil.LocalAnalyzePackage fLocalAnalyzePackage;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameLocalVariableProcessor"; //$NON-NLS-1$
-	
+
 	/**
 	 * Creates a new rename local variable processor.
 	 * @param localVariable the local variable, or <code>null</code> if invoked by scripting
@@ -101,19 +101,19 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fNewName= ""; //$NON-NLS-1$
 		fIsComposite= false;
 	}
-	
+
 	public RenameLocalVariableProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
 		this(null);
 		RefactoringStatus initializeStatus= initialize(arguments);
 		status.merge(initializeStatus);
 	}
-	
+
 	/**
 	 * Creates a new rename local variable processor.
 	 * <p>
 	 * This constructor is only used by <code>RenameTypeProcessor</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param localVariable the local variable
 	 * @param manager the change manager
 	 * @param node the compilation unit node
@@ -126,42 +126,42 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fCompilationUnitNode= node;
 		fIsComposite= true;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#getAffectedProjectNatures()
 	 */
 	protected final String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fLocalVariable);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
 	public Object[] getElements() {
 		return new Object[] { fLocalVariable };
 	}
-	
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
 	 */
 	public String getIdentifier() {
 		return IDENTIFIER;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	public String getProcessorName() {
-		return RefactoringCoreMessages.RenameTempRefactoring_rename; 
+		return RefactoringCoreMessages.RenameTempRefactoring_rename;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fLocalVariable);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating#canEnableUpdateReferences()
 	 */
@@ -182,7 +182,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public void setUpdateReferences(boolean updateReferences) {
 		fUpdateReferences= updateReferences;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getCurrentElementName()
 	 */
@@ -215,12 +215,12 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		initAST();
 		if (fTempDeclarationNode == null || fTempDeclarationNode.resolveBinding() == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_must_select_local); 
-		if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class) 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_must_select_local);
+		if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class)
 		 && ! Checks.isDeclaredIn(fTempDeclarationNode, Initializer.class))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_and_initializers); 
-				
-		initNames();			
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_and_initializers);
+
+		initNames();
 		return new RefactoringStatus();
 	}
 
@@ -234,25 +234,25 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		if (name.getParent() instanceof VariableDeclaration)
 			fTempDeclarationNode= (VariableDeclaration) name.getParent();
 	}
-	
+
 	private void initNames(){
 		fCurrentName= fTempDeclarationNode.getName().getIdentifier();
 	}
-	
+
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fLocalVariable, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
-	
+
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[] {ResourceUtil.getFile(fCu)};
 	}
-	
+
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_NOTHING;
 	}
-	
+
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
 			throws CoreException, OperationCanceledException {
 		try {
@@ -275,9 +275,9 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				fCompilationUnitNode= null;
 				fTempDeclarationNode= null;
 			}
-		}	
+		}
 	}
-		
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#checkNewElementName(java.lang.String)
 	 */
@@ -291,17 +291,17 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			} else {
 				result.addWarning(RefactoringCoreMessages.RenameTempRefactoring_lowercase);
 			}
-		return result;		
+		return result;
 	}
-		
+
 	private void createEdits() {
 		TextEdit declarationEdit= createRenameEdit(fTempDeclarationNode.getName().getStartPosition());
 		TextEdit[] allRenameEdits= getAllRenameEdits(declarationEdit);
-		
+
 		TextEdit[] allUnparentedRenameEdits= new TextEdit[allRenameEdits.length];
 		TextEdit unparentedDeclarationEdit= null;
-		
-		fChange= new CompilationUnitChange(RefactoringCoreMessages.RenameTempRefactoring_rename, fCu); 
+
+		fChange= new CompilationUnitChange(RefactoringCoreMessages.RenameTempRefactoring_rename, fCu);
 		MultiTextEdit rootEdit= new MultiTextEdit();
 		fChange.setEdit(rootEdit);
 		fChange.setKeepPreviewEdits(true);
@@ -311,7 +311,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				// Add a copy of the text edit (text edit may only have one
 				// parent) to keep problem reporting code clean
 				TextChangeCompatibility.addTextEdit(fChangeManager.get(fCu), RefactoringCoreMessages.RenameTempRefactoring_changeName, allRenameEdits[i].copy(), fCategorySet);
-				
+
 				// Add a separate copy for problem reporting
 				allUnparentedRenameEdits[i]= allRenameEdits[i].copy();
 				if (allRenameEdits[i].equals(declarationEdit))
@@ -324,14 +324,14 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		// store information for analysis
 		if (fIsComposite) {
 			fLocalAnalyzePackage= new RenameAnalyzeUtil.LocalAnalyzePackage(unparentedDeclarationEdit, allUnparentedRenameEdits);
-		} else 
+		} else
 			fLocalAnalyzePackage= new RenameAnalyzeUtil.LocalAnalyzePackage(declarationEdit, allRenameEdits);
 	}
-	
+
 	private TextEdit[] getAllRenameEdits(TextEdit declarationEdit) {
 		if (! fUpdateReferences)
 			return new TextEdit[] { declarationEdit };
-		
+
 		TempOccurrenceAnalyzer fTempAnalyzer= new TempOccurrenceAnalyzer(fTempDeclarationNode, true);
 		fTempAnalyzer.perform();
 		int[] referenceOffsets= fTempAnalyzer.getReferenceAndJavadocOffsets();
@@ -350,7 +350,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenameTypeProcessor_creating_changes, 1);
-			
+
 			RenameJavaElementDescriptor descriptor= createRefactoringDescriptor();
 			fChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
 			return fChange;

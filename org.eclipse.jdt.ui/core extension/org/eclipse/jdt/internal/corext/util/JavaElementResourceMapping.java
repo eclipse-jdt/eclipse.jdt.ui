@@ -48,39 +48,39 @@ import org.eclipse.jdt.internal.ui.model.JavaModelProvider;
  * An abstract super class to describe mappings from a Java element to a
  * set of resources. The class also provides factory methods to create
  * resource mappings.
- * 
+ *
  * @since 3.1
  */
 public abstract class JavaElementResourceMapping extends ResourceMapping {
-	
+
 	protected JavaElementResourceMapping() {
 	}
-	
+
 	public IJavaElement getJavaElement() {
 		Object o= getModelObject();
 		if (o instanceof IJavaElement)
 			return (IJavaElement)o;
 		return null;
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (!(obj instanceof JavaElementResourceMapping))
 			return false;
 		return getJavaElement().equals(((JavaElementResourceMapping)obj).getJavaElement());
 	}
-	
+
 	public int hashCode() {
 		IJavaElement javaElement= getJavaElement();
 		if (javaElement == null)
 			return super.hashCode();
-		
+
 		return javaElement.hashCode();
 	}
-	
+
 	public String getModelProviderId() {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 	}
-	
+
 	public boolean contains(ResourceMapping mapping) {
 		if (mapping instanceof JavaElementResourceMapping) {
 			JavaElementResourceMapping javaMapping = (JavaElementResourceMapping) mapping;
@@ -91,9 +91,9 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		return false;
 	}
-	
+
 	//---- the factory code ---------------------------------------------------------------
-	
+
 	private static final class JavaModelResourceMapping extends JavaElementResourceMapping {
 		private final IJavaModel fJavaModel;
 		private JavaModelResourceMapping(IJavaModel model) {
@@ -126,7 +126,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			return result;
 		}
 	}
-	
+
 	private static final class JavaProjectResourceMapping extends JavaElementResourceMapping {
 		private final IJavaProject fProject;
 		private JavaProjectResourceMapping(IJavaProject project) {
@@ -145,7 +145,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			};
 		}
 	}
-	
+
 	private static final class PackageFragementRootResourceMapping extends JavaElementResourceMapping {
 		private final IPackageFragmentRoot fRoot;
 		private PackageFragementRootResourceMapping(IPackageFragmentRoot root) {
@@ -164,7 +164,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			};
 		}
 	}
-	
+
 	private static final class LocalPackageFragementTraversal extends ResourceTraversal {
 		private final IPackageFragment fPack;
 		public LocalPackageFragementTraversal(IPackageFragment pack) {
@@ -181,7 +181,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			}
 		}
 	}
-	
+
 	private static final class PackageFragmentResourceMapping extends JavaElementResourceMapping {
 		private final IPackageFragment fPack;
 		private PackageFragmentResourceMapping(IPackageFragment pack) {
@@ -223,7 +223,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			}
 		}
 	}
-	
+
 	private static IFile[] getPackageContent(IPackageFragment pack) throws CoreException {
 		List result= new ArrayList();
 		IContainer container= (IContainer)pack.getResource();
@@ -241,8 +241,8 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		return (IFile[])result.toArray(new IFile[result.size()]);
 	}
-	
-	
+
+
 	private static final class CompilationUnitResourceMapping extends JavaElementResourceMapping {
 		private final ICompilationUnit fUnit;
 		private CompilationUnitResourceMapping(ICompilationUnit unit) {
@@ -279,7 +279,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			};
 		}
 	}
-	
+
 	private static final class LogicalPackageResourceMapping extends ResourceMapping {
 		private final IPackageFragment[] fFragments;
 		private LogicalPackageResourceMapping(IPackageFragment[] fragments) {
@@ -309,12 +309,12 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			}
 			return (ResourceTraversal[])result.toArray(new ResourceTraversal[result.size()]);
 		}
-		
+
 		public String getModelProviderId() {
 			return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 		}
 	}
-	
+
 	public static ResourceMapping create(IJavaElement element) {
 		switch (element.getElementType()) {
 			case IJavaElement.TYPE:
@@ -333,24 +333,24 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 				return create((IJavaModel)element);
 			default:
 				return null;
-		}		
-		
+		}
+
 	}
 
 	public static ResourceMapping create(final IJavaModel model) {
 		return new JavaModelResourceMapping(model);
 	}
-	
+
 	public static ResourceMapping create(final IJavaProject project) {
 		return new JavaProjectResourceMapping(project);
 	}
-	
+
 	public static ResourceMapping create(final IPackageFragmentRoot root) {
 		if (root.isExternal())
 			return null;
 		return new PackageFragementRootResourceMapping(root);
 	}
-	
+
 	public static ResourceMapping create(final IPackageFragment pack) {
 		// test if in an archive
 		IPackageFragmentRoot root= (IPackageFragmentRoot)pack.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -359,13 +359,13 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		return null;
 	}
-	
+
 	public static ResourceMapping create(ICompilationUnit unit) {
 		if (unit == null)
 			return null;
 		return new CompilationUnitResourceMapping(unit.getPrimary());
 	}
-	
+
 	public static ResourceMapping create(IClassFile classFile) {
 		// test if in a archive
 		IPackageFragmentRoot root= (IPackageFragmentRoot)classFile.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -374,7 +374,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		return null;
 	}
-	
+
 	public static ResourceMapping create(IType type) {
 		// top level types behave like the CU
 		IJavaElement parent= type.getParent();
@@ -383,7 +383,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		return null;
 	}
-	
+
 	public static ResourceMapping create(LogicalPackage logicalPackage) {
 		IPackageFragment[] fragments= logicalPackage.getFragments();
 		List toProcess= new ArrayList(fragments.length);

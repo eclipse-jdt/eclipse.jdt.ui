@@ -17,6 +17,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -26,12 +28,10 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  * Tests for the BreakContinueTargerFinder class.
@@ -40,31 +40,31 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
  */
 public class BreakContinueTargetFinderTest extends TestCase{
 	private static final Class THIS= BreakContinueTargetFinderTest.class;
-	
+
 	public static Test suite() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-	
+
 	private ASTParser fParser;
 	private BreakContinueTargetFinder fFinder;
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
-	
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
 		fParser = ASTParser.newParser(AST.JLS3);
 		fFinder= new BreakContinueTargetFinder();
-		
+
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see junit.framework.TestCase#tearDown()
 	 */
@@ -124,7 +124,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 			return new OccurrenceLocation(idx, pattern.length(), 0, "");
 	    return find(s, pattern, ithOccurrence-1, idx+1);
 	}
-	
+
 	public void testBreakFor() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -219,7 +219,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		OccurrenceLocation[] ranges= { find(s, "bar", 1), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
-	
+
 	public void testLabeledBreakFor1() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -258,7 +258,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		OccurrenceLocation[] ranges= { find(s, "stay", 1), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
-	
+
 	public void testContinueFor() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -273,7 +273,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		OccurrenceLocation[] ranges= { find(s, "for", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
-	
+
 	public void testContinueForeach() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -356,7 +356,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		OccurrenceLocation[] ranges= { find(s, "bar", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
-	
+
 	public void testLabeledContinueFor1() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");

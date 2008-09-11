@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
@@ -50,13 +50,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
 
 public class CUPositionCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
-	
+
 	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
-	
+
 	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
 	private CompletionProposalComparator fComparator;
-	
+
 	private CompletionContextRequestor fCompletionContextRequestor;
 
 	private CUPositionCompletionRequestor fCompletionRequestor;
@@ -68,7 +68,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	 */
 	public CUPositionCompletionProcessor(CUPositionCompletionRequestor completionRequestor) {
 		fCompletionRequestor= completionRequestor;
-		
+
 		fComparator= new CompletionProposalComparator();
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
@@ -91,7 +91,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			}
 		};
 	}
-	
+
 	public void setCompletionContextRequestor(CompletionContextRequestor completionContextRequestor) {
 		fCompletionContextRequestor= completionContextRequestor;
 	}
@@ -105,7 +105,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
-	
+
 	/**
 	 * Computing context information on a <code>ITextViewer</code> is not supported.
 	 * @see #computeContextInformation(IContentAssistSubjectControl, int)
@@ -115,7 +115,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
@@ -171,7 +171,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		try {
 			/*
 			 * Explicitly create a new non-shared working copy.
-			 * 
+			 *
 			 * The WorkingCopy cannot easily be shared between calls, since IContentAssistProcessor
 			 * has no dispose() lifecycle method. A workaround could be to pass in a WorkingCopyOwner
 			 * and dispose the owner's working copies from the caller's dispose().
@@ -180,9 +180,9 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			cu.getBuffer().setContents(cuString);
 			int cuPrefixLength= fCompletionContextRequestor.getBeforeString().length();
 			fCompletionRequestor.setOffsetReduction(cuPrefixLength);
-			
+
 			cu.codeComplete(cuPrefixLength + documentOffset, fCompletionRequestor);
-			
+
 			JavaCompletionProposal[] proposals= fCompletionRequestor.getResults();
 			if (proposals.length == 0) {
 				String errorMsg= fCompletionRequestor.getErrorMessage();
@@ -208,9 +208,9 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 
 	protected abstract static class CUPositionCompletionRequestor extends CompletionRequestor {
 		public static final char[] TRIGGER_CHARACTERS= new char[] { '.' };
-		
+
 		private int fOffsetReduction;
-		
+
 		private List fProposals;
 		private String fErrorMessage2;
 
@@ -218,7 +218,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			fOffsetReduction= offsetReduction;
 			fProposals= new ArrayList();
 		}
-		
+
 		public final void completionFailure(IProblem error) {
 			fErrorMessage2= error.getMessage();
 		}
@@ -226,11 +226,11 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		public final JavaCompletionProposal[] getResults() {
 			return (JavaCompletionProposal[]) fProposals.toArray(new JavaCompletionProposal[fProposals.size()]);
 		}
-		
+
 		public final String getErrorMessage() {
 			return fErrorMessage2;
 		}
-		
+
 		protected final void addAdjustedCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor) {
 			JavaCompletionProposal javaCompletionProposal= new JavaCompletionProposal(completion, start - fOffsetReduction, end - start,
@@ -238,7 +238,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
 		}
-		
+
 		protected final void addAdjustedTypeCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor, String fullyQualifiedName) {
 			String replacementString= fullyQualifiedName == null || completion.length() == 0 ? completion : fullyQualifiedName;

@@ -19,26 +19,26 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * to which the fragment maps is an Expression.
  */
 public interface IExpressionFragment extends IASTFragment {
-	
-	/** 
+
+	/**
 	 * Every IASTFragment maps to an ASTNode, although this mapping may
 	 * not be straightforward, and more than one fragment may map to the
 	 * same node.
 	 * An IExpressionFragment maps, specifically, to an Expression.
-	 * 
+	 *
 	 * @return Expression	The node to which this fragment maps.
 	 */
 	public Expression getAssociatedExpression();
 
 	/**
 	 * Creates a copy of this IExpressionFragment.
-	 * 
+	 *
 	 * @param rewrite an ASTRewrite
 	 * @param removeSurroundingParenthesis if set to <code>true</true>, a surrounding ParenthesizedExpression will not be part of
 	 * the copied node.
 	 * @return a copy of this IExpressionFragment, ready for use in the given
 	 *         rewrite
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) throws JavaModelException;
 }

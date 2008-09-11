@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * Dynamic validation state change with support for refactoring descriptors.
- * 
+ *
  * @since 3.2
  */
 public final class DynamicValidationRefactoringChange extends DynamicValidationStateChange {
@@ -33,7 +33,7 @@ public final class DynamicValidationRefactoringChange extends DynamicValidationS
 
 	/**
 	 * Creates a new dynamic validation refactoring change.
-	 * 
+	 *
 	 * @param descriptor
 	 *            the refactoring descriptor
 	 * @param name
@@ -47,7 +47,7 @@ public final class DynamicValidationRefactoringChange extends DynamicValidationS
 
 	/**
 	 * Creates a new dynamic validation refactoring change.
-	 * 
+	 *
 	 * @param descriptor
 	 *            the refactoring descriptor
 	 * @param name

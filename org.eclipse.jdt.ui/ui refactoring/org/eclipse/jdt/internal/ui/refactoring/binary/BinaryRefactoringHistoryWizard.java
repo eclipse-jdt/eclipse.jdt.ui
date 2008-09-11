@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 /**
  * Partial implementation of a refactoring history wizard which creates stubs
  * from a binary package fragment root while refactoring.
- * 
+ *
  * @since 3.2
  */
 public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryWizard {
@@ -92,7 +92,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Updates the new classpath with exclusion patterns for the specified path.
-	 * 
+	 *
 	 * @param entries
 	 *            the classpath entries
 	 * @param path
@@ -116,7 +116,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * Checks whether the archive referenced by the package fragment root is not
 	 * shared with multiple java projects in the workspace.
-	 * 
+	 *
 	 * @param root
 	 *            the package fragment root
 	 * @param monitor
@@ -176,7 +176,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Configures the classpath of the project before refactoring.
-	 * 
+	 *
 	 * @param project
 	 *            the java project
 	 * @param root
@@ -215,7 +215,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Returns the location URI of the classpath entry
-	 * 
+	 *
 	 * @param entry
 	 *            the classpath entry
 	 * @return the location URI
@@ -255,7 +255,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Creates a new stub refactoring history wizard.
-	 * 
+	 *
 	 * @param overview
 	 *            <code>true</code> to show an overview of the refactorings,
 	 *            <code>false</code> otherwise
@@ -272,7 +272,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Creates a new stub refactoring history wizard.
-	 * 
+	 *
 	 * @param caption
 	 *            the wizard caption
 	 * @param title
@@ -350,7 +350,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * Can this wizard use the source attachment of the package fragment root if
 	 * necessary?
-	 * 
+	 *
 	 * @return <code>true</code> to use the source attachment,
 	 *         <code>false</code> otherwise
 	 */
@@ -369,7 +369,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * Checks whether there are any refactorings to be executed which need a
 	 * source attachment, but none exists.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor
 	 * @return a status describing the outcome of the check
@@ -398,7 +398,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Creates the necessary source code for the refactoring.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to use
 	 * @return
@@ -480,25 +480,25 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 */
 	protected Refactoring createRefactoring(RefactoringDescriptor descriptor, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(descriptor);
-		
+
 		createNecessarySourceCode(monitor);
-		
+
 		if (descriptor instanceof JavaRefactoringDescriptor) {
 			JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
 			RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
-			
+
 			Map map= contribution.retrieveArgumentMap(descriptor);
 			if (fJavaProject == null) {
 				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
 				return null;
 			}
-				
+
 			String name= fJavaProject.getElementName();
 
 			String handle= (String) map.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 			if (handle != null && handle.length() > 0)
 				map.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
-			
+
 			int count= 1;
 			String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 			while ((handle= (String) map.get(attribute)) != null) {
@@ -507,7 +507,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				count++;
 				attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 			}
-			
+
 			// create adapted descriptor
 			try {
 				descriptor= contribution.createDescriptor(descriptor.getID(), name, descriptor.getDescription(), descriptor.getComment(), map, descriptor.getFlags());
@@ -521,7 +521,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Deconfigures the classpath after all refactoring have been performed.
-	 * 
+	 *
 	 * @param entries
 	 *            the classpath entries to reset the project to
 	 * @param monitor
@@ -537,7 +537,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Deconfigures the classpath of the project after refactoring.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to use
 	 * @throws CoreException
@@ -579,14 +579,14 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 	/**
 	 * Returns the package fragment root to stub.
-	 * 
+	 *
 	 * @return the package fragment root to stub, or <code>null</code>
 	 */
 	protected abstract IPackageFragmentRoot getPackageFragmentRoot();
 
 	/**
 	 * Returns the refactoring history to perform.
-	 * 
+	 *
 	 * @return the refactoring history to perform, or the empty history
 	 */
 	protected abstract RefactoringHistory getRefactoringHistory();
@@ -594,7 +594,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * Returns the transformed handle corresponding to the specified input
 	 * handle.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle

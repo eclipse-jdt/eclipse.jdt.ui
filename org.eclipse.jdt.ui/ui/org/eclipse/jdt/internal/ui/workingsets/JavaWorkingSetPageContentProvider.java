@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvider {
-	
+
 	public boolean hasChildren(Object element) {
 
 		if (element instanceof IProject && !((IProject)element).isAccessible())
@@ -42,9 +42,9 @@ class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvid
 
 	public Object[] getChildren(Object parentElement) {
 		try {
-			if (parentElement instanceof IJavaModel) 
+			if (parentElement instanceof IJavaModel)
 				return concatenate(super.getChildren(parentElement), getNonJavaProjects((IJavaModel)parentElement));
-			
+
 			if (parentElement instanceof IProject) {
 				IProject project= (IProject) parentElement;
 				if (project.isAccessible()) {

@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
@@ -39,35 +40,35 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 	private Map/*<IBinding,IBinding>*/ fBindingMap= new HashMap();
 
 	private Map/*<IBinding + CompilationUnitRange,ExpressionVariable>*/ fExpressionMap= new Hashtable();
-	private Map/*<Integer,ExpressionVariable>*/ fLiteralMap= new HashMap();	
+	private Map/*<Integer,ExpressionVariable>*/ fLiteralMap= new HashMap();
 	private Map/*<CompilationUnitRange,TypeVariable>*/ fTypeVariableMap= new HashMap();
 	private Map/*<String,DeclaringTypeVariable>*/ fDeclaringTypeVariableMap= new HashMap();
 	private Map/*<String,ParameterTypeVariable>*/ fParameterMap= new HashMap();
 	private Map/*<String,RawBindingVariable>*/ fRawBindingMap= new HashMap();
 	private Map/*<String,ReturnTypeVariable>*/ fReturnVariableMap= new HashMap();
-	
+
 	public static final boolean REPORT= false;
 	protected int nrCreated=0;
 	protected int nrRetrieved=0;
-	
+
 	public int getNumCreated(){
 		return nrCreated;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IConstraintVariableFactory#makeExpressionVariable(org.eclipse.jdt.core.dom.Expression, org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IContext)
 	 */
 	public ConstraintVariable makeExpressionOrTypeVariable(Expression expression,
 													       IContext context) {
 		IBinding binding= ExpressionVariable.resolveBinding(expression);
-		
+
 		if (binding instanceof ITypeBinding){
 			ICompilationUnit cu= ASTCreator.getCu(expression);
 			Assert.isNotNull(cu);
 			CompilationUnitRange range= new CompilationUnitRange(cu, expression);
 			return makeTypeVariable((ITypeBinding)getKey(binding), expression.toString(), range);
 		}
-		
+
 		if (ASTNodes.isLiteral(expression)){
 			Integer nodeType= new Integer(expression.getNodeType());
 			if (! fLiteralMap.containsKey(nodeType)){
@@ -79,7 +80,7 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 			if (REPORT) dumpConstraintStats();
 			return (ExpressionVariable) fLiteralMap.get(nodeType);
 		}
-			
+
 		// For ExpressionVariables, there are two cases. If the expression has a binding
 		// we use that as the key. Otherwise, we use the CompilationUnitRange. See
 		// also ExpressionVariable.equals()
@@ -91,7 +92,7 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 			key= new CompilationUnitRange(ASTCreator.getCu(expression), expression);
 		}
 		ev= (ExpressionVariable)fExpressionMap.get(key);
-		
+
 		if (ev != null){
 			if (REPORT) nrRetrieved++;
 		} else {
@@ -102,8 +103,8 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 		}
 		return ev;
 	}
-	
-	
+
+
 	//
 	// The method IBinding.equals() does not have the desired behavior, and Bindings.equals()
 	// must be used to compare bindings. We use an additional layer of Hashing.
@@ -167,7 +168,7 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 		if (REPORT) dumpConstraintStats();
 		return (DeclaringTypeVariable)fDeclaringTypeVariableMap.get(key);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IConstraintVariableFactory#makeParameterTypeVariable(org.eclipse.jdt.core.dom.IMethodBinding, int)
 	 */

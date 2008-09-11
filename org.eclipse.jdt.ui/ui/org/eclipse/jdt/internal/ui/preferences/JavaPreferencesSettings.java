@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class JavaPreferencesSettings  {
-	
+
 	public static CodeGenerationSettings getCodeGenerationSettings(IJavaProject project) {
 		CodeGenerationSettings res= new CodeGenerationSettings();
 		res.createComments= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
@@ -29,6 +29,6 @@ public class JavaPreferencesSettings  {
 		res.indentWidth= CodeFormatterUtil.getIndentWidth(project);
 		return res;
 	}
-		
+
 }
 

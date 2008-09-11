@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.dom.IBinding;
  * Creates AST from a set of compilation units. Uses the
  * batch parser. Splits the set of compilation units in subsets
  * such that it is unlikely that a out of memory exception will occur.
- * 
+ *
  * @since 3.4
  */
 public class ASTBatchParser {
@@ -66,14 +66,14 @@ public class ASTBatchParser {
 	/**
 	 * Creates ASTs for each compilation unit in <code>units</code>.
 	 * <p>
-	 * <code>ASTRequestor.acceptAST</code> is called in no particular order to 
+	 * <code>ASTRequestor.acceptAST</code> is called in no particular order to
 	 * pass the compilation unit and the corresponding AST to <code>requestor</code>.
 	 * </p>
 	 * <p>
 	 * The <code>bindingKeys</code> parameter specifies bindings keys
 	 * ({@link IBinding#getKey()}) that are to be looked up.
 	 * </p>
-	 * 
+	 *
 	 * @param compilationUnits the compilation units to create ASTs for
 	 * @param bindingKeys the binding keys to create bindings for
 	 * @param requestor the AST requestor that collects abstract syntax trees and bindings
@@ -122,7 +122,7 @@ public class ASTBatchParser {
 	 * <p>
 	 * Subclasses may override
 	 * </p>
-	 * 
+	 *
 	 * @param project the project for which ASTs are been generated
 	 * @return an AST parser capable of creating ASTs of compilation units in project
 	 */

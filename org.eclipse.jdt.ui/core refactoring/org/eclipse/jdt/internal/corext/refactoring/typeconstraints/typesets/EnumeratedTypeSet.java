@@ -350,7 +350,7 @@ public class EnumeratedTypeSet extends TypeSet {
 				}
 			} else {
 				for (Iterator iterator= TTypes.getAllSubTypesIterator(t); iterator.hasNext();) {
-					result.fMembers.remove(iterator.next());					
+					result.fMembers.remove(iterator.next());
 				}
 			}
 		}
@@ -481,9 +481,9 @@ public class EnumeratedTypeSet extends TypeSet {
 	public EnumeratedTypeSet enumerate() {
 		return this; // (EnumeratedTypeSet) makeClone();
 	}
-	
+
 	public void initComplete() {
 		Assert.isTrue(! fMembers.isEmpty());
 	}
-	
+
 }

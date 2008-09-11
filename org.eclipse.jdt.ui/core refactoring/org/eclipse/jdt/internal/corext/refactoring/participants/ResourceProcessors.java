@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 public class ResourceProcessors {
-	
+
 	public static String[] computeAffectedNatures(IResource resource) throws CoreException {
 		IProject project= resource.getProject();
 		Set result= new HashSet();
@@ -27,7 +27,7 @@ public class ResourceProcessors {
 		computeNatures(result, visitedProjects, project);
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	public static String[] computeAffectedNatures(IResource[] resources) throws CoreException {
 		Set result= new HashSet();
 		Set visitedProjects= new HashSet();
@@ -36,7 +36,7 @@ public class ResourceProcessors {
 		}
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	private static void computeNatures(Set result, Set visitedProjects, IProject focus) throws CoreException {
 		if (visitedProjects.contains(focus))
 			return;

@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 
 /**
  * The label and icon part of the breadcrumb item.
- * 
+ *
  * @since 3.4
  */
 class BreadcrumbItemDetails {
@@ -54,7 +54,7 @@ class BreadcrumbItemDetails {
 	private boolean fSelected;
 	private boolean fHasFocus;
 
-	
+
 	public BreadcrumbItemDetails(BreadcrumbItem parent, Composite parentContainer) {
 		fParent= parent;
 		fTextVisible= true;
@@ -110,7 +110,7 @@ class BreadcrumbItemDetails {
 		layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 		fElementText.setLayoutData(layoutData);
 		addElementListener(fElementText);
-		
+
 		fTextComposite.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			public void getName(AccessibleEvent e) {
 				e.result= fElementText.getText();
@@ -121,13 +121,13 @@ class BreadcrumbItemDetails {
 				e.result= fElementText.getText();
 			}
 		});
-		
+
 		fDetailComposite.setTabList(new Control[] { fTextComposite });
 	}
 
 	/**
 	 * Returns whether this element has the keyboard focus.
-	 * 
+	 *
 	 * @return true if this element has the keyboard focus.
 	 */
 	public boolean hasFocus() {
@@ -136,7 +136,7 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Sets the tool tip to the given text.
-	 * 
+	 *
 	 * @param text the tool tip
 	 */
 	public void setToolTip(String text) {
@@ -155,7 +155,7 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Sets the image to the given image.
-	 * 
+	 *
 	 * @param image the image to use
 	 */
 	public void setImage(Image image) {
@@ -166,7 +166,7 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Sets the text to the given text.
-	 * 
+	 *
 	 * @param text the text to use
 	 */
 	public void setText(String text) {
@@ -180,7 +180,7 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Returns the width of this element.
-	 * 
+	 *
 	 * @return current width of this element
 	 */
 	public int getWidth() {
@@ -204,7 +204,7 @@ class BreadcrumbItemDetails {
 		GridData data= (GridData) fTextComposite.getLayoutData();
 		data.exclude= !enabled;
 		fTextComposite.setVisible(enabled);
-		
+
 		if (fTextVisible) {
 			fDetailComposite.setTabList(new Control[] { fTextComposite });
 		} else {
@@ -223,7 +223,7 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Tells whether this item shows a text or only an image.
-	 * 
+	 *
 	 * @return <code>true</code> if it shows a text and an image, false if it only shows the image
 	 */
 	public boolean isTextVisible() {
@@ -232,12 +232,12 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Sets whether details should be shown.
-	 * 
+	 *
 	 * @param visible <code>true</code> if details should be shown
 	 */
 	public void setVisible(boolean visible) {
 		fDetailComposite.setVisible(visible);
-		
+
 		GridData data= (GridData) fDetailComposite.getLayoutData();
 		data.exclude= !visible;
 	}
@@ -302,7 +302,7 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Install focus and key listeners to the given composite.
-	 * 
+	 *
 	 * @param composite the composite which may get focus
 	 */
 	private void installFocusComposite(Composite composite) {
@@ -327,7 +327,7 @@ class BreadcrumbItemDetails {
 		composite.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
-				
+
 				switch (e.keyCode) {
 					case SWT.ARROW_LEFT:
 						if (fSelected) {
@@ -382,7 +382,7 @@ class BreadcrumbItemDetails {
 
 				int index= viewer.getIndexOfItem(fParent);
 				BreadcrumbItem parent= fParent.getViewer().getItem(index - 1);
-				
+
 				Shell shell= parent.getDropDownShell();
 				if (shell == null) {
 					parent.openDropDownMenu();
@@ -414,7 +414,7 @@ class BreadcrumbItemDetails {
 
 	/**
 	 * Add mouse listeners to the given control.
-	 * 
+	 *
 	 * @param control the control to which may be clicked
 	 */
 	private void addElementListener(Control control) {
@@ -424,14 +424,14 @@ class BreadcrumbItemDetails {
 
 			public void mouseDown(MouseEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
-				
+
 				int parentIndex= viewer.getIndexOfItem(fParent) - 1;
 				Shell shell= null;
 				if (parentIndex >= 0) {//sanity check, must always hold
 					BreadcrumbItem dropDownItem= viewer.getItem(parentIndex);
 					shell= dropDownItem.getDropDownShell();
 				}
-				
+
 				viewer.selectItem(fParent);
 				if (shell == null && e.button == 1 && e.stateMask == 0) {
 					fParent.getViewer().fireDoubleClick();

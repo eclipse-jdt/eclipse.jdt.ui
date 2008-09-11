@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,6 +19,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.CodeStyleConfiguration;
 
 /**
  * Workspace runnable to add custom constructors initializing fields.
- * 
+ *
  * @since 3.1
  */
 public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
@@ -83,7 +83,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Creates a new add custom constructor operation.
-	 * 
+	 *
 	 * @param astRoot the compilation unit ast node
 	 * @param parentType the type to add the methods to
 	 * 	@param variables the variable bindings to use in the constructor
@@ -113,7 +113,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the resulting text edit.
-	 * 
+	 *
 	 * @return the resulting text edit
 	 */
 	public final TextEdit getResultingEdit() {
@@ -122,7 +122,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the scheduling rule for this operation.
-	 * 
+	 *
 	 * @return the scheduling rule
 	 */
 	public final ISchedulingRule getSchedulingRule() {
@@ -131,7 +131,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the visibility modifier of the generated constructors.
-	 * 
+	 *
 	 * @return the visibility modifier
 	 */
 	public final int getVisibility() {
@@ -140,7 +140,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Should the call to the super constructor be omitted?
-	 * 
+	 *
 	 * @return <code>true</code> to omit the call, <code>false</code> otherwise
 	 */
 	public final boolean isOmitSuper() {
@@ -196,7 +196,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Determines whether the call to the super constructor should be omitted.
-	 * 
+	 *
 	 * @param omit <code>true</code> to omit the call, <code>false</code> otherwise
 	 */
 	public final void setOmitSuper(final boolean omit) {
@@ -205,7 +205,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Sets the visibility modifier of the generated constructors.
-	 * 
+	 *
 	 * @param visibility the visibility modifier
 	 */
 	public final void setVisibility(final int visibility) {

@@ -127,9 +127,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  */
 public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyViewPart, ISelectionChangedListener {
 
-	
+
 	private class CallHierarchySelectionProvider extends SelectionProviderMediator {
-		
+
 		public CallHierarchySelectionProvider(StructuredViewer[] viewers) {
 			super(viewers, null);
 		}
@@ -145,7 +145,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			return selection;
 		}
 	}
-	
+
 
 	/*
 	 * @since 3.5
@@ -185,7 +185,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * The key to be used is <code>DIALOGSTORE_RATIO + fCurrentOrientation</code>.
 	 */
 	private static final String DIALOGSTORE_RATIO= "CallHierarchyViewPart.ratio"; //$NON-NLS-1$
-	
+
     static final int VIEW_ORIENTATION_VERTICAL = 0;
     static final int VIEW_ORIENTATION_HORIZONTAL = 1;
     static final int VIEW_ORIENTATION_SINGLE = 2;
@@ -274,7 +274,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     public void setInputElements(IMember[] members) {
     	IMember[] oldMembers= fInputElements;
     	fInputElements= members;
-        
+
     	if (members == null || members.length == 0) {
             showPage(PAGE_EMPTY);
             return;
@@ -283,7 +283,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     	if (! Arrays.equals(members, oldMembers)) {
     		addHistoryEntry(members);
     	}
-        
+
     	refresh();
     }
 
@@ -298,7 +298,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             return fCalleeRoots;
         }
     }
-           
+
     /**
      * called from ToggleOrientationAction.
      * @param orientation VIEW_ORIENTATION_HORIZONTAL or VIEW_ORIENTATION_VERTICAL
@@ -326,7 +326,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             updateCheckedState();
 
             fCurrentOrientation = orientation;
-			
+
 			restoreSplitterRatio();
         }
     }
@@ -390,21 +390,21 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         dropTarget.setTransfer(new Transfer[] { LocalSelectionTransfer.getInstance() });
         dropTarget.addDropListener(new CallHierarchyTransferDropAdapter(this, fCallHierarchyViewer));
     }
-        
+
 	private void addDropAdapters(StructuredViewer viewer) {
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), PluginTransfer.getInstance() };
 		int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
-		
+
 		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
 		delegatingDropAdapter.addDropTargetListener(new CallHierarchyTransferDropAdapter(this, viewer));
 		delegatingDropAdapter.addDropTargetListener(new PluginTransferDropAdapter(viewer));
-		
+
 		viewer.addDropSupport(ops, transfers, delegatingDropAdapter);
 	}
 
 	private void addDragAdapters(StructuredViewer viewer) {
 		int ops= DND.DROP_COPY | DND.DROP_LINK;
-		
+
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
 
 		DelegatingDragAdapter dragAdapter= new DelegatingDragAdapter() {
@@ -421,10 +421,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(fSelectionProviderMediator));
 		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(fSelectionProviderMediator));
 		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(fSelectionProviderMediator));
-		
+
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}
-            
+
     public void createPartControl(Composite parent) {
     	fParent= parent;
     	addResizeListener(parent);
@@ -440,9 +440,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fNoHierarchyShownLabel.setText(CallHierarchyMessages.CallHierarchyViewPart_empty); //
 
         showPage(PAGE_EMPTY);
-        
+
         PlatformUI.getWorkbench().getHelpSystem().setHelp(fPagebook, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
-        
+
         fSelectionProviderMediator = new CallHierarchySelectionProvider(new StructuredViewer[] {
                     fCallHierarchyViewer, fLocationViewer
                 });
@@ -458,9 +458,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		            }
 		        }, getSite(), fSelectionProviderMediator);
 
-        
+
         fClipboard= new Clipboard(parent.getDisplay());
-        
+
         makeActions();
         fillViewMenu();
         fillActionBars();
@@ -636,15 +636,15 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
 
         viewMenu.add(new Separator());
-        
+
         MenuManager layoutSubMenu= new MenuManager(CallHierarchyMessages.CallHierarchyViewPart_layout_menu);
         for (int i = 0; i < fToggleOrientationActions.length; i++) {
         	layoutSubMenu.add(fToggleOrientationActions[i]);
         }
         viewMenu.add(layoutSubMenu);
-        
+
 		viewMenu.add(new Separator(IContextMenuConstants.GROUP_SEARCH));
-		
+
         MenuManager fieldSubMenu= new MenuManager(CallHierarchyMessages.CallHierarchyViewPart_field_menu);
         for (int i = 0; i < fToggleFieldModeActions.length; i++) {
         	fieldSubMenu.add(fToggleFieldModeActions[i]);
@@ -658,10 +658,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     public void dispose() {
         if (fActionGroups != null)
             fActionGroups.dispose();
-		
+
 		if (fClipboard != null)
 	        fClipboard.dispose();
-		
+
 		if (fPartListener != null) {
 			getViewSite().getPage().removePartListener(fPartListener);
 			fPartListener= null;
@@ -781,7 +781,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             }
         }
     }
-    
+
     /**
 	 * {@inheritDoc}
 	 */
@@ -929,11 +929,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void fillActionBars() {
         IActionBars actionBars = getActionBars();
 		actionBars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
-        
+
         IToolBarManager toolBar = actionBars.getToolBarManager();
 
         fActionGroups.fillActionBars(actionBars);
-        
+
         toolBar.add(fRefreshAction);
         toolBar.add(fCancelSearchAction);
         for (int i = 0; i < fToggleCallModeActions.length; i++) {
@@ -960,7 +960,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 		new CallHierarchyOpenEditorHelper(fLocationViewer);
 		new CallHierarchyOpenEditorHelper(fCallHierarchyViewer);
-        
+
 		fOpenLocationAction= new OpenLocationAction(this, getSite());
 		fLocationCopyAction= fLocationViewer.initCopyAction(getViewSite(), fClipboard);
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
@@ -1047,11 +1047,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			setContentDescription(computeContentDescription());
 		}
     }
-	
+
 	private String computeContentDescription() {
 		// see also HistoryAction.getElementLabel(IMember[])
 		String scopeDescription= fSearchScopeActions.getFullDescription();
-		
+
 		if (fInputElements.length == 1) {
 			IMember element= fInputElements[0];
 			String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
@@ -1085,7 +1085,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMethod, args);
 				}
 			}
-			
+
 		} else {
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
 				switch (fInputElements.length) {
@@ -1095,11 +1095,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		        	case 2:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_2,
 		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
-		        		
+
 		        	case 3:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_3,
 		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
-		        		
+
 		        	default:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_more,
 		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
@@ -1112,11 +1112,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 					case 2:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_2,
 								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
-						
+
 					case 3:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_3,
 								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
-						
+
 					default:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_more,
 								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
@@ -1128,7 +1128,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	private static String getShortLabel(IMember member) {
 		return JavaElementLabels.getElementLabel(member, 0L);
 	}
-	
+
     static CallHierarchyViewPart findAndShowCallersView(IWorkbenchPartSite site) {
         IWorkbenchPage workbenchPage = site.getPage();
         CallHierarchyViewPart callersView = null;
@@ -1151,7 +1151,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Sets the enablement state of the cancel button.
-	 * 
+	 *
 	 * @param enabled <code>true</code> if cancel should be enabled
 	 */
     void setCancelEnabled(boolean enabled) {

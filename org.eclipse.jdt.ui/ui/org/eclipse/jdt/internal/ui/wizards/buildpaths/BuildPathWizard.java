@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 
 public abstract class BuildPathWizard extends NewElementWizard {
-	
+
 	private boolean fDoFlushChange;
 	private final CPListElement fEntryToEdit;
 	private IPackageFragmentRoot fPackageFragmentRoot;
@@ -42,7 +42,7 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		fOutputLocation= outputLocation;
 		if (image != null)
 			setDefaultPageImageDescriptor(image);
-		
+
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(titel);
 
@@ -50,19 +50,19 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		fExistingEntries= new ArrayList(Arrays.asList(existingEntries));
 		fDoFlushChange= true;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		if (fDoFlushChange) {
 			IJavaProject javaProject= getEntryToEdit().getJavaProject();
-			
+
 			BuildPathsBlock.flush(getExistingEntries(), getOutputLocation(), javaProject, monitor);
-			
+
 			IProject project= javaProject.getProject();
 			IPath path= getEntryToEdit().getPath();
-			
+
 			IResource folder= project.getWorkspace().getRoot().findMember(path);
 			fPackageFragmentRoot= javaProject.getPackageFragmentRoot(folder);
 		}
@@ -74,11 +74,11 @@ public abstract class BuildPathWizard extends NewElementWizard {
 	public IJavaElement getCreatedElement() {
 		return fPackageFragmentRoot;
 	}
-	
+
 	public void setDoFlushChange(boolean b) {
 		fDoFlushChange= b;
 	}
-	
+
 	public ArrayList getExistingEntries() {
 		return fExistingEntries;
 	}
@@ -86,7 +86,7 @@ public abstract class BuildPathWizard extends NewElementWizard {
 	public IPath getOutputLocation() {
 		return fOutputLocation;
 	}
-	
+
 	protected void setOutputLocation(IPath outputLocation) {
 		fOutputLocation= outputLocation;
 	}
@@ -108,7 +108,7 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		result.add(fEntryToEdit);
 		return result;
 	}
-	
+
 	public abstract void cancel();
 
 }

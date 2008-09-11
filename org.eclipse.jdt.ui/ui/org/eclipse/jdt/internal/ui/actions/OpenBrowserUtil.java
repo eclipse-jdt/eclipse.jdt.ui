@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
 public class OpenBrowserUtil {
-	
+
 	public static void open(final URL url, Display display, final String dialogTitle) {
 		display.syncExec(new Runnable() {
 			public void run() {
@@ -26,12 +26,12 @@ public class OpenBrowserUtil {
 			}
 		});
 	}
-	
+
 	private static void internalOpen(final URL url, String title) {
 		BusyIndicator.showWhile(null, new Runnable() {
 			public void run() {
 				PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
 			}
-		});			
+		});
 	}
 }

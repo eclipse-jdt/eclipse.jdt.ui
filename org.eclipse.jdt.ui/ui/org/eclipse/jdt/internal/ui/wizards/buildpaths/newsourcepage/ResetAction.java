@@ -52,27 +52,27 @@ public class ResetAction extends BuildpathModifierAction {
 	public ResetAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
-	
+
 	public ResetAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
     }
 
 	public ResetAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.RESET);
-		
+
 		fContext= context;
-		
+
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
-		
+
 		Iterator iterator= getSelectedElements().iterator();
 		Object p= iterator.next();
 		while (iterator.hasNext()) {
@@ -108,9 +108,9 @@ public class ResetAction extends BuildpathModifierAction {
 					} else {
 						project= ((CPListElementAttribute)firstElement).getParent().getJavaProject();
 					}
-					
+
 					List result= reset(getSelectedElements(), project, monitor);
-					selectAndReveal(new StructuredSelection(result));					
+					selectAndReveal(new StructuredSelection(result));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
@@ -127,12 +127,12 @@ public class ResetAction extends BuildpathModifierAction {
         } catch (InterruptedException e) {
         }
 	}
-	
+
 	private List reset(List selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 	    if (monitor == null)
         	monitor= new NullProgressMonitor();
         try {
-        	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size()); 
+        	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size());
         	List entries= ClasspathModifier.getExistingEntries(project);
         	List result= new ArrayList();
         	for (int i= 0; i < selection.size(); i++) {
@@ -154,19 +154,19 @@ public class ResetAction extends BuildpathModifierAction {
         			result.add(outputFolder);
         		}
         	}
-        
+
         	ClasspathModifier.commitClassPath(entries, project, null);
-        
+
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
         	informListeners(delta);
-        	
+
         	return result;
         } finally {
         	monitor.done();
         }
     }
-	
+
 	protected boolean canHandle(IStructuredSelection elements) {
 		try {
 	        for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
@@ -175,11 +175,11 @@ public class ResetAction extends BuildpathModifierAction {
 	            	IJavaProject project= (IJavaProject)element;
 	            	if (!project.isOnClasspath(project))
 	            		return false;
-	            	
+
 	            	IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE);
 	                if (entry.getInclusionPatterns().length == 0 && entry.getExclusionPatterns().length == 0)
 	                    return false;
-	            	
+
 	        		return true;
 	            } else if (element instanceof IPackageFragmentRoot) {
 	            	if (ClasspathModifier.filtersSet((IPackageFragmentRoot)element))

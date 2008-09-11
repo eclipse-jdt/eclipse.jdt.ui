@@ -40,7 +40,7 @@ import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class MainMethodSearchEngine{
-	
+
 	private static class MethodCollector extends SearchRequestor {
 			private List fResult;
 			private int fStyle;
@@ -54,11 +54,11 @@ public class MainMethodSearchEngine{
 			private boolean considerExternalJars() {
 				return (fStyle & IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS) != 0;
 			}
-					
+
 			private boolean considerBinaries() {
 				return (fStyle & IJavaElementSearchConstants.CONSIDER_BINARIES) != 0;
-			}		
-			
+			}
+
 			/* (non-Javadoc)
 			 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 			 */
@@ -94,21 +94,21 @@ public class MainMethodSearchEngine{
 	 * @param scope the search scope
 	 * @param style search style constants (see {@link IJavaElementSearchConstants})
 	 * @return the types found
-	 * @throws CoreException 
-	 */	
+	 * @throws CoreException
+	 */
 	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws CoreException {
 		List typesFound= new ArrayList(200);
-		
+
 		SearchPattern pattern= SearchPattern.createPattern("main(String[]) void", //$NON-NLS-1$
 				IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 		SearchRequestor requestor= new MethodCollector(typesFound, style);
 		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
-			
+
 		return (IType[]) typesFound.toArray(new IType[typesFound.size()]);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Searches for all main methods in the given scope.
 	 * Valid styles are IJavaElementSearchConstants.CONSIDER_BINARIES and
@@ -117,15 +117,15 @@ public class MainMethodSearchEngine{
 	 * @param scope the search scope
 	 * @param style style search style constants (see {@link IJavaElementSearchConstants})
 	 * @return the types found
-	 * @throws InvocationTargetException 
-	 * @throws InterruptedException 
+	 * @throws InvocationTargetException
+	 * @throws InterruptedException
 	 */
 	public IType[] searchMainMethods(IRunnableContext context, final IJavaSearchScope scope, final int style) throws InvocationTargetException, InterruptedException  {
 		int allFlags=  IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS | IJavaElementSearchConstants.CONSIDER_BINARIES;
 		Assert.isTrue((style | allFlags) == allFlags);
-		
+
 		final IType[][] res= new IType[1][];
-		
+
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
@@ -136,8 +136,8 @@ public class MainMethodSearchEngine{
 			}
 		};
 		context.run(true, true, runnable);
-		
+
 		return res[0];
 	}
-			
+
 }

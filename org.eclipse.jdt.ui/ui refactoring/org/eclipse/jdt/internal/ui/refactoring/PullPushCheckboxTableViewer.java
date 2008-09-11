@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 
@@ -53,13 +53,13 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 		for (int i= 0; i < infos.length; i++) {
 			IMemberActionInfo info= infos[i];
 			setChecked(info, PullPushCheckboxTableViewer.getCheckState(info));
-		}	
+		}
 	}
 
 	private static boolean getCheckState(IMemberActionInfo info) {
 		return info.isActive();
-	}		
-	
+	}
+
 	/*
 	 * @see org.eclipse.jface.viewers.Viewer#refresh()
 	 */

@@ -17,10 +17,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -35,6 +31,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 /**
  * Wizard page for the extract supertype refactoring, which, apart from pull up
  * facilities, also allows to specify the types where to extract the supertype.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
@@ -88,7 +88,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 		/**
 		 * Creates a new supertype selection dialog.
-		 * 
+		 *
 		 * @param shell
 		 *            the parent shell
 		 */
@@ -135,16 +135,16 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			applyDialogFont(control);
 			return control;
 		}
-		
+
 		protected void performSelectionChanged(Object[] selection) {
 			setSelectionResult(selection);
 			getOkButton().setEnabled(selection.length != 0);
 		}
-		
+
 
 		/**
 		 * Sets the input of this dialog.
-		 * 
+		 *
 		 * @param input
 		 *            the input elements
 		 */
@@ -162,7 +162,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 		/**
 		 * Creates a new supertype selection label provider.
-		 * 
+		 *
 		 * @param textFlags
 		 *            the text flags
 		 * @param imageFlags
@@ -202,7 +202,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Creates a label provider for a type list.
-	 * 
+	 *
 	 * @return a label provider
 	 */
 	private static ILabelProvider createLabelProvider() {
@@ -220,12 +220,12 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Creates a new extract supertype member page.
-	 * 
+	 *
 	 * @param name
 	 *            the page name
 	 * @param page
 	 *            the method page
-	 * @param processor 
+	 * @param processor
 	 * 	           the processor
 	 */
 	public ExtractSupertypeMemberPage(final String name, final ExtractSupertypeMethodPage page, ExtractSupertypeProcessor processor) {
@@ -251,7 +251,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Computes the candidate types.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 *             if the computation has been interrupted
 	 */
@@ -281,7 +281,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Creates the button composite.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
 	 */
@@ -410,7 +410,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Creates the super type field.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
 	 */
@@ -432,10 +432,10 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Creates the super type list.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	protected void createSuperTypeList(final Composite parent) throws JavaModelException {
 		createSpacer(parent);
@@ -485,7 +485,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Returns the declaring type.
-	 * 
+	 *
 	 * @return the declaring type
 	 */
 	public IType getDeclaringType() {
@@ -515,7 +515,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Returns the refactoring processor.
-	 * 
+	 *
 	 * @return the refactoring processor
 	 */
 	protected ExtractSupertypeProcessor getProcessor() {
@@ -545,7 +545,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Handles the name changed event.
-	 * 
+	 *
 	 * @param name
 	 *            the name
 	 */

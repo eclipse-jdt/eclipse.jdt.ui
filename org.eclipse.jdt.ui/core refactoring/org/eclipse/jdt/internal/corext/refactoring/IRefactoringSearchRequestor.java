@@ -14,14 +14,14 @@ import org.eclipse.jdt.core.search.SearchMatch;
 
 /**
  * Interface for search requestors used in conjunction with {@link org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2}.
- * 
+ *
  * @since 3.1
  */
 public interface IRefactoringSearchRequestor {
 
 	/**
 	 * Can the search match be accepted?
-	 * 
+	 *
 	 * @param match the search match to test
 	 * @return The accepted match, or <code>null</code> if not accepted
 	 */

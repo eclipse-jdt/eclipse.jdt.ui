@@ -87,7 +87,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param isConstructor If the method is a constructor
 	 * @param type the type
 	 * @return The first found method or <code>null</code>, if nothing found
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
 		Map typeVariables= computeTypeVariables(type);
@@ -186,7 +186,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 						String ourParamName= computeSimpleTypeName(paramTypes[i], typeVariables);
 						String otherParamName1= computeSimpleTypeName(otherParams[i], typeVariables);
 						String otherParamName2= computeSimpleTypeName(otherParamsFromSignature[i], typeVariables);
-						
+
 						if (!ourParamName.equals(otherParamName1) && !ourParamName.equals(otherParamName2)) {
 							return false;
 						}
@@ -200,7 +200,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 
 	/**
 	 * Returns the simple erased name for a given type signature, possibly replacing type variables.
-	 * 
+	 *
 	 * @param signature the type signature
 	 * @param typeVariables the Map&lt;SimpleName, VariableName>
 	 * @return the simple erased name for signature

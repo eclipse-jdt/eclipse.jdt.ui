@@ -202,7 +202,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Helper to open and activate editors.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
@@ -380,7 +380,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		activateHandlers((IHandlerService) getViewSite().getService(IHandlerService.class));
 		fillActionBars(getViewSite().getActionBars());
-		
+
 		setHelp();
 	}
 
@@ -439,7 +439,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fDropSupport.start();
 		new JdtViewerDragSupport(fViewer).start();
 	}
-	
+
 	protected JdtViewerDropSupport getDropSupport() {
 		return fDropSupport;
 	}
@@ -1039,7 +1039,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Compute if a new input must be set.
-	 * 
+	 *
 	 * @param elementToSelect the element to select
 	 * @param oldInput old input
 	 * @param newInput new input
@@ -1155,7 +1155,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	void setSelectionFromEditor(IWorkbenchPart part) {
 		if (!fProcessSelectionEvents || !linkBrowsingViewSelectionToEditor() || !(part instanceof IEditorPart))
 			return;
-		
+
 		IWorkbenchPartSite site= part.getSite();
 		if (site == null)
 			return;

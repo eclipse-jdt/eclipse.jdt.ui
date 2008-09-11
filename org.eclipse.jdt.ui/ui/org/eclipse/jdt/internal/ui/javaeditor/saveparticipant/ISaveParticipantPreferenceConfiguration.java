@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
 
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.jface.preference.IPreferencePageContainer;
 
@@ -24,17 +24,17 @@ import org.eclipse.jface.preference.IPreferencePageContainer;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 3.3
  */
 public interface ISaveParticipantPreferenceConfiguration {
 
 	/**
-	 * Creates a control that will be displayed on the Java &gt; Editor &gt; Save Participants 
+	 * Creates a control that will be displayed on the Java &gt; Editor &gt; Save Participants
 	 * preference page to edit the details of a save participant.
 	 *
 	 * @param parent the parent composite to which to add the preferences control
-	 * @param container the container in which this preference configuration is displayed 
+	 * @param container the container in which this preference configuration is displayed
 	 * @return the control that was added to the <code>parent</code>
 	 */
 	Control createControl(Composite parent, IPreferencePageContainer container);
@@ -73,17 +73,17 @@ public interface ISaveParticipantPreferenceConfiguration {
 	 * Implementations should free any resources they are holding on to.</p>
 	 */
 	void dispose();
-	
+
 	/**
 	 * Called when project specific settings have been enabled
 	 */
 	void enableProjectSettings();
-	
+
 	/**
 	 * Called when project specific settings have been disabled
 	 */
 	void disableProjectSettings();
-	
+
 	/**
 	 * Called when a compilation unit is saved.
 	 * <p>
@@ -91,14 +91,14 @@ public interface ISaveParticipantPreferenceConfiguration {
 	 * @return true if the corresponding {@link IPostSaveListener} needs to be informed
 	 */
 	boolean isEnabled(IScopeContext context);
-	
+
 	/**
 	 * Called when the property page is opened to check whether this has enabled settings
 	 * in the given context.
-	 * 
+	 *
 	 * @param context the context to check
 	 * @return true if this has settings in context
 	 */
 	boolean hasSettingsInScope(IScopeContext context);
-	
+
 }

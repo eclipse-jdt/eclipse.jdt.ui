@@ -24,6 +24,7 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
@@ -88,7 +89,7 @@ public class PropertiesFileEditor extends TextEditor {
 		markAsStateDependentAction(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT, true);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.TOGGLE_COMMENT_ACTION);
 		configureToggleCommentAction();
-		
+
 		fOpenAction= new OpenAction(this);
 		fOpenAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 		setAction(JdtActionConstants.OPEN, fOpenAction);
@@ -107,7 +108,7 @@ public class PropertiesFileEditor extends TextEditor {
 			((ToggleCommentAction)action).configure(sourceViewer, configuration);
 		}
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
@@ -148,7 +149,7 @@ public class PropertiesFileEditor extends TextEditor {
 		}
 		return super.getAdapter(adapter);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.part.WorkbenchPart#getOrientation()
 	 * @since 3.2
@@ -193,7 +194,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 */
 	protected void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
-		
+
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);
 	}
 }

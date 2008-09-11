@@ -32,12 +32,12 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
 
 public class ParametricStructureComputer {
 	public static class ParametricStructure {
-		
+
 		public static final ParametricStructure NONE= new ParametricStructure();
-		
+
 		private final GenericType fBase;
 		private final ParametricStructure[] fParameters;
-		
+
 		public ParametricStructure(GenericType base) {
 			if (base == null)
 				throw new NullPointerException();
@@ -53,11 +53,11 @@ public class ParametricStructureComputer {
 		public ParametricStructure[] getParameters() {
 			return fParameters;
 		}
-		
+
 		public GenericType getBase() {
 			return fBase;
 		}
-		
+
 		public String toString() {
 			if (this == NONE)
 				return "NONE"; //$NON-NLS-1$
@@ -65,10 +65,10 @@ public class ParametricStructureComputer {
 				return "ParamStructure " + fBase.toString() + '<' + Arrays.asList(fParameters) + '>'; //$NON-NLS-1$
 		}
 	}
-	
-	
+
+
 	private static final boolean DEBUG_INITIALIZATION= false;
-	
+
 	/**
 	 * Maps each ConstraintVariable2 onto an IType that is either an instance
 	 * of AbstractTypeParameter, if the ConstraintVariable2 cannot possibly
@@ -83,11 +83,11 @@ public class ParametricStructureComputer {
 		fAllConstraintVariables= allConstraintVariables;
 		fTCModel= tcModel;
 	}
-	
+
 	public ElementStructureEnvironment getElemStructureEnv() {
 		return fElemStructureEnv;
 	}
-	
+
 	private void dumpContainerStructure() {
 		System.out.println("\n*** Container Structure: ***\n"); //$NON-NLS-1$
 		for (int i= 0; i < fAllConstraintVariables.length; i++) {
@@ -98,7 +98,7 @@ public class ParametricStructureComputer {
 		System.out.println();
 	}
 
-	
+
 	private Stack/*<ConstraintVariable2>*/ fWorkList2= new Stack();
 
 
@@ -106,7 +106,7 @@ public class ParametricStructureComputer {
 		setElemStructure(v, structure);
 		fWorkList2.push(v);
 	}
-	
+
 	//TODO hard-wired to collections
 	private void initializeContainerStructure(){
 		if (DEBUG_INITIALIZATION)
@@ -168,7 +168,7 @@ public class ParametricStructureComputer {
 	protected static TType declaredTypeOf(ConstraintVariable2 cv) {
 		//TODO: record original type of CollectionElementVariable2 iff source already had type parameter
 		return cv.getType();
-		
+
 //		if (v instanceof ContextualExpressionVariable) {
 //			ContextualExpressionVariable ev= (ContextualExpressionVariable) v;
 //
@@ -188,7 +188,7 @@ public class ParametricStructureComputer {
 //		} else
 //			return null;
 	}
-	
+
 	private boolean mightBeParametric(TType type) {
 		return isParametricType(type);//TODO check this is the only case?
 	}
@@ -205,7 +205,7 @@ public class ParametricStructureComputer {
 		while (!fWorkList2.isEmpty()) {
 			ConstraintVariable2 v= (ConstraintVariable2) fWorkList2.pop();
 			List/*<ITypeConstraint>*/ usedIn= fTCModel.getUsedIn(v);
-			
+
 			for(Iterator/*<ITypeConstraint>*/ iter= usedIn.iterator(); iter.hasNext(); ) {
 				SubTypeConstraint2 stc= (SubTypeConstraint2) iter.next();
 
@@ -214,14 +214,14 @@ public class ParametricStructureComputer {
 
 				unifyContainerStructure(lhs, rhs);
 			}
-			
+
 			TypeEquivalenceSet typeEquivalenceSet= v.getTypeEquivalenceSet();
 			if (typeEquivalenceSet != null) {
 				ConstraintVariable2[] contributingVariables= typeEquivalenceSet.getContributingVariables();
 				for (int i= 0; i + 1 < contributingVariables.length; i++) {
 					ConstraintVariable2 first= contributingVariables[i];
 					ConstraintVariable2 second= contributingVariables[i + 1];
-					
+
 					unifyContainerStructure(first, second);
 				}
 			}
@@ -359,7 +359,7 @@ public class ParametricStructureComputer {
 		int parmIdx= elemVar.getDeclarationTypeVariableIndex(); //TODO: index is NOT_DECLARED_TYPE_VARIABLE_INDEX if the type variable comes from a supertype!!!
 		if (parmIdx == CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
 			return; //TODO: ParametricStructure should use type variable keys instead of index
-			
+
 		if (elemContainerStructure == v1Structure || containsSubStructure(v1Structure, elemContainerStructure)) { // avoid creating cyclic structure
 			if (!(elemStructure(elemVar) == ParametricStructure.NONE))
 				setStructureAndPush(elemVar, ParametricStructure.NONE);
@@ -378,7 +378,7 @@ public class ParametricStructureComputer {
 	private boolean containsSubStructure(ParametricStructure containingStructure, ParametricStructure subStructure) {
 		if (containingStructure == null)
 			return false;
-		
+
 		ParametricStructure[] parameters= containingStructure.getParameters();
 		for (int i= 0; i < parameters.length; i++) {
 			ParametricStructure parameter= parameters[i];
@@ -478,7 +478,7 @@ public class ParametricStructureComputer {
 		}
 		return false;
 	}
-	
+
 	private void setElemStructure(ConstraintVariable2 v, ParametricStructure t) {
 		fElemStructureEnv.setElemStructure(v, t);
 	}
@@ -542,7 +542,7 @@ public class ParametricStructureComputer {
 		Collection result= createVars(elementVars, parmType.getParameters());
 		return result;
 	}
-	
+
 	private Collection/*ConstraintVariable2*/ createVars(Collection/*ConstraintVariable2>*/ cvs, ParametricStructure[] parms) {
 		if (parms.length > 0) { // happens, e.g., for Properties (non-parametric)
 //			Assert.isTrue(cvs.size() == parms.length, "cvs.length==" + cvs.size() + " parms.length=" + parms.length); //assumption is wrong in presence of NOT_DECLARED_TYPE_VARIABLE_INDEX

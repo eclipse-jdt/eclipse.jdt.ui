@@ -31,17 +31,17 @@ import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
  * as configured by {@link #setSelection(IStructuredSelection)} or takes a preconfigured
  * new annotation wizard page, see {@link #setConfiguredWizardPage(NewAnnotationWizardPage)}.
  * </p>
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *  
- * @since 3.2 
- * 
+ *
+ * @since 3.2
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenNewAnnotationWizardAction extends AbstractOpenWizardAction {
-	
+
 	private NewAnnotationWizardPage fPage;
 	private boolean fOpenEditorOnFinish;
 
@@ -49,17 +49,17 @@ public class OpenNewAnnotationWizardAction extends AbstractOpenWizardAction {
 	 * Creates an instance of the <code>OpenNewAnnotationWizardAction</code>.
 	 */
 	public OpenNewAnnotationWizardAction() {
-		setText(ActionMessages.OpenNewAnnotationWizardAction_text); 
-		setDescription(ActionMessages.OpenNewAnnotationWizardAction_description); 
-		setToolTipText(ActionMessages.OpenNewAnnotationWizardAction_tooltip); 
+		setText(ActionMessages.OpenNewAnnotationWizardAction_text);
+		setDescription(ActionMessages.OpenNewAnnotationWizardAction_description);
+		setToolTipText(ActionMessages.OpenNewAnnotationWizardAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWANNOT);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_ANNOTATION_WIZARD_ACTION);
 		setShell(JavaPlugin.getActiveWorkbenchShell());
-		
+
 		fPage= null;
 		fOpenEditorOnFinish= true;
 	}
-	
+
 	/**
 	 * Sets a page to be used by the wizard or <code>null</code> to use a page initialized with values
 	 * from the current selection (see {@link #getSelection()} and {@link #setSelection(IStructuredSelection)}).
@@ -68,19 +68,19 @@ public class OpenNewAnnotationWizardAction extends AbstractOpenWizardAction {
 	public void setConfiguredWizardPage(NewAnnotationWizardPage page) {
 		fPage= page;
 	}
-	
+
 	/**
 	 * Specifies if the wizard will open the created type with the default editor. The default behaviour is to open
 	 * an editor.
-	 * 
+	 *
 	 * @param openEditorOnFinish if set, the wizard will open the created type with the default editor
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	public void setOpenEditorOnFinish(boolean openEditorOnFinish) {
 		fOpenEditorOnFinish= openEditorOnFinish;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */

@@ -56,7 +56,7 @@ public abstract class AbstractJavaElementRenameChange extends ResourceChange {
 	public Object getModifiedElement() {
 		return JavaCore.create(getResource());
 	}
-	
+
 	protected IResource getModifiedResource() {
 		return getResource();
 	}

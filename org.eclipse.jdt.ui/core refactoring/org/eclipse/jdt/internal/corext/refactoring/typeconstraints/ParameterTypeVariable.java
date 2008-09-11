@@ -20,7 +20,7 @@ public class ParameterTypeVariable extends ConstraintVariable {
 
 	private final IMethodBinding fMethodBinding;
 	private final int fParameterIndex;
-	
+
 	public ParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex) {
 		super(methodBinding.getParameterTypes()[parameterIndex]);
 		Assert.isNotNull(methodBinding);
@@ -29,7 +29,7 @@ public class ParameterTypeVariable extends ConstraintVariable {
 		fMethodBinding= methodBinding;
 		fParameterIndex= parameterIndex;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

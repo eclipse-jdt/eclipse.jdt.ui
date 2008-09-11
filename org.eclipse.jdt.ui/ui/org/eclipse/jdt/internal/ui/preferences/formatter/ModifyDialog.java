@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public abstract class ModifyDialog extends StatusDialog implements IModifyDialogTabPage.IModificationListener {
-    
+
     /**
      * The keys to retrieve the preferred area from the dialog settings.
      */
@@ -70,14 +70,14 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
     private static final String DS_KEY_PREFERRED_HEIGHT= "modify_dialog.preferred_height"; //$NON-NLS-1$
     private static final String DS_KEY_PREFERRED_X= "modify_dialog.preferred_x"; //$NON-NLS-1$
     private static final String DS_KEY_PREFERRED_Y= "modify_dialog.preferred_y"; //$NON-NLS-1$
-    
-    
+
+
     /**
      * The key to store the number (beginning at 0) of the tab page which had the
      * focus last time.
      */
     private static final String DS_KEY_LAST_FOCUS= "modify_dialog.last_focus"; //$NON-NLS-1$
-    
+
     private static final int APPLAY_BUTTON_ID= IDialogConstants.CLIENT_ID;
     private static final int SAVE_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
 
@@ -101,7 +101,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
 	public ModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile, String dialogPreferencesKey, String lastSavePathKey) {
 		super(parentShell);
-		
+
 		fProfileStore= profileStore;
 		fLastSaveLoadPathKey= lastSavePathKey;
 
@@ -113,7 +113,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
 		fProfileManager= profileManager;
 		fNewProfile= newProfile;
-				
+
 		fProfile= profile;
 		setTitle(Messages.format(FormatterMessages.ModifyDialog_dialog_title, profile.getName()));
 		fWorkingValues= new HashMap(fProfile.getSettings());
@@ -121,7 +121,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		fTabPages= new ArrayList();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
@@ -142,23 +142,23 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		} catch (NumberFormatException x) {
 			lastFocusNr= 0;
 		}
-		
+
 		if (!fNewProfile) {
 			fTabFolder.setSelection(lastFocusNr);
 			((IModifyDialogTabPage)fTabFolder.getSelection()[0].getData()).setInitialFocus();
 		}
 	}
-	
-	
+
+
 
 	protected Control createDialogArea(Composite parent) {
-		
+
 		final Composite composite= (Composite)super.createDialogArea(parent);
-		
+
 		Composite nameComposite= new Composite(composite, SWT.NONE);
 		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		nameComposite.setLayout(new GridLayout(3, false));
-		
+
 		fProfileNameField= new StringDialogField();
 		fProfileNameField.setLabelText(FormatterMessages.ModifyDialog_ProfileName_Label);
 		fProfileNameField.setText(fProfile.getName());
@@ -169,9 +169,9 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 				doValidate();
             }
 		});
-		
+
 		fSaveButton= createButton(nameComposite, SAVE_BUTTON_ID, FormatterMessages.ModifyDialog_Export_Button, false);
-		
+
 		fTabFolder = new TabFolder(composite, SWT.NONE);
 		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -179,7 +179,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		addPages(fWorkingValues);
 
 		applyDialogFont(composite);
-		
+
 		fTabFolder.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 			public void widgetSelected(SelectionEvent e) {
@@ -190,22 +190,22 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 				page.makeVisible();
 			}
 		});
-		
+
 		doValidate();
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, getHelpContextId());
-		
+
 		return composite;
 	}
 
 	/**
 	 * Returns the context ID for the Help system
-	 * 
+	 *
 	 * @return the string used as ID for the Help context
 	 * @since 3.5
 	 */
 	 protected abstract String getHelpContextId();
-	
+
 	public void updateStatus(IStatus status) {
 		if (status == null) {
 			doValidate();
@@ -231,7 +231,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		}
 		return initialSize;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
 	 */
@@ -242,7 +242,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 			return super.getInitialLocation(initialSize);
 		}
 	}
-	    
+
 	public boolean close() {
 		final Rectangle shell= getShell().getBounds();
 
@@ -253,7 +253,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
 		return super.close();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
@@ -261,7 +261,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		applyPressed();
 		super.okPressed();
 	}
-	
+
     protected void buttonPressed(int buttonId) {
 		if (buttonId == APPLAY_BUTTON_ID) {
 			applyPressed();
@@ -272,7 +272,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 			super.buttonPressed(buttonId);
 		}
     }
-	
+
 	private void applyPressed() {
 		if (!fProfile.getName().equals(fProfileNameField.getText())) {
 			fProfile= fProfile.rename(fProfileNameField.getText(), fProfileManager);
@@ -281,10 +281,10 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		fProfileManager.setSelected(fProfile);
 		doValidate();
 	}
-	
+
 	private void saveButtonPressed() {
 		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
-		
+
 		final FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title);
 		dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
@@ -317,11 +317,11 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 	}
-    
+
     protected void createButtonsForButtonBar(Composite parent) {
 	    fApplyButton= createButton(parent, APPLAY_BUTTON_ID, FormatterMessages.ModifyDialog_apply_button, false);
 		fApplyButton.setEnabled(false);
-		
+
 		GridLayout layout= (GridLayout) parent.getLayout();
 		layout.numColumns++;
 		layout.makeColumnsEqualWidth= false;
@@ -354,25 +354,25 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	    	fSaveButton.setEnabled(!validateProfileName().matches(IStatus.ERROR));
 	    }
 	}
-	
+
     private void doValidate() {
     	String name= fProfileNameField.getText().trim();
 		if (name.equals(fProfile.getName()) && fProfile.hasEqualSettings(fWorkingValues, fWorkingValues.keySet())) {
 			updateStatus(StatusInfo.OK_STATUS);
 			return;
 		}
-    	
+
     	IStatus status= validateProfileName();
     	if (status.matches(IStatus.ERROR)) {
     		updateStatus(status);
     		return;
     	}
-    	
+
 		if (!name.equals(fProfile.getName()) && fProfileManager.containsName(name)) {
 			updateStatus(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_Duplicate_Status));
 			return;
 		}
-		
+
 		if (fProfile.isBuiltInProfile() || fProfile.isSharedProfile()) {
 			updateStatus(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_NewCreated_Status));
 			return;
@@ -383,30 +383,30 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
     private IStatus validateProfileName() {
     	final String name= fProfileNameField.getText().trim();
-    	
+
 	    if (fProfile.isBuiltInProfile()) {
 			if (fProfile.getName().equals(name)) {
 				return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_BuiltIn_Status);
 			}
     	}
-    	
+
     	if (fProfile.isSharedProfile()) {
 			if (fProfile.getName().equals(name)) {
 				return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_Shared_Status);
 			}
     	}
-		
+
 		if (name.length() == 0) {
 			return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_EmptyName_Status);
 		}
-		
+
 		return StatusInfo.OK_STATUS;
     }
 
 	private boolean hasChanges() {
 		if (!fProfileNameField.getText().trim().equals(fProfile.getName()))
 			return true;
-		
+
 		Iterator iter= fProfile.getSettings().entrySet().iterator();
 		for (;iter.hasNext();) {
 			Map.Entry curr= (Map.Entry) iter.next();
@@ -416,5 +416,5 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		}
 		return false;
 	}
-	
+
 }

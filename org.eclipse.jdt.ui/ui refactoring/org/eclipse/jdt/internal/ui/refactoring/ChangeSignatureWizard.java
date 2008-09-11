@@ -66,13 +66,13 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 	public ChangeSignatureWizard(ChangeSignatureProcessor processor, Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		fProcessor= processor;
-		setDefaultPageTitle(RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters); 
+		setDefaultPageTitle(RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters);
 	}
 
 	protected void addUserInputPages(){
 		addPage(new ChangeSignatureInputPage(fProcessor));
 	}
-	
+
 	private static class ChangeSignatureInputPage extends UserInputWizardPage {
 
 		public static final String PAGE_NAME= "ChangeSignatureInputPage"; //$NON-NLS-1$
@@ -82,14 +82,14 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private Button fDeprecateDelegateCheckBox;
 
 		private final ChangeSignatureProcessor fProcessor;
-		
+
 		public ChangeSignatureInputPage(ChangeSignatureProcessor processor) {
 			super(PAGE_NAME);
 			fProcessor= processor;
-			setMessage(RefactoringMessages.ChangeSignatureInputPage_change); 
+			setMessage(RefactoringMessages.ChangeSignatureInputPage_change);
 			fSignaturePreviewDocument= new Document();
 		}
-	
+
 		/*
 		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 		 */
@@ -98,7 +98,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			final GridLayout layout= new GridLayout();
 			composite.setLayout(layout);
 			initializeDialogUnits(composite);
-		
+
 			try {
 				createHeadControls(composite);
 
@@ -130,12 +130,12 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				Label sep= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 				sep.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 				createSignaturePreview(composite);
-				
+
 				update(false);
 				setControl(composite);
 				Dialog.applyDialogFont(composite);
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureInputPage_Change_Signature, RefactoringMessages.ChangeSignatureInputPage_Internal_Error); 
+				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureInputPage_Change_Signature, RefactoringMessages.ChangeSignatureInputPage_Internal_Error);
 			}
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 		}
@@ -148,7 +148,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			composite.setLayout(layout);
-			
+
 			createAccessControl(composite);
 			createReturnTypeControl(composite);
 			createNameControl(composite);
@@ -160,12 +160,12 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			access.setLayout(layout);
-			
+
 			final int[] availableVisibilities= getChangeMethodSignatureProcessor().getAvailableVisibilities();
 			int currentVisibility= getChangeMethodSignatureProcessor().getVisibility();
-						
+
 			Label label= new Label(access, SWT.NONE);
-			label.setText(RefactoringMessages.ChangeSignatureInputPage_access_modifier); 
+			label.setText(RefactoringMessages.ChangeSignatureInputPage_access_modifier);
 
 			final Combo combo= new Combo(access, SWT.DROP_DOWN | SWT.READ_ONLY);
 			if (availableVisibilities.length == 0) {
@@ -184,7 +184,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			}
 			combo.setText(getAccessModifierString(currentVisibility));
 			combo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-			
+
 			// ensure that "Access modifier:" and "Return type:" Labels are not too close:
 			Dialog.applyDialogFont(access);
 			access.pack();
@@ -192,7 +192,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			if (minLabelWidth > combo.getSize().x)
 				label.setLayoutData(new GridData(minLabelWidth, label.getSize().y));
 		}
-		
+
 		private String getAccessModifierString(int modifier) {
 			switch (modifier) {
 				case Modifier.PUBLIC :
@@ -200,7 +200,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				case Modifier.PROTECTED :
 					return JdtFlags.VISIBILITY_STRING_PROTECTED;
 				case Modifier.NONE :
-					return RefactoringMessages.ChangeSignatureInputPage_default; 
+					return RefactoringMessages.ChangeSignatureInputPage_default;
 				case Modifier.PRIVATE :
 					return JdtFlags.VISIBILITY_STRING_PRIVATE;
 				default :
@@ -217,7 +217,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			returnType.setLayout(layout);
 
 			Label label= new Label(returnType, SWT.NONE);
-			label.setText(RefactoringMessages.ChangeSignatureInputPage_return_type); 
+			label.setText(RefactoringMessages.ChangeSignatureInputPage_return_type);
 
 			final Text text= new Text(returnType, SWT.BORDER);
 			text.setText(getChangeMethodSignatureProcessor().getReturnTypeString());
@@ -234,7 +234,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			} else {
 				text.setEnabled(false);
 			}
-			
+
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, true);
 			StubTypeContext stubTypeContext= getChangeMethodSignatureProcessor().getStubTypeContext();
 			processor.setCompletionContext(stubTypeContext.getCuHandle(), stubTypeContext.getBeforeString(), stubTypeContext.getAfterString());
@@ -250,8 +250,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			name.setLayout(layout);
 
 			Label label= new Label(name, SWT.NONE);
-			label.setText(RefactoringMessages.ChangeSignatureInputPage_method_name); 
-			
+			label.setText(RefactoringMessages.ChangeSignatureInputPage_method_name);
+
 			final Text text= new Text(name, SWT.BORDER);
 			text.setText(getChangeMethodSignatureProcessor().getMethodName());
 			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
@@ -272,13 +272,13 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private void createParameterExceptionsFolder(Composite composite) {
 			TabFolder folder= new TabFolder(composite, SWT.TOP);
 			folder.setLayoutData(new GridData(GridData.FILL_BOTH));
-			
+
 			TabItem item= new TabItem(folder, SWT.NONE);
-			item.setText(RefactoringMessages.ChangeSignatureInputPage_parameters); 
+			item.setText(RefactoringMessages.ChangeSignatureInputPage_parameters);
 			item.setControl(createParameterTableControl(folder));
-			
+
 			TabItem itemEx= new TabItem(folder, SWT.NONE);
-			itemEx.setText(RefactoringMessages.ChangeSignatureInputPage_exceptions); 
+			itemEx.setText(RefactoringMessages.ChangeSignatureInputPage_exceptions);
 			itemEx.setControl(createExceptionsTableControl(folder));
 
 			folder.addSelectionListener(new SelectionAdapter() {
@@ -287,11 +287,11 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				}
 			});
 		}
-	
+
 		private Control createParameterTableControl(Composite composite) {
 			Composite border= new Composite(composite, SWT.NONE);
 			border.setLayout(new GridLayout());
-			
+
 			String labelText= null; //no label
 			ChangeParametersControl cp= new ChangeParametersControl(border, SWT.NONE, labelText, new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
@@ -308,11 +308,11 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			cp.setInput(getChangeMethodSignatureProcessor().getParameterInfos());
 			return border;
 		}
-		
+
 		private Control createExceptionsTableControl(Composite parent) {
 			Composite border= new Composite(parent, SWT.NONE);
 			border.setLayout(new GridLayout());
-			
+
 			ChangeExceptionsControl cp= new ChangeExceptionsControl(border, SWT.NONE, new IExceptionListChangeListener() {
 				public void exceptionListChanged() {
 					update(true);
@@ -328,15 +328,15 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			super.dispose();
 		}
-		
+
 		private void createSignaturePreview(Composite composite) {
 			Label previewLabel= new Label(composite, SWT.NONE);
-			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview); 
-			
+			previewLabel.setText(RefactoringMessages.ChangeSignatureInputPage_method_Signature_Preview);
+
 //			//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
 //			//inside GridLayout. GridData must be constrained to force wrapping. See bug 9866 et al.
 //			ViewForm border= new ViewForm(composite, SWT.BORDER | SWT.FLAT);
-			
+
 			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
 			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
@@ -344,7 +344,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
 			fSignaturePreview.setDocument(fSignaturePreviewDocument);
 			fSignaturePreview.setEditable(false);
-			
+
 			//Layouting problems with wrapped text: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
 			Control signaturePreviewControl= fSignaturePreview.getControl();
 			PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
@@ -352,7 +352,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
 			gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
 			signaturePreviewControl.setLayoutData(gdata);
-			
+
 //			//XXX must force JavaSourceViewer text widget to wrap:
 //			border.setContent(signaturePreviewControl);
 //			GridData borderData= new GridData(GridData.FILL_BOTH);
@@ -374,7 +374,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			try{
 				if (getChangeMethodSignatureProcessor().isSignatureSameAsInitial()) {
 					if (displayErrorMessage)
-						setErrorMessage(RefactoringMessages.ChangeSignatureInputPage_unchanged); 
+						setErrorMessage(RefactoringMessages.ChangeSignatureInputPage_unchanged);
 					else
 						setErrorMessage(null);
 					setPageComplete(false);
@@ -384,11 +384,11 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				if (displayErrorMessage) {
 					setPageComplete(nameCheck);
 				} else {
-					setErrorMessage(null);	
+					setErrorMessage(null);
 					setPageComplete(true);
-				}	
+				}
 			} catch (JavaModelException e){
-				setErrorMessage(RefactoringMessages.ChangeSignatureInputPage_Internal_Error); 
+				setErrorMessage(RefactoringMessages.ChangeSignatureInputPage_Internal_Error);
 				setPageComplete(false);
 				JavaPlugin.log(e);
 			}
@@ -397,11 +397,11 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try{
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(getChangeMethodSignatureProcessor().getNewMethodSignature()); 
+				fSignaturePreviewDocument.set(getChangeMethodSignatureProcessor().getNewMethodSignature());
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception); 
-			}	
+				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception);
+			}
 		}
 	}
 }

@@ -43,13 +43,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Action to remove package fragment roots from the classpath of its parent
  * project. Currently, the action is applicable to selections containing
  * non-external archives (JAR or zip).
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class RemoveFromClasspathAction extends SelectionDispatchAction {
@@ -58,23 +58,23 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	 * Creates a new <code>RemoveFromClasspathAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type
 	 * <code> org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public RemoveFromClasspathAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.RemoveFromClasspathAction_Remove); 
-		setToolTipText(ActionMessages.RemoveFromClasspathAction_tooltip); 
+		setText(ActionMessages.RemoveFromClasspathAction_Remove);
+		setToolTipText(ActionMessages.RemoveFromClasspathAction_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REMOVE_FROM_CLASSPATH_ACTION);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
-	
+
 	private static boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
@@ -84,7 +84,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 		}
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
@@ -94,7 +94,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 				public void run(IProgressMonitor pm) throws CoreException {
 					try{
 						IPackageFragmentRoot[] roots= getRootsToRemove(selection);
-						pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length); 
+						pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length);
 						for (int i= 0; i < roots.length; i++) {
 							int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
 							roots[i].delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
@@ -105,23 +105,23 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 				}
 		}));
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), 
-					ActionMessages.RemoveFromClasspathAction_exception_dialog_title, 
-					ActionMessages.RemoveFromClasspathAction_Problems_occurred); 
+			ExceptionHandler.handle(e, getShell(),
+					ActionMessages.RemoveFromClasspathAction_exception_dialog_title,
+					ActionMessages.RemoveFromClasspathAction_Problems_occurred);
 		} catch (InterruptedException e) {
 			// canceled
 		}
 	}
-	
+
 	private static IPackageFragmentRoot[] getRootsToRemove(IStructuredSelection selection){
-		List result= new ArrayList(selection.size()); 
+		List result= new ArrayList(selection.size());
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (canRemove(element))
 				result.add(element);
 		}
 		return (IPackageFragmentRoot[]) result.toArray(new IPackageFragmentRoot[result.size()]);
-	}	
+	}
 
 	private static boolean canRemove(Object element){
 		if (! (element instanceof IPackageFragmentRoot))
@@ -137,6 +137,6 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 				JavaPlugin.log(e);
 		}
 		return false;
-	}	
+	}
 }
 

@@ -21,7 +21,7 @@ import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 /**
  * Resource mapping for the java model provider.
- * 
+ *
  * @since 3.2
  */
 public final class JavaResourceMapping extends ResourceMapping {
@@ -31,7 +31,7 @@ public final class JavaResourceMapping extends ResourceMapping {
 
 	/**
 	 * Creates a new java resource mapping.
-	 * 
+	 *
 	 * @param resource
 	 *            the resource to map
 	 */

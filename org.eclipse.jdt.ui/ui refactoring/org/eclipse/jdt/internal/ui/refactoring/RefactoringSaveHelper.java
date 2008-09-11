@@ -13,6 +13,15 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,15 +31,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -56,33 +56,33 @@ public class RefactoringSaveHelper {
 	 * Save mode to save all dirty editors (always ask).
 	 */
 	public static final int SAVE_ALL_ALWAYS_ASK= 1;
-	
+
 	/**
 	 * Save mode to save all dirty editors.
 	 */
 	public static final int SAVE_ALL= 2;
-	
+
 	/**
 	 * Save mode to save all unknown editors, i.e. those that don't work on
 	 * resources, don't use file buffers, or are otherwise suspect.
-	 * 
+	 *
 	 * Used for refactorings with participants or qualified name updating.
 	 */
 	public static final int SAVE_NON_JAVA_UPDATES= 3;
-	
+
 	/**
 	 * Save mode to save only dirty editors on compilation units that are not in
 	 * working copy mode.
-	 * 
+	 *
 	 * Used for refactorings without participants or qualified name updating.
 	 */
 	public static final int SAVE_JAVA_ONLY_UPDATES= 4;
-	
+
 	/**
 	 * Save mode to not save save any editors.
 	 */
 	public static final int SAVE_NOTHING= 5;
-	
+
 	/**
 	 * @param saveMode one of the SAVE_* constants
 	 */
@@ -94,7 +94,7 @@ public class RefactoringSaveHelper {
 				|| saveMode == SAVE_NOTHING);
 		fSaveMode= saveMode;
 	}
-	
+
 	/**
 	 * @param shell
 	 * @return <code>true</code> if save was successful and refactoring can proceed;
@@ -107,18 +107,18 @@ public class RefactoringSaveHelper {
 			case SAVE_ALL:
 				dirtyEditors= EditorUtility.getDirtyEditors(true);
 				break;
-				
+
 			case SAVE_NON_JAVA_UPDATES:
 				dirtyEditors= EditorUtility.getDirtyEditorsToSave(false); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=175495
 				break;
-				
+
 			case SAVE_JAVA_ONLY_UPDATES:
 				dirtyEditors= EditorUtility.getDirtyEditorsToSave(false);
 				break;
-				
+
 			case SAVE_NOTHING:
 				return true;
-				
+
 			default:
 				throw new IllegalStateException(Integer.toString(fSaveMode));
 		}
@@ -157,7 +157,7 @@ public class RefactoringSaveHelper {
 					} catch (InterruptedException e) {
 						return false;
 					} catch (InvocationTargetException e) {
-						ExceptionHandler.handle(e, shell, 
+						ExceptionHandler.handle(e, shell,
 								RefactoringMessages.RefactoringStarter_saving, RefactoringMessages.RefactoringStarter_unexpected_exception);
 						return false;
 					}
@@ -169,8 +169,8 @@ public class RefactoringSaveHelper {
 			}
 			return true;
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, shell, 
-				RefactoringMessages.RefactoringStarter_saving, RefactoringMessages.RefactoringStarter_unexpected_exception);  
+			ExceptionHandler.handle(e, shell,
+				RefactoringMessages.RefactoringStarter_saving, RefactoringMessages.RefactoringStarter_unexpected_exception);
 			return false;
 		}
 	}
@@ -180,7 +180,7 @@ public class RefactoringSaveHelper {
 			new GlobalBuildAction(JavaPlugin.getActiveWorkbenchWindow(), IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
 		}
 	}
-	
+
 	private boolean askSaveAllDirtyEditors(Shell shell, IEditorPart[] dirtyEditors) {
 		final boolean canSaveAutomatically= fSaveMode != SAVE_ALL_ALWAYS_ASK;
 		if (canSaveAutomatically && RefactoringSavePreferences.getSaveAllEditors()) //must save everything
@@ -193,7 +193,7 @@ public class RefactoringSaveHelper {
 				Composite result= (Composite) super.createDialogArea(parent);
 				if (canSaveAutomatically) {
 					final Button check= new Button(result, SWT.CHECK);
-					check.setText(RefactoringMessages.RefactoringStarter_always_save); 
+					check.setText(RefactoringMessages.RefactoringStarter_always_save);
 					check.setSelection(RefactoringSavePreferences.getSaveAllEditors());
 					check.addSelectionListener(new SelectionAdapter() {
 						public void widgetSelected(SelectionEvent e) {
@@ -205,19 +205,19 @@ public class RefactoringSaveHelper {
 				return result;
 			}
 		};
-		dialog.setTitle(RefactoringMessages.RefactoringStarter_save_all_resources); 
+		dialog.setTitle(RefactoringMessages.RefactoringStarter_save_all_resources);
 		dialog.setAddCancelButton(true);
 		dialog.setLabelProvider(createDialogLabelProvider());
-		dialog.setMessage(RefactoringMessages.RefactoringStarter_must_save); 
+		dialog.setMessage(RefactoringMessages.RefactoringStarter_must_save);
 		dialog.setContentProvider(new ArrayContentProvider());
 		dialog.setInput(Arrays.asList(dirtyEditors));
 		return dialog.open() == Window.OK;
 	}
-	
+
 	public boolean hasFilesSaved() {
 		return fFilesSaved;
 	}
-	
+
 	private ILabelProvider createDialogLabelProvider() {
 		return new LabelProvider() {
 			public Image getImage(Object element) {
@@ -227,5 +227,5 @@ public class RefactoringSaveHelper {
 				return ((IEditorPart) element).getTitle();
 			}
 		};
-	}	
+	}
 }

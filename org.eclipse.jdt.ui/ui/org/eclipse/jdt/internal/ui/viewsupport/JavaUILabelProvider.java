@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -32,12 +32,12 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelP
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IStyledLabelProvider {
-	
+
 	protected ListenerList fListeners = new ListenerList();
-	
+
 	protected JavaElementImageProvider fImageLabelProvider;
 	protected StorageLabelProvider fStorageLabelProvider;
-	
+
 	private ArrayList fLabelDecorators;
 
 	private int fImageFlags;
@@ -56,13 +56,13 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	 */
 	public JavaUILabelProvider(long textFlags, int imageFlags) {
 		fImageLabelProvider= new JavaElementImageProvider();
-		fLabelDecorators= null; 
-		
+		fLabelDecorators= null;
+
 		fStorageLabelProvider= new StorageLabelProvider();
 		fImageFlags= imageFlags;
 		fTextFlags= textFlags;
 	}
-	
+
 	/**
 	 * Adds a decorator to the label provider
 	 * @param decorator the decorator to add
@@ -73,7 +73,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		}
 		fLabelDecorators.add(decorator);
 	}
-	
+
 	/**
 	 * Sets the textFlags.
 	 * @param textFlags The textFlags to set
@@ -83,13 +83,13 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	}
 
 	/**
-	 * Sets the imageFlags 
+	 * Sets the imageFlags
 	 * @param imageFlags The imageFlags to set
 	 */
 	public final void setImageFlags(int imageFlags) {
 		fImageFlags= imageFlags;
 	}
-	
+
 	/**
 	 * Gets the image flags.
 	 * Can be overwritten by super classes.
@@ -106,7 +106,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	public final long getTextFlags() {
 		return fTextFlags;
 	}
-	
+
 	/**
 	 * Evaluates the image flags for a element.
 	 * Can be overwritten by super classes.
@@ -125,7 +125,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	protected long evaluateTextFlags(Object element) {
 		return getTextFlags();
 	}
-	
+
 	protected Image decorateImage(Image image, Object element) {
 		if (fLabelDecorators != null && image != null) {
 			for (int i= 0; i < fLabelDecorators.size(); i++) {
@@ -144,7 +144,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		if (result == null && (element instanceof IStorage)) {
 			result= fStorageLabelProvider.getImage(element);
 		}
-		
+
 		return decorateImage(result, element);
 	}
 
@@ -157,7 +157,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 					text= decorated;
 				}
 			}
-		}	
+		}
 		return text;
 	}
 
@@ -172,7 +172,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		}
 		return decorateText(result, element);
 	}
-	
+
 	public StyledString getStyledText(Object element) {
 		StyledString string= JavaElementLabels.getStyledTextLabel(element, (evaluateTextFlags(element) | JavaElementLabels.COLORIZE));
 		if (string.length() == 0 && (element instanceof IStorage)) {
@@ -184,7 +184,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		}
 		return string;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#dispose
 	 */
@@ -199,7 +199,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		fStorageLabelProvider.dispose();
 		fImageLabelProvider.dispose();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#addListener(ILabelProviderListener)
 	 */
@@ -210,14 +210,14 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 				decorator.addListener(listener);
 			}
 		}
-		fListeners.add(listener);	
+		fListeners.add(listener);
 	}
 
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#isLabelProperty(Object, String)
 	 */
 	public boolean isLabelProperty(Object element, String property) {
-		return true;	
+		return true;
 	}
 
 	/* (non-Javadoc)
@@ -230,9 +230,9 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 				decorator.removeListener(listener);
 			}
 		}
-		fListeners.remove(listener);	
+		fListeners.remove(listener);
 	}
-	
+
 	public static ILabelDecorator[] getDecorators(boolean errortick, ILabelDecorator extra) {
 		if (errortick) {
 			if (extra == null) {
@@ -260,7 +260,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	public Color getBackground(Object element) {
 		return null;
 	}
-	
+
     /**
      * Fires a label provider changed event to all registered listeners
      * Only listeners registered at the time this method is called are notified.

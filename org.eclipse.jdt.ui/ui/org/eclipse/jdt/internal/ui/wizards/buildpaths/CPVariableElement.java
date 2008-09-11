@@ -20,7 +20,7 @@ public class CPVariableElement {
 
 	private String fName;
 	private IPath fPath;
-	
+
 	/**
 	 * @param name the variable name
 	 * @param path the path
@@ -31,7 +31,7 @@ public class CPVariableElement {
 		fName= name;
 		fPath= path;
 	}
-	
+
 	/**
 	 * Gets the path
 	 * @return Returns a IPath
@@ -65,10 +65,10 @@ public class CPVariableElement {
 		Assert.isNotNull(name);
 		fName= name;
 	}
-	
+
 	/*
 	 * @see Object#equals()
-	 */	
+	 */
 	public boolean equals(Object other) {
 		if (other != null && other.getClass().equals(getClass())) {
 			CPVariableElement elem= (CPVariableElement)other;
@@ -76,14 +76,14 @@ public class CPVariableElement {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see Object#hashCode()
 	 */
 	public int hashCode() {
 		return fName.hashCode();
-	}	
-	
+	}
+
 	/**
 	 * @return <code>true</code> iff variable is read-only
 	 */

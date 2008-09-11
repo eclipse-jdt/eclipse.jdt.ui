@@ -11,9 +11,9 @@
 
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -33,13 +33,13 @@ import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
  * <p>Action that opens the new Java project wizard. The action initializes the wizard with the
  * selection as configured by {@link #setSelection(IStructuredSelection)} or the selection of
  * the active workbench window.</p>
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *  
- * @since 3.2 
- * 
+ *
+ * @since 3.2
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenNewJavaProjectWizardAction extends AbstractOpenWizardAction {
@@ -51,9 +51,9 @@ public class OpenNewJavaProjectWizardAction extends AbstractOpenWizardAction {
 	 * Creates an instance of the <code>OpenNewJavaProjectWizardAction</code>.
 	 */
 	public OpenNewJavaProjectWizardAction() {
-		setText(ActionMessages.OpenNewJavaProjectWizardAction_text); 
-		setDescription(ActionMessages.OpenNewJavaProjectWizardAction_description); 
-		setToolTipText(ActionMessages.OpenNewJavaProjectWizardAction_tooltip); 
+		setText(ActionMessages.OpenNewJavaProjectWizardAction_text);
+		setDescription(ActionMessages.OpenNewJavaProjectWizardAction_description);
+		setToolTipText(ActionMessages.OpenNewJavaProjectWizardAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_WIZARD_ACTION);
 		setShell(JavaPlugin.getActiveWorkbenchShell());
@@ -63,11 +63,11 @@ public class OpenNewJavaProjectWizardAction extends AbstractOpenWizardAction {
 	}
 
 	/**
-	 * Sets the configure wizard pages to be used by the wizard. 
-	 *  
+	 * Sets the configure wizard pages to be used by the wizard.
+	 *
 	 * @param pageOne the {@link NewJavaProjectWizardPageOne} page to use or <code>null</code> to use the default page.
 	 * @param pageTwo the {@link NewJavaProjectWizardPageTwo} page to use or <code>null</code> to use the default page.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public void setConfiguredWizardPages(NewJavaProjectWizardPageOne pageOne, NewJavaProjectWizardPageTwo pageTwo) {

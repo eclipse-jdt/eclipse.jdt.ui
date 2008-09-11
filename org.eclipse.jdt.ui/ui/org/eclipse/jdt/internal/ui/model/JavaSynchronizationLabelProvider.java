@@ -10,23 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.model;
 
+import org.eclipse.team.core.diff.IDiff;
+import org.eclipse.team.core.diff.IDiffTree;
+import org.eclipse.team.core.mapping.ISynchronizationContext;
+
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreePathLabelProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
-
-import org.eclipse.team.core.diff.IDiff;
-import org.eclipse.team.core.diff.IDiffTree;
-import org.eclipse.team.core.mapping.ISynchronizationContext;
 
 import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationLabelProvider;
 
@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Java-aware synchronization label provider.
- * 
+ *
  * @since 3.2
  */
 public final class JavaSynchronizationLabelProvider extends AbstractSynchronizationLabelProvider implements ITreePathLabelProvider{

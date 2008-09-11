@@ -20,20 +20,21 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 public class QualifiedNameSearchResult {
 
 	private Map fChanges;
-	
+
 	public QualifiedNameSearchResult() {
 		fChanges= new HashMap();
 	}
-	
+
 	public TextChange getChange(IFile file) {
 		TextChange result= (TextChange)fChanges.get(file);
 		if (result == null) {
@@ -42,23 +43,23 @@ public class QualifiedNameSearchResult {
 		}
 		return result;
 	}
-	
+
 	public TextChange[] getAllChanges() {
 		Collection values= fChanges.values();
 		return (TextChange[])values.toArray(new TextChange[values.size()]);
 	}
-	
+
 	public IFile[] getAllFiles() {
 		Set keys= fChanges.keySet();
-		return (IFile[])keys.toArray(new IFile[keys.size()]);			
+		return (IFile[])keys.toArray(new IFile[keys.size()]);
 	}
 
 	public Change getSingleChange(IFile[] alreadyTouchedFiles) {
 		Collection values= fChanges.values();
 		if (values.size() == 0)
 			return null;
-		
-		CompositeChange result= new CompositeChange(RefactoringCoreMessages.QualifiedNameSearchResult_change_name); 
+
+		CompositeChange result= new CompositeChange(RefactoringCoreMessages.QualifiedNameSearchResult_change_name);
 		result.markAsSynthetic();
 		List files= Arrays.asList(alreadyTouchedFiles);
 		for (Iterator iter= values.iterator(); iter.hasNext();) {

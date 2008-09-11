@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
  * @since 3.0
  */
 public final class JavaIndenter {
-	
+
 	/**
 	 * The JDT Core preferences.
 	 * @since 3.2
@@ -70,7 +70,7 @@ public final class JavaIndenter {
 		final int prefContinuationIndent;
 		final boolean prefHasGenerics;
 		final String prefTabChar;
-		
+
 		private final IJavaProject fProject;
 
 		/**
@@ -82,7 +82,7 @@ public final class JavaIndenter {
 		private boolean isStandalone() {
 			return JavaCore.getPlugin() == null;
 		}
-		
+
 		/**
 		 * Returns the possibly project-specific core preference defined under <code>key</code>.
 		 *
@@ -95,7 +95,7 @@ public final class JavaIndenter {
 				return JavaCore.getOption(key);
 			return fProject.getOption(key, true);
 		}
-		
+
 		CorePrefs(IJavaProject project) {
 			fProject= project;
 			if (isStandalone()) {
@@ -160,7 +160,7 @@ public final class JavaIndenter {
 				prefTabChar= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 			}
 		}
-		
+
 		private boolean prefUseTabs() {
 			return !JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
 		}
@@ -1583,12 +1583,12 @@ public final class JavaIndenter {
 	 * header (i.e. a type name (potentially qualified) and a new keyword). The heuristic calls
 	 * <code>nextToken</code> and expects a possibly qualified identifier (type name) and a new
 	 * keyword
-	 * 
+	 *
 	 * @return <code>true</code> if the current position looks like a anonymous type declaration
 	 *         header.
 	 */
 	private boolean looksLikeAnonymousTypeDecl() {
-		
+
 		nextToken();
 		if (fToken == Symbols.TokenIDENT) { // type name
 			nextToken();

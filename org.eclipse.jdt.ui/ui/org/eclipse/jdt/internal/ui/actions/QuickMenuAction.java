@@ -35,18 +35,18 @@ import org.eclipse.ui.keys.IBindingService;
 /**
  * A quick menu actions provides support to assign short cuts
  * to sub menus.
- * 
+ *
  * @since 3.0
  */
-public abstract class QuickMenuAction extends Action { 
+public abstract class QuickMenuAction extends Action {
 
 	private static final int CHAR_INDENT= 3;
-	
+
 	/**
 	 * Creates a new quick menu action with the given command id.
-	 * 
+	 *
 	 * @param commandId the command id of the short cut used to open
-	 *  the sub menu 
+	 *  the sub menu
 	 */
 	public QuickMenuAction(String commandId) {
 		setActionDefinitionId(commandId);
@@ -62,7 +62,7 @@ public abstract class QuickMenuAction extends Action {
 		Control focus= display.getFocusControl();
 		if (focus == null || focus.isDisposed())
 			return;
-		
+
 		MenuManager menu= new MenuManager();
 		fillMenu(menu);
 		final Menu widget= menu.createContextMenu(focus.getShell());
@@ -79,17 +79,17 @@ public abstract class QuickMenuAction extends Action {
 			widget.dispose();
 		}
 	}
-	
+
 	/**
 	 * Hook to fill a menu manager with the items of the sub menu.
-	 * 
+	 *
 	 * @param menu the sub menu to fill
 	 */
 	protected abstract void fillMenu(IMenuManager menu);
-	
+
 	/**
 	 * Adds the shortcut to the given menu text and returns it.
-	 * 
+	 *
 	 * @param menuText the menu text
 	 * @return the menu text with the shortcut
 	 * @since 3.1
@@ -98,14 +98,14 @@ public abstract class QuickMenuAction extends Action {
 		String shortcut= getShortcutString();
 		if (menuText == null || shortcut == null)
 			return menuText;
-		
+
 		return menuText + '\t' + shortcut;
 	}
-	
+
 	/**
 	 * Returns the shortcut assigned to the sub menu or <code>null</code> if
 	 * no short cut is assigned.
-	 * 
+	 *
 	 * @return the shortcut as a human readable string or <code>null</code>
 	 */
 	private String getShortcutString() {
@@ -137,7 +137,7 @@ public abstract class QuickMenuAction extends Action {
 		}
 		if (clientArea != null && !clientArea.contains(result)) {
 			result= new Point(
-				clientArea.x + clientArea.width  / 2, 
+				clientArea.x + clientArea.width  / 2,
 				clientArea.y + clientArea.height / 2);
 		}
 		Rectangle shellArea= focus.getShell().getClientArea();
@@ -148,13 +148,13 @@ public abstract class QuickMenuAction extends Action {
 		}
 		return focus.toDisplay(result);
 	}
-	
+
 	/**
 	 * Hook to compute the menu location if the focus widget is
 	 * a styled text widget.
-	 * 
+	 *
 	 * @param text the styled text widget that has the focus
-	 * 
+	 *
 	 * @return a widget relative position of the menu to pop up or
 	 *  <code>null</code> if now position inside the widget can
 	 *  be computed
@@ -167,13 +167,13 @@ public abstract class QuickMenuAction extends Action {
 			return null;
 		return result;
 	}
-	
+
 	/**
 	 * Hook to compute the menu location if the focus widget is
 	 * a tree widget.
-	 * 
+	 *
 	 * @param tree the tree widget that has the focus
-	 * 
+	 *
 	 * @return a widget relative position of the menu to pop up or
 	 *  <code>null</code> if now position inside the widget can
 	 *  be computed
@@ -189,7 +189,7 @@ public abstract class QuickMenuAction extends Action {
 				Rectangle intersect= clientArea.intersection(bounds);
 				if (intersect != null && intersect.height == bounds.height) {
 					return new Point(
-						Math.max(0, bounds.x + getAvarageCharWith(tree) * CHAR_INDENT), 
+						Math.max(0, bounds.x + getAvarageCharWith(tree) * CHAR_INDENT),
 						bounds.y + bounds.height);
 				} else {
 					return null;
@@ -200,20 +200,20 @@ public abstract class QuickMenuAction extends Action {
 					rectangles[i]= items[i].getBounds();
 				}
 				Point cursorLocation= tree.getDisplay().getCursorLocation();
-				Point result= findBestLocation(getIncludedPositions(rectangles, clientArea), 
+				Point result= findBestLocation(getIncludedPositions(rectangles, clientArea),
 					tree.toControl(cursorLocation));
 				if (result != null)
 					result.x= result.x + getAvarageCharWith(tree) * CHAR_INDENT;
 				return result;
 		}
 	}
-	
+
 	/**
 	 * Hook to compute the menu location if the focus widget is
 	 * a table widget.
-	 * 
+	 *
 	 * @param table the table widget that has the focus
-	 * 
+	 *
 	 * @return a widget relative position of the menu to pop up or
 	 *  <code>null</code> if now position inside the widget can
 	 *  be computed
@@ -230,7 +230,7 @@ public abstract class QuickMenuAction extends Action {
 				Rectangle intersect= clientArea.intersection(bounds);
 				if (intersect != null && intersect.height == bounds.height) {
 					return new Point(
-						Math.max(0, bounds.x + iBounds.width + getAvarageCharWith(table) * CHAR_INDENT), 
+						Math.max(0, bounds.x + iBounds.width + getAvarageCharWith(table) * CHAR_INDENT),
 						bounds.y + bounds.height);
 				} else {
 					return null;
@@ -242,15 +242,15 @@ public abstract class QuickMenuAction extends Action {
 				}
 				Rectangle iBounds= items[0].getImageBounds(0);
 				Point cursorLocation= table.getDisplay().getCursorLocation();
-				Point result= findBestLocation(getIncludedPositions(rectangles, clientArea), 
+				Point result= findBestLocation(getIncludedPositions(rectangles, clientArea),
 					table.toControl(cursorLocation));
-				if (result != null) 
+				if (result != null)
 					result.x= result.x + iBounds.width + getAvarageCharWith(table) * CHAR_INDENT;
 				return result;
 			}
 		}
 	}
-	
+
 	private Point[] getIncludedPositions(Rectangle[] rectangles, Rectangle widgetBounds) {
 		List result= new ArrayList();
 		for (int i= 0; i < rectangles.length; i++) {
@@ -262,7 +262,7 @@ public abstract class QuickMenuAction extends Action {
 		}
 		return (Point[]) result.toArray(new Point[result.size()]);
 	}
-	
+
 	private Point findBestLocation(Point[] points, Point relativeCursor) {
 		Point result= null;
 		double bestDist= Double.MAX_VALUE;
@@ -276,7 +276,7 @@ public abstract class QuickMenuAction extends Action {
 				a= relativeCursor.x - point.x;
 			}
 			if (point.y > relativeCursor.y) {
-				b= point.y - relativeCursor.y;	
+				b= point.y - relativeCursor.y;
 			} else {
 				b= relativeCursor.y - point.y;
 			}
@@ -288,7 +288,7 @@ public abstract class QuickMenuAction extends Action {
 		}
 		return result;
 	}
-	
+
 	private int getAvarageCharWith(Control control) {
 		GC gc= null;
 		try {

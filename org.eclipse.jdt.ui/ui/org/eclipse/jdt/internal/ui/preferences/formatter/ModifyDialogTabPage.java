@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
-	
+
 	/**
 	 * This is the default listener for any of the Preference
 	 * classes. It is added by the respective factory methods and
@@ -70,8 +70,8 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			notifyValuesModified();
 		}
 	};
-	
-	
+
+
 	/**
 	 * The base class of all Preference classes. A preference class provides a wrapper
 	 * around one or more SWT widgets and handles the input of values for some key.
@@ -81,7 +81,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	    private final Map fPreferences;
 	    private boolean fEnabled;
 	    private String fKey;
-	    
+
 	    /**
 	     * Create a new Preference.
 	     * @param preferences The map where the value is written.
@@ -107,14 +107,14 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	        fEnabled= enabled;
 	        updateWidget();
 	    }
-	    
+
 	    /**
 	     * @return Gets the enabled state of all SWT widgets of this Preference.
 	     */
 	    public final boolean getEnabled() {
 	        return fEnabled;
 	    }
-	    
+
 	    /**
 	     * Set the key which is used to store the value.
 	     * @param key New value
@@ -131,7 +131,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	    public final String getKey() {
 	        return fKey;
 	    }
-	    
+
 	    /**
 	     * Returns the main control of a preference, which is mainly used to
 	     * manage the focus. This may be <code>null</code> if the preference doesn't
@@ -139,21 +139,21 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	     * @return The main control
 	     */
 	    public abstract Control getControl();
-	    
+
 	    /**
 	     * To be implemented in subclasses. Update the SWT widgets when the state
 	     * of this object has changed (enabled, key, ...).
 	     */
 	    protected abstract void updateWidget();
 	}
-	
+
 	/**
 	 * Wrapper around a checkbox and a label.
 	 */
 	protected class ButtonPreference extends Preference {
 		private final String[] fValues;
 		private final Button fCheckbox;
-		
+
 		/**
 		 * Create a new CheckboxPreference.
 		 * @param composite The composite on which the SWT widgets are added.
@@ -176,7 +176,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fCheckbox.setText(text);
 			fCheckbox.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
 			fCheckbox.setFont(composite.getFont());
-			
+
 			updateWidget();
 
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
@@ -185,13 +185,13 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				}
 			});
 		}
-		
+
 		protected void checkboxChecked(boolean state) {
 			getPreferences().put(getKey(), state ? fValues[1] : fValues[0]);
 			setChanged();
 			notifyObservers();
 		}
-		
+
 		protected void updateWidget() {
 			if (getKey() != null) {
 				fCheckbox.setEnabled(getEnabled());
@@ -201,34 +201,34 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				fCheckbox.setEnabled(false);
 			}
 		}
-		
+
 		public boolean getChecked() {
 			return fValues[1].equals(getPreferences().get(getKey()));
 		}
-		
+
 		public void setChecked(boolean checked) {
 			getPreferences().put(getKey(), checked ? fValues[1] : fValues[0]);
 			updateWidget();
 			checkboxChecked(checked);
 		}
-		
+
 		public Control getControl() {
 			return fCheckbox;
 		}
 	}
-	
+
 	protected final class CheckboxPreference extends ButtonPreference {
 		public CheckboxPreference(Composite composite, int numColumns, Map preferences, String key, String[] values, String text) {
 	        super(composite, numColumns, preferences, key, values, text, SWT.CHECK);
         }
 	}
-	
+
 	protected final class RadioPreference extends ButtonPreference {
 		public RadioPreference(Composite composite, int numColumns, Map preferences, String key, String[] values, String text) {
 	        super(composite, numColumns, preferences, key, values, text, SWT.RADIO);
         }
 	}
-	
+
 	/**
 	 * Wrapper around a Combo box.
 	 */
@@ -236,7 +236,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		private final String [] fItems;
 		private final String[] fValues;
 		private final Combo fCombo;
-		
+
 		/**
 		 * Create a new ComboPreference.
 		 * @param composite The composite on which the SWT widgets are added.
@@ -260,11 +260,11 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fCombo.setFont(composite.getFont());
 			SWTUtil.setDefaultVisibleItemCount(fCombo);
 			fCombo.setItems(items);
-			
+
 			int max= 0;
 			for (int i= 0; i < items.length; i++)
 			    if (items[i].length() > max) max= items[i].length();
-			
+
 			fCombo.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_FILL, fCombo.computeSize(SWT.DEFAULT, SWT.DEFAULT).x));
 
 			updateWidget();
@@ -275,13 +275,13 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				}
 			});
 		}
-		
+
 		protected void comboSelected(int index) {
 			getPreferences().put(getKey(), fValues[index]);
 			setChanged();
 			notifyObservers(fValues[index]);
 		}
-		
+
 		protected void updateWidget() {
 			if (getKey() != null) {
 				fCombo.setEnabled(getEnabled());
@@ -291,7 +291,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				fCombo.setEnabled(false);
 			}
 		}
-		
+
 		public String getSelectedItem() {
 			final String selected= (String)getPreferences().get(getKey());
 			for (int i= 0; i < fValues.length; i++) {
@@ -301,29 +301,29 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			}
 			return ""; //$NON-NLS-1$
 		}
-		
+
 		public boolean hasValue(String value) {
 			return value.equals(getPreferences().get(getKey()));
 		}
-		
+
 		public Control getControl() {
 			return fCombo;
 		}
 	}
-	
+
 	/**
 	 * Wrapper around a textfied which requests an integer input of a given range.
 	 */
 	protected final class NumberPreference extends Preference {
-		
+
 		private final int fMinValue, fMaxValue;
 		private final Label fNumberLabel;
 		private final Text fNumberText;
 
 		protected int fSelected;
         protected int fOldSelected;
-        
-        
+
+
 		/**
 		 * Create a new NumberPreference.
 		 * @param composite The composite on which the SWT widgets are added.
@@ -338,19 +338,19 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 							   Map preferences, String key,
 							   int minValue, int maxValue, String text) {
 		    super(preferences, key);
-		    
+
 			fNumberLabel= createLabel(numColumns - 1, composite, text, GridData.FILL_HORIZONTAL);
 			fNumberText= new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.RIGHT);
 			fNumberText.setFont(composite.getFont());
 
 			final int length= Integer.toString(maxValue).length() + 3;
 			fNumberText.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_END, fPixelConverter.convertWidthInCharsToPixels(length)));
-			
+
 			fMinValue= minValue;
 			fMaxValue= maxValue;
-			
+
 			updateWidget();
-			
+
 			fNumberText.addFocusListener(new FocusListener() {
 				public void focusGained(FocusEvent e) {
 				    NumberPreference.this.focusGained();
@@ -359,24 +359,24 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				    NumberPreference.this.focusLost();
 				}
 			});
-			
+
 			fNumberText.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					fieldModified();
 				}
 			});
 		}
-		
+
 		private IStatus createErrorStatus() {
 		    return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(FormatterMessages.ModifyDialogTabPage_NumberPreference_error_invalid_value, new String [] {Integer.toString(fMinValue), Integer.toString(fMaxValue)}), null);
-		    
+
 		}
 
 		protected void focusGained() {
 		    fOldSelected= fSelected;
 		    fNumberText.setSelection(0, fNumberText.getCharCount());
 		}
-		
+
 		protected void focusLost() {
 		    updateStatus(null);
 		    final String input= fNumberText.getText();
@@ -389,12 +389,12 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		    	fNumberText.setText(Integer.toString(fSelected));
 		    }
 		}
-		
-		
+
+
 		protected void fieldModified() {
 		    final String trimInput= fNumberText.getText().trim();
 		    final boolean valid= validInput(trimInput);
-		    
+
 		    updateStatus(valid ? null : createErrorStatus());
 
 		    if (valid) {
@@ -405,27 +405,27 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		        }
 		    }
 		}
-		
+
 		private boolean validInput(String trimInput) {
 		    int number;
-		    
+
 		    try {
 		        number= Integer.parseInt(trimInput);
 		    } catch (NumberFormatException x) {
 		        return false;
 		    }
-		    
+
 		    if (number < fMinValue) return false;
 		    if (number > fMaxValue) return false;
 		    return true;
 		}
-		
+
 		private void saveSelected() {
 			getPreferences().put(getKey(), Integer.toString(fSelected));
 			setChanged();
 			notifyObservers();
 		}
-		
+
 		protected void updateWidget() {
 		    final boolean hasKey= getKey() != null;
 
@@ -446,13 +446,13 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			    fNumberText.setText(""); //$NON-NLS-1$
 			}
 		}
-		
+
 		public Control getControl() {
 			return fNumberText;
 		}
 	}
 
-	
+
 	/**
 	 * This class provides the default way to preserve and re-establish the focus
 	 * over multiple modify sessions. Each ModifyDialogTabPage has its own instance,
@@ -464,16 +464,16 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * index.
 	 */
 	protected final static class DefaultFocusManager extends FocusAdapter {
-		
+
 		private final static String PREF_LAST_FOCUS_INDEX= JavaUI.ID_PLUGIN + "formatter_page.modify_dialog_tab_page.last_focus_index"; //$NON-NLS-1$
-		
+
 		private final IDialogSettings fDialogSettings;
-		
+
 		private final Map fItemMap;
 		private final List fItemList;
-		
+
 		private int fIndex;
-		
+
 		public DefaultFocusManager() {
 			fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 			fItemMap= new HashMap();
@@ -484,23 +484,23 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		public void focusGained(FocusEvent e) {
 			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, ((Integer)fItemMap.get(e.widget)).intValue());
 		}
-		
+
 		public void add(Control control) {
 			control.addFocusListener(this);
 			fItemList.add(fIndex, control);
 			fItemMap.put(control, new Integer(fIndex++));
 		}
-		
+
 		public void add(Preference preference) {
 			final Control control= preference.getControl();
 			if (control != null)
 				add(control);
 		}
-		
+
 		public boolean isUsed() {
 			return fIndex != 0;
 		}
-		
+
 		public void restoreFocus() {
 			int index= 0;
 			try {
@@ -513,18 +513,18 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				// this is the first time
 			}
 		}
-		
+
 		public void resetFocus() {
 			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, -1);
 		}
 	}
-	
+
 	/**
 	 * Layout used for the settings part. Makes sure to show scrollbars
 	 * if necessary. The settings part needs to be layouted on resize.
 	 */
 	private static class PageLayout extends Layout {
-		
+
 		private final ScrolledComposite fContainer;
 		private final int fMinimalWidth;
 		private final int fMinimalHight;
@@ -534,12 +534,12 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fMinimalWidth= minimalWidth;
 			fMinimalHight= minimalHight;
 		}
-		
+
 		public Point computeSize(Composite composite, int wHint, int hHint, boolean force) {
 			if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) {
 				return new Point(wHint, hHint);
 			}
-			
+
 			int x = fMinimalWidth;
 			int y = fMinimalHight;
 			Control[] children = composite.getChildren();
@@ -548,27 +548,27 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				x = Math.max(x, size.x);
 				y = Math.max(y, size.y);
 			}
-			
+
 			Rectangle area= fContainer.getClientArea();
 			if (area.width > x) {
 				fContainer.setExpandHorizontal(true);
 			} else {
 				fContainer.setExpandHorizontal(false);
 			}
-			
+
 			if (area.height > y) {
 				fContainer.setExpandVertical(true);
 			} else {
 				fContainer.setExpandVertical(false);
 			}
-			
+
 			if (wHint != SWT.DEFAULT) {
 				x = wHint;
 			}
 			if (hHint != SWT.DEFAULT) {
 				y = hHint;
 			}
-			
+
 			return new Point(x, y);
 		}
 
@@ -586,7 +586,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * and listens for focusGained events, on which it stores the index of the current
 	 * focus holder. When the dialog is restarted, <code>restoreFocus()</code> sets the
 	 * focus to the last control which had it.
-	 * 
+	 *
 	 * The standard Preference object are managed by this focus manager if they are created
 	 * using the respective factory methods. Other SWT widgets can be added in subclasses
 	 * when they are created.
@@ -597,13 +597,13 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * A pixel converter for layout calculations
 	 */
 	protected PixelConverter fPixelConverter;
-	
-	
+
+
 	/**
 	 * The map where the current settings are stored.
 	 */
 	protected Map fWorkingValues;
-	
+
 	/**
 	 * The modify dialog where we can display status messages.
 	 */
@@ -618,25 +618,25 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		fModifyListener= modifyListener;
 		fDefaultFocusManager= new DefaultFocusManager();
 	}
-	
+
 	public ModifyDialogTabPage() {
 		fDefaultFocusManager= new DefaultFocusManager();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setWorkingValues(Map workingValues) {
 		fWorkingValues= workingValues;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setModifyListener(IModifyDialogTabPage.IModificationListener modifyListener) {
 		fModifyListener= modifyListener;
 	}
-	
+
 	/**
 	 * Create the contents of this tab page. Subclasses cannot override this,
 	 * instead they must implement <code>doCreatePreferences</code>. <code>doCreatePreview</code> may also
@@ -646,26 +646,26 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 */
 	public final Composite createContents(Composite parent) {
 		final int numColumns= 4;
-		
+
 		if (fPixelConverter == null) {
 		    fPixelConverter= new PixelConverter(parent);
 		}
-		
+
 		final SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
 		sashForm.setFont(parent.getFont());
-		
+
 		Composite scrollContainer = new Composite(sashForm, SWT.NONE);
-		
+
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		scrollContainer.setLayoutData(gridData);
-				
+
 		GridLayout layout= new GridLayout(2, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.horizontalSpacing= 0;
 		layout.verticalSpacing= 0;
 		scrollContainer.setLayout(layout);
-		
+
 		ScrolledComposite scroll= new ScrolledComposite(scrollContainer, SWT.V_SCROLL | SWT.H_SCROLL);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scroll.setExpandHorizontal(true);
@@ -673,15 +673,15 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 		final Composite settingsContainer= new Composite(scroll, SWT.NONE);
 		settingsContainer.setFont(sashForm.getFont());
-		
+
 		scroll.setContent(settingsContainer);
-		
+
 		settingsContainer.setLayout(new PageLayout(scroll, 400, 400));
 		settingsContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		Composite settingsPane= new Composite(settingsContainer, SWT.NONE);
 		settingsPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		layout= new GridLayout(numColumns, false);
 		layout.verticalSpacing= (int)(1.5 * fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING));
 		layout.horizontalSpacing= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
@@ -689,9 +689,9 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		layout.marginWidth= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		settingsPane.setLayout(layout);
 		doCreatePreferences(settingsPane, numColumns);
-		
+
 		settingsContainer.setSize(settingsContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
+
 		scroll.addControlListener(new ControlListener() {
 
 			public void controlMoved(ControlEvent e) {
@@ -701,7 +701,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				settingsContainer.setSize(settingsContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			}
 		});
-		
+
 		Label sashHandle = new Label(scrollContainer, SWT.SEPARATOR | SWT.VERTICAL);
 		gridData= new GridData(SWT.RIGHT, SWT.FILL, false, true);
 		sashHandle.setLayoutData(gridData);
@@ -712,18 +712,18 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		doCreatePreviewPane(previewPane, numColumns);
 
 		initializePage();
-	
+
 		sashForm.setWeights(new int [] {3, 3});
 		return sashForm;
 	}
-	
+
 	/**
 	 * This method is called after all controls have been allocated, including the preview.
 	 * It can be used to set the preview text and to create listeners.
 	 *
 	 */
 	protected abstract void initializePage();
-	
+
 
 	/**
 	 * Create the left side of the modify dialog. This is meant to be implemented by subclasses.
@@ -731,7 +731,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * @param numColumns Number of columns to use
 	 */
 	protected abstract void doCreatePreferences(Composite composite, int numColumns);
-	
+
 
 	/**
 	 * Create the right side of the modify dialog. By default, the preview is displayed there.
@@ -742,17 +742,17 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * @return Created composite
 	 */
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
-		
+
 		createLabel(numColumns, composite, FormatterMessages.ModifyDialogTabPage_preview_label_text);
-		
+
 		final JavaPreview preview= doCreateJavaPreview(composite);
 		fDefaultFocusManager.add(preview.getControl());
-		
+
 		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH, 0);
 		gd.widthHint= 0;
 		gd.heightHint=0;
 		preview.getControl().setLayoutData(gd);
-		
+
 		return composite;
 	}
 
@@ -767,7 +767,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 */
 	protected abstract JavaPreview doCreateJavaPreview(Composite parent);
 
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -775,12 +775,12 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		fDefaultFocusManager.resetFocus();
 		doUpdatePreview();
 	}
-	
+
 	/**
 	 * Update the preview. To be implemented by subclasses.
 	 */
 	protected abstract void doUpdatePreview();
-	
+
 	protected void notifyValuesModified() {
 		fModifyListener.valuesModified();
 	}
@@ -792,7 +792,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fDefaultFocusManager.restoreFocus();
 		}
 	}
-	
+
 
     /**
      * Set the status field on the dialog. This can be used by tab pages to report
@@ -802,11 +802,11 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	protected void updateStatus(IStatus status) {
 		fModifyListener.updateStatus(status);
 	}
-	
+
 	/*
 	 * Factory methods to make GUI construction easier
 	 */
-	
+
 	/*
 	 * Create a GridLayout with the default margin and spacing settings, as
 	 * well as the specified number of columns.
@@ -842,7 +842,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	protected static Label createLabel(int numColumns, Composite parent, String text) {
 		return createLabel(numColumns, parent, text, GridData.FILL_HORIZONTAL);
 	}
-	
+
 	/*
 	 * Convenience method to create a label
 	 */
@@ -850,7 +850,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		final Label label= new Label(parent, SWT.WRAP);
 		label.setFont(parent.getFont());
 		label.setText(text);
-		
+
 		PixelConverter pixelConverter= new PixelConverter(parent);
 		label.setLayoutData(createGridData(numColumns, gridDataStyle, pixelConverter.convertHorizontalDLUsToPixels(150)));
 		return label;
@@ -863,7 +863,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		final Group group= new Group(parent, SWT.NONE);
 		group.setFont(parent.getFont());
 		group.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
-		
+
 		final GridLayout layout= new GridLayout(numColumns, false);
 		layout.verticalSpacing=  fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 		layout.horizontalSpacing= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
@@ -871,12 +871,12 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 		//layout.marginHeight= fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		//layout.marginWidth= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-		
+
 		group.setLayout(layout);//createGridLayout(numColumns, true));
 		group.setText(text);
 		return group;
 	}
-	
+
 
 	/*
 	 * Convenience method to create a NumberPreference. The widget is registered as
@@ -890,7 +890,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		pref.addObserver(fUpdater);
 		return pref;
 	}
-	
+
 	/*
 	 * Convenience method to create a ComboPreference. The widget is registered as
 	 * a potential focus holder, and the default updater is added.
@@ -916,7 +916,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		pref.addObserver(fUpdater);
 		return pref;
 	}
-	
+
 	protected RadioPreference createRadioPref(Composite composite, int numColumns, String name, String key,
 			String [] values) {
 		final RadioPreference pref= new RadioPreference(composite, numColumns,
@@ -925,7 +925,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		pref.addObserver(fUpdater);
 		return pref;
 	}
-	
+
 
 	/*
 	 * Create a nice javadoc comment for some string.

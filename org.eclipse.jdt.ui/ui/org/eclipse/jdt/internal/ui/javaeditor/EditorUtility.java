@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
+
 import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.Assert;
@@ -28,17 +30,15 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
-import org.eclipse.swt.SWT;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -61,17 +61,17 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiEditorInput;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
-
-import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.ide.IGotoMarker;
 
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
@@ -113,7 +113,7 @@ public class EditorUtility {
 
 	/**
 	 * Tests if a CU is currently shown in an editor
-	 * 
+	 *
 	 * @param inputElement the input element
 	 * @return the IEditorPart if shown, null if element is not open in an editor
 	 */
@@ -133,7 +133,7 @@ public class EditorUtility {
 	/**
 	 * Opens a Java editor for an element such as <code>IJavaElement</code>, <code>IFile</code>, or <code>IStorage</code>.
 	 * The editor is activated by default.
-	 * 
+	 *
 	 * @param inputElement the input element
 	 * @return an open editor or <code>null</code> if an external editor was opened
 	 * @throws PartInitException if the editor could not be opened or the input element is not valid.
@@ -146,7 +146,7 @@ public class EditorUtility {
 
 	/**
 	 * Opens the editor currently associated with the given element (IJavaElement, IFile, IStorage...)
-	 * 
+	 *
 	 * @param inputElement the input element
 	 * @param activate <code>true</code> if the editor should be activated
 	 * @return an open editor or <code>null</code> if an external editor was opened
@@ -163,7 +163,7 @@ public class EditorUtility {
 		 * Support to navigate inside non-primary working copy.
 		 * For now we only support to navigate inside the currently
 		 * active editor.
-		 * 
+		 *
 		 * XXX: once we have FileStoreEditorInput as API,
 		 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=111887
 		 * we can fix this code by creating the correct editor input
@@ -190,13 +190,13 @@ public class EditorUtility {
 		IEditorInput input= getEditorInput(inputElement);
 		if (input == null)
 			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT);
-		
+
 		return openInEditor(input, getEditorID(input), activate);
 	}
 
 	/**
 	 * Selects a Java Element in an editor.
-	 * 
+	 *
 	 * @param part the editor part
 	 * @param element the Java element to reveal
 	 */
@@ -236,7 +236,7 @@ public class EditorUtility {
 
 	/**
 	 * Selects and reveals the given region in the given editor part.
-	 * 
+	 *
 	 * @param part the editor part
 	 * @param region the region
 	 */
@@ -310,11 +310,11 @@ public class EditorUtility {
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
 		if (file == null)
 			throwPartInitException(JavaEditorMessages.EditorUtility_file_must_not_be_null);
-		
+
 		IWorkbenchPage p= JavaPlugin.getActivePage();
 		if (p == null)
 			throwPartInitException(JavaEditorMessages.EditorUtility_no_active_WorkbenchPage);
-		
+
 		IEditorPart editorPart= IDE.openEditor(p, file, activate);
 		initializeHighlightRange(editorPart);
 		return editorPart;
@@ -337,11 +337,11 @@ public class EditorUtility {
 		IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, code, message, null);
 		throw new PartInitException(status);
 	}
-	
+
 	private static void throwPartInitException(String message) throws PartInitException {
 		throwPartInitException(message, IStatus.OK);
 	}
-		
+
 	private static void initializeHighlightRange(IEditorPart editorPart) {
 		if (editorPart instanceof ITextEditor) {
 			IAction toggleAction= editorPart.getEditorSite().getActionBars().getGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY);
@@ -393,7 +393,7 @@ public class EditorUtility {
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput == null)
 			return null;
-		
+
 		ITypeRoot je= JavaUI.getEditorInputTypeRoot(editorInput);
 		if (je != null || primaryOnly)
 			return je;
@@ -434,7 +434,7 @@ public class EditorUtility {
 
 	/**
 	 * Returns the Java element edited in the current active editor.
-	 * 
+	 *
 	 * @return the Java element or <code>null</code> if the active editor doesn't edit a Java element
 	 */
 	public static IJavaElement getActiveEditorJavaInput() {
@@ -538,11 +538,11 @@ public class EditorUtility {
 		}
 		return jProject;
 	}
-	
+
 	/**
 	 * Returns an array of all editors that have an unsaved content. If the identical content is
 	 * presented in more than one editor, only one of those editor parts is part of the result.
-	 * 
+	 *
 	 * @return an array of all dirty editor parts.
 	 * @since 3.2
 	 * @deprecated TODO: remove for 3.4
@@ -550,13 +550,13 @@ public class EditorUtility {
 	public static IEditorPart[] getDirtyEditors() {
 		return getDirtyEditors(false);
 	}
-	
+
 	/**
 	 * Returns an array of all editors that have an unsaved content. If the identical content is
 	 * presented in more than one editor, only one of those editor parts is part of the result.
 	 * @param skipNonResourceEditors if <code>true</code>, editors whose inputs do not adapt to {@link IResource}
 	 * are not saved
-	 * 
+	 *
 	 * @return an array of dirty editor parts
 	 * @since 3.4
 	 */
@@ -582,7 +582,7 @@ public class EditorUtility {
 		}
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
 	}
-	
+
 	private static boolean isResourceEditorInput(IEditorInput input) {
 		if (input instanceof MultiEditorInput) {
 			IEditorInput[] inputs= ((MultiEditorInput) input).getInput();
@@ -596,12 +596,12 @@ public class EditorUtility {
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Returns the editors to save before performing global Java-related
 	 * operations.
-	 * 
+	 *
 	 * @param saveUnknownEditors <code>true</code> iff editors with unknown buffer management should also be saved
 	 * @return the editors to save
 	 * @since 3.3
@@ -620,7 +620,7 @@ public class EditorUtility {
 					IEditorInput input= ep.getEditorInput();
 					if (!mustSaveDirtyEditor(ep, input, saveUnknownEditors))
 						continue;
-					
+
 					if (inputs.add(input))
 						result.add(ep);
 				}
@@ -635,11 +635,11 @@ public class EditorUtility {
 	private static boolean mustSaveDirtyEditor(IEditorPart ep, IEditorInput input, boolean saveUnknownEditors) {
 		/*
 		 * Goal: save all editors that could interfere with refactoring operations.
-		 * 
+		 *
 		 * Always save all editors for compilation units that are not working copies.
 		 * (Leaving them dirty would cause problems, since the file buffer could have been
 		 * modified but the Java model is not reconciled.)
-		 * 
+		 *
 		 * If <code>saveUnknownEditors</code> is <code>true</code>, save all editors
 		 * whose implementation is probably not based on file buffers.
 		 */
@@ -654,15 +654,15 @@ public class EditorUtility {
 				return true;
 			}
 		}
-		
+
 		if (! (ep instanceof ITextEditor))
 			return saveUnknownEditors;
-		
+
 		ITextEditor textEditor= (ITextEditor) ep;
 		IDocumentProvider documentProvider= textEditor.getDocumentProvider();
 		if (! (documentProvider instanceof TextFileDocumentProvider))
 			return saveUnknownEditors;
-		
+
 		return false;
 	}
 
@@ -671,7 +671,7 @@ public class EditorUtility {
 	 * last save occurred. Each region in the result spans over the size of at least one line.
 	 * If successive lines have changed a region spans over the size of all successive lines.
 	 * The regions include line delimiters.
-	 * 
+	 *
 	 * @param buffer the buffer to compare contents from
 	 * @param monitor to report progress to
 	 * @return the regions of the changed lines
@@ -681,10 +681,10 @@ public class EditorUtility {
 	public static IRegion[] calculateChangedLineRegions(final ITextFileBuffer buffer, final IProgressMonitor monitor) throws CoreException {
 		final IRegion[][] result= new IRegion[1][];
 		final IStatus[] errorStatus= new IStatus[] { Status.OK_STATUS };
-	
+
 		try {
 			SafeRunner.run(new ISafeRunnable() {
-	
+
 				/*
 				 * @see org.eclipse.core.runtime.ISafeRunnable#handleException(java.lang.Throwable)
 				 */
@@ -694,20 +694,20 @@ public class EditorUtility {
 					errorStatus[0]= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, msg, exception);
 					result[0]= null;
 				}
-	
+
 				/*
 				 * @see org.eclipse.core.runtime.ISafeRunnable#run()
 				 */
 				public void run() throws Exception {
 					monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_calculatingChangedRegions_message, 20);
 					IFileStore fileStore= buffer.getFileStore();
-	
+
 					ITextFileBufferManager fileBufferManager= FileBuffers.createTextFileBufferManager();
 					fileBufferManager.connectFileStore(fileStore, getSubProgressMonitor(monitor, 15));
 					try {
 						IDocument currentDocument= buffer.getDocument();
 						IDocument oldDocument= ((ITextFileBuffer) fileBufferManager.getFileStoreFileBuffer(fileStore)).getDocument();
-	
+
 						result[0]= getChangedLineRegions(oldDocument, currentDocument);
 					} finally {
 						fileBufferManager.disconnectFileStore(fileStore, getSubProgressMonitor(monitor, 5));
@@ -718,7 +718,7 @@ public class EditorUtility {
 				/**
 				 * Return regions of all lines which differ comparing <code>oldDocument</code>s content
 				 * with <code>currentDocument</code>s content. Successive lines are merged into one region.
-				 * 
+				 *
 				 * @param oldDocument a document containing the old content
 				 * @param currentDocument a document containing the current content
 				 * @return the changed regions
@@ -767,7 +767,7 @@ public class EditorUtility {
 			if (!errorStatus[0].isOK())
 				throw new CoreException(errorStatus[0]);
 		}
-	
+
 		return result[0];
 	}
 

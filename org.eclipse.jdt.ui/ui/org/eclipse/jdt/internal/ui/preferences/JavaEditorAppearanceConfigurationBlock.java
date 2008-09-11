@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor hover preferences.
- * 
+ *
  * @since 2.1
  */
 class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock {
@@ -57,7 +57,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, null },
 			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, null },
 			{PreferencesMessages.JavaEditorPreferencePage_sourceHoverBackgroundColor, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT},
-			
+
 		};
 
 	private List fAppearanceColorList;
@@ -73,7 +73,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		
+
 		ArrayList overlayKeys= new ArrayList();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
@@ -96,27 +96,27 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	/**
 	 * Creates page for appearance preferences.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		
+
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
 		scrolled.setExpandVertical(true);
-		
+
 
 		Composite composite= new Composite(scrolled, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		composite.setLayout(layout);
-		
+
 		createHeader(composite);
 		createAppearancePage(composite);
-		
+
 		scrolled.setContent(composite);
 		final Point size= composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolled.setMinSize(size.x, size.y);
@@ -137,25 +137,25 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
 		link.setToolTipText(PreferencesMessages.JavaEditorPreferencePage_link_tooltip);
-		
-		
+
+
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
 		link.setLayoutData(gridData);
-		
+
 		addFiller(contents);
 	}
-	
+
 	private void addFiller(Composite composite) {
 		PixelConverter pixelConverter= new PixelConverter(composite);
-		
+
 		Label filler= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
 		filler.setLayoutData(gd);
 	}
-	
+
 	/**
      * Returns the number of pixels corresponding to the width of the given
      * number of characters.
@@ -166,7 +166,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
      * <p>
      * Clients may call this framework method, but should not override it.
      * </p>
-     * 
+     *
      * @param chars
      *            the number of characters
      * @return the number of pixels
@@ -188,7 +188,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
      * <p>
      * Clients may call this framework method, but should not override it.
      * </p>
-     * 
+     *
      * @param chars
      *            the number of characters
      * @return the number of pixels
@@ -199,7 +199,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
             return 0;
         return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
     }
-    
+
     private Control createAppearancePage(Composite parent) {
 
 		Composite appearanceComposite= new Composite(parent, SWT.NONE);
@@ -208,28 +208,28 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		appearanceComposite.setLayout(layout);
 
 		String label;
-		
+
 		label= PreferencesMessages.JavaEditorPreferencePage_subWordNavigation;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_analyseAnnotationsWhileTyping;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
-		
+
 		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link;
 		addLink(appearanceComposite, text, INDENT);
-		
+
 		Label spacer= new Label(appearanceComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		spacer.setLayoutData(gd);
-		
+
 		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBrackets;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_quickassist_lightbulb;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0);
-		
+
 		label= PreferencesMessages.JavaEditorPreferencePage_showJavaElementOnly;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SHOW_SEGMENTS, 0);
 
@@ -238,7 +238,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		gd.horizontalSpan= 2;
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		l.setLayoutData(gd);
-		
+
 		l= new Label(appearanceComposite, SWT.LEFT);
 		l.setText(PreferencesMessages.JavaEditorPreferencePage_appearanceOptions);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -259,7 +259,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
 		gd.heightHint= convertHeightInCharsToPixels(12);
 		fAppearanceColorList.setLayoutData(gd);
-						
+
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -267,7 +267,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		layout.numColumns= 2;
 		stylesComposite.setLayout(layout);
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		l= new Label(stylesComposite, SWT.LEFT);
 		l.setText(PreferencesMessages.JavaEditorPreferencePage_color);
 		gd= new GridData();
@@ -284,7 +284,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			public void widgetSelected(SelectionEvent e) {
 				boolean systemDefault= fAppearanceColorDefault.getSelection();
 				fAppearanceColorEditor.getButton().setEnabled(!systemDefault);
-				
+
 				int i= fAppearanceColorList.getSelectionIndex();
 				if (i == -1)
 					return;
@@ -295,7 +295,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		};
-		
+
 		fAppearanceColorDefault= new Button(stylesComposite, SWT.CHECK);
 		fAppearanceColorDefault.setText(PreferencesMessages.JavaEditorPreferencePage_systemDefault);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -304,7 +304,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		fAppearanceColorDefault.setLayoutData(gd);
 		fAppearanceColorDefault.setVisible(false);
 		fAppearanceColorDefault.addSelectionListener(colorDefaultSelectionListener);
-		
+
 		fAppearanceColorList.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -345,7 +345,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			}
 		});
 	}
-    
+
     private void handleAppearanceColorListSelection() {
 		int i= fAppearanceColorList.getSelectionIndex();
 		if (i == -1)
@@ -375,10 +375,10 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	public void initialize() {
 		super.initialize();
 		initializeDefaultColors();
-		
+
 		for (int i= 0; i < fAppearanceColorListModel.length; i++)
 			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
-		
+
 		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
@@ -392,7 +392,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	/**
 	 * Initializes the default colors.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	private void initializeDefaultColors() {
@@ -418,7 +418,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
      * This method must be called before any of the dialog unit based conversion
      * methods are called.
      * </p>
-     * 
+     *
      * @param testControl
      *            a control from which to obtain the current font
      */
@@ -429,5 +429,5 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
         fFontMetrics = gc.getFontMetrics();
         gc.dispose();
     }
-    
+
 }

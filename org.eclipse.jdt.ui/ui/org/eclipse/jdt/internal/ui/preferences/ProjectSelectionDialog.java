@@ -12,10 +12,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Set;
 
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -25,6 +21,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -58,24 +58,24 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 	// sizing constants
 	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 250;
 	private final static int SIZING_SELECTION_WIDGET_WIDTH= 300;
-	
+
 	private final static String DIALOG_SETTINGS_SHOW_ALL= "ProjectSelectionDialog.show_all"; //$NON-NLS-1$
 
 	private ViewerFilter fFilter;
 
 	public ProjectSelectionDialog(Shell parentShell, Set projectsWithSpecifics) {
 		super(parentShell);
-		setTitle(PreferencesMessages.ProjectSelectionDialog_title);  
-		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption); 
+		setTitle(PreferencesMessages.ProjectSelectionDialog_title);
+		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption);
 		fProjectsWithSpecifics= projectsWithSpecifics;
-		
+
 		fFilter= new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return fProjectsWithSpecifics.contains(element);
 			}
 		};
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * Method declared on Dialog.
@@ -111,7 +111,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		fTableViewer.getControl().setFont(font);
 
 		Button checkbox= new Button(composite, SWT.CHECK);
-		checkbox.setText(PreferencesMessages.ProjectSelectionDialog_filter); 
+		checkbox.setText(PreferencesMessages.ProjectSelectionDialog_filter);
 		checkbox.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false));
 		checkbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -125,15 +125,15 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		boolean doFilter= !dialogSettings.getBoolean(DIALOG_SETTINGS_SHOW_ALL) && !fProjectsWithSpecifics.isEmpty();
 		checkbox.setSelection(doFilter);
 		updateFilter(doFilter);
-		
+
 		IJavaModel input= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		fTableViewer.setInput(input);
-		
+
 		doSelectionChanged(new Object[0]);
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	protected void updateFilter(boolean selected) {
 		if (selected) {
 			fTableViewer.addFilter(fFilter);
@@ -148,7 +148,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 			updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
 			setSelectionResult(null);
 		} else {
-			updateStatus(new StatusInfo()); 
+			updateStatus(new StatusInfo());
 			setSelectionResult(objects);
 		}
 	}

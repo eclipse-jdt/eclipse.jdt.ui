@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -50,11 +50,11 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 	public static final long SERIAL_VALUE= 1;
 
 	/** The default serial id expression */
-	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; 
+	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX;
 
 	/** The name of the serial version field */
 	protected static final String NAME_FIELD= "serialVersionUID"; //$NON-NLS-1$
-	
+
 	/** The originally selected node */
 	private final ASTNode[] fNodes;
 	private final ICompilationUnit fUnit;
@@ -70,10 +70,10 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 	 * @param fragment the variable declaration fragment to add an initializer
 	 * @param declarationNode
 	 * @return false if no id could be calculated
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	protected abstract boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException;
-	
+
 	/**
 	 * Adds the necessary linked positions for the specified fragment.
 	 *
@@ -82,7 +82,7 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 	 * @param positionGroups the list of {@link LinkedProposalPositionGroup}s
 	 */
 	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModel positionGroups);
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -91,7 +91,7 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 		VariableDeclarationFragment fragment= null;
 		for (int i= 0; i < fNodes.length; i++) {
 			final ASTNode node= fNodes[i];
-			
+
 			final AST ast= node.getAST();
 
 			fragment= ast.newVariableDeclarationFragment();
@@ -105,7 +105,7 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 				continue;
 
 			if (fragment.getInitializer() != null) {
-				
+
 				final TextEditGroup editGroup= createTextEditGroup(FixMessages.SerialVersion_group_description, cuRewrite);
 				if (node instanceof AbstractTypeDeclaration)
 					rewrite.getListRewrite(node, ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty()).insertAt(declaration, 0, editGroup);
@@ -122,7 +122,7 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 					}
 				} else
 					Assert.isTrue(false);
-				
+
 				addLinkedPositions(rewrite, fragment, positionGroups);
 			}
 
@@ -134,8 +134,8 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 		}
 		if (fragment == null)
 			return;
-		
+
 		positionGroups.setEndPosition(rewrite.track(fragment));
 	}
-	
+
 }

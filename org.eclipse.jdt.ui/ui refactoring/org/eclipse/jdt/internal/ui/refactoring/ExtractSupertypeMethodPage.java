@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Wizard page to select methods to be deleted after extract supertype.
- * 
+ *
  * @since 3.2
  */
 public class ExtractSupertypeMethodPage extends PullUpMethodPage {
@@ -36,10 +36,10 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 	public ExtractSupertypeMethodPage(ExtractSupertypeProcessor processor) {
 		super(processor);
 	}
-	
+
 	/**
 	 * Returns the refactoring processor.
-	 * 
+	 *
 	 * @return the refactoring processor
 	 */
 	private ExtractSupertypeProcessor getProcessor() {
@@ -53,7 +53,7 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_SUPERTYPE_WIZARD_PAGE);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

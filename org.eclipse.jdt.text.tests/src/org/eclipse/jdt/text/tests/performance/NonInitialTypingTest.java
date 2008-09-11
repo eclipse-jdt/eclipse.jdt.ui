@@ -11,11 +11,11 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -26,23 +26,23 @@ import org.eclipse.ui.texteditor.ITextEditor;
 /**
  * Measures the time to type in one single method into a large file. Abstract
  * implementation.
- * 
+ *
  * @since 3.1
  */
 public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
-	
+
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
 	private static final char[] METHOD= ("public int foobar(int iParam, Object oParam) {\r" +
 			"return 42;\r" +
 			"}\r").toCharArray();
-	
+
 	private static final int WARM_UP_RUNS= 3;
-	
+
 	private static final int MEASURED_RUNS= 3;
 
 	private ITextEditor fEditor;
-	
+
 	protected PerformanceMeter fMeter;
 
 	protected void setUp() throws Exception {
@@ -53,17 +53,17 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		dirtyEditor();
 		Performance performance= Performance.getDefault();
 		fMeter= performance.createPerformanceMeter(getScenarioId());
-		
-		
+
+
 		// FIXME: Currently removed from summary because unstable under Linux
 //		String summaryName= getSummaryName();
 //		if (summaryName != null)
 //			performance.tagAsSummary(fMeter, summaryName, Dimension.ELAPSED_PROCESS);
-		
+
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	protected String getSummaryName() {
 		return null;
 	}
@@ -78,7 +78,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		fEditor.getSelectionProvider().setSelection(new TextSelection(0, 0));
 		EditorTestHelper.runEventQueue();
 		sleep(1000);
-		
+
 		Display display= EditorTestHelper.getActiveDisplay();
 		getKeyboardProbe().pressChar('a', display);
 		EditorTestHelper.runEventQueue();
@@ -96,20 +96,20 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to type in one single method into a large file.
-	 * 
+	 *
 	 * @throws BadLocationException
 	 */
 	public void testTypeAMethod() throws BadLocationException {
 		Display display= EditorTestHelper.getActiveDisplay();
 		int offset= getInsertPosition();
-		
+
 		int warmUpRuns= getWarmUpRuns();
 		int measuredRuns= getMeasuredRuns();
 		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 			fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
 			EditorTestHelper.runEventQueue(display, 1000);
 			KeyboardProbe keyboardProbe= getKeyboardProbe();
-			
+
 			if (i >= warmUpRuns)
 				fMeter.start();
 
@@ -117,10 +117,10 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 				keyboardProbe.pressChar(METHOD[j], display);
 				EditorTestHelper.runEventQueue();
 			}
-			
+
 			if (i >= warmUpRuns)
 				fMeter.stop();
-			
+
 			EditorTestHelper.revertEditor(fEditor, true);
 			EditorTestHelper.runEventQueue(display, 1000);
 		}
@@ -131,7 +131,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	private synchronized void sleep(int time) {
 		DisplayHelper.sleep(EditorTestHelper.getActiveDisplay(), time);
 	}
-	
+
 	private int getInsertPosition() throws BadLocationException {
 		IDocument document= EditorTestHelper.getDocument(fEditor);
 		int lines= document.getNumberOfLines();

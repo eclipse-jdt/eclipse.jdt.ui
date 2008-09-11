@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
-
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;

@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
  * which are related to an object
  */
 public class ResourceLocator implements IResourceLocator {
-	
+
 	public IResource getUnderlyingResource(Object element) throws JavaModelException {
 		if (element instanceof IJavaElement)
 			return ((IJavaElement) element).getUnderlyingResource();

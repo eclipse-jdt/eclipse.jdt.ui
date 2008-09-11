@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -25,6 +22,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -45,25 +45,25 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	private static class Page {
 		private Object[] elements;
 		public String filter;
-		public boolean okState= false;		
-		
+		public boolean okState= false;
+
 		public Page(Object[] elements) {
 			this.elements= elements;
 		}
 	}
-	
-	private Page[] fPages;		
+
+	private Page[] fPages;
 	private int fCurrentPage;
 	private int fNumberOfPages;
-	
+
 	private Button fFinishButton;
 	private Button fBackButton;
 	private Button fNextButton;
-	
+
 	private Label fPageInfoLabel;
 	private String fPageInfoMessage= JavaUIMessages.MultiElementListSelectionDialog_pageInfoMessage;
-	private Comparator fComparator; 
-	
+	private Comparator fComparator;
+
 	/**
 	 * Constructs a multi-page list selection dialog.
 	 * @param parent The parent shell
@@ -72,7 +72,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	public MultiElementListSelectionDialog(Shell parent, ILabelProvider renderer) {
 		super(parent, renderer);
 	}
-	
+
 	/**
 	 * Sets message shown in the right top corner. Use {0} and {1} as placeholders
 	 * for the current and the total number of pages.
@@ -81,17 +81,17 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	public void setPageInfoMessage(String message) {
 		fPageInfoMessage= message;
 	}
-	
+
 	/**
 	 * Sets the elements to be displayed in the dialog.
 	 * @param elements an array of pages holding arrays of elements
 	 */
 	public void setElements(Object[][] elements) {
-		fNumberOfPages= elements.length;			
+		fNumberOfPages= elements.length;
 		fPages= new Page[fNumberOfPages];
 		for (int i= 0; i != fNumberOfPages; i++)
 			fPages[i]= new Page(elements[i]);
-		
+
 		initializeResult(fNumberOfPages);
 	}
 
@@ -104,15 +104,15 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			setInitialSelections(new Object[fNumberOfPages]);
 			selection= getInitialElementSelections();
 		}
-			
+
 		Assert.isTrue(selection.size() == fNumberOfPages);
-		
+
 		return super.open();
 	}
-		 
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(Composite)
-	 */	
+	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
 
@@ -122,8 +122,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 
 		fCurrentPage= 0;
 		setPageData();
-		
-		applyDialogFont(contents);		
+
+		applyDialogFont(contents);
 		return contents;
 	}
 
@@ -136,7 +136,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		fFinishButton= createButton(parent, IDialogConstants.OK_ID, IDialogConstants.FINISH_LABEL, false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.dialogs.SelectionDialog#createMessageArea(Composite)
 	 */
@@ -149,29 +149,29 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		layout.horizontalSpacing= 5;
 		layout.numColumns= 2;
 		composite.setLayout(layout);
-		
+
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		composite.setLayoutData(data);
-		
+
 		Label messageLabel= super.createMessageArea(composite);
-		
+
 		fPageInfoLabel= new Label(composite, SWT.NULL);
 		fPageInfoLabel.setText(getPageInfoMessage());
-		
+
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data.horizontalAlignment= GridData.END;
 		fPageInfoLabel.setLayoutData(data);
 		applyDialogFont(messageLabel);
 		return messageLabel;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
 		setResult(fCurrentPage, getSelectedElements());
 	}
-		
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
@@ -182,11 +182,11 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			turnPage(true);
 		} else {
 			super.buttonPressed(buttonId);
-		}			
+		}
 	}
-	
+
 	/**
-	 * @see AbstractElementListSelectionDialog#handleDefaultSelected() 
+	 * @see AbstractElementListSelectionDialog#handleDefaultSelected()
 	 */
 	protected void handleDefaultSelected() {
 		if (validateCurrentSelection()) {
@@ -197,25 +197,25 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			}
 		}
 	}
-	
+
 	/**
 	 * @see AbstractElementListSelectionDialog#updateButtonsEnableState(IStatus)
 	 */
 	protected void updateButtonsEnableState(IStatus status) {
 		boolean isOK= !status.matches(IStatus.ERROR);
 		fPages[fCurrentPage].okState= isOK;
-		
+
 		boolean isAllOK= isOK;
 		for (int i= 0; i != fNumberOfPages; i++)
 			isAllOK = isAllOK && fPages[i].okState;
-		
+
 		fFinishButton.setEnabled(isAllOK);
-		
+
 		boolean nextButtonEnabled= isOK && (fCurrentPage < fNumberOfPages - 1);
-		
+
 		fNextButton.setEnabled(nextButtonEnabled);
-		fBackButton.setEnabled(fCurrentPage != 0);		
-		
+		fBackButton.setEnabled(fCurrentPage != 0);
+
 		if (nextButtonEnabled) {
 			getShell().setDefaultButton(fNextButton);
 		} else if (isAllOK) {
@@ -225,8 +225,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 
 	private void turnPage(boolean toNextPage) {
 		Page page= fPages[fCurrentPage];
-		
-		// store filter		
+
+		// store filter
 		String filter= getFilter();
 		if (filter == null)
 			filter= ""; //$NON-NLS-1$
@@ -243,7 +243,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		if (toNextPage) {
 			if (fCurrentPage + 1 >= fNumberOfPages)
 				return;
-			
+
 			fCurrentPage++;
 		} else {
 			if (fCurrentPage - 1 < 0)
@@ -251,41 +251,41 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 
 			fCurrentPage--;
 		}
-		
+
 		if (fPageInfoLabel != null && !fPageInfoLabel.isDisposed())
 			fPageInfoLabel.setText(getPageInfoMessage());
-		
-		setPageData();		
-		
+
+		setPageData();
+
 		validateCurrentSelection();
 	}
-	
+
 	private void setPageData() {
 		Page page= fPages[fCurrentPage];
-		
+
 		// 1. set elements
 		setListElements(page.elements);
-		
+
 		// 2. apply filter
 		String filter= page.filter;
 		if (filter == null)
 			filter= ""; //$NON-NLS-1$
 		setFilter(filter);
-		
+
 		// 3. select elements
 		Object[] selectedElements= (Object[]) getInitialElementSelections().get(fCurrentPage);
 		setSelection(selectedElements);
 		fFilteredList.setFocus();
 	}
-	
+
 	private String getPageInfoMessage() {
 		if (fPageInfoMessage == null)
 			return ""; //$NON-NLS-1$
-			
-		String[] args= new String[] { Integer.toString(fCurrentPage + 1), Integer.toString(fNumberOfPages) };	
+
+		String[] args= new String[] { Integer.toString(fCurrentPage + 1), Integer.toString(fNumberOfPages) };
 		return Messages.format(fPageInfoMessage, args);
 	}
-		
+
 	private void initializeResult(int length) {
 		List result= new ArrayList(length);
 		for (int i= 0; i != length; i++)
@@ -293,7 +293,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 
 		setResult(result);
 	}
-	
+
 	/**
 	 * Gets the current Page.
 	 * @return Returns a int
@@ -305,7 +305,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	/**
 	 * Set the <code>Comparator</code> used to sort
 	 * the elements in the List.
-	 * 
+	 *
 	 * @param comparator the comparator to use, not null.
 	 */
 	public void setComparator(Comparator comparator) {
@@ -313,7 +313,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		if (fFilteredList != null)
 			fFilteredList.setComparator(fComparator);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
- *       o inline call that is used in a field initializer 
+ *       o inline call that is used in a field initializer
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 
 public class InputFlowAnalyzer extends FlowAnalyzer {
-	
+
 	private static class LoopReentranceVisitor extends FlowAnalyzer {
 		private Selection fSelection;
 		private ASTNode fLoopNode;
@@ -44,18 +44,18 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			fLoopNode= loopNode;
 		}
 		protected boolean traverseNode(ASTNode node) {
-			return true; // end <= fSelection.end || fSelection.enclosedBy(start, end);	
+			return true; // end <= fSelection.end || fSelection.enclosedBy(start, end);
 		}
 		protected boolean createReturnFlowInfo(ReturnStatement node) {
 			// Make sure that the whole return statement is selected or located before the selection.
 			return node.getStartPosition() + node.getLength() <= fSelection.getExclusiveEnd();
-		}	
+		}
 		protected ASTNode getLoopNode() {
 			return fLoopNode;
 		}
 		public void process(ASTNode node) {
 			try {
-				fFlowContext.setLoopReentranceMode(true);	
+				fFlowContext.setLoopReentranceMode(true);
 				node.accept(this);
 			} finally {
 				fFlowContext.setLoopReentranceMode(false);
@@ -68,7 +68,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			setFlowInfo(node, info);
 			info.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
 			// No need to merge the condition. It was already considered by the InputFlowAnalyzer.
-			info.removeLabel(null);	
+			info.removeLabel(null);
 		}
 		public void endVisit(EnhancedForStatement node) {
 			if (skipNode(node))
@@ -123,7 +123,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			forInfo.removeLabel(null);
 		}
 	}
-	
+
 	private Selection fSelection;
 	private boolean fDoLoopReentrance;
 	private LoopReentranceVisitor fLoopReentranceVisitor;
@@ -140,42 +140,42 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		node.accept(this);
 		return getFlowInfo(node);
 	}
-	
+
 	protected boolean traverseNode(ASTNode node) {
 		return node.getStartPosition() + node.getLength() > fSelection.getInclusiveEnd();
 	}
-	
+
 	protected boolean createReturnFlowInfo(ReturnStatement node) {
 		// Make sure that the whole return statement is located after the selection. There can be cases like
-		// return i + [x + 10] * 10; In this case we must not create a return info node.		
+		// return i + [x + 10] * 10; In this case we must not create a return info node.
 		return node.getStartPosition() >= fSelection.getInclusiveEnd();
 	}
-	
+
 	public boolean visit(DoStatement node) {
 		createLoopReentranceVisitor(node);
-		return super.visit(node);			
+		return super.visit(node);
 	}
-	
+
 	public boolean visit(EnhancedForStatement node) {
 		createLoopReentranceVisitor(node);
-		return super.visit(node);			
+		return super.visit(node);
 	}
-	
+
 	public boolean visit(ForStatement node) {
 		createLoopReentranceVisitor(node);
-		return super.visit(node);			
+		return super.visit(node);
 	}
-	
+
 	public boolean visit(WhileStatement node) {
 		createLoopReentranceVisitor(node);
-		return super.visit(node);			
+		return super.visit(node);
 	}
-	
+
 	private void createLoopReentranceVisitor(ASTNode node) {
 		if (fLoopReentranceVisitor == null && fDoLoopReentrance)
 			fLoopReentranceVisitor= new LoopReentranceVisitor(fFlowContext, fSelection, node);
 	}
-	
+
 	public void endVisit(ConditionalExpression node) {
 		if (skipNode(node))
 			return;
@@ -190,7 +190,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			super.endVisit(node);
 		}
 	}
-	
+
 	public void endVisit(DoStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);
@@ -201,7 +201,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			return;
 		Statement thenPart= node.getThenStatement();
 		Statement elsePart= node.getElseStatement();
-		if ((thenPart != null && fSelection.coveredBy(thenPart)) || 
+		if ((thenPart != null && fSelection.coveredBy(thenPart)) ||
 				(elsePart != null && fSelection.coveredBy(elsePart))) {
 			GenericSequentialFlowInfo info= createSequential();
 			setFlowInfo(node, info);
@@ -210,17 +210,17 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			super.endVisit(node);
 		}
 	}
-	
+
 	public void endVisit(EnhancedForStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);
 	}
-	
+
 	public void endVisit(ForStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);
 	}
-	
+
 	public void endVisit(SwitchStatement node) {
 		if (skipNode(node))
 			return;
@@ -239,12 +239,12 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		}
 		super.endVisit(node, data);
 	}
-	
+
 	public void endVisit(WhileStatement node) {
 		super.endVisit(node);
 		handleLoopReentrance(node);
 	}
-	
+
 	private void endVisitConditional(GenericSequentialFlowInfo info, ASTNode condition, ASTNode[] branches) {
 		info.merge(getFlowInfo(condition), fFlowContext);
 		for (int i= 0; i < branches.length; i++) {
@@ -255,11 +255,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			}
 		}
 	}
-	
+
 	private void handleLoopReentrance(ASTNode node) {
 		if (!fSelection.coveredBy(node) || fLoopReentranceVisitor == null || fLoopReentranceVisitor.getLoopNode() != node)
 			return;
-		
+
 		fLoopReentranceVisitor.process(node);
 		GenericSequentialFlowInfo info= createSequential();
 		info.merge(getFlowInfo(node), fFlowContext);

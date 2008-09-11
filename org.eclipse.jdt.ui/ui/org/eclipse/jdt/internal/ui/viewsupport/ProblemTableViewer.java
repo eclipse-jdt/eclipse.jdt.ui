@@ -13,12 +13,12 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -53,7 +53,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	public ProblemTableViewer(Composite parent, int style) {
 		super(parent, style);
 		initMapper();
-	} 
+	}
 
 	/**
 	 * Constructor for ProblemTableViewer.
@@ -67,14 +67,14 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	private void initMapper() {
 		fResourceToItemsMapper= new ResourceToItemsMapper(this);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper.IContentViewerAccessor#doUpdateItem(org.eclipse.swt.widgets.Widget)
 	 */
 	public void doUpdateItem(Widget item) {
 		doUpdateItem(item, item.getData(), true);
 	}
-	
+
 	/*
 	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
@@ -91,7 +91,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	protected void unmapElement(Object element, Widget item) {
 		if (item instanceof Item) {
 			fResourceToItemsMapper.removeFromMap(element, (Item) item);
-		}		
+		}
 		super.unmapElement(element, item);
 	}
 
@@ -102,7 +102,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 		fResourceToItemsMapper.clearMap();
 		super.unmapAllElements();
 	}
-	
+
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
@@ -113,7 +113,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 				return;
 			}
 		}
-		
+
 		Object[] changed= event.getElements();
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
 			ArrayList others= new ArrayList(changed.length);
@@ -132,7 +132,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 		}
 		super.handleLabelProviderChanged(event);
 	}
-	
+
 	/**
 	 * Answers whether this viewer can ignore label provider changes resulting from
 	 * marker changes in annotation models

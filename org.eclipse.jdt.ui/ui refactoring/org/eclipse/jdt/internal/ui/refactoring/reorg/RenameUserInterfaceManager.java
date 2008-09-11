@@ -26,11 +26,11 @@ import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceManager;
 
 public class RenameUserInterfaceManager extends UserInterfaceManager {
 	private static final UserInterfaceManager fgInstance= new RenameUserInterfaceManager();
-	
+
 	public static UserInterfaceManager getDefault() {
 		return fgInstance;
 	}
-	
+
 	private RenameUserInterfaceManager() {
 		put(RenameJavaProjectProcessor.class, RenameUserInterfaceStarter.class, RenameJavaProjectWizard.class);
 		put(RenameSourceFolderProcessor.class, RenameUserInterfaceStarter.class, RenameSourceFolderWizard.class);

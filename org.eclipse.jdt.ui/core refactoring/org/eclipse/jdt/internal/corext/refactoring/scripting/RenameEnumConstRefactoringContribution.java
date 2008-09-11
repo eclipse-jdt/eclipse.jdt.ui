@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcess
 
 /**
  * Refactoring contribution for the rename enum constant refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class RenameEnumConstRefactoringContribution extends JavaRefactoringContribution {

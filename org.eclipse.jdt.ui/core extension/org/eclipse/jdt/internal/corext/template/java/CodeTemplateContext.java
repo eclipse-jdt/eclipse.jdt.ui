@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeTemplateContext extends TemplateContext {
-	
+
 	private String fLineDelimiter;
 	private IJavaProject fProject;
 
@@ -60,15 +60,15 @@ public class CodeTemplateContext extends TemplateContext {
 
 		if (!canEvaluate(template))
 			return null;
-			
+
 		String pattern= changeLineDelimiter(template.getPattern(), fLineDelimiter);
-		
+
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(pattern);
 		getContextType().resolve(buffer, this);
 		return buffer;
 	}
-	
+
 	private static String changeLineDelimiter(String code, String lineDelim) {
 		try {
 			ILineTracker tracker= new DefaultLineTracker();
@@ -77,7 +77,7 @@ public class CodeTemplateContext extends TemplateContext {
 			if (nLines == 1) {
 				return code;
 			}
-			
+
 			StringBuffer buf= new StringBuffer();
 			for (int i= 0; i < nLines; i++) {
 				if (i != 0) {
@@ -92,7 +92,7 @@ public class CodeTemplateContext extends TemplateContext {
 			// can not happen
 			return code;
 		}
-	}		
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#canEvaluate(org.eclipse.jdt.internal.corext.template.Template)
@@ -100,7 +100,7 @@ public class CodeTemplateContext extends TemplateContext {
 	public boolean canEvaluate(Template template) {
 		return true;
 	}
-	
+
 	public void setCompilationUnitVariables(ICompilationUnit cu) {
 		setVariable(CodeTemplateContextType.FILENAME, cu.getElementName());
 		setVariable(CodeTemplateContextType.PACKAGENAME, cu.getParent().getElementName());

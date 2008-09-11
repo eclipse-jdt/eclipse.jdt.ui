@@ -39,7 +39,7 @@ abstract class PackageReorgChange extends ResourceChange {
 		fPackageHandle= pack.getHandleIdentifier();
 		fDestinationHandle= dest.getHandleIdentifier();
 		fNameQuery= nameQuery;
-		
+
 		// it is enough to check the package only since package reorg changes
 		// are not undoable. Don't check for read only here since
 		// we already ask for user confirmation and moving a read

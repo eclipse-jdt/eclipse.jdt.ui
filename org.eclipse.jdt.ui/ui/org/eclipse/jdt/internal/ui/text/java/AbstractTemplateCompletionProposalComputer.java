@@ -31,25 +31,25 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 /**
  * An template completion proposal computer can generate template completion proposals
  * from a given TemplateEngine.
- * 
+ *
  * Subclasses must implement {@link #computeCompletionEngine(JavaContentAssistInvocationContext)}
- * 
+ *
  * @since 3.4
  */
 public abstract class AbstractTemplateCompletionProposalComputer implements IJavaCompletionProposalComputer {
-	
+
 	/**
 	 * The engine for the current session, if any
 	 */
 	private TemplateEngine fEngine;
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!(context instanceof JavaContentAssistInvocationContext))
 			return Collections.EMPTY_LIST;
-		
+
 		JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 		ICompilationUnit unit= javaContext.getCompilationUnit();
 		if (unit == null)
@@ -92,7 +92,7 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 
 	/**
 	 * Compute the engine used to retrieve completion proposals in the given context
-	 * 
+	 *
 	 * @param context the context where proposals will be made
 	 * @return the engine or <code>null</code> if no engine available in the context
 	 */

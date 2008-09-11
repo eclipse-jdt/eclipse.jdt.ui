@@ -155,7 +155,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	class AdaptedSourceViewer extends JavaSourceViewer  {
-		
+
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
 		}
@@ -235,7 +235,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 	}
 
-	
+
 	private class ExitPolicy implements IExitPolicy {
 
 		final char fExitCharacter;
@@ -764,7 +764,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		/**
 		 * Computes the element line of a java element (the start of the element, or the line with
 		 * the element's name range).
-		 * 
+		 *
 		 * @param document the displayed document for line information
 		 * @param element the java element, may be <code>null</code>
 		 * @return the element's start line, or -1
@@ -989,7 +989,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
 	private CompositeActionGroup fContextMenuGroup;
-	
+
 	private CorrectionCommandInstaller fCorrectionCommands;
 
 	/**
@@ -1006,7 +1006,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * </p>
 	 */
 	private final Object fReconcilerLock= new Object();
-	
+
 	/**
 	 * The templates page.
 	 * @since 3.4
@@ -1099,7 +1099,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		setAction("IndentOnTab", action); //$NON-NLS-1$
 		markAsStateDependentAction("IndentOnTab", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("IndentOnTab", true); //$NON-NLS-1$
-		
+
 		// override the text editor actions with indenting move line actions
 		JavaMoveLinesAction[] moveLinesActions= JavaMoveLinesAction.createMoveCopyActionSet(JavaEditorMessages.getBundleForConstructedKeys(), this);
 		ResourceAction rAction= moveLinesActions[0];
@@ -1131,7 +1131,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT, false);
 		ActionGroup surroundWith= new SurroundWithActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
-		
+
 		fActionGroups.addGroup(surroundWith);
 		fActionGroups.addGroup(rg);
 		fActionGroups.addGroup(fGenerateActionGroup);
@@ -1142,7 +1142,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			rg,
 			surroundWith,
 			new LocalHistoryActionGroup(this, ITextEditorActionConstants.GROUP_EDIT)});
-		
+
 		fCorrectionCommands= new CorrectionCommandInstaller(); // allow shortcuts for quick fix/assist
 		fCorrectionCommands.registerCommands(this);
 	}
@@ -1276,7 +1276,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				performSave(false, progressMonitor);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#openSaveErrorDialog(java.lang.String, java.lang.String, org.eclipse.core.runtime.CoreException)
 	 * @since 3.3
@@ -1294,7 +1294,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	/**
 	 * Opens a warning dialog informing about a failure during handling of save listeners.
-	 * 
+	 *
 	 * @param title the dialog title
 	 * @param message the message to display
 	 * @param exception the exception to handle
@@ -1441,7 +1441,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fCorrectionCommands.deregisterCommands();
 			fCorrectionCommands= null;
 		}
-		
+
 		super.dispose();
 	}
 
@@ -1595,12 +1595,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
-		
+
 		// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=58245
 		JavaPlugin javaPlugin= JavaPlugin.getDefault();
 		if (javaPlugin == null)
 			return;
-		
+
 		// Always notify AST provider
 		javaPlugin.getASTProvider().reconciled(ast, getInputJavaElement(), progressMonitor);
 
@@ -1728,7 +1728,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	/**
 	 * Creates the templates page used with this editor.
-	 * 
+	 *
 	 * @return the created Java templates page
 	 * @since 3.4
 	 */

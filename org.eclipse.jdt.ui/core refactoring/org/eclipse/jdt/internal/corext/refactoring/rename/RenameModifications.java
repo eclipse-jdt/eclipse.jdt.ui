@@ -57,17 +57,17 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.RefactoringModification
 
 
 public class RenameModifications extends RefactoringModifications {
-	
+
 	private List fRename;
 	private List fRenameArguments;
 	private List fParticipantDescriptorFilter;
-	
+
 	public RenameModifications() {
 		fRename= new ArrayList();
 		fRenameArguments= new ArrayList();
 		fParticipantDescriptorFilter= new ArrayList();
 	}
-	
+
 	public void rename(IResource resource, RenameArguments args) {
 		add(resource, args, null);
 	}
@@ -93,7 +93,7 @@ public class RenameModifications extends RefactoringModifications {
 			getResourceModifications().addRename(sourceFolder.getResource(), arguments);
 		}
 	}
-	
+
 	public void rename(IPackageFragment rootPackage, RenameArguments args, boolean renameSubPackages) throws CoreException {
 		add(rootPackage, args, null);
 		IPackageFragment[] allSubPackages= null;
@@ -140,27 +140,27 @@ public class RenameModifications extends RefactoringModifications {
 			getResourceModifications().addRename(unit.getResource(), new RenameArguments(args.getNewName(), args.getUpdateReferences()));
 		}
 	}
-	
+
 	public void rename(IType type, RenameTypeArguments args, IParticipantDescriptorFilter filter) {
 		add(type, args, filter);
 	}
-	
+
 	public void rename(IField field, RenameArguments args) {
 		add(field, args, null);
 	}
-	
+
 	public void rename(IMethod method, RenameArguments args) {
 		add(method, args, null);
 	}
-	
+
 	public void rename(ILocalVariable variable, RenameArguments args) {
 		add(variable, args, null);
 	}
-	
+
 	public void rename(ITypeParameter typeParameter, RenameArguments arguments) {
 		add(typeParameter, arguments, null);
 	}
-	
+
 	public void buildDelta(IResourceChangeDescriptionFactory builder) {
 		for (int i= 0; i < fRename.size(); i++) {
 			Object element= fRename.get(i);
@@ -170,7 +170,7 @@ public class RenameModifications extends RefactoringModifications {
 		}
 		getResourceModifications().buildDelta(builder);
 	}
-	
+
 	public void buildValidateEdits(ValidateEditChecker checker) {
 		for (Iterator iter= fRename.iterator(); iter.hasNext();) {
 			Object element= iter.next();
@@ -196,7 +196,7 @@ public class RenameModifications extends RefactoringModifications {
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
 		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
-	
+
 	private void add(Object element, RefactoringArguments args, IParticipantDescriptorFilter filter) {
 		Assert.isNotNull(element);
 		Assert.isNotNull(args);
@@ -204,7 +204,7 @@ public class RenameModifications extends RefactoringModifications {
 		fRenameArguments.add(args);
 		fParticipantDescriptorFilter.add(filter);
 	}
-	
+
 	private void addAllResourceModifications(IPackageFragment rootPackage, RenameArguments args, boolean renameSubPackages, IPackageFragment[] allSubPackages) throws CoreException {
 		IFolder target= addResourceModifications(rootPackage, args, rootPackage, renameSubPackages);
 		if (renameSubPackages) {
@@ -223,7 +223,7 @@ public class RenameModifications extends RefactoringModifications {
 			}
 		}
 	}
-	
+
 	private IFolder addResourceModifications(IPackageFragment rootPackage, RenameArguments args, IPackageFragment pack, boolean renameSubPackages) throws CoreException {
 		IContainer container= (IContainer)pack.getResource();
 		if (container == null)
@@ -269,14 +269,14 @@ public class RenameModifications extends RefactoringModifications {
 		}
 		return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
 	}
-	
+
 	private IFolder computeTargetFolder(IPackageFragment rootPackage, RenameArguments args, IPackageFragment pack) {
 		IPath path= pack.getParent().getPath();
 		path= path.append(getNewPackageName(rootPackage, args.getNewName(),  pack.getElementName()).replace('.', IPath.SEPARATOR));
 		IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
 		return target;
 	}
-	
+
 	private String getNewPackageName(IPackageFragment rootPackage, String newPackageName, String oldSubPackageName) {
 		String oldPackageName= rootPackage.getElementName();
 		return newPackageName + oldSubPackageName.substring(oldPackageName.length());

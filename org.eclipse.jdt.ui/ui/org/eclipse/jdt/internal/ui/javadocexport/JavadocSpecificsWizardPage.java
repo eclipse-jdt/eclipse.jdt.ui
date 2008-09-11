@@ -12,10 +12,6 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -28,6 +24,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.Dialog;
 
@@ -47,7 +47,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private Button fOverViewBrowseButton;
 	private Button fAntButton;
 	private Combo fSourceCombo;
-	
+
 	private Composite fLowerComposite;
 	private Text fOverViewText;
 	private Text fExtraOptionsText;
@@ -55,7 +55,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	private StatusInfo fOverviewStatus;
 	private StatusInfo fAntStatus;
-	
+
 	private JavadocTreeWizardPage fFirstPage;
 
 	private JavadocOptionsManager fStore;
@@ -65,7 +65,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	protected JavadocSpecificsWizardPage(String pageName, JavadocTreeWizardPage firstPage, JavadocOptionsManager store) {
 		super(pageName);
-		setDescription(JavadocExportMessages.JavadocSpecificsWizardPage_description); 
+		setDescription(JavadocExportMessages.JavadocSpecificsWizardPage_description);
 
 		fStore= store;
 
@@ -102,12 +102,12 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 3, 0));
 		((GridLayout) c.getLayout()).marginWidth= 0;
 
-		fOverViewButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbutton_label, createGridData(1)); 
+		fOverViewButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbutton_label, createGridData(1));
 		fOverViewText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		SWTUtil.setAccessibilityText(fOverViewText, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbutton_description);
 		//there really aught to be a way to specify this
 		 ((GridData) fOverViewText.getLayoutData()).widthHint= 200;
-		fOverViewBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); 
+		fOverViewBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fOverViewBrowseButton);
 
 		String str= fStore.getOverview();
@@ -120,32 +120,32 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			fOverViewText.setText(str);
 		}
 
-		createLabel(composite, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_vmoptionsfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0)); 
+		createLabel(composite, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_vmoptionsfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0));
 		fVMOptionsText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 3, 0));
 		fVMOptionsText.setText(fStore.getVMParams());
-		
-		
-		createLabel(composite, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_extraoptionsfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0)); 
+
+
+		createLabel(composite, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_extraoptionsfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0));
 		fExtraOptionsText= createText(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.H_SCROLL | SWT.V_SCROLL, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 3, 0));
 		//fExtraOptionsText.setSize(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
 
 		fExtraOptionsText.setText(fStore.getAdditionalParams());
-		
+
 		Composite inner= new Composite(composite, SWT.NONE);
 		inner.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 3, 1));
 		GridLayout layout= new GridLayout(2, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		inner.setLayout(layout);
-		
-		createLabel(inner, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_sourcecompatibility_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0)); 
+
+		createLabel(inner, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_sourcecompatibility_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0));
 
 		fSourceCombo= createCombo(inner, SWT.NONE, fStore.getSource(), createGridData(1));
 		String[] versions= { "-", "1.3", "1.4", "1.5", "1.6" };//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		fSourceCombo.setItems(versions);   
+		fSourceCombo.setItems(versions);
 		fSourceCombo.setText(fStore.getSource());
-		
-		
+
+
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
 			public void validate() {
@@ -173,20 +173,20 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 3, 0));
 		((GridLayout) c.getLayout()).marginWidth= 0;
 
-		fAntButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbutton_label, createGridData(3)); 
-		createLabel(c, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_antscripttext_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0)); 
+		fAntButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbutton_label, createGridData(3));
+		createLabel(c, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_antscripttext_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0));
 		fAntText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		//there really aught to be a way to specify this
 		 ((GridData) fAntText.getLayoutData()).widthHint= 200;
 
 		fAntText.setText(fStore.getAntpath());
 
-		fAntBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); 
+		fAntBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
 		fAntText.setEnabled(false);
 		fAntBrowseButton.setEnabled(false);
-		
-		fCheckbrowser= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_openbrowserbutton_label, createGridData(3)); 
+
+		fCheckbrowser= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_openbrowserbutton_label, createGridData(3));
 		fCheckbrowser.setSelection(fStore.doOpenInBrowser());
 
 		fAntButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fAntText, fAntBrowseButton }) {
@@ -210,7 +210,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 					file= "javadoc.xml";//$NON-NLS-1$
 				path= path.removeLastSegments(1);
 
-				String selected= handleFolderBrowseButtonPressed(path.toOSString(), JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbrowsedialog_title, JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbrowsedialog_label); 
+				String selected= handleFolderBrowseButtonPressed(path.toOSString(), JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbrowsedialog_title, JavadocExportMessages.JavadocSpecificsWizardPage_antscriptbrowsedialog_label);
 
 				path= Path.fromOSString(selected).append(file);
 				fAntText.setText(path.toOSString());
@@ -227,14 +227,14 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				if (fOverViewButton.getSelection()) {
 					String filename= fOverViewText.getText();
 					if (filename.length() == 0) {
-						fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewnotfound_error); 
+						fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewnotfound_error);
 					} else {
 						File file= new File(filename);
 						String ext= filename.substring(filename.lastIndexOf('.') + 1);
 						if (!file.isFile()) {
-							fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewnotfound_error); 
+							fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewnotfound_error);
 						} else if (!ext.equalsIgnoreCase("html")) { //$NON-NLS-1$
-							fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewincorrect_error); 
+							fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewincorrect_error);
 						}
 					}
 				}
@@ -244,14 +244,14 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 				if (fAntButton.getSelection()) {
 					String filename= fAntText.getText();
 					if (filename.length() == 0) {
-						fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_antfileincorrect_error); 
+						fOverviewStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_antfileincorrect_error);
 					} else {
 						File file= new File(filename);
 						String ext= filename.substring(filename.lastIndexOf('.') + 1);
 						if (file.isDirectory() || !(ext.equalsIgnoreCase("xml"))) //$NON-NLS-1$
-							fAntStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_antfileincorrect_error); 
+							fAntStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_antfileincorrect_error);
 						else if (file.exists())
-							fAntStatus.setWarning(JavadocExportMessages.JavadocSpecificsWizardPage_antfileoverwrite_warning); 
+							fAntStatus.setWarning(JavadocExportMessages.JavadocSpecificsWizardPage_antfileoverwrite_warning);
 					}
 				}
 				break;
@@ -275,7 +275,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		else
 			fStore.setOverview(""); //$NON-NLS-1$
 
-		//for now if there are multiple then the ant file is not stored for specific projects	
+		//for now if there are multiple then the ant file is not stored for specific projects
 		if (fAntText.getEnabled()) {
 			fStore.setGeneralAntpath(fAntText.getText());
 		}

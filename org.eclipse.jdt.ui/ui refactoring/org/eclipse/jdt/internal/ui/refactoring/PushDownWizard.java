@@ -18,9 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,6 +30,9 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -178,11 +178,11 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		private static final int ACTION_COLUMN= 1;
 
-		private final static String ACTION_PROPERTY= "action"; //$NON-NLS-1$	
+		private final static String ACTION_PROPERTY= "action"; //$NON-NLS-1$
 
 		private static final int MEMBER_COLUMN= 0;
 
-		private final static String MEMBER_PROPERTY= "member"; //$NON-NLS-1$	
+		private final static String MEMBER_PROPERTY= "member"; //$NON-NLS-1$
 
 		private static final String PAGE_NAME= "PushDownInputPage"; //$NON-NLS-1$
 

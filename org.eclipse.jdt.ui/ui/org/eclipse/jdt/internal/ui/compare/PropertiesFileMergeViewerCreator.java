@@ -12,17 +12,17 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.viewers.Viewer;
+
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.IViewerCreator;
-
-import org.eclipse.jface.viewers.Viewer;
 
 /**
  * A factory object for the {@link org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewer}.
  * This indirection is necessary because only objects with a default
  * constructor can be created via an extension point
  * (this precludes Viewers).
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileMergeViewerCreator implements IViewerCreator {

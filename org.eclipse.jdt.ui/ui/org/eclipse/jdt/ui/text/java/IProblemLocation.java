@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * </p>
  *
  * @since 3.0
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IProblemLocation {
@@ -47,7 +47,7 @@ public interface IProblemLocation {
 	 * @since 3.2
 	 */
 	String getMarkerType();
-	
+
 	/**
 	 * Returns the id of problem. Note that problem ids are defined per problem marker type.
 	 * See {@link org.eclipse.jdt.core.compiler.IProblem} for id definitions for problems of type

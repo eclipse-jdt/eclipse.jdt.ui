@@ -11,12 +11,12 @@
 
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -30,17 +30,17 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class NativeLibrariesDialog extends StatusDialog {
 
 	private final NativeLibrariesConfigurationBlock fConfigurationBlock;
-	
+
 	public NativeLibrariesDialog(Shell parent, String nativeLibPath, IClasspathEntry parentEntry) {
 		super(parent);
 		setTitle(NewWizardMessages.NativeLibrariesDialog_title);
-		
+
 		IStatusChangeListener listener= new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
-		};	
-		
+		};
+
 		fConfigurationBlock= new NativeLibrariesConfigurationBlock(listener, parent, nativeLibPath, parentEntry);
 		setHelpAvailable(false);
 	}
@@ -61,7 +61,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		Control inner= fConfigurationBlock.createContents(composite);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-		applyDialogFont(composite);		
+		applyDialogFont(composite);
 		return composite;
 	}
 

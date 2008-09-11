@@ -14,12 +14,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFolder;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
@@ -42,23 +42,23 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * @since 2.1
  */
 public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
-	
+
 	private PackageExplorerContentProvider fContentProvider;
 	private Map fWorkingSetImages;
-	
+
 	private boolean fIsFlatLayout;
 	private PackageExplorerProblemsDecorator fProblemDecorator;
 
 	public PackageExplorerLabelProvider(PackageExplorerContentProvider cp) {
 		super(DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED | JavaElementLabels.ALL_CATEGORY, DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
-		
+
 		fProblemDecorator= new PackageExplorerProblemsDecorator();
 		addLabelDecorator(fProblemDecorator);
 		Assert.isNotNull(cp);
 		fContentProvider= cp;
 		fWorkingSetImages= null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
@@ -69,7 +69,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return super.getStyledText(element);
 	}
-	
+
 	private String getSpecificText(Object element) {
 		if (!fIsFlatLayout && element instanceof IPackageFragment) {
 			IPackageFragment fragment = (IPackageFragment) element;
@@ -84,7 +84,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return null;
 	}
-	
+
 	public String getText(Object element) {
 		String text= getSpecificText(element);
 		if (text != null) {
@@ -92,7 +92,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return super.getText(element);
 	}
-	
+
 	private String getNameDelta(IPackageFragment parent, IPackageFragment fragment) {
 		String prefix= parent.getElementName() + '.';
 		String fullName= fragment.getElementName();
@@ -101,7 +101,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return fullName;
 	}
-	
+
 	private String getNameDelta(IFolder parent, IPackageFragment fragment) {
 		IPath prefix= parent.getFullPath();
 		IPath fullPath= fragment.getPath();
@@ -116,7 +116,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return fragment.getElementName();
 	}
-	
+
 	public Image getImage(Object element) {
 		if (element instanceof IWorkingSet) {
 			ImageDescriptor image= ((IWorkingSet)element).getImageDescriptor();
@@ -126,7 +126,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 			if (fWorkingSetImages == null) {
 				fWorkingSetImages= new HashMap();
 			}
-				
+
 			Image result= (Image) fWorkingSetImages.get(image);
 			if (result == null) {
 				result= image.createImage();
@@ -136,12 +136,12 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return super.getImage(element);
 	}
-	
+
 	public void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
 		fProblemDecorator.setIsFlatLayout(state);
 	}
-	
+
 	public void dispose() {
 		if (fWorkingSetImages != null) {
 			for (Iterator iter= fWorkingSetImages.values().iterator(); iter.hasNext();) {

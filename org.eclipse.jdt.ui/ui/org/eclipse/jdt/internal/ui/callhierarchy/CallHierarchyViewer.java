@@ -115,11 +115,11 @@ class CallHierarchyViewer extends TreeViewer {
     void clearViewer() {
         setInput(TreeRoot.EMPTY_ROOT);
     }
-    
+
     void cancelJobs() {
     	if (fPart == null)
     		return;
         fContentProvider.cancelJobs(fPart.getCurrentMethodWrappers());
     }
-    
+
 }

@@ -22,7 +22,7 @@ public class CallContext {
 
 	public ASTNode invocation;
 	public String[] arguments;
-	public String receiver; 
+	public String receiver;
 	public boolean receiverIsStatic;
 	public CodeScopeBuilder.Scope scope;
 	public int callMode;
@@ -35,7 +35,7 @@ public class CallContext {
 		callMode= cm;
 		importer= i;
 	}
-	
+
 	public ITypeBinding getReceiverType() {
 		Expression expression= Invocations.getExpression(invocation);
 		if (expression != null) {

@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements IStyledLabelProvider {
-	
+
 	public OccurrencesSearchLabelProvider(AbstractTextSearchViewPage page) {
 		super(page);
 	}
@@ -35,25 +35,25 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {
-		return getLabelWithCounts(element, internalGetText(element)); 
+		return getLabelWithCounts(element, internalGetText(element));
 	}
-	
+
 	private String getLineNumberLabel(JavaElementLine element) {
 		return Messages.format(SearchMessages.OccurrencesSearchLabelProvider_line_number, new Integer(element.getLine()));
 	}
-	
+
 	private String internalGetText(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
 		return getLineNumberLabel(jel) + jel.getLineContents();
 	}
-	
+
 	private StyledString internalGetRichText(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
 
 		String lineNumberString= getLineNumberLabel(jel);
 
 		Styler highlightStyle= ColoringLabelProvider.HIGHLIGHT_STYLE;
-		
+
 		StyledString res= new StyledString();
 		res.append(lineNumberString, StyledString.QUALIFIER_STYLER);
 		res.append(jel.getLineContents());
@@ -62,7 +62,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 			OccurrenceMatch curr= (OccurrenceMatch) matches[i];
 			int offset= curr.getOriginalOffset() - jel.getLineStartOffset() + lineNumberString.length();
 			int length= curr.getOriginalLength();
-			
+
 			if (offset >= 0 && (offset + length <= res.length())) {
 				if ((curr.getFlags() & IOccurrencesFinder.F_WRITE_OCCURRENCE) != 0) {
 					res.setStyle(offset, length, ColoringLabelProvider.HIGHLIGHT_WRITE_STYLE);
@@ -73,7 +73,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		}
 		return res;
 	}
-	
+
 	public Image getImage(Object element) {
 		if (element instanceof JavaElementLine) {
 			int flags= ((JavaElementLine) element).getFlags();
@@ -83,7 +83,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 			if ((flags & IOccurrencesFinder.F_READ_OCCURRENCE) != 0) {
 				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_READACCESS);
 			}
-			if ((flags & IOccurrencesFinder.F_EXCEPTION_DECLARATION) != 0) {				
+			if ((flags & IOccurrencesFinder.F_EXCEPTION_DECLARATION) != 0) {
 				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			}
 		}
@@ -94,6 +94,6 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
 	 */
 	public StyledString getStyledText(Object element) {
-		return getColoredLabelWithCounts(element, internalGetRichText(element));			
+		return getColoredLabelWithCounts(element, internalGetRichText(element));
 	}
 }

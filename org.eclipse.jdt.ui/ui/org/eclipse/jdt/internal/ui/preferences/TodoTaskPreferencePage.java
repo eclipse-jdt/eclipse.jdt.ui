@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -30,26 +30,26 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.TodoTaskPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.TodoTaskPreferencePage"; //$NON-NLS-1$
-	
+
 	private TodoTaskConfigurationBlock fConfigurationBlock;
 
 	public TodoTaskPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.TodoTaskPreferencePage_description); 
-		
+		setDescription(PreferencesMessages.TodoTaskPreferencePage_description);
+
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.TodoTaskPreferencePage_title); 
+		setTitle(PreferencesMessages.TodoTaskPreferencePage_title);
 	}
-			
+
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new TodoTaskConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
-		
+
 		super.createControl(parent);
-		
+
 		if (isProjectPreferencePage()) {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TODOTASK_PROPERTY_PAGE);
 		} else {
@@ -63,29 +63,29 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions(org.eclipse.core.resources.IProject)
 	 */
 	protected boolean hasProjectSpecificOptions(IProject project) {
 		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
 	 */
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
 	 */
@@ -94,8 +94,8 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
 		}
-	}	
-			
+	}
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -112,10 +112,10 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
-		}	
+		}
 		return super.performOk();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */
@@ -124,7 +124,7 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.performApply();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -134,7 +134,7 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 		}
 		super.dispose();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
 	 */

@@ -45,7 +45,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 	public String getNameLabel(ClasspathAttributeAccess attribute) {
 		return NewWizardMessages.CPListLabelProvider_javadoc_location_label;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getValueLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
@@ -62,7 +62,7 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 					String archive= str.substring(prefix.length(), sepIndex);
 					String root= str.substring(sepIndex + 2);
 					if (root.length() > 0) {
-						arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { BasicElementLabels.getURLPart(archive), BasicElementLabels.getURLPart(root) }); 
+						arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { BasicElementLabels.getURLPart(archive), BasicElementLabels.getURLPart(root) });
 					} else {
 						arg= BasicElementLabels.getURLPart(archive);
 					}

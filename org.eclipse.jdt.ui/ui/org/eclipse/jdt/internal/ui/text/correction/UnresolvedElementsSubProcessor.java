@@ -16,9 +16,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.ISharedImages;
 
@@ -234,7 +234,7 @@ public class UnresolvedElementsSubProcessor {
 
 			typeKind &= ~SimilarElementsRequestor.ANNOTATIONS;
 			addNewTypeProposals(cu, node, typeKind, relevance, proposals);
-			
+
 			ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 		}
 
@@ -570,7 +570,7 @@ public class UnresolvedElementsSubProcessor {
 			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
 		}
 		addNewTypeProposals(cu, node, kind, 0, proposals);
-		
+
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
 
@@ -593,11 +593,11 @@ public class UnresolvedElementsSubProcessor {
 				proposals.add(proposal);
 				if (proposal instanceof AddImportCorrectionProposal)
 					proposal.setRelevance(relevance + elements.length + 2);
-	
+
 				if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
 					proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 2));
 				}
-			}	
+			}
 		} else {
 			ASTNode normalizedNode= ASTNodes.getNormalizedNode(node);
 			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {

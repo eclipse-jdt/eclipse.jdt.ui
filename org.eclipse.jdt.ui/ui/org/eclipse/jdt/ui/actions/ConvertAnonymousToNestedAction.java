@@ -38,49 +38,49 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Action to convert an anonymous inner class to a nested class.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
 	private final JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ConvertAnonymousToNestedAction(JavaEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.ConvertAnonymousToNestedAction_Convert_Anonymous); 
+		setText(RefactoringMessages.ConvertAnonymousToNestedAction_Convert_Anonymous);
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 
 	/**
-	 * Creates a new <code>ConvertAnonymousToNestedAction</code>. The action requires 
+	 * Creates a new <code>ConvertAnonymousToNestedAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public ConvertAnonymousToNestedAction(IWorkbenchSite site) {
 		super(site);
 		fEditor= null;
-		setText(RefactoringMessages.ConvertAnonymousToNestedAction_Convert_Anonymous); 
+		setText(RefactoringMessages.ConvertAnonymousToNestedAction_Convert_Anonymous);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
-	
+
 	//---- Structured selection -----------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -93,7 +93,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -106,7 +106,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 			range= type.getNameRange();
 			run(type.getCompilationUnit(), range.getOffset(), range.getLength());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception);
 		}
 	}
 
@@ -125,19 +125,19 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		}
 		return null;
 	}
-	
+
 	//---- Text selection -----------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
-		run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());	
+		run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
@@ -145,7 +145,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection the Java text selection (internal type)
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -157,7 +157,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	}
 
 	//---- helpers -------------------------------------------------------------------
-	
+
 	private void run(ICompilationUnit unit, int offset, int length) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;

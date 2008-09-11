@@ -25,9 +25,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
- * 
+ *
  * This filter is only applicable to instances of the Common Navigator.
- * 
+ *
  * This filter will not allow essential elements to be blocked.
  */
 public abstract class NonEssentialElementsFilter extends ViewerFilter {
@@ -77,10 +77,10 @@ public abstract class NonEssentialElementsFilter extends ViewerFilter {
 			children= filters[i].filter(viewer, fragment, children);
 			if (children.length == 0)
 				return false;
-		} 
+		}
 		return true;
 	}
-	
+
 	private Object[] getRawChildren(StructuredViewer viewer, IPackageFragment fragment) {
 		IStructuredContentProvider provider = (IStructuredContentProvider) viewer.getContentProvider();
 		if (provider instanceof ITreeContentProvider) {

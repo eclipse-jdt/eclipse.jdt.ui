@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,19 +45,19 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Inlines a constant.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  */
 public class InlineConstantAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the java editor
 	 */
 	public InlineConstantAction(JavaEditor editor) {
@@ -68,10 +68,10 @@ public class InlineConstantAction extends SelectionDispatchAction {
 
 	public InlineConstantAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.InlineConstantAction_inline_Constant); 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);		
+		setText(RefactoringMessages.InlineConstantAction_inline_Constant);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
-	
+
 	//---- structured selection ---------------------------------------------
 
 	/*
@@ -91,32 +91,32 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	public void run(IStructuredSelection selection) {		
+	public void run(IStructuredSelection selection) {
 		try {
 			Assert.isTrue(RefactoringAvailabilityTester.isInlineConstantAvailable(selection));
-			
+
 			Object first= selection.getFirstElement();
 			Assert.isTrue(first instanceof IField);
-			
+
 			IField field= (IField) first;
 			run(field.getNameRange().getOffset(), field.getNameRange().getLength(), field.getCompilationUnit());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_unexpected_exception);	 
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_unexpected_exception);
 		}
-	}	
+	}
 
 	//---- text selection -----------------------------------------------
-	
+
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
     }
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * @param selection 
+	 * @param selection
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -125,10 +125,10 @@ public class InlineConstantAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		run(selection.getOffset(), selection.getLength(), SelectionConverter.getInputAsCompilationUnit(fEditor));
 	}

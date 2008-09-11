@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -21,6 +19,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.Dialog;
 
@@ -42,8 +42,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class RenameFieldWizard extends RenameRefactoringWizard {
 
 	public RenameFieldWizard(Refactoring refactoring) {
-		super(refactoring, RefactoringMessages.RenameFieldWizard_defaultPageTitle,  
-			RefactoringMessages.RenameFieldWizard_inputPage_description,   
+		super(refactoring, RefactoringMessages.RenameFieldWizard_defaultPageTitle,
+			RefactoringMessages.RenameFieldWizard_inputPage_description,
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD,
 			IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);
 	}
@@ -54,7 +54,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 				RefactoringStatus result= validateNewName(text);
 				updateGetterSetterLabels();
 				return result;
-			}	
+			}
 		};
 	}
 
@@ -64,7 +64,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 		private Button fRenameSetter;
 		private String fGetterRenamingErrorMessage;
 		private String fSetterRenamingErrorMessage;
-		
+
 		public RenameFieldInputWizardPage(String message, String contextHelpId, String initialValue) {
 			super(message, contextHelpId, true, initialValue);
 		}
@@ -72,19 +72,19 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 		public void createControl(Composite parent) {
 			super.createControl(parent);
 			Composite parentComposite= (Composite)getControl();
-				
+
 			Composite composite= new Composite(parentComposite, SWT.NONE);
 			final GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			composite.setLayout(layout);
 			composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 			getGetterSetterRenamingEnablement();
-				
+
 			fRenameGetter= new Button(composite, SWT.CHECK);
 			boolean getterEnablement= fGetterRenamingErrorMessage == null;
 			fRenameGetter.setEnabled(getterEnablement);
@@ -98,7 +98,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
 				}
 			});
-		
+
 			fRenameSetter= new Button(composite, SWT.CHECK);
 			boolean setterEnablement= fSetterRenamingErrorMessage == null;
 			fRenameSetter.setEnabled(setterEnablement);
@@ -112,12 +112,12 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
 				}
 			});
-		
+
 			updateGetterSetterLabels();
 			updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
 			Dialog.applyDialogFont(composite);
 		}
-		
+
 		public void dispose() {
 			if (saveSettings()) {
 				if (fRenameGetter.isEnabled())
@@ -127,7 +127,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			}
 			super.dispose();
 		}
-		
+
 		private void getGetterSetterRenamingEnablement() {
 			BusyIndicator.showWhile(getShell().getDisplay(), new Runnable(){
 				public void run() {
@@ -136,14 +136,14 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 				}
 			});
 		}
-	
+
 		protected void updateGetterSetterLabels(){
 			fRenameGetter.setText(getRenameGetterLabel());
 			fRenameSetter.setText(getRenameSetterLabel());
 		}
-	
+
 		private String getRenameGetterLabel(){
-			String defaultLabel= RefactoringMessages.RenameFieldInputWizardPage_rename_getter; 
+			String defaultLabel= RefactoringMessages.RenameFieldInputWizardPage_rename_getter;
 			if (fGetterRenamingErrorMessage != null)
 				return constructDisabledGetterRenamingLabel(defaultLabel);
 			try {
@@ -152,15 +152,15 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 					return defaultLabel;
 				String oldGetterName= BasicElementLabels.getJavaElementName(getter.getElementName());
 				String newGetterName= BasicElementLabels.getJavaElementName(createNewGetterName());
-				return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_rename_getter_to, new String[]{oldGetterName, newGetterName}); 
+				return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_rename_getter_to, new String[]{oldGetterName, newGetterName});
 			} catch(CoreException e) {
 				JavaPlugin.log(e)	;
-				return defaultLabel;			
+				return defaultLabel;
 			}
 		}
-		
+
 		private String getRenameSetterLabel(){
-			String defaultLabel= RefactoringMessages.RenameFieldInputWizardPage_rename_setter; 
+			String defaultLabel= RefactoringMessages.RenameFieldInputWizardPage_rename_setter;
 			if (fSetterRenamingErrorMessage != null)
 				return constructDisabledSetterRenamingLabel(defaultLabel);
 			try {
@@ -172,31 +172,31 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 				return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_rename_setter_to, new String[]{oldSetterName, newSetterName});
 			} catch(CoreException e) {
 				JavaPlugin.log(e);
-				return defaultLabel;			
+				return defaultLabel;
 			}
 		}
 		private String constructDisabledSetterRenamingLabel(String defaultLabel) {
 			if (fSetterRenamingErrorMessage.equals("")) //$NON-NLS-1$
 				return defaultLabel;
 			String[] keys= {defaultLabel, fSetterRenamingErrorMessage};
-			return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_setter_label, keys); 
+			return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_setter_label, keys);
 		}
-	
+
 		private String constructDisabledGetterRenamingLabel(String defaultLabel) {
 			if (fGetterRenamingErrorMessage.equals("")) //$NON-NLS-1$
 				return defaultLabel;
 			String[] keys= {defaultLabel, fGetterRenamingErrorMessage};
-			return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_getter_label, keys);			 
+			return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_getter_label, keys);
 		}
-	
+
 		private String createNewGetterName() throws CoreException {
 			return getRenameFieldProcessor().getNewGetterName();
 		}
-	
+
 		private String createNewSetterName() throws CoreException {
 			return getRenameFieldProcessor().getNewSetterName();
 		}
-	
+
 		private String checkGetterRenamingEnablement() {
 			if (fGetterRenamingErrorMessage != null)
 				return  fGetterRenamingErrorMessage;
@@ -206,7 +206,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				return ""; //$NON-NLS-1$
-			} 
+			}
 		}
 
 		private String checkSetterRenamingEnablement() {
@@ -218,9 +218,9 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				return ""; //$NON-NLS-1$
-			} 
+			}
 		}
-	
+
 		private RenameFieldProcessor getRenameFieldProcessor() {
 			return (RenameFieldProcessor)((RenameRefactoring)getRefactoring()).getProcessor();
 		}

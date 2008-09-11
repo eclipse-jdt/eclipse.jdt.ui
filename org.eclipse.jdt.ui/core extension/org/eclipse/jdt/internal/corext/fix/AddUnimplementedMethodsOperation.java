@@ -65,12 +65,12 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		IMethodBinding[] unimplementedMethods= getUnimplementedMethods(fTypeNode);
 		if (unimplementedMethods.length == 0)
 			return;
-		
+
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition(), cuRewrite.getImportRewrite());
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		ICompilationUnit unit= cuRewrite.getCu();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
-		
+
 		ListRewrite listRewrite;
 
 		if (fTypeNode instanceof AnonymousClassDeclaration) {

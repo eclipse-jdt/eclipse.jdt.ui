@@ -32,6 +32,6 @@ public class NonJavaProjectsFilter extends ViewerFilter {
 		else if (element instanceof IProject)
 			return !((IProject)element).isOpen();
 
-		return true; 
+		return true;
 	}
 }

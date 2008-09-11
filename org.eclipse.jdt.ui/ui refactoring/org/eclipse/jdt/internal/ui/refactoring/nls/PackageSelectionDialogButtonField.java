@@ -15,11 +15,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public final class PackageSelectionDialogButtonField extends StringButtonDialogField {
 

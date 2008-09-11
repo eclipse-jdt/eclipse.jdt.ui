@@ -55,31 +55,31 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	public AddSelectedLibraryToBuildpathAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
-	
+
 	public AddSelectedLibraryToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
     }
-	
+
 	private AddSelectedLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.ADD_SEL_LIB_TO_BP);
-		
+
 		fContext= context;
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_EXTJAR);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip);
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
-		
+
 		IFile file= (IFile)getSelectedElements().get(0);
         IJavaProject project= JavaCore.create(file.getProject());
-        
+
         try {
 	        if (ClasspathModifier.isArchive(file, project)) {
 	            String name= ClasspathModifier.escapeSpecialChars(BasicElementLabels.getResourceName(file));
@@ -88,7 +88,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
         } catch (JavaModelException e) {
 	        JavaPlugin.log(e);
         }
-        
+
         return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath;
 	}
 
@@ -98,7 +98,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	public void run() {
 		try {
 			final IFile[] files= (IFile[])getSelectedElements().toArray(new IFile[getSelectedElements().size()]);
-			
+
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
@@ -120,21 +120,21 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 		} catch (final InterruptedException e) {
 		}
 	}
-	
+
 	private List addLibraryEntries(IFile[] resources, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		List addedEntries= new ArrayList();
 		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 			for (int i= 0; i < resources.length; i++) {
 				IResource res= resources[i];
 				addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res));
 			}
 			monitor.worked(1);
-			
+
 			List existingEntries= ClasspathModifier.getExistingEntries(project);
 			ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
-			
+
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
@@ -147,7 +147,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 					result.add(elem);
 				}
 			}
-					
+
 			monitor.worked(1);
 			return result;
 		} finally {
@@ -158,7 +158,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() == 0)
 			return false;
-		
+
 		try {
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				Object element= iter.next();
@@ -167,7 +167,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 					IJavaProject project= JavaCore.create(file.getProject());
 					if (project == null)
 						return false;
-					
+
 					if (!ClasspathModifier.isArchive(file, project))
 						return false;
 				} else {

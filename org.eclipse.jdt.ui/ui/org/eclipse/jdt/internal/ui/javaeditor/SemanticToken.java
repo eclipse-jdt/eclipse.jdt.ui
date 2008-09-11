@@ -43,7 +43,7 @@ public final class SemanticToken {
 			if (fNode != null)
 				fBinding= fNode.resolveBinding();
 		}
-		
+
 		return fBinding;
 	}
 
@@ -53,7 +53,7 @@ public final class SemanticToken {
 	public SimpleName getNode() {
 		return fNode;
 	}
-	
+
 	/**
 	 * @return the AST node (a <code>Boolean-, Character- or NumberLiteral</code>)
 	 */

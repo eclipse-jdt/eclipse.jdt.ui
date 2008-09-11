@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 public class SourceRange implements ISourceRange{
-	
+
 	private final int fOffset;
 	private final int fLength;
 
@@ -26,7 +26,7 @@ public class SourceRange implements ISourceRange{
 		fLength= length;
 		fOffset= offset;
 	}
-	
+
 	public SourceRange(ASTNode node) {
 		this(node.getStartPosition(), node.getLength());
 	}
@@ -34,7 +34,7 @@ public class SourceRange implements ISourceRange{
 	public SourceRange(IProblem problem) {
 		this(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1);
 	}
-	
+
 	/*
 	 * @see ISourceRange#getLength()
 	 */
@@ -48,22 +48,22 @@ public class SourceRange implements ISourceRange{
 	public int getOffset() {
 		return fOffset;
 	}
-	
+
 	public int getEndExclusive() {
 		return getOffset() + getLength();
 	}
-	
+
 	public int getEndInclusive() {
-		return getEndExclusive() - 1;	
+		return getEndExclusive() - 1;
 	}
-	
+
 	/*non java doc
 	 * for debugging only
 	 */
 	public String toString(){
 		return "<offset: " + fOffset +" length: " + fLength + "/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	/**
 	 * Sorts the given ranges by offset (backwards).
 	 * Note: modifies the parameter.
@@ -95,20 +95,20 @@ public class SourceRange implements ISourceRange{
     public int hashCode() {
         return fLength ^ fOffset;
     }
-    
+
     public boolean covers(ASTNode node) {
     	return covers(new SourceRange(node));
     }
-    
+
     public boolean covers(SourceRange range) {
     	return    getOffset() <= range.getOffset()
     	       	&& getEndInclusive() >= range.getEndInclusive();
     }
-    
+
     /**
      * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=130161
      * (Java Model returns ISourceRanges [-1, 0] if source not available).
-     * 
+     *
      * @param range a source range, can be <code>null</code>
      * @return <code>true</code> iff range is not null and range.getOffset() is not -1
      */

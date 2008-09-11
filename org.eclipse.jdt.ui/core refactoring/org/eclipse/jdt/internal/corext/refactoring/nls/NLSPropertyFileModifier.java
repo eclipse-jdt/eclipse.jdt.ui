@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -25,6 +23,8 @@ import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Document;
 
@@ -46,7 +46,7 @@ public class NLSPropertyFileModifier {
 
 	public static Change create(NLSSubstitution[] nlsSubstitutions, IPath propertyFilePath) throws CoreException {
 
-		String name= Messages.format(NLSMessages.NLSPropertyFileModifier_change_name, BasicElementLabels.getPathLabel(propertyFilePath, false)); 
+		String name= Messages.format(NLSMessages.NLSPropertyFileModifier_change_name, BasicElementLabels.getPathLabel(propertyFilePath, false));
 		TextChange textChange= null;
 		if (!Checks.resourceExists(propertyFilePath)) {
 			IProject project= getFileHandle(propertyFilePath).getProject();
@@ -56,7 +56,7 @@ public class NLSPropertyFileModifier {
 			textChange= new DocumentChange(name, document);
 			addChanges(textChange, nlsSubstitutions);
 			textChange.perform(new NullProgressMonitor());
-			
+
 			String encoding= null;
 			IContentType javaPropertiesContentType= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
 			IContentType[] contentTypes= Platform.getContentTypeManager().findContentTypesFor(propertyFilePath.lastSegment());
@@ -66,7 +66,7 @@ public class NLSPropertyFileModifier {
 				if (encoding == null)
 					encoding= "ISO-8859-1"; //$NON-NLS-1$
 			}
-			
+
 			return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(new NullProgressMonitor()), encoding, "properties"); //$NON-NLS-1$
 		}
 
@@ -81,7 +81,7 @@ public class NLSPropertyFileModifier {
 	private static IFile getPropertyFile(IPath propertyFilePath) {
 		return (IFile) ResourcesPlugin.getWorkspace().getRoot().findMember(propertyFilePath);
 	}
-	
+
 	private static IFile getFileHandle(IPath propertyFilePath) {
 		if (propertyFilePath == null)
 			return null;
@@ -101,7 +101,7 @@ public class NLSPropertyFileModifier {
 
 	/**
 	 * Maps the new keys to a substitutions. If a substitution is not in the map then it is a duplicate.
-	 * 
+	 *
 	 * @param substitutions the substitutions to add to the map
 	 * @return the map containing the substitutions
 	 */
@@ -119,10 +119,10 @@ public class NLSPropertyFileModifier {
 		}
 		return keyToSubstMap;
 	}
-	
+
 	/**
 	 * Maps the old keys to a substitutions. If a substitution is not in the map then it is a duplicate.
-	 * 
+	 *
 	 * @param substitutions the substitutions to add to the map
 	 * @return the map containing the substitutions
 	 */
@@ -158,24 +158,24 @@ public class NLSPropertyFileModifier {
 		}
 		return false;
 	}
-	
+
 	private static void addReplaceEdits(TextChange textChange, NLSSubstitution[] substitutions, Map newKeyToSubstMap, Map oldKeyToSubstMap, PropertyFileDocumentModel model) {
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
 			if (doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				KeyValuePair initialPair= new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
-				
+
 				String key= PropertyFileDocumentModel.unwindEscapeChars(substitution.getKey());
 				String value= PropertyFileDocumentModel.unwindValue(substitution.getValue()) + model.getLineDelimiter();
 				KeyValuePair newPair= new KeyValuePair(key, value);
 				TextEdit edit= model.replace(initialPair, newPair);
 				if (edit != null) {
-					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_replace_entry, BasicElementLabels.getJavaElementName(substitution.getKey())), edit); 
+					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_replace_entry, BasicElementLabels.getJavaElementName(substitution.getKey())), edit);
 				}
 			}
 		}
 	}
-	
+
 	static boolean doInsert(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
 		if (substitution.getState() != NLSSubstitution.EXTERNALIZED) {
 			return false; // does not go into the property file
@@ -193,22 +193,22 @@ public class NLSPropertyFileModifier {
 
 	private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, Map newKeyToSubstMap, Map oldKeyToSubstMap, PropertyFileDocumentModel model) {
 		ArrayList keyValuePairsToAdd= new ArrayList();
-		
+
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
-			
+
 			if (doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				String value= PropertyFileDocumentModel.unwindValue(substitution.getValueNonEmpty()) + model.getLineDelimiter();
 				String key= PropertyFileDocumentModel.unwindEscapeChars(substitution.getKey());
 				keyValuePairsToAdd.add(new KeyValuePair(key, value));
-			}	
+			}
 		}
-		
+
 		if (keyValuePairsToAdd.size() > 0) {
 			model.insert((KeyValuePair[]) keyValuePairsToAdd.toArray(new KeyValuePair[keyValuePairsToAdd.size()]), textChange);
 		}
 	}
-	
+
 	static boolean doRemove(NLSSubstitution substitution, Map newKeyToSubstMap, Map oldKeyToSubstMap) {
 		if (substitution.getInitialState() != NLSSubstitution.EXTERNALIZED || substitution.getInitialKey() == null) {
 			return false; // was not in property file before
@@ -225,14 +225,14 @@ public class NLSPropertyFileModifier {
 		}
 		return false;
 	}
-	
+
 	private static void addRemoveEdits(TextChange textChange, NLSSubstitution[] substitutions, Map newKeyToSubstMap, Map oldKeyToSubstMap, PropertyFileDocumentModel model) {
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
 			if (doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				TextEdit edit= model.remove(substitution.getInitialKey());
 				if (edit != null) {
-					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_remove_entry, BasicElementLabels.getJavaElementName(substitution.getInitialKey())), edit); 
+					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_remove_entry, BasicElementLabels.getJavaElementName(substitution.getInitialKey())), edit);
 				}
 			}
 		}

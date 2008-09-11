@@ -29,6 +29,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.keys.IBindingService;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.ITypeRoot;
@@ -44,13 +45,13 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 /**
  * Action group that adds the occurrences in file actions
  * to a context menu and the global menu bar.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OccurrencesSearchGroup extends ActionGroup  {
@@ -58,7 +59,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
 	private IActionBars fActionBars;
-	
+
 	private String fGroupId;
 
 	private FindOccurrencesInFileAction fOccurrencesInFileAction;
@@ -68,10 +69,10 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	private FindMethodExitOccurrencesAction fMethodExitOccurrencesAction;
 
 	/**
-	 * Creates a new <code>ImplementorsSearchGroup</code>. The group 
-	 * requires that the selection provided by the site's selection provider 
+	 * Creates a new <code>ImplementorsSearchGroup</code>. The group
+	 * requires that the selection provided by the site's selection provider
 	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the view part that owns this action group
 	 */
 	public OccurrencesSearchGroup(IWorkbenchSite site) {
@@ -80,23 +81,23 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Creates a new <code>OccurrencesSearchGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public OccurrencesSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		fSite= site;
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
-		
+
 		fOccurrencesInFileAction= new FindOccurrencesInFileAction(site);
 		fOccurrencesInFileAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE);
 		// Need to reset the label
-		fOccurrencesInFileAction.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel); 
+		fOccurrencesInFileAction.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel);
 
 		fExceptionOccurrencesAction= new FindExceptionOccurrencesAction(site);
 		fExceptionOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE);
@@ -110,7 +111,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fMethodExitOccurrencesAction= new FindMethodExitOccurrencesAction(site);
 		fMethodExitOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_METHOD_EXIT_OCCURRENCES);
 
-		
+
 		// register the actions as selection listeners
 		ISelectionProvider provider= specialSelectionProvider == null ? fSite.getSelectionProvider() : specialSelectionProvider;
 		ISelection selection= provider.getSelection();
@@ -123,9 +124,9 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OccurrencesSearchGroup(JavaEditor editor) {
@@ -136,7 +137,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
 		fOccurrencesInFileAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE);
 		// Need to reset the label
-		fOccurrencesInFileAction.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel); 
+		fOccurrencesInFileAction.setText(SearchMessages.Search_FindOccurrencesInFile_shortLabel);
 		fEditor.setAction("SearchOccurrencesInFile", fOccurrencesInFileAction); //$NON-NLS-1$
 
 		fExceptionOccurrencesAction= new FindExceptionOccurrencesAction(fEditor);
@@ -171,7 +172,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 			action.setSpecialSelectionProvider(specialSelectionProvider);
 	}
 
-	/* 
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void fillContextMenu(IMenuManager manager) {
@@ -213,7 +214,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	private void updateActionsInJavaEditor() {
 		if (fEditor == null)
 			return;
-		
+
 		ITypeRoot element= SelectionConverter.getInput(fEditor);
 		if (element == null)
 			return;
@@ -228,7 +229,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fBreakContinueTargetOccurrencesAction.update(javaSelection);
 		fMethodExitOccurrencesAction.update(javaSelection);
 	}
-	
+
 	private String getShortcutString() {
 		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		if (bindingService == null)
@@ -236,7 +237,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		return bindingService.getBestActiveBindingFormattedFor(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU);
 	}
 
-	/* 
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -245,8 +246,8 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fActionBars= actionBars;
 		updateGlobalActionHandlers();
 	}
-	
-	/* 
+
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void dispose() {

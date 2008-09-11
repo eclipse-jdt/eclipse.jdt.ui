@@ -15,7 +15,7 @@ import java.util.HashSet;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 class BranchFlowInfo extends FlowInfo {
-	
+
 	public BranchFlowInfo(SimpleName label, FlowContext context) {
 		super(NO_RETURN);
 		fBranches= new HashSet(2);

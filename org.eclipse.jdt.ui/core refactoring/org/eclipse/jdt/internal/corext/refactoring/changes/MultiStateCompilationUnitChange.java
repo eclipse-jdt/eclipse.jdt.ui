@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Multi state compilation unit change for composite refactorings.
- * 
+ *
  * @since 3.2
  */
 public final class MultiStateCompilationUnitChange extends MultiStateTextFileChange {
@@ -33,7 +33,7 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 
 	/**
 	 * Creates a new multi state compilation unit change.
-	 * 
+	 *
 	 * @param name
 	 *            the name of the change
 	 * @param unit
@@ -60,7 +60,7 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 
 	/**
 	 * Returns the compilation unit.
-	 * 
+	 *
 	 * @return the compilation unit
 	 */
 	public final ICompilationUnit getCompilationUnit() {

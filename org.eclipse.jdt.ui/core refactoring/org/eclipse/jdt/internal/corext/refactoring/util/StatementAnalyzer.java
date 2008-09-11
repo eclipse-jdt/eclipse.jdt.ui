@@ -62,24 +62,24 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		fStatus= new RefactoringStatus();
 		fScanner= new TokenScanner(fCUnit);
 	}
-	
+
 	protected void checkSelectedNodes() {
 		ASTNode[] nodes= getSelectedNodes();
 		if (nodes.length == 0)
 			return;
-		
+
 		ASTNode node= nodes[0];
 		int selectionOffset= getSelection().getOffset();
 		try {
 			int pos= fScanner.getNextStartOffset(selectionOffset, true);
 			if (pos == node.getStartPosition()) {
 				int lastNodeEnd= ASTNodes.getExclusiveEnd(nodes[nodes.length - 1]);
-				
+
 				pos= fScanner.getNextStartOffset(lastNodeEnd, true);
 				int selectionEnd= getSelection().getInclusiveEnd();
 				if (pos <= selectionEnd) {
 					ISourceRange range= new SourceRange(lastNodeEnd, pos - lastNodeEnd);
-					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range)); 
+					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range));
 				}
 				return; // success
 			}
@@ -89,19 +89,19 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ISourceRange range= new SourceRange(selectionOffset, node.getStartPosition() - selectionOffset + 1);
 		invalidSelection(RefactoringCoreMessages.StatementAnalyzer_beginning_of_selection, JavaStatusContext.create(fCUnit, range));
 	}
-	
+
 	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
-	
+
 	protected ICompilationUnit getCompilationUnit() {
 		return fCUnit;
 	}
-	
+
 	protected TokenScanner getTokenScanner() {
 		return fScanner;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
@@ -120,7 +120,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			checkSelectedNodes();
 		super.endVisit(node);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
@@ -128,12 +128,12 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getBody()) && contains(selectedNodes, node.getExpression())) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_do_body_expression); 
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_do_body_expression);
 			}
 		}
 		super.endVisit(node);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
@@ -143,11 +143,11 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			boolean containsExpression= contains(selectedNodes, node.getExpression());
 			boolean containsUpdaters= contains(selectedNodes, node.updaters());
 			if (contains(selectedNodes, node.initializers()) && containsExpression) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_initializer_expression); 
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_initializer_expression);
 			} else if (containsExpression && containsUpdaters) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_expression_updater); 
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_expression_updater);
 			} else if (containsUpdaters && contains(selectedNodes, node.getBody())) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_updater_body); 
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_updater_body);
 			}
 		}
 		super.endVisit(node);
@@ -163,7 +163,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			for (int i= 0; i < selectedNodes.length; i++) {
 				ASTNode topNode= selectedNodes[i];
 				if (cases.contains(topNode)) {
-					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_switch_statement); 
+					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_switch_statement);
 					break;
 				}
 			}
@@ -178,7 +178,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
 			if (firstSelectedNode == node.getBody()) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_synchronized_statement); 
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_synchronized_statement);
 			}
 		}
 		super.endVisit(node);
@@ -191,22 +191,22 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (firstSelectedNode == node.getBody() || firstSelectedNode == node.getFinally()) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement); 
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement);
 			} else {
 				List catchClauses= node.catchClauses();
 				for (Iterator iterator= catchClauses.iterator(); iterator.hasNext();) {
 					CatchClause element= (CatchClause)iterator.next();
 					if (element == firstSelectedNode || element.getBody() == firstSelectedNode) {
-						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement); 
+						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement);
 					} else if (element.getException() == firstSelectedNode) {
-						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_catch_argument); 
+						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_catch_argument);
 					}
 				}
 			}
 		}
 		super.endVisit(node);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */
@@ -214,26 +214,26 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getExpression()) && contains(selectedNodes, node.getBody())) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_while_expression_body); 
+				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_while_expression_body);
 			}
 		}
 		super.endVisit(node);
-	}	
-	
+	}
+
 	private boolean doAfterValidation(ASTNode node, ASTNode[] selectedNodes) {
 		return selectedNodes.length > 0 && node == selectedNodes[0].getParent() && getSelection().getEndVisitSelectionMode(node) == Selection.AFTER;
 	}
-	
+
 	protected void invalidSelection(String message) {
 		fStatus.addFatalError(message);
 		reset();
 	}
-	
+
 	protected void invalidSelection(String message, RefactoringStatusContext context) {
 		fStatus.addFatalError(message, context);
 		reset();
 	}
-	
+
 	private static List getSwitchCases(SwitchStatement node) {
 		List result= new ArrayList();
 		for (Iterator iter= node.statements().iterator(); iter.hasNext(); ) {
@@ -243,20 +243,20 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		}
 		return result;
 	}
-	
+
 	protected static boolean contains(ASTNode[] nodes, ASTNode node) {
 		for (int i = 0; i < nodes.length; i++) {
 			if (nodes[i] == node)
 				return true;
 		}
 		return false;
-	}	
-	
+	}
+
 	protected static boolean contains(ASTNode[] nodes, List list) {
 		for (int i = 0; i < nodes.length; i++) {
 			if (list.contains(nodes[i]))
 				return true;
 		}
 		return false;
-	}	
+	}
 }

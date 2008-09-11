@@ -39,7 +39,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 
 	/**
 	 * Creates a compilation unit context.
-	 * 
+	 *
 	 * @param type   the context type
 	 * @param document the document
 	 * @param completionOffset the completion position within the document
@@ -51,13 +51,13 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 		fCompilationUnit= compilationUnit;
 		fIsManaged= false;
 	}
-	
+
 	/**
 	 * Creates a compilation unit context.
-	 * 
+	 *
 	 * @param type   the context type
 	 * @param document the document
-	 * @param completionPosition the position defining the completion offset and length 
+	 * @param completionPosition the position defining the completion offset and length
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 * @since 3.2
 	 */
@@ -66,11 +66,11 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 		fCompilationUnit= compilationUnit;
 		fIsManaged= true;
 	}
-	
+
 	/**
 	 * Returns the compilation unit if one is associated with this context,
 	 * <code>null</code> otherwise.
-	 * 
+	 *
 	 * @return the compilation unit of this context or <code>null</code>
 	 */
 	public final ICompilationUnit getCompilationUnit() {
@@ -80,7 +80,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	/**
 	 * Returns the enclosing element of a particular element type,
 	 * <code>null</code> if no enclosing element of that type exists.
-	 * 
+	 *
 	 * @param elementType the element type
 	 * @return the enclosing element of the given type or <code>null</code>
 	 */
@@ -93,27 +93,27 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 			if (element == null) {
 				element= fCompilationUnit;
 			}
-			
+
 			return element.getAncestor(elementType);
 
 		} catch (JavaModelException e) {
 			return null;
-		}	
+		}
 	}
 
 	/**
 	 * Sets whether evaluation is forced or not.
-	 * 
+	 *
 	 * @param evaluate <code>true</code> in order to force evaluation,
 	 *            <code>false</code> otherwise
 	 */
 	public void setForceEvaluation(boolean evaluate) {
-		fForceEvaluation= evaluate;	
+		fForceEvaluation= evaluate;
 	}
-	
+
 	/**
 	 * Returns the multi-variable guess.
-	 * 
+	 *
 	 * @return the multi-variable guess
 	 */
 	public MultiVariableGuess getMultiVariableGuess() {
@@ -126,10 +126,10 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	void setMultiVariableGuess(MultiVariableGuess multiVariableGuess) {
 		fMultiVariableGuess= multiVariableGuess;
 	}
-	
+
 	protected IJavaProject getJavaProject() {
 		ICompilationUnit compilationUnit= getCompilationUnit();
 		IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
 		return project;
-	}	
+	}
 }

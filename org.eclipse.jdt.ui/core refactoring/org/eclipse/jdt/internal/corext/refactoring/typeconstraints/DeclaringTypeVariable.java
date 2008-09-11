@@ -23,9 +23,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
  * Tells the type which declares the member.
  */
 public class DeclaringTypeVariable extends ConstraintVariable{
-	
+
 	private final IBinding fMemberBinding;
-	
+
 	protected DeclaringTypeVariable(ITypeBinding memberTypeBinding) {
 		super(memberTypeBinding.getDeclaringClass());
 		fMemberBinding= memberTypeBinding;

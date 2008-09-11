@@ -21,55 +21,55 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 /**
  * Gives access to the import rewrite configured with the settings as specified in the user interface.
- * These settings are kept in JDT UI for compatibility reasons. 
- * 
+ * These settings are kept in JDT UI for compatibility reasons.
+ *
  * <p>
  * This class is not intended to be subclassed or instantiated by clients.
  * </p>
  * @since 3.2
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class CodeStyleConfiguration {
-	
+
 	private static final Pattern SEMICOLON_PATTERN= Pattern.compile(";"); //$NON-NLS-1$
 
 	private CodeStyleConfiguration() {
 		// do not instantiate and subclass
 	}
-	
-	
+
+
 	/**
 	 * Returns a {@link ImportRewrite} using {@link ImportRewrite#create(ICompilationUnit, boolean)} and
 	 * configures the rewriter with the settings as specified in the JDT UI preferences.
 	 * <p>
-	 * 
+	 *
 	 * @param cu the compilation unit to create the rewriter on
 	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
 	 * @return the new rewriter configured with the settings as specified in the JDT UI preferences.
 	 * @throws JavaModelException thrown when the compilation unit could not be accessed.
-	 * 
+	 *
 	 * @see ImportRewrite#create(ICompilationUnit, boolean)
 	 */
 	public static ImportRewrite createImportRewrite(ICompilationUnit cu, boolean restoreExistingImports) throws JavaModelException {
 		return configureImportRewrite(ImportRewrite.create(cu, restoreExistingImports));
 	}
-	
+
 	/**
 	 * Returns a {@link ImportRewrite} using {@link ImportRewrite#create(CompilationUnit, boolean)} and
 	 * configures the rewriter with the settings as specified in the JDT UI preferences.
-	 * 
+	 *
 	 * @param astRoot the AST root to create the rewriter on
 	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
 	 * @return the new rewriter configured with the settings as specified in the JDT UI preferences.
-	 * 
+	 *
 	 * @see ImportRewrite#create(CompilationUnit, boolean)
 	 */
 	public static ImportRewrite createImportRewrite(CompilationUnit astRoot, boolean restoreExistingImports) {
 		return configureImportRewrite(ImportRewrite.create(astRoot, restoreExistingImports));
 	}
-	
+
 	private static ImportRewrite configureImportRewrite(ImportRewrite rewrite) {
 		IJavaProject project= rewrite.getCompilationUnit().getJavaProject();
 		String order= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);

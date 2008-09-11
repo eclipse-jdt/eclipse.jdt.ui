@@ -50,48 +50,48 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
-	
+
 	public static final String ID= "OccurrencesFinder"; //$NON-NLS-1$
-	
+
 	public static final String IS_WRITEACCESS= "writeAccess"; //$NON-NLS-1$
 	public static final String IS_VARIABLE= "variable"; //$NON-NLS-1$
-	
+
 	private CompilationUnit fRoot;
 	private Name fSelectedNode;
 	private IBinding fTarget;
 
 	private List/*<OccurrenceLocation>*/fResult;
 	private Set fWriteUsages;
-	
+
 	private boolean fTargetIsStaticMethodImport;
 
 	private String fReadDescription;
 	private String fWriteDescription;
-	
+
 	public OccurrencesFinder() {
 		super(true);
 	}
-	
+
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
-	
+
 	public String initialize(CompilationUnit root, ASTNode node) {
 		if (!(node instanceof Name))
-			return SearchMessages.OccurrencesFinder_no_element; 
+			return SearchMessages.OccurrencesFinder_no_element;
 		fRoot= root;
 		fSelectedNode= (Name)node;
 		fTarget= fSelectedNode.resolveBinding();
 		if (fTarget == null)
-			return SearchMessages.OccurrencesFinder_no_binding; 
+			return SearchMessages.OccurrencesFinder_no_binding;
 		fTarget= getBindingDeclaration(fTarget);
-		
+
 		fTargetIsStaticMethodImport= isStaticImport(fSelectedNode.getParent());
 		fReadDescription= Messages.format(SearchMessages.OccurrencesFinder_occurrence_description, BasicElementLabels.getJavaElementName(fTarget.getName()));
 		fWriteDescription= Messages.format(SearchMessages.OccurrencesFinder_occurrence_write_description, BasicElementLabels.getJavaElementName(fTarget.getName()));
 		return null;
 	}
-	
+
 	private void performSearch() {
 		if (fResult == null) {
 			fResult= new ArrayList/*<OccurrenceLocation>*/();
@@ -99,7 +99,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 			fRoot.accept(this);
 		}
 	}
-	
+
 	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
@@ -110,29 +110,29 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	public CompilationUnit getASTRoot() {
 		return fRoot;
 	}
-		
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getJobLabel()
 	 */
 	public String getJobLabel() {
-		return SearchMessages.OccurrencesFinder_searchfor ; 
+		return SearchMessages.OccurrencesFinder_searchfor ;
 	}
-	
+
 	public String getElementName() {
 		if (fSelectedNode != null) {
 			return ASTNodes.asString(fSelectedNode);
 		}
 		return null;
 	}
-	
+
 	public String getUnformattedPluralLabel() {
 		return SearchMessages.OccurrencesFinder_label_plural;
 	}
-	
+
 	public String getUnformattedSingularLabel() {
 		return SearchMessages.OccurrencesFinder_label_singular;
 	}
-	
+
 	public boolean visit(QualifiedName node) {
 		final IBinding binding= node.resolveBinding();
 		if (binding instanceof IVariableBinding && ((IVariableBinding)binding).isField()) {
@@ -147,11 +147,11 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return !addUsage(node, binding);
 	}
-	
+
 	private static boolean isStaticImport(ASTNode node) {
 		if (!(node instanceof QualifiedName))
 			return false;
-		
+
 		ASTNode parent= ((QualifiedName)node).getParent();
 		return parent instanceof ImportDeclaration && ((ImportDeclaration) parent).isStatic();
 	}
@@ -162,7 +162,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return true;
 	}
-	
+
 	public boolean visit(SimpleName node) {
 		addUsage(node, node.resolveBinding());
 		return true;
@@ -173,7 +173,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	 */
 	public boolean visit(ClassInstanceCreation node) {
 		// match with the constructor and the type.
-		
+
 		Type type= node.getType();
 		if (type instanceof ParameterizedType) {
 			type= ((ParameterizedType) type).getType();
@@ -186,19 +186,19 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(Assignment node) {
 		SimpleName name= getSimpleName(node.getLeftHandSide());
-		if (name != null) 
+		if (name != null)
 			addWrite(name, name.resolveBinding());
 		return true;
 	}
-	
+
 	public boolean visit(SingleVariableDeclaration node) {
 		addWrite(node.getName(), node.resolveBinding());
 		return true;
 	}
-	
+
 	public boolean visit(VariableDeclarationFragment node) {
 		if (node.getParent() instanceof FieldDeclaration || node.getInitializer() != null)
 			addWrite(node.getName(), node.resolveBinding());
@@ -206,18 +206,18 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 
 	public boolean visit(PrefixExpression node) {
-		PrefixExpression.Operator operator= node.getOperator();	
+		PrefixExpression.Operator operator= node.getOperator();
 		if (operator == Operator.INCREMENT || operator == Operator.DECREMENT) {
 			SimpleName name= getSimpleName(node.getOperand());
-			if (name != null) 
-				addWrite(name, name.resolveBinding());				
+			if (name != null)
+				addWrite(name, name.resolveBinding());
 		}
 		return true;
 	}
 
 	public boolean visit(PostfixExpression node) {
 		SimpleName name= getSimpleName(node.getOperand());
-		if (name != null) 
+		if (name != null)
 			addWrite(name, name.resolveBinding());
 		return true;
 	}
@@ -229,7 +229,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return false;
 	}
-	
+
 	private boolean addUsage(Name node, IBinding binding) {
 		if (binding != null && Bindings.equals(getBindingDeclaration(binding), fTarget)) {
 			int flag= 0;
@@ -249,13 +249,13 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	public int getSearchKind() {
 		return K_OCCURRENCE;
 	}
-	
-	
-	
+
+
+
 	private boolean addPossibleStaticImport(Name node, IMethodBinding binding) {
 		if (binding == null || node == null || !(fTarget instanceof IMethodBinding) || !Modifier.isStatic(binding.getModifiers()))
 			return false;
-		
+
 		IMethodBinding targetMethodBinding= (IMethodBinding)fTarget;
 		if ((fTargetIsStaticMethodImport || Modifier.isStatic(targetMethodBinding.getModifiers())) && (targetMethodBinding.getDeclaringClass().getTypeDeclaration() == binding.getDeclaringClass().getTypeDeclaration())) {
 			if (node.getFullyQualifiedName().equals(targetMethodBinding.getName())) {
@@ -275,7 +275,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 			return ((FieldAccess)expression).getName();
 		return null;
 	}
-	
+
 	private IBinding getBindingDeclaration(IBinding binding) {
 		switch (binding.getKind()) {
 			case IBinding.TYPE :

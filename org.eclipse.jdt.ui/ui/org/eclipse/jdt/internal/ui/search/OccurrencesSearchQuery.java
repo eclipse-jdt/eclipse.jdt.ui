@@ -44,7 +44,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	private final String fPluralLabel;
 	private final String fName;
 	private final String fFinderId;
-	
+
 	public OccurrencesSearchQuery(IOccurrencesFinder finder, ITypeRoot element) {
 		fFinder= finder;
 		fElement= element;
@@ -55,7 +55,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		fName= fFinder.getElementName();
 		fFinderId= fFinder.getID();
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -65,14 +65,14 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		}
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		
+
 		try {
 			OccurrenceLocation[] occurrences= fFinder.getOccurrences();
 			if (occurrences != null) {
 				HashMap lineMap= new HashMap();
 				CompilationUnit astRoot= fFinder.getASTRoot();
 				ArrayList resultingMatches= new ArrayList();
-				
+
 				for (int i= 0; i < occurrences.length; i++) {
 					OccurrenceLocation loc= occurrences[i];
 
@@ -119,14 +119,14 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		}
 		return lineElement;
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */
 	public String getLabel() {
 		return fJobLabel;
 	}
-	
+
 	public String getResultLabel(int nMatches) {
 		if (nMatches == 1) {
 			return Messages.format(fSingularLabel, new Object[] { fName, BasicElementLabels.getFileName(fElement) });
@@ -134,7 +134,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 			return Messages.format(fPluralLabel, new Object[] { fName, new Integer(nMatches), BasicElementLabels.getFileName(fElement) });
 		}
 	}
-		
+
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#canRerun()
 	 */

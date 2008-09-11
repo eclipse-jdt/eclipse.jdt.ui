@@ -150,12 +150,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 			if (!(element instanceof NLSSubstitution))
 				return false;
-			
+
 			NLSSubstitution subst= (NLSSubstitution) element;
 			if (PROPERTIES[KEY_PROP].equals(property) && subst.getState() != NLSSubstitution.EXTERNALIZED) {
 				return false;
 			}
-			
+
 			return true;
 		}
 
@@ -384,7 +384,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 		return outBuffer.toString();
 	}
-	
+
 	private class NLSInputDialog extends StatusDialog implements IDialogFieldListener {
 		private StringDialogField fKeyField;
 		private StringDialogField fValueField;
@@ -393,11 +393,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		public NLSInputDialog(Shell parent, NLSSubstitution substitution) {
 			super(parent);
-			
+
 			setTitle(NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Title);
 
 			fSubstitution= substitution;
-			
+
 			fMessageField= new DialogField();
 			if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
 				fMessageField.setLabelText(NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_ext_Label);
@@ -432,7 +432,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 			Composite inner= new Composite(composite, SWT.NONE);
 			inner.setFont(composite.getFont());
-			
+
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
@@ -440,12 +440,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			inner.setLayout(layout);
 
 			fMessageField.doFillIntoGrid(inner, 2);
-			
+
 			if (fSubstitution.getState() == NLSSubstitution.EXTERNALIZED) {
 				fKeyField.doFillIntoGrid(inner, 2);
 				LayoutUtil.setWidthHint(fKeyField.getTextControl(null), convertWidthInCharsToPixels(45));
 			}
-			
+
 			fValueField.doFillIntoGrid(inner, 2);
 			LayoutUtil.setWidthHint(fValueField.getTextControl(null), convertWidthInCharsToPixels(45));
 			LayoutUtil.setHorizontalGrabbing(fValueField.getTextControl(null));
@@ -472,15 +472,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (fSubstitution.getState() != NLSSubstitution.EXTERNALIZED) {
 				return StatusInfo.OK_STATUS;
 			}
-			
+
 			if (val == null || val.length() == 0) {
 				return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_empty_key);
 			}
-			
+
 			if (fNLSRefactoring.isEclipseNLS()) {
 				if (!Character.isJavaIdentifierStart(val.charAt(0)))
 					return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_invalid_EclipseNLS_key);
-				
+
 				for (int i= 1, length= val.length(); i < length; i++) {
 					if (!Character.isJavaIdentifierPart(val.charAt(i)))
 						return new StatusInfo(IStatus.ERROR, NLSUIMessages.ExternalizeWizardPage_NLSInputDialog_Error_invalid_EclipseNLS_key);
@@ -499,7 +499,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private static final String SETTINGS_NLS_ACCESSORS= "nls_accessor_history"; //$NON-NLS-1$
 	private static final int SETTINGS_MAX_ENTRIES= 5;
-	
+
 	private Text fPrefixField;
 	private Button fIsEclipseNLS;
 	private Table fTable;
@@ -516,7 +516,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private NLSRefactoring fNLSRefactoring;
 	private Button fRenameButton;
 	private Combo fAccessorClassField;
-	
+
 	private AccessorDescription[] fAccessorChoices;
 	private Button fFilterCheckBox;
 
@@ -542,7 +542,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		supercomposite.setLayout(new GridLayout());
 
 		createIsEclipseNLSCheckbox(supercomposite);
-		
+
 		createKeyPrefixField(supercomposite);
 
 		SashForm composite= new SashForm(supercomposite, SWT.VERTICAL);
@@ -553,14 +553,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		createTableViewer(composite);
 		createSourceViewer(composite);
-		
+
 		createAccessorInfoComposite(supercomposite);
 
 		composite.setWeights(new int[]{65, 45});
 
 		validateKeys(false);
 		updateButtonStates(StructuredSelection.EMPTY);
-		
+
 		// promote control
 		setControl(supercomposite);
 		Dialog.applyDialogFont(supercomposite);
@@ -577,20 +577,20 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		accessorComposite.setLayout(layout);
-		
+
 		Composite composite= new Composite(accessorComposite, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		layout= new GridLayout(1, true);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
-		
+
 		Label accessorClassLabel= new Label(composite, SWT.NONE);
 		accessorClassLabel.setText(NLSUIMessages.ExternalizeWizardPage_accessorclass_label);
 		accessorClassLabel.setLayoutData(new GridData());
-		
-		
+
+
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (e.widget instanceof Button) {
@@ -600,18 +600,18 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				}
 			}
 		};
-		
-		
+
+
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint= convertWidthInCharsToPixels(30);
 		fAccessorClassField= new Combo(composite, SWT.READ_ONLY);
 		SWTUtil.setDefaultVisibleItemCount(fAccessorClassField);
 		fAccessorClassField.setLayoutData(data);
 		fAccessorClassField.addSelectionListener(listener);
-		
-		
+
+
 		//new Label(composite, SWT.NONE); // placeholder
-		
+
 		Button configure= new Button(accessorComposite, SWT.PUSH);
 		configure.setText(NLSUIMessages.ExternalizeWizardPage_configure_button);
 		data= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_END);
@@ -619,11 +619,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		configure.setLayoutData(data);
 
 		configure.addSelectionListener(listener);
-		
+
 		updateAccessorChoices();
-		
+
 	}
-	
+
 	protected void doAccessorSelectionChanged() {
 		int selectionIndex= fAccessorClassField.getSelectionIndex();
 		if (fAccessorChoices != null && selectionIndex < fAccessorChoices.length) {
@@ -633,7 +633,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fNLSRefactoring.setResourceBundleName(selected.getResourceBundleName());
 			fNLSRefactoring.setResourceBundlePackage(selected.getResourceBundlePackage());
 			fNLSRefactoring.setIsEclipseNLS(fNLSRefactoring.detectIsEclipseNLS());
-			
+
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
 			if (fIsEclipseNLS != null) {
 				fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
@@ -643,7 +643,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			validateKeys(true);
 		}
 	}
-	
+
 	private boolean willCreateAccessorClass() {
 		try {
 			return fNLSRefactoring.willCreateAccessorClass();
@@ -653,24 +653,24 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private void updateAccessorChoices() {
-		
+
 		AccessorDescription configured= new AccessorDescription(
 				fNLSRefactoring.getAccessorClassName(),
 				fNLSRefactoring.getAccessorClassPackage(),
 				fNLSRefactoring.getResourceBundleName(),
 				fNLSRefactoring.getResourceBundlePackage());
-		
+
 		ArrayList currChoices= new ArrayList();
 		ArrayList currLabels= new ArrayList();
-		
+
 		currChoices.add(configured);
 		currLabels.add(configured.getLabel());
-		
+
 		AccessorDescription[] choices= fAccessorChoices;
 		if (choices == null) {
 			choices= loadAccessorDescriptions();
 		}
-		
+
 		for (int i= 0; i < choices.length; i++) {
 			AccessorDescription curr= choices[i];
 			if (!curr.equals(configured)) {
@@ -678,15 +678,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				currLabels.add(curr.getLabel());
 			}
 		}
-		
+
 		String[] labels= (String[]) currLabels.toArray(new String[currLabels.size()]);
 		fAccessorChoices= (AccessorDescription[]) currChoices.toArray(new AccessorDescription[currChoices.size()]);
-		
+
 		fAccessorClassField.setItems(labels);
 		fAccessorClassField.select(0);
 	}
-	
-	
+
+
 	private AccessorDescription[] loadAccessorDescriptions() {
 		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_NLS_ACCESSORS);
 		if (section == null) {
@@ -704,9 +704,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 		return (AccessorDescription[]) res.toArray(new AccessorDescription[res.size()]);
 	}
-	
-	
-	
+
+
+
 	private void storeAccessorDescriptions() {
 		if (fAccessorChoices == null) {
 			return;
@@ -722,7 +722,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fAccessorChoices[i].serialize(serializedDesc);
 		}
 	}
-	
+
 
 	private void doConfigureButtonPressed() {
 		NLSAccessorConfigurationDialog dialog= new NLSAccessorConfigurationDialog(getShell(), fNLSRefactoring);
@@ -806,7 +806,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				return (curr.getInitialState() == NLSSubstitution.INTERNALIZED) || (curr.getInitialState() == NLSSubstitution.EXTERNALIZED && curr.getInitialValue() == null);
 			}
 		});
-		
+
 
 		fTableViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
 		fTableViewer.setInput(new Object());
@@ -899,22 +899,22 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		});
 	}
-	
+
 	private boolean isEclipseNLSAvailable() {
 		if (fNLSRefactoring == null || fNLSRefactoring.getCu() == null)
 			return false;
-		
+
 		IJavaProject jp= fNLSRefactoring.getCu().getJavaProject();
 		if (jp == null || !jp.exists())
 			return false;
-		
+
 		try {
 			return jp.findType("org.eclipse.osgi.util.NLS") != null; //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			return false;
 		}
 	}
-	
+
 	private void createIsEclipseNLSCheckbox(Composite parent) {
 		if (fNLSRefactoring.isEclipseNLS() || isEclipseNLSAvailable()) {
 			fIsEclipseNLS= new Button(parent, SWT.CHECK);
@@ -949,16 +949,16 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				return;
 		}
 	}
-	
+
 	private boolean isKeyValid(NLSSubstitution substitution, RefactoringStatus status) {
 		if (substitution == null)
 			return false;
-		
+
 		if (substitution.getState() != NLSSubstitution.EXTERNALIZED)
 			return true;
-		
+
 		String key= substitution.getKey();
-		
+
 		if (fNLSRefactoring.isEclipseNLS()) {
 			if (key == null || key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0))) {
 				if (status != null)
@@ -987,10 +987,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private void checkDuplicateKeys(RefactoringStatus status) {
 		for (int i= 0; i < fSubstitutions.length; i++) {
 			NLSSubstitution substitution= fSubstitutions[i];
@@ -1021,20 +1021,20 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private void createTableComposite(Composite parent) {
 		Composite comp= new Composite(parent, SWT.NONE);
 		comp.setFont(parent.getFont());
-		
+
 		comp.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		FormLayout fl= new FormLayout();
 		fl.marginWidth= 0;
 		fl.marginHeight= 0;
 		comp.setLayout(fl);
-				
+
 		Label l= new Label(comp, SWT.NONE);
 		l.setText(NLSUIMessages.ExternalizeWizardPage_strings_to_externalize);
 		FormData formData = new FormData();
 		formData.left = new FormAttachment(0, 0);
 		l.setLayoutData(formData);
-		
+
 		Control tableControl= createTable(comp);
 		formData = new FormData();
 		formData.top = new FormAttachment(l, 5);
@@ -1042,7 +1042,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		formData.right = new FormAttachment(100,0);
 		formData.bottom = new FormAttachment(100,0);
 		tableControl.setLayoutData(formData);
-		
+
 		fFilterCheckBox= new Button(comp, SWT.CHECK);
 		fFilterCheckBox.setText(NLSUIMessages.ExternalizeWizardPage_filter_label);
 		formData = new FormData();
@@ -1058,7 +1058,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 		fFilterCheckBox.setSelection(hasNewOrMissingSubstitutions());
 	}
-	
+
 	private boolean hasNewOrMissingSubstitutions() {
 		for (int i= 0; i < fSubstitutions.length; i++) {
 			NLSSubstitution curr= fSubstitutions[i];
@@ -1073,7 +1073,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected void doFilterCheckBoxPressed() {
 		fTableViewer.refresh();
@@ -1090,7 +1090,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
 		fTable.setFont(parent.getFont());
-		
+
 		GridData tableGD= new GridData(GridData.FILL_BOTH);
 		tableGD.heightHint= SWTUtil.getTableHeightHint(fTable, ROW_COUNT);
 		//tableGD.widthHint= 40;
@@ -1125,7 +1125,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		gl.marginWidth= 0;
 		buttonComp.setLayout(gl);
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		
+
 		SelectionAdapter adapter= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleButtonPressed(e.widget);
@@ -1137,7 +1137,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fInternalizeButton= createTaskButton(buttonComp, NLSUIMessages.ExternalizeWizardPage_Internalize_Selected, adapter);
 
 		new Label(buttonComp, SWT.NONE); // separator
-		
+
 		fEditButton= createTaskButton(buttonComp, NLSUIMessages.ExternalizeWizardPage_Edit_key_and_value, adapter);
 		fRevertButton= createTaskButton(buttonComp, NLSUIMessages.ExternalizeWizardPage_Revert_Selected, adapter);
 		fRenameButton= createTaskButton(buttonComp, NLSUIMessages.ExternalizeWizardPage_Rename_Keys, adapter);
@@ -1167,7 +1167,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void openRenameDialog() {
 		IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
@@ -1188,7 +1188,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTableViewer.refresh();
 		updateButtonStates((IStructuredSelection) fTableViewer.getSelection());
 	}
-	
+
 	private Button createTaskButton(Composite parent, String label, SelectionAdapter adapter) {
 		Button button= new Button(parent, SWT.PUSH);
 		button.setText(label);
@@ -1205,7 +1205,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (substitution == null) {
 				return;
 			}
-			
+
 			NLSInputDialog dialog= new NLSInputDialog(getShell(), substitution);
 			if (dialog.open() == Window.CANCEL)
 				return;
@@ -1282,7 +1282,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		if (!containsElementsWithChange(selection)) {
 			fRevertButton.setEnabled(false);
 		}
-		
+
 		fRenameButton.setEnabled(getExternalizedElements(selection).size() > 1);
 		fEditButton.setEnabled(selection.size() == 1);
 	}
@@ -1296,7 +1296,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 		return false;
 	}
-		
+
 	private List getExternalizedElements(IStructuredSelection selection) {
 		ArrayList res= new ArrayList();
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
@@ -1339,7 +1339,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	/**
 	 * Updates the prefix.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private void updatePrefix() {

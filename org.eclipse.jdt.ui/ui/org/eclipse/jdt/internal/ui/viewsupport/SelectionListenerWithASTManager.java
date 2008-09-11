@@ -30,6 +30,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -45,9 +46,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * Infrastructure to share an AST for editor post selection listeners.
  */
 public class SelectionListenerWithASTManager {
-	
+
 	private static SelectionListenerWithASTManager fgDefault;
-	
+
 	/**
 	 * @return Returns the default manager instance.
 	 */
@@ -57,8 +58,8 @@ public class SelectionListenerWithASTManager {
 		}
 		return fgDefault;
 	}
-	
-	
+
+
 	private final static class PartListenerGroup {
 		private ITextEditor fPart;
 		private ISelectionListener fPostSelectionListener;
@@ -70,12 +71,12 @@ public class SelectionListenerWithASTManager {
 		 * Only jobs may synchronize on this as otherwise deadlocks are possible.
 		 */
 		private final Object fJobLock= new Object();
-		
+
 		public PartListenerGroup(ITextEditor editorPart) {
 			fPart= editorPart;
 			fCurrentJob= null;
 			fAstListeners= new ListenerList(ListenerList.IDENTITY);
-			
+
 			fSelectionListener= new ISelectionChangedListener() {
 				public void selectionChanged(SelectionChangedEvent event) {
 					ISelection selection= event.getSelection();
@@ -84,7 +85,7 @@ public class SelectionListenerWithASTManager {
 					}
 				}
 			};
-			
+
 			fPostSelectionListener= new ISelectionListener() {
 				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 					if (part == fPart && selection instanceof ITextSelection)
@@ -106,7 +107,7 @@ public class SelectionListenerWithASTManager {
 			}
 			fAstListeners.add(listener);
 		}
-		
+
 		public void uninstall(ISelectionListenerWithAST listener) {
 			fAstListeners.remove(listener);
 			if (isEmpty()) {
@@ -116,10 +117,10 @@ public class SelectionListenerWithASTManager {
 					selectionProvider.removeSelectionChangedListener(fSelectionListener);
 			}
 		}
-		
+
 		/**
 		 * A selection event has occurred.
-		 * 
+		 *
 		 * @param selection the selection
 		 */
 		public void fireSelectionChanged(final ITextSelection selection) {
@@ -127,10 +128,10 @@ public class SelectionListenerWithASTManager {
 				fCurrentJob.cancel();
 			}
 		}
-		
+
 		/**
 		 * A post selection event has occurred.
-		 * 
+		 *
 		 * @param selection the selection
 		 */
 		public void firePostSelectionChanged(final ITextSelection selection) {
@@ -142,9 +143,9 @@ public class SelectionListenerWithASTManager {
 				return;
 			}
 			final ITypeRoot typeRoot= (ITypeRoot) input;
-			
-			
-			fCurrentJob= new Job(JavaUIMessages.SelectionListenerWithASTManager_job_title) { 
+
+
+			fCurrentJob= new Job(JavaUIMessages.SelectionListenerWithASTManager_job_title) {
 				public IStatus run(IProgressMonitor monitor) {
 					if (monitor == null) {
 						monitor= new NullProgressMonitor();
@@ -158,7 +159,7 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob.setSystem(true);
 			fCurrentJob.schedule();
 		}
-		
+
 		protected final IStatus calculateASTandInform(ITypeRoot input, ITextSelection selection, IProgressMonitor monitor) {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
@@ -166,7 +167,7 @@ public class SelectionListenerWithASTManager {
 			// create AST
 			try {
 				CompilationUnit astRoot= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_ACTIVE_ONLY, monitor);
-			
+
 				if (astRoot != null && !monitor.isCanceled()) {
 					Object[] listeners;
 					synchronized (PartListenerGroup.this) {
@@ -186,14 +187,14 @@ public class SelectionListenerWithASTManager {
 			return Status.CANCEL_STATUS;
 		}
 	}
-	
-		
+
+
 	private Map fListenerGroups;
-	
+
 	private SelectionListenerWithASTManager() {
 		fListenerGroups= new HashMap();
 	}
-	
+
 	/**
 	 * Registers a selection listener for the given editor part.
 	 * @param part The editor part to listen to.

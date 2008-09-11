@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.TestCase;
+
 import org.eclipse.test.performance.Performance;
 
 

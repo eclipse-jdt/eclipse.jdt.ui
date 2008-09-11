@@ -37,15 +37,15 @@ import org.eclipse.jdt.internal.ui.actions.MultiFormatAction;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FormatAllAction extends SelectionDispatchAction {
-	
+
 	private MultiFormatAction fCleanUpDelegate;
-	
+
 	/* (non-Javadoc)
 	 * Class implements IObjectActionDelegate
 	 */
@@ -67,26 +67,26 @@ public class FormatAllAction extends SelectionDispatchAction {
 	 * Creates a new <code>FormatAllAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FormatAllAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.FormatAllAction_label);
 		setToolTipText(ActionMessages.FormatAllAction_tooltip);
-		setDescription(ActionMessages.FormatAllAction_description); 
+		setDescription(ActionMessages.FormatAllAction_description);
 
 		fCleanUpDelegate= new MultiFormatAction(site);
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
 		// do nothing
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -94,13 +94,13 @@ public class FormatAllAction extends SelectionDispatchAction {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
 	}
-		
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -116,7 +116,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 		if (cus.length == 0)
 			return;
 
-		fCleanUpDelegate.run(new StructuredSelection(cus));	
+		fCleanUpDelegate.run(new StructuredSelection(cus));
 	}
-		
+
 }

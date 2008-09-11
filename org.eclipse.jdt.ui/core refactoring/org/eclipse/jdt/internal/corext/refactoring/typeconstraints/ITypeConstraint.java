@@ -21,7 +21,7 @@ public interface ITypeConstraint {
 	public abstract String toResolvedString();
 
 	/**
-	 * Returns whether this is a simple constraint. If so, it can be safely downcast to 
+	 * Returns whether this is a simple constraint. If so, it can be safely downcast to
 	 * <code>SimpleTypeConstraint</code>.
 	 */
 	public boolean isSimpleTypeConstraint();

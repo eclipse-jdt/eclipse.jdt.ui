@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     N.Metchev@teamphone.com - contributed fixes for
- *     - convert anonymous to nested should sometimes declare class as static [refactoring] 
+ *     - convert anonymous to nested should sometimes declare class as static [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
  *     - Convert anonymous to nested: should show error if field form outer anonymous type is references [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=48282)
@@ -113,17 +113,17 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
-	
+
 	private static final String KEY_TYPE_NAME= "type_name"; //$NON-NLS-1$
 	private static final String KEY_PARAM_NAME_EXT= "param_name_ext"; //$NON-NLS-1$
 	private static final String KEY_PARAM_NAME_CONST= "param_name_const"; //$NON-NLS-1$
 	private static final String KEY_FIELD_NAME_EXT= "field_name_ext"; //$NON-NLS-1$
-	
+
 	public static class TypeVariableFinder extends ASTVisitor {
 
 		private final Map fBindings= new HashMap();
 		private final List fFound= new ArrayList();
-		
+
 		public final boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
 			final ITypeBinding binding= node.resolveTypeBinding();
@@ -154,7 +154,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private AnonymousClassDeclaration fAnonymousInnerClassNode;
     private Set fClassNamesUsed;
 	private boolean fSelfInitializing= false;
-	
+
 	private LinkedProposalModel fLinkedProposalModel;
 
 	/**
@@ -173,28 +173,28 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         fAnonymousInnerClassNode= null;
         fCompilationUnitNode= null;
     }
-    
+
     public ConvertAnonymousToNestedRefactoring(AnonymousClassDeclaration declaration) {
     	Assert.isTrue(declaration != null);
-    	
+
     	ASTNode astRoot= declaration.getRoot();
     	Assert.isTrue(astRoot instanceof CompilationUnit);
     	fCompilationUnitNode= (CompilationUnit) astRoot;
-    	
+
      	IJavaElement javaElement= fCompilationUnitNode.getJavaElement();
         Assert.isTrue(javaElement instanceof ICompilationUnit);
-        
+
         fCu= (ICompilationUnit) javaElement;
         fSelectionStart= declaration.getStartPosition();
         fSelectionLength= declaration.getLength();
     }
-    
+
     public ConvertAnonymousToNestedRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this(null, 0, 0);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
     }
-    
+
 	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
 		fLinkedProposalModel= linkedProposalModel;
 	}
@@ -232,11 +232,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     public boolean getDeclareFinal() {
         return fDeclareFinal;
     }
-    
+
     public boolean getDeclareStatic() {
         return fDeclareStatic;
     }
-    
+
     public void setDeclareFinal(boolean declareFinal) {
         fDeclareFinal= declareFinal;
     }
@@ -246,17 +246,17 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     public String getName() {
-        return RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name; 
+        return RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name;
     }
-    
+
     private boolean useThisForFieldAccess() {
     	return StubUtility.useThisForFieldAccess(fCu.getJavaProject());
     }
-    
+
     private boolean doAddComments() {
     	return StubUtility.doAddComments(fCu.getJavaProject());
     }
-    
+
     public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
         RefactoringStatus result= Checks.validateModifiesFiles(
         	ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
@@ -267,13 +267,13 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		initAST(pm);
 
 		if (fAnonymousInnerClassNode == null)
-		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_place_caret); 
+		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_place_caret);
 		if (!fSelfInitializing)
 			initializeDefaults();
 		if (getSuperConstructorBinding() == null)
-		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_compile_errors); 
+		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_compile_errors);
 		if (getSuperTypeBinding().isLocal())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_extends_local_class); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_extends_local_class);
 		return new RefactoringStatus();
     }
 
@@ -326,14 +326,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             return result;
 
         if (fClassNamesUsed.contains(fClassName))
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_type_exists); 
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_type_exists);
         IMethodBinding superConstructorBinding = getSuperConstructorBinding();
         if (superConstructorBinding == null)
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_compile_errors); 
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_compile_errors);
         if (fClassName.equals(superConstructorBinding.getDeclaringClass().getName()))
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_another_name); 
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_another_name);
         if (classNameHidesEnclosingType())
-            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name_hides); 
+            return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name_hides);
         return result;
     }
 
@@ -348,7 +348,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
                 IVariableBinding variableBinding2 = (IVariableBinding) it2.next();
                 if(Bindings.equals(variableBinding, variableBinding2)) {
                     return true;
-                }   
+                }
             }
         }
         return false;
@@ -433,21 +433,21 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         try {
             RefactoringStatus status= validateInput();
             if (accessesAnonymousFields())
-                status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_anonymous_field_access)); 
+                status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_anonymous_field_access));
             return status;
         } finally {
             pm.done();
         }
     }
-    
+
     public CompilationUnitChange createCompilationUnitChange(IProgressMonitor pm) throws CoreException {
 		final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
 		final ITypeBinding[] typeParameters= getTypeParameters();
 		addNestedClass(rewrite, typeParameters);
 		modifyConstructorCall(rewrite, typeParameters);
-		return rewrite.createChange(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, false, pm); 
+		return rewrite.createChange(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, false, pm);
     }
-    
+
 
     /*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
@@ -532,16 +532,16 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		if (fDeclareFinal && fDeclareStatic)
 			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_final_static);
 		else if (fDeclareFinal)
-			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_final);			
+			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_final);
 		else if (fDeclareStatic)
-			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_static);			
+			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_static);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(projectName, fCu));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fClassName);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + ' ' + new Integer(fSelectionLength).toString());
 		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-		
+
 		ConvertAnonymousDescriptor descriptor= new ConvertAnonymousDescriptor(projectName, description, comment.asString(), arguments, flags);
 		return new RefactoringChangeDescriptor(descriptor);
 	}
@@ -566,7 +566,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		newClassCreation.setType(type);
 		copyArguments(rewrite, newClassCreation);
 		addArgumentsForLocalsUsedInInnerClass(newClassCreation);
-		
+
 		addLinkedPosition(KEY_TYPE_NAME, newNameNode, rewrite.getASTRewrite(), true);
 
 		return newClassCreation;
@@ -590,14 +590,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	Iterator iter= ((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().iterator();
     	if (!iter.hasNext())
     		return;
-    	
+
     	IMethodBinding superConstructorBinding= getSuperConstructorBinding();
     	ITypeBinding[] parameterTypes= superConstructorBinding.getParameterTypes();
-    	
+
     	List arguments= newClassCreation.arguments();
 		ASTRewrite astRewrite= rewrite.getASTRewrite();
 		int last= parameterTypes.length - 1;
-		
+
 		for (int i= 0; i < last; i++) {
 			arguments.add(astRewrite.createCopyTarget((Expression) iter.next()));
 		}
@@ -640,13 +640,13 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private AbstractTypeDeclaration createNewNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters) throws CoreException {
 		final AST ast= fAnonymousInnerClassNode.getAST();
-		
+
 		final TypeDeclaration newDeclaration= ast.newTypeDeclaration();
 		newDeclaration.setInterface(false);
 		newDeclaration.setJavadoc(null);
 		newDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiersForNestedClass()));
 		newDeclaration.setName(ast.newSimpleName(fClassName));
-		
+
 		TypeParameter parameter= null;
 		for (int index= 0; index < typeParameters.length; index++) {
 			parameter= ast.newTypeParameter();
@@ -654,17 +654,17 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			newDeclaration.typeParameters().add(parameter);
 		}
 		setSuperType(newDeclaration);
-		
+
 		IJavaProject project= fCu.getJavaProject();
-		
+
 		IVariableBinding[] bindings= getUsedLocalVariables();
 		ArrayList fieldNames= new ArrayList();
 		for (int i= 0; i < bindings.length; i++) {
 			String name= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
 			String[] fieldNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, project, name, 0, fieldNames, true);
 			fieldNames.add(fieldNameProposals[0]);
-			
-			
+
+
 			if (fLinkedProposalModel != null) {
 				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_FIELD_NAME_EXT + i, true);
 				for (int k= 0; k < fieldNameProposals.length; k++) {
@@ -673,18 +673,18 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			}
 		}
 		String[] allFieldNames= (String[]) fieldNames.toArray(new String[fieldNames.size()]);
-		
+
 		List newBodyDeclarations= newDeclaration.bodyDeclarations();
-		
+
 		createFieldsForAccessedLocals(rewrite, bindings, allFieldNames, newBodyDeclarations);
-		
+
 		MethodDeclaration newConstructorDecl= createNewConstructor(rewrite, bindings, allFieldNames);
 		if (newConstructorDecl != null) {
 			newBodyDeclarations.add(newConstructorDecl);
 		}
-		
+
 		updateAndMoveBodyDeclarations(rewrite, bindings, allFieldNames, newBodyDeclarations, newConstructorDecl);
-		
+
 		if (doAddComments()) {
 			String[] parameterNames= new String[typeParameters.length];
 			for (int index= 0; index < parameterNames.length; index++) {
@@ -700,21 +700,21 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			addLinkedPosition(KEY_TYPE_NAME, newDeclaration.getName(), rewrite.getASTRewrite(), false);
 			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(fLinkedProposalModel, rewrite.getASTRewrite(), newDeclaration.modifiers(), false);
 		}
-		
+
 		return newDeclaration;
 	}
 
 	private void updateAndMoveBodyDeclarations(CompilationUnitRewrite rewriter, IVariableBinding[] bindings, String[] fieldNames, List newBodyDeclarations, MethodDeclaration newConstructorDecl) {
 		final ASTRewrite astRewrite= rewriter.getASTRewrite();
 		final AST ast= astRewrite.getAST();
-		
+
 		final boolean useThisAccess= useThisForFieldAccess();
-		
+
 		int fieldInsertIndex= newConstructorDecl != null ? newBodyDeclarations.lastIndexOf(newConstructorDecl) : newBodyDeclarations.size();
-		
+
 		for (Iterator iterator= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iterator.hasNext();) {
 			BodyDeclaration body= (BodyDeclaration) iterator.next();
-			
+
 			for (int i= 0; i < bindings.length; i++) {
 				SimpleName[] names= LinkedNodeFinder.findByBinding(body, bindings[i]);
 				String fieldName= fieldNames[i];
@@ -737,9 +737,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				newBodyDeclarations.add(astRewrite.createMoveTarget(body));
 			}
 		}
-		
+
 		if (newConstructorDecl != null) {
-			// move initialization of existing fields to constructor if an outer is referenced 
+			// move initialization of existing fields to constructor if an outer is referenced
 			List bodyStatements= newConstructorDecl.getBody().statements();
 
 			List fieldsToInitializeInConstructor= getFieldsToInitializeInConstructor();
@@ -761,7 +761,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		final ImportRewrite importRewrite= rewrite.getImportRewrite();
 		final ASTRewrite astRewrite= rewrite.getASTRewrite();
 		final AST ast= astRewrite.getAST();
-				
+
 		for (int i= 0; i < varBindings.length; i++) {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setExtraDimensions(0);
@@ -778,19 +778,19 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 					field.setJavadoc(javadoc);
 				}
 			}
-			
+
 			newBodyDeclarations.add(field);
-			
+
 			addLinkedPosition(KEY_FIELD_NAME_EXT + i, fragment.getName(), astRewrite, false);
 		}
 	}
-    
+
     private void addLinkedPosition(String key, ASTNode nodeToTrack, ASTRewrite rewrite, boolean isFirst) {
     	if (fLinkedProposalModel != null) {
     		fLinkedProposalModel.getPositionGroup(key, true).addPosition(rewrite.track(nodeToTrack), isFirst);
     	}
     }
-    
+
 
     private IVariableBinding[] getUsedLocalVariables() {
         final Set result= new HashSet(0);
@@ -831,7 +831,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private MethodDeclaration createNewConstructor(CompilationUnitRewrite rewrite, IVariableBinding[] bindings, String[] fieldNames) throws JavaModelException {
     	ClassInstanceCreation instanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
-    	
+
     	if (instanceCreation.arguments().isEmpty() && bindings.length == 0)
 			return null;
 
@@ -839,7 +839,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         AST ast= rewrite.getAST();
         ImportRewrite importRewrite= rewrite.getImportRewrite();
         ASTRewrite astRewrite= rewrite.getASTRewrite();
-		
+
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setConstructor(true);
 		newConstructor.setExtraDimensions(0);
@@ -847,14 +847,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, fVisibility));
 		newConstructor.setName(ast.newSimpleName(fClassName));
 		addLinkedPosition(KEY_TYPE_NAME, newConstructor.getName(), astRewrite, false);
-		
+
 		newConstructor.setBody(ast.newBlock());
-		
+
 		List newStatements= newConstructor.getBody().statements();
-		
+
         List newParameters= newConstructor.parameters();
         List newParameterNames= new ArrayList();
-		
+
         // add parameters for elements passed with the instance creation
         if (!instanceCreation.arguments().isEmpty()) {
         	IMethodBinding constructorBinding= getSuperConstructorBinding();
@@ -865,14 +865,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	        for (int i= 0; i < parameterNames.length; i++) {
     	        	String[] nameProposals= parameterNames[i];
     	        	String paramName= nameProposals[0];
-    	        	
+
     	    		SingleVariableDeclaration param= newParameterDeclaration(ast, importRewrite, paramName, parameterTypes[i]);
     	    		newParameters.add(param);
     	    		newParameterNames.add(paramName);
-    	    		
+
     	    		SimpleName newSIArgument= ast.newSimpleName(paramName);
 					superConstructorInvocation.arguments().add(newSIArgument);
-    	    		
+
 					if (fLinkedProposalModel != null) {
 						LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_PARAM_NAME_CONST+ String.valueOf(i), true);
 						positionGroup.addPosition(astRewrite.track(param.getName()), false);
@@ -891,16 +891,16 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         	String baseName= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
         	String[] paramNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, baseName, 0, newParameterNames, true);
         	String paramName= paramNameProposals[0];
-        	
+
         	SingleVariableDeclaration param= newParameterDeclaration(ast, importRewrite, paramName, bindings[i].getType());
     		newParameters.add(param);
     		newParameterNames.add(paramName);
-    		
+
     		String fieldName= fieldNames[i];
     		SimpleName fieldNameNode= ast.newSimpleName(fieldName);
     		SimpleName paramNameNode= ast.newSimpleName(paramName);
 			newStatements.add(newFieldAssignment(ast, fieldNameNode, paramNameNode, useThisAccess || newParameterNames.contains(fieldName)));
-			
+
 			if (fLinkedProposalModel != null) {
 				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_PARAM_NAME_EXT+ String.valueOf(i), true);
 				positionGroup.addPosition(astRewrite.track(param.getName()), false);
@@ -908,13 +908,13 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	        for (int k= 0; k < paramNameProposals.length; k++) {
     	        	positionGroup.addProposal(paramNameProposals[k], null, paramNameProposals.length - k);
 				}
-    	        
+
     	        fLinkedProposalModel.getPositionGroup(KEY_FIELD_NAME_EXT + i, true).addPosition(astRewrite.track(fieldNameNode), false);
 			}
 		}
 
 		addExceptionsToNewConstructor(newConstructor);
-		
+
 		if (doAddComments()) {
 			try {
 				String[] allParamNames= (String[]) newParameterNames.toArray(new String[newParameterNames.size()]);
@@ -929,7 +929,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		}
 		return newConstructor;
 	}
-    
+
     private Statement newFieldAssignment(AST ast, SimpleName fieldNameNode, Expression initializer, boolean useThisAccess) {
 		Assignment assignment= ast.newAssignment();
 		if (useThisAccess) {
@@ -942,10 +942,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		}
 		assignment.setOperator(Assignment.Operator.ASSIGN);
 		assignment.setRightHandSide(initializer);
-		
+
 		return ast.newExpressionStatement(assignment);
      }
-    
+
 
     // live List of VariableDeclarationFragments
     private List getFieldsToInitializeInConstructor() {
@@ -971,9 +971,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private boolean areLocalsUsedIn(Expression fieldInitializer, List fieldsToInitialize) {
         Set localsUsed= new HashSet(0);
         collectRefrencedVariables(fieldInitializer, localsUsed);
-        
+
         ITypeBinding anonType= fAnonymousInnerClassNode.resolveBinding();
-        
+
         for (Iterator iterator= localsUsed.iterator(); iterator.hasNext();) {
 			IVariableBinding curr= (IVariableBinding) iterator.next();
 			if (isBindingToTemp(curr)) { // reference a local from outside
@@ -1026,7 +1026,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private SingleVariableDeclaration newParameterDeclaration(AST ast, ImportRewrite importRewrite, String paramName, ITypeBinding paramType) {
-    	SingleVariableDeclaration param= ast.newSingleVariableDeclaration();	
+    	SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setExtraDimensions(0);
 		param.setInitializer(null);
 		param.setType(importRewrite.addImport(paramType, ast));
@@ -1044,9 +1044,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             Assert.isTrue(binding.getInterfaces().length <= 1);
             if (binding.getInterfaces().length == 0)
                 return;
-            declaration.superInterfaceTypes().add(0, newType); 
+            declaration.superInterfaceTypes().add(0, newType);
         } else {
-            declaration.setSuperclassType(newType); 
+            declaration.setSuperclassType(newType);
         }
     }
 

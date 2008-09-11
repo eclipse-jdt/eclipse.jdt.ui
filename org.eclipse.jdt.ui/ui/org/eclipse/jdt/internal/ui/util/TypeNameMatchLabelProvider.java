@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class TypeNameMatchLabelProvider extends LabelProvider {
-	
+
 	public static final int SHOW_FULLYQUALIFIED=		0x01;
 	public static final int SHOW_PACKAGE_POSTFIX=		0x02;
 	public static final int SHOW_PACKAGE_ONLY=			0x04;
@@ -37,43 +37,43 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 	public static final int SHOW_TYPE_ONLY=				0x10;
 	public static final int SHOW_TYPE_CONTAINER_ONLY=	0x20;
 	public static final int SHOW_POST_QUALIFIED=		0x40;
-	
+
 	private int fFlags;
-	
+
 	public TypeNameMatchLabelProvider(int flags) {
 		fFlags= flags;
-	}	
-	
+	}
+
 	/* non java-doc
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-		if (! (element instanceof TypeNameMatch)) 
+		if (! (element instanceof TypeNameMatch))
 			return super.getText(element);
-		
+
 		return getText((TypeNameMatch) element, fFlags);
 	}
-	
+
 	/* non java-doc
 	 * @see ILabelProvider#getImage
-	 */	
+	 */
 	public Image getImage(Object element) {
-		if (! (element instanceof TypeNameMatch)) 
-			return super.getImage(element);	
+		if (! (element instanceof TypeNameMatch))
+			return super.getImage(element);
 		return getImage((TypeNameMatch) element, fFlags);
 	}
-	
+
 	private static boolean isSet(int flag, int flags) {
 		return (flags & flag) != 0;
 	}
 
 	private static String getPackageName(String packName) {
 		if (packName.length() == 0)
-			return JavaUIMessages.TypeInfoLabelProvider_default_package; 
+			return JavaUIMessages.TypeInfoLabelProvider_default_package;
 		else
 			return packName;
 	}
-	
+
 	public static String getText(TypeNameMatch typeRef, int flags) {
 		StringBuffer buf= new StringBuffer();
 		if (isSet(SHOW_TYPE_ONLY, flags)) {
@@ -109,10 +109,10 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 			IPackageFragmentRoot root= typeRef.getPackageFragmentRoot();
 			JavaElementLabels.getPackageFragmentRootLabel(root, JavaElementLabels.ROOT_QUALIFIED, buf);
 		}
-		return BasicElementLabels.getJavaElementName(buf.toString());			
+		return BasicElementLabels.getJavaElementName(buf.toString());
 	}
-	
-	
+
+
 	public static ImageDescriptor getImageDescriptor(TypeNameMatch typeRef, int flags) {
 		if (isSet(SHOW_TYPE_CONTAINER_ONLY, flags)) {
 			if (typeRef.getPackageName().equals(typeRef.getTypeContainerName()))
@@ -126,7 +126,7 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 		} else {
 			boolean isInner= typeRef.getTypeContainerName().indexOf('.') != -1;
 			int modifiers= typeRef.getModifiers();
-			
+
 			ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, false, modifiers, false);
 			int adornmentFlags= 0;
 			if (Flags.isFinal(modifiers)) {
@@ -145,10 +145,10 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 			return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 		}
 	}
-		
+
 	public static Image getImage(TypeNameMatch typeRef, int flags) {
 		return JavaPlugin.getImageDescriptorRegistry().get(getImageDescriptor(typeRef, flags));
 	}
-	
-	
+
+
 }

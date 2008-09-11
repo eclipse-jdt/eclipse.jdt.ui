@@ -37,9 +37,9 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 	private VariableDeclaration fTempDeclaration;
 	private IBinding fTempBinding;
 	private boolean fAnalyzeJavadoc;
-	
+
 	private boolean fIsInJavadoc;
-	
+
 	public TempOccurrenceAnalyzer(VariableDeclaration tempDeclaration, boolean analyzeJavadoc){
 		Assert.isNotNull(tempDeclaration);
 		fReferenceNodes= new HashSet();
@@ -49,25 +49,25 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 		fTempBinding= tempDeclaration.resolveBinding();
 		fIsInJavadoc= false;
 	}
-	
+
 	public void perform() {
 		ASTNode cuNode= ASTNodes.getParent(fTempDeclaration, CompilationUnit.class);
 		cuNode.accept(this);
 	}
-	
+
 	public int[] getReferenceOffsets(){
 		int[] offsets= new int[fReferenceNodes.size()];
 		addOffsets(offsets, 0, fReferenceNodes);
 		return offsets;
 	}
-	
+
 	public int[] getReferenceAndJavadocOffsets(){
 		int[] offsets= new int[fReferenceNodes.size() + fJavadocNodes.size()];
 		addOffsets(offsets, 0, fReferenceNodes);
 		addOffsets(offsets, fReferenceNodes.size(), fJavadocNodes);
 		return offsets;
 	}
-	
+
 	private void addOffsets(int[] offsets, int start, Set nodeSet) {
 		int i= start;
 		for (Iterator iter= nodeSet.iterator(); iter.hasNext(); i++) {
@@ -75,7 +75,7 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 			offsets[i]= node.getStartPosition();
 		}
 	}
-	
+
 	public int getNumberOfReferences() {
 		return fReferenceNodes.size();
 	}
@@ -83,42 +83,42 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 	public SimpleName[] getReferenceNodes() {
 		return (SimpleName[]) fReferenceNodes.toArray(new SimpleName[fReferenceNodes.size()]);
 	}
-	
+
 	public SimpleName[] getJavadocNodes() {
 		return (SimpleName[]) fJavadocNodes.toArray(new SimpleName[fJavadocNodes.size()]);
 	}
-	
+
 	public SimpleName[] getReferenceAndDeclarationNodes() {
 		SimpleName[] nodes= (SimpleName[]) fReferenceNodes.toArray(new SimpleName[fReferenceNodes.size() + 1]);
 		nodes[fReferenceNodes.size()]= fTempDeclaration.getName();
 		return nodes;
 	}
-			
+
 	//------- visit ------ (don't call)
-	
+
 	public boolean visit(Javadoc node) {
 		if (fAnalyzeJavadoc)
 			fIsInJavadoc= true;
 		return fAnalyzeJavadoc;
 	}
-		
+
 	public void endVisit(Javadoc node) {
 		fIsInJavadoc= false;
 	}
-	
+
 	public boolean visit(SimpleName node){
 		if (node.getParent() instanceof VariableDeclaration){
 			if (((VariableDeclaration)node.getParent()).getName() == node)
 				return true; //don't include declaration
 		}
-		
+
 		if (fTempBinding != null && fTempBinding == node.resolveBinding()) {
 			if (fIsInJavadoc)
 				fJavadocNodes.add(node);
 			else
 				fReferenceNodes.add(node);
 		}
-				
+
 		return true;
 	}
 }

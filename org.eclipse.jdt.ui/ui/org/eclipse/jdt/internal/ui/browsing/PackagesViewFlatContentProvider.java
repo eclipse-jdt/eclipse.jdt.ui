@@ -39,7 +39,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
  */
 //TODO: made public and added setRefreshLoggingEnabled(..) to track down https://bugs.eclipse.org/bugs/show_bug.cgi?id=243132
 public class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements IStructuredContentProvider {
-	
+
 	private boolean fRefreshLoggingEnabled;
 
 	public void setRefreshLoggingEnabled(boolean enabled) {
@@ -127,7 +127,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 			String elementLabel= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED);
 			new Exception("Delta for: " + elementLabel).printStackTrace(System.out); //$NON-NLS-1$
 		}
-		
+
 		if (isClassPathChange(delta)) {
 			Object input= fViewer.getInput();
 			if (input != null) {
@@ -277,7 +277,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 		if (fRefreshLoggingEnabled) {
 			new Exception("postRefresh: " + element).printStackTrace(System.out); //$NON-NLS-1$
 		}
-		
+
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();

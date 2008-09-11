@@ -77,7 +77,7 @@ import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
  * in order not to eagerly load refactoring classes during action
  * initialization.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public final class RefactoringAvailabilityTester {
@@ -311,7 +311,7 @@ public final class RefactoringAvailabilityTester {
 						return true;
 					} else if (elementType == IJavaElement.COMPILATION_UNIT) {
 						ICompilationUnit cu= (ICompilationUnit)javaElement;
-						if (cu.exists()) 
+						if (cu.exists())
 							return true;
 					} else if (elementType == IJavaElement.TYPE) {
 						IJavaElement parent= ((IType) element).getParent();

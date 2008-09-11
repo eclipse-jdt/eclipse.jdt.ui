@@ -31,7 +31,7 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 		super(name);
 		fPackageDeletes= packageDeletes;
 	}
-	
+
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		int count= fPackageDeletes.size();
 		pm.beginTask("", count * 3); //$NON-NLS-1$
@@ -41,9 +41,9 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 			packageDeleteDescriptions[i]= ResourceDescription.fromResource(resource);
 			pm.worked(1);
 		}
-		
+
 		DynamicValidationStateChange result= (DynamicValidationStateChange) super.perform(new SubProgressMonitor(pm, count));
-		
+
 		for (int i= 0; i < fPackageDeletes.size(); i++) {
 			IResource resource= (IResource) fPackageDeletes.get(i);
 			ResourceDescription resourceDescription= packageDeleteDescriptions[i];

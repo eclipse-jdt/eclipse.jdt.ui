@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +23,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -85,13 +85,13 @@ import org.eclipse.jdt.ui.CodeGeneration;
  * <code>{@link java.lang.Object#equals(java.lang.Object)}</code> and
  * <code>{@link java.lang.Object#hashCode()}</code>.
  * </p>
- * 
+ *
  * <p>
  * This implementation creates a hashCode() and an equals() method intended to
  * be used in value types: The implementation assumes that two objects are equal
  * (and provide the same hashCode) if all values of all fields are equal.
  * </p>
- * 
+ *
  * <p>
  * About the implementation:
  * <ul>
@@ -116,7 +116,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
  * java.lang.Double.</li>
  * </ul>
  * </p>
- * 
+ *
  * @since 3.2
  */
 public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable {
@@ -139,7 +139,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private static final String METHODNAME_EQUALS= "equals"; //$NON-NLS-1$
 
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
-	
+
 	private static final String METHODNAME_OUTER_TYPE= "getOuterType"; //$NON-NLS-1$
 
 	private static final String PRIME_NUMBER= "31"; //$NON-NLS-1$
@@ -201,13 +201,13 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	/** <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise */
 	private final boolean fUseInstanceOf;
-	
+
 	/** <code>true</code> to use blocks for then */
 	private boolean fUseBlocksForThen;
 
 	/**
 	 * Creates a new add hash code equals operation.
-	 * 
+	 *
 	 * @param type the type to add the methods to
 	 * @param fields the method binding keys to implement
 	 * @param unit the compilation unit ast node
@@ -228,7 +228,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		Assert.isNotNull(unit);
 		Assert.isNotNull(settings);
 		Assert.isTrue(unit.getTypeRoot() instanceof ICompilationUnit);
-		
+
 		fType= type;
 		fInsert= insert;
 		fUnit= unit;
@@ -246,16 +246,16 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	/**
 	 * Defines if then statements should use blocks or not.
-	 * 
-	 * @param useBlocksForThen if set, blocks are forced in if-then statements 
+	 *
+	 * @param useBlocksForThen if set, blocks are forced in if-then statements
 	 */
 	public void setUseBlocksForThen(boolean useBlocksForThen) {
 		fUseBlocksForThen= useBlocksForThen;
 	}
-	
+
 	/**
 	 * Returns the resulting text edit.
-	 * 
+	 *
 	 * @return the resulting edit
 	 */
 	public final TextEdit getResultingEdit() {
@@ -264,7 +264,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	/**
 	 * Returns the scheduling rule for this operation.
-	 * 
+	 *
 	 * @return the scheduling rule
 	 */
 	public final ISchedulingRule getSchedulingRule() {
@@ -312,18 +312,18 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				// helpers
 				for (final Iterator iterator= fCustomHashCodeTypes.iterator(); iterator.hasNext();) {
 					final ITypeBinding binding= (ITypeBinding) iterator.next();
-					
+
 					if (findMethodToReplace(list, METHODNAME_HASH_CODE, objectAsParam) == null) {
 						final MethodDeclaration helperDecl= createHashCodeHelper(binding);
 						addHelper(rewriter, null, helperDecl);
 					}
 				}
-				
+
 				if (isMemberType()) {
 					if (findMethodToReplace(list, METHODNAME_OUTER_TYPE, new ITypeBinding[0]) == null) {
 						final MethodDeclaration helperDecl= createGetOuterHelper();
 						rewriter.insertLast(helperDecl, null);
-					}				
+					}
 				}
 
 				fEdit= fRewrite.createChange().getEdit();
@@ -334,11 +334,11 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			monitor.done();
 		}
 	}
-	
+
 	private boolean isMemberType() {
 		return fType.isMember() && !Modifier.isStatic(fType.getModifiers());
 	}
-	
+
 	private BodyDeclaration findMethodToReplace(final List list, String name, ITypeBinding[] paramTypes) {
 		for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
 			final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
@@ -415,15 +415,15 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		if (isMemberType()) {
 			body.statements().add(createAddOuterHashCode());
 		}
-		
+
 		for (int i= 0; i < fFields.length; i++) {
 			if (fFields[i].getType().isPrimitive()) {
 				Statement[] sts= createAddSimpleHashCode(fFields[i].getType(), new IHashCodeAccessProvider() {
-				
+
 					public Expression getThisAccess(String name) {
 						return getThisAccessForHashCode(name);
 					}
-				
+
 				}, fFields[i].getName(), false);
 				for (int j= 0; j < sts.length; j++) {
 					body.statements().add(sts[j]);
@@ -553,29 +553,29 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 		return prepareAssignment(invoc);
 	}
-	
+
 	private MethodDeclaration createGetOuterHelper() {
 		String outerTypeName= fType.getDeclaringClass().getTypeDeclaration().getName();
-		
+
 		MethodDeclaration helperMethod= fAst.newMethodDeclaration();
 		helperMethod.modifiers().addAll(ASTNodeFactory.newModifiers(fAst, Modifier.PRIVATE));
 		helperMethod.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
 		helperMethod.setConstructor(false);
 		helperMethod.setReturnType2(fAst.newSimpleType(fAst.newSimpleName(outerTypeName)));
-		
+
 		Block body= fAst.newBlock();
 		helperMethod.setBody(body);
-		
+
 		ThisExpression thisExpression= fAst.newThisExpression();
 		thisExpression.setQualifier(fAst.newSimpleName(outerTypeName));
-		
+
 		ReturnStatement endReturn= fAst.newReturnStatement();
 		endReturn.setExpression(thisExpression);
 		body.statements().add(endReturn);
-		
+
 		return helperMethod;
 	}
-	
+
 
 	private MethodDeclaration createHashCodeHelper(ITypeBinding binding) {
 		Assert.isTrue(!binding.isArray());
@@ -630,7 +630,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		// FOR LOOP
 		ForStatement forStatement= fAst.newForStatement();
-		
+
 		VariableDeclarationFragment indexDeclaration= fAst.newVariableDeclarationFragment();
 		indexDeclaration.setName(fAst.newSimpleName(VARIABLE_NAME_INDEX));
 		indexDeclaration.setInitializer(fAst.newNumberLiteral("0")); //$NON-NLS-1$
@@ -650,10 +650,10 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		postfixExpr.setOperator(org.eclipse.jdt.core.dom.PostfixExpression.Operator.INCREMENT);
 		forStatement.updaters().add(postfixExpr);
 		body.statements().add(forStatement);
-		
+
 		Block forBody= fAst.newBlock();
 		Statement[] statements= createAddSimpleHashCode(binding, new IHashCodeAccessProvider() {
-		
+
 			public Expression getThisAccess(String name) {
 				ArrayAccess a= fAst.newArrayAccess();
 				a.setArray(fAst.newSimpleName(VARIABLE_NAME_HASHCODE_PARAM));
@@ -665,7 +665,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			forBody.statements().add(statements[index]);
 		}
 		forStatement.setBody(forBody);
-		
+
 		// END RETURN
 		ReturnStatement endReturn= fAst.newReturnStatement();
 		endReturn.setExpression(fAst.newSimpleName(VARIABLE_NAME_RESULT));
@@ -810,10 +810,10 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 			PrefixExpression notExpression= fAst.newPrefixExpression();
 			notExpression.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
-			
+
 			ParenthesizedExpression parenthesizedExpression= fAst.newParenthesizedExpression();
 			parenthesizedExpression.setExpression(expression);
-			
+
 			notExpression.setOperand(parenthesizedExpression);
 
 			body.statements().add(createReturningIfStatement(false, notExpression));
@@ -828,7 +828,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 			body.statements().add(createReturningIfStatement(thisClass, objGetClass, Operator.NOT_EQUALS, false));
 		}
-		
+
 		// Type other= (Type) obj;
 		VariableDeclarationFragment sd= fAst.newVariableDeclarationFragment();
 		sd.setName(fAst.newSimpleName(VARIABLE_NAME_EQUALS_CASTED));
@@ -846,7 +846,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		if (isMemberType()) { // test outer type
 			body.statements().add(createOuterComparison());
 		}
-		
+
 		for (int i= 0; i < fFields.length; i++) {
 			if (fFields[i].getType().isPrimitive())
 				body.statements().add(createSimpleComparison(fFields[i]));
@@ -881,20 +881,20 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private Statement createOuterComparison() {
 		MethodInvocation outer1= fAst.newMethodInvocation();
 		outer1.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
-		
+
 		MethodInvocation outer2= fAst.newMethodInvocation();
 		outer2.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
 		outer2.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_CASTED));
-		
+
 		MethodInvocation outerEql= fAst.newMethodInvocation();
 		outerEql.setName(fAst.newSimpleName(METHODNAME_EQUALS));
 		outerEql.setExpression(outer1);
 		outerEql.arguments().add(outer2);
-		
+
 		PrefixExpression not= fAst.newPrefixExpression();
 		not.setOperand(outerEql);
 		not.setOperator(PrefixExpression.Operator.NOT);
-		
+
 		IfStatement notEqNull= fAst.newIfStatement();
 		notEqNull.setExpression(not);
 		notEqNull.setThenStatement(getThenStatement(getReturnFalse()));
@@ -932,7 +932,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	/**
 	 * Creates a comparison of reference types.
-	 * 
+	 *
 	 * <pre>
 	 * if (this.a == null) {
 	 * 	if (other.a != null)
@@ -1076,7 +1076,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		falseReturn.setExpression(fAst.newBooleanLiteral(false));
 		return falseReturn;
 	}
-	
+
 	private Statement getThenStatement(Statement statement) {
 		if (fUseBlocksForThen && !(statement instanceof Block)) {
 			Block block= fAst.newBlock();
@@ -1085,7 +1085,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 		return statement;
 	}
-	
+
 
 	private Expression parenthesize(Expression expression) {
 		ParenthesizedExpression pe= fAst.newParenthesizedExpression();

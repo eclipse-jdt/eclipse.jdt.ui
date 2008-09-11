@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.packageview;
 import org.eclipse.jface.viewers.IElementComparer;
 
 public class DefaultElementComparer implements IElementComparer {
-	
+
 	public static final DefaultElementComparer INSTANCE= new DefaultElementComparer();
-	
+
 	public boolean equals(Object a, Object b) {
 		return a.equals(b);
 	}

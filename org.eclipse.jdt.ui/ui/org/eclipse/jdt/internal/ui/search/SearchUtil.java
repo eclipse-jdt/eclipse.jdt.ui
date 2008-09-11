@@ -15,10 +15,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -44,8 +46,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
-import org.osgi.framework.Bundle;
-
 /**
  * This class contains some utility methods for J Search.
  */
@@ -58,43 +58,43 @@ public class SearchUtil {
 	// Settings store
 	private static final String DIALOG_SETTINGS_KEY= "JavaElementSearchActions"; //$NON-NLS-1$
 	private static final String STORE_LRU_WORKING_SET_NAMES= "lastUsedWorkingSetNames"; //$NON-NLS-1$
-	
+
 	private static final String BIN_PRIM_CONST_WARN_DIALOG_ID= "BinaryPrimitiveConstantWarningDialog"; //$NON-NLS-1$
 
 	public static boolean isSearchPlugInActivated() {
 		return Platform.getBundle("org.eclipse.search").getState() == Bundle.ACTIVE; //$NON-NLS-1$
 	}
 
-	
+
 	/**
 	 * This helper method with Object as parameter is needed to prevent the loading
 	 * of the Search plug-in: the VM verifies the method call and hence loads the
 	 * types used in the method signature, eventually triggering the loading of
 	 * a plug-in (in this case ISearchQuery results in Search plug-in being loaded).
-	 * 
-	 * @param query the search query 
+	 *
+	 * @param query the search query
 	 */
 	public static void runQueryInBackground(Object query) {
 		NewSearchUI.runQueryInBackground((ISearchQuery)query);
 	}
-	
+
 	/**
 	 * This helper method with Object as parameter is needed to prevent the loading
 	 * of the Search plug-in: the VM verifies the method call and hence loads the
 	 * types used in the method signature, eventually triggering the loading of
 	 * a plug-in (in this case ISearchQuery results in Search plug-in being loaded).
-	 * 
-	 * @param context the runnable context 
+	 *
+	 * @param context the runnable context
 	 * @param query the search query
 	 * @return status
 	 */
 	public static IStatus runQueryInForeground(IRunnableContext context, Object query) {
 		return NewSearchUI.runQueryInForeground(context, (ISearchQuery)query);
 	}
-	
+
 	/**
 	 * Returns the compilation unit for the given java element.
-	 * 
+	 *
 	 * @param	element the java element whose compilation unit is searched for
 	 * @return	the compilation unit of the given java element
 	 */
@@ -113,7 +113,7 @@ public class SearchUtil {
 			for (int i= 0; i < workingSets.length; i++) {
 				String workingSetLabel= BasicElementLabels.getWorkingSetLabel(workingSets[i]);
 				if (firstFound)
-					result= Messages.format(SearchMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetLabel}); 
+					result= Messages.format(SearchMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetLabel});
 				else {
 					result= workingSetLabel;
 					firstFound= true;
@@ -127,13 +127,13 @@ public class SearchUtil {
 
 	/**
 	 * Updates the LRU list of working sets.
-	 * 
+	 *
 	 * @param workingSets	the workings sets to be added to the LRU list
 	 */
 	public static void updateLRUWorkingSets(IWorkingSet[] workingSets) {
 		if (workingSets == null || workingSets.length < 1)
 			return;
-		
+
 		getLRUWorkingSets().add(workingSets);
 		saveState(getDialogStoreSection());
 	}
@@ -162,7 +162,7 @@ public class SearchUtil {
 	private static void restoreState() {
 		fgLRUWorkingSets= new LRUWorkingSetsList(LRU_WORKINGSET_LIST_SIZE);
 		IDialogSettings settingsStore= getDialogStoreSection();
-		
+
 		boolean foundLRU= false;
 		for (int i= LRU_WORKINGSET_LIST_SIZE - 1; i >= 0; i--) {
 			String[] lruWorkingSetNames= settingsStore.getArray(STORE_LRU_WORKING_SET_NAMES + i);
@@ -216,14 +216,14 @@ public class SearchUtil {
 			OptionalMessageDialog.open(
 				BIN_PRIM_CONST_WARN_DIALOG_ID,
 				shell,
-				SearchMessages.Search_FindReferencesAction_BinPrimConstWarnDialog_title, 
+				SearchMessages.Search_FindReferencesAction_BinPrimConstWarnDialog_title,
 				null,
-				SearchMessages.Search_FindReferencesAction_BinPrimConstWarnDialog_message, 
+				SearchMessages.Search_FindReferencesAction_BinPrimConstWarnDialog_message,
 				MessageDialog.INFORMATION,
 				new String[] { IDialogConstants.OK_LABEL },
 				0);
 	}
-	
+
 	private static boolean isBinaryPrimitiveConstantOrString(IJavaElement element) {
 		if (element != null && element.getElementType() == IJavaElement.FIELD) {
 			IField field= (IField)element;

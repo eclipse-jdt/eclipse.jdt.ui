@@ -35,16 +35,16 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
 
 /**
- * Utility class to simplify access to some SWT resources. 
+ * Utility class to simplify access to some SWT resources.
  */
 public class SWTUtil {
-	
+
 	/**
 	 * The default visible item count for {@link Combo}s.
 	 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=7845 .
-	 * 
+	 *
 	 * @see Combo#setVisibleItemCount(int)
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	public static final int COMBO_VISIBLE_ITEM_COUNT= 30;
@@ -60,14 +60,14 @@ public class SWTUtil {
 		display= Display.getCurrent();
 		if (display == null)
 			display= Display.getDefault();
-		return display;		
+		return display;
 	}
-	
+
 	/**
 	 * Returns the shell for the given widget. If the widget doesn't represent
 	 * a SWT object that manage a shell, <code>null</code> is returned.
 	 * @param widget the widget
-	 * 
+	 *
 	 * @return the shell for the given widget
 	 */
 	public static Shell getShell(Widget widget) {
@@ -83,8 +83,8 @@ public class SWTUtil {
 			return ((Menu)widget).getParent().getShell();
 		if (widget instanceof ScrollBar)
 			return ((ScrollBar)widget).getParent().getShell();
-							
-		return null;	
+
+		return null;
 	}
 
 
@@ -104,30 +104,30 @@ public class SWTUtil {
 	 * Sets width and height hint for the button control.
 	 * <b>Note:</b> This is a NOP if the button's layout data is not
 	 * an instance of <code>GridData</code>.
-	 * 
+	 *
 	 * @param button	the button for which to set the dimension hint
-	 */		
+	 */
 	public static void setButtonDimensionHint(Button button) {
 		Assert.isNotNull(button);
 		Object gd= button.getLayoutData();
 		if (gd instanceof GridData) {
-			((GridData)gd).widthHint= getButtonWidthHint(button);	
-			((GridData)gd).horizontalAlignment = GridData.FILL;	 
+			((GridData)gd).widthHint= getButtonWidthHint(button);
+			((GridData)gd).horizontalAlignment = GridData.FILL;
 		}
 	}
-	
+
 	public static int getTableHeightHint(Table table, int rows) {
 		if (table.getFont().equals(JFaceResources.getDefaultFont()))
 			table.setFont(JFaceResources.getDialogFont());
 		int result= table.getItemHeight() * rows + table.getHeaderHeight();
 		if (table.getLinesVisible())
 			result+= table.getGridLineWidth() * (rows - 1);
-		return result;		
+		return result;
 	}
-	
+
 	/**
 	 * Adds an accessibility listener returning the given fixed name.
-	 * 
+	 *
 	 * @param control the control to add the accessibility support to
 	 * @param text the name
 	 */
@@ -138,28 +138,28 @@ public class SWTUtil {
 			}
 		});
 	}
-	
+
 	/**
 	 * Sets the default visible item count for {@link Combo}s.
 	 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=7845 .
-	 * 
+	 *
 	 * @param combo the combo
-	 * 
+	 *
 	 * @see Combo#setVisibleItemCount(int)
 	 * @see #COMBO_VISIBLE_ITEM_COUNT
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	public static void setDefaultVisibleItemCount(Combo combo) {
 		combo.setVisibleItemCount(COMBO_VISIBLE_ITEM_COUNT);
 	}
-	
+
 	public static GridLayout newLayoutNoMargins(int columns) {
 		GridLayout layout= new GridLayout(columns, false);
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		return layout;
 	}
-	
+
 
 }

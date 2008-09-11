@@ -21,7 +21,7 @@ public class ArrayTypeVariable2 extends ConstraintVariable2 {
 	public ArrayTypeVariable2(ArrayType type) {
 		super(type);
 	}
-	
+
 	// hashCode() and equals(..) not necessary (unique per construction)
-	
+
 }

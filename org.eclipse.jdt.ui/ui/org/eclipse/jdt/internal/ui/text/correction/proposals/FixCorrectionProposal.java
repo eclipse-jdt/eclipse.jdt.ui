@@ -197,7 +197,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 		} else {
 			changeName= CorrectionMessages.FixCorrectionProposal_MultiFixChange_label;
 		}
-		
+
 		final CleanUpRefactoring refactoring= new CleanUpRefactoring(changeName);
 		for (int i= 0; i < targets.length; i++) {
 			refactoring.addCleanUpTarget(targets[i]);

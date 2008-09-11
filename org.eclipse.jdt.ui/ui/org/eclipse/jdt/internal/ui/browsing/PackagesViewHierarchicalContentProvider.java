@@ -15,13 +15,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -82,7 +82,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 										list.add(fragment);
 								}
 							}
-							
+
 							IPackageFragmentRoot[] packageFragmentRoots= project.getPackageFragmentRoots();
 							List folders= new ArrayList();
 							for (int i= 0; i < packageFragmentRoots.length; i++) {
@@ -92,7 +92,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 									folders.addAll(getFolders(((IFolder)resource).members()));
 								}
 							}
-							
+
 							Object[] logicalPackages= combineSamePackagesIntoLogialPackages((IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]));
 							if (folders.size() > 0) {
 								if (logicalPackages.length > 0)
@@ -120,11 +120,11 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 							} else if (resource != null && resource instanceof IFolder) {
 								List children= getFoldersAndElements(((IFolder)resource).members());
-								
+
 								IPackageFragment defaultPackage= root.getPackageFragment(""); //$NON-NLS-1$
 								if(defaultPackage.exists())
 									children.add(defaultPackage);
-								
+
 								addFragmentsToMap(children);
 								return children.toArray();
 							} else {
@@ -137,12 +137,12 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							IPackageFragment packageFragment= (IPackageFragment) parentElement;
 							if (packageFragment.isDefaultPackage())
 								return NO_CHILDREN;
-							
+
 							IPackageFragmentRoot parent= (IPackageFragmentRoot) packageFragment.getParent();
 							IPackageFragment[] fragments= findNextLevelChildrenByElementName(parent, packageFragment);
-							
+
 							addFragmentsToMap(fragments);
-							
+
 							Object[] nonJavaResources= packageFragment.getNonJavaResources();
 							if (nonJavaResources.length == 0) {
 								return fragments;
@@ -191,7 +191,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		List packageFragments= new ArrayList();
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			Object elem= iter.next();
-			if (elem instanceof IPackageFragment) 
+			if (elem instanceof IPackageFragment)
 				packageFragments.add(elem);
 		}
 		addFragmentsToMap((IPackageFragment[])packageFragments.toArray(new IPackageFragment[packageFragments.size()]));
@@ -201,34 +201,34 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		List list= new ArrayList();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
-			
+
 			if (resource instanceof IFolder) {
 				IFolder folder= (IFolder) resource;
 				IJavaElement element= JavaCore.create(folder);
-				
+
 				if (element instanceof IPackageFragment) {
-					list.add(element);	
+					list.add(element);
 				} else {
 					list.add(folder);
 				}
-			}	
+			}
 		}
 		return list;
 	}
-	
+
 	private List getFolders(IResource[] resources) {
 		List list= new ArrayList();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
-			
+
 			if (resource instanceof IFolder) {
 				IFolder folder= (IFolder) resource;
 				IJavaElement element= JavaCore.create(folder);
-				
+
 				if (element == null) {
 					list.add(folder);
 				}
-			}	
+			}
 		}
 		return list;
 	}
@@ -395,7 +395,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 	private Object findNextLevelParentByElementName(IPackageFragment child) {
 		String name= child.getElementName();
-		
+
 		int index= name.lastIndexOf('.');
 		if (index != -1) {
 			String realParentName= name.substring(0, index);

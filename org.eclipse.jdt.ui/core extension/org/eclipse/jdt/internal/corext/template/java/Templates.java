@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * <code>Templates</code> gives access to the available templates.
- * 
+ *
  * @deprecated As of 3.0, replaced by {@link org.eclipse.jface.text.templates.persistence.TemplateStore}
  */
 public class Templates extends org.eclipse.jdt.internal.corext.template.java.TemplateSet {
@@ -31,7 +31,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 	/**
 	 * Returns an instance of templates.
-	 * 
+	 *
 	 * @return an instance of templates
 	 * @deprecated As of 3.0, replaced by
 	 *             {@link org.eclipse.jdt.internal.ui.JavaPlugin#getTemplateStore()}
@@ -39,15 +39,15 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	public static Templates getInstance() {
 		if (fgTemplates == null)
 			fgTemplates= new Templates();
-		
+
 		return fgTemplates;
 	}
-	
+
 	public Templates() {
 		super("template", JavaPlugin.getDefault().getTemplateContextRegistry()); //$NON-NLS-1$
 		create();
 	}
-	
+
 
 	private void create() {
 
@@ -62,11 +62,11 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 			clear();
 		}
 
-	}	
-	
+	}
+
 	/**
 	 * Resets the template set.
-	 * 
+	 *
 	 * @throws CoreException in case the reset operation fails
 	 */
 	public void reset() throws CoreException {
@@ -74,7 +74,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 	/**
 	 * Resets the template set with the default templates.
-	 * 
+	 *
 	 * @throws CoreException in case the restore operation fails
 	 */
 	public void restoreDefaults() throws CoreException {
@@ -82,16 +82,16 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 	/**
 	 * Saves the template set.
-	 * 
+	 *
 	 * @throws CoreException in case the save operation fails
 	 */
-	public void save() throws CoreException {					
+	public void save() throws CoreException {
 	}
 
 	private static File getTemplateFile() {
 		IPath path= JavaPlugin.getDefault().getStateLocation();
 		path= path.append(TEMPLATE_FILE);
-		
+
 		return path.toFile();
 	}
 }

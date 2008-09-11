@@ -13,12 +13,12 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.util.Enumeration;
 
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-
 import junit.extensions.TestDecorator;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * @since 3.1
@@ -26,13 +26,13 @@ import junit.framework.TestSuite;
 public abstract class TextEditorTestSetup extends TestSetup {
 
 	protected final static String DEFAULT_EDITOR_ID= "";
-	
+
 	private AbstractTextEditor fEditor;
 
 	public TextEditorTestSetup(Test test) {
 		super(test);
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		if (getEditorId() == DEFAULT_EDITOR_ID)
@@ -42,15 +42,15 @@ public abstract class TextEditorTestSetup extends TestSetup {
 		EditorTestHelper.joinBackgroundActivities(fEditor);
 		setEditor(getTest(), fEditor);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 		fEditor= null;
 	}
-	
+
 	protected abstract String getFile();
-	
+
 	protected String getEditorId() {
 		return DEFAULT_EDITOR_ID;
 	}
@@ -58,7 +58,7 @@ public abstract class TextEditorTestSetup extends TestSetup {
 	protected AbstractTextEditor getEditor() {
 		return fEditor;
 	}
-	
+
 	private void setEditor(Test test, AbstractTextEditor editor) {
 		if (test instanceof ITextEditorTestCase)
 			((ITextEditorTestCase) test).setEditor(editor);

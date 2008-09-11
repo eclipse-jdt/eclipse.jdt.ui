@@ -17,16 +17,11 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.CompletionProposal;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -40,18 +35,18 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
-import org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -61,6 +56,12 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 
 
 public class CodeCompletionTest extends AbstractCompletionTest {
@@ -84,7 +85,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 	private IJavaProject fJProject1;
 
-	
+
 	private void assertAppliedProposal(String contents, IJavaCompletionProposal proposal, String completion) {
 		IDocument doc= new Document(contents);
 		proposal.apply(doc);
@@ -132,14 +133,14 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		closeAllEditors();
 		JavaProjectHelper.delete(fJProject1);
 	}
-	
+
 	public static void closeEditor(IEditorPart editor) {
 		IWorkbenchPartSite site;
 		IWorkbenchPage page;
 		if (editor != null && (site= editor.getSite()) != null && (page= site.getPage()) != null)
 			page.closeEditor(editor, false);
 	}
-	
+
 	public static void closeAllEditors() {
 		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -249,7 +250,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"");
 		assertEquals(buf.toString(), doc.get());
 	}
-	
+
 	public void testAnonymousTypeCompletion3() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -284,7 +285,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IDocument doc= new Document(contents);
 
 		proposals[0].apply(doc);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -303,7 +304,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("}\n");
 		assertEquals(buf.toString(), doc.get());
 	}
-	
+
 	public void testAnonymousTypeCompletion4() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -338,7 +339,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IDocument doc= new Document(contents);
 
 		proposals[0].apply(doc);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -358,7 +359,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("}\n");
 		assertEquals(buf.toString(), doc.get());
 	}
-	
+
 	public void testAnonymousTypeCompletion5() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -394,7 +395,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IDocument doc= new Document(contents);
 
 		proposals[0].apply(doc);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
@@ -462,7 +463,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"");
 		assertEquals(buf.toString(), doc.get());
 	}
-	
+
 
 	public void testConstructorCompletion() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -489,7 +490,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
-	
+
 			codeComplete(cu, offset, collector);
 
 			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
@@ -587,7 +588,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		assertEquals(doc.get(), result);
 	}
-	
+
 	private CompletionProposalCollector createCollector(ICompilationUnit cu, int offset) throws PartInitException, JavaModelException {
 		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setInvocationContext(createContext(offset, cu));
@@ -625,7 +626,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
-	
+
 			codeComplete(cu, offset, collector);
 
 			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
@@ -687,7 +688,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
-	
+
 			codeComplete(cu, offset, collector);
 
 			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
@@ -1239,7 +1240,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("}\n");
 		assertEquals(doc.get(), buf.toString());
 	}
-	
+
 	public void testOverrideCompletion6_bug157069() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -1328,7 +1329,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
-	
+
 			codeComplete(cu, offset, collector);
 
 			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
@@ -1364,11 +1365,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			part.getSite().getPage().closeAllEditors(false);
 		}
 	}
-	
+
 	public void testStaticImports1() throws Exception {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test1.A.foo");
-		
+
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -1380,7 +1381,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -1398,15 +1399,15 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			String str= "//here";
 
 			int offset= contents.indexOf(str);
-			
+
 			ISourceViewer viewer= ((JavaEditor) part).getViewer();
 
 			JavaContentAssistInvocationContext context= new JavaContentAssistInvocationContext(viewer, offset, part);
 			JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
-			
+
 			// make sure we get an import rewrite context
 			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
-			
+
 			List proposals= computer.computeCompletionProposals(context, null);
 
 			ICompletionProposal proposal= null;
@@ -1436,14 +1437,14 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		} finally {
 			store.setToDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
 			part.getSite().getPage().closeAllEditors(false);
-			
+
 		}
 	}
-	
+
 	public void testStaticImports2() throws Exception {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test1.A.foo");
-		
+
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -1455,7 +1456,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+
 		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -1476,15 +1477,15 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			String str= "//here";
 
 			int offset= contents.indexOf(str);
-			
+
 			ISourceViewer viewer= ((JavaEditor) part).getViewer();
 
 			JavaContentAssistInvocationContext context= new JavaContentAssistInvocationContext(viewer, offset, part);
 			JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
-			
+
 			// make sure we get an import rewrite context
 			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
-			
+
 			List proposals= computer.computeCompletionProposals(context, null);
 
 			ICompletionProposal proposal= null;
@@ -1516,11 +1517,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		} finally {
 			store.setToDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
 			part.getSite().getPage().closeAllEditors(false);
-			
+
 		}
 	}
-	
-	
+
+
 	private static void assertNumberOf(String name, int is, int expected) {
 		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
 	}

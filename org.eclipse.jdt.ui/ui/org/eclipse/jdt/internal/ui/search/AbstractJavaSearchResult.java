@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
 public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
-	
+
 	protected static final Match[] NO_MATCHES= new Match[0];
 
 	public AbstractJavaSearchResult() {
@@ -43,14 +43,14 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		return computeContainedMatches(editor.getEditorInput());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult, org.eclipse.ui.IEditorPart)
 	 */
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
 		return computeContainedMatches(file);
 	}
-	
+
 	private Match[] computeContainedMatches(IAdaptable adaptable) {
 		IJavaElement javaElement= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
 		Set matches= new HashSet();
@@ -66,7 +66,7 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 		}
 		return NO_MATCHES;
 	}
-	
+
 	private void collectMatches(Set matches, IFile element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
@@ -75,7 +75,7 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 			}
 		}
 	}
-	
+
 	private void collectMatches(Set matches, IJavaElement element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
@@ -115,14 +115,14 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 			return (IFile) element;
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#isShownInEditor(org.eclipse.search.ui.text.Match, org.eclipse.ui.IEditorPart)
 	 */
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		Object element= match.getElement();
 		if (element instanceof IJavaElement) {
-			element= ((IJavaElement) element).getOpenable(); // class file or compilation unit 
+			element= ((IJavaElement) element).getOpenable(); // class file or compilation unit
 			return element != null && element.equals(editor.getEditorInput().getAdapter(IJavaElement.class));
 		} else if (element instanceof IFile) {
 			return element.equals(editor.getEditorInput().getAdapter(IFile.class));
@@ -133,7 +133,7 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 	public IFileMatchAdapter getFileMatchAdapter() {
 		return this;
 	}
-	
+
 	public IEditorMatchAdapter getEditorMatchAdapter() {
 		return this;
 	}

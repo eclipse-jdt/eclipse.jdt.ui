@@ -22,7 +22,7 @@ public class PerformanceTestSuite2 extends TestSuite {
 	public static Test suite() {
 		return new PerformanceTestSetup(new PerformanceTestSuite2());
 	}
-	
+
 	public PerformanceTestSuite2() {
 		addTest(OpenJavaEditorTest.suite());
 		addTest(new OpenTextEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)

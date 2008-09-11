@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 
 /**
  * Refactoring contribution for the introduce parameter refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class IntroduceParameterRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class IntroduceParameterRefactoringContribution extends JavaRefacto
 	public RefactoringDescriptor createDescriptor() {
 		return new IntroduceParameterDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new IntroduceParameterDescriptor(project, description, comment, arguments, flags);
 	}

@@ -28,18 +28,18 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindReadReferencesAction extends FindReferencesAction {
 
 	/**
-	 * Creates a new <code>FindReadReferencesAction</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>FindReadReferencesAction</code>. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FindReadReferencesAction(IWorkbenchSite site) {
@@ -49,29 +49,29 @@ public class FindReadReferencesAction extends FindReferencesAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindReadReferencesAction(JavaEditor editor) {
 		super(editor);
 	}
-	
+
 	Class[] getValidTypes() {
 		return new Class[] { IField.class, ILocalVariable.class };
 	}
 
 	void init() {
-		setText(SearchMessages.Search_FindReadReferencesAction_label); 
-		setToolTipText(SearchMessages.Search_FindReadReferencesAction_tooltip); 
+		setText(SearchMessages.Search_FindReadReferencesAction_label);
+		setToolTipText(SearchMessages.Search_FindReadReferencesAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
 	}
-	
+
 	int getLimitTo() {
 		return IJavaSearchConstants.READ_ACCESSES;
-	}	
+	}
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.JavaElementAction_operationUnavailable_field; 
+		return SearchMessages.JavaElementAction_operationUnavailable_field;
 	}
 }

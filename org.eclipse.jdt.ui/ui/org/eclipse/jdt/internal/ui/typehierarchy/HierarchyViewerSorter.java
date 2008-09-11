@@ -16,18 +16,18 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 /**
   */
 public class HierarchyViewerSorter extends AbstractHierarchyViewerSorter {
-		
+
 	private final TypeHierarchyLifeCycle fHierarchy;
 	private boolean fSortByDefiningType;
-	
+
 	public HierarchyViewerSorter(TypeHierarchyLifeCycle cycle) {
 		fHierarchy= cycle;
 	}
-	
+
 	public void setSortByDefiningType(boolean sortByDefiningType) {
 		fSortByDefiningType= sortByDefiningType;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#getTypeKind(org.eclipse.jdt.core.IType)
 	 */
@@ -38,7 +38,7 @@ public class HierarchyViewerSorter extends AbstractHierarchyViewerSorter {
 		}
 		return 0;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#isSortByDefiningType()

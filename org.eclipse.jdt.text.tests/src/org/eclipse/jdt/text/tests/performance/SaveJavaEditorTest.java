@@ -24,7 +24,7 @@ public class SaveJavaEditorTest extends SaveEditorTest {
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	protected String getEditorId() {
 		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}

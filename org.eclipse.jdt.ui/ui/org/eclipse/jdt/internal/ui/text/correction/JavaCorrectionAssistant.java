@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -38,6 +38,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -146,7 +147,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	public String showPossibleQuickAssists() {
 		boolean isReinvoked= false;
 		fIsProblemLocationAvailable= false;
-		
+
 		if (fIsCompletionActive) {
 			if (isUpdatedOffset()) {
 				isReinvoked= true;
@@ -155,10 +156,10 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 				fIsProblemLocationAvailable= true;
 			}
 		}
-		
+
 		fPosition= null;
 		fCurrentAnnotations= null;
-		
+
 		if (fViewer == null || fViewer.getDocument() == null)
 			// Let superclass deal with this
 			return super.showPossibleQuickAssists();
@@ -170,7 +171,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			int currOffset= selectedRange.x;
 			int currLength= selectedRange.y;
 			boolean goToClosest= (currLength == 0) && !isReinvoked;
-			
+
 			int newOffset= collectQuickFixableAnnotations(fEditor, currOffset, goToClosest, resultingAnnotations);
 			if (newOffset != currOffset) {
 				storePosition(currOffset, currLength);
@@ -188,8 +189,8 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 		return super.showPossibleQuickAssists();
 	}
-	
-	
+
+
 	private static IRegion getRegionOfInterest(ITextEditor editor, int invocationLocation) throws BadLocationException {
 		IDocumentProvider documentProvider= editor.getDocumentProvider();
 		if (documentProvider == null) {
@@ -201,15 +202,15 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 		}
 		return document.getLineInformationOfOffset(invocationLocation);
 	}
-	
+
 	public static int collectQuickFixableAnnotations(ITextEditor editor, int invocationLocation, boolean goToClosest, ArrayList resultingAnnotations) throws BadLocationException {
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
 		if (model == null) {
 			return invocationLocation;
 		}
-		
+
 		ensureUpdatedAnnotations(editor);
-		
+
 		Iterator iter= model.getAnnotationIterator();
 		if (goToClosest) {
 			IRegion lineInfo= getRegionOfInterest(editor, invocationLocation);
@@ -218,7 +219,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			}
 			int rangeStart= lineInfo.getOffset();
 			int rangeEnd= rangeStart + lineInfo.getLength();
-			
+
 			ArrayList allAnnotations= new ArrayList();
 			ArrayList allPositions= new ArrayList();
 			int bestOffset= Integer.MAX_VALUE;
@@ -343,7 +344,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	public boolean isUpdatedOffset() {
 		return fPosition != null;
 	}
-	
+
 	/**
 	 * @return <code>true</code> if a problem exist on the current line and the completion was not invoked at the problem location
 	 * @since 3.4

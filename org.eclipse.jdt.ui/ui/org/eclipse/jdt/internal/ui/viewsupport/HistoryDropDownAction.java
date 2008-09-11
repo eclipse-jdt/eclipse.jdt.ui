@@ -6,20 +6,20 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuCreator;
@@ -71,28 +71,28 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 				public void menuAboutToShow(IMenuManager manager2) {
 					List entries= fHistory.getHistoryEntries();
 					boolean checkOthers= addEntryMenuItems(manager2, entries);
-					
+
 					manager2.add(new Separator());
-					
+
 					Action others= new HistoryListAction(fHistory);
 					others.setChecked(checkOthers);
 					manager2.add(others);
-					
+
 					Action clearAction= fHistory.getClearAction();
 					if (clearAction != null) {
 						manager2.add(clearAction);
 					}
-					
+
 					manager2.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-					
+
 					fHistory.addMenuEntries(manager);
 				}
-				
+
 				private boolean addEntryMenuItems(IMenuManager manager2, List entries) {
 					if (entries.isEmpty()) {
 						return false;
 					}
-					
+
 					boolean checkOthers= true;
 					int min= Math.min(entries.size(), RESULTS_IN_DROP_DOWN);
 					for (int i= 0; i < min; i++) {
@@ -107,9 +107,9 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 					return checkOthers;
 				}
 			});
-			
+
 			fMenu= manager.createContextMenu(parent);
-			
+
 			//workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=129973
 			final Display display= parent.getDisplay();
 			fMenu.addMenuListener(new MenuAdapter() {
@@ -130,7 +130,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 
 		public void dispose() {
 			fHistory= null;
-		
+
 			if (fMenu != null) {
 				fMenu.dispose();
 				fMenu= null;

@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class MethodOverwriteCompletionTest extends AbstractCompletionTest {
@@ -33,7 +33,7 @@ public class MethodOverwriteCompletionTest extends AbstractCompletionTest {
 	public static Test suite() {
 		return new CompletionTestSetup(allTests());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
@@ -45,27 +45,27 @@ public class MethodOverwriteCompletionTest extends AbstractCompletionTest {
 	public void testThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|", "hashCode(", "this.hashCode()|");
 	}
-	
+
 	public void testMethod() throws Exception {
 		assertMethodBodyProposal("h", "hashCode(", "hashCode()");
 	}
-	
+
 	public void testMethodWithParam() throws Exception {
 		assertMethodBodyProposal("e", "equals(", "equals(|)");
 	}
-	
+
 	/* overwriting */
-	
+
 	public void testOverwriteThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|class", "hashCode(", "this.hashCode()|");
 	}
-	
+
 	public void testOverwriteMethod() throws Exception {
 		assertMethodBodyProposal("h|foobar", "hashCode(", "hashCode()|");
 	}
-	
+
 	public void testOverwriteMethodWithParam() throws Exception {
 		assertMethodBodyProposal("e|foobar", "equals(", "equals(|)");
 	}
-	
+
 }

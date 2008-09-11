@@ -22,6 +22,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IInitializer;

@@ -27,45 +27,45 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 /**
  * Action that removes the enclosing comment marks from a Java block comment.
- * 
+ *
  * @since 3.0
  */
 public class RemoveBlockCommentAction extends BlockCommentAction {
 
 	/**
 	 * Creates a new instance.
-	 * 
+	 *
 	 * @param bundle the resource bundle
 	 * @param prefix a prefix to be prepended to the various resource keys
-	 *   (described in <code>ResourceAction</code> constructor), or 
+	 *   (described in <code>ResourceAction</code> constructor), or
 	 *   <code>null</code> if none
 	 * @param editor the text editor
 	 */
 	public RemoveBlockCommentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix, editor);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction#runInternal(org.eclipse.jface.text.ITextSelection, org.eclipse.jface.text.IDocumentExtension3, org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction.Edit.EditFactory)
 	 */
 	protected void runInternal(ITextSelection selection, IDocumentExtension3 docExtension, Edit.EditFactory factory) throws BadPartitioningException, BadLocationException {
 		List edits= new LinkedList();
 		int tokenLength= getCommentStart().length();
-		
+
 		int offset= selection.getOffset();
 		int endOffset= offset + selection.getLength();
 
 		ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset, false);
 		int partOffset= partition.getOffset();
 		int partEndOffset= partOffset + partition.getLength();
-		
+
 		while (partEndOffset < endOffset) {
-			
+
 			if (partition.getType() == IJavaPartitions.JAVA_MULTI_LINE_COMMENT) {
 				edits.add(factory.createEdit(partOffset, tokenLength, "")); //$NON-NLS-1$
 				edits.add(factory.createEdit(partEndOffset - tokenLength, tokenLength, "")); //$NON-NLS-1$
 			}
-			
+
 			partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, partEndOffset, false);
 			partOffset= partition.getOffset();
 			partEndOffset= partOffset + partition.getLength();

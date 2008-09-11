@@ -35,20 +35,20 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class MatchLocations {
-	
+
 	public static class MatchLocationSelectionDialog extends TrayDialog {
-		
+
 		private final ArrayList fButtons;
 		private final int fSearchFor;
 		private int fCurrentSelection;
-		
+
 		public MatchLocationSelectionDialog(Shell parent, int initialSelection, int searchFor) {
 			super(parent);
 			fSearchFor= searchFor;
 			fButtons= new ArrayList();
 			fCurrentSelection= initialSelection;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 		 */
@@ -56,14 +56,14 @@ public class MatchLocations {
 			super.configureShell(shell);
 			shell.setText(SearchMessages.MatchLocations_dialog_title);
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 */
 		protected boolean isResizable() {
 			return true;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 		 */
@@ -82,14 +82,14 @@ public class MatchLocations {
 			} else {
 				createMethodFieldMatchLocationsControls(contents);
 			}
-			
+
 			Composite buttonComposite= new Composite(contents, SWT.NONE);
 			buttonComposite.setLayoutData(new GridData(SWT.LEFT, SWT.BEGINNING, true, true, 2, 1));
 			GridLayout blayout= new GridLayout(2, false);
 			blayout.marginWidth= 0;
 			blayout.marginHeight= 0;
 			buttonComposite.setLayout(blayout);
-			
+
 			Button selectAllButton= new Button(buttonComposite, SWT.PUSH);
 			selectAllButton.setLayoutData(new GridData());
 			selectAllButton.setText(SearchMessages.MatchLocations_select_all_button_label);
@@ -101,9 +101,9 @@ public class MatchLocations {
 					performSelectAction(true);
 				}
 			});
-			
+
 			SWTUtil.setButtonDimensionHint(selectAllButton);
-			
+
 			Button deselectAllButton= new Button(buttonComposite, SWT.PUSH);
 			deselectAllButton.setLayoutData(new GridData());
 			deselectAllButton.setText(SearchMessages.MatchLocations_deselect_all_button_label);
@@ -116,24 +116,24 @@ public class MatchLocations {
 				}
 			});
 			SWTUtil.setButtonDimensionHint(deselectAllButton);
-			
+
 			Dialog.applyDialogFont(contents);
-			
+
 			return contents;
 		}
 
 		private void createMethodFieldMatchLocationsControls(Composite contents) {
-			
+
 			Composite composite= new Composite(contents, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.LEFT, SWT.BEGINNING, true, true, 2, 1));
 			GridLayout blayout= new GridLayout(1, false);
 			blayout.marginWidth= 0;
 			blayout.marginHeight= 0;
 			composite.setLayout(blayout);
-			
+
 			createButton(composite, SearchMessages.MatchLocations_this_label, IJavaSearchConstants.THIS_REFERENCE);
 			createButton(composite, SearchMessages.MatchLocations_implicit_this_label, IJavaSearchConstants.IMPLICIT_THIS_REFERENCE);
-			
+
 			createButton(composite, SearchMessages.MatchLocations_super_label, IJavaSearchConstants.SUPER_REFERENCE);
 			createButton(composite, SearchMessages.MatchLocations_qualified_label, IJavaSearchConstants.QUALIFIED_REFERENCE);
 		}
@@ -156,29 +156,29 @@ public class MatchLocations {
 			createButton(group, SearchMessages.MatchLocations_method_types_label, IJavaSearchConstants.RETURN_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_parameter_types_label, IJavaSearchConstants.PARAMETER_DECLARATION_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_thrown_exceptions_label, IJavaSearchConstants.THROWS_CLAUSE_TYPE_REFERENCE);
-			
+
 			Group ptGroup= new Group(contents, SWT.NONE);
 			ptGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 			ptGroup.setLayout(new GridLayout(1, false));
 			ptGroup.setText(SearchMessages.MatchLocations_in_parameterized_types_group_label);
-					
+
 			createButton(ptGroup, SearchMessages.MatchLocations_type_parameter_bounds_label, IJavaSearchConstants.TYPE_VARIABLE_BOUND_TYPE_REFERENCE);
 			createButton(ptGroup, SearchMessages.MatchLocations_wildcard_bounds_label, IJavaSearchConstants.WILDCARD_BOUND_TYPE_REFERENCE);
-			
+
 			createButton(ptGroup, SearchMessages.MatchLocations_type_arguments_label, IJavaSearchConstants.TYPE_ARGUMENT_TYPE_REFERENCE);
 
 			Group statementGroup= new Group(contents, SWT.NONE);
 			statementGroup.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 			statementGroup.setLayout(new GridLayout(1, false));
 			statementGroup.setText(SearchMessages.MatchLocations_expression_group_label);
-			
+
 			createButton(statementGroup, SearchMessages.MatchLocations_casts_label, IJavaSearchConstants.CAST_TYPE_REFERENCE);
 			createButton(statementGroup, SearchMessages.MatchLocations_catch_clauses_label, IJavaSearchConstants.CATCH_TYPE_REFERENCE);
 			addSeparator(statementGroup);
 			createButton(statementGroup, SearchMessages.MatchLocations_class_instance_label, IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE);
 			createButton(statementGroup, SearchMessages.MatchLocations_instanceof_label, IJavaSearchConstants.INSTANCEOF_TYPE_REFERENCE);
 		}
-		
+
 		protected final void performSelectAction(boolean selectAll) {
 			for (int i= 0; i < fButtons.size(); i++) {
 				Button button= (Button) fButtons.get(i);
@@ -193,11 +193,11 @@ public class MatchLocations {
 			data.heightHint= 4;
 			label.setLayoutData(data);
 		}
-		
-		
+
+
 		private Button createButton(Composite parent, String text, int data) {
 			boolean isSelected= (fCurrentSelection & data) != 0;
-			
+
 			Button button= new Button(parent, SWT.CHECK);
 			button.setText(text);
 			button.setData(new Integer(data));
@@ -211,13 +211,13 @@ public class MatchLocations {
 					widgetDefaultSelected(e);
 				}
 			});
-			
-			
+
+
 			fButtons.add(button);
-			
+
 			return button;
 		}
-		
+
 		private int getIntValue(Button button) {
 			Integer bData= (Integer) button.getData();
 			if (bData != null) {
@@ -239,10 +239,10 @@ public class MatchLocations {
 				}
 			}
 			fCurrentSelection= selected;
-			
+
 			getButton(IDialogConstants.OK_ID).setEnabled(selected != 0);
 		}
-		
+
 		public int getCurrentSelection() {
 			return fCurrentSelection;
 		}
@@ -255,7 +255,7 @@ public class MatchLocations {
 		}
 		ArrayList args= new ArrayList(3);
 		if (isSet(locations, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE)) {
-			args.add(SearchMessages.MatchLocations_super_types_description); 
+			args.add(SearchMessages.MatchLocations_super_types_description);
 		}
 		if (isSet(locations, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_annotations_description);
@@ -320,11 +320,11 @@ public class MatchLocations {
 		}
 		return buf.toString();
 	}
-	
+
 	private static boolean isSet(int flags, int flag) {
 		return (flags & flag) != 0;
 	}
-	
+
 	public static int getTotalNumberOfSettings(int searchFor) {
 		if (searchFor == IJavaSearchConstants.TYPE) {
 			return 14;
@@ -333,11 +333,11 @@ public class MatchLocations {
 		}
 		return 0;
 	}
-	
+
 	public static int getNumberOfSelectedSettings(int locations, int searchFor) {
 		int count= 0;
 		if (searchFor == IJavaSearchConstants.TYPE) {
-		
+
 			if (isSet(locations, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE)) {
 				count++;
 			}

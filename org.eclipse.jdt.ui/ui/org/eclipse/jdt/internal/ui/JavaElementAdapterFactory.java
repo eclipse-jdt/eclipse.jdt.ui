@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import org.eclipse.team.ui.history.IHistoryPageSource;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IAdapterFactory;
 
@@ -21,18 +23,14 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.ui.IContainmentAdapter;
 import org.eclipse.ui.IContributorResourceAdapter;
 import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.ide.IContributorResourceAdapter2;
 import org.eclipse.ui.model.IWorkbenchAdapter;
-
 import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.eclipse.ui.views.tasklist.ITaskListResourceAdapter;
 
-import org.eclipse.ui.ide.IContributorResourceAdapter2;
-
 import org.eclipse.search.ui.ISearchPageScoreComputer;
-
-import org.eclipse.team.ui.history.IHistoryPageSource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,7 +48,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  * Implements handle to persistent support for Java elements.
  */
 public class JavaElementAdapterFactory implements IAdapterFactory, IContributorResourceAdapter, IContributorResourceAdapter2 {
-	
+
 	private static Class[] PROPERTIES= new Class[] {
 		IPropertySource.class,
 		IResource.class,
@@ -63,7 +61,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		IContainmentAdapter.class,
 		IHistoryPageSource.class
 	};
-	
+
 	/*
 	 * Do not use real type since this would cause
 	 * the Search plug-in to be loaded.
@@ -73,16 +71,16 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter;
 	private static ITaskListResourceAdapter fgTaskListAdapter;
 	private static JavaElementContainmentAdapter fgJavaElementContainmentAdapter;
-	
+
 	public Class[] getAdapterList() {
 		updateLazyLoadedAdapters();
 		return PROPERTIES;
 	}
-	
+
 	public Object getAdapter(Object element, Class key) {
 		updateLazyLoadedAdapters();
 		IJavaElement java= getJavaElement(element);
-		
+
 		if (IPropertySource.class.equals(key)) {
 			return getProperties(java);
 		} if (IResource.class.equals(key)) {
@@ -106,9 +104,9 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		} if (IHistoryPageSource.class.equals(key) && JavaElementHistoryPageSource.hasEdition(java)) {
 			return JavaElementHistoryPageSource.getInstance();
 		}
-		return null; 
+		return null;
 	}
-	
+
 	private IResource getResource(IJavaElement element) {
 		// can't use IJavaElement.getResource directly as we are interested in the
 		// corresponding resource
@@ -136,7 +134,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 				return element.getResource();
 			default:
 				return null;
-		}		
+		}
     }
 
     public IResource getAdaptedResource(IAdaptable adaptable) {
@@ -146,7 +144,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 
     	return null;
     }
-    
+
     public ResourceMapping getAdaptedResourceMapping(IAdaptable adaptable) {
     	IJavaElement je= getJavaElement(adaptable);
     	if (je != null)
@@ -154,7 +152,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 
     	return null;
     }
-    
+
 	private IJavaElement getJavaElement(Object element) {
 		if (element instanceof IJavaElement)
 			return (IJavaElement)element;
@@ -163,7 +161,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 
 		return null;
 	}
-	
+
 	private IPropertySource getProperties(IJavaElement element) {
 		IResource resource= getResource(element);
 		if (resource == null)
@@ -200,9 +198,9 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			fgResourceLocator= new ResourceLocator();
 		return fgResourceLocator;
 	}
-	
+
 	private static JavaWorkbenchAdapter getJavaWorkbenchAdapter() {
-		if (fgJavaWorkbenchAdapter == null) 
+		if (fgJavaWorkbenchAdapter == null)
 			fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
 		return fgJavaWorkbenchAdapter;
 	}

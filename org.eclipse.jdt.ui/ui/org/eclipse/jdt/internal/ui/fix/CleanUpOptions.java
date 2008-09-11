@@ -25,38 +25,38 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
  * <p>
  * Client should not extend this class.
  * </p>
- * 
+ *
  * @since 3.4
  */
 public class CleanUpOptions {
-	
+
 	private final Map fOptions;
-	
+
 	/**
 	 * True value
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	public static final String TRUE= "true"; //$NON-NLS-1$
-	
+
 	/**
 	 * False value
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	public static final String FALSE= "false"; //$NON-NLS-1$
-	
+
 	/**
 	 * Create new CleanUpOptions instance. <code>options</code>
-	 * maps named clean ups keys to {@link CleanUpOptions#TRUE}, 
+	 * maps named clean ups keys to {@link CleanUpOptions#TRUE},
 	 * {@link CleanUpOptions#FALSE} or any String value
-	 * 
+	 *
 	 * @param options map from String to String
 	 */
 	protected CleanUpOptions(Map options) {
 		fOptions= options;
 	}
-	
+
 	/**
 	 * Create new CleanUpOptions instance.
 	 */
@@ -66,14 +66,14 @@ public class CleanUpOptions {
 
 	/**
 	 * Is the option with the given <code>key</code> enabled?
-	 * 
+	 *
 	 * @param key the name of the option
 	 * @return true if enabled, false if not enabled or unknown key
 	 * @see CleanUpConstants
 	 */
 	public boolean isEnabled(String key) {
 		Assert.isNotNull(key);
-		
+
 		Object value= fOptions.get(key);
 		return CleanUpOptions.TRUE == value || CleanUpOptions.TRUE.equals(value);
 	}
@@ -90,17 +90,17 @@ public class CleanUpOptions {
 	/**
 	 * @param key the name of the option to set
 	 * @param value the value of the option
-	 * 
+	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
 	 */
 	public void setOption(String key, String value) {
 		Assert.isNotNull(key);
 		Assert.isNotNull(value);
-		
+
 		fOptions.put(key, value);
 	}
-	
+
 	/**
 	 * @return an unmodifiable set of all keys
 	 */

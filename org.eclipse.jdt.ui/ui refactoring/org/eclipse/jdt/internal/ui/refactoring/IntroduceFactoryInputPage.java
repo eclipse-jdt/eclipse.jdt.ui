@@ -51,7 +51,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	 * The name of the factory method to be created.
 	 */
 	private Text fMethodName;
-	
+
 	private RefactoringStatus fMethodNameStatus;
 	private RefactoringStatus fDestinationStatus;
 
@@ -83,35 +83,35 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		result.setLayout(layout);
 
 		Label methNameLabel= new Label(result, SWT.NONE);
-		methNameLabel.setText(RefactoringMessages.IntroduceFactoryInputPage_method_name); 
-		
+		methNameLabel.setText(RefactoringMessages.IntroduceFactoryInputPage_method_name);
+
 		fMethodName= createTextInputField(result);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		fMethodName.setLayoutData(gd);
 		fMethodName.setText(getUseFactoryRefactoring().getNewMethodName());
 
 		final Label	factoryTypeLabel= new Label(result, SWT.NONE);
-		factoryTypeLabel.setText(RefactoringMessages.IntroduceFactoryInputPage_factoryClassLabel); 
-		
+		factoryTypeLabel.setText(RefactoringMessages.IntroduceFactoryInputPage_factoryClassLabel);
+
 		Composite inner= new Composite(result, SWT.NONE);
 		GridLayout innerLayout= new GridLayout();
 		innerLayout.marginHeight= 0; innerLayout.marginWidth= 0;
 		innerLayout.numColumns= 2;
 		inner.setLayout(innerLayout);
 		inner.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		final Text factoryTypeName= createTextInputField(inner);
 		factoryTypeName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		final Button browseTypes= new Button(inner, SWT.PUSH);
-		browseTypes.setText(RefactoringMessages.IntroduceFactoryInputPage_browseLabel); 
+		browseTypes.setText(RefactoringMessages.IntroduceFactoryInputPage_browseLabel);
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.END;
-		gd.widthHint = SWTUtil.getButtonWidthHint(browseTypes);		
+		gd.widthHint = SWTUtil.getButtonWidthHint(browseTypes);
 		browseTypes.setLayoutData(gd);
 
 		final Button protectCtorCB= new Button(result, SWT.CHECK);
-		protectCtorCB.setText(RefactoringMessages.IntroduceFactoryInputPage_protectConstructorLabel); 
+		protectCtorCB.setText(RefactoringMessages.IntroduceFactoryInputPage_protectConstructorLabel);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		protectCtorCB.setLayoutData(gd);
@@ -125,7 +125,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 
 				if (status.hasFatalError()) {
 					IntroduceFactoryInputPage.this.setPageComplete(false);
-					
+
 				}
 				IntroduceFactoryInputPage.this.setPageComplete(!status.hasFatalError());
 				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ?
@@ -185,7 +185,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		fMethodNameStatus = getUseFactoryRefactoring().setNewMethodName(getUseFactoryRefactoring().getNewMethodName());
 		validateInput(true);
 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_FACTORY_WIZARD_PAGE);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_FACTORY_WIZARD_PAGE);
 	}
 
 	private IType chooseFactoryClass() {
@@ -200,8 +200,8 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(
 			getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
 
-		dialog.setTitle(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_title); 
-		dialog.setMessage(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_message); 
+		dialog.setTitle(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_title);
+		dialog.setMessage(RefactoringMessages.IntroduceFactoryInputPage_chooseFactoryClass_message);
 
 		if (dialog.open() == Window.OK) {
 			return (IType) dialog.getFirstResult();
@@ -212,14 +212,14 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	private IntroduceFactoryRefactoring getUseFactoryRefactoring() {
 		return (IntroduceFactoryRefactoring) getRefactoring();
 	}
-	
+
 	private void validateInput(boolean methodName) {
 		RefactoringStatus merged= new RefactoringStatus();
 		if (fMethodNameStatus != null && (methodName || fMethodNameStatus.hasError()))
 			merged.merge(fMethodNameStatus);
 		if (fDestinationStatus != null && (!methodName || fDestinationStatus.hasError()))
 			merged.merge(fDestinationStatus);
-		
+
 		setPageComplete(!merged.hasError());
 		int severity= merged.getSeverity();
 		String message= merged.getMessageMatchingSeverity(severity);

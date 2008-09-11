@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 //TODO: Use global history
 public class ResetAllAction extends BuildpathModifierAction {
-	
+
 	private final HintTextGroup fProvider;
 	private final IRunnableContext fContext;
 	private IJavaProject fJavaProject;
@@ -53,17 +53,17 @@ public class ResetAllAction extends BuildpathModifierAction {
 
 	public ResetAllAction(HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		super(null, selectionTarget, BuildpathModifierAction.RESET_ALL);
-		
+
 		fProvider= provider;
 		fContext= context;
-		
+
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CLEAR);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CLEAR);
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_label);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
 		setEnabled(false);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -84,7 +84,7 @@ public class ResetAllAction extends BuildpathModifierAction {
 			setEnabled(true);
 		} else {
 			JavaCore.addElementChangedListener(new IElementChangedListener() {
-		
+
 				public void elementChanged(ElementChangedEvent event) {
 					if (fJavaProject.exists()) {
 						try {
@@ -97,13 +97,13 @@ public class ResetAllAction extends BuildpathModifierAction {
 							JavaCore.removeElementChangedListener(this);
                         }
 						setEnabled(true);
-					}					
+					}
 		        }
-				
+
 			}, ElementChangedEvent.POST_CHANGE);
 		}
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -117,25 +117,25 @@ public class ResetAllAction extends BuildpathModifierAction {
 	        		try {
 	        			if (!hasChange(fJavaProject))
 	        				return;
-	        			
+
 	        			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-	        			
+
 	        			ClasspathModifier.commitClassPath(fEntries, fJavaProject, monitor);
         				delta.setNewEntries((CPListElement[])fEntries.toArray(new CPListElement[fEntries.size()]));
-        				
+
 	        			fJavaProject.setOutputLocation(fOutputLocation, monitor);
 	        			delta.setDefaultOutputLocation(fOutputLocation);
-	        			
+
 	        			for (Iterator iterator= fProvider.getCreatedResources().iterator(); iterator.hasNext();) {
 	                        IResource resource= (IResource)iterator.next();
 	                        resource.delete(false, null);
 	                        delta.addDeletedResource(resource);
                         }
-	        			
+
 	        			fProvider.resetCreatedResources();
-	                    
+
 	                    informListeners(delta);
-	                    
+
 	            		selectAndReveal(new StructuredSelection(fJavaProject));
 	                } catch (JavaModelException e) {
 	                    showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
@@ -156,7 +156,7 @@ public class ResetAllAction extends BuildpathModifierAction {
         } catch (InterruptedException e) {
         }
 	}
-	
+
 
 	/**
      * {@inheritDoc}
@@ -164,20 +164,20 @@ public class ResetAllAction extends BuildpathModifierAction {
     protected boolean canHandle(IStructuredSelection elements) {
     	if (fJavaProject == null)
     		return false;
-    	
+
 	    return true;
     }
 
-	
+
 	//TODO: Remove, action should be disabled if not hasChange
 	private boolean hasChange(IJavaProject project) throws JavaModelException {
 		if (!project.getOutputLocation().equals(fOutputLocation))
             return true;
-      
+
 		IClasspathEntry[] currentEntries= project.getRawClasspath();
         if (currentEntries.length != fEntries.size())
             return true;
-        
+
         int i= 0;
         for (Iterator iterator= fEntries.iterator(); iterator.hasNext();) {
 	        CPListElement oldEntrie= (CPListElement)iterator.next();

@@ -34,7 +34,7 @@ public class JavaRefactoringDescriptorUtil {
 	/* TODO: share implementation with
 	 * org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil
 	 */
-	
+
 	private JavaRefactoringDescriptorUtil(){}
 
 	/**
@@ -95,13 +95,13 @@ public class JavaRefactoringDescriptorUtil {
 
 	/**
 	 * Converts the specified element to an input handle.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param element
 	 *            the element
 	 * @return a corresponding input handle
-	 *         Note: if the given project is not the element's project, then the full handle is returned 
+	 *         Note: if the given project is not the element's project, then the full handle is returned
 	 */
 	public static String elementToHandle(final String project, final IJavaElement element) {
 		final String handle= element.getHandleIdentifier();
@@ -114,10 +114,10 @@ public class JavaRefactoringDescriptorUtil {
 		}
 		return handle;
 	}
-	
+
 	/**
 	 * Converts an input handle back to the corresponding java element.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle
@@ -131,7 +131,7 @@ public class JavaRefactoringDescriptorUtil {
 
 	/**
 	 * Converts an input handle back to the corresponding java element.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle
@@ -148,7 +148,7 @@ public class JavaRefactoringDescriptorUtil {
 
 	/**
 	 * Converts an input handle back to the corresponding java element.
-	 * 
+	 *
 	 * @param owner
 	 *            the working copy owner
 	 * @param project
@@ -194,12 +194,12 @@ public class JavaRefactoringDescriptorUtil {
 	/**
 	 * Converts an input handle with the given prefix back to the corresponding
 	 * resource.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle
 	 *            the input handle
-	 * 
+	 *
 	 * @return the corresponding resource, or <code>null</code> if no such
 	 *         resource exists.
 	 *         Note: if the given handle is absolute, the project is not used to resolve.
@@ -218,14 +218,14 @@ public class JavaRefactoringDescriptorUtil {
 
 	/**
 	 * Converts the specified resource to an input handle.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param resource
 	 *            the resource
-	 * 
+	 *
 	 * @return the input handle.
-	 *         Note: if the given project is not the resource's project, then the full handle is returned. 
+	 *         Note: if the given project is not the resource's project, then the full handle is returned.
 	 */
 	public static String resourceToHandle(final String project, final IResource resource) {
 		if (project != null && !"".equals(project) && project.equals(resource.getProject().getName())) //$NON-NLS-1$
@@ -236,7 +236,7 @@ public class JavaRefactoringDescriptorUtil {
 	/**
 	 * Creates a fatal error status telling that the input element does not
 	 * exist.
-	 * 
+	 *
 	 * @param element
 	 *            the input element, or <code>null</code>
 	 * @param name
@@ -256,7 +256,7 @@ public class JavaRefactoringDescriptorUtil {
 
 	/**
 	 * Creates a warning status telling that the input element does not exist.
-	 * 
+	 *
 	 * @param element
 	 *            the input element, or <code>null</code>
 	 * @param name

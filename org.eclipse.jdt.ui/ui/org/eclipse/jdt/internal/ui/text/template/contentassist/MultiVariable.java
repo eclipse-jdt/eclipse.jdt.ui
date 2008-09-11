@@ -30,7 +30,7 @@ import org.eclipse.jface.text.templates.TemplateVariableType;
  */
 public class MultiVariable extends TemplateVariable {
 	private static final Object DEFAULT_KEY= new Object();
-	
+
 	private final Map fValueMap= new HashMap(); // <Object, Object[]>
 	/** The master key defining the active set. */
 	private Object fKey;
@@ -69,11 +69,11 @@ public class MultiVariable extends TemplateVariable {
 			fCurrentChoice= getChoices()[0];
 		}
 	}
-	
+
 	public Object getCurrentChoice() {
 		return fCurrentChoice;
 	}
-	
+
 	public void setCurrentChoice(Object currentChoice) {
 		Assert.isTrue(Arrays.asList(getChoices()).contains(currentChoice));
 		fCurrentChoice= currentChoice;
@@ -85,11 +85,11 @@ public class MultiVariable extends TemplateVariable {
 	public void setValues(String[] values) {
 		setChoices(values);
 	}
-	
+
 	public void setChoices(Object[] values) {
 		setChoices(DEFAULT_KEY, values);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.templates.TemplateVariable#getDefaultValue()
 	 * @since 3.3
@@ -112,7 +112,7 @@ public class MultiVariable extends TemplateVariable {
 			result[i]= toString(values[i]);
 		return result;
 	}
-	
+
 	public Object[] getChoices() {
 		return getChoices(fKey);
 	}

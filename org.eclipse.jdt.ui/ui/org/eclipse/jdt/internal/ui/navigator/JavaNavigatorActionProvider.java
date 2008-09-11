@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuil
 /**
  * Contributes the following actions to the menu on behalf of the JDT content
  * extension.
- * 
+ *
  * <ul>
  * <li>{@link OpenViewActionGroup}. Contributes the Open View actions (type
  * hierarchy, call hierarchy, etc).</li>

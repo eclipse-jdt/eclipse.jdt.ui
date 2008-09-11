@@ -21,8 +21,8 @@ public class CreateSourceFolderAction2 extends CreateSourceFolderAction {
 	private final HintTextGroup fProvider;
 
 	public CreateSourceFolderAction2(HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		super(context, selectionTarget);	
-		
+		super(context, selectionTarget);
+
 		fProvider= provider;
     }
 
@@ -31,7 +31,7 @@ public class CreateSourceFolderAction2 extends CreateSourceFolderAction {
 	 */
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleFolderCreation(((StructuredSelection)selection).toList());
-	    
+
 	    super.selectAndReveal(selection);
 	}
 }

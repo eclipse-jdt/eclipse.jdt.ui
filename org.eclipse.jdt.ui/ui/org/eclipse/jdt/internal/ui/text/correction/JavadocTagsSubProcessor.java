@@ -16,15 +16,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -140,7 +140,7 @@ public class JavadocTagsSubProcessor {
 				javadoc= ast.newJavadoc();
 				rewrite.set(bodyDecl, bodyDecl.getJavadocProperty(), javadoc, null);
 			}
-			
+
 		 	ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 
 		 	StructuralPropertyDescriptor location= missingNode.getLocationInParent();
@@ -203,9 +203,9 @@ public class JavadocTagsSubProcessor {
 			TextElement textElement= ast.newTextElement();
 			textElement.setText(""); //$NON-NLS-1$
 			newTag.fragments().add(textElement);
-		 	
+
 			addLinkedPosition(rewrite.track(textElement), false, "comment_start"); //$NON-NLS-1$
-			
+
 			if (bodyDecl.getJavadoc() == null) {
 				// otherwise the linked position spans over a line delimiter
 				newTag.fragments().add(ast.newTextElement());
@@ -363,49 +363,49 @@ public class JavadocTagsSubProcessor {
 	 	} else {
 	 		return;
 	 	}
-	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 1); 
+	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 1);
 	 	proposals.add(proposal);
 
 	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;
-	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5); 
+	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5);
 	 	proposals.add(addAllMissing);
 	}
-	
+
 	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IJavaProject project= cu.getJavaProject();
-		
+
 		if (!JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true))) {
 			return;
 		}
-		
+
 		boolean isUnusedParam= problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
 		String key= isUnusedParam ? JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE : JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE;
-		
+
 		if (!JavaCore.ENABLED.equals(project.getOption(key, true))) {
 			return;
 		}
-		
+
 	 	ASTNode node= problem.getCoveringNode(context.getASTRoot());
 	 	if (node == null) {
 	 		return;
 	 	}
-		
+
 		MethodDeclaration methodDecl= (MethodDeclaration) ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
 		if (methodDecl == null || methodDecl.resolveBinding() == null) {
 			return;
 		}
-			
+
 		String label;
 		if (isUnusedParam) {
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
 		} else {
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
 		}
-	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, 1); 
+	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, 1);
 	 	proposals.add(proposal);
 	}
-	
+
 	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node == null) {
@@ -548,7 +548,7 @@ public class JavadocTagsSubProcessor {
 		for (int i= 0; i < nTags; i++) {
 			TagElement curr= (TagElement) tags.get(i);
 			String currName= curr.getTagName();
-			if (TagElement.TAG_THROWS.equals(currName) || TagElement.TAG_EXCEPTION.equals(currName)) {  
+			if (TagElement.TAG_THROWS.equals(currName) || TagElement.TAG_EXCEPTION.equals(currName)) {
 				String argument= getArgument(curr);
 				if (arg.equals(argument)) {
 					return curr;
@@ -600,7 +600,7 @@ public class JavadocTagsSubProcessor {
 		}
 		return false;
 	}
-	
+
 	private static String[] TAG_ORDER= { // see http://java.sun.com/j2se/javadoc/writingdoccomments/index.html#orderoftags
 		TagElement.TAG_AUTHOR,
 		TagElement.TAG_VERSION,
@@ -612,7 +612,7 @@ public class JavadocTagsSubProcessor {
 		TagElement.TAG_SERIAL,
 		TagElement.TAG_DEPRECATED
 	};
-	
+
 	private static int getTagRanking(String tagName) {
 		if (tagName.equals(TagElement.TAG_EXCEPTION)) {
 			tagName= TagElement.TAG_THROWS;
@@ -660,7 +660,7 @@ public class JavadocTagsSubProcessor {
 
 		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description;
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image)); 
+		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image));
 	}
 
 	public static void getInvalidQualificationProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
@@ -682,14 +682,14 @@ public class JavadocTagsSubProcessor {
 		while (outerClass.getDeclaringClass() != null) {
 			outerClass= outerClass.getDeclaringClass();
 		}
-		
+
 		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
+
 		String label= CorrectionMessages.JavadocTagsSubProcessor_qualifylinktoinner_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
-		
+
 		ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
 		String importedType= importRewrite.addImport(outerClass);
 		if (importedType.equals(outerClass.getName())) {
@@ -697,6 +697,6 @@ public class JavadocTagsSubProcessor {
 		} else {
 			rewrite.replace(name, ast.newName(typeBinding.getQualifiedName()), null);
 		}
-		proposals.add(proposal); 
+		proposals.add(proposal);
 	}
 }

@@ -36,9 +36,9 @@ import org.eclipse.jdt.core.JavaCore;
 public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChangedListener {
 
 	public static final String ID= "org.eclipse.jdt.ui.JavaWorkingSetPage"; //$NON-NLS-1$
-	
+
 	private List fWorkingSets;
-	
+
 	private static class WorkingSetDelta {
 		private IWorkingSet fWorkingSet;
 		private List fElements;
@@ -65,12 +65,12 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 			}
 		}
 	}
-	
+
 	public JavaWorkingSetUpdater() {
 		fWorkingSets= new ArrayList();
 		JavaCore.addElementChangedListener(this);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -91,7 +91,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		}
 		return result;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -167,7 +167,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 			processJavaDelta(result, children[i]);
 		}
 	}
-	
+
 	private void processResourceDelta(WorkingSetDelta result, IResourceDelta delta) {
 		IResource resource= delta.getResource();
 		int type= resource.getType();
@@ -181,17 +181,17 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		}
 		if (index != -1 && kind == IResourceDelta.REMOVED) {
 			if ((flags & IResourceDelta.MOVED_TO) != 0) {
-				result.set(index, 
+				result.set(index,
 					ResourcesPlugin.getWorkspace().getRoot().findMember(delta.getMovedToPath()));
 			} else {
 				result.remove(index);
 			}
 		}
-		
+
 		// Don't dive into closed or opened projects
 		if (projectGotClosedOrOpened(resource, kind, flags))
 			return;
-		
+
 		IResourceDelta[] children= delta.getAffectedChildren();
 		for (int i= 0; i < children.length; i++) {
 			processResourceDelta(result, children[i]);
@@ -199,11 +199,11 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	}
 
 	private boolean projectGotClosedOrOpened(IResource resource, int kind, int flags) {
-		return resource.getType() == IResource.PROJECT 
-			&& kind == IResourceDelta.CHANGED 
+		return resource.getType() == IResource.PROJECT
+			&& kind == IResourceDelta.CHANGED
 			&& (flags & IResourceDelta.OPEN) != 0;
 	}
-	
+
 	private void checkElementExistence(IWorkingSet workingSet) {
 		List elements= new ArrayList(Arrays.asList(workingSet.getElements()));
 		boolean changed= false;

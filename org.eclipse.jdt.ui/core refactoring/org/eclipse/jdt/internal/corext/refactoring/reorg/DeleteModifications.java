@@ -45,37 +45,37 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * A modification collector for Java element delete operations.
  */
 public class DeleteModifications extends RefactoringModifications {
-	
+
 	private List/*<IJavaElement>*/ fDelete;
-	
+
 	/**
 	 * Contains the actual packages when executing
 	 * <code>handlePackageFragmentDelete</code>. This is part of the
 	 * algorithm to check if a parent folder can be deleted.
 	 */
 	private List/*<IPackageFragment>*/ fPackagesToDelete;
-	
+
 	public DeleteModifications() {
 		fDelete= new ArrayList();
 		fPackagesToDelete= new ArrayList();
 	}
-	
+
 	public void delete(IResource resource) {
 		getResourceModifications().addDelete(resource);
 	}
-	
+
 	public void delete(IResource[] resources) {
 		for (int i= 0; i < resources.length; i++) {
 			delete(resources[i]);
 		}
 	}
-	
+
 	public void delete(IJavaElement[] elements) throws CoreException {
 		for (int i= 0; i < elements.length; i++) {
 			delete(elements[i]);
 		}
 	}
-	
+
 	public void delete(IJavaElement element) throws CoreException {
 		switch(element.getElementType()) {
 			case IJavaElement.JAVA_MODEL:
@@ -113,12 +113,12 @@ public class DeleteModifications extends RefactoringModifications {
 			default:
 				fDelete.add(element);
 		}
-		
+
 	}
-	
+
 	/**
 	 * @return a List of IResources that are removed by package deletes
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public List/*<IResource>*/ postProcess() throws CoreException {
 		ArrayList resourcesCollector= new ArrayList();
@@ -128,43 +128,43 @@ public class DeleteModifications extends RefactoringModifications {
 		}
 		return resourcesCollector;
 	}
-	
+
 	public void buildDelta(IResourceChangeDescriptionFactory deltaFactory) {
 		getResourceModifications().buildDelta(deltaFactory);
 	}
-	
+
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
 		List result= new ArrayList();
 		for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
-			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(status, 
-				owner, iter.next(), 
+			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(status,
+				owner, iter.next(),
 				new DeleteArguments(), natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
 		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
-	
+
 	/**
 	 * This method collects file and folder deletion for notifying
-	 * participants. Participants will get notified of 
-	 * 
+	 * participants. Participants will get notified of
+	 *
 	 * * deletion of the package (in any case)
-	 * * deletion of files within the package if only the files are deleted without 
+	 * * deletion of files within the package if only the files are deleted without
 	 *   the package folder ("package cleaning")
 	 * * deletion of the package folder if it is not only cleared and if its parent
 	 *   is not removed as well.
-	 *   
+	 *
 	 * All deleted resources are added to <code>resourcesCollector</code>
 	 * @param pack the package
-	 * 
+	 *
 	 * @param resourcesCollector a collector for IResources to be deleted
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
-	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList resourcesCollector) throws CoreException {		
+	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList resourcesCollector) throws CoreException {
 		final IContainer container= (IContainer)pack.getResource();
 		if (container == null)
 			return;
-		
+
 		final IResource[] members= container.members();
 
 		/*
@@ -185,7 +185,7 @@ public class DeleteModifications extends RefactoringModifications {
 				// Parent is marked if it is in the list
 				parentIsMarked= fPackagesToDelete.contains(parent);
 			}
-			
+
 			if (parentIsMarked) {
 				// Parent is marked, but is it really deleted or only cleared?
 				if (canRemoveCompletely(parent)) {
@@ -198,7 +198,7 @@ public class DeleteModifications extends RefactoringModifications {
 					getResourceModifications().addDelete(container);
 				}
 			} else {
-				// Parent will not be removed, but we will 
+				// Parent will not be removed, but we will
 				resourcesCollector.add(container);
 				getResourceModifications().addDelete(container);
 			}
@@ -230,13 +230,13 @@ public class DeleteModifications extends RefactoringModifications {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns true if this initially selected package is really deletable
 	 * (if it has non-selected sub packages, it may only be cleared).
 	 * @param pack the package
 	 * @return  true if this initially selected package is really deletable
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	private boolean canRemoveCompletely(IPackageFragment pack) throws JavaModelException {
 		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);

@@ -27,17 +27,17 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
  * Dialog field containing a label and a text control.
  */
 public class StringDialogField extends DialogField {
-		
+
 	private String fText;
 	private Text fTextControl;
 	private ModifyListener fModifyListener;
     private IContentAssistProcessor fContentAssistProcessor;
-	
+
 	public StringDialogField() {
 		super();
 		fText= ""; //$NON-NLS-1$
 	}
-			
+
 	public void setContentAssistProcessor(IContentAssistProcessor processor) {
 	    fContentAssistProcessor= processor;
 	    if (fContentAssistProcessor != null && isOkToUse(fTextControl)) {
@@ -48,40 +48,40 @@ public class StringDialogField extends DialogField {
 	public IContentAssistProcessor getContentAssistProcessor() {
 	    return fContentAssistProcessor;
 	}
-	
+
 	// ------- layout helpers
-		
+
 	/*
 	 * @see DialogField#doFillIntoGrid
 	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
-		
+
 		Label label= getLabelControl(parent);
 		label.setLayoutData(gridDataForLabel(1));
 		Text text= getTextControl(parent);
 		text.setLayoutData(gridDataForText(nColumns - 1));
-		
+
 		return new Control[] { label, text };
-	} 
+	}
 
 	/*
 	 * @see DialogField#getNumberOfControls
 	 */
 	public int getNumberOfControls() {
-		return 2;	
+		return 2;
 	}
-	
+
 	protected static GridData gridDataForText(int span) {
 		GridData gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= span;
 		return gd;
-	}	
-	
+	}
+
 	// ------- focus methods
-	
+
 	/*
 	 * @see DialogField#setFocus
 	 */
@@ -92,14 +92,14 @@ public class StringDialogField extends DialogField {
 		}
 		return true;
 	}
-		
-	// ------- ui creation			
+
+	// ------- ui creation
 
 	/**
 	 * Creates or returns the created text control.
 	 * @param parent The parent composite or <code>null</code> when the widget has
 	 * already been created.
-	 */		
+	 */
 	public Text getTextControl(Composite parent) {
 		if (fTextControl == null) {
 			assertCompositeNotNull(parent);
@@ -108,13 +108,13 @@ public class StringDialogField extends DialogField {
 					doModifyText(e);
 				}
 			};
-			
+
 			fTextControl= new Text(parent, SWT.SINGLE | SWT.BORDER);
 			// moved up due to 1GEUNW2
 			fTextControl.setText(fText);
 			fTextControl.setFont(parent.getFont());
 			fTextControl.addModifyListener(fModifyListener);
-			
+
 			fTextControl.setEnabled(isEnabled());
 			if (fContentAssistProcessor != null) {
 			    ControlContentAssistHelper.createTextContentAssistant(fTextControl, fContentAssistProcessor);
@@ -122,35 +122,35 @@ public class StringDialogField extends DialogField {
 		}
 		return fTextControl;
 	}
-	
+
 	private void doModifyText(ModifyEvent e) {
 		if (isOkToUse(fTextControl)) {
 			fText= fTextControl.getText();
 		}
 		dialogFieldChanged();
-	}		
-	
+	}
+
 	// ------ enable / disable management
-	
+
 	/*
 	 * @see DialogField#updateEnableState
-	 */		
+	 */
 	protected void updateEnableState() {
-		super.updateEnableState();		
+		super.updateEnableState();
 		if (isOkToUse(fTextControl)) {
 			fTextControl.setEnabled(isEnabled());
-		}	
-	}		
-		
-	// ------ text access 
-	
+		}
+	}
+
+	// ------ text access
+
 	/**
 	 * Gets the text. Can not be <code>null</code>
-	 */	
+	 */
 	public String getText() {
 		return fText;
 	}
-	
+
 	/**
 	 * Sets the text. Triggers a dialog-changed event.
 	 */
@@ -160,7 +160,7 @@ public class StringDialogField extends DialogField {
 			fTextControl.setText(text);
 		} else {
 			dialogFieldChanged();
-		}	
+		}
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class StringDialogField extends DialogField {
 			fTextControl.addModifyListener(fModifyListener);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
 	 */
@@ -184,5 +184,5 @@ public class StringDialogField extends DialogField {
 			setTextWithoutUpdate(fText);
 		}
 	}
-	
+
 }

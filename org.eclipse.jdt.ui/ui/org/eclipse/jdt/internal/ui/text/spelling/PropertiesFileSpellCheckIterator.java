@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import com.ibm.icu.text.BreakIterator;
-
 import java.util.Locale;
+
+import com.ibm.icu.text.BreakIterator;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -55,13 +55,13 @@ public class PropertiesFileSpellCheckIterator extends SpellCheckIterator {
 
 		if (token != null && token.length() > 1 && token.startsWith("&")) { //$NON-NLS-1$
 			token= token.substring(1);
-			
+
 			// Add characters in front of '&'
 			while (fPrevious > 0 && !Character.isWhitespace(fContent.charAt(fPrevious - 1)) && fContent.charAt(fPrevious - 1) != '=') {
 				token= fContent.charAt(fPrevious - 1) + token;
 				fPrevious--;
 			}
-				
+
 		}
 
 		fLastToken= token;

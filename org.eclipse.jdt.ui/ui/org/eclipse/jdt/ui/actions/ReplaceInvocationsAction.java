@@ -40,13 +40,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Action that replaces method invocations. This action may be invoked
  * on source or binary methods or method invocations with or without attached source.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.2
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ReplaceInvocationsAction extends SelectionDispatchAction {
@@ -56,7 +56,7 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ReplaceInvocationsAction(JavaEditor editor) {
@@ -66,8 +66,8 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>ReplaceInvocationsAction</code>. 
-	 * 
+	 * Creates a new <code>ReplaceInvocationsAction</code>.
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public ReplaceInvocationsAction(IWorkbenchSite site) {
@@ -100,7 +100,7 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {

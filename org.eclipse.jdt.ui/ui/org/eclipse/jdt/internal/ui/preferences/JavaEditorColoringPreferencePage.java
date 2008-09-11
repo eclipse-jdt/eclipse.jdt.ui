@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * <p>
  * Note: Must be public since it is referenced from plugin.xml
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class JavaEditorColoringPreferencePage extends AbstractConfigurationBlockPreferencePage {
@@ -40,15 +40,15 @@ public class JavaEditorColoringPreferencePage extends AbstractConfigurationBlock
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
 	protected void setDescription() {
-		String description= PreferencesMessages.JavaEditorPreferencePage_colors; 
+		String description= PreferencesMessages.JavaEditorPreferencePage_colors;
 		setDescription(description);
 	}
-	
-	
+
+
 	protected Label createDescriptionLabel(Composite parent) {
 		return null;
 	}
-	
+
 	/*
 	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */

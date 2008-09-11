@@ -52,7 +52,7 @@ public class NLSScanner {
 	public static NLSLine[] scan(String s) throws InvalidInputException {
 		return scan(s.toCharArray());
 	}
-	
+
 	private static NLSLine[] scan(char[] content) throws InvalidInputException {
 		List lines= new ArrayList();
 		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
@@ -62,7 +62,7 @@ public class NLSScanner {
 		int previousLineNr= -1;
 		NLSLine currentLine= null;
 		int nlsElementIndex= 0;
-		
+
 		/*
 		 * Stack of int[1] containing either
 		 * a) >=0: parenthesis counter per nested annotation level, or
@@ -70,7 +70,7 @@ public class NLSScanner {
 		 */
 		LinkedList insideAnnotation= new LinkedList();
 		int defaultCounter= 0; // counting up tokens starting with 'default'
-		
+
 		while (token != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
 				// don't NLS inside annotation arguments and after 'default'
@@ -80,7 +80,7 @@ public class NLSScanner {
 				case ITerminalSymbols.TokenNameinterface:
 					insideAnnotation.clear(); //e.g. @interface
 					break;
-				
+
 				case ITerminalSymbols.TokenNameIdentifier:
 					if (! insideAnnotation.isEmpty()) {
 						int[] parenCounter= (int[]) insideAnnotation.getLast();
@@ -90,7 +90,7 @@ public class NLSScanner {
 							insideAnnotation.removeLast(); // identifier after annotation name -> was a simple annotation
 					}
 					break;
-				
+
 				case ITerminalSymbols.TokenNameDOT:
 					if (! insideAnnotation.isEmpty()) {
 						int[] parenCounter= (int[]) insideAnnotation.getLast();
@@ -100,7 +100,7 @@ public class NLSScanner {
 							insideAnnotation.removeLast(); // '@' '.' -> something's wrong, back out...
 					}
 					break;
-					
+
 				case ITerminalSymbols.TokenNameLPAREN:
 					if (! insideAnnotation.isEmpty())
 						++((int[]) insideAnnotation.getLast())[0];
@@ -111,10 +111,10 @@ public class NLSScanner {
 						if (parenCount <= 0) {
 							insideAnnotation.removeLast();
 						}
-						
+
 					}
 					break;
-					
+
 				case ITerminalSymbols.TokenNamedefault:
 					defaultCounter= 1;
 					break;
@@ -127,8 +127,8 @@ public class NLSScanner {
 				case ITerminalSymbols.TokenNameSEMICOLON:
 					defaultCounter= 0;
 					break;
-					
-					
+
+
 				case ITerminalSymbols.TokenNameStringLiteral:
 					if (insideAnnotation.isEmpty() && defaultCounter == 0) {
 						currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
@@ -152,15 +152,15 @@ public class NLSScanner {
 					defaultCounter= 0;
 					if (currentLineNr != scanner.getLineNumber(scanner.getCurrentTokenStartPosition()))
 						break;
-						
+
 					parseTags(currentLine, scanner);
 					break;
-				
+
 				case ITerminalSymbols.TokenNameWHITESPACE:
 				case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
 				case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 					break;
-					
+
 				default:
 					if (defaultCounter > 0)
 						defaultCounter++;
@@ -180,7 +180,7 @@ public class NLSScanner {
 		}
 		return result;
 	}
-	
+
 	private static void parseTags(NLSLine line, IScanner scanner) {
 		String s= new String(scanner.getCurrentTokenSource());
 		int pos= s.indexOf(NLSElement.TAG_PREFIX);
@@ -189,7 +189,7 @@ public class NLSScanner {
 			int end= s.indexOf(NLSElement.TAG_POSTFIX, start);
 			if (end < 0)
 				return; //no error recovery
-				
+
 			String index= s.substring(start, end);
 			int i= 0;
 			try {
@@ -206,7 +206,7 @@ public class NLSScanner {
 			pos= s.indexOf(NLSElement.TAG_PREFIX, start);
 		}
 	}
-	
+
 	private static void setTagPositions(IDocument document, NLSLine line) throws BadLocationException {
 		IRegion info= document.getLineInformation(line.getLineNumber());
 		int defaultValue= info.getOffset() + info.getLength();
@@ -218,7 +218,7 @@ public class NLSScanner {
 			}
 		}
 	}
-	
+
 	private static int computeInsertOffset(NLSElement[] elements, int index, int defaultValue) {
 		NLSElement previousTagged= findPreviousTagged(index, elements);
 		if (previousTagged != null)
@@ -228,7 +228,7 @@ public class NLSScanner {
 			return nextTagged.getTagPosition().getOffset();
 		return defaultValue;
 	}
-	
+
 	private static NLSElement findPreviousTagged(int startIndex, NLSElement[] elements){
 		int i= startIndex - 1;
 		while (i >= 0){
@@ -238,7 +238,7 @@ public class NLSScanner {
 		}
 		return null;
 	}
-    
+
 	private static NLSElement findNextTagged(int startIndex, NLSElement[] elements){
 		int i= startIndex + 1;
 		while (i < elements.length){

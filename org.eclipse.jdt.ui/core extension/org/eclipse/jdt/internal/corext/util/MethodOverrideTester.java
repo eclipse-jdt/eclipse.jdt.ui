@@ -28,29 +28,29 @@ import org.eclipse.jdt.core.Signature;
 
 public class MethodOverrideTester {
 	private static class Substitutions {
-		
+
 		public static final Substitutions EMPTY_SUBST= new Substitutions();
-		
+
 		private HashMap fMap;
-		
+
 		public Substitutions() {
 			fMap= null;
 		}
-		
+
 		public void addSubstitution(String typeVariable, String substitution, String erasure) {
 			if (fMap == null) {
 				fMap= new HashMap(3);
 			}
 			fMap.put(typeVariable, new String[] { substitution, erasure });
 		}
-		
+
 		private String[] getSubstArray(String typeVariable) {
 			if (fMap != null) {
 				return (String[]) fMap.get(typeVariable);
 			}
 			return null;
 		}
-						
+
 		public String getSubstitution(String typeVariable) {
 			String[] subst= getSubstArray(typeVariable);
 			if (subst != null) {
@@ -58,7 +58,7 @@ public class MethodOverrideTester {
 			}
 			return null;
 		}
-		
+
 		public String getErasure(String typeVariable) {
 			String[] subst= getSubstArray(typeVariable);
 			if (subst != null) {
@@ -66,14 +66,14 @@ public class MethodOverrideTester {
 			}
 			return null;
 		}
-	}	
-	
+	}
+
 	private final IType fFocusType;
 	private final ITypeHierarchy fHierarchy;
-	
+
 	private Map /* <IMethod, Substitutions> */ fMethodSubstitutions;
 	private Map /* <IType, Substitutions> */ fTypeVariableSubstitutions;
-			
+
 	public MethodOverrideTester(IType focusType, ITypeHierarchy hierarchy) {
 		if (focusType == null || hierarchy == null) {
 			throw new IllegalArgumentException();
@@ -83,15 +83,15 @@ public class MethodOverrideTester {
 		fTypeVariableSubstitutions= null;
 		fMethodSubstitutions= null;
 	}
-	
+
 	public IType getFocusType() {
 		return fFocusType;
 	}
-	
+
 	public ITypeHierarchy getTypeHierarchy() {
 		return fHierarchy;
 	}
-	
+
 	/**
 	 * Finds the method that declares the given method. A declaring method is the 'original' method declaration that does
 	 * not override nor implement a method. <code>null</code> is returned it the given method does not override
@@ -110,7 +110,7 @@ public class MethodOverrideTester {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Finds the method that is overridden by the given method.
 	 * First the super class is examined and then the implemented interfaces.
@@ -124,7 +124,7 @@ public class MethodOverrideTester {
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor()) {
 			return null;
 		}
-		
+
 		IType type= overriding.getDeclaringType();
 		IType superClass= fHierarchy.getSuperclass(type);
 		if (superClass != null) {
@@ -146,10 +146,10 @@ public class MethodOverrideTester {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the directly overridden method in a type and its super types. First the super class is examined and then the implemented interfaces.
-	 * With generics it is possible that 2 methods in the same type are overidden at the same time. In that case, the first overridden method found is returned. 
+	 * With generics it is possible that 2 methods in the same type are overidden at the same time. In that case, the first overridden method found is returned.
 	 * 	@param type The type to find methods in
 	 * @param overriding The overriding method
 	 * @return The first overridden method or <code>null</code> if no method is overridden
@@ -176,9 +176,9 @@ public class MethodOverrideTester {
 				}
 			}
 		}
-		return method;		
+		return method;
 	}
-	
+
 	/**
 	 * Finds an overridden method in a type. With generics it is possible that 2 methods in the same type are overridden at the same time.
 	 * In that case the first overridden method found is returned.
@@ -196,7 +196,7 @@ public class MethodOverrideTester {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds an overriding method in a type.
 	 * @param overridingType The type to find methods in
@@ -213,7 +213,7 @@ public class MethodOverrideTester {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Tests if a method is a subsignature of another method.
 	 * @param overriding overriding method (m1)
@@ -232,11 +232,11 @@ public class MethodOverrideTester {
 		if (nParameters != overriding.getNumberOfParameters()) {
 			return false;
 		}
-		
+
 		if (!hasCompatibleTypeParameters(overriding, overridden)) {
 			return false;
 		}
-		
+
 		return nParameters == 0 || hasCompatibleParameterTypes(overriding, overridden);
 	}
 
@@ -267,10 +267,10 @@ public class MethodOverrideTester {
 	private boolean hasCompatibleParameterTypes(IMethod overriding, IMethod overridden) throws JavaModelException {
 		String[] overriddenParamTypes= overridden.getParameterTypes();
 		String[] overridingParamTypes= overriding.getParameterTypes();
-		
+
 		String[] substitutedOverriding= new String[overridingParamTypes.length];
 		boolean testErasure= false;
-		
+
 		for (int i= 0; i < overridingParamTypes.length; i++) {
 			String overriddenParamSig= overriddenParamTypes[i];
 			String overriddenParamName= getSubstitutedTypeName(overriddenParamSig, overridden);
@@ -295,7 +295,7 @@ public class MethodOverrideTester {
 		}
 		return true;
 	}
-	
+
 	private String getVariableSubstitution(IMember context, String variableName) throws JavaModelException {
 		IType type;
 		if (context instanceof IMethod) {
@@ -313,7 +313,7 @@ public class MethodOverrideTester {
 		}
 		return variableName; // not a type variable
 	}
-	
+
 	private String getVariableErasure(IMember context, String variableName) throws JavaModelException {
 		IType type;
 		if (context instanceof IMethod) {
@@ -331,7 +331,7 @@ public class MethodOverrideTester {
 		}
 		return variableName; // not a type variable
 	}
-	
+
 	/*
 	 * Returns the substitutions for a method's type parameters
 	 */
@@ -339,7 +339,7 @@ public class MethodOverrideTester {
 		if (fMethodSubstitutions == null) {
 			fMethodSubstitutions= new LRUMap(3);
 		}
-		
+
 		Substitutions s= (Substitutions) fMethodSubstitutions.get(method);
 		if (s == null) {
 			ITypeParameter[] typeParameters= method.getTypeParameters();
@@ -357,7 +357,7 @@ public class MethodOverrideTester {
 		}
 		return s;
 	}
-	
+
 	/*
 	 * Returns the substitutions for a type's type parameters
 	 */
@@ -372,13 +372,13 @@ public class MethodOverrideTester {
 		}
 		return subst;
 	}
-	
+
 	private void computeSubstitutions(IType instantiatedType, IType instantiatingType, String[] typeArguments) throws JavaModelException {
 		Substitutions s= new Substitutions();
 		fTypeVariableSubstitutions.put(instantiatedType, s);
-		
+
 		ITypeParameter[] typeParameters= instantiatedType.getTypeParameters();
-		
+
 		if (instantiatingType == null) { // the focus type
 			for (int i= 0; i < typeParameters.length; i++) {
 				ITypeParameter curr= typeParameters[i];
@@ -426,7 +426,7 @@ public class MethodOverrideTester {
 			}
 		}
 	}
-	
+
 	private String getTypeParameterErasure(ITypeParameter typeParameter, IType context) throws JavaModelException {
 		String[] bounds= typeParameter.getBounds();
 		if (bounds.length > 0) {
@@ -434,7 +434,7 @@ public class MethodOverrideTester {
 		}
 		return "Object"; //$NON-NLS-1$
 	}
-	
+
 
 	/**
 	 * Translates the type signature to a 'normalized' type name where all variables are substituted for the given type or method context.
@@ -442,16 +442,16 @@ public class MethodOverrideTester {
 	 * @param typeSig The type signature to translate
 	 * @param context The context for the substitution
 	 * @return a type name
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	private String getSubstitutedTypeName(String typeSig, IMember context) throws JavaModelException {
 		return internalGetSubstitutedTypeName(typeSig, context, false, new StringBuffer()).toString();
 	}
-	
+
 	private String getErasedTypeName(String typeSig, IMember context) throws JavaModelException {
 		return internalGetSubstitutedTypeName(typeSig, context, true, new StringBuffer()).toString();
 	}
-		
+
 	private StringBuffer internalGetSubstitutedTypeName(String typeSig, IMember context, boolean erasure, StringBuffer buf) throws JavaModelException {
 		int sigKind= Signature.getTypeSignatureKind(typeSig);
 		switch (sigKind) {
@@ -466,7 +466,7 @@ public class MethodOverrideTester {
 			case Signature.CLASS_TYPE_SIGNATURE: {
 				String erasureSig= Signature.getTypeErasure(typeSig);
 				String erasureName= Signature.getSimpleName(Signature.toString(erasureSig));
-				
+
 				char ch= erasureSig.charAt(0);
 				if (ch == Signature.C_RESOLVED) {
 					buf.append(erasureName);
@@ -520,5 +520,5 @@ public class MethodOverrideTester {
 				return buf;
 		}
 	}
-			
+
 }

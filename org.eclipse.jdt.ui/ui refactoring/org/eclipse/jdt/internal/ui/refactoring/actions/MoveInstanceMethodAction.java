@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
@@ -57,8 +57,8 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 
 	public MoveInstanceMethodAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.MoveInstanceMethodAction_Move_Method); 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);		
+		setText(RefactoringMessages.MoveInstanceMethodAction_Move_Method);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 
 	/*
@@ -89,11 +89,11 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	private static IMethod getSingleSelectedMethod(IStructuredSelection selection) {
-		if (selection.isEmpty() || selection.size() != 1) 
+		if (selection.isEmpty() || selection.size() != 1)
 			return null;
-		
+
 		Object first= selection.getFirstElement();
 		if (! (first instanceof IMethod))
 			return null;
@@ -102,7 +102,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	public void run(IStructuredSelection selection) {		
+	public void run(IStructuredSelection selection) {
 		try {
 			Assert.isTrue(RefactoringAvailabilityTester.isMoveMethodAvailable(selection));
 			IMethod method= getSingleSelectedMethod(selection);
@@ -111,18 +111,18 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 				return;
 			RefactoringExecutionStarter.startMoveMethodRefactoring(method, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_unexpected_exception);	 
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_unexpected_exception);
 		}
- 	}	
-	
+ 	}
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		try {
 			run(selection, SelectionConverter.getInputAsCompilationUnit(fEditor));
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_unexpected_exception);	 
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_unexpected_exception);
 		}
 	}
 
@@ -138,7 +138,7 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 		if (method != null) {
 			RefactoringExecutionStarter.startMoveMethodRefactoring(method, getShell());
 		} else {
-			MessageDialog.openInformation(getShell(), RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_No_reference_or_declaration); 
+			MessageDialog.openInformation(getShell(), RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_No_reference_or_declaration);
 		}
 	}
 

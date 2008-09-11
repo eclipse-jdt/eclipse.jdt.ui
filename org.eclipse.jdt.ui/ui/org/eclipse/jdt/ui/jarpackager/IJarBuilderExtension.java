@@ -21,14 +21,14 @@ import org.eclipse.core.runtime.IPath;
  * <ul>
  * <li>Write a file to the JAR to build</li>
  * </ul>
- * 
+ *
  * @since 3.5
  */
 public interface IJarBuilderExtension {
 
 	/**
 	 * Add the given file to the archive at the given path
-	 * 
+	 *
 	 * @param file
 	 *        the file to be written. It is guaranteed, that the file is not a directory.
 	 * @param destinationPath

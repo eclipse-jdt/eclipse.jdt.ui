@@ -15,7 +15,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 /**
  * Startup performance tests.
- * 
+ *
  * @since 3.1
  */
 public class StartupPerformanceTestCase extends TextPerformanceTestCase {

@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.text.edits.UndoEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -41,7 +41,7 @@ public class CompilationUnitChange extends TextFileChange {
 
 	/**
 	 * Creates a new <code>CompilationUnitChange</code>.
-	 * 
+	 *
 	 * @param name the change's name mainly used to render the change in the UI
 	 * @param cunit the compilation unit this text change works on
 	 */
@@ -65,7 +65,7 @@ public class CompilationUnitChange extends TextFileChange {
 
 	/**
 	 * Returns the compilation unit this change works on.
-	 * 
+	 *
 	 * @return the compilation unit this change works on
 	 */
 	public ICompilationUnit getCompilationUnit() {
@@ -122,7 +122,7 @@ public class CompilationUnitChange extends TextFileChange {
 
 	/**
 	 * Sets the refactoring descriptor for this change
-	 * 
+	 *
 	 * @param descriptor the descriptor to set
 	 */
 	public void setDescriptor(ChangeDescriptor descriptor) {

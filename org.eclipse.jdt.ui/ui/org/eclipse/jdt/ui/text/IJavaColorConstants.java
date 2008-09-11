@@ -22,7 +22,7 @@ package org.eclipse.jdt.ui.text;
  *
  * @see org.eclipse.jdt.ui.text.IColorManager
  * @see org.eclipse.jdt.ui.text.IColorManagerExtension
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IJavaColorConstants {
@@ -31,7 +31,7 @@ public interface IJavaColorConstants {
 	 * Note: This constant is for internal use only. Clients should not use this constant.
 	 * The prefix all color constants start with
 	 * (value <code>"java_"</code>).
-	 * 
+	 *
 	 * @noreference This field is not intended to be referenced by clients.
 	 */
 	String PREFIX= "java_"; //$NON-NLS-1$

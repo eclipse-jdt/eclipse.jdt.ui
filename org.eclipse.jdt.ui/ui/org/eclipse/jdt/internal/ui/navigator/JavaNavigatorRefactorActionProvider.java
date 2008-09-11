@@ -24,7 +24,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 /**
  * Contributes the following actions to the menu on behalf of the JDT content
  * extension.
- * 
+ *
  * <ul>
  * <li>{@link RefactorActionGroup}. Contributes the "Refactor>" and "Source>" submenus to the context menu.</li>
  * </ul>
@@ -51,7 +51,7 @@ public class JavaNavigatorRefactorActionProvider extends CommonActionProvider {
 		if (site.getViewSite() instanceof ICommonViewerWorkbenchSite)
 			workbenchSite= (ICommonViewerWorkbenchSite) site.getViewSite();
 
-		// we only initialize the refactor group when in a view part 
+		// we only initialize the refactor group when in a view part
 		// (required for the constructor)
 		if (workbenchSite != null) {
 			if (workbenchSite.getPart() != null && workbenchSite.getPart() instanceof IViewPart) {

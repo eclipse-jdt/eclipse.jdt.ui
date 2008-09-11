@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.JavaUI;
 
 public class InitializeAfterLoadJob extends UIJob {
-	
+
 	private final class RealJob extends Job {
 		public RealJob(String name) {
 			super(name);
@@ -44,7 +44,7 @@ public class InitializeAfterLoadJob extends UIJob {
 			return JavaUI.ID_PLUGIN.equals(family);
 		}
 	}
-	
+
 	public InitializeAfterLoadJob() {
 		super(JavaUIMessages.InitializeAfterLoadJob_starter_job_name);
 		setSystem(true);

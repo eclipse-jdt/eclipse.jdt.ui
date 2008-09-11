@@ -31,13 +31,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Action to programmatically open a Java perspective.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenJavaBrowsingPerspectiveAction extends Action {
@@ -61,9 +61,9 @@ public class OpenJavaBrowsingPerspectiveAction extends Action {
 		try {
 			workbench.showPerspective(JavaUI.ID_BROWSING_PERSPECTIVE, window, input);
 		} catch (WorkbenchException e) {
-			ExceptionHandler.handle(e, window.getShell(), 
-				ActionMessages.OpenJavaBrowsingPerspectiveAction_dialog_title, 
-				ActionMessages.OpenJavaBrowsingPerspectiveAction_error_open_failed); 
+			ExceptionHandler.handle(e, window.getShell(),
+				ActionMessages.OpenJavaBrowsingPerspectiveAction_dialog_title,
+				ActionMessages.OpenJavaBrowsingPerspectiveAction_error_open_failed);
 		}
 	}
 }

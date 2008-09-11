@@ -19,13 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -448,11 +448,11 @@ public class ExtractClassRefactoring extends Refactoring {
 				field.setJavadoc((Javadoc) moveNode(cuRewrite, parent.getJavadoc()));
 			}
 		}
-		
+
 		public boolean isCreateSetter(ParameterInfo pi) {
 			return true; //ignore that the original variable was final
 		}
-		
+
 		public boolean isUseInConstructor(ParameterInfo pi) {
 			FieldInfo fi= getFieldInfo(pi.getOldName());
 			return fi.initializer != null && !fi.hasFieldReference();
@@ -544,7 +544,7 @@ public class ExtractClassRefactoring extends Refactoring {
 					spm.worked(1);
 
 					status.merge(replaceReferences(pof, group, cuRewrite));
-					if (cuRewrite != fBaseCURewrite) //Change for fBaseCURewrite will be generated later 
+					if (cuRewrite != fBaseCURewrite) //Change for fBaseCURewrite will be generated later
 						fChangeManager.manage(unit, cuRewrite.createChange(true, new SubProgressMonitor(spm, 9)));
 					if (spm.isCanceled())
 						throw new OperationCanceledException();
@@ -738,7 +738,7 @@ public class ExtractClassRefactoring extends Refactoring {
 								if (package1 != null && !fDescriptor.getPackage().equals(package1.getName())){
 									status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_protected_class, new String[] {BasicElementLabels.getJavaElementName(typeBinding.getName()), BasicElementLabels.getJavaElementName(fDescriptor.getPackage())}), JavaStatusContext.create(typeRoot, vdf));
 								}
-							} 
+							}
 						}
 					}
 				}
@@ -838,7 +838,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			}
 		});
 	}
-	
+
 	private boolean isCreateField(FieldInfo fi) {
 		return getField(fi.name).isCreateField();
 	}

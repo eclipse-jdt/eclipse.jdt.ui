@@ -27,18 +27,18 @@ final class InfoViewMessages extends NLS {
 	public static String CopyAction_label;
 	public static String CopyAction_tooltip;
 	public static String CopyAction_description;
-	
+
 	public static String SelectAllAction_label;
 	public static String SelectAllAction_tooltip;
 	public static String SelectAllAction_description;
-	
+
 	public static String GotoInputAction_label;
 	public static String GotoInputAction_tooltip;
 	public static String GotoInputAction_description;
-	
+
 	public static String CopyToClipboard_error_title;
 	public static String CopyToClipboard_error_message;
-	
+
 	public static String JavadocView_action_back_disabledTooltip;
 	public static String JavadocView_action_back_enabledTooltip;
 	public static String JavadocView_action_back_name;

@@ -129,109 +129,109 @@ public class InlineConstantRefactoring extends Refactoring {
 	private static class InlineTargetCompilationUnit {
 
 		private static class InitializerTraversal extends HierarchicalASTVisitor {
-		
+
 			private static boolean areInSameType(ASTNode one, ASTNode other) {
 				ASTNode onesContainer= getContainingTypeDeclaration(one);
 				ASTNode othersContainer= getContainingTypeDeclaration(other);
-		
+
 				if (onesContainer == null || othersContainer == null)
 					return false;
-		
+
 				ITypeBinding onesContainerBinding= getTypeBindingForTypeDeclaration(onesContainer);
 				ITypeBinding othersContainerBinding= getTypeBindingForTypeDeclaration(othersContainer);
-		
+
 				Assert.isNotNull(onesContainerBinding);
 				Assert.isNotNull(othersContainerBinding);
-		
+
 				String onesKey= onesContainerBinding.getKey();
 				String othersKey= othersContainerBinding.getKey();
-		
+
 				if (onesKey == null || othersKey == null)
 					return false;
-		
+
 				return onesKey.equals(othersKey);
 			}
-		
+
 			private static boolean isStaticAccess(SimpleName memberName) {
 				IBinding binding= memberName.resolveBinding();
 				Assert.isTrue(binding instanceof IVariableBinding || binding instanceof IMethodBinding || binding instanceof ITypeBinding);
-		
+
 				if (binding instanceof ITypeBinding)
 					return true;
-		
+
 				if (binding instanceof IVariableBinding)
 					return ((IVariableBinding) binding).isField();
-		
+
 				int modifiers= binding.getModifiers();
 				return Modifier.isStatic(modifiers);
 			}
-		
+
 			private static ASTNode getContainingTypeDeclaration(ASTNode node) {
 				while (node != null && !(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
 					node= node.getParent();
 				}
 				return node;
 			}
-		
+
 			private static ITypeBinding getTypeBindingForTypeDeclaration(ASTNode declaration) {
 				if (declaration instanceof AnonymousClassDeclaration)
 					return ((AnonymousClassDeclaration) declaration).resolveBinding();
-		
+
 				if (declaration instanceof AbstractTypeDeclaration)
 					return ((AbstractTypeDeclaration) declaration).resolveBinding();
-		
+
 				Assert.isTrue(false);
 				return null;
 			}
-		
+
 			private final Expression fInitializer;
 			private ASTRewrite fInitializerRewrite;
 			private final HashSet fStaticImportsInInitializer2;
-		
+
 			// cache:
 			private Set fNamesDeclaredLocallyAtNewLocation;
-		
+
 			private final Expression fNewLocation;
 			private final HashSet fStaticImportsInReference;
 			private final CompilationUnitRewrite fNewLocationCuRewrite;
-		
+
 			public InitializerTraversal(Expression initializer, HashSet staticImportsInInitializer, Expression newLocation, HashSet staticImportsInReference, CompilationUnitRewrite newLocationCuRewrite) {
 				fInitializer= initializer;
 				fInitializerRewrite= ASTRewrite.create(initializer.getAST());
 				fStaticImportsInInitializer2= staticImportsInInitializer;
-				
+
 				fNewLocation= newLocation;
 				fStaticImportsInReference= staticImportsInReference;
 				fNewLocationCuRewrite= newLocationCuRewrite;
-		
+
 				perform(initializer);
 			}
-		
+
 			/**
 			 * @param scope not a TypeDeclaration
 			 * @return Set containing Strings representing simple names
 			 */
 			private Set getLocallyDeclaredNames(BodyDeclaration scope) {
 				Assert.isTrue(!(scope instanceof AbstractTypeDeclaration));
-		
+
 				final Set result= new HashSet();
-		
+
 				if (scope instanceof FieldDeclaration)
 					return result;
-		
+
 				scope.accept(new HierarchicalASTVisitor() {
-		
+
 					public boolean visit(AbstractTypeDeclaration node) {
 						Assert.isTrue(node.getParent() instanceof TypeDeclarationStatement);
-		
+
 						result.add(node.getName().getIdentifier());
 						return false;
 					}
-		
+
 					public boolean visit(AnonymousClassDeclaration anonDecl) {
 						return false;
 					}
-		
+
 					public boolean visit(VariableDeclaration varDecl) {
 						result.add(varDecl.getName().getIdentifier());
 						return false;
@@ -239,18 +239,18 @@ public class InlineConstantRefactoring extends Refactoring {
 				});
 				return result;
 			}
-		
+
 			public ASTRewrite getInitializerRewrite() {
 				return fInitializerRewrite;
 			}
-		
+
 			private void perform(Expression initializer) {
 				initializer.accept(this);
 				if (initializer instanceof MethodInvocation || initializer instanceof SuperMethodInvocation) {
 					addExplicitTypeArgumentsIfNecessary(initializer);
 				}
 			}
-			
+
 			private void addExplicitTypeArgumentsIfNecessary(Expression invocation) {
 				if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
 					ASTNode referenceContext= fNewLocation.getParent();
@@ -268,27 +268,27 @@ public class InlineConstantRefactoring extends Refactoring {
 					}
 				}
 			}
-			
+
 			public boolean visit(FieldAccess fieldAccess) {
 				fieldAccess.getExpression().accept(this);
 				return false;
 			}
-		
+
 			public boolean visit(MethodInvocation invocation) {
 				if (invocation.getExpression() == null)
 					qualifyUnqualifiedMemberNameIfNecessary(invocation.getName());
 				else
 					invocation.getExpression().accept(this);
-		
+
 				for (Iterator it= invocation.arguments().iterator(); it.hasNext();)
 					((Expression) it.next()).accept(this);
-		
+
 				return false;
 			}
-		
+
 			public boolean visit(Name name) {
 				SimpleName leftmost= getLeftmost(name);
-		
+
 				IBinding leftmostBinding= leftmost.resolveBinding();
 				if (leftmostBinding instanceof IVariableBinding || leftmostBinding instanceof IMethodBinding || leftmostBinding instanceof ITypeBinding) {
 					if (shouldUnqualify(leftmost))
@@ -296,27 +296,27 @@ public class InlineConstantRefactoring extends Refactoring {
 					else
 						qualifyUnqualifiedMemberNameIfNecessary(leftmost);
 				}
-		
+
 				if (leftmostBinding instanceof ITypeBinding) {
 					String addedImport= fNewLocationCuRewrite.getImportRewrite().addImport((ITypeBinding) leftmostBinding);
 					fNewLocationCuRewrite.getImportRemover().registerAddedImport(addedImport);
 				}
-				
+
 				return false;
 			}
-			
+
 			private void qualifyUnqualifiedMemberNameIfNecessary(SimpleName memberName) {
 				if (shouldQualify(memberName))
 					qualifyMemberName(memberName);
 			}
-		
+
 			private boolean shouldUnqualify(SimpleName memberName) {
 				if (areInSameType(memberName, fNewLocation))
 					return ! mayBeShadowedByLocalDeclaration(memberName);
-				
+
 				return false;
 			}
-		
+
 			private void unqualifyMemberName(SimpleName memberName) {
 				if (doesParentQualify(memberName))
 					fInitializerRewrite.replace(memberName.getParent(), memberName, null);
@@ -325,28 +325,28 @@ public class InlineConstantRefactoring extends Refactoring {
 			private boolean shouldQualify(SimpleName memberName) {
 				if (! areInSameType(fInitializer, fNewLocation))
 					return true;
-		
+
 				return mayBeShadowedByLocalDeclaration(memberName);
 			}
-			
+
 			private boolean mayBeShadowedByLocalDeclaration(SimpleName memberName) {
 				return getNamesDeclaredLocallyAtNewLocation().contains(memberName.getIdentifier());
 			}
-		
+
 			private Set getNamesDeclaredLocallyAtNewLocation() {
 				if (fNamesDeclaredLocallyAtNewLocation != null)
 					return fNamesDeclaredLocallyAtNewLocation;
-		
+
 				BodyDeclaration enclosingBodyDecl= (BodyDeclaration) ASTNodes.getParent(fNewLocation, BodyDeclaration.class);
 				Assert.isTrue(!(enclosingBodyDecl instanceof AbstractTypeDeclaration));
-		
+
 				return fNamesDeclaredLocallyAtNewLocation= getLocallyDeclaredNames(enclosingBodyDecl);
 			}
-		
+
 			private void qualifyMemberName(SimpleName memberName) {
 				if (isStaticAccess(memberName)) {
 					IBinding memberBinding= memberName.resolveBinding();
-					
+
 					if (memberBinding instanceof IVariableBinding || memberBinding instanceof IMethodBinding) {
 						if (fStaticImportsInReference.contains(fNewLocation)) { // use static import if reference location used static import
 							importStatically(memberName, memberBinding);
@@ -359,51 +359,51 @@ public class InlineConstantRefactoring extends Refactoring {
 					qualifyToTopLevelClass(memberName); //otherwise: qualify and import non-static
 				}
 			}
-		
+
 			private void importStatically(SimpleName toImport, IBinding binding) {
 				String newName= fNewLocationCuRewrite.getImportRewrite().addStaticImport(binding);
 				fNewLocationCuRewrite.getImportRemover().registerAddedStaticImport(binding);
-				
+
 				Name newReference= ASTNodeFactory.newName(fInitializerRewrite.getAST(), newName);
 				fInitializerRewrite.replace(toImport, newReference, null);
 			}
-			
+
 			private void qualifyToTopLevelClass(SimpleName toQualify) {
 				ITypeBinding declaringClass= getDeclaringClassBinding(toQualify);
 				if (declaringClass == null)
 					return;
-				
+
 				Type newQualification= fNewLocationCuRewrite.getImportRewrite().addImport(declaringClass, fInitializerRewrite.getAST());
 				fNewLocationCuRewrite.getImportRemover().registerAddedImports(newQualification);
-				
+
 				SimpleName newToQualify= (SimpleName) fInitializerRewrite.createMoveTarget(toQualify);
 				Type newType= fInitializerRewrite.getAST().newQualifiedType(newQualification, newToQualify);
 				fInitializerRewrite.replace(toQualify, newType, null);
 			}
-			
+
 			private static ITypeBinding getDeclaringClassBinding(SimpleName memberName) {
-		
+
 				IBinding binding= memberName.resolveBinding();
 				if (binding instanceof IMethodBinding)
 					return ((IMethodBinding) binding).getDeclaringClass();
-		
+
 				if (binding instanceof IVariableBinding)
 					return ((IVariableBinding) binding).getDeclaringClass();
-		
+
 				if (binding instanceof ITypeBinding)
 					return ((ITypeBinding) binding).getDeclaringClass();
-		
+
 				Assert.isTrue(false);
 				return null;
-		
+
 			}
-		
+
 		}
-		
+
 		private final Expression fInitializer;
 		private final ICompilationUnit fInitializerUnit;
-		private final VariableDeclarationFragment fOriginalDeclaration; 
-		
+		private final VariableDeclarationFragment fOriginalDeclaration;
+
 		/** The references in this compilation unit, represented as AST Nodes in the parsed representation of the compilation unit */
 		private final Expression[] fReferences;
 		private final VariableDeclarationFragment fDeclarationToRemove;
@@ -411,11 +411,11 @@ public class InlineConstantRefactoring extends Refactoring {
 		private final TightSourceRangeComputer fSourceRangeComputer;
 		private final HashSet fStaticImportsInInitializer;
 		private final boolean fIs15;
-		
+
 		private InlineTargetCompilationUnit(CompilationUnitRewrite cuRewrite, Name[] references, InlineConstantRefactoring refactoring, HashSet staticImportsInInitializer) {
 			fInitializer= refactoring.getInitializer();
 			fInitializerUnit= refactoring.getDeclaringCompilationUnit();
-			
+
 			fCuRewrite= cuRewrite;
 			fSourceRangeComputer= new TightSourceRangeComputer();
 			fCuRewrite.getASTRewrite().setTargetSourceRangeComputer(fSourceRangeComputer);
@@ -423,13 +423,13 @@ public class InlineConstantRefactoring extends Refactoring {
 				fDeclarationToRemove= refactoring.getDeclaration();
 			else
 				fDeclarationToRemove= null;
-			
+
 			fOriginalDeclaration= refactoring.getDeclaration();
-			
+
 			fReferences= new Expression[references.length];
 			for (int i= 0; i < references.length; i++)
 				fReferences[i]= getQualifiedReference(references[i]);
-			
+
 			fIs15= JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject());
 			fStaticImportsInInitializer= fIs15 ? staticImportsInInitializer : new HashSet(0);
 		}
@@ -460,9 +460,9 @@ public class InlineConstantRefactoring extends Refactoring {
 		public CompilationUnitChange getChange() throws CoreException {
 			for (int i= 0; i < fReferences.length; i++)
 				inlineReference(fReferences[i]);
-			
+
 			removeConstantDeclarationIfNecessary();
-			
+
 			return fCuRewrite.createChange();
 		}
 
@@ -477,7 +477,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			if (modifiedInitializer == null)
 				return;
 
-			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_Inline); 
+			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_Inline);
 			Expression newReference= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
 
 			if (fInitializer instanceof ArrayInitializer) {
@@ -514,7 +514,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			InitializerTraversal traversal= new InitializerTraversal(fInitializer, fStaticImportsInInitializer, location, staticImportsInReference, fCuRewrite);
 			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();
 			IDocument document= new Document(fInitializerUnit.getBuffer().getContents()); // could reuse document when generating and applying undo edits
-			
+
 			final RangeMarker marker= new RangeMarker(fInitializer.getStartPosition(), fInitializer.getLength());
 			TextEdit[] rewriteEdits= initializerRewrite.rewriteAST(document, fInitializerUnit.getJavaProject().getOptions(true)).removeChildren();
 			marker.addChildren(rewriteEdits);
@@ -538,11 +538,11 @@ public class InlineConstantRefactoring extends Refactoring {
 			else
 				return ASTNodes.substituteMustBeParenthesized(substitute, location);
 		}
-		
+
 		private void removeConstantDeclarationIfNecessary() {
 			if (fDeclarationToRemove == null)
 				return;
-			
+
 			FieldDeclaration parentDeclaration= (FieldDeclaration) fDeclarationToRemove.getParent();
 			ASTNode toRemove;
 			if (parentDeclaration.fragments().size() == 1)
@@ -550,7 +550,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			else
 				toRemove= fDeclarationToRemove;
 
-			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_remove_declaration); 
+			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_remove_declaration);
 			fCuRewrite.getASTRewrite().remove(toRemove, msg);
 			fCuRewrite.getImportRemover().registerRemovedNode(toRemove);
 		}
@@ -567,11 +567,11 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	private int fSelectionStart;
 	private int fSelectionLength;
-	
+
 	private ICompilationUnit fSelectionCu;
 	private CompilationUnitRewrite fSelectionCuRewrite;
 	private Name fSelectedConstantName;
-	
+
 	private IField fField;
 	private CompilationUnitRewrite fDeclarationCuRewrite;
 	private VariableDeclarationFragment fDeclaration;
@@ -584,13 +584,13 @@ public class InlineConstantRefactoring extends Refactoring {
 	private boolean fReplaceAllReferences= true;
 
 	private CompilationUnitChange[] fChanges;
-	
+
 	/**
 	 * Creates a new inline constant refactoring.
 	 * <p>
 	 * This constructor is only used by <code>DelegateCreator</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param field the field to inline
 	 */
 	public InlineConstantRefactoring(IField field) {
@@ -615,7 +615,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		if (unit != null)
 			initialize(unit, node);
 	}
-	
+
     public InlineConstantRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this(null, null, 0, 0);
    		RefactoringStatus initializeStatus= initialize(arguments);
@@ -653,20 +653,20 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	public RefactoringStatus checkStaticFinalConstantNameSelected() {
 		if (fSelectedConstantName == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_static_final_field, null, Corext.getPluginId(), RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED, null); 
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_static_final_field, null, Corext.getPluginId(), RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED, null);
 
 		return new RefactoringStatus();
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.InlineConstantRefactoring_name; 
+		return RefactoringCoreMessages.InlineConstantRefactoring_name;
 	}
 
 	/**
 	 * Returns the field to inline, or null if the field could not be found or
 	 * {@link #checkInitialConditions(IProgressMonitor)} has not been called yet.
-	 * 
-	 * @return the field, or <code>null</code> 
+	 *
+	 * @return the field, or <code>null</code>
 	 */
 	public IJavaElement getField() {
 		return fField;
@@ -677,12 +677,12 @@ public class InlineConstantRefactoring extends Refactoring {
 			pm.beginTask("", 3); //$NON-NLS-1$
 
 			if (!fSelectionCu.isStructureKnown())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_syntax_errors, null, Corext.getPluginId(), RefactoringStatusCodes.SYNTAX_ERRORS, null); 
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_syntax_errors, null, Corext.getPluginId(), RefactoringStatusCodes.SYNTAX_ERRORS, null);
 
 			RefactoringStatus result= checkStaticFinalConstantNameSelected();
 			if (result.hasFatalError())
 				return result;
-			
+
 			result.merge(findField());
 			if (result.hasFatalError())
 				return result;
@@ -699,7 +699,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			pm.worked(1);
 
 			return result;
-			
+
 		} finally {
 			pm.done();
 		}
@@ -708,8 +708,8 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus findField() {
 		fField= (IField) ((IVariableBinding) fSelectedConstantName.resolveBinding()).getJavaElement();
 		if (fField != null && ! fField.exists())
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_local_anonymous_unsupported, null, Corext.getPluginId(), RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED, null); 
-		
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_local_anonymous_unsupported, null, Corext.getPluginId(), RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED, null);
+
 		return null;
 	}
 	private RefactoringStatus findDeclaration() throws JavaModelException {
@@ -725,7 +725,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				return null;
 			}
 		}
-		
+
 		VariableDeclarationFragment declaration= (VariableDeclarationFragment) fSelectionCuRewrite.getRoot().findDeclaringNode(fSelectedConstantName.resolveBinding());
 		if (declaration != null) {
 			fDeclarationCuRewrite= fSelectionCuRewrite;
@@ -734,8 +734,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 
 		if (fField.getCompilationUnit() == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_binary_file, null, Corext.getPluginId(), RefactoringStatusCodes.DECLARED_IN_CLASSFILE, null); 
-		
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_binary_file, null, Corext.getPluginId(), RefactoringStatusCodes.DECLARED_IN_CLASSFILE, null);
+
 		fDeclarationCuRewrite= new CompilationUnitRewrite(fField.getCompilationUnit());
 		fDeclaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fField, fDeclarationCuRewrite.getRoot());
 		return null;
@@ -744,7 +744,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus checkInitializer() {
 		Expression initializer= getInitializer();
 		if (initializer == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_blank_finals, null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL, null); 
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_blank_finals, null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL, null);
 
 		fInitializerAllStaticFinal= ConstantChecks.isStaticFinalConstant((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(initializer));
 		fInitializerChecked= true;
@@ -758,7 +758,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private Expression getInitializer() {
 		return fDeclaration.getInitializer();
 	}
-	
+
 	private ICompilationUnit getDeclaringCompilationUnit() {
 		return fField.getCompilationUnit();
 	}
@@ -766,12 +766,12 @@ public class InlineConstantRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask("", 3); //$NON-NLS-1$
-		
+
 		try {
 			List/*<CompilationUnitChange>*/changes= new ArrayList();
 			HashSet staticImportsInInitializer= new HashSet();
 			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList(), staticImportsInInitializer);
-			
+
 			if (getReplaceAllReferences()) {
 				SearchResultGroup[] searchResultGroups= findReferences(pm, result);
 				for (int i= 0; i < searchResultGroups.length; i++) {
@@ -830,7 +830,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			fChanges= (CompilationUnitChange[]) changes.toArray(new CompilationUnitChange[changes.size()]);
 
 			return result;
-			
+
 		} finally {
 			fSelectionCuRewrite= null;
 			fSelectedConstantName= null;

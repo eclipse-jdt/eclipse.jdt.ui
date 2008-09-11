@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
+ *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix
  *       expressions into a combination of setter and getter calls.
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       bug Encapsulate field can fail when two variables in one variable declaration (see
@@ -21,9 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +29,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -127,7 +127,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private IField fField;
 	private TextChangeManager fChangeManager;
-	
+
 	private CompilationUnit fRoot;
 	private VariableDeclarationFragment fFieldDeclaration;
 	private ASTRewrite fRewriter;
@@ -141,13 +141,13 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private int fInsertionIndex;	// -1 represents as first method.
 	private boolean fEncapsulateDeclaringClass;
 	private boolean fGenerateJavadoc;
-	
+
 	private List fUsedReadNames;
 	private List fUsedModifyNames;
 	private boolean fConsiderVisibility=true;
-	
+
 	private static final String NO_NAME= ""; //$NON-NLS-1$
-	
+
 	/**
 	 * Creates a new self encapsulate field refactoring.
 	 * @param field the field, or <code>null</code> if invoked by scripting
@@ -167,7 +167,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fArgName= NamingConventions.removePrefixAndSuffixForFieldName(field.getJavaProject(), field.getElementName(), field.getFlags());
 		checkArgName();
 	}
-	
+
 	public void reinitialize() {
 		try {
 			initialize(fField);
@@ -175,7 +175,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			// ignore
 		}
 	}
-	
+
 	public IField getField() {
 		return fField;
 	}
@@ -183,7 +183,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public String getGetterName() {
 		return fGetterName;
 	}
-		
+
 	public void setGetterName(String name) {
 		fGetterName= name;
 		Assert.isNotNull(fGetterName);
@@ -192,24 +192,24 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public String getSetterName() {
 		return fSetterName;
 	}
-	
+
 	public void setSetterName(String name) {
 		fSetterName= name;
 		Assert.isNotNull(fSetterName);
 	}
-	
+
 	public void setInsertionIndex(int index) {
 		fInsertionIndex= index;
 	}
-	
+
 	public int getVisibility() {
 		return fVisibility;
 	}
-	
+
 	public void setVisibility(int visibility) {
 		fVisibility= visibility;
 	}
-	
+
 	public void setEncapsulateDeclaringClass(boolean encapsulateDeclaringClass) {
 		fEncapsulateDeclaringClass= encapsulateDeclaringClass;
 	}
@@ -217,11 +217,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public boolean getEncapsulateDeclaringClass() {
 		return fEncapsulateDeclaringClass;
 	}
-	
+
 	public boolean getGenerateJavadoc() {
 		return fGenerateJavadoc;
 	}
-	
+
 	public void setGenerateJavadoc(boolean value) {
 		fGenerateJavadoc= value;
 	}
@@ -247,7 +247,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		if (fFieldDeclaration.resolveBinding() == null) {
 			if (!processCompilerError(result, node))
-				result.addFatalError(RefactoringCoreMessages.SelfEncapsulateField_type_not_resolveable); 
+				result.addFatalError(RefactoringCoreMessages.SelfEncapsulateField_type_not_resolveable);
 			return result;
 		}
 		computeUsedNames();
@@ -267,14 +267,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (messages.length == 0)
 			return false;
 		result.addFatalError(Messages.format(
-			RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_field,  
+			RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_field,
 			new String[] { BasicElementLabels.getJavaElementName(fField.getElementName()), messages[0].getMessage()}));
 		return true;
 	}
 
 	private String getMappingErrorMessage() {
 		return Messages.format(
-			RefactoringCoreMessages.SelfEncapsulateField_cannot_analyze_selected_field, 
+			RefactoringCoreMessages.SelfEncapsulateField_cannot_analyze_selected_field,
 			BasicElementLabels.getJavaElementName(fField.getElementName()));
 	}
 
@@ -283,7 +283,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public RefactoringStatus checkMethodNames() {
 		return checkMethodNames(isUsingLocalGetter(),isUsingLocalSetter());
 	}
-	
+
 	public RefactoringStatus checkMethodNames(boolean usingLocalGetter, boolean usingLocalSetter) {
 		RefactoringStatus result= new RefactoringStatus();
 		IType declaringType= fField.getDeclaringType();
@@ -291,10 +291,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		checkName(result, fSetterName, fUsedModifyNames, declaringType, usingLocalSetter, fField);
 		return result;
 	}
-	
+
 	private static void checkName(RefactoringStatus status, String name, List usedNames, IType type, boolean reUseExistingField, IField field) {
 		if ("".equals(name)) { //$NON-NLS-1$
-			status.addFatalError(RefactoringCoreMessages.Checks_Choose_name); 
+			status.addFatalError(RefactoringCoreMessages.Checks_Choose_name);
 			return;
 	    }
 		boolean isStatic=false;
@@ -322,9 +322,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		if (reUseExistingField)
 			status.addFatalError(Messages.format(
-				RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_methoddoesnotexist_status_fatalError, 
+				RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_methoddoesnotexist_status_fatalError,
 				new String[] { BasicElementLabels.getJavaElementName(name), BasicElementLabels.getJavaElementName(type.getElementName())}));
-	}	
+	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
@@ -337,28 +337,28 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		pm.worked(1);
 		if (result.hasFatalError())
 			return result;
-		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_searching_for_cunits); 
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_searching_for_cunits);
 		final SubProgressMonitor subPm= new SubProgressMonitor(pm, 5);
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 			SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES),
 			RefactoringScopeFactory.create(fField, fConsiderVisibility),
 			subPm,
 			result, true);
-		
+
 		checkInHierarchy(result, usingLocalGetter, usingLocalSetter);
 		if (result.hasFatalError())
 			return result;
-			
-		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_analyzing);	 
+
+		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_analyzing);
 		IProgressMonitor sub= new SubProgressMonitor(pm, 5);
 		sub.beginTask(NO_NAME, affectedCUs.length);
 		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
-		ITypeBinding declaringClass= 
+		ITypeBinding declaringClass=
 			((AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class)).resolveBinding();
 		List ownerDescriptions= new ArrayList();
 		ICompilationUnit owner= fField.getCompilationUnit();
 		fImportRewrite= StubUtility.createImportRewrite(fRoot, true);
-		
+
 		for (int i= 0; i < affectedCUs.length; i++) {
 			ICompilationUnit unit= affectedCUs[i];
 			sub.subTask(BasicElementLabels.getFileName(unit));
@@ -381,7 +381,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter, importRewrite);
 			root.accept(analyzer);
 			result.merge(analyzer.getStatus());
-			if (!fSetterMustReturnValue) 
+			if (!fSetterMustReturnValue)
 				fSetterMustReturnValue= analyzer.getSetterMustReturnValue();
 			if (result.hasFatalError()) {
 				fChangeManager.clear();
@@ -444,7 +444,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (fEncapsulateDeclaringClass)
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_use_accessors);
 		else
-			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_do_not_use_accessors);			
+			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_do_not_use_accessors);
 		if (fGenerateJavadoc)
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_generate_comments);
 		final EncapsulateFieldDescriptor descriptor= new EncapsulateFieldDescriptor(project, description, comment.asString(), arguments, flags);
@@ -468,24 +468,24 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.SelfEncapsulateField_name; 
+		return RefactoringCoreMessages.SelfEncapsulateField_name;
 	}
-	
+
 	//---- Helper methods -------------------------------------------------------------
-	
+
 	private void checkCompileErrors(RefactoringStatus result, CompilationUnit root, ICompilationUnit element) {
 		IProblem[] messages= root.getProblems();
 		for (int i= 0; i < messages.length; i++) {
 			IProblem problem= messages[i];
 			if (!isIgnorableProblem(problem)) {
 				result.addWarning(Messages.format(
-						RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update, 
+						RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update,
 						BasicElementLabels.getFileName(element)), JavaStatusContext.create(element));
 				return;
 			}
 		}
 	}
-	
+
 	private void checkInHierarchy(RefactoringStatus status, boolean usingLocalGetter, boolean usingLocalSetter) {
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class);
 		ITypeBinding type= declaration.resolveBinding();
@@ -496,7 +496,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				new ITypeBinding[] {fieldType}, status, usingLocalSetter);
 		}
 	}
-	
+
 	public static void checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding returnType, ITypeBinding[] parameters, RefactoringStatus result, boolean reUseMethod) {
 		IMethodBinding method= Bindings.findMethodInHierarchy(type, methodName, parameters);
 		if (method != null) {
@@ -506,31 +506,31 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				String returnTypeKey= returnType.getKey();
 				String methodReturnTypeKey= methodReturnType.getKey();
 				if (returnTypeKey == null && methodReturnTypeKey == null) {
-					returnTypeClash= returnType != methodReturnType;	
+					returnTypeClash= returnType != methodReturnType;
 				} else if (returnTypeKey != null && methodReturnTypeKey != null) {
 					returnTypeClash= !returnTypeKey.equals(methodReturnTypeKey);
 				}
 			}
 			ITypeBinding dc= method.getDeclaringClass();
 			if (returnTypeClash) {
-				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_returnTypeClash, 
+				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_returnTypeClash,
 					new Object[] { BasicElementLabels.getJavaElementName(methodName), BasicElementLabels.getJavaElementName(dc.getName())}),
 					JavaStatusContext.create(method));
 			} else {
 				if (!reUseMethod)
-					result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_overrides, 
+					result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_overrides,
 							new Object[] { BasicElementLabels.getJavaElementName(methodName), BasicElementLabels.getJavaElementName(dc.getName())}),
 						JavaStatusContext.create(method));
 			}
 		} else {
 			if (reUseMethod){
-				result.addError(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_nosuchmethod_status_fatalError, 
+				result.addError(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_nosuchmethod_status_fatalError,
 						BasicElementLabels.getJavaElementName(methodName)),
 						JavaStatusContext.create(method));
 			}
 		}
 	}
-	
+
 	private void computeUsedNames() {
 		fUsedReadNames= new ArrayList(0);
 		fUsedModifyNames= new ArrayList(0);
@@ -544,7 +544,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				fUsedReadNames.add(method);
 			} else if (parameters.length == 1 && parameters[0] == type) {
 				fUsedModifyNames.add(method);
-			} 
+			}
 		}
 	}
 
@@ -564,19 +564,19 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 					position++;
 					break;
 				}
-				numberOfMethods++;	
+				numberOfMethods++;
 			}
 			position++;
 		}
 		TextEditGroup description;
 		ListRewrite rewrite= fRewriter.getListRewrite(decl.getParent(), getBodyDeclarationsProperty(decl.getParent()));
 		if (!JdtFlags.isFinal(fField) && !usingLocalSetter) {
-			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_setter); 
+			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_setter);
 			result.add(description);
 			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position++, description);
 		}
 		if (!usingLocalGetter){
-			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter); 
+			description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_add_getter);
 			result.add(description);
 			rewrite.insertAt(createGetterMethod(ast, rewriter, lineDelimiter), position, description);
 		}
@@ -587,7 +587,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private TextEditGroup makeDeclarationPrivate(ASTRewrite rewriter, FieldDeclaration decl) {
 		AST ast= rewriter.getAST();
-		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_change_visibility); 
+		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.SelfEncapsulateField_change_visibility);
 		if (decl.fragments().size() > 1) {
 			//TODO: doesn't work for cases like this:  int field1, field2= field1, field3= field2; // keeping refs to field
 			rewriter.remove(fFieldDeclaration, description);
@@ -626,10 +626,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		param.setName(ast.newSimpleName(fArgName));
 		param.setType((Type)rewriter.createCopyTarget(type));
 		param.setExtraDimensions(fFieldDeclaration.getExtraDimensions());
-		
+
 		Block block= ast.newBlock();
 		result.setBody(block);
-		
+
 		String fieldAccess= createFieldAccess();
 		String body= CodeGeneration.getSetterMethodBodyContent(fField.getCompilationUnit(), getTypeName(field.getParent()), fSetterName, fieldAccess, fArgName, lineDelimiter);
 		if (body != null) {
@@ -648,8 +648,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
         }
         if (fGenerateJavadoc) {
 			String string= CodeGeneration.getSetterComment(
-				fField.getCompilationUnit() , getTypeName(field.getParent()), fSetterName, 
-				fField.getElementName(), ASTNodes.asString(type), fArgName, 
+				fField.getCompilationUnit() , getTypeName(field.getParent()), fSetterName,
+				fField.getElementName(), ASTNodes.asString(type), fArgName,
 				NamingConventions.removePrefixAndSuffixForFieldName(fField.getJavaProject(), fField.getElementName(), fField.getFlags()),
 				lineDelimiter);
 			if (string != null) {
@@ -659,7 +659,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		return result;
 	}
-	
+
 	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter, String lineDelimiter) throws CoreException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
@@ -671,7 +671,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			returnType= ast.newArrayType(returnType, fFieldDeclaration.getExtraDimensions());
 		}
 		result.setReturnType2(returnType);
-		
+
 		Block block= ast.newBlock();
 		result.setBody(block);
 
@@ -687,7 +687,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	    if (fGenerateJavadoc) {
 			String string= CodeGeneration.getGetterComment(
 				fField.getCompilationUnit() , getTypeName(field.getParent()), fGetterName,
-				fField.getElementName(), ASTNodes.asString(type), 
+				fField.getElementName(), ASTNodes.asString(type),
 				NamingConventions.removePrefixAndSuffixForFieldName(fField.getJavaProject(), fField.getElementName(), fField.getFlags()),
 				lineDelimiter);
 			if (string != null) {
@@ -700,21 +700,21 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private int createModifiers() throws JavaModelException {
 		int result= 0;
-		if (Flags.isPublic(fVisibility)) 
+		if (Flags.isPublic(fVisibility))
 			result |= Modifier.PUBLIC;
-		else if (Flags.isProtected(fVisibility)) 
+		else if (Flags.isProtected(fVisibility))
 			result |= Modifier.PROTECTED;
 		else if (Flags.isPrivate(fVisibility))
 			result |= Modifier.PRIVATE;
-		if (JdtFlags.isStatic(fField)) 
-			result |= Modifier.STATIC; 
+		if (JdtFlags.isStatic(fField))
+			result |= Modifier.STATIC;
 		return result;
 	}
-	
+
 	private String createFieldAccess() throws JavaModelException {
 		String fieldName= fField.getElementName();
 		boolean nameConflict= fArgName.equals(fieldName);
-		
+
 		if (JdtFlags.isStatic(fField)) {
 			if (nameConflict) {
 				return JavaModelUtil.concatenateName(fField.getDeclaringType().getElementName(), fieldName);
@@ -726,7 +726,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		return fieldName;
 	}
-	
+
 	private void checkArgName() {
 		String fieldName= fField.getElementName();
 		boolean isStatic= true;
@@ -739,7 +739,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			fArgName= "_" + fArgName; //$NON-NLS-1$
 		}
 	}
-	
+
 	private String getTypeName(ASTNode type) {
 		if (type instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)type).getName().getIdentifier();
@@ -817,7 +817,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public boolean isUsingLocalSetter() {
 		return checkName(fSetterName, fUsedModifyNames);
 	}
-	
+
 	private static boolean checkName(String name, List usedNames) {
 		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
 			IMethodBinding method= (IMethodBinding)iter.next();
@@ -827,8 +827,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			}
 		}
 		return false;
-	}	
-	
+	}
+
 	private boolean isIgnorableProblem(IProblem problem) {
 		if (problem.getID() == IProblem.NotVisibleField)
 			return true;

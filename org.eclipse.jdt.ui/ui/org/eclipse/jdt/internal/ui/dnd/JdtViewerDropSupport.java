@@ -10,18 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.part.PluginTransfer;
-
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDropAdapter;
@@ -37,34 +36,34 @@ public class JdtViewerDropSupport {
 
 	public JdtViewerDropSupport(StructuredViewer viewer) {
 		fViewer= viewer;
-		
+
 		fDelegatingDropAdapter= new DelegatingDropAdapter();
 		fReorgDropListener= new SelectionTransferDropAdapter(fViewer);
 		fDelegatingDropAdapter.addDropTargetListener(fReorgDropListener);
 		fDelegatingDropAdapter.addDropTargetListener(new FileTransferDropAdapter(fViewer));
 		fDelegatingDropAdapter.addDropTargetListener(new PluginTransferDropAdapter(fViewer));
-		
+
 		fStarted= false;
 	}
 
 	public void addDropTargetListener(TransferDropTargetListener listener) {
 		Assert.isLegal(!fStarted);
-		
+
 		fDelegatingDropAdapter.addDropTargetListener(listener);
 	}
 
 	public void start() {
 		Assert.isLegal(!fStarted);
-		
+
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_DEFAULT;
-		
+
 		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(), 
+			LocalSelectionTransfer.getInstance(),
 			FileTransfer.getInstance(),
 			PluginTransfer.getInstance()};
-		
+
 		fViewer.addDropSupport(ops, transfers, fDelegatingDropAdapter);
-		
+
 		fStarted= true;
 	}
 

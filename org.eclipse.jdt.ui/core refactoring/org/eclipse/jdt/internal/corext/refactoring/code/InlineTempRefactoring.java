@@ -14,15 +14,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -100,7 +100,7 @@ public class InlineTempRefactoring extends Refactoring {
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private ICompilationUnit fCu;
-	
+
 	//the following fields are set after the construction
 	private VariableDeclaration fVariableDeclaration;
 	private SimpleName[] fReferences;
@@ -119,11 +119,11 @@ public class InlineTempRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= unit;
-		
+
 		fASTRoot= node;
 		fVariableDeclaration= null;
 	}
-	
+
 	/**
 	 * Creates a new inline constant refactoring.
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
@@ -133,80 +133,80 @@ public class InlineTempRefactoring extends Refactoring {
 	public InlineTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		this(unit, null, selectionStart, selectionLength);
 	}
-	
+
 	public InlineTempRefactoring(VariableDeclaration decl) {
 		fVariableDeclaration= decl;
 		ASTNode astRoot= decl.getRoot();
 		Assert.isTrue(astRoot instanceof CompilationUnit);
 		fASTRoot= (CompilationUnit) astRoot;
 		Assert.isTrue(fASTRoot.getJavaElement() instanceof ICompilationUnit);
-		
+
 		fSelectionStart= decl.getStartPosition();
 		fSelectionLength= decl.getLength();
 		fCu= (ICompilationUnit) fASTRoot.getJavaElement();
 	}
-	
+
     public InlineTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this(null, null, 0, 0);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
     }
-	
-	
+
+
 	public RefactoringStatus checkIfTempSelected() {
 		VariableDeclaration decl= getVariableDeclaration();
 		if (decl == null) {
 			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, getASTRoot(), RefactoringCoreMessages.InlineTempRefactoring_select_temp);
 		}
 		if (decl.getParent() instanceof FieldDeclaration) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTemRefactoring_error_message_fieldsCannotBeInlined); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTemRefactoring_error_message_fieldsCannotBeInlined);
 		}
 		return new RefactoringStatus();
-	}	
-	
+	}
+
 	private CompilationUnit getASTRoot() {
 		if (fASTRoot == null) {
 			fASTRoot= RefactoringASTParser.parseWithASTProvider(fCu, true, null);
 		}
 		return fASTRoot;
 	}
-	
+
 	public VariableDeclaration getVariableDeclaration() {
 		if (fVariableDeclaration == null) {
 			fVariableDeclaration= TempDeclarationFinder.findTempDeclaration(getASTRoot(), fSelectionStart, fSelectionLength);
 		}
 		return fVariableDeclaration;
 	}
-	
+
 	/*
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.InlineTempRefactoring_name; 
+		return RefactoringCoreMessages.InlineTempRefactoring_name;
 	}
-	
+
 	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
-			
+
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}), getValidationContext());
 			if (result.hasFatalError())
 				return result;
-					
+
 			VariableDeclaration declaration= getVariableDeclaration();
-			
+
 			result.merge(checkSelection(declaration));
 			if (result.hasFatalError())
 				return result;
-			
-			result.merge(checkInitializer(declaration));	
+
+			result.merge(checkInitializer(declaration));
 			return result;
 		} finally {
 			pm.done();
-		}	
+		}
 	}
 
     private RefactoringStatus checkInitializer(VariableDeclaration decl) {
@@ -218,25 +218,25 @@ public class InlineTempRefactoring extends Refactoring {
 	private RefactoringStatus checkSelection(VariableDeclaration decl) {
 		ASTNode parent= decl.getParent();
 		if (parent instanceof MethodDeclaration) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_method_parameter); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_method_parameter);
 		}
-		
+
 		if (parent instanceof CatchClause) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_exceptions_declared); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_exceptions_declared);
 		}
-		
+
 		if (parent instanceof VariableDeclarationExpression && parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_for_initializers); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_for_initializers);
 		}
-		
+
 		if (decl.getInitializer() == null) {
 			String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_not_initialized, BasicElementLabels.getJavaElementName(decl.getName().getIdentifier()));
 			return RefactoringStatus.createFatalErrorStatus(message);
-		}	
-				
+		}
+
 		return checkAssignments(decl);
 	}
-	
+
 	private RefactoringStatus checkAssignments(VariableDeclaration decl) {
 		TempAssignmentFinder assignmentFinder= new TempAssignmentFinder(decl);
 		getASTRoot().accept(assignmentFinder);
@@ -246,11 +246,11 @@ public class InlineTempRefactoring extends Refactoring {
 		int start= firstAssignment.getStartPosition();
 		int length= firstAssignment.getLength();
 		ISourceRange range= new SourceRange(start, length);
-		RefactoringStatusContext context= JavaStatusContext.create(fCu, range);	
+		RefactoringStatusContext context= JavaStatusContext.create(fCu, range);
 		String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_assigned_more_once, BasicElementLabels.getJavaElementName(decl.getName().getIdentifier()));
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
-	
+
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
@@ -260,9 +260,9 @@ public class InlineTempRefactoring extends Refactoring {
 			return new RefactoringStatus();
 		} finally {
 			pm.done();
-		}	
+		}
 	}
-	
+
 	//----- changes
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
@@ -273,7 +273,7 @@ public class InlineTempRefactoring extends Refactoring {
 			IJavaProject javaProject= fCu.getJavaProject();
 			if (javaProject != null)
 				project= javaProject.getElementName();
-			
+
 			final IVariableBinding binding= getVariableDeclaration().resolveBinding();
 			String text= null;
 			final IMethodBinding method= binding.getDeclaringMethod();
@@ -288,12 +288,12 @@ public class InlineTempRefactoring extends Refactoring {
 			final InlineLocalVariableDescriptor descriptor= new InlineLocalVariableDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, String.valueOf(fSelectionStart) + ' ' + String.valueOf(fSelectionLength));
-			
+
 			CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(fCu, fASTRoot);
-			
+
 			inlineTemp(cuRewrite);
 			removeTemp(cuRewrite);
-			
+
 			final CompilationUnitChange result= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, new SubProgressMonitor(pm, 1));
 			result.setDescriptor(new RefactoringChangeDescriptor(descriptor));
 			return result;
@@ -314,15 +314,15 @@ public class InlineTempRefactoring extends Refactoring {
 			rewrite.replace(curr, initializerCopy, groupDesc);
 		}
 	}
-	
+
     private boolean needsBrackets(SimpleName name, VariableDeclaration variableDeclaration) {
 		Expression initializer= variableDeclaration.getInitializer();
 		if (initializer instanceof Assignment) //for esthetic reasons
 			return true;
-    		
+
     	return ASTNodes.substituteMustBeParenthesized(initializer, name);
     }
-    
+
 
 	private void removeTemp(CompilationUnitRewrite cuRewrite) {
 		VariableDeclaration variableDeclaration= getVariableDeclaration();
@@ -335,7 +335,7 @@ public class InlineTempRefactoring extends Refactoring {
 			rewrite.remove(variableDeclaration, groupDesc);
 		}
 	}
-	
+
 	private Expression getInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
 		Expression copy= getModifiedInitializerSource(rewrite, reference);
 		boolean brackets= needsBrackets(reference, getVariableDeclaration());
@@ -346,11 +346,11 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 		return copy;
 	}
-	
+
 	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
 		VariableDeclaration varDecl= getVariableDeclaration();
 		Expression initializer= varDecl.getInitializer();
-		
+
 		ASTNode referenceContext= reference.getParent();
 		if (isInvocation(initializer)) {
 			if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
@@ -368,11 +368,11 @@ public class InlineTempRefactoring extends Refactoring {
 				}
 			}
 		}
-		
+
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
 		if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
 			ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
-			
+
 			ArrayCreation newArrayCreation= rewrite.getAST().newArrayCreation();
 			newArrayCreation.setType(newType);
 			newArrayCreation.setInitializer((ArrayInitializer) copy);
@@ -387,7 +387,7 @@ public class InlineTempRefactoring extends Refactoring {
 		for (int i= 0; i < typeArgumentNodes.length; i++) {
 			typeArgsRewrite.insertLast(typeArgumentNodes[i], null);
 		}
-		
+
 		IDocument document= new Document(fCu.getBuffer().getContents());
 		final RangeMarker marker= new RangeMarker(invocation.getStartPosition(), invocation.getLength());
 		IJavaProject project= fCu.getJavaProject();
@@ -407,7 +407,7 @@ public class InlineTempRefactoring extends Refactoring {
 		//fallback:
 		return fCu.getBuffer().getText(invocation.getStartPosition(), invocation.getLength());
 	}
-	
+
 	private static boolean isInvocation(Expression node) {
 		return node instanceof MethodInvocation || node instanceof SuperMethodInvocation;
 	}

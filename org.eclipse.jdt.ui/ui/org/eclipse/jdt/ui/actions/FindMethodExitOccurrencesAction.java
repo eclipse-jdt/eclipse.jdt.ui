@@ -18,6 +18,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.ITypeRoot;
@@ -37,23 +38,23 @@ import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 
 /**
  * Action to find all method exits for a given method.
- * <p> 
+ * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.4
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindMethodExitOccurrencesAction(JavaEditor editor) {
@@ -61,12 +62,12 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(getEditorInput(editor) != null);
 	}
-	
+
 	/**
-	 * Creates a new {@link FindMethodExitOccurrencesAction}. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new {@link FindMethodExitOccurrencesAction}. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FindMethodExitOccurrencesAction(IWorkbenchSite site) {
@@ -75,9 +76,9 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 		setToolTipText(ActionMessages.FindMethodExitOccurrencesAction_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_METHOD_EXIT_OCCURRENCES);
 	}
-	
+
 	//---- Text Selection ----------------------------------------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -88,14 +89,14 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
 		setEnabled(astRoot != null && new MethodExitsFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -122,12 +123,12 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 
 	private static ITypeRoot getEditorInput(JavaEditor editor) {
 		return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
-	} 
-		
+	}
+
 	private static void showMessage(Shell shell, JavaEditor editor, String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
-		if (statusLine != null) 
-			statusLine.setMessage(true, msg, null); 
+		if (statusLine != null)
+			statusLine.setMessage(true, msg, null);
 		shell.getDisplay().beep();
 	}
 }

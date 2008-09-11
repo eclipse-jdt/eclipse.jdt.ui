@@ -41,25 +41,25 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Tries to use a super type of a class where possible.
- *  
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 // Note: The disclaimer about instantiating and subclassing got added in 3.1.
 // Don't make this class final or remove a constructor!
 public class UseSupertypeAction extends SelectionDispatchAction{
-	
+
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public UseSupertypeAction(JavaEditor editor) {
@@ -72,15 +72,15 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	 * Creates a new <code>UseSupertypeAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public UseSupertypeAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.UseSupertypeAction_use_Supertype); 
+		setText(RefactoringMessages.UseSupertypeAction_use_Supertype);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.USE_SUPERTYPE_ACTION);
 	}
-	
+
 	//---- structured selection ---------------------------------------------------
 
 	/*
@@ -109,35 +109,35 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 				RefactoringExecutionStarter.startUseSupertypeRefactoring(singleSelectedType, getShell());
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 
 	private static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException{
-		if (selection.isEmpty() || selection.size() != 1) 
+		if (selection.isEmpty() || selection.size() != 1)
 			return null;
-		
+
 		Object first= selection.getFirstElement();
 		if (first instanceof IType)
 			return (IType)first;
-		if (first instanceof ICompilationUnit)	
+		if (first instanceof ICompilationUnit)
 			return JavaElementUtil.getMainType((ICompilationUnit)first);
 		return null;
 	}
-	
+
 	//---- text selection ------------------------------------------------------
-	
+
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -147,7 +147,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 			setEnabled(false);
 		}
 	}
-	
+
 	/*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
@@ -159,10 +159,10 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 					return;
 				RefactoringExecutionStarter.startUseSupertypeRefactoring(type, getShell());
 			} else {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.UseSupertypeAction_to_activate); 
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.UseSupertypeAction_to_activate);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 }

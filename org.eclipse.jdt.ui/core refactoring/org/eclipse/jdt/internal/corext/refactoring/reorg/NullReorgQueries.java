@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 /**
  * Null implementation of reorg queries.
- * 
+ *
  * @since 3.3
  */
 public final class NullReorgQueries implements IReorgQueries {

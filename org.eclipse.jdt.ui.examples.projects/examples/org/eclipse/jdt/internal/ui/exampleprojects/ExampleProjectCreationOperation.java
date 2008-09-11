@@ -15,25 +15,39 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.zip.ZipFile;
 
+import org.osgi.framework.Bundle;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.*;
+
 import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
-import org.osgi.framework.Bundle;
 
 public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 
 	private IResource fElementToOpen;
-	
+
 	private ExampleProjectCreationWizardPage fPage;
 	private IOverwriteQuery fOverwriteQuery;
-	
+
 	/*
 	 * Constructor for ExampleProjectCreationOperation
 	 */
@@ -42,7 +56,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		fPage= page;
 		fOverwriteQuery= overwriteQuery;
 	}
-	
+
 	/*
 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 	 */
@@ -55,30 +69,30 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		} finally {
 			monitor.done();
 		}
-	}		
-	
+	}
+
 	public IResource getElementToOpen() {
 		return fElementToOpen;
 	}
-	
+
 
 	private void createProject(ExampleProjectCreationWizardPage page, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		IWorkspaceRoot root= ExampleProjectsPlugin.getWorkspace().getRoot();
 		IConfigurationElement desc= page.getConfigurationElement();
-		
+
 		String encoding= desc.getAttribute("encoding"); //$NON-NLS-1$
-		
+
 		IConfigurationElement[] imports= desc.getChildren("import"); //$NON-NLS-1$
 		IConfigurationElement[] natures= desc.getChildren("nature"); //$NON-NLS-1$
 		IConfigurationElement[] references= desc.getChildren("references"); //$NON-NLS-1$
 		int nImports= (imports == null) ? 0 : imports.length;
 		int nNatures= (natures == null) ? 0 : natures.length;
 		int nReferences= (references == null) ? 0 : references.length;
-		
-		monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc_proj, nImports + 2); 
+
+		monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc_proj, nImports + 2);
 
 		String name= page.getName();
-		
+
 		String[] natureIds= new String[nNatures];
 		for (int i= 0; i < nNatures; i++) {
 			natureIds[i]= natures[i].getAttribute("id"); //$NON-NLS-1$
@@ -86,24 +100,24 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		IProject[] referencedProjects= new IProject[nReferences];
 		for (int i= 0; i < nReferences; i++) {
 			referencedProjects[i]= root.getProject(references[i].getAttribute("id")); //$NON-NLS-1$
-		}		
-		
+		}
+
 		IProject proj= configNewProject(root, name, natureIds, referencedProjects, encoding, monitor);
-			
+
 		for (int i= 0; i < nImports; i++) {
 			doImports(proj, imports[i], new SubProgressMonitor(monitor, 1));
 		}
-		
+
 		String open= desc.getAttribute("open"); //$NON-NLS-1$
 		if (open != null && open.length() > 0) {
 			IResource fileToOpen= proj.findMember(new Path(open));
 			if (fileToOpen != null) {
 				fElementToOpen= fileToOpen;
 			}
-		}		
-		
+		}
+
 	}
-	
+
 	private IProject configNewProject(IWorkspaceRoot root, String name, String[] natureIds, IProject[] referencedProjects, String encoding, IProgressMonitor monitor) throws InvocationTargetException {
 		try {
 			IProject project= root.getProject(name);
@@ -117,19 +131,19 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			desc.setLocation(null);
 			desc.setNatureIds(natureIds);
 			desc.setReferencedProjects(referencedProjects);
-			
+
 			project.setDescription(desc, new SubProgressMonitor(monitor, 1));
 
 			if (encoding != null) {
 				project.setDefaultCharset(encoding, new SubProgressMonitor(monitor, 1));
 			}
-			
+
 			return project;
 		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
 		}
 	}
-	
+
 	private void doImports(IProject project, IConfigurationElement curr, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
 			IPath destPath;
@@ -149,14 +163,14 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 				ExampleProjectsPlugin.log("projectsetup descriptor: import missing"); //$NON-NLS-1$
 				return;
 			}
-		
+
 			ZipFile zipFile= getZipFileFromPluginDir(importPath, getContributingPlugin(curr));
 			importFilesFromZip(zipFile, destPath, new SubProgressMonitor(monitor, 1));
 		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
 		}
 	}
-	
+
 	private Bundle getContributingPlugin(IConfigurationElement configurationElement) {
 		String namespace= configurationElement.getContributor().getName();
 		return Platform.getBundle(namespace);
@@ -172,8 +186,8 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			throw new CoreException(status);
 		}
 	}
-	
-	private void importFilesFromZip(ZipFile srcZipFile, IPath destPath, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {		
+
+	private void importFilesFromZip(ZipFile srcZipFile, IPath destPath, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		ZipFileStructureProvider structureProvider=	new ZipFileStructureProvider(srcZipFile);
 		ImportOperation op= new ImportOperation(destPath, structureProvider.getRoot(), structureProvider, fOverwriteQuery);
 		op.run(monitor);

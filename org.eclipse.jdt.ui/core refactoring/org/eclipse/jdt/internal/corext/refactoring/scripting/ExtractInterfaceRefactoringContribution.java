@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfacePro
 
 /**
  * Refactoring contribution for the extract interface refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractInterfaceRefactoringContribution extends JavaRefactoringContribution {
@@ -45,7 +45,7 @@ public final class ExtractInterfaceRefactoringContribution extends JavaRefactori
 	public RefactoringDescriptor createDescriptor() {
 		return new ExtractInterfaceDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ExtractInterfaceDescriptor(project, description, comment, arguments, flags);
 	}

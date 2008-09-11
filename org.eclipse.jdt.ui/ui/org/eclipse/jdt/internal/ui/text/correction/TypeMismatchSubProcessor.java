@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -186,21 +186,21 @@ public class TypeMismatchSubProcessor {
 		}
 
 		addChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, false, 5, proposals);
-		
+
 		if (castTypeBinding == ast.resolveWellKnownType(CorrectionMessages.TypeMismatchSubProcessor_0) && currBinding != null && !currBinding.isPrimitive() && !Bindings.isVoidType(currBinding)) {
 			String label= CorrectionMessages.TypeMismatchSubProcessor_insertnullcheck_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
-			
+
 			InfixExpression expression= ast.newInfixExpression();
 			expression.setLeftOperand((Expression) rewrite.createMoveTarget(nodeToCast));
 			expression.setRightOperand(ast.newNullLiteral());
 			expression.setOperator(InfixExpression.Operator.NOT_EQUALS);
 			rewrite.replace(nodeToCast, expression, null);
-			
+
 			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image));
 		}
-		
+
 	}
 
 	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection proposals) throws JavaModelException {
@@ -411,12 +411,12 @@ public class TypeMismatchSubProcessor {
 		}
 		EnhancedForStatement forStatement= (EnhancedForStatement) selectedNode.getParent();
 
-		
+
 		ITypeBinding expressionBinding= forStatement.getExpression().resolveTypeBinding();
 		if (expressionBinding == null) {
 			return;
 		}
-		
+
 		ITypeBinding expectedBinding;
 		if (expressionBinding.isArray()) {
 			expectedBinding= expressionBinding.getComponentType();
@@ -431,7 +431,7 @@ public class TypeMismatchSubProcessor {
 			}
 			expectedBinding= typeArguments[0];
 		}
-		
+
 		SingleVariableDeclaration parameter= forStatement.getParameter();
 
 		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { BasicElementLabels.getJavaElementName(parameter.getName().getIdentifier()), BindingLabelProvider.getBindingLabel(expectedBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS) });
@@ -442,7 +442,7 @@ public class TypeMismatchSubProcessor {
 		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
 		Type newType= importRewrite.addImport(expectedBinding, astRoot.getAST());
 		rewrite.replace(parameter.getType(), newType, null);
-		
+
 		proposals.add(proposal);
 	}
 

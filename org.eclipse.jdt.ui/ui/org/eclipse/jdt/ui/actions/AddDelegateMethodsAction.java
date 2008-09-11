@@ -18,10 +18,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,6 +27,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -101,13 +101,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * <p>
  * The action is applicable to structured selections containing elements of type
  * <code>IField</code> or <code>IType</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class AddDelegateMethodsAction extends SelectionDispatchAction {
@@ -132,13 +132,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					if (selection[index] instanceof DelegateEntry) {
 						DelegateEntry delegateEntry= (DelegateEntry) selection[index];
 						if (!signatures.add(getSignature(delegateEntry.delegateMethod))) {
-							return new StatusInfo(IStatus.ERROR, ActionMessages.AddDelegateMethodsAction_duplicate_methods); 
+							return new StatusInfo(IStatus.ERROR, ActionMessages.AddDelegateMethodsAction_duplicate_methods);
 						}
 						count++;
 					}
 				}
 			}
-			info= new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.AddDelegateMethodsAction_selectioninfo_more, new Object[] { String.valueOf(count), String.valueOf(fEntries)})); 
+			info= new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.AddDelegateMethodsAction_selectioninfo_more, new Object[] { String.valueOf(count), String.valueOf(fEntries)}));
 			return info;
 		}
 
@@ -190,7 +190,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 				}
 				return result.toArray();
-			}			
+			}
 			return null;
 		}
 
@@ -245,13 +245,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		 */
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
-			link.setText(ActionMessages.AddDelegateMethodsAction_template_link_message); 
+			link.setText(ActionMessages.AddDelegateMethodsAction_template_link_message);
 			link.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.OVERRIDECOMMENT_ID);
 				}
 			});
-			link.setToolTipText(ActionMessages.AddDelegateMethodsAction_template_link_tooltip); 
+			link.setToolTipText(ActionMessages.AddDelegateMethodsAction_template_link_tooltip);
 
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
@@ -303,7 +303,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static final String DIALOG_TITLE= ActionMessages.AddDelegateMethodsAction_error_title; 
+	private static final String DIALOG_TITLE= ActionMessages.AddDelegateMethodsAction_error_title;
 
 	private static boolean hasPrimitiveType(IField field) throws JavaModelException {
 		String signature= field.getTypeSignature();
@@ -320,9 +320,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this
 	 * constructor.
-	 * 
+	 *
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public AddDelegateMethodsAction(CompilationUnitEditor editor) {
@@ -335,14 +335,14 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	 * Creates a new <code>AddDelegateMethodsAction</code>. The action requires that
 	 * the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public AddDelegateMethodsAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.AddDelegateMethodsAction_label); 
-		setDescription(ActionMessages.AddDelegateMethodsAction_description); 
-		setToolTipText(ActionMessages.AddDelegateMethodsAction_tooltip); 
+		setText(ActionMessages.AddDelegateMethodsAction_label);
+		setDescription(ActionMessages.AddDelegateMethodsAction_description);
+		setToolTipText(ActionMessages.AddDelegateMethodsAction_tooltip);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_DELEGATE_METHODS_ACTION);
 	}
@@ -371,19 +371,19 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				count++;
 		}
 		if (count == 0)
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable);
 		return (count > 0);
 	}
 
 	private boolean canRunOn(IType type) throws JavaModelException {
 		if (type == null || type.getCompilationUnit() == null) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_in_source_file); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_in_source_file);
 			return false;
 		} else if (type.isAnnotation()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_annotation_not_applicable); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_annotation_not_applicable);
 			return false;
 		} else if (type.isInterface()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_interface_not_applicable); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_interface_not_applicable);
 			return false;
 		}
 		return canRunOn(type.getFields());
@@ -444,9 +444,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			else if (firstElement instanceof ICompilationUnit)
 				run(JavaElementUtil.getMainType((ICompilationUnit) firstElement), new IField[0], false);
 			else if (!(firstElement instanceof IField))
-				MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
+				MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed);
 		}
 
 	}
@@ -475,11 +475,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 				}
 			}
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed);
 		} catch (InterruptedException e) {
 			// cancelled
 		}
@@ -530,8 +530,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			dialog.setComparator(comparator);
 			dialog.setInput(new Object());
 			dialog.setContainerMode(true);
-			dialog.setMessage(ActionMessages.AddDelegateMethodsAction_message); 
-			dialog.setTitle(ActionMessages.AddDelegateMethodsAction_title); 
+			dialog.setMessage(ActionMessages.AddDelegateMethodsAction_message);
+			dialog.setTitle(ActionMessages.AddDelegateMethodsAction_title);
 			IVariableBinding[] expanded= provider.getExpandedElements();
 			if (expanded.length > 0) {
 				dialog.setExpandedElements(expanded);
@@ -583,9 +583,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			}
 			notifyResult(result == Window.OK);
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
+			ExceptionHandler.handle(exception, DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
+			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed);
 		}
 	}
 }

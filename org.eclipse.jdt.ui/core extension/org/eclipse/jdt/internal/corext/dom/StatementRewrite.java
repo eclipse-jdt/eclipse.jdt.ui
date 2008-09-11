@@ -25,10 +25,10 @@ public class StatementRewrite extends ReplaceRewrite {
 	public StatementRewrite(ASTRewrite rewrite, ASTNode[] nodes) {
 		super(rewrite, nodes);
 	}
-	
+
 	protected void handleOneMany(ASTNode[] replacements, TextEditGroup description) {
 		AST ast= fToReplace[0].getAST();
-		// to replace == 1, but more than one replacement. Have to check if we 
+		// to replace == 1, but more than one replacement. Have to check if we
 		// need to insert a block to not change structure
 		if (ASTNodes.isControlStatementBody(fDescriptor)) {
 			Block block= ast.newBlock();
@@ -44,5 +44,5 @@ public class StatementRewrite extends ReplaceRewrite {
 				container.insertAfter(replacements[i], replacements[i - 1], description);
 			}
 		}
-	}	
+	}
 }

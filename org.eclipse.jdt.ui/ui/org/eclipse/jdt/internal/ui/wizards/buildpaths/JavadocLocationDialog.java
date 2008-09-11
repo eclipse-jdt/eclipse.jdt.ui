@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.net.URL;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -36,25 +36,25 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class JavadocLocationDialog extends StatusDialog {
 
 	private JavadocConfigurationBlock fJavadocConfigurationBlock;
-	
+
 	/**
 	 * Shows the UI for configuring a javadoc location.
 	 * Use {@link org.eclipse.jdt.ui.JavaUI} to access and configure Javadoc locations.
-	 * 
+	 *
 	 * @param parent The parent shell for the dialog.
 	 * @param libraryName Name of of the library to which configured javadoc location belongs.
 	 * @param initialURL The initial URL or <code>null</code>.
 	 */
 	public JavadocLocationDialog(Shell parent, String libraryName, URL initialURL) {
 		super(parent);
-		
+
 		IStatusChangeListener listener= new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
-		};	
-		
-		setTitle(Messages.format(NewWizardMessages.LibrariesWorkbookPage_JavadocPropertyDialog_title, libraryName)); 
+		};
+
+		setTitle(Messages.format(NewWizardMessages.LibrariesWorkbookPage_JavadocPropertyDialog_title, libraryName));
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, listener, initialURL, false);
 	}
 
@@ -73,10 +73,10 @@ public class JavadocLocationDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		Control inner= fJavadocConfigurationBlock.createContents(composite);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-		applyDialogFont(composite);		
+		applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	/**
 	 * Returns the configured Javadoc location. The result is only valid after the dialog
 	 * has been opened and has not been cancelled by the user.

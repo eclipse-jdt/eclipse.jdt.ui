@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+
+import org.eclipse.search.ui.NewSearchUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Opens the Search Dialog and brings the Java search page to front
@@ -55,5 +59,5 @@ public class OpenJavaSearchPageAction implements IWorkbenchWindowActionDelegate 
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (shell != null && shell.getDisplay() != null)
 			shell.getDisplay().beep();
-	}	
+	}
 }

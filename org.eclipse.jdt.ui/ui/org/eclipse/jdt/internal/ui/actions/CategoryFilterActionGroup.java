@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,13 +18,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionItem;
@@ -78,7 +78,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 					String[] categories= member.getCategories();
 					if (categories.length == 0)
 						return !fFilterUncategorizedMembers;
-					
+
 					for (int i= 0; i < categories.length; i++) {
 						if (!fFilteredCategories.contains(categories[i]))
 							return true;
@@ -90,11 +90,11 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			}
 			return true;
 		}
-		
+
 	}
-	
+
 	private class CategoryFilterSelectionDialog extends SelectionStatusDialog implements IListAdapter {
-		
+
 		private static final int SELECT_ALL= 0;
 		private static final int DESELECT_ALL= 1;
 
@@ -102,14 +102,14 @@ public class CategoryFilterActionGroup extends ActionGroup {
 
 		public CategoryFilterSelectionDialog(Shell parent, List categories, List selectedCategories) {
 			super(parent);
-			
+
 			setTitle(ActionMessages.CategoryFilterActionGroup_JavaCategoryFilter_title);
-			
+
 			String[] buttons= {
-					ActionMessages.CategoryFilterActionGroup_SelectAllCategories, 
+					ActionMessages.CategoryFilterActionGroup_SelectAllCategories,
 					ActionMessages.CategoryFilterActionGroup_DeselectAllCategories
 					};
-			
+
 			fCategoryList= new CheckedListDialogField(this, buttons, new ILabelProvider() {
 							public Image getImage(Object element) {return null;}
 							public String getText(Object element) {return (String)element;}
@@ -130,7 +130,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				fCategoryList.setEnabled(false);
 			}
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -139,9 +139,9 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fCategoryList }, true, 5, 5);
 			LayoutUtil.setHorizontalGrabbing(fCategoryList.getListControl(null));
 			Dialog.applyDialogFont(composite);
-			
+
 			setHelpAvailable(false);
-			
+
 			return composite;
 		}
 
@@ -174,16 +174,16 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		}
 		public void selectionChanged(ListDialogField field) {}
 	}
-	
+
 	private class CategoryFilterMenuAction extends Action {
-		
+
 		public CategoryFilterMenuAction() {
-			setDescription(ActionMessages.CategoryFilterActionGroup_ShowCategoriesActionDescription); 
-			setToolTipText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesToolTip); 
+			setDescription(ActionMessages.CategoryFilterActionGroup_ShowCategoriesActionDescription);
+			setToolTipText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesToolTip);
 			setText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesLabel);
 			JavaPluginImages.setLocalImageDescriptors(this, "category_menu.gif"); //$NON-NLS-1$
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -192,9 +192,9 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		}
 
 	}
-		
+
 	private class CategoryFilterAction extends Action {
-		
+
 		private final String fCategory;
 
 		public CategoryFilterAction(String category, int count) {
@@ -222,7 +222,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		}
 
 	}
-	
+
 	private class FilterUncategorizedMembersAction extends Action {
 
 		public FilterUncategorizedMembersAction() {
@@ -230,7 +230,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			setChecked(!fFilterUncategorizedMembers);
 			setId(FILTER_CATEGORY_ACTION_ID);
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -240,13 +240,13 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			fireSelectionChange();
 		}
 	}
-	
+
 	private interface IResultCollector {
 		public boolean accept(String[] category);
 	}
-	
+
 	private static int COUNTER= 0;//WORKAROUND for Bug 132669 https://bugs.eclipse.org/bugs/show_bug.cgi?id=132669
-	
+
 	private static final String FILTER_CATEGORY_ACTION_ID= "FilterCategoryActionId"; //$NON-NLS-1$
 	private final String CATEGORY_MENU_GROUP_NAME= "CategoryMenuGroup" + (COUNTER++); //$NON-NLS-1$
 	private static final int MAX_NUMBER_OF_CATEGORIES_IN_MENU= 5;
@@ -266,7 +266,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		Assert.isLegal(viewer != null);
 		Assert.isLegal(viewerId != null);
 		Assert.isLegal(input != null);
-		
+
 		fLRUList= new LinkedHashMap(MAX_NUMBER_OF_CATEGORIES_IN_MENU * 2, 0.75f, true) {
 			private static final long serialVersionUID= 1L;
 			protected boolean removeEldestEntry(Map.Entry eldest) {
@@ -276,22 +276,22 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		fViewer= viewer;
 		fViewerId= viewerId;
 		fInputElement= input;
-		
+
 		fFilter= new CategoryFilter();
-		
+
 		fFilteredCategories= new HashSet();
 		loadSettings();
 
 		fMenuAction= new CategoryFilterMenuAction();
-		
+
 		fViewer.addFilter(fFilter);
 	}
-	
+
 	public void setInput(IJavaElement[] input) {
 		Assert.isLegal(input != null);
 		fInputElement= input;
 	}
-	
+
 	private void loadSettings() {
 		fFilteredCategories.clear();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -340,7 +340,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			store.setValue(getPreferenceKey()+".FilterUncategorized", fFilterUncategorizedMembers); //$NON-NLS-1$
 		}
 	}
-	
+
 	public void contributeToViewMenu(IMenuManager menuManager) {
 		menuManager.add(new Separator(CATEGORY_MENU_GROUP_NAME));
 		menuManager.appendToGroup(CATEGORY_MENU_GROUP_NAME, fMenuAction);
@@ -349,12 +349,12 @@ public class CategoryFilterActionGroup extends ActionGroup {
 						if (!manager.isVisible())
 							return;
 						updateMenu(manager);
-					}			
+					}
 				};
 		menuManager.addMenuListener(fMenuListener);
 		fMenuManager= menuManager;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -383,10 +383,10 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		List menuEntries= new ArrayList();
 		boolean hasUncategorizedMembers= getMenuCategories(menuEntries);
 		Collections.sort(menuEntries, Collator.getInstance());
-		
+
 		if (menuEntries.size() > 0 && hasUncategorizedMembers)
 			manager.appendToGroup(CATEGORY_MENU_GROUP_NAME, new FilterUncategorizedMembersAction());
-		
+
 		int count= 0;
 		for (Iterator iter= menuEntries.iterator(); iter.hasNext();) {
 			String category= (String)iter.next();
@@ -408,7 +408,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 							categories.add(category);
 							if (fLRUList.containsKey(category)) {
 								foundLRUCategories.add(category);
-							}	
+							}
 						}
 					} else {
 						hasUncategorizedMember[0]= true;
@@ -480,11 +480,11 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		});
 		fViewer.getControl().setRedraw(true);
 	}
-	
+
 	private String getPreferenceKey() {
 		return "CategoryFilterActionGroup." + fViewerId; //$NON-NLS-1$
 	}
-	
+
 	private void showCategorySelectionDialog(IJavaElement[] input) {
 		final HashSet/*<String>*/ categories= new HashSet();
 		for (int i= 0; i < input.length; i++) {
@@ -514,7 +514,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			fireSelectionChange();
 		}
 	}
-	
+
 	private boolean contains(Object[] selected, String category) {
 		for (int i= 0; i < selected.length; i++) {
 			if (selected[i].equals(category))

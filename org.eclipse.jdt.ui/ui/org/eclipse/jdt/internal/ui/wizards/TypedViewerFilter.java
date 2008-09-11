@@ -37,12 +37,12 @@ public class TypedViewerFilter extends ViewerFilter {
 	 * @param acceptedTypes Accepted elements must be of this types
 	 * @param rejectedElements Element equals to the rejected elements are
 	 * filtered out
-	 */	
+	 */
 	public TypedViewerFilter(Class[] acceptedTypes, Object[] rejectedElements) {
 		Assert.isNotNull(acceptedTypes);
 		fAcceptedTypes= acceptedTypes;
 		fRejectedElements= rejectedElements;
-	}	
+	}
 
 	/**
 	 * @see ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)

@@ -17,11 +17,11 @@ public class RefactoringStatusCodes {
 
 	public static final int OVERRIDES_ANOTHER_METHOD= 						1;
 	public static final int METHOD_DECLARED_IN_INTERFACE= 					2;
-	
+
 	public static final int EXPRESSION_NOT_RVALUE= 								64;
 	public static final int EXPRESSION_NOT_RVALUE_VOID= 						65;
 	public static final int EXTRANEOUS_TEXT= 											66;
-	
+
 	public static final int NOT_STATIC_FINAL_SELECTED= 							128;
 	public static final int SYNTAX_ERRORS= 												129;
 	public static final int DECLARED_IN_CLASSFILE= 									130;
@@ -31,7 +31,7 @@ public class RefactoringStatusCodes {
 
 	public static final int NATIVE_METHOD= 192;
 	public static final int MAIN_METHOD= 193;
-	
+
 	// inline method error codes
 	public static final int INLINE_METHOD_FIELD_INITIALIZER= 						256;
 	public static final int INLINE_METHOD_LOCAL_INITIALIZER= 						257;

@@ -24,7 +24,7 @@ public class OccurrenceMatch extends Match {
 		fFlags= flags;
 		fOriginalLocation= null;
 	}
-	
+
 	public void setOffset(int offset) {
 		if (fOriginalLocation == null) {
 			// remember the original location before changing it
@@ -32,7 +32,7 @@ public class OccurrenceMatch extends Match {
 		}
 		super.setOffset(offset);
 	}
-	
+
 	public void setLength(int length) {
 		if (fOriginalLocation == null) {
 			// remember the original location before changing it
@@ -40,14 +40,14 @@ public class OccurrenceMatch extends Match {
 		}
 		super.setLength(length);
 	}
-	
+
 	public int getOriginalOffset() {
 		if (fOriginalLocation != null) {
 			return fOriginalLocation.getOffset();
 		}
 		return getOffset();
 	}
-	
+
 	public int getOriginalLength() {
 		if (fOriginalLocation != null) {
 			return fOriginalLocation.getLength();

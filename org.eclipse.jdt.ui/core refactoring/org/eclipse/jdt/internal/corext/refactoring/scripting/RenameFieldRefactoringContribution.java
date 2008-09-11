@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
 /**
  * Refactoring contribution for the rename field refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class RenameFieldRefactoringContribution extends JavaRefactoringContribution {

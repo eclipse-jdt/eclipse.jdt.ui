@@ -27,16 +27,16 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class HistoryDropDownAction extends Action implements IMenuCreator {
-	
+
 	public static class ClearHistoryAction extends Action {
 
 		private TypeHierarchyViewPart fView;
-		
+
 		public ClearHistoryAction(TypeHierarchyViewPart view) {
 			super(TypeHierarchyMessages.HistoryDropDownAction_clearhistory_label);
 			fView= view;
 		}
-			
+
 		public void run() {
 			fView.setHistoryEntries(new IJavaElement[0]);
 			fView.setInputElement(null);
@@ -47,11 +47,11 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 
 	private TypeHierarchyViewPart fHierarchyView;
 	private Menu fMenu;
-	
+
 	public HistoryDropDownAction(TypeHierarchyViewPart view) {
 		fHierarchyView= view;
 		fMenu= null;
-		setToolTipText(TypeHierarchyMessages.HistoryDropDownAction_tooltip); 
+		setToolTipText(TypeHierarchyMessages.HistoryDropDownAction_tooltip);
 		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TYPEHIERARCHY_HISTORY_ACTION);
 		setMenuCreator(this);
@@ -81,10 +81,10 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		addActionToMenu(fMenu, new ClearHistoryAction(fHierarchyView));
 		return fMenu;
 	}
-	
+
 	private boolean addEntries(Menu menu, IJavaElement[] elements) {
 		boolean checked= false;
-		
+
 		int min= Math.min(elements.length, RESULTS_IN_DROP_DOWN);
 		for (int i= 0; i < min; i++) {
 			HistoryAction action= new HistoryAction(fHierarchyView, elements[i]);
@@ -92,11 +92,11 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 			checked= checked || action.isChecked();
 			addActionToMenu(menu, action);
 		}
-		
-		
+
+
 		return checked;
 	}
-	
+
 
 	protected void addActionToMenu(Menu parent, Action action) {
 		ActionContributionItem item= new ActionContributionItem(action);

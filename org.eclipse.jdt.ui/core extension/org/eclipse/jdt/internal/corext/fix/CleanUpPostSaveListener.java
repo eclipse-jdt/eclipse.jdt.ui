@@ -16,8 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.UndoEdit;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -31,16 +30,17 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
-
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
@@ -89,7 +89,7 @@ import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
 public class CleanUpPostSaveListener implements IPostSaveListener {
-	
+
 	private static class CleanUpSaveUndo extends TextFileChange {
 
 		private final IFile fFile;
@@ -100,7 +100,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		public CleanUpSaveUndo(String name, IFile file, UndoEdit[] undos, long documentStamp, long fileStamp) {
 			super(name, file);
 			Assert.isNotNull(undos);
-			
+
 			fDocumentStamp= documentStamp;
 			fFileStamp= fileStamp;
 			fFile= file;
@@ -117,10 +117,10 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		public Change perform(IProgressMonitor pm) throws CoreException {
 			if (isValid(pm).hasFatalError())
 				return new NullChange();
-			
+
 			if (pm == null)
 				pm= new NullProgressMonitor();
-			
+
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ITextFileBuffer buffer= null;
@@ -128,7 +128,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				manager.connect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
 				buffer= manager.getTextFileBuffer(fFile.getFullPath(), LocationKind.IFILE);
 				IDocument document= buffer.getDocument();
-				
+
 				long oldFileValue= fFile.getModificationStamp();
 				long oldDocValue;
 				if (document instanceof IDocumentExtension4) {
@@ -146,7 +146,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				}
 
 				boolean stampSetted= false;
-				
+
 				if (document instanceof IDocumentExtension4 && fDocumentStamp != IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP) {
 					try {
 						((IDocumentExtension4)document).replace(0, 0, "", fDocumentStamp); //$NON-NLS-1$
@@ -155,12 +155,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 						throw wrapBadLocationException(e);
 					}
 				}
-				
+
 				buffer.commit(pm, false);
 				if (!stampSetted) {
 					fFile.revertModificationStamp(fFileStamp);
 				}
-				
+
 				return new CleanUpSaveUndo(getName(), fFile, ((UndoEdit[]) list.toArray(new UndoEdit[list.size()])), oldDocValue, oldFileValue);
 			} catch (BadLocationException e) {
 				throw wrapBadLocationException(e);
@@ -175,7 +175,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
 	private static final String CHANGED_REGION_POSITION_CATEGORY= "changed_region_position_category"; //$NON-NLS-1$
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -190,13 +190,13 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	public void saved(ICompilationUnit unit, IRegion[] changedRegions, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		
+
 		monitor.beginTask(getName(), IProgressMonitor.UNKNOWN);
-		
+
 		try {
 			if (!ActionUtil.isOnBuildPath(unit))
 				return;
-			
+
 			IProject project= unit.getJavaProject().getProject();
 			Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new ProjectScope(project));
 			if (settings == null) {
@@ -207,7 +207,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				}
 				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
 			}
-			
+
 			ICleanUp[] cleanUps;
 			if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
 				cleanUps= CleanUpRefactoring.createCleanUps(settings);
@@ -217,19 +217,19 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
 				cleanUps= CleanUpRefactoring.createCleanUps(filteredSettins);
 			}
-						
+
 			long oldFileValue= unit.getResource().getModificationStamp();
 			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), new SubProgressMonitor(monitor, 2));
-			
+
 			CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
 			LinkedList undoEdits= new LinkedList();
-			
+
 			IUndoManager manager= RefactoringCore.getUndoManager();
-			
+
 			boolean success= false;
 			try {
     			manager.aboutToPerformChange(result);
-    			
+
     			do {
     				RefactoringStatus preCondition= new RefactoringStatus();
     				for (int i= 0; i < cleanUps.length; i++) {
@@ -238,7 +238,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				}
     				if (showStatus(preCondition) != Window.OK)
     					return;
-    				
+
     				Map options= new HashMap();
     				for (int i= 0; i < cleanUps.length; i++) {
     					Map map= cleanUps[i].getRequirements().getCompilerOptions();
@@ -246,22 +246,22 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     						options.putAll(map);
     					}
     				}
-    					
+
     				CompilationUnit ast= null;
     				if (requiresAST(cleanUps)) {
     					ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
     				}
-    				
+
     				CleanUpContext context;
     				if (changedRegions == null) {
     					context= new CleanUpContext(unit, ast);
     				} else {
     					context= new MultiLineCleanUpContext(unit, ast, changedRegions);
     				}
-    				
+
     				ArrayList undoneCleanUps= new ArrayList();
 					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps);
-    				
+
     				RefactoringStatus postCondition= new RefactoringStatus();
     				for (int i= 0; i < cleanUps.length; i++) {
     					RefactoringStatus conditions= cleanUps[i].checkPostConditions(new SubProgressMonitor(monitor, 1));
@@ -269,23 +269,23 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				}
     				if (showStatus(postCondition) != Window.OK)
     					return;
-    				
+
     				cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
     				if (change != null) {
     					result.add(change);
-    					
+
     					change.setSaveMode(TextFileChange.LEAVE_DIRTY);
     					change.initializeValidationData(new NullProgressMonitor());
-    					
+
     					PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
     					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
-    					
+
     					if (changedRegions != null && changedRegions.length > 0 && requiresChangedRegions(cleanUps)) {
 							changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, new SubProgressMonitor(monitor, 5));
 						} else {
 							performChangeOperation.run(new SubProgressMonitor(monitor, 5));
 						}
-    					
+
     					performChangeOperation.getUndoChange();
     					undoEdits.addFirst(change.getUndoEdit());
     				}
@@ -294,7 +294,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			} finally {
 				manager.changePerformed(result, success);
 			}
-			
+
 			if (undoEdits.size() > 0) {
     			UndoEdit[] undoEditArray= (UndoEdit[])undoEdits.toArray(new UndoEdit[undoEdits.size()]);
     			CleanUpSaveUndo undo= new CleanUpSaveUndo(result.getName(), (IFile)unit.getResource(), undoEditArray, oldDocValue, oldFileValue);
@@ -317,7 +317,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			}
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
 		}
-		
+
 		if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
 			cleanUps= CleanUpRefactoring.createCleanUps(settings);
 		} else {
@@ -327,7 +327,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
 			cleanUps= CleanUpRefactoring.createCleanUps(filteredSettins);
 		}
-		
+
 		return cleanUps;
 	}
 
@@ -336,9 +336,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			return Window.OK;
 
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		
+
 		Dialog dialog= RefactoringUI.createRefactoringStatusDialog(status, shell, "", false); //$NON-NLS-1$
-		return dialog.open(); 
+		return dialog.open();
     }
 
 	private long getDocumentStamp(IFile file, IProgressMonitor monitor) throws CoreException {
@@ -346,13 +346,13 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	    final IPath path= file.getFullPath();
 
 	    monitor.beginTask("", 2); //$NON-NLS-1$
-	    
+
 	    ITextFileBuffer buffer= null;
 	    try {
 	    	manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
 		    buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
     	    IDocument document= buffer.getDocument();
-    	    
+
     	    if (document instanceof IDocumentExtension4) {
     			return ((IDocumentExtension4)document).getModificationStamp();
     		} else {
@@ -426,17 +426,17 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	        if (cleanUps[i].getRequirements().requiresAST())
 	        	return true;
         }
-		
+
 	    return false;
     }
-	
+
 	private boolean requiresChangedRegions(ICleanUp[] cleanUps) {
 		for (int i= 0; i < cleanUps.length; i++) {
 			CleanUpRequirements requirements= cleanUps[i].getRequirements();
 			if (requirements instanceof SaveActionRequirements && ((SaveActionRequirements)requirements).requiresChangedRegions())
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -447,23 +447,23 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			if (ast != null)
 				return ast;
 		}
-		
+
 		ASTParser parser= CleanUpRefactoring.createCleanUpASTParser();
 		parser.setSource(unit);
-		
+
 		Map compilerOptions= RefactoringASTParser.getCompilerOptions(unit.getJavaProject());
 		compilerOptions.putAll(cleanUpOptions);
 		parser.setCompilerOptions(compilerOptions);
-		
+
 		return (CompilationUnit)parser.createAST(monitor);
 	}
-	
+
 	private boolean compatibleOptions(IJavaProject project, Map cleanUpOptions) {
 		if (cleanUpOptions.size() == 0)
 			return true;
-		
+
 		Map projectOptions= project.getOptions(true);
-		
+
 		for (Iterator iterator= cleanUpOptions.keySet().iterator(); iterator.hasNext();) {
 	        String key= (String)iterator.next();
 	        String projectOption= (String)projectOptions.get(key);
@@ -471,20 +471,20 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			if (!strongerEquals(projectOption, cleanUpOption))
 				return false;
         }
-		
+
 	    return true;
     }
 
 	private boolean strongerEquals(String projectOption, String cleanUpOption) {
 		if (projectOption == null)
 			return false;
-		
+
 		if (ERROR_VALUE.equals(cleanUpOption)) {
 			return ERROR_VALUE.equals(projectOption);
 		} else if (WARNING_VALUE.equals(cleanUpOption)) {
 			return ERROR_VALUE.equals(projectOption) || WARNING_VALUE.equals(projectOption);
 		}
-		
+
 	    return false;
     }
 
@@ -494,7 +494,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	public String getName() {
 		return FixMessages.CleanUpPostSaveListener_name;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

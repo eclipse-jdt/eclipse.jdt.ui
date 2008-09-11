@@ -18,7 +18,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 /**
  * Action to apply a refactoring script to the workspace.
- * 
+ *
  * TODO: remove once bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=131746 is fixed
  */
 public final class ApplyRefactoringScriptAction implements IWorkbenchWindowActionDelegate {

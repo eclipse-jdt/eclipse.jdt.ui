@@ -17,7 +17,7 @@ public interface ITextUpdating {
 	 * updating references to the renamed element.
 	 */
 	public boolean canEnableTextUpdating();
-	
+
 	/**
 	 * If <code>canEnableTextUpdating</code> returns <code>true</code>,
 	 * then this method is used to ask the refactoring object whether references
@@ -26,7 +26,7 @@ public interface ITextUpdating {
 	 * <code>false</code>.
 	 */
 	public boolean getUpdateTextualMatches();
-	
+
 	/**
 	 * If <code>canEnableTextUpdating</code> returns <code>true</code>,
 	 * then this method is used to inform the refactoring object whether references
@@ -35,24 +35,24 @@ public interface ITextUpdating {
 	 * <code>false</code>.
 	 */
 	public void setUpdateTextualMatches(boolean update);
-	
+
 	/**
 	 * Returns the current name of the element to be renamed.
-	 * 
+	 *
 	 * @return the current name of the element to be renamed
 	 */
 	public String getCurrentElementName();
-	
+
 	/**
 	 * Returns the current qualifier of the element to be renamed.
-	 * 
+	 *
 	 * @return the current qualifier of the element to be renamed
 	 */
 	public String getCurrentElementQualifier();
-	
+
 	/**
 	 * Returns the new name of the element
-	 * 
+	 *
 	 * @return the new element name
 	 */
 	public String getNewElementName();

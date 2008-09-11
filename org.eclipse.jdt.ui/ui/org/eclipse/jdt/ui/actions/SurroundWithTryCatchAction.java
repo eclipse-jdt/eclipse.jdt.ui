@@ -48,13 +48,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
 
 /**
  * Action to surround a set of statements with a try/catch block.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class SurroundWithTryCatchAction extends SelectionDispatchAction {
@@ -64,12 +64,12 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.SurroundWithTryCatchAction_label); 
+		setText(RefactoringMessages.SurroundWithTryCatchAction_label);
 		fEditor= editor;
 		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
@@ -82,7 +82,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
 		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection);
-		
+
 		if (refactoring == null)
 			return;
 		try {
@@ -106,13 +106,13 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			WorkbenchRunnableAdapter adapter= new WorkbenchRunnableAdapter(op);
 			PlatformUI.getWorkbench().getProgressService().runInUI(
 				new BusyIndicatorRunnableContext(), adapter, adapter.getSchedulingRule());
-			
+
 			new LinkedProposalModelPresenter().enterLinkedMode(fEditor.getViewer(), fEditor, refactoring.getLinkedProposalModel());
-			
+
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception); 
+			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception); 
+			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception);
 		} catch (InterruptedException e) {
 			// not cancelable
 		} catch (BadLocationException e) {
@@ -125,6 +125,6 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	private static String getDialogTitle() {
-		return RefactoringMessages.SurroundWithTryCatchAction_dialog_title; 
+		return RefactoringMessages.SurroundWithTryCatchAction_dialog_title;
 	}
 }

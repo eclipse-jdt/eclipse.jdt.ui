@@ -49,18 +49,18 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Create Javadoc comment stubs for the selected members.
  * <p>
- * Will open the parent compilation unit in a Java editor. The result is 
+ * Will open the parent compilation unit in a Java editor. The result is
  * unsaved, so the user can decide if the changes are acceptable.
  * <p>
  * The action is applicable to structured selections containing elements
  * of type <code>IMember</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class AddJavaDocStubAction extends SelectionDispatchAction {
@@ -71,21 +71,21 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	 * Creates a new <code>AddJavaDocStubAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public AddJavaDocStubAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.AddJavaDocStubAction_label); 
-		setDescription(ActionMessages.AddJavaDocStubAction_description); 
-		setToolTipText(ActionMessages.AddJavaDocStubAction_tooltip); 
+		setText(ActionMessages.AddJavaDocStubAction_label);
+		setDescription(ActionMessages.AddJavaDocStubAction_description);
+		setToolTipText(ActionMessages.AddJavaDocStubAction_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_JAVADOC_STUB_ACTION);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public AddJavaDocStubAction(CompilationUnitEditor editor) {
@@ -95,7 +95,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	}
 
 	//---- Structured Viewer -----------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -103,50 +103,50 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		IMember[] members= getSelectedMembers(selection);
 		setEnabled(members != null && members.length > 0);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
 		if (members == null || members.length == 0) {
 			return;
 		}
-		
+
 		try {
 			ICompilationUnit cu= members[0].getCompilationUnit();
 			if (!ActionUtil.isEditable(getShell(), cu)) {
 				return;
 			}
-			
+
 			// open the editor, forces the creation of a working copy
 			IEditorPart editor= JavaUI.openInEditor(cu);
-			
+
 			if (ElementValidator.check(members, getShell(), getDialogTitle(), false))
 				run(cu, members);
 			JavaModelUtil.reconcile(cu);
 			EditorUtility.revealInEditor(editor, members[0]);
-			
+
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed); 
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed);
 		}
 	}
-	
+
 	//---- Java Editor --------------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	private boolean checkEnabledEditor() {
 		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
@@ -156,8 +156,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE && type != IJavaElement.FIELD) {
 		 		element= SelectionConverter.getTypeAtOffset(fEditor);
 		 		if (element == null) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), 
-						ActionMessages.AddJavaDocStubsAction_not_applicable); 
+					MessageDialog.openInformation(getShell(), getDialogTitle(),
+						ActionMessages.AddJavaDocStubsAction_not_applicable);
 					return;
 		 		}
 			}
@@ -165,18 +165,18 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			if (ElementValidator.checkValidateEdit(members, getShell(), getDialogTitle()))
 				run(members[0].getCompilationUnit(), members);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed); 
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed);
 		}
 	}
 
 	//---- Helpers -------------------------------------------------------------------
-	
+
 	/**
-	 * Note this method is for internal use only. 
-	 * 
+	 * Note this method is for internal use only.
+	 *
 	 * @param cu the compilation unit
 	 * @param members an array of members
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void run(ICompilationUnit cu, IMember[] members) {
@@ -187,12 +187,12 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 				new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
 				op.getScheduleRule());
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed); 
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed);
 		} catch (InterruptedException e) {
 			// operation canceled
 		}
 	}
-	
+
 	private IMember[] getSelectedMembers(IStructuredSelection selection) {
 		List elements= selection.toList();
 		int nElements= elements.size();
@@ -226,8 +226,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		}
 		return null;
 	}
-	
+
 	private String getDialogTitle() {
-		return ActionMessages.AddJavaDocStubsAction_error_dialogTitle; 
-	}	
+		return ActionMessages.AddJavaDocStubsAction_error_dialogTitle;
+	}
 }

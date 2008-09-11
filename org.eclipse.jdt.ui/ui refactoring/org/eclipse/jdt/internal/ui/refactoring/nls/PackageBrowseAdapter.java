@@ -35,30 +35,30 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 
 
 public class PackageBrowseAdapter implements IStringButtonAdapter {
-	
+
     PackageSelectionDialogButtonField  fReceiver;
     private ICompilationUnit fCu;
-    
+
     public PackageBrowseAdapter(ICompilationUnit unit) {
         fCu = unit;
     }
-    
+
     public void setReceiver(PackageSelectionDialogButtonField  receiver) {
        fReceiver = receiver;
     }
-    
+
 	public void changeControlPressed(DialogField field) {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(
 			Display.getCurrent().getActiveShell(), new JavaElementLabelProvider());
         dialog.setIgnoreCase(false);
-        dialog.setTitle(NLSUIMessages.PackageBrowseAdapter_package_selection); 
-        dialog.setMessage(NLSUIMessages.PackageBrowseAdapter_choose_package); 
+        dialog.setTitle(NLSUIMessages.PackageBrowseAdapter_package_selection);
+        dialog.setMessage(NLSUIMessages.PackageBrowseAdapter_choose_package);
         dialog.setElements(createPackageListInput(fCu, null));
-        if (dialog.open() == Window.OK) { 
+        if (dialog.open() == Window.OK) {
         	IPackageFragment selectedPackage= (IPackageFragment)dialog.getFirstResult();
         	if (selectedPackage != null) {
         		fReceiver.setPackage(selectedPackage);
-        	}						
+        	}
         }
 	}
 	public static Object[] createPackageListInput(ICompilationUnit cu, String elementNameMatch){
@@ -70,7 +70,7 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 			for (int i= 0; i < roots.length; i++){
 				if (canAddPackageRoot(roots[i])){
 					getValidPackages(roots[i], result, entered, elementNameMatch);
-				}	
+				}
 			}
 			return result.toArray();
 		} catch (JavaModelException e){
@@ -82,33 +82,33 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
     static boolean canAddPackageRoot(IPackageFragmentRoot root) throws JavaModelException{
     	if (! root.exists())
     		return false;
-    	if (root.isArchive())	
+    	if (root.isArchive())
     		return false;
     	if (root.isExternal())
     		return false;
-    	if (root.isReadOnly())		
+    	if (root.isReadOnly())
     		return false;
-    	if (! root.isStructureKnown())	
+    	if (! root.isStructureKnown())
     		return false;
-    	return true;	
+    	return true;
     }
-	
+
 	static void getValidPackages(IPackageFragmentRoot root, List result, HashMap entered, String elementNameMatch) throws JavaModelException {
 		IJavaElement[] children= null;
 		try {
 			children= root.getChildren();
 		} catch (JavaModelException e){
 			return;
-		}	
+		}
 		for (int i= 0; i < children.length; i++){
             if (children[i] instanceof IPackageFragment) {
                 IPackageFragment packageFragment = (IPackageFragment)children[i];
                 String packageName = packageFragment.getElementName();
-                
+
                 if ((entered != null) && (entered.containsKey(packageName)) == true) {
                     continue;
                 }
-                
+
 			    if (canAddPackage(packageFragment)) {
 			        if ((elementNameMatch == null) || (elementNameMatch.equals(packageName))) {
 			            result.add(packageFragment);
@@ -121,14 +121,14 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 		}
 	}
 
-    static boolean canAddPackage(IPackageFragment p) throws JavaModelException{ 
+    static boolean canAddPackage(IPackageFragment p) throws JavaModelException{
     	if (! p.exists())
     		return false;
     	if (p.isReadOnly())
     		return false;
     	if (! p.isStructureKnown())
     		return false;
-    	return true;	
+    	return true;
     }
 
     public static List searchAllPackages(IJavaProject project, String matcher) {
@@ -138,7 +138,7 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 			for (int i= 0; i < roots.length; i++){
 				if (canAddPackageRoot(roots[i])){
 					getValidPackages(roots[i], result, null, matcher);
-				}	
+				}
 			}
 			return result;
 		} catch (JavaModelException e) {

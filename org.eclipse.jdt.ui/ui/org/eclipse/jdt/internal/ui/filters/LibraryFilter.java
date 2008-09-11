@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
  * a Java library is shown
  */
 public class LibraryFilter extends ViewerFilter {
-	
+
 	/* (non-Javadoc)
 	 * Method declared on ViewerFilter.
 	 */

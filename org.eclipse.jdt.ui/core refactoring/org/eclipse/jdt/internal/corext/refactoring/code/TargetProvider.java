@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
- *       o Allow 'this' constructor to be inlined  
+ *       o Allow 'this' constructor to be inlined
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
@@ -67,27 +67,27 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 /**
- * A TargetProvider provides all targets that have to be adapted, i.e. all method invocations that should be inlined. 
+ * A TargetProvider provides all targets that have to be adapted, i.e. all method invocations that should be inlined.
  */
 abstract class TargetProvider {
 
 	public abstract void initialize();
 
 	public abstract ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm)  throws CoreException;
-	
+
 	public abstract BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm);
-	
+
 	// constructor invocation is not an expression but a statement
 	public abstract ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm);
-	
+
 	public abstract RefactoringStatus checkActivation() throws JavaModelException;
-	
+
 	public abstract int getStatusSeverity();
-	
+
 	public boolean isSingle() {
 		return false;
 	}
-	
+
 	public static TargetProvider create(ICompilationUnit cu, MethodInvocation invocation) {
 		return new SingleCallTargetProvider(cu, invocation);
 	}
@@ -120,7 +120,7 @@ abstract class TargetProvider {
 	public static TargetProvider create(IMethodBinding methodBinding) {
 		return new MemberTypeTargetProvider(methodBinding);
 	}
-	
+
 	static void fastDone(IProgressMonitor pm) {
 		if (pm == null)
 			return;
@@ -128,7 +128,7 @@ abstract class TargetProvider {
 		pm.worked(1);
 		pm.done();
 	}
-	
+
 	static class ErrorTargetProvider extends TargetProvider {
 		private RefactoringStatus fErrorStatus;
 		public ErrorTargetProvider(RefactoringStatus status) {
@@ -152,7 +152,7 @@ abstract class TargetProvider {
 			return 0;
 		}
 	}
-	
+
 	static class SingleCallTargetProvider extends TargetProvider {
 		private ICompilationUnit fCUnit;
 		private ASTNode fInvocation;
@@ -175,11 +175,11 @@ abstract class TargetProvider {
 			if (fIterated)
 				return new BodyDeclaration[0];
 			fastDone(pm);
-			return new BodyDeclaration[] { 
+			return new BodyDeclaration[] {
 				(BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class)
 			};
 		}
-	
+
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			fastDone(pm);
 			if (fIterated)
@@ -301,7 +301,7 @@ abstract class TargetProvider {
 				result.put(node, fCurrent);
 			}
 			endVisitType();
-			
+
 		}
 		public boolean visit(Initializer node) {
 			fBodies.add(fCurrent);
@@ -320,7 +320,7 @@ abstract class TargetProvider {
 			return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
 		}
 	}
-	
+
 	private static class LocalTypeTargetProvider extends TargetProvider {
 		private ICompilationUnit fCUnit;
 		private MethodDeclaration fDeclaration;
@@ -341,30 +341,30 @@ abstract class TargetProvider {
 			fastDone(pm);
 			return new ICompilationUnit[] { fCUnit };
 		}
-	
+
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
 			Assert.isTrue(unit == fCUnit);
 			Set result= fBodies.keySet();
 			fastDone(pm);
 			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
 		}
-	
+
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fBodies.get(declaration);
 			Assert.isNotNull(data);
 			fastDone(pm);
 			return data.getInvocations();
 		}
-	
+
 		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
-		
+
 		public int getStatusSeverity() {
 			return RefactoringStatus.ERROR;
 		}
 	}
-	
+
 	private static class MemberTypeTargetProvider extends TargetProvider {
 		private final IMethodBinding fMethodBinding;
 		private Map fCurrentBodies;
@@ -379,7 +379,7 @@ abstract class TargetProvider {
 		public ICompilationUnit[] getAffectedCompilationUnits(final RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) throws CoreException {
 			IMethod method= (IMethod)fMethodBinding.getJavaElement();
 			Assert.isTrue(method != null);
-			
+
 			SearchPattern pattern= SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(method, true, false);
 			final HashSet affectedCompilationUnits= new HashSet();
@@ -390,7 +390,7 @@ abstract class TargetProvider {
 						return;
 					if (match.isInsideDocComment())
 						return; // TODO: should warn user (with something like a ReferencesInBinaryContext)
-					
+
 					ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
 					if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
 						if (unit != null) {
@@ -420,18 +420,18 @@ abstract class TargetProvider {
 			fastDone(pm);
 			return (BodyDeclaration[])result.toArray(new BodyDeclaration[result.size()]);
 		}
-	
+
 		public ASTNode[] getInvocations(BodyDeclaration declaration, IProgressMonitor pm) {
 			BodyData data= (BodyData)fCurrentBodies.get(declaration);
 			Assert.isNotNull(data);
 			fastDone(pm);
 			return data.getInvocations();
 		}
-	
+
 		public RefactoringStatus checkActivation() throws JavaModelException {
 			return new RefactoringStatus();
 		}
-		
+
 		public int getStatusSeverity() {
 			return RefactoringStatus.ERROR;
 		}

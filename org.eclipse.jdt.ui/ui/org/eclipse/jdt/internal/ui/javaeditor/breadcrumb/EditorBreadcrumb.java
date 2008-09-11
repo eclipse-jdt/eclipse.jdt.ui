@@ -52,17 +52,17 @@ import org.eclipse.ui.texteditor.ITextEditor;
 /**
  * The editor breadcrumb shows the parent chain of the active editor item inside a
  * {@link BreadcrumbViewer}.
- * 
+ *
  * <p>
  * Clients must implement the abstract methods.
  * </p>
- * 
+ *
  * @since 3.4
  */
 public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	private static final String ACTIVE_TAB_BG_END= "org.eclipse.ui.workbench.ACTIVE_TAB_BG_END"; //$NON-NLS-1$
-	
+
 	private ITextEditor fTextEditor;
 	private ITextViewer fTextViewer;
 
@@ -82,10 +82,10 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	private IPartListener fPartListener;
 
-	
+
 	/**
 	 * The editor inside which this breadcrumb is shown.
-	 * 
+	 *
 	 * @param editor the editor
 	 */
 	public EditorBreadcrumb(ITextEditor editor) {
@@ -94,14 +94,14 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	/**
 	 * The active element of the editor.
-	 * 
+	 *
 	 * @return the active element of the editor, or <b>null</b> if none
 	 */
 	protected abstract Object getCurrentInput();
 
 	/**
 	 * Create and configure the viewer used to display the parent chain.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @return the viewer
 	 */
@@ -109,7 +109,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	/**
 	 * Reveal the given element in the editor if possible.
-	 * 
+	 *
 	 * @param element the element to reveal
 	 * @return true if the element could be revealed
 	 */
@@ -117,7 +117,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	/**
 	 * Open the element in a new editor if possible.
-	 * 
+	 *
 	 * @param element the element to open
 	 * @return true if the element could be opened
 	 */
@@ -126,7 +126,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/**
 	 * Create an action group for the context menu shown for the selection of the given selection
 	 * provider or <code>null</code> if no context menu should be shown.
-	 * 
+	 *
 	 * @param selectionProvider the provider of the context selection
 	 * @return action group to use to fill the context menu or <code>null</code>
 	 */
@@ -143,7 +143,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 * editor actions.
 	 */
 	protected abstract void deactivateBreadcrumb();
-	
+
 	public ISelectionProvider getSelectionProvider() {
 		return fBreadcrumbViewer;
 	}
@@ -151,7 +151,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	protected void setTextViewer(ITextViewer viewer) {
 		fTextViewer= viewer;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#setInput(java.lang.Object)
 	 */
@@ -162,10 +162,10 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		Object input= fBreadcrumbViewer.getInput();
 		if (input == element || element.equals(input))
 			return;
-		
+
 		if (fBreadcrumbViewer.isDropDownOpen())
 			return;
-		
+
 		fBreadcrumbViewer.setInput(element);
 	}
 
@@ -208,22 +208,22 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (isBreadcrumbEvent(event)) {
 					if (fHasFocus)
 						return;
-					
+
 					fIsActive= true;
 
 					focusGained();
 				} else {
 					if (!fIsActive)
 						return;
-					
+
 					boolean hasTextFocus= fTextViewer.getTextWidget().isFocusControl();
 					if (hasTextFocus) {
 						fIsActive= false;
 					}
-					
+
 					if (!fHasFocus)
 						return;
-					
+
 					focusLost();
 				}
 			}
@@ -242,7 +242,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
 				if (item == null)
 					return;
-				
+
 				int index= fBreadcrumbViewer.getIndexOfItem(item);
 				BreadcrumbItem parentItem= fBreadcrumbViewer.getItem(index - 1);
 				parentItem.openDropDownMenu();
@@ -254,7 +254,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				doRevealOrOpen(event.getSelection());
 			}
 		});
-		
+
 		fBreadcrumbViewer.addMenuDetectListener(new MenuDetectListener() {
 			public void menuDetected(MenuDetectEvent event) {
 				ISelectionProvider selectionProvider;
@@ -263,7 +263,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				} else {
 					selectionProvider= fBreadcrumbViewer;
 				}
-				
+
 				ActionGroup actionGroup= createContextMenuActionGroup(selectionProvider);
 				if (actionGroup == null)
 					return;
@@ -301,7 +301,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			}
 		};
 		JFaceResources.getColorRegistry().addListener(fPropertyChangeListener);
-		
+
 		return fComposite;
 	}
 
@@ -326,7 +326,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/**
 	 * Either reveal the selection in the editor or open the selection in a new editor. If both fail
 	 * open the child pop up of the selected element.
-	 * 
+	 *
 	 * @param selection the selection to open
 	 */
 	private void doRevealOrOpen(ISelection selection) {
@@ -360,9 +360,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 		if (fOldTextSelection != null) {
 			getTextEditor().getSelectionProvider().setSelection(fOldTextSelection);
-			
+
 			boolean result= reveal(structuredSelection.getFirstElement());
-			
+
 			fOldTextSelection= getTextEditor().getSelectionProvider().getSelection();
 			getTextEditor().getSelectionProvider().setSelection(new StructuredSelection(this));
 			return result;
@@ -377,18 +377,18 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private void focusGained() {
 		if (fHasFocus)
 			focusLost();
-		
+
 		fComposite.setBackground(JFaceResources.getColorRegistry().get(ACTIVE_TAB_BG_END));
 		fHasFocus= true;
-		
+
 		installDisplayListeners();
-		
+
 		activateBreadcrumb();
-		
+
 		getTextEditor().getEditorSite().getActionBars().updateActionBars();
-		
+
 		fOldTextSelection= getTextEditor().getSelectionProvider().getSelection();
-		
+
 		getTextEditor().getSelectionProvider().setSelection(new StructuredSelection(this));
 	}
 
@@ -398,13 +398,13 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private void focusLost() {
 		fComposite.setBackground(null);
 		fHasFocus= false;
-		
+
 		deinstallDisplayListeners();
-		
+
 		deactivateBreadcrumb();
-		
+
 		getTextEditor().getEditorSite().getActionBars().updateActionBars();
-		
+
 		getTextEditor().getSelectionProvider().setSelection(fOldTextSelection);
 		fOldTextSelection= null;
 	}
@@ -415,7 +415,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private void installDisplayListeners() {
 		//Sanity check
 		deinstallDisplayListeners();
-	
+
 		fDisplayKeyListener= new Listener() {
 			public void handleEvent(Event event) {
 				if (event.keyCode != SWT.ESC)
@@ -442,7 +442,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	/**
 	 * Tells whether the given event was issued inside the breadcrumb viewer's control.
-	 * 
+	 *
 	 * @param event the event to inspect
 	 * @return <code>true</code> if event was generated by a breadcrumb child
 	 */
@@ -453,7 +453,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		Widget item= event.widget;
 		if (!(item instanceof Control))
 			return false;
-		
+
 		Shell dropDownShell= fBreadcrumbViewer.getDropDownShell();
 		if (dropDownShell != null && isChild((Control) item, dropDownShell))
 			return true;
@@ -473,15 +473,15 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	/**
 	 * Sets the text editor for which this breadcrumb is.
-	 * 
+	 *
 	 * @param textEditor the text editor to be used
 	 */
 	protected void setTextEditor(ITextEditor textEditor) {
 		fTextEditor= textEditor;
-		
+
 		if (fTextEditor == null)
 			return;
-		
+
 		fPartListener= new IPartListener() {
 
 			public void partActivated(IWorkbenchPart part) {
@@ -497,7 +497,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			}
 
 			public void partClosed(IWorkbenchPart part) {
-				
+
 			}
 
 			public void partDeactivated(IWorkbenchPart part) {
@@ -515,7 +515,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	/**
 	 * This breadcrumb's text editor.
-	 * 
+	 *
 	 * @return the text editor
 	 */
 	protected ITextEditor getTextEditor() {

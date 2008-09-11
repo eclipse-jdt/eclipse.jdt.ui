@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * The page for setting the editor options.
  */
 public final class MarkOccurrencesPreferencePage extends AbstractConfigurationBlockPreferencePage {
-	
+
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#getHelpId()
 	 */
@@ -34,18 +34,18 @@ public final class MarkOccurrencesPreferencePage extends AbstractConfigurationBl
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
 	protected void setDescription() {
-		String description= PreferencesMessages.MarkOccurrencesConfigurationBlock_title; 
+		String description= PreferencesMessages.MarkOccurrencesConfigurationBlock_title;
 		setDescription(description);
 	}
-	
+
 	/*
 	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */
 	protected void setPreferenceStore() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
-	
-	
+
+
 	protected Label createDescriptionLabel(Composite parent) {
 		return null; // no description for new look.
 	}

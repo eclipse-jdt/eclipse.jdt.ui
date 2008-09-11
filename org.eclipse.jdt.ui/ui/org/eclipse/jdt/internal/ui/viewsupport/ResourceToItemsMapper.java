@@ -15,10 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -30,24 +30,24 @@ import org.eclipse.jdt.core.IJavaElement;
  * elements.
  */
 public class ResourceToItemsMapper {
-	
+
 	public static interface IContentViewerAccessor {
 		public void doUpdateItem(Widget item);
 	}
-	
+
 
 	private static final int NUMBER_LIST_REUSE= 10;
 
 	// map from resource to item
 	private HashMap fResourceToItem;
 	private Stack fReuseLists;
-	
+
 	private IContentViewerAccessor fContentViewerAccess;
 
 	public ResourceToItemsMapper(IContentViewerAccessor viewer) {
 		fResourceToItem= new HashMap();
 		fReuseLists= new Stack();
-		
+
 		fContentViewerAccess= viewer;
 	}
 
@@ -68,7 +68,7 @@ public class ResourceToItemsMapper {
 			}
 		}
 	}
-		
+
 	private void updateItem(Item item) {
 		if (!item.isDisposed()) {
 			fContentViewerAccess.doUpdateItem(item);
@@ -93,7 +93,7 @@ public class ResourceToItemsMapper {
 					list.add(item);
 					fResourceToItem.put(resource, list);
 				}
-			} else { // List			
+			} else { // List
 				List list= (List) existingMapping;
 				if (!list.contains(item)) {
 					list.add(item);
@@ -106,7 +106,7 @@ public class ResourceToItemsMapper {
 	 * Removes an element from the map.
 	 * @param element The data element
 	 * @param item The table or tree item
-	 */	
+	 */
 	public void removeFromMap(Object element, Item item) {
 		IResource resource= getCorrespondingResource(element);
 		if (resource != null) {
@@ -125,41 +125,41 @@ public class ResourceToItemsMapper {
 			}
 		}
 	}
-	
+
 	private List getNewList() {
 		if (!fReuseLists.isEmpty()) {
 			return (List) fReuseLists.pop();
 		}
 		return new ArrayList(2);
 	}
-	
+
 	private void releaseList(List list) {
 		if (fReuseLists.size() < NUMBER_LIST_REUSE) {
 			fReuseLists.push(list);
 		}
 	}
-	
+
 	/**
 	 * Clears the map.
 	 */
 	public void clearMap() {
 		fResourceToItem.clear();
 	}
-	
+
 	/**
 	 * Tests if the map is empty
 	 * @return Returns if there are mappings
 	 */
 	public boolean isEmpty() {
 		return fResourceToItem.isEmpty();
-	}	
-	
+	}
+
 	/**
 	 * Method that decides which elements can have error markers
 	 * Returns null if an element can not have error markers.
 	 * @param element The input element
 	 * @return Returns the corresponding resource or null
-	 */	
+	 */
 	private static IResource getCorrespondingResource(Object element) {
 		if (element instanceof IJavaElement) {
 			IJavaElement elem= (IJavaElement) element;
@@ -171,11 +171,11 @@ public class ResourceToItemsMapper {
 					res= cu.getResource();
 				}
 			}
-			return res; 
+			return res;
 		} else if (element instanceof IResource) {
 			return (IResource) element;
 		}
 		return null;
 	}
-	
+
 }

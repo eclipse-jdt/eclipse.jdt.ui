@@ -70,15 +70,15 @@ public class ParameterGuesser {
 		public final String name;
 		public final int variableType;
 		public final int positionScore;
-		
+
 		public final boolean isAutoboxingMatch;
 
 		public final char[] triggerChars;
 		public final ImageDescriptor descriptor;
-		
+
 		public boolean alreadyMatched;
 
-		public Variable(String qualifiedTypeName, String name, int variableType, boolean isAutoboxMatch, int positionScore, char[] triggerChars, ImageDescriptor descriptor) {			
+		public Variable(String qualifiedTypeName, String name, int variableType, boolean isAutoboxMatch, int positionScore, char[] triggerChars, ImageDescriptor descriptor) {
 			this.qualifiedTypeName= qualifiedTypeName;
 			this.name= name;
 			this.variableType= variableType;
@@ -107,13 +107,13 @@ public class ParameterGuesser {
 	}
 
 	private static final char[] NO_TRIGGERS= new char[0];
-	
+
 	private final Set fAlreadyMatchedNames;
 	private final IJavaElement fEnclosingElement;
 
 	/**
 	 * Creates a parameter guesser
-	 * 
+	 *
 	 * @param enclosingElement
 	 */
 	public ParameterGuesser(IJavaElement enclosingElement) {
@@ -126,7 +126,7 @@ public class ParameterGuesser {
 		if (fEnclosingElement != null) {
 			currentType= (IType) fEnclosingElement.getAncestor(IJavaElement.TYPE);
 		}
-		
+
 		ArrayList res= new ArrayList();
 		for (int i= 0; i < suggestions.length; i++) {
 			Variable variable= createVariable(suggestions[i], currentType, expectedType, i);
@@ -137,7 +137,7 @@ public class ParameterGuesser {
 				res.add(variable);
 			}
 		}
-		
+
 		// add 'this'
 		if (currentType != null && !(fEnclosingElement instanceof IMethod && Flags.isStatic(((IMethod) fEnclosingElement).getFlags()))) {
 			String fullyQualifiedName= currentType.getFullyQualifiedName('.');
@@ -146,7 +146,7 @@ public class ParameterGuesser {
 				res.add(new Variable(fullyQualifiedName, "this", Variable.LITERALS, false, res.size(), new char[] {'.'}, desc));  //$NON-NLS-1$
 			}
 		}
-		
+
 		Code primitiveTypeCode= getPrimitiveTypeCode(expectedType);
 		if (primitiveTypeCode == null) {
 			// add 'null'
@@ -165,12 +165,12 @@ public class ParameterGuesser {
 		}
 		return res;
 	}
-	
+
 	public Variable createVariable(IJavaElement element, IType enclosingType, String expectedType, int positionScore) throws JavaModelException {
 		int variableType;
 		int elementType= element.getElementType();
 		String elementName= element.getElementName();
-		
+
 		String typeSignature;
 		switch (elementType) {
 			case IJavaElement.FIELD: {
@@ -216,22 +216,22 @@ public class ParameterGuesser {
 				return null;
 		}
 		String type= Signature.toString(typeSignature);
-		
+
 		boolean isAutoboxMatch= isPrimitiveType(expectedType) != isPrimitiveType(type);
 		return new Variable(type, elementName, variableType, isAutoboxMatch, positionScore, NO_TRIGGERS, getImageDescriptor(element));
 	}
-	
+
 	private ImageDescriptor getImageDescriptor(IJavaElement elem) {
 		JavaElementImageProvider imageProvider= new JavaElementImageProvider();
 		ImageDescriptor desc= imageProvider.getBaseImageDescriptor(elem, JavaElementImageProvider.OVERLAY_ICONS);
 		imageProvider.dispose();
 		return desc;
 	}
-	
+
 	private boolean isPrimitiveType(String type) {
 		return PrimitiveType.toCode(type) != null;
 	}
-	
+
 	private PrimitiveType.Code getPrimitiveTypeCode(String type) {
 		PrimitiveType.Code code= PrimitiveType.toCode(type);
 		if (code != null) {
@@ -257,7 +257,7 @@ public class ParameterGuesser {
 			} else if (code == PrimitiveType.DOUBLE) {
 				if ("java.lang.Double".equals(type)) { //$NON-NLS-1$
 					return code;
-				}				
+				}
 			} else if (code == PrimitiveType.CHAR) {
 				if ("java.lang.Character".equals(type)) { //$NON-NLS-1$
 					return code;
@@ -270,7 +270,7 @@ public class ParameterGuesser {
 		}
 		return null;
 	}
-	
+
 	private boolean isMethodToSuggest(IMethod method) {
 		try {
 			String methodName= method.getElementName();
@@ -280,7 +280,7 @@ public class ParameterGuesser {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Returns the matches for the type and name argument, ordered by match quality.
 	 *
@@ -288,7 +288,7 @@ public class ParameterGuesser {
 	 * @param paramName - the name of the parameter (used to find similarly named matches)
 	 * @param pos
 	 * @param suggestions the suggestions or <code>null</code>
-	 * @param fillBestGuess 
+	 * @param fillBestGuess
 	 * @return returns the name of the best match, or <code>null</code> if no match found
 	 * @throws JavaModelException if it fails
 	 */
@@ -308,11 +308,11 @@ public class ParameterGuesser {
 
 			String displayString= v.name;
 			hasVarWithParamName |= displayString.equals(paramName);
-			
+
 			final char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
 			triggers[triggers.length - 1]= ';';
-				
+
 			ret[i++]= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null, triggers);
 		}
 		if (!fillBestGuess && !hasVarWithParamName) {
@@ -380,7 +380,7 @@ public class ParameterGuesser {
 	 *
 	 * 	4) A better source position score will prevail (the declaration point of the variable, or
 	 * 		"how close to the point of completion?"
-	 * 
+	 *
 	 * @param typeMatches the list of type matches
 	 * @param paramName the parameter name
 	 */
@@ -390,7 +390,7 @@ public class ParameterGuesser {
 
 	/**
 	 * Returns the longest common substring of two strings.
-	 * 
+	 *
 	 * @param first the first string
 	 * @param second the second string
 	 * @return the longest common substring

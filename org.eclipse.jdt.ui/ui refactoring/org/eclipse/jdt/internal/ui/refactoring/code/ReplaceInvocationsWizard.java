@@ -17,10 +17,10 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefact
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class ReplaceInvocationsWizard extends RefactoringWizard {
-	
+
 	public ReplaceInvocationsWizard(ReplaceInvocationsRefactoring ref){
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.ReplaceInvocationsWizard_title);  
+		setDefaultPageTitle(RefactoringMessages.ReplaceInvocationsWizard_title);
 	}
 
 	protected void addUserInputPages(){

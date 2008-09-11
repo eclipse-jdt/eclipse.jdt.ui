@@ -13,26 +13,29 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.search.ui.IQueryListener;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.JavaCore;
+
 public class SearchResultUpdater implements IElementChangedListener, IQueryListener {
 
 	JavaSearchResult fResult;
-	private static final int REMOVED_FLAGS= IJavaElementDelta.F_MOVED_TO | 
+	private static final int REMOVED_FLAGS= IJavaElementDelta.F_MOVED_TO |
 									IJavaElementDelta.F_REMOVED_FROM_CLASSPATH |
 									IJavaElementDelta.F_CLOSED |
 									IJavaElementDelta.F_CONTENT;
-	
+
 	public SearchResultUpdater(JavaSearchResult result) {
 		fResult= result;
 		NewSearchUI.addQueryListener(this);
@@ -75,7 +78,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 							fResult.removeMatch(matches[j]);
 						}
 					}
-					
+
 				}
 			}
 		}
@@ -104,7 +107,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 	}
 
 	private void collectRemoved(Set potentiallyRemovedSet, Set removedElements, IJavaElementDelta delta) {
-		if (delta.getKind() == IJavaElementDelta.REMOVED) 
+		if (delta.getKind() == IJavaElementDelta.REMOVED)
 			removedElements.add(delta.getElement());
 		else if (delta.getKind() == IJavaElementDelta.CHANGED) {
 			int flags= delta.getFlags();
@@ -133,7 +136,7 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		if (fResult.equals(query.getSearchResult())) {
 			JavaCore.removeElementChangedListener(this);
 			NewSearchUI.removeQueryListener(this);
-		}		
+		}
 	}
 
 	private void collectRemovals(Set removals, IResourceDelta delta) {

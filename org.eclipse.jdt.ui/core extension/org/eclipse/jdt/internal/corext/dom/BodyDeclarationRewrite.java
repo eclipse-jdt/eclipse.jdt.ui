@@ -25,17 +25,17 @@ public class BodyDeclarationRewrite {
 
 	private ASTNode fTypeNode;
 	private ListRewrite fListRewrite;
-	
+
 	public static BodyDeclarationRewrite create(ASTRewrite rewrite, ASTNode typeNode) {
 		return new BodyDeclarationRewrite(rewrite, typeNode);
 	}
-	
+
 	private BodyDeclarationRewrite(ASTRewrite rewrite, ASTNode typeNode) {
 		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(typeNode);
 		fTypeNode= typeNode;
 		fListRewrite= rewrite.getListRewrite(typeNode, property);
 	}
-	
+
 	public void insert(BodyDeclaration decl, TextEditGroup description) {
 		List container= ASTNodes.getBodyDeclarations(fTypeNode);
 		int index= ASTNodes.getInsertionIndex(decl, container);

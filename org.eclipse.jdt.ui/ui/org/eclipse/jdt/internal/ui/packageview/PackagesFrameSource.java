@@ -16,7 +16,7 @@ import org.eclipse.ui.views.framelist.TreeViewerFrameSource;
 
 class PackagesFrameSource extends TreeViewerFrameSource {
 	private PackageExplorerPart fPackagesExplorer;
-	
+
 	PackagesFrameSource(PackageExplorerPart explorer) {
 		super(explorer.getTreeViewer());
 		fPackagesExplorer= explorer;

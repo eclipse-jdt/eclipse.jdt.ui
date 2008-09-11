@@ -64,7 +64,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
-	 * 
+	 *
 	 * @param editor
 	 *            the Java editor
 	 */
@@ -92,7 +92,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	 *            to clean up
 	 * @param cleanUps
 	 *            clean ups to execute on units
-	 * 
+	 *
 	 * @throws JavaModelException
 	 * @throws InvocationTargetException
 	 */
@@ -286,7 +286,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
-		}		
+		}
 	}
 
 	private void collectCompilationUnits(IPackageFragment pack, Collection result) throws JavaModelException {

@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 
 /**
  * A computer wrapper for the hippie processor.
- * 
+ *
  * @since 3.2
  */
 public final class HippieProposalComputer implements IJavaCompletionProposalComputer {
@@ -35,7 +35,7 @@ public final class HippieProposalComputer implements IJavaCompletionProposalComp
 	 */
 	public HippieProposalComputer() {
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */

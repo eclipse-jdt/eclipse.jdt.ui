@@ -22,7 +22,7 @@ public final class TypeVariable extends ConstraintVariable {
 
 	private final String fSource;
 	private final CompilationUnitRange fTypeRange;
-	
+
 	public TypeVariable(Type type){
 		super(type.resolveBinding());
 		fSource= type.toString();
@@ -35,8 +35,8 @@ public final class TypeVariable extends ConstraintVariable {
 		super(binding);
 		fSource= source;
 		fTypeRange= range;
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

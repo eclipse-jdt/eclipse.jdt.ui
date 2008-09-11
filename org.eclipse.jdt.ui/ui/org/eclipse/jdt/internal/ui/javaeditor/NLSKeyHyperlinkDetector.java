@@ -18,6 +18,7 @@ import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorSite;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ITypeRoot;
@@ -67,7 +68,7 @@ public class NLSKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		ASTNode node= NodeFinder.perform(ast, region.getOffset(), 1);
 		if (!(node instanceof StringLiteral)  && !(node instanceof SimpleName))
 			return null;
-		
+
 		if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY)
 			return null;
 

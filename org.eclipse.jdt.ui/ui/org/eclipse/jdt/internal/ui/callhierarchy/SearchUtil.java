@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class SearchUtil {
-	
+
 	// LRU working sets
 	public static int LRU_WORKINGSET_LIST_SIZE= 3;
 	private static LRUWorkingSetsList fgLRUWorkingSets;
@@ -37,20 +37,20 @@ public class SearchUtil {
 	private static final String DIALOG_SETTINGS_KEY= "CallHierarchySearchScope"; //$NON-NLS-1$
 	private static final String STORE_LRU_WORKING_SET_NAMES= "lastUsedWorkingSetNames"; //$NON-NLS-1$
 	private static IDialogSettings fgSettingsStore;
-	
+
 	/**
 	 * Updates the LRU list of working sets.
-	 * 
+	 *
 	 * @param workingSets   the workings sets to be added to the LRU list
 	 */
 	public static void updateLRUWorkingSets(IWorkingSet[] workingSets) {
 		if (workingSets == null || workingSets.length < 1)
 			return;
-		
+
 		SearchUtil.getLRUWorkingSets().add(workingSets);
 		SearchUtil.saveState();
 	}
-	
+
 	private static void saveState() {
 		IWorkingSet[] workingSets;
 		Iterator iter= SearchUtil.fgLRUWorkingSets.iterator();
@@ -64,20 +64,20 @@ public class SearchUtil {
 			i++;
 		}
 	}
-	
+
 	public static LRUWorkingSetsList getLRUWorkingSets() {
 		if (SearchUtil.fgLRUWorkingSets == null) {
 			restoreState();
 		}
 		return SearchUtil.fgLRUWorkingSets;
 	}
-	
+
 	static void restoreState() {
 		SearchUtil.fgLRUWorkingSets= new LRUWorkingSetsList(SearchUtil.LRU_WORKINGSET_LIST_SIZE);
 		SearchUtil.fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().getSection(SearchUtil.DIALOG_SETTINGS_KEY);
 		if (SearchUtil.fgSettingsStore == null)
 			SearchUtil.fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().addNewSection(SearchUtil.DIALOG_SETTINGS_KEY);
-		
+
 		boolean foundLRU= false;
 		for (int i= SearchUtil.LRU_WORKINGSET_LIST_SIZE - 1; i >= 0; i--) {
 			String[] lruWorkingSetNames= SearchUtil.fgSettingsStore.getArray(SearchUtil.STORE_LRU_WORKING_SET_NAMES + i);
@@ -98,13 +98,13 @@ public class SearchUtil {
 			// try old preference format
 			restoreFromOldFormat();
 	}
-	
+
 	private static void restoreFromOldFormat() {
 		SearchUtil.fgLRUWorkingSets= new LRUWorkingSetsList(SearchUtil.LRU_WORKINGSET_LIST_SIZE);
 		SearchUtil.fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().getSection(SearchUtil.DIALOG_SETTINGS_KEY);
 		if (SearchUtil.fgSettingsStore == null)
 			SearchUtil.fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().addNewSection(SearchUtil.DIALOG_SETTINGS_KEY);
-		
+
 		boolean foundLRU= false;
 		String[] lruWorkingSetNames= SearchUtil.fgSettingsStore.getArray(SearchUtil.STORE_LRU_WORKING_SET_NAMES);
 		if (lruWorkingSetNames != null) {
@@ -120,7 +120,7 @@ public class SearchUtil {
 			// save in new format
 			saveState();
 	}
-	
+
 	public static String toString(IWorkingSet[] workingSets) {
 		Arrays.sort(workingSets, new WorkingSetComparator());
 		String result= ""; //$NON-NLS-1$
@@ -129,7 +129,7 @@ public class SearchUtil {
 			for (int i= 0; i < workingSets.length; i++) {
 				String workingSetName= BasicElementLabels.getWorkingSetLabel(workingSets[i]);
 				if (firstFound)
-					result= Messages.format(CallHierarchyMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetName}); 
+					result= Messages.format(CallHierarchyMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetName});
 				else {
 					result= workingSetName;
 					firstFound= true;

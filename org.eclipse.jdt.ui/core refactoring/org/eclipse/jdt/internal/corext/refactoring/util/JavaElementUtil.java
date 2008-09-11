@@ -43,11 +43,11 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class JavaElementUtil {
-	
+
 	//no instances
 	private JavaElementUtil(){
 	}
-	
+
 	public static String createMethodSignature(IMethod method){
 		try {
 			return BasicElementLabels.getJavaElementName(Signature.toString(method.getSignature(), method.getElementName(), method.getParameterNames(), false, ! method.isConstructor()));
@@ -55,11 +55,11 @@ public class JavaElementUtil {
 			return BasicElementLabels.getJavaElementName(method.getElementName()); //fallback
 		}
 	}
-	
+
 	public static String createFieldSignature(IField field){
 		return BasicElementLabels.getJavaElementName(field.getDeclaringType().getFullyQualifiedName('.') + "." + field.getElementName()); //$NON-NLS-1$
 	}
-	
+
 	public static String createSignature(IMember member){
 		switch (member.getElementType()){
 			case IJavaElement.FIELD:
@@ -67,15 +67,15 @@ public class JavaElementUtil {
 			case IJavaElement.TYPE:
 				return BasicElementLabels.getJavaElementName(((IType)member).getFullyQualifiedName('.'));
 			case IJavaElement.INITIALIZER:
-				return RefactoringCoreMessages.JavaElementUtil_initializer; 
+				return RefactoringCoreMessages.JavaElementUtil_initializer;
 			case IJavaElement.METHOD:
-				return createMethodSignature((IMethod)member);				
+				return createMethodSignature((IMethod)member);
 			default:
 				Assert.isTrue(false);
-				return null;	
+				return null;
 		}
 	}
-	
+
 	public static IJavaElement[] getElementsOfType(IJavaElement[] elements, int type){
 		Set result= new HashSet(elements.length);
 		for (int i= 0; i < elements.length; i++) {
@@ -94,20 +94,20 @@ public class JavaElementUtil {
 		}
 		return null;
 	}
-	
+
 	public static boolean isMainType(IType type) throws JavaModelException{
-		if (! type.exists())	
+		if (! type.exists())
 			return false;
 
 		if (type.isBinary())
 			return false;
-			
+
 		if (type.getCompilationUnit() == null)
 			return false;
-		
+
 		if (type.getDeclaringType() != null)
 			return false;
-		
+
 		return isPrimaryType(type) || isCuOnlyType(type);
 	}
 
@@ -129,7 +129,7 @@ public class JavaElementUtil {
 		}
 		return parent != null;
 	}
-	
+
 	public static IMethod[] getAllConstructors(IType type) throws JavaModelException {
 		if (JavaModelUtil.isInterfaceOrAnnotation(type))
 			return new IMethod[0];
@@ -144,9 +144,9 @@ public class JavaElementUtil {
 	}
 
 	/**
-	 * @param root 
+	 * @param root
 	 * @return array of projects that have the specified root on their classpaths
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public static IJavaProject[] getReferencingProjects(IPackageFragmentRoot root) throws JavaModelException {
 		IClasspathEntry cpe= root.getRawClasspathEntry();
@@ -159,8 +159,8 @@ public class JavaElementUtil {
 				result.add(project);
 		}
 		return (IJavaProject[]) result.toArray(new IJavaProject[result.size()]);
-	}	
-	
+	}
+
 	public static IMember[] merge(IMember[] a1, IMember[] a2) {
 		// Don't use hash sets since ordering is important for some refactorings.
 		List result= new ArrayList(a1.length + a2.length);
@@ -180,16 +180,16 @@ public class JavaElementUtil {
 	public static boolean isDefaultPackage(Object element) {
 		return (element instanceof IPackageFragment) && ((IPackageFragment)element).isDefaultPackage();
 	}
-	
+
 	/**
 	 * @param pack a package fragment
-	 * @return an array containing the given package and all subpackages 
-	 * @throws JavaModelException 
+	 * @return an array containing the given package and all subpackages
+	 * @throws JavaModelException
 	 */
 	public static IPackageFragment[] getPackageAndSubpackages(IPackageFragment pack) throws JavaModelException {
 		if (pack.isDefaultPackage())
 			return new IPackageFragment[] { pack };
-		
+
 		IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
 		IJavaElement[] allPackages= root.getChildren();
 		ArrayList subpackages= new ArrayList();
@@ -202,7 +202,7 @@ public class JavaElementUtil {
 		}
 		return (IPackageFragment[]) subpackages.toArray(new IPackageFragment[subpackages.size()]);
 	}
-	
+
 	/**
 	 * @param pack the package fragment; may not be null
 	 * @return the parent package fragment, or null if the given package fragment is the default package or a top level package
@@ -210,7 +210,7 @@ public class JavaElementUtil {
 	public static IPackageFragment getParentSubpackage(IPackageFragment pack) {
 		if (pack.isDefaultPackage())
 			return null;
-		
+
 		final int index= pack.getElementName().lastIndexOf('.');
 		if (index == -1)
 			return null;
@@ -223,7 +223,7 @@ public class JavaElementUtil {
 		else
 			return null;
 	}
-	
+
 	public static IMember[] sortByOffset(IMember[] members){
 		Comparator comparator= new Comparator(){
 			public int compare(Object o1, Object o2){
@@ -231,13 +231,13 @@ public class JavaElementUtil {
 					return ((IMember) o1).getNameRange().getOffset() - ((IMember) o2).getNameRange().getOffset();
 				} catch (JavaModelException e){
 					return 0;
-				}	
+				}
 			}
 		};
 		Arrays.sort(members, comparator);
 		return members;
 	}
-	
+
 	public static boolean isSourceAvailable(ISourceReference sourceReference) {
 		try {
 			return SourceRange.isAvailable(sourceReference.getSourceRange());

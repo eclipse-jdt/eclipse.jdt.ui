@@ -527,7 +527,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			while (node != null && (relativeOffset == node.getStartPosition() || relativeOffset == node.getStartPosition() + node.getLength()))
 				node= node.getParent();
 		}
-		
+
 		if (node == null)
 			return false;
 
@@ -812,7 +812,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		int newInsert= insert;
 		while (newInsert < endOffset - 2 && document.get(newInsert, 2).equals(LINE_COMMENT))
 			newInsert += 2;
-		
+
 		// Heuristic to check whether it is commented code or just a comment
 		if (newInsert > insert) {
 			int whitespaceCount= 0;
@@ -824,7 +824,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				 whitespaceCount= whitespaceCount + computeVisualLength(ch, tabLength);
 				 i++;
 			}
-			
+
 			if (whitespaceCount != 0 && whitespaceCount >= CodeFormatterUtil.getIndentWidth(fProject))
 				insert= newInsert;
 		}
@@ -918,7 +918,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	/**
 	 * The preference setting that tells whether to insert spaces when pressing the Tab key.
-	 * 
+	 *
 	 * @return <code>true</code> if spaces are inserted when pressing the Tab key
 	 * @since 3.5
 	 */
@@ -929,7 +929,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	/**
 	 * Returns the possibly <code>project</code>-specific core preference defined under
 	 * <code>key</code>.
-	 * 
+	 *
 	 * @param project the project to get the preference from, or <code>null</code> to get the global
 	 *            preference
 	 * @param key the key of the preference
@@ -1028,7 +1028,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
     /**
      * Skips the scope opened by <code>token</code>.
-     * 
+     *
      * @param scanner the scanner
      * @param start the start position
      * @param token the token
@@ -1190,9 +1190,9 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.doit == false)
 			return;
-		
+
 		clearCachedValues();
-		
+
 		if (!fIsSmartMode) {
 			super.customizeDocumentCommand(d, c);
 			return;
@@ -1212,7 +1212,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	/**
 	 * Tells whether the given inserted string represents hitting the Tab key.
-	 * 
+	 *
 	 * @param text the text to check
 	 * @return <code>true</code> if the text represents hitting the Tab key
 	 * @since 3.5

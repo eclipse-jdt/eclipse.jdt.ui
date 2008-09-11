@@ -19,7 +19,7 @@ import org.eclipse.core.commands.IParameterValues;
 
 /**
  * Map of parameters for the specific content assist command.
- * 
+ *
  * @since 3.2
  */
 public final class ContentAssistComputerParameter implements IParameterValues {

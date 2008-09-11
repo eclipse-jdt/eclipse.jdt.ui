@@ -17,6 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -26,10 +30,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -69,7 +69,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			Object object= fNonExistingFolders.get(element);
 			if (object != null)
 				return object;
-			
+
 			return super.getParent(element);
 		}
 
@@ -88,7 +88,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			}
 			if (result.size() == 0)
 				return super.getChildren(element);
-			
+
 			Object[] children= super.getChildren(element);
 			for (int i= 0; i < children.length; i++) {
 				result.add(children[i]);
@@ -114,7 +114,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		fModifiedElements= new HashSet();
 		fInsertedElements= new HashSet();
 		fNonExistingFolders= new Hashtable();
-		
+
 		for (int i= 0; i < existingElements.length; i++) {
 			CPListElement cur= existingElements[i];
 			if (cur.getResource() == null || !cur.getResource().exists()) {
@@ -136,12 +136,12 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			}
 		}
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
-		
+
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new FakeFolderBaseWorkbenchContentProvider();
 
-		String title= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_new_title; 
-		String message= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_description; 
+		String title= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_new_title;
+		String message= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_description;
 
 
 		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp) {
@@ -150,7 +150,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_CHOOSE_EXISTING_FOLDER_TO_MAKE_SOURCE_FOLDER);
 				return result;
 			}
-			
+
 			protected Object createFolder(final IContainer container) {
 				final Object[] result= new Object[1];
 				final CPListElement newElement= new CPListElement(fJavaProject, IClasspathEntry.CPE_SOURCE);
@@ -183,7 +183,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		dialog.setInitialFocus(fJavaProject.getProject());
 
 		if (dialog.open() == Window.OK) {
-			Object[] elements= dialog.getResult();	
+			Object[] elements= dialog.getResult();
 			for (int i= 0; i < elements.length; i++) {
 				IResource res= (IResource)elements[i];
 				fInsertedElements.add(new CPListElement(fJavaProject, IClasspathEntry.CPE_SOURCE, res.getFullPath(), res));
@@ -229,10 +229,10 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 
 	/**
 	 * Asks to change the output folder to 'proj/bin' when no source folders were existing
-	 * 
+	 *
 	 * @param existing the element to remove
 	 * @return returns <code>true</code> if the element has been removed
-	 */ 
+	 */
 	private boolean removeProjectFromBP(CPListElement existing) {
 		IPath outputFolder= new Path(fOutputLocation);
 
@@ -241,11 +241,11 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		if (outputFolder.segmentCount() == 1) {
 			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 			newOutputFolder= outputFolder.append(outputFolderName);
-			message= Messages.format(NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_and_output_message, BasicElementLabels.getPathLabel(newOutputFolder, false)); 
+			message= Messages.format(NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_and_output_message, BasicElementLabels.getPathLabel(newOutputFolder, false));
 		} else {
-			message= NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_message; 
+			message= NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_message;
 		}
-		String title= NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_title; 
+		String title= NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_title;
 		if (MessageDialog.openQuestion(getShell(), title, message)) {
 			fRemovedElements.add(existing);
 			if (newOutputFolder != null) {
@@ -259,24 +259,24 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 	private void addExlusionPatterns(List newEntries, Set modifiedEntries) {
 		BuildPathBasePage.fixNestingConflicts((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]), fExistingElements, modifiedEntries);
 		if (!modifiedEntries.isEmpty()) {
-			String title= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_title; 
-			String message= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_message; 
+			String title= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_title;
+			String message= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_message;
 			MessageDialog.openInformation(getShell(), title, message);
 		}
 	}
-	
+
 	private AddSourceFolderWizard newSourceFolderWizard(CPListElement element, CPListElement[] existing, String outputLocation, IContainer parent) {
 		AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, element, new Path(outputLocation).makeAbsolute(), false, true, false, false, false, parent);
 		wizard.setDoFlushChange(false);
 		return wizard;
 	}
-	
+
 	private List getExistingContainers(CPListElement[] existingElements) {
 		List res= new ArrayList();
 		for (int i= 0; i < existingElements.length; i++) {
 			IResource resource= existingElements[i].getResource();
 			if (resource instanceof IContainer) {
-				res.add(resource);	
+				res.add(resource);
 			}
 		}
 		Set keys= fNonExistingFolders.keySet();
@@ -286,7 +286,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		}
 		return res;
 	}
-	
+
 	private IFolder addFakeFolder(final IContainer container, final CPListElement element) {
 		IFolder result;
 		IPath projectPath= fJavaProject.getPath();

@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.eclipse.team.ui.history.ElementLocalHistoryPageSource;
+
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
-import org.eclipse.team.ui.history.ElementLocalHistoryPageSource;
-
 public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource {
-	
+
 	private static JavaElementHistoryPageSource instance;
 
 	public static JavaElementHistoryPageSource getInstance() {
@@ -27,7 +27,7 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 			instance = new JavaElementHistoryPageSource();
 		return instance;
 	}
-	
+
 	/**
 	 * Returns true if the given IJavaElement maps to a JavaNode.
 	 * The JavaHistoryAction uses this function to determine whether
@@ -38,7 +38,7 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 
 		if (je instanceof IMember && ((IMember)je).isBinary())
 			return false;
-			
+
 		switch (je.getElementType()) {
 		case IJavaElement.COMPILATION_UNIT:
 		case IJavaElement.TYPE:
@@ -63,13 +63,13 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 			cu= (ICompilationUnit) input;
 		else if (input instanceof IMember)
 			cu= ((IMember)input).getCompilationUnit();
-			
+
 		if (cu == null || !cu.exists())
 			return null;
-			
+
 		// get to original CU
 		cu= cu.getPrimary();
-			
+
 		// find underlying file
 		IFile file= (IFile) cu.getResource();
 		if (file != null && file.exists())

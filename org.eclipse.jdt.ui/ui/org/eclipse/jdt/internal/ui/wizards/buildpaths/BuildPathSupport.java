@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,8 +21,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -44,17 +44,17 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  *
  */
 public class BuildPathSupport {
-	
+
 	public static final String JRE_PREF_PAGE_ID= "org.eclipse.jdt.debug.ui.preferences.VMPreferencePage"; //$NON-NLS-1$
 
-	
+
 	private BuildPathSupport() {
 		super();
 	}
-	
+
 	/**
 	 * Returns a deprecation message for a classpath variable name.
-	 * 
+	 *
 	 * @param variableName classpath variable name
 	 * @return the deprecation message, or <code>null</code> iff
 	 *         <code>variableName</code> is not a classpath variable or the
@@ -103,7 +103,7 @@ public class BuildPathSupport {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds a javadoc location for a new archive in the existing classpaths.
 	 * @param elem The new classpath entry
@@ -141,7 +141,7 @@ public class BuildPathSupport {
 		}
 		return null;
 	}
-	
+
 	private static class UpdatedClasspathContainer implements IClasspathContainer {
 
 		private IClasspathEntry[] fNewEntries;
@@ -186,8 +186,8 @@ public class BuildPathSupport {
 			updateProjectClasspath(shell, jproject, newEntry, changedAttributes, monitor);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Apply a modified classpath entry to the classpath. The classpath entry can also be from a classpath container.
 	 * @param shell If not null and the entry could not be found on the projects classpath, a dialog will ask to put the entry on the classpath
@@ -271,22 +271,22 @@ public class BuildPathSupport {
 				return;
 			}
 			// add new
-			newEntries.add(newEntry);			
+			newEntries.add(newEntry);
 		}
 		IClasspathEntry[] newClasspath= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 		jproject.setRawClasspath(newClasspath, monitor);
 	}
-	
+
 	private static boolean putJarOnClasspathDialog(final Shell shell) {
 		if (shell == null) {
 			return false;
 		}
-		
+
 		final boolean[] result= new boolean[1];
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
-				String title= NewWizardMessages.BuildPathSupport_putoncpdialog_title; 
-				String message= NewWizardMessages.BuildPathSupport_putoncpdialog_message; 
+				String title= NewWizardMessages.BuildPathSupport_putoncpdialog_title;
+				String message= NewWizardMessages.BuildPathSupport_putoncpdialog_message;
 				result[0]= MessageDialog.openQuestion(shell, title, message);
 			}
 		});

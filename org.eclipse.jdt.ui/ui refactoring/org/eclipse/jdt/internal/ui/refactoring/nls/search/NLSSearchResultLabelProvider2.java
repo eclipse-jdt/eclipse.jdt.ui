@@ -11,9 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
@@ -28,30 +28,30 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements IStyledLabelProvider {
-	
+
 	private AppearanceAwareLabelProvider fLabelProvider;
-	
+
 	public NLSSearchResultLabelProvider2(AbstractTextSearchViewPage page) {
 		super(page);
 		fLabelProvider= new AppearanceAwareLabelProvider(JavaElementLabels.ALL_POST_QUALIFIED, 0);
 	}
-	
+
 	public StyledString getStyledText(Object element) {
 		return getColoredLabelWithCounts(element, internalGetText(element));
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {
-		return getLabelWithCounts(element, internalGetText(element).getString()); 
+		return getLabelWithCounts(element, internalGetText(element).getString());
 	}
-		
+
 	private StyledString internalGetText(Object element) {
 		String description;
 		StyledString elementLabel;
-		
+
 		if (element instanceof FileEntry) {
 			FileEntry fileEntry= (FileEntry) element;
 			description= fileEntry.getMessage();
@@ -66,13 +66,13 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 		}
 		return new StyledString(description).append(' ').append(elementLabel);
 	}
-	
+
 	private StyledString getPropertiesName(IFile propertiesFile) {
 		String path= BasicElementLabels.getPathLabel(propertiesFile.getFullPath().removeLastSegments(1), false);
 		String propertiesName= BasicElementLabels.getResourceName(propertiesFile.getName());
-		return new StyledString(propertiesName).append(JavaElementLabels.CONCAT_STRING + path, StyledString.QUALIFIER_STYLER); 
+		return new StyledString(propertiesName).append(JavaElementLabels.CONCAT_STRING + path, StyledString.QUALIFIER_STYLER);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 	 */
@@ -81,10 +81,10 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 			element= ((FileEntry) element).getPropertiesFile();
 		if (element instanceof CompilationUnitEntry)
 			element= ((CompilationUnitEntry)element).getCompilationUnit();
-		
+
 		return fLabelProvider.getImage(element);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.LabelProvider#dispose()
 	 */

@@ -13,19 +13,23 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import org.eclipse.team.core.TeamException;
+import org.eclipse.team.ui.history.ElementLocalHistoryPageSource;
+import org.eclipse.team.ui.history.HistoryPageCompareEditorInput;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -37,11 +41,6 @@ import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
-
-import org.eclipse.team.core.TeamException;
-
-import org.eclipse.team.ui.history.ElementLocalHistoryPageSource;
-import org.eclipse.team.ui.history.HistoryPageCompareEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -70,42 +69,42 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Provides "Replace from local history" for Java elements.
  */
 class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
-	
+
 	protected boolean fPrevious= false;
 
 	JavaReplaceWithEditionActionImpl(boolean previous) {
 		super(true);
 		fPrevious= previous;
 	}
-	
+
 	public void run(ISelection selection) {
-		
+
 		Shell shell= getShell();
-		
+
 		final IMember input= getEditionElement(selection);
 		if (input == null) {
 			MessageDialog.openInformation(shell, CompareMessages.ReplaceFromHistory_title, CompareMessages.ReplaceFromHistory_invalidSelectionMessage);
 			return;
 		}
-		
+
 		final IFile file= getFile(input);
 		if (file == null) {
 			showError();
 			return;
 		}
-		
+
 		IStatus status= Resources.makeCommittable(file, shell);
 		if (!status.isOK()) {
 			return;
 		}
-		
+
 		if (fPrevious) {
-			String errorTitle= CompareMessages.ReplaceFromHistory_title; 
-			String errorMessage= CompareMessages.ReplaceFromHistory_internalErrorMessage; 
+			String errorTitle= CompareMessages.ReplaceFromHistory_title;
+			String errorMessage= CompareMessages.ReplaceFromHistory_internalErrorMessage;
 			try {
 				ITypedElement ti = ElementLocalHistoryPageSource.getPreviousEdition(file, input);
 				if (ti == null) {
-					MessageDialog.openInformation(shell, errorTitle, CompareMessages.ReplaceFromHistory_parsingErrorMessage);	
+					MessageDialog.openInformation(shell, errorTitle, CompareMessages.ReplaceFromHistory_parsingErrorMessage);
 					return;
 				}
 				replace(input, file, ti);
@@ -132,12 +131,12 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 	}
 
 	public void replace(IMember input, IFile file, ITypedElement element) {
-		
+
 		Shell shell= getShell();
-		
-		String errorTitle= CompareMessages.ReplaceFromHistory_title; 
+
+		String errorTitle= CompareMessages.ReplaceFromHistory_title;
 		String errorMessage= CompareMessages.ReplaceFromHistory_internalErrorMessage;
-		
+
 		// get the document where to insert the text
 		IPath path= file.getFullPath();
 		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
@@ -145,18 +144,18 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 		try {
 			bufferManager.connect(path, LocationKind.IFILE, null);
 			textFileBuffer= bufferManager.getTextFileBuffer(path, LocationKind.IFILE);
-			IDocument document= textFileBuffer.getDocument();		
+			IDocument document= textFileBuffer.getDocument();
 			performReplace(input, file, textFileBuffer, document, element);
 	 	} catch(InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
-			
+
 		} catch(InterruptedException ex) {
 			// shouldn't be called because is not cancelable
 			Assert.isTrue(false);
-			
+
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
-			
+
 		} finally {
 			try {
 				if (textFileBuffer != null)
@@ -166,27 +165,27 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 			}
 		}
 	}
-	
+
 	private void performReplace(IMember input, IFile file,
 			ITextFileBuffer textFileBuffer, IDocument document, ITypedElement ti)
 			throws CoreException, JavaModelException,
 			InvocationTargetException, InterruptedException {
-		
+
 		if (ti instanceof IStreamContentAccessor) {
-			
+
 			boolean inEditor= beingEdited(file);
-			
+
 			String content= JavaCompareUtilities.readString((IStreamContentAccessor)ti);
 			String newContent= trimTextBlock(content, TextUtilities.getDefaultLineDelimiter(document), input.getJavaProject());
 			if (newContent == null) {
 				showError();
 				return;
 			}
-			
+
 			ICompilationUnit compilationUnit= input.getCompilationUnit();
 			CompilationUnit root= parsePartialCompilationUnit(compilationUnit);
-			
-			
+
+
 			final ISourceRange nameRange= input.getNameRange();
 			// workaround for bug in getNameRange(): for AnnotationMembers length is negative
 			int length= nameRange.getLength();
@@ -198,28 +197,28 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 				node= ASTNodes.getParent(node2, AnnotationTypeDeclaration.class);
 			if (node == null)
 				node= ASTNodes.getParent(node2, EnumDeclaration.class);
-			
+
 			//ASTNode node= getBodyContainer(root, input);
 			if (node == null) {
 				showError();
 				return;
 			}
-			
+
 			ASTRewrite rewriter= ASTRewrite.create(root.getAST());
 			rewriter.replace(node, rewriter.createStringPlaceholder(newContent, node.getNodeType()), null);
-			
+
 			if (inEditor) {
 				JavaEditor je= getEditor(file);
 				if (je != null)
 					je.setFocus();
 			}
-			
+
 			Map options= null;
 			IJavaProject javaProject= compilationUnit.getJavaProject();
 			if (javaProject != null)
 				options= javaProject.getOptions(true);
 			applyChanges(rewriter, document, textFileBuffer, getShell(), inEditor, options);
-			
+
 		}
 	}
 

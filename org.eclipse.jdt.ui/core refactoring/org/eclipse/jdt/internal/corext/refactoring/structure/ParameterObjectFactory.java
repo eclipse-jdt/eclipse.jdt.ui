@@ -15,12 +15,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -125,7 +125,7 @@ public class ParameterObjectFactory {
 		 * @param declaration the new declaration
 		 */
 		public void typeCreated(CompilationUnitRewrite cuRewrite, TypeDeclaration declaration) {}
-		
+
 		protected static ASTNode moveNode(CompilationUnitRewrite cuRewrite, ASTNode node) {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			if (rewrite.getAST() != node.getAST()) {
@@ -138,7 +138,7 @@ public class ParameterObjectFactory {
 			return rewrite.createMoveTarget(node);
 		}
 		/**
-		 * Return whether the setter should be created for this field. This method is only called when 
+		 * Return whether the setter should be created for this field. This method is only called when
 		 * the global createSetters is set and the parameterInfo is marked for field creation.
 		 * @param pi the parameter info
 		 * @return <code>true</code> if a setter should be created
@@ -147,7 +147,7 @@ public class ParameterObjectFactory {
 			return !Modifier.isFinal(pi.getOldBinding().getModifiers());
 		}
 		/**
-		 * Return whether the getter should be created for this field. This method is only called when 
+		 * Return whether the getter should be created for this field. This method is only called when
 		 * the global createGetters is set and the parameterInfo is marked for field creation.
 		 * @param pi the parameter info
 		 * @return <code>true</code> if a getter should be created
@@ -167,7 +167,7 @@ public class ParameterObjectFactory {
 
 	/**
 	 * Creates a new TypeDeclaration for the parameterInfo objects.
-	 * 
+	 *
 	 * @param declaringType the fully qualified name of the type
 	 * @param cuRewrite the {@link CompilationUnitRewrite} that will be used for creation
 	 * @param listener the creation listener or null
@@ -255,7 +255,7 @@ public class ParameterObjectFactory {
 
 			String paramName= getParameterName(pi, project, usedParameter);
 			usedParameter.add(paramName);
-			
+
 			Type fieldType= importBinding(typeBinding, cuRewrite);
 			svd.setType(fieldType);
 			svd.setName(ast.newSimpleName(paramName));
@@ -333,7 +333,7 @@ public class ParameterObjectFactory {
 		}
 		return createFieldAccess(pi, ast, completeQualifier);
 	}
-	
+
 	public Expression createFieldWriteAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, Expression assignedValue, boolean useSuper, Expression qualifier) {
 		Expression completeQualifier= generateQualifier(paramName, ast, useSuper, qualifier);
 		if (fCreateSetter) {
@@ -572,7 +572,7 @@ public class ParameterObjectFactory {
 	/**
 	 * Updates the position of the newly inserted parameterObject so that it is
 	 * directly after the first checked parameter
-	 * 
+	 *
 	 * @param parameterObjectReference
 	 */
 	public void updateParameterPosition(ParameterInfo parameterObjectReference) {

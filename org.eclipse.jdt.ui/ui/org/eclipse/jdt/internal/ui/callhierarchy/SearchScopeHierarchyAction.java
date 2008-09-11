@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *          (report 60714: Call Hierarchy: display search scope in view title)
@@ -30,20 +30,20 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 class SearchScopeHierarchyAction extends SearchScopeAction {
 	//TODO: does such a scope make sense at all?
-	
+
 	private final SearchScopeActionGroup fGroup;
-	
+
 	public SearchScopeHierarchyAction(SearchScopeActionGroup group) {
-		super(group, CallHierarchyMessages.SearchScopeActionGroup_hierarchy_text); 
+		super(group, CallHierarchyMessages.SearchScopeActionGroup_hierarchy_text);
 		this.fGroup = group;
-		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_hierarchy_tooltip); 
+		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_hierarchy_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
-	
+
 	public IJavaSearchScope getSearchScope() {
 		try {
 			IMember[] members = fGroup.getView().getInputElements();
-			
+
 			if (members != null && members.length == 1) {
 				IType type= members[0] instanceof IType ? (IType) members[0] : members[0].getDeclaringType();
 				return SearchEngine.createHierarchyScope(type);
@@ -53,17 +53,17 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
 	 */
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_HIERARCHY;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */

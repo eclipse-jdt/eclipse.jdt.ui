@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -88,17 +87,17 @@ public class JavaFoldingStructureProviderRegistry {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String currentProviderId= preferenceStore.getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		JavaFoldingStructureProviderDescriptor desc= getFoldingProviderDescriptor(currentProviderId);
-		
+
 		// Fallback to default if extension has gone
 		if (desc == null) {
 			String message= Messages.format(FoldingMessages.JavaFoldingStructureProviderRegistry_warning_providerNotFound_resetToDefault, currentProviderId);
 			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null));
-			
+
 			String defaultProviderId= preferenceStore.getDefaultString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
-			
+
 			desc= getFoldingProviderDescriptor(defaultProviderId);
 			Assert.isNotNull(desc);
-			
+
 			preferenceStore.setToDefault(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		}
 

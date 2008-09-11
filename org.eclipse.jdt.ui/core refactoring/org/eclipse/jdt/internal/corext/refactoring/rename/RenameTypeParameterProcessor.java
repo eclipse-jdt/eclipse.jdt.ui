@@ -93,7 +93,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 		/**
 		 * Creates a new rename type parameter visitor.
-		 * 
+		 *
 		 * @param rewrite
 		 *            the compilation unit rewrite to use
 		 * @param range
@@ -114,7 +114,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 		/**
 		 * Returns the resulting change.
-		 * 
+		 *
 		 * @return the resulting change
 		 * @throws CoreException
 		 *             if the change could not be created
@@ -179,7 +179,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 	/**
 	 * Creates a new rename type parameter processor.
-	 * 
+	 *
 	 * @param parameter
 	 *            the type parameter to rename, or <code>null</code> if invoked by scripting
 	 */
@@ -197,7 +197,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	public final boolean canEnableUpdateReferences() {
 		return true;
 	}
-	
+
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fTypeParameter, new RenameArguments(getNewElementName(), getUpdateReferences()));
@@ -207,11 +207,11 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[] {ResourceUtil.getFile(fTypeParameter.getDeclaringMember().getCompilationUnit())};
 	}
-	
+
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_NOTHING;
 	}
-	
+
 	protected final RefactoringStatus doCheckFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(context);
@@ -299,7 +299,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 	/**
 	 * Creates the necessary changes for the renaming of the type parameter.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @return the status of the operation
@@ -350,7 +350,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	public final String getIdentifier() {
 		return IDENTIFIER;
 	}
-	
+
 	public final Object getNewElement() throws CoreException {
 		final IMember member= fTypeParameter.getDeclaringMember();
 		if (member instanceof IType) {

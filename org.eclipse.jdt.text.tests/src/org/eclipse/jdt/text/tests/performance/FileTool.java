@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.Plugin;
 
 
 public class FileTool {
-	
+
 	/**
 	 * A buffer.
 	 */
@@ -41,15 +41,15 @@ public class FileTool {
 	/**
 	 * Unzips the given zip file to the given destination directory extracting only those entries
 	 * the pass through the given filter.
-	 * 
+	 *
 	 * @param zipFile the zip file to unzip
 	 * @param dstDir the destination directory
 	 * @throws IOException if an I/O error occurs
 	 */
 	public static void unzip(ZipFile zipFile, File dstDir) throws IOException {
-	
+
 		Enumeration entries = zipFile.entries();
-	
+
 		try {
 			while(entries.hasMoreElements()){
 				ZipEntry entry = (ZipEntry)entries.nextElement();
@@ -91,7 +91,7 @@ public class FileTool {
 	 * Returns the given file path with its separator
 	 * character changed from the given old separator to the
 	 * given new separator.
-	 * 
+	 *
 	 * @param path a file path
 	 * @param oldSeparator a path separator character
 	 * @param newSeparator a path separator character
@@ -105,7 +105,7 @@ public class FileTool {
 
 	/**
 	 * Copies all bytes in the given source file to the given destination file.
-	 * 
+	 *
 	 * @param source the given source file
 	 * @param destination the given destination file
 	 * @throws IOException if an I/O error occurs
@@ -137,7 +137,7 @@ public class FileTool {
 	/**
 	 * Copies all bytes in the given source stream to the given destination stream. Neither streams
 	 * are closed.
-	 * 
+	 *
 	 * @param source the given source stream
 	 * @param destination the given destination stream
 	 * @throws IOException if an I/O error occurs
@@ -154,7 +154,7 @@ public class FileTool {
 
 	/**
 	 * Copies the given source file to the given destination file.
-	 * 
+	 *
 	 * @param src the given source file
 	 * @param dst the given destination file
 	 * @throws IOException if an I/O error occurs

@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
 
 /**
  * Type constraint solver to solve supertype constraint models.
- * 
+ *
  * @since 3.1
  */
 public class SuperTypeConstraintsSolver {
@@ -55,7 +55,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Creates a new super type constraints solver.
-	 * 
+	 *
 	 * @param model the model to solve
 	 */
 	public SuperTypeConstraintsSolver(final SuperTypeConstraintsModel model) {
@@ -66,7 +66,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Computes the necessary equality constraints for conditional expressions.
-	 * 
+	 *
 	 * @param constraints the type constraints (element type: <code>ITypeConstraint2</code>)
 	 * @param level the compliance level
 	 */
@@ -85,7 +85,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Computes the necessary equality constraints for non-covariant return types.
-	 * 
+	 *
 	 * @param constraints the type constraints (element type: <code>ITypeConstraint2</code>)
 	 * @param level the compliance level
 	 */
@@ -102,7 +102,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Computes the obsolete casts for the specified cast variables.
-	 * 
+	 *
 	 * @param variables the cast variables (element type: <code>CastVariable2</code>)
 	 */
 	private void computeObsoleteCasts(final Collection variables) {
@@ -127,7 +127,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Computes the initial type estimate for the specified constraint variable.
-	 * 
+	 *
 	 * @param variable the constraint variable
 	 * @return the initial type estimate
 	 */
@@ -140,7 +140,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Computes the initial type estimates for the specified variables.
-	 * 
+	 *
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
 	private void computeTypeEstimates(final Collection variables) {
@@ -167,7 +167,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Computes a single type for each of the specified constraint variables.
-	 * 
+	 *
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
 	private void computeTypeOccurrences(final Collection variables) {
@@ -211,7 +211,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Returns the computed obsolete casts.
-	 * 
+	 *
 	 * @return the obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>)
 	 */
 	public final Map getObsoleteCasts() {
@@ -220,7 +220,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Returns the computed type occurrences.
-	 * 
+	 *
 	 * @return the type occurrences (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>)
 	 */
 	public final Map getTypeOccurrences() {
@@ -229,7 +229,7 @@ public class SuperTypeConstraintsSolver {
 
 	/**
 	 * Processes the given constraints on the constraint variable and propagates it.
-	 * 
+	 *
 	 * @param constraints the type constraints to process (element type: <code>ITypeConstraint2</code>)
 	 */
 	private void processConstraints(final Collection constraints) {

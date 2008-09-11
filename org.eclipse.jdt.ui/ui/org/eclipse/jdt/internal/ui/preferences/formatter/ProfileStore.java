@@ -39,6 +39,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -52,13 +60,6 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
 
 /**
  * Can load/store profiles from/to profilesKey
@@ -67,17 +68,17 @@ public class ProfileStore {
 
 	/** The default encoding to use */
 	public static final String ENCODING= "UTF-8"; //$NON-NLS-1$
-	
+
 	protected static final String VERSION_KEY_SUFFIX= ".version"; //$NON-NLS-1$
 
 	/**
-	 * A SAX event handler to parse the xml format for profiles. 
+	 * A SAX event handler to parse the xml format for profiles.
 	 */
 	private final static class ProfileDefaultHandler extends DefaultHandler {
-		
+
 		private List fProfiles;
 		private int fVersion;
-		
+
 		private String fName;
 		private Map fSettings;
 		private String fKind;
@@ -96,7 +97,7 @@ public class ProfileStore {
 				fKind= attributes.getValue(XML_ATTRIBUTE_PROFILE_KIND);
 				if (fKind == null) //Can only be an CodeFormatterProfile created pre 3.3M2
 					fKind= ProfileVersioner.CODE_FORMATTER_PROFILE_KIND;
-				
+
 				fSettings= new HashMap(200);
 
 			}
@@ -111,7 +112,7 @@ public class ProfileStore {
 
 			}
 		}
-		
+
 		public void endElement(String uri, String localName, String qName) {
 			if (qName.equals(XML_NODE_PROFILE)) {
 				fProfiles.add(new CustomProfile(fName, fSettings, fVersion, fKind));
@@ -120,37 +121,37 @@ public class ProfileStore {
 				fKind= null;
 			}
 		}
-		
+
 		public List getProfiles() {
 			return fProfiles;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Identifiers for the XML file.
 	 */
 	private final static String XML_NODE_ROOT= "profiles"; //$NON-NLS-1$
 	private final static String XML_NODE_PROFILE= "profile"; //$NON-NLS-1$
 	private final static String XML_NODE_SETTING= "setting"; //$NON-NLS-1$
-	
+
 	private final static String XML_ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_ID= "id"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_PROFILE_KIND= "kind"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_VALUE= "value"; //$NON-NLS-1$
-	
+
 	private final IProfileVersioner fProfileVersioner;
 	private final String fProfilesKey;
 	private final String fProfilesVersionKey;
-		
-	
+
+
 	public ProfileStore(String profilesKey, IProfileVersioner profileVersioner) {
 		fProfilesKey= profilesKey;
 		fProfileVersioner= profileVersioner;
 		fProfilesVersionKey= profilesKey + VERSION_KEY_SUFFIX;
 	}
-	
+
 	/**
 	 * @return Returns the collection of profiles currently stored in the preference store or
 	 * <code>null</code> if the loading failed. The elements are of type {@link ProfileManager.CustomProfile}
@@ -160,7 +161,7 @@ public class ProfileStore {
 	public List readProfiles(IScopeContext scope) throws CoreException {
 		return readProfilesFromString(scope.getNode(JavaUI.ID_PLUGIN).get(fProfilesKey, null));
 	}
-	
+
 	public void writeProfiles(Collection profiles, IScopeContext instanceScope) throws CoreException {
 		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 		try {
@@ -169,7 +170,7 @@ public class ProfileStore {
 			try {
 				val= stream.toString(ENCODING);
 			} catch (UnsupportedEncodingException e) {
-				val= stream.toString(); 
+				val= stream.toString();
 			}
 			IEclipsePreferences uiPreferences = instanceScope.getNode(JavaUI.ID_PLUGIN);
 			uiPreferences.put(fProfilesKey, val);
@@ -178,7 +179,7 @@ public class ProfileStore {
 			try { stream.close(); } catch (IOException e) { /* ignore */ }
 		}
 	}
-	
+
 	public List readProfilesFromString(String profiles) throws CoreException {
 	    if (profiles != null && profiles.length() > 0) {
 			byte[] bytes;
@@ -201,9 +202,9 @@ public class ProfileStore {
 			}
 		}
 		return null;
-    }	
-	
-	
+    }
+
+
 	/**
 	 * Read the available profiles from the internal XML file and return them
 	 * as collection or <code>null</code> if the file is not a profile file.
@@ -213,17 +214,17 @@ public class ProfileStore {
 	 */
 	public List readProfilesFromFile(File file) throws CoreException {
 		try {
-			final FileInputStream reader= new FileInputStream(file); 
+			final FileInputStream reader= new FileInputStream(file);
 			try {
 				return readProfilesFromStream(new InputSource(reader));
 			} finally {
 				try { reader.close(); } catch (IOException e) { /* ignore */ }
 			}
 		} catch (IOException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);  
+			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
 		}
 	}
-	
+
 	/**
 	 * Load profiles from a XML stream and add them to a map or <code>null</code> if the source is not a profile store.
 	 * @param inputSource The input stream
@@ -231,22 +232,22 @@ public class ProfileStore {
 	 * @throws CoreException
 	 */
 	public static List readProfilesFromStream(InputSource inputSource) throws CoreException {
-		
+
 		final ProfileDefaultHandler handler= new ProfileDefaultHandler();
 		try {
 		    final SAXParserFactory factory= SAXParserFactory.newInstance();
 			final SAXParser parser= factory.newSAXParser();
 			parser.parse(inputSource, handler);
 		} catch (SAXException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);  
+			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
 		} catch (IOException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);  
+			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
 		} catch (ParserConfigurationException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);  
+			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
 		}
 		return handler.getProfiles();
 	}
-	
+
 	/**
 	 * Write the available profiles to the internal XML file.
 	 * @param profiles List of <code>CustomProfile</code>
@@ -264,10 +265,10 @@ public class ProfileStore {
 				try { stream.close(); } catch (IOException e) { /* ignore */ }
 			}
 		} catch (IOException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);  
+			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);
 		}
 	}
-	
+
 	/**
 	 * Save profiles to an XML stream
 	 * @param profiles the list of <code>CustomProfile</code>
@@ -279,14 +280,14 @@ public class ProfileStore {
 
 		try {
 			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			final DocumentBuilder builder= factory.newDocumentBuilder();		
+			final DocumentBuilder builder= factory.newDocumentBuilder();
 			final Document document= builder.newDocument();
-			
+
 			final Element rootElement = document.createElement(XML_NODE_ROOT);
 			rootElement.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profileVersioner.getCurrentVersion()));
 
 			document.appendChild(rootElement);
-			
+
 			for(final Iterator iter= profiles.iterator(); iter.hasNext();) {
 				final Profile profile= (Profile)iter.next();
 				if (profile.isProfileToSave()) {
@@ -301,25 +302,25 @@ public class ProfileStore {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 			transformer.transform(new DOMSource(document), new StreamResult(stream));
 		} catch (TransformerException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);  
+			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);
 		} catch (ParserConfigurationException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);  
+			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);
 		}
 	}
 
-	
+
 	/*
 	 * Create a new profile element in the specified document. The profile is not added
-	 * to the document by this method. 
+	 * to the document by this method.
 	 */
 	private static Element createProfileElement(Profile profile, Document document, IProfileVersioner profileVersioner) {
 		final Element element= document.createElement(XML_NODE_PROFILE);
 		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile.getVersion()));
 		element.setAttribute(XML_ATTRIBUTE_PROFILE_KIND, profileVersioner.getProfileKind());
-		
+
 		final Iterator keyIter= profile.getSettings().keySet().iterator();
-		
+
 		while (keyIter.hasNext()) {
 			final String key= (String)keyIter.next();
 			final String value= (String)profile.getSettings().get(key);
@@ -334,8 +335,8 @@ public class ProfileStore {
 		}
 		return element;
 	}
-	
-		
+
+
 	/*
 	 * Creates a UI exception for logging purposes
 	 */

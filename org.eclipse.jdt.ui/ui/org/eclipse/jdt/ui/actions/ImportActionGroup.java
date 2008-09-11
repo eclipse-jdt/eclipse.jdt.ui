@@ -24,35 +24,35 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 /**
  * Action group to add the Import and Export action to a view part's
  * context menu.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ImportActionGroup extends ActionGroup {
 
 	private static final String GROUP_IMPORT= "group.import"; //$NON-NLS-1$
-	
+
 	private ImportResourcesAction fImportAction;
 	private ExportResourcesAction fExportAction;
 
 	/**
-	 * Creates a new <code>ImportActionGroup</code>. The group 
-	 * requires that the selection provided by the part's selection provider 
+	 * Creates a new <code>ImportActionGroup</code>. The group
+	 * requires that the selection provided by the part's selection provider
 	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 */
 	public ImportActionGroup(IViewPart part) {
 		IWorkbenchWindow workbenchWindow = part.getSite().getWorkbenchWindow();
 		fImportAction= new ImportResourcesAction(workbenchWindow);
-		fExportAction= new ExportResourcesAction(workbenchWindow);			
+		fExportAction= new ExportResourcesAction(workbenchWindow);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -62,7 +62,7 @@ public class ImportActionGroup extends ActionGroup {
 		menu.appendToGroup(GROUP_IMPORT, fExportAction);
 		super.fillContextMenu(menu);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

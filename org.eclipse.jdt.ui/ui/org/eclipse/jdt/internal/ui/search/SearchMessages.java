@@ -180,7 +180,7 @@ public final class SearchMessages extends NLS {
 	public static String DoubleWorkingSetScopeNoJRE;
 	public static String WorkingSetsScope;
 	public static String WorkingSetsScopeNoJRE;
-	
+
 	public static String SelectionScope;
 	public static String SelectionScopeNoJRE;
 	public static String SingleSelectionScope;
@@ -269,22 +269,22 @@ public final class SearchMessages extends NLS {
 	public static String MatchFilter_PotentialFilter_name;
 	public static String MatchFilter_PotentialFilter_actionLabel;
 	public static String MatchFilter_PotentialFilter_description;
-	
+
 	public static String MatchLocations_dialog_description;
 	public static String MatchLocations_dialog_title;
-	
+
 	public static String MatchLocations_casts_description;
 	public static String MatchLocations_casts_label;
-	
+
 	public static String MatchLocations_catch_clauses_description;
 	public static String MatchLocations_catch_clauses_label;
-	
+
 	public static String MatchLocations_class_instance_description;
 	public static String MatchLocations_class_instance_label;
-	
+
 	public static String MatchLocations_implicit_this_description;
 	public static String MatchLocations_implicit_this_label;
-	
+
 	public static String MatchLocations_local_types_description;
 	public static String MatchLocations_local_types_label;
 
@@ -293,7 +293,7 @@ public final class SearchMessages extends NLS {
 
 	public static String MatchLocations_field_types_description;
 	public static String MatchLocations_field_types_label;
-	
+
 	public static String MatchLocations_declaration_group_label;
 	public static String MatchLocations_expression_group_label;
 	public static String MatchLocations_in_parameterized_types_group_label;

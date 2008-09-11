@@ -44,20 +44,20 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class VariableCreationDialog extends StatusDialog {
-		
+
 	private IDialogSettings fDialogSettings;
-	
+
 	private StringDialogField fNameField;
 	private StatusInfo fNameStatus;
-	
+
 	private StringButtonDialogField fPathField;
 	private StatusInfo fPathStatus;
 	private SelectionButtonDialogField fDirButton;
-		
+
 	private CPVariableElement fElement;
-	
+
 	private List fExistingNames;
-		
+
 	public VariableCreationDialog(Shell parent, CPVariableElement element, List existingNames) {
 		super(parent);
 		if (element == null) {
@@ -65,14 +65,14 @@ public class VariableCreationDialog extends StatusDialog {
 		} else {
 			setTitle(NewWizardMessages.VariableCreationDialog_titleedit);
 		}
-		
+
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
-		
+
 		fElement= element;
-		
+
 		fNameStatus= new StatusInfo();
 		fPathStatus= new StatusInfo();
-		
+
 		NewVariableAdapter adapter= new NewVariableAdapter();
 		fNameField= new StringDialogField();
 		fNameField.setDialogFieldListener(adapter);
@@ -82,13 +82,13 @@ public class VariableCreationDialog extends StatusDialog {
 		fPathField.setDialogFieldListener(adapter);
 		fPathField.setLabelText(NewWizardMessages.VariableCreationDialog_path_label);
 		fPathField.setButtonLabel(NewWizardMessages.VariableCreationDialog_path_file_button);
-		
+
 		fDirButton= new SelectionButtonDialogField(SWT.PUSH);
 		fDirButton.setDialogFieldListener(adapter);
 		fDirButton.setLabelText(NewWizardMessages.VariableCreationDialog_path_dir_button);
-		
+
 		fExistingNames= existingNames;
-		
+
 		if (element != null) {
 			fNameField.setText(element.getName());
 			fPathField.setText(element.getPath().toString());
@@ -98,7 +98,7 @@ public class VariableCreationDialog extends StatusDialog {
 			fPathField.setText(""); //$NON-NLS-1$
 		}
 	}
-	
+
 	/*
 	 * @see Windows#configureShell
 	 */
@@ -106,7 +106,7 @@ public class VariableCreationDialog extends StatusDialog {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.VARIABLE_CREATION_DIALOG);
 	}
-	
+
 
 	public CPVariableElement getClasspathElement() {
 		return new CPVariableElement(fNameField.getText(), new Path(fPathField.getText()));
@@ -117,51 +117,51 @@ public class VariableCreationDialog extends StatusDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-				
+
 		Composite inner= new Composite(composite, SWT.NONE);
 		inner.setFont(composite.getFont());
-		
+
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		layout.numColumns= 4;
 		inner.setLayout(layout);
-		
+
 		int fieldWidthHint= convertWidthInCharsToPixels(50);
-		
+
 		fNameField.doFillIntoGrid(inner, 2);
 		LayoutUtil.setWidthHint(fNameField.getTextControl(null), fieldWidthHint);
 		LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(null));
-		
+
 		DialogField.createEmptySpace(inner, 2);
-		
+
 		fPathField.doFillIntoGrid(inner, 3);
 		LayoutUtil.setWidthHint(fPathField.getTextControl(null), fieldWidthHint);
-		
+
 		fDirButton.doFillIntoGrid(inner, 1);
-		
+
 		DialogField focusField= (fElement == null) ? fNameField : fPathField;
 		focusField.postSetFocusOnDialogField(parent.getDisplay());
 		applyDialogFont(composite);
 		return composite;
 	}
 
-		
+
 	// -------- NewVariableAdapter --------
 
 	private class NewVariableAdapter implements IDialogFieldListener, IStringButtonAdapter {
-		
+
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
 			doFieldUpdated(field);
 		}
-		
+
 		// -------- IStringButtonAdapter
 		public void changeControlPressed(DialogField field) {
 			doChangeControlPressed(field);
 		}
 	}
-	
+
 	private void doChangeControlPressed(DialogField field) {
 		if (field == fPathField) {
 			IPath path= chooseExtJarFile();
@@ -170,7 +170,7 @@ public class VariableCreationDialog extends StatusDialog {
 			}
 		}
 	}
-	
+
 	private void doFieldUpdated(DialogField field) {
 		if (field == fNameField) {
 			fNameStatus= nameUpdated();
@@ -184,7 +184,7 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 		updateStatus(StatusUtil.getMoreSevere(fPathStatus, fNameStatus));
 	}
-	
+
 	private StatusInfo nameUpdated() {
 		StatusInfo status= new StatusInfo();
 		String name= fNameField.getText();
@@ -201,7 +201,7 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 		return status;
 	}
-	
+
 	private boolean nameConflict(String name) {
 		if (fElement != null && fElement.getName().equals(name)) {
 			return false;
@@ -214,11 +214,11 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 		return false;
 	}
-	
-	
+
+
 	private StatusInfo pathUpdated() {
 		StatusInfo status= new StatusInfo();
-		
+
 		String path= fPathField.getText();
 		if (path.length() > 0) { // empty path is ok
 			if (!Path.ROOT.isValidPath(path)) {
@@ -229,8 +229,8 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 		return status;
 	}
-	
-	
+
+
 	private String getInitPath() {
 		String initPath= fPathField.getText();
 		if (initPath.length() == 0) {
@@ -247,14 +247,14 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 		return initPath;
 	}
-	
-	
+
+
 	/*
 	 * Open a dialog to choose a jar from the file system
 	 */
 	private IPath chooseExtJarFile() {
 		String initPath= getInitPath();
-		
+
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(NewWizardMessages.VariableCreationDialog_extjardialog_text);
 		dialog.setFilterExtensions(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
@@ -266,10 +266,10 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 		return null;
 	}
-	
+
 	private IPath chooseExtDirectory() {
 		String initPath= getInitPath();
-		
+
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setText(NewWizardMessages.VariableCreationDialog_extdirdialog_text);
 		dialog.setMessage(NewWizardMessages.VariableCreationDialog_extdirdialog_message);
@@ -281,7 +281,7 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 		return null;
 	}
-	
-		
-	
+
+
+
 }

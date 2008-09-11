@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * </p>
  *
  * @since 3.0
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IInvocationContext {

@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * <p>
  * Note: Must be public since it is referenced from plugin.xml
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class OccurrencesPreferencePage extends AbstractConfigurationBlockPreferencePage {
@@ -39,7 +39,7 @@ public class OccurrencesPreferencePage extends AbstractConfigurationBlockPrefere
 	protected void setDescription() {
 		// This page has no description
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */

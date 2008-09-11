@@ -12,18 +12,18 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
-import com.ibm.icu.text.Collator;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
+
+import com.ibm.icu.text.Collator;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -41,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredList;
 import org.eclipse.ui.progress.IProgressService;
+
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -63,30 +64,30 @@ import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
-	
+
 	private static final AddImportComparator ADD_IMPORT_COMPARATOR= new AddImportComparator();
-	
+
 	private static final class AddImportComparator implements Comparator {
-		
+
 		public int compare(Object o1, Object o2) {
 			if (((String)o1).equals(o2))
 				return 0;
-			
+
 			History history= QualifiedTypeNameHistory.getDefault();
-			
+
 			int pos1= history.getPosition(o1);
 			int pos2= history.getPosition(o2);
-			
+
 			if (pos1 == pos2)
 				return Collator.getInstance().compare(o1, o2);
-			
+
 			if (pos1 > pos2) {
 				return -1;
 			} else {
 				return 1;
 			}
 		}
-		
+
 	}
 
 	private CompilationUnitEditor fEditor;
@@ -187,14 +188,14 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 
 	/**
 	 * Creates a import query that shows a dialog for conflics.
-	 * 
+	 *
 	 * @param shell the parent shell
 	 * @return the created mport query
 	 */
 	public static IChooseImportQuery newDialogQuery(Shell shell) {
 		return new SelectTypeQuery(shell);
 	}
-	
+
 	private static class SelectTypeQuery implements IChooseImportQuery {
 
 		private final Shell fShell;

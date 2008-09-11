@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui;
- 
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -30,18 +30,18 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 /**
  * Helper needed to get the content of a Javadoc comment.
- * 
+ *
  * <p>
  * This class is not intended to be subclassed or instantiated by clients.
  * </p>
  *
  * @since 3.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavadocContentAccess {
-	
+
 	private JavadocContentAccess() {
 		// do not instantiate
 	}
@@ -79,7 +79,7 @@ public class JavadocContentAccess {
 		if (buf == null) {
 			return null; // no source attachment found
 		}
-		
+
 		ISourceRange javadocRange= member.getJavadocRange();
 		if (javadocRange != null) {
 			JavaDocCommentReader reader= new JavaDocCommentReader(buf, javadocRange.getOffset(), javadocRange.getOffset() + javadocRange.getLength() - 1);
@@ -88,14 +88,14 @@ public class JavadocContentAccess {
 				return reader;
 			}
 		}
-		
+
 		return null;
 	}
 
 	/**
 	 * Checks whether the given reader only returns
 	 * the inheritDoc tag.
-	 * 
+	 *
 	 * @param reader the reader
 	 * @param length the length of the underlying content
 	 * @return <code>true</code> if the reader only returns the inheritDoc tag
@@ -109,14 +109,14 @@ public class JavadocContentAccess {
 			return false;
 		}
 		return new String(content).trim().equals("{@inheritDoc}"); //$NON-NLS-1$
-		
+
 	}
 
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
 	 * and renders the tags in HTML.
 	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
-	 * 
+	 *
 	 * @param member				the member to get the Javadoc of.
 	 * @param allowInherited		for methods with no (Javadoc) comment, the comment of the overridden
 	 * 									class is returned if <code>allowInherited</code> is <code>true</code>
@@ -131,26 +131,26 @@ public class JavadocContentAccess {
 		Reader contentReader= internalGetContentReader(member);
 		if (contentReader != null)
 			return new JavaDoc2HTMLTextReader(contentReader);
-		
+
 		if (useAttachedJavadoc && member.getOpenable().getBuffer() == null) { // only if no source available
 			String s= member.getAttachedJavadoc(null);
 			if (s != null)
 				return new StringReader(s);
 		}
-		
+
 		if (allowInherited && (member.getElementType() == IJavaElement.METHOD))
 			return findDocInHierarchy((IMethod) member, true, useAttachedJavadoc);
 
 		return null;
 	}
-	
-	
+
+
 
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
 	 * and renders the tags in HTML.
 	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
-	 * 
+	 *
 	 * @param member The member to get the Javadoc of.
 	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
@@ -170,12 +170,12 @@ public class JavadocContentAccess {
 		 */
 		if (!method.getJavaProject().exists())
 			return null;
-		
+
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);
-		
+
 		MethodOverrideTester tester= new MethodOverrideTester(type, hierarchy);
-		
+
 		IType[] superTypes= hierarchy.getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++) {
 			IType curr= superTypes[i];

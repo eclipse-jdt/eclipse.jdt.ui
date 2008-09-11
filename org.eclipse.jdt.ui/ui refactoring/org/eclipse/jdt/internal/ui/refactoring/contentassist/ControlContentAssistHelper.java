@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
  * @since 3.0
  */
 public class ControlContentAssistHelper {
-	
+
 	/**
 	 * @param text the text field to install ContentAssist
 	 * @param processor the <code>IContentAssistProcessor</code>
@@ -52,9 +52,9 @@ public class ControlContentAssistHelper {
 
 	public static SubjectControlContentAssistant createJavaContentAssistant(IContentAssistProcessor processor) {
 		final SubjectControlContentAssistant contentAssistant= new SubjectControlContentAssistant();
-		
+
 		contentAssistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-		
+
 		ContentAssistPreference.configure(contentAssistant, JavaPlugin.getDefault().getPreferenceStore());
 		contentAssistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 		contentAssistant.setInformationControlCreator(new IInformationControlCreator() {
@@ -62,8 +62,8 @@ public class ControlContentAssistHelper {
 				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 			}
 		});
-		
+
 		return contentAssistant;
 	}
-	
+
 }

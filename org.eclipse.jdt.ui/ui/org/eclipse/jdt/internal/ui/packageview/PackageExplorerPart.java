@@ -144,54 +144,54 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
- 
+
 /**
  * The ViewPart for the ProjectExplorer. It listens to part activation events.
  * When selection linking with the editor is enabled the view selection tracks
  * the active editor page. Similarly when a resource is selected in the packages
  * view the corresponding editor is activated.
  */
- 
+
 public class PackageExplorerPart extends ViewPart
 	implements ISetSelectionTarget, IMenuListener,
 		IShowInTarget, IRefreshable,
 		IPackagesViewPart,  IPropertyChangeListener,
 		IViewPartInputProvider {
-	
+
 	private static final String PERF_CREATE_PART_CONTROL= "org.eclipse.jdt.ui/perf/explorer/createPartControl"; //$NON-NLS-1$
 	private static final String PERF_MAKE_ACTIONS= "org.eclipse.jdt.ui/perf/explorer/makeActions"; //$NON-NLS-1$
-	
+
 	private static final int HIERARCHICAL_LAYOUT= 0x1;
 	private static final int FLAT_LAYOUT= 0x2;
-	
+
 	public static final int PROJECTS_AS_ROOTS= 1;
 	public static final int WORKING_SETS_AS_ROOTS= 2;
-	
+
 	private final static String VIEW_ID= JavaUI.ID_PACKAGES;
-				
+
 	// Persistence tags.
 	private static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
 	private static final String TAG_GROUP_LIBRARIES= "group_libraries"; //$NON-NLS-1$
 	private static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
 	private static final String TAG_LINK_EDITOR= "linkWithEditor"; //$NON-NLS-1$
 	private static final String TAG_MEMENTO= "memento"; //$NON-NLS-1$
-	
+
 	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierarchical
 	private boolean fShowLibrariesNode;
 	private boolean fLinkingEnabled;
-	
+
 	private int fRootMode;
 	private WorkingSetModel fWorkingSetModel;
-	
+
 	private PackageExplorerLabelProvider fLabelProvider;
 	private DecoratingJavaLabelProvider fDecoratingLabelProvider;
 	private PackageExplorerContentProvider fContentProvider;
 	private FilterUpdater fFilterUpdater;
-	
+
 	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer;
 	private Menu fContextMenu;
-	
+
 	private IMemento fMemento;
 
 	/**
@@ -199,11 +199,11 @@ public class PackageExplorerPart extends ViewPart
 	 * @since 3.5
 	 */
 	private OpenAndLinkWithEditorHelper fOpenAndLinkWithEditorHelper;
-	
+
 	private String fWorkingSetLabel;
 	private IDialogSettings fDialogSettings;
-	
-	
+
+
 	private IPartListener2 fLinkWithEditorListener= new IPartListener2() {
 		public void partVisible(IWorkbenchPartReference partRef) {}
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
@@ -216,7 +216,7 @@ public class PackageExplorerPart extends ViewPart
 				editorActivated(((IEditorReference) partRef).getEditor(true));
 			}
 		}
-		
+
 		public void partActivated(IWorkbenchPartReference partRef) {
 			if (partRef instanceof IEditorReference) {
 				editorActivated(((IEditorReference) partRef).getEditor(true));
@@ -224,11 +224,11 @@ public class PackageExplorerPart extends ViewPart
 		}
 
 	};
-	
+
 	private ITreeViewerListener fExpansionListener= new ITreeViewerListener() {
 		public void treeCollapsed(TreeExpansionEvent event) {
 		}
-		
+
 		public void treeExpanded(TreeExpansionEvent event) {
 			Object element= event.getElement();
 			if (element instanceof ICompilationUnit ||
@@ -241,7 +241,7 @@ public class PackageExplorerPart extends ViewPart
 	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
 		// fix for 64372  Projects showing up in Package Explorer twice [package explorer]
 		private List fPendingRefreshes;
-		
+
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
 			fPendingRefreshes= Collections.synchronizedList(new ArrayList());
@@ -252,7 +252,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 			super.add(parentElement, childElements);
 		}
-						
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.AbstractTreeViewer#internalRefresh(java.lang.Object, boolean)
 		 */
@@ -264,7 +264,7 @@ public class PackageExplorerPart extends ViewPart
 				fPendingRefreshes.remove(element);
 			}
 		}
-	    
+
 		protected boolean evaluateExpandableWithFilters(Object parent) {
 			if (parent instanceof IJavaProject
 					|| parent instanceof ICompilationUnit || parent instanceof IClassFile
@@ -284,7 +284,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 			return res;
 		}
-		
+
 		/* Checks if a filtered object in essential (i.e. is a parent that
 		 * should not be removed).
 		 */
@@ -301,7 +301,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 			return false;
 		}
-		
+
 		protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
 			IStructuredSelection is= (IStructuredSelection)invalidSelection;
 			List ns= null;
@@ -335,7 +335,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 			super.handleInvalidSelection(invalidSelection, newSelection);
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -345,7 +345,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 			return elements;
 		}
-		
+
 	    //---- special handling to preserve the selection correctly
 	    private boolean fInPreserveSelection;
 		protected void preservingSelection(Runnable updateCode) {
@@ -425,31 +425,31 @@ public class PackageExplorerPart extends ViewPart
 			return result;
 		}
 	}
-	
+
 	public PackageExplorerPart() {
-		
+
 		// exception: initialize from preference
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
-		
+
 		// on by default
 		fShowLibrariesNode= fDialogSettings.get(TAG_GROUP_LIBRARIES) == null || fDialogSettings.getBoolean(TAG_GROUP_LIBRARIES);
-		
+
 		fLinkingEnabled= fDialogSettings.getBoolean(TAG_LINK_EDITOR);
-		
+
 		try {
 			fIsCurrentLayoutFlat= fDialogSettings.getInt(TAG_LAYOUT) == FLAT_LAYOUT;
 		} catch (NumberFormatException e) {
 			fIsCurrentLayoutFlat= true;
 		}
-		
+
 		try {
 			fRootMode= fDialogSettings.getInt(TAG_ROOT_MODE);
 		} catch (NumberFormatException e) {
 			fRootMode= PROJECTS_AS_ROOTS;
 		}
-		
+
 	}
-	
+
     public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		if (memento == null) {
@@ -483,12 +483,12 @@ public class PackageExplorerPart extends ViewPart
 	private void restoreLayoutState(IMemento memento) {
 		Integer layoutState= memento.getInteger(TAG_LAYOUT);
 		fIsCurrentLayoutFlat= layoutState == null || layoutState.intValue() == FLAT_LAYOUT;
-		
+
 		// on by default
 		Integer groupLibraries= memento.getInteger(TAG_GROUP_LIBRARIES);
 		fShowLibrariesNode= groupLibraries == null || groupLibraries.intValue() != 0;
 	}
-	
+
 	/**
 	 * Returns the package explorer part of the active perspective. If
 	 * there isn't any package explorer part <code>null</code> is returned.
@@ -503,7 +503,7 @@ public class PackageExplorerPart extends ViewPart
 			return (PackageExplorerPart)view;
 		return null;
 	}
-	
+
 	/**
 	 * Makes the package explorer part visible in the active perspective. If there
 	 * isn't a package explorer part registered <code>null</code> is returned.
@@ -517,7 +517,7 @@ public class PackageExplorerPart extends ViewPart
 			return null;
 		}
 	}
-		
+
 	 public void dispose() {
 		XMLMemento memento= XMLMemento.createWriteRoot("packageExplorer"); //$NON-NLS-1$
 		saveState(memento);
@@ -528,16 +528,16 @@ public class PackageExplorerPart extends ViewPart
 		} catch (IOException e) {
 			// don't do anything. Simply don't store the settings
 		}
-		 
+
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
-		
+
 		getSite().getPage().removePartListener(fLinkWithEditorListener); // always remove even if we didn't register
-		
+
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		if (fViewer != null)
 			fViewer.removeTreeListener(fExpansionListener);
-		
+
 		if (fActionSet != null)
 			fActionSet.dispose();
 		if (fFilterUpdater != null)
@@ -558,33 +558,33 @@ public class PackageExplorerPart extends ViewPart
 
 		fViewer= createViewer(parent);
 		fViewer.setUseHashlookup(true);
-		
+
 		initDragAndDrop();
-		
+
 		setProviders();
-		
+
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-	
-		
+
+
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(this);
 		fContextMenu= menuMgr.createContextMenu(fViewer.getTree());
 		fViewer.getTree().setMenu(fContextMenu);
-		
+
 		// Register viewer with site. This must be done before making the actions.
 		IWorkbenchPartSite site= getSite();
 		site.registerContextMenu(menuMgr, fViewer);
 		site.setSelectionProvider(fViewer);
-		
+
 		makeActions(); // call before registering for selection changes
-		
+
 		// Set input after filter and sorter has been set. This avoids resorting and refiltering.
 		restoreFilterAndSorter();
 		fViewer.setInput(findInputElement());
 		initFrameActions();
 		initKeyListener();
-			
+
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				fActionSet.handleDoubleClick(event);
@@ -609,28 +609,28 @@ public class PackageExplorerPart extends ViewPart
 			protected void open(ISelection selection, boolean activate) {
 				fActionSet.handleOpen(selection, activate);
 			}
-			
+
 		};
 
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
 		fViewer.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		fViewer.addTreeListener(fExpansionListener);
-	
+
 		// Set help for the view
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.PACKAGES_VIEW);
-		
+
 		fillActionBars();
 
 		updateTitle();
-		
+
 		fFilterUpdater= new FilterUpdater(fViewer);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
-		
+
 		// Sync'ing the package explorer has to be done here. It can't be done
 		// when restoring the link state since the package explorers input isn't
 		// set yet.
 		setLinkingEnabled(isLinkingEnabled());
-		
+
 		stats.endRun();
 	}
 
@@ -647,13 +647,13 @@ public class PackageExplorerPart extends ViewPart
 	/**
 	 * Answers whether this part shows the packages flat or hierarchical.
 	 * @return <true> if flat layout is selected
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public boolean isFlatLayout() {
 		return fIsCurrentLayoutFlat;
 	}
-	
+
 	private void setProviders() {
 		//content provider must be set before the label provider
 		fContentProvider= createContentProvider();
@@ -662,45 +662,45 @@ public class PackageExplorerPart extends ViewPart
 		fViewer.setContentProvider(fContentProvider);
 
 		fViewer.setComparer(createElementComparer());
-		
+
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
 		fDecoratingLabelProvider= new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat);
 		fViewer.setLabelProvider(fDecoratingLabelProvider);
 		// problem decoration provided by PackageLabelProvider
 	}
-	
+
 	public void setShowLibrariesNode(boolean enabled) {
 		fShowLibrariesNode= enabled;
 		saveDialogSettings();
-		
+
 		fContentProvider.setShowLibrariesNode(enabled);
 		fViewer.getControl().setRedraw(false);
 		fViewer.refresh();
 		fViewer.getControl().setRedraw(true);
 	}
-	
+
 	boolean isLibrariesNodeShown() {
 		return fShowLibrariesNode;
 	}
-	
-	
+
+
 	public void setFlatLayout(boolean enable) {
 		// Update current state and inform content and label providers
 		fIsCurrentLayoutFlat= enable;
 		saveDialogSettings();
-		
+
 		if (fViewer != null) {
 			fContentProvider.setIsFlatLayout(isFlatLayout());
 			fLabelProvider.setIsFlatLayout(isFlatLayout());
 			fDecoratingLabelProvider.setFlatPackageMode(isFlatLayout());
-			
+
 			fViewer.getControl().setRedraw(false);
 			fViewer.refresh();
 			fViewer.getControl().setRedraw(true);
 		}
 	}
-	
+
 	/**
 	 * This method should only be called inside this class
 	 * and from test cases.
@@ -714,23 +714,23 @@ public class PackageExplorerPart extends ViewPart
 		else
 			return new WorkingSetAwareContentProvider(showCUChildren, fWorkingSetModel);
 	}
-	
+
 	private PackageExplorerLabelProvider createLabelProvider() {
 		return new PackageExplorerLabelProvider(fContentProvider);
 	}
-	
+
 	private IElementComparer createElementComparer() {
 		if (getRootMode() == PROJECTS_AS_ROOTS)
 			return null;
 		else
 			return WorkingSetModel.COMPARER;
 	}
-	
+
 	private void fillActionBars() {
 		IActionBars actionBars= getViewSite().getActionBars();
 		fActionSet.fillActionBars(actionBars);
 	}
-	
+
 	private Object findInputElement() {
 		if (getRootMode() == WORKING_SETS_AS_ROOTS) {
 			return fWorkingSetModel;
@@ -750,7 +750,7 @@ public class PackageExplorerPart extends ViewPart
 			return JavaCore.create(JavaPlugin.getWorkspace().getRoot());
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#getAdapter(java.lang.Class)
 	 */
@@ -834,13 +834,13 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 	}
-	
+
 	public String getTitleToolTip() {
 		if (fViewer == null)
 			return super.getTitleToolTip();
 		return getToolTipText(fViewer.getInput());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
 	 */
@@ -851,15 +851,15 @@ public class PackageExplorerPart extends ViewPart
 	private ISelection getSelection() {
 		return fViewer.getSelection();
 	}
-	  
+
 	//---- Action handling ----------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * @see IMenuListener#menuAboutToShow(IMenuManager)
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
-		
+
 		fActionSet.setContext(new ActionContext(getSelection()));
 		fActionSet.fillContextMenu(menu);
 		fActionSet.setContext(null);
@@ -876,9 +876,9 @@ public class PackageExplorerPart extends ViewPart
 
 		stats.endRun();
 	}
-	
+
 	// ---- Event handling ----------------------------------------------------------
-	
+
 	private void initDragAndDrop() {
 		initDrag();
 		initDrop();
@@ -911,7 +911,7 @@ public class PackageExplorerPart extends ViewPart
 		Control ctrl= getTreeViewer().getControl();
 		if (ctrl == null || ctrl.isDisposed())
 			return;
-		
+
 		fContentProvider.runPendingUpdates();
 		fViewer.setSelection(convertSelection(selection), true);
 	}
@@ -919,9 +919,9 @@ public class PackageExplorerPart extends ViewPart
 	public ISelection convertSelection(ISelection s) {
 		if (!(s instanceof IStructuredSelection))
 			return s;
-			
+
 		Object[] elements= ((IStructuredSelection)s).toArray();
-		
+
 		boolean changed= false;
 		for (int i= 0; i < elements.length; i++) {
 			Object convertedElement= convertElement(elements[i]);
@@ -945,10 +945,10 @@ public class PackageExplorerPart extends ViewPart
 					if (resource != null)
 						return resource;
 				}
-				
+
 			}
 			return original;
-		
+
 		} else if (original instanceof IResource) {
 			IJavaElement je= JavaCore.create((IResource)original);
 			if (je != null && je.exists()) {
@@ -962,7 +962,7 @@ public class PackageExplorerPart extends ViewPart
 			IJavaElement je= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
 			if (je != null && je.exists())
 				return je;
-			
+
 			IResource r= (IResource) adaptable.getAdapter(IResource.class);
 			if (r != null) {
 				je= JavaCore.create(r);
@@ -974,11 +974,11 @@ public class PackageExplorerPart extends ViewPart
 		}
 		return original;
 	}
-	
+
 	public void selectAndReveal(Object element) {
 		selectReveal(new StructuredSelection(element));
 	}
-	
+
 	public boolean isLinkingEnabled() {
 		return fLinkingEnabled;
 	}
@@ -1006,14 +1006,14 @@ public class PackageExplorerPart extends ViewPart
 			memento.putMemento(fMemento);
 			return;
 		}
-		
+
 		memento.putInteger(TAG_ROOT_MODE, fRootMode);
 		if (fWorkingSetModel != null)
 			fWorkingSetModel.saveState(memento);
-		
+
 		saveLayoutState(memento);
 		saveLinkingEnabled(memento);
-		
+
 		if (fActionSet != null) {
 			fActionSet.saveFilterAndSorterState(memento);
 		}
@@ -1029,7 +1029,7 @@ public class PackageExplorerPart extends ViewPart
 			memento.putInteger(TAG_GROUP_LIBRARIES, fShowLibrariesNode ? 1 : 0);
 		}
 	}
-	
+
 	private void saveDialogSettings() {
 		fDialogSettings.put(TAG_GROUP_LIBRARIES, fShowLibrariesNode);
 		fDialogSettings.put(TAG_LAYOUT, getLayoutAsInt());
@@ -1055,7 +1055,7 @@ public class PackageExplorerPart extends ViewPart
 		Integer val= memento.getInteger(TAG_LINK_EDITOR);
 		fLinkingEnabled= val != null && val.intValue() != 0;
 	}
-	
+
 	/**
 	 * Create the KeyListener for doing the refresh on the viewer.
 	 */
@@ -1084,7 +1084,7 @@ public class PackageExplorerPart extends ViewPart
 		else
 			getTreeViewer().getTree().showSelection();
 	}
-	
+
 	private Object getInputFromEditor(IEditorInput editorInput) {
 		Object input= JavaUI.getEditorInputJavaElement(editorInput);
 		if (input instanceof ICompilationUnit) {
@@ -1105,7 +1105,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 		return input;
 	}
-	
+
 
 	private boolean inputIsSelected(IEditorInput input) {
 		IStructuredSelection selection= (IStructuredSelection)fViewer.getSelection();
@@ -1118,14 +1118,14 @@ public class PackageExplorerPart extends ViewPart
 
 	boolean showInput(Object input) {
 		Object element= null;
-			
+
 		if (input instanceof IFile && isOnClassPath((IFile)input)) {
 			element= JavaCore.create((IFile)input);
 		}
-				
+
 		if (element == null) // try a non Java resource
 			element= input;
-				
+
 		if (element != null) {
 			ISelection newSelection= new StructuredSelection(element);
 			if (fViewer.getSelection().equals(newSelection)) {
@@ -1146,7 +1146,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 		return false;
 	}
-	
+
 	private boolean isOnClassPath(IFile file) {
 		IJavaProject jproject= JavaCore.create(file.getProject());
 		return jproject.isOnClasspath(file);
@@ -1155,7 +1155,7 @@ public class PackageExplorerPart extends ViewPart
 	/**
 	 * Returns the element's parent.
 	 * @param element the element
-	 * 
+	 *
 	 * @return the parent or <code>null</code> if there's no parent
 	 */
 	private Object getParent(Object element) {
@@ -1168,7 +1168,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 		return null;
 	}
-	
+
 	/**
 	 * A compilation unit or class was expanded, expand
 	 * the main type.
@@ -1204,7 +1204,7 @@ public class PackageExplorerPart extends ViewPart
 			// no reveal
 		}
 	}
-	
+
 	/**
  	 * Returns the TreeViewer.
 	 * @return the tree viewer
@@ -1212,7 +1212,7 @@ public class PackageExplorerPart extends ViewPart
 	public TreeViewer getTreeViewer() {
 		return fViewer;
 	}
-	
+
 	boolean isExpandable(Object element) {
 		if (fViewer == null)
 			return false;
@@ -1223,12 +1223,12 @@ public class PackageExplorerPart extends ViewPart
 		fWorkingSetLabel= workingSetName;
 		setTitleToolTip(getTitleToolTip());
 	}
-	
+
 	void updateToolbar() {
 		IActionBars actionBars= getViewSite().getActionBars();
 		fActionSet.updateToolBar(actionBars.getToolBarManager());
 	}
-	
+
 	/**
 	 * Updates the title text and title tool tip.
 	 * Called whenever the input of the viewer changes.
@@ -1245,7 +1245,7 @@ public class PackageExplorerPart extends ViewPart
 			setTitleToolTip(getToolTipText(input));
 		}
 	}
-	
+
 	/**
 	 * Sets the decorator for the package explorer.
 	 *
@@ -1254,20 +1254,20 @@ public class PackageExplorerPart extends ViewPart
 	 */
 	public void setLabelDecorator(ILabelDecorator decorator) {
 	}
-	
+
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		if (fViewer == null)
 			return;
-		
+
 		boolean refreshViewer= false;
-	
+
 		if (PreferenceConstants.SHOW_CU_CHILDREN.equals(event.getProperty())) {
 			boolean showCUChildren= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 			((StandardJavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
-			
+
 			refreshViewer= true;
 		} else if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
 			refreshViewer= true;
@@ -1276,7 +1276,7 @@ public class PackageExplorerPart extends ViewPart
 		if (refreshViewer)
 			fViewer.refresh();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IViewPartInputProvider#getViewPartInput()
 	 */
@@ -1295,7 +1295,7 @@ public class PackageExplorerPart extends ViewPart
 			fViewer.getControl().setRedraw(true);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.IShowInTarget#show(org.eclipse.ui.part.ShowInContext)
 	 */
@@ -1315,7 +1315,7 @@ public class PackageExplorerPart extends ViewPart
 				return true;
 			}
 		}
-		
+
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
 			Object elementOfInput= getInputFromEditor((IEditorInput) input);
@@ -1345,11 +1345,11 @@ public class PackageExplorerPart extends ViewPart
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
 		saveDialogSettings();
-		
+
 		IWorkbenchPage page= getSite().getPage();
 		if (enabled) {
 			page.addPartListener(fLinkWithEditorListener);
-			
+
 			IEditorPart editor = page.getActiveEditor();
 			if (editor != null)
 				editorActivated(editor);
@@ -1361,7 +1361,7 @@ public class PackageExplorerPart extends ViewPart
 
 	/**
 	 * Returns the name for the given element. Used as the name for the current frame.
-	 * 
+	 *
 	 * @param element the element
 	 * @return the name of the frame
 	 */
@@ -1374,11 +1374,11 @@ public class PackageExplorerPart extends ViewPart
 			return fLabelProvider.getText(element);
 		}
 	}
-	
+
     public int tryToReveal(Object element) {
 		if (revealElementOrParent(element))
             return IStatus.OK;
-        
+
         WorkingSetFilterActionGroup workingSetGroup= fActionSet.getWorkingSetActionGroup().getFilterGroup();
         if (workingSetGroup != null) {
 		    IWorkingSet workingSet= workingSetGroup.getWorkingSet();
@@ -1431,7 +1431,7 @@ public class PackageExplorerPart extends ViewPart
         }
         return IStatus.ERROR;
     }
-    
+
     private boolean revealElementOrParent(Object element) {
         if (revealAndVerify(element))
 		    return true;
@@ -1485,7 +1485,7 @@ public class PackageExplorerPart extends ViewPart
 	public void rootModeChanged(int newMode) {
 		fRootMode= newMode;
 		saveDialogSettings();
-		
+
 		if (getRootMode() == WORKING_SETS_AS_ROOTS && fWorkingSetModel == null) {
 			createWorkingSetModel();
 			if (fActionSet != null) {
@@ -1531,7 +1531,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 		});
 	}
-	
+
 
 	/**
 	 * @return the selected working set to filter if in root mode {@link #PROJECTS_AS_ROOTS}
@@ -1539,17 +1539,17 @@ public class PackageExplorerPart extends ViewPart
 	public IWorkingSet getFilterWorkingSet() {
 		if (getRootMode() != PROJECTS_AS_ROOTS)
 			return null;
-		
+
 		if (fActionSet == null)
 			return null;
-		
+
 		return fActionSet.getWorkingSetActionGroup().getFilterGroup().getWorkingSet();
 	}
 
 	public WorkingSetModel getWorkingSetModel() {
 		return fWorkingSetModel;
 	}
-	
+
 	/**
 	 * Returns the root mode: Either {@link #PROJECTS_AS_ROOTS} or {@link #WORKING_SETS_AS_ROOTS}.
 	 * @return returns the root mode
@@ -1557,7 +1557,7 @@ public class PackageExplorerPart extends ViewPart
 	public int getRootMode() {
 		return fRootMode;
 	}
-	
+
 	private void setComparator() {
 		if (getRootMode() == WORKING_SETS_AS_ROOTS) {
 			fViewer.setComparator(new WorkingSetAwareJavaElementSorter());
@@ -1565,9 +1565,9 @@ public class PackageExplorerPart extends ViewPart
 			fViewer.setComparator(new JavaElementComparator());
 		}
 	}
-	
+
 	//---- test methods for working set mode -------------------------------
-	
+
 	public void internalTestShowWorkingSets(IWorkingSet[] workingSets) {
 		if (fWorkingSetModel == null)
 			createWorkingSetModel();

@@ -24,11 +24,11 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 /**
  * Resolves template variables to non-conflicting names that adhere to the naming conventions and
  * match the parameter (fully qualified name).
- * 
+ *
  * @since 3.3
  */
 public class NameResolver extends TemplateVariableResolver {
-	
+
 	private final String fDefaultType;
 
 	/**
@@ -37,7 +37,7 @@ public class NameResolver extends TemplateVariableResolver {
 	public NameResolver() {
 		this("java.lang.Object"); //$NON-NLS-1$
 	}
-	
+
 	NameResolver(String defaultType) {
 		fDefaultType= defaultType;
 	}
@@ -59,14 +59,14 @@ public class NameResolver extends TemplateVariableResolver {
 			// reference is another variable
 			MultiVariable refVar= (MultiVariable) ref;
 			jc.addDependency(refVar, mv);
-			
+
 			refVar.getAllChoices();
 			Object[] types= flatten(refVar.getAllChoices());
 			for (int i= 0; i < types.length; i++) {
 				String[] names= jc.suggestVariableNames(mv.toString(types[i]));
 				mv.setChoices(types[i], names);
 			}
-			
+
 			mv.setKey(refVar.getCurrentChoice());
 			jc.markAsUsed(mv.getDefaultValue());
 		} else {

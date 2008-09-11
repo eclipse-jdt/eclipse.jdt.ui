@@ -42,8 +42,8 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 			result.addFatalError(Messages.format(RefactoringCoreMessages.Change_does_not_exist, getRootLabel(root)));
 			return result;
 		}
-		
-		
+
+
 		if (result.hasFatalError())
 			return result;
 
@@ -129,7 +129,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		RefactoringStatus result= super.isValid(pm);
 		if (result.hasFatalError())
 			return result;
-		
+
 		IPackageFragmentRoot sourceFolder= getSourceFolder();
 		result.merge(checkIfModifiable(sourceFolder));
 

@@ -30,7 +30,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 /**
  * Change to create move targets during scripting of move refactorings.
- * 
+ *
  * @since 3.3
  */
 public final class LoggedCreateTargetChange extends ResourceChange {
@@ -43,7 +43,7 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 
 	/**
 	 * Creates a new logged create target change.
-	 * 
+	 *
 	 * @param selection
 	 *            the selection
 	 * @param queries

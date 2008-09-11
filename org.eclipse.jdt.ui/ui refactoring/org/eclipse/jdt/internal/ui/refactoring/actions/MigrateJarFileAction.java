@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
 
 /**
  * Action to migrate a JAR file.
- * 
+ *
  * @since 3.2
  */
 public final class MigrateJarFileAction implements IWorkbenchWindowActionDelegate {

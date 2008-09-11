@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IFolder;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;

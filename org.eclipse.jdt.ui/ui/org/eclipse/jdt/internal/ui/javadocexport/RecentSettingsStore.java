@@ -32,19 +32,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.JavaUI;
 
 public class RecentSettingsStore {
-	
+
 	private final String HREF= "href"; //$NON-NLS-1$
 	private final String DESTINATION= "destdir"; //$NON-NLS-1$
 	private final String ANTPATH= "antpath"; //$NON-NLS-1$
-	
+
 	private final String SECTION_PROJECTS= "projects"; //$NON-NLS-1$
-	
+
 	private final static char REF_SEPARATOR= ';';
-	
-	
+
+
 	//list of hrefs in string format
 	private Map fPerProjectSettings;
-	
+
 	/**
 	 * @param settings the settings to load from
 	 */
@@ -54,7 +54,7 @@ public class RecentSettingsStore {
 			load(settings);
 		}
 	}
-	
+
 	/**
 	* Method creates a list of data structes that contain
 	* The destination, antfile location and the list of library/project references for every
@@ -64,8 +64,8 @@ public class RecentSettingsStore {
 	private void load(IDialogSettings settings) {
 
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		
-		IDialogSettings projectsSection= settings.getSection(SECTION_PROJECTS); 
+
+		IDialogSettings projectsSection= settings.getSection(SECTION_PROJECTS);
 		if (projectsSection != null) {
 			IDialogSettings[] sections= projectsSection.getSections();
 			for (int i= 0; i < sections.length; i++) {
@@ -115,9 +115,9 @@ public class RecentSettingsStore {
 			}
 		}
 	}
-	
+
 	public void store(IDialogSettings settings) {
-		
+
 		IDialogSettings projectsSection= settings.addNewSection(SECTION_PROJECTS);
 
 		//Write all project information to DialogSettings.
@@ -148,18 +148,18 @@ public class RecentSettingsStore {
 		}
 		data.setDestination(destination);
 		data.setAntpath(antpath);
-		
+
 		StringBuffer refs= new StringBuffer();
 		for (int i= 0; i < hrefs.length; i++) {
 			if (i > 0) {
 				refs.append(REF_SEPARATOR);
 			}
 			refs.append(hrefs[i]);
-			
+
 		}
 		data.setHRefs(refs.toString());
 	}
-	
+
 	public static String[] getRefTokens(String refs) {
 		StringTokenizer tok= new StringTokenizer(refs, String.valueOf(REF_SEPARATOR));
 		String[] res= new String[tok.countTokens()];
@@ -168,9 +168,9 @@ public class RecentSettingsStore {
 		}
 		return res;
 	}
-	
-	
-	
+
+
+
 	public String[] getHRefs(IJavaProject project) {
 		ProjectData data= (ProjectData) fPerProjectSettings.get(project);
 		if (data != null) {
@@ -179,9 +179,9 @@ public class RecentSettingsStore {
 		}
 		return new String[0];
 	}
-	
+
 	//for now if multiple projects are selected the destination
-	//feild will be empty, 
+	//feild will be empty,
 	public String getDestination(IJavaProject project) {
 
 		ProjectData data= (ProjectData) fPerProjectSettings.get(project);
@@ -190,7 +190,7 @@ public class RecentSettingsStore {
 		else
 			return getDefaultDestination(project);
 	}
-	
+
 	public String getAntpath(IJavaProject project) {
 		ProjectData data= (ProjectData) fPerProjectSettings.get(project);
 		if (data != null)
@@ -198,14 +198,14 @@ public class RecentSettingsStore {
 		else
 			return getDefaultAntPath(project);
 	}
-	
+
 	/// internal
-	
-	
+
+
 	private String getDefaultAntPath(IJavaProject project) {
 		if (project != null) {
 			// The Javadoc.xml file can only be stored locally. So if
-			// the project isn't local then we can't provide a good 
+			// the project isn't local then we can't provide a good
 			// default location.
 			IPath path= project.getProject().getLocation();
 			if (path != null)
@@ -236,7 +236,7 @@ public class RecentSettingsStore {
 		return ""; //$NON-NLS-1$
 
 	}
-	
+
 	private static class ProjectData {
 
 		private String fHrefs;
@@ -278,5 +278,5 @@ public class RecentSettingsStore {
 
 	}
 
-	
+
 }

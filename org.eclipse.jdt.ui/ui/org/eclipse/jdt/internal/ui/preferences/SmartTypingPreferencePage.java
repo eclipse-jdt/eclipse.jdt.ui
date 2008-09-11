@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * The page for setting the editor options.
  */
 public final class SmartTypingPreferencePage extends AbstractConfigurationBlockPreferencePage {
-	
+
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#getHelpId()
 	 */
@@ -34,22 +34,22 @@ public final class SmartTypingPreferencePage extends AbstractConfigurationBlockP
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
 	protected void setDescription() {
-		String description= PreferencesMessages.JavaEditorPreferencePage_typing_tabTitle; 
+		String description= PreferencesMessages.JavaEditorPreferencePage_typing_tabTitle;
 		setDescription(description);
 	}
-	
+
 	/*
 	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */
 	protected void setPreferenceStore() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
-	
-	
+
+
 	protected Label createDescriptionLabel(Composite parent) {
 		return null; // no description for new look.
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.ui.internal.editors.text.OverlayPreferenceStore)
 	 */

@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.Assert;
 
 
 public final class ConstraintOperator {
-	
+
 	private final String fOperatorString;
 	private final int fOperatorCode;
 
@@ -26,7 +26,7 @@ public final class ConstraintOperator {
 	private static final int CODE_EQUALS= 1;
 	private static final int CODE_DEFINES= 2;
 	private static final int CODE_STRICT_SUBTYPE= 3;
-	
+
 	private static final String STRING_SUBTYPE= "<=";//$NON-NLS-1$
 	private static final String STRING_EQUALS= "==";//$NON-NLS-1$
 	private static final String STRING_DEFINES= "=^=";//$NON-NLS-1$
@@ -53,25 +53,25 @@ public final class ConstraintOperator {
 	public static ConstraintOperator createStrictSubtypeOperator() {
 		return fgStrictSubtype;
 	}
-	
+
 	private ConstraintOperator(String string, int code){
 		Assert.isTrue(fgOperatorStrings.contains(string));
 		Assert.isTrue(code == CODE_DEFINES || code == CODE_EQUALS || code == CODE_STRICT_SUBTYPE || code == CODE_SUBTYPE);
 		fOperatorString= string;
 		fOperatorCode= code;
 	}
-		
+
 	public String getOperatorString(){
 		return fOperatorString;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		return getOperatorString();
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */

@@ -10,21 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.model;
 
+import org.eclipse.team.core.mapping.IResourceMappingMerger;
+import org.eclipse.team.ui.mapping.ISynchronizationCompareAdapter;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
-import org.eclipse.team.core.mapping.IResourceMappingMerger;
-
-import org.eclipse.team.ui.mapping.ISynchronizationCompareAdapter;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 /**
  * Adaptor factory for model support.
- * 
+ *
  * @since 3.2
  */
 public final class JavaModelAdapterFactory implements IAdapterFactory {

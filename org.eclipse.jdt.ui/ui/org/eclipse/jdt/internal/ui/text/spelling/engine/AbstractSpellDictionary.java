@@ -200,7 +200,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			distance= fDistanceAlgorithm.getDistance(word, candidate);
 
 			if (distance <= minimum) {
-				
+
 				if (distance < minimum)
 					matches.clear();
 
@@ -217,10 +217,10 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		result.addAll(matches);
 	}
-	
+
 	/**
 	 * Tells whether this dictionary is empty.
-	 * 
+	 *
 	 * @return <code>true</code> if this dictionary is empty
 	 * @since 3.3
 	 */
@@ -397,7 +397,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	public boolean isCorrect(String word) {
 		word= stripNonLetters(word);
 		try {
-			
+
 			if (!fLoaded) {
 				synchronized (this) {
 					fLoaded= load(getURL());
@@ -425,7 +425,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#setStripNonLetters(boolean)
 	 * @since 3.3
@@ -433,13 +433,13 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	public void setStripNonLetters(boolean state) {
 		fIsStrippingNonLetters= state;
 	}
-	
+
 	/**
 	 * Strips non-letter characters from the given word.
 	 * <p>
 	 * This will only happen if the corresponding preference is enabled.
 	 * </p>
-	 * 
+	 *
 	 * @param word the word to strip
 	 * @return the stripped word
 	 * @since 3.3
@@ -447,17 +447,17 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	protected String stripNonLetters(String word) {
 		if (!fIsStrippingNonLetters)
 			return word;
-		
+
 		int i= 0;
 		int j= word.length() - 1;
 		while (i <= j && !Character.isLetter(word.charAt(i)))
 			i++;
 		if (i > j)
 			return ""; //$NON-NLS-1$
-		
+
 		while (j > i && !Character.isLetter(word.charAt(j)))
 			j--;
-		
+
 		return word.substring(i, j+1);
 	}
 
@@ -487,13 +487,13 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 				stream= url.openStream();
 				if (stream != null) {
 					String word= null;
-					
+
 					// Setup a reader with a decoder in order to read over malformed input if needed.
 					CharsetDecoder decoder= Charset.forName(getEncoding()).newDecoder();
 					decoder.onMalformedInput(CodingErrorAction.REPORT);
 					decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
 					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream, decoder));
-					
+
 					boolean doRead= true;
 					while (doRead) {
 						try {
@@ -504,11 +504,11 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 							decoder.reset();
 							word= reader.readLine();
 							decoder.onMalformedInput(CodingErrorAction.REPORT);
-							
+
 							String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new String[] { word, decoder.replacement(), BasicElementLabels.getURLPart(url.toString()) });
 							IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
 							JavaPlugin.log(status);
-							
+
 							doRead= word != null;
 							continue;
 						}
@@ -550,7 +550,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Compacts the dictionary.
-	 * 
+	 *
 	 * @since 3.3.
 	 */
 	private void compact() {
@@ -604,10 +604,10 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	public void addWord(final String word) {
 		// Do nothing
 	}
-	
+
 	/**
 	 * Returns the encoding of this dictionary.
-	 * 
+	 *
 	 * @return the encoding of this dictionary
 	 * @since 3.3
 	 */
@@ -617,5 +617,5 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			encoding= ResourcesPlugin.getEncoding();
 		return encoding;
 	}
-	
+
 }

@@ -22,10 +22,10 @@ import org.eclipse.jdt.core.IOpenable;
 
 
 public class ResourceUtil {
-	
+
 	private ResourceUtil(){
 	}
-	
+
 	public static IFile[] getFiles(ICompilationUnit[] cus) {
 		List files= new ArrayList(cus.length);
 		for (int i= 0; i < cus.length; i++) {
@@ -45,21 +45,21 @@ public class ResourceUtil {
 	}
 
 	//----- other ------------------------------
-			
+
 	public static IResource getResource(Object o){
 		if (o instanceof IResource)
 			return (IResource)o;
 		if (o instanceof IJavaElement)
 			return getResource((IJavaElement)o);
-		return null;	
+		return null;
 	}
 
 	private static IResource getResource(IJavaElement element){
 		if (element.getElementType() == IJavaElement.COMPILATION_UNIT)
 			return ((ICompilationUnit) element).getResource();
-		else if (element instanceof IOpenable) 
+		else if (element instanceof IOpenable)
 			return element.getResource();
-		else	
-			return null;	
+		else
+			return null;
 	}
 }

@@ -45,7 +45,7 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, long stampToRestore, boolean updateReferences) {
 		super(resourcePath, oldName, newName, stampToRestore);
 		fUpdateReferences= updateReferences;
-		
+
 		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
 

@@ -17,7 +17,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.PlatformObject;
 
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -89,7 +88,7 @@ public class LogicalPackage extends PlatformObject {
 
 		return false;
 	}
-	
+
 	public boolean hasSubpackages() throws JavaModelException {
 		for (Iterator iter= fPackages.iterator(); iter.hasNext();) {
 			IPackageFragment pack= (IPackageFragment) iter.next();
@@ -99,7 +98,7 @@ public class LogicalPackage extends PlatformObject {
 		}
 		return false;
 	}
-	
+
 	public boolean isDefaultPackage() {
 		return fName.length() == 0;
 	}

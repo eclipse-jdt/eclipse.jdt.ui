@@ -18,11 +18,11 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class FormatterModifyDialog extends ModifyDialog {
-    
+
     public FormatterModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile, String dialogPreferencesKey, String lastSavePathKey) {
 		super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
 	}
-	
+
 	protected void addPages(Map values) {
 	    addTabPage(FormatterMessages.ModifyDialog_tabpage_indentation_title, new IndentationTabPage(this, values));
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_braces_title, new BracesTabPage(this, values));
@@ -33,14 +33,14 @@ public class FormatterModifyDialog extends ModifyDialog {
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_line_wrapping_title, new LineWrappingTabPage(this, values));
 		addTabPage(FormatterMessages.ModifyDialog_tabpage_comments_title, new CommentsTabPage(this, values));
     }
-	
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE;
 	}
-	
+
 }

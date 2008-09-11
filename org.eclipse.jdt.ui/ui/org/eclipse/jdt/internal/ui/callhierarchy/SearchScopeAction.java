@@ -6,33 +6,33 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *          (report 60714: Call Hierarchy: display search scope in view title)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-
 import org.eclipse.jface.action.Action;
+
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 
 abstract class SearchScopeAction extends Action {
 	private final SearchScopeActionGroup fGroup;
-	
+
 	public SearchScopeAction(SearchScopeActionGroup group, String text) {
 		super(text, AS_RADIO_BUTTON);
 		this.fGroup = group;
 	}
-	
+
 	public abstract IJavaSearchScope getSearchScope();
-	
+
 	public abstract int getSearchScopeType();
-	
+
 	public void run() {
 		this.fGroup.setSelected(this, true);
 	}
-	
+
 	public abstract String getFullDescription();
 }

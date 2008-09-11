@@ -23,6 +23,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -45,7 +46,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 public class AddWordProposal implements IJavaCompletionProposal {
 
 	private static final String PREF_KEY_DO_NOT_ASK= "do_not_ask_to_install_user_dictionary"; //$NON-NLS-1$
-	
+
 	/** The invocation context */
 	private final IInvocationContext fContext;
 
@@ -76,36 +77,36 @@ public class AddWordProposal implements IJavaCompletionProposal {
 
 		if (checker == null)
 			return;
-		
+
 		IQuickAssistInvocationContext quickAssistContext= null;
 		if (fContext instanceof IQuickAssistInvocationContext)
 			quickAssistContext= (IQuickAssistInvocationContext)fContext;
-		
+
 		if (!checker.acceptsWords()) {
 			final Shell shell;
 			if (quickAssistContext != null && quickAssistContext.getSourceViewer() != null)
 				shell= quickAssistContext.getSourceViewer().getTextWidget().getShell();
 			else
 				shell= JavaPlugin.getActiveWorkbenchShell();
-			
+
 			if (!canAskToConfigure() || !askUserToConfigureUserDictionary(shell))
 				return;
-			
+
 			String[] preferencePageIds= new String[] { "org.eclipse.ui.editors.preferencePages.Spelling" }; //$NON-NLS-1$
 			PreferencesUtil.createPreferenceDialogOn(shell, preferencePageIds[0], preferencePageIds, null).open();
 		}
-		
+
 		if (checker.acceptsWords()) {
 			checker.addWord(fWord);
 			if (quickAssistContext != null && quickAssistContext.getSourceViewer() != null)
 				SpellingProblem.removeAll(quickAssistContext.getSourceViewer(), fWord);
 		}
 	}
-	
+
 	/**
 	 * Asks the user whether he wants to configure
 	 * a user dictionary.
-	 * 
+	 *
 	 * @param shell
 	 * @return <code>true</code> if the user wants to configure the user dictionary
 	 * @since 3.3
@@ -119,16 +120,16 @@ public class AddWordProposal implements IJavaCompletionProposal {
 				false,
 				null,
 				null);
-		
+
 		PreferenceConstants.getPreferenceStore().setValue(PREF_KEY_DO_NOT_ASK, toggleDialog.getToggleState());
-		
+
 		return toggleDialog.getReturnCode() == IDialogConstants.YES_ID;
 	}
 
 	/**
 	 * Tells whether this proposal can ask to
 	 * configure a user dictionary.
-	 * 
+	 *
 	 * @return <code>true</code> if it can ask the user
 	 */
 	static boolean canAskToConfigure() {

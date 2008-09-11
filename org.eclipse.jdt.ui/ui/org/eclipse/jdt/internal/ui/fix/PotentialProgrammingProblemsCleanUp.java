@@ -33,42 +33,42 @@ import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
-	
+
 	public PotentialProgrammingProblemsCleanUp(Map options) {
 		super(options);
 	}
-	
+
 	public PotentialProgrammingProblemsCleanUp() {
 		super();
 	}
-	
+
 	/**A
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
 	}
-	
+
 	private boolean requireAST() {
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		if (!addSUID)
 			return false;
-		
-		return isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) || 
+
+		return isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) ||
 		       isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
-		
+
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		if (!addSUID)
 			return null;
-		
+
 		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit,
-				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) || 
+				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) ||
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
 	}
 
@@ -78,15 +78,15 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		
-		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit, problems, 
-				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) || 
+
+		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit, problems,
+				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)));
 	}
 
 	private Map getRequiredOptions() {
 		Map result= new Hashtable();
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) || 
+		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
 			result.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
 		return result;
@@ -97,21 +97,21 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		
+
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)))
 			result.add(MultiFixMessages.SerialVersionCleanUp_Generated_description);
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
 			result.add(MultiFixMessages.CodeStyleCleanUp_addDefaultSerialVersionId_description);
-		
+
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf.append("class E implements java.io.Serializable{\n"); //$NON-NLS-1$
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))) {
 			buf.append("    private static final long serialVersionUID = -391484377137870342L;\n"); //$NON-NLS-1$
@@ -119,7 +119,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 			buf.append("    private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
 		}
 		buf.append("}\n"); //$NON-NLS-1$
-		
+
 		return buf.toString();
 	}
 
@@ -133,7 +133,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 
 		return false;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -141,7 +141,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 		RefactoringStatus superStatus= super.checkPreConditions(project, compilationUnits, monitor);
 		if (superStatus.hasFatalError())
 			return superStatus;
-		
+
 		return PotentialProgrammingProblemsFix.checkPreConditions(project, compilationUnits, monitor,
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED),
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT),
@@ -159,10 +159,10 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) || 
+		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
 			return getNumberOfProblems(compilationUnit.getProblems(), IProblem.MissingSerialVersion);
-		
+
 		return 0;
 	}
 }

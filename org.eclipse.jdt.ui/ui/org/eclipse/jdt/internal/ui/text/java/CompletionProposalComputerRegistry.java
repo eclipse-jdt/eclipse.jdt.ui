@@ -22,6 +22,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
@@ -30,14 +38,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -59,7 +59,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * A registry for all extensions to the
  * <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code>
  * extension point.
- * 
+ *
  * @since 3.2
  */
 public final class CompletionProposalComputerRegistry {
@@ -67,26 +67,26 @@ public final class CompletionProposalComputerRegistry {
 	private static final String EXTENSION_POINT= "javaCompletionProposalComputer"; //$NON-NLS-1$
 	private static final String NUM_COMPUTERS_PREF_KEY= "content_assist_number_of_computers"; //$NON-NLS-1$
 
-	
+
 	/** The singleton instance. */
 	private static CompletionProposalComputerRegistry fgSingleton= null;
-	
+
 	/**
 	 * Returns the default computer registry.
 	 * <p>
 	 * TODO keep this or add some other singleton, e.g. JavaPlugin?
 	 * </p>
-	 * 
+	 *
 	 * @return the singleton instance
 	 */
 	public static synchronized CompletionProposalComputerRegistry getDefault() {
 		if (fgSingleton == null) {
 			fgSingleton= new CompletionProposalComputerRegistry();
 		}
-		
+
 		return fgSingleton;
 	}
-	
+
 	/**
 	 * The sets of descriptors, grouped by partition type (key type:
 	 * {@link String}, value type:
@@ -109,7 +109,7 @@ public final class CompletionProposalComputerRegistry {
 	 * Unmodifiable view of <code>fDescriptors</code>
 	 */
 	private final List fPublicDescriptors= Collections.unmodifiableList(fDescriptors);
-	
+
 	private final List fCategories= new ArrayList();
 	private final List fPublicCategories= Collections.unmodifiableList(fCategories);
 	/**
@@ -130,7 +130,7 @@ public final class CompletionProposalComputerRegistry {
 
 	/**
 	 * Returns if the registry detected that computers got uninstalled since the last run.
-	 * 
+	 *
 	 * @param included list of included proposal categories
 	 * @param partition the document partition
 	 * @return <code>true</code> if the registry detected that computers got uninstalled since the last run
@@ -147,13 +147,13 @@ public final class CompletionProposalComputerRegistry {
 					return "org.eclipse.jdt.ui.swtProposalCategory".equals(((CompletionProposalCategory) included.get(0)).getId()); //$NON-NLS-1$
 			}
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * Clears the setting that uninstalled computers have been detected.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	void resetUnistalledComputers() {
@@ -179,7 +179,7 @@ public final class CompletionProposalComputerRegistry {
 	 * computing proposals, it is therefore imperative to copy the returned list before iterating
 	 * over it.
 	 * </p>
-	 * 
+	 *
 	 * @param partition
 	 *        the partition type for which to retrieve the computer descriptors
 	 * @return the list of extensions to the <code>javaCompletionProposalComputer</code> extension
@@ -202,7 +202,7 @@ public final class CompletionProposalComputerRegistry {
 	 * computing proposals, it is therefore imperative to copy the returned list before iterating
 	 * over it.
 	 * </p>
-	 * 
+	 *
 	 * @return the list of extensions to the <code>javaCompletionProposalComputer</code> extension
 	 *         point (element type: {@link CompletionProposalComputerDescriptor})
 	 */
@@ -210,7 +210,7 @@ public final class CompletionProposalComputerRegistry {
 		ensureExtensionPointRead();
 		return fPublicDescriptors;
 	}
-	
+
 	/**
 	 * Returns the list of proposal categories contributed to the
 	 * <code>javaCompletionProposalComputer</code> extension point.
@@ -220,7 +220,7 @@ public final class CompletionProposalComputerRegistry {
 	 * There are no duplicate elements in the returned list. The returned list may change if
 	 * plug-ins are loaded or unloaded while the application is running.
 	 * </p>
-	 * 
+	 *
 	 * @return list of proposal categories contributed to the
 	 *         <code>javaCompletionProposalComputer</code> extension point (element type:
 	 *         {@link CompletionProposalCategory})
@@ -266,10 +266,10 @@ public final class CompletionProposalComputerRegistry {
 	public void reload() {
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
 		List elements= new ArrayList(Arrays.asList(registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT)));
-		
+
 		Map map= new HashMap();
 		List all= new ArrayList();
-		
+
 		List categories= getCategories(elements);
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			IConfigurationElement element= (IConfigurationElement) iter.next();
@@ -286,7 +286,7 @@ public final class CompletionProposalComputerRegistry {
 					list.add(desc);
 				}
 				all.add(desc);
-				
+
 			} catch (InvalidRegistryObjectException x) {
 				/*
 				 * Element is not valid any longer as the contributing plug-in was unloaded or for
@@ -301,11 +301,11 @@ public final class CompletionProposalComputerRegistry {
 				informUser(x.getStatus());
 			}
 		}
-		
+
 		synchronized (this) {
 			fCategories.clear();
 			fCategories.addAll(categories);
-			
+
 			Set partitions= map.keySet();
 			fDescriptorsByPartition.keySet().retainAll(partitions);
 			fPublicDescriptorsByPartition.keySet().retainAll(partitions);
@@ -321,7 +321,7 @@ public final class CompletionProposalComputerRegistry {
 					fPublicDescriptorsByPartition.put(partition, Collections.unmodifiableList(current));
 				}
 			}
-			
+
 			fDescriptors.clear();
 			fDescriptors.addAll(all);
 		}
@@ -343,14 +343,14 @@ public final class CompletionProposalComputerRegistry {
 			int rank= Integer.parseInt(inner.nextToken());
 			ordered.put(id, new Integer(rank));
 		}
-		
+
 		List categories= new ArrayList();
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			IConfigurationElement element= (IConfigurationElement) iter.next();
 			try {
 				if (element.getName().equals("proposalCategory")) { //$NON-NLS-1$
 					iter.remove(); // remove from list to leave only computers
-					
+
 					CompletionProposalCategory category= new CompletionProposalCategory(element, this);
 					categories.add(category);
 					category.setIncluded(!disabled.contains(category.getId()));
@@ -381,7 +381,7 @@ public final class CompletionProposalComputerRegistry {
 
 	/**
 	 * Log the status and inform the user about a misbehaving extension.
-	 * 
+	 *
 	 * @param descriptor the descriptor of the misbehaving extension
 	 * @param status a status object that will be logged
 	 */
@@ -391,14 +391,14 @@ public final class CompletionProposalComputerRegistry {
         CompletionProposalCategory category= descriptor.getCategory();
         IContributor culprit= descriptor.getContributor();
         Set affectedPlugins= getAffectedContributors(category, culprit);
-        
+
 		final String avoidHint;
 		final String culpritName= culprit == null ? null : culprit.getName();
 		if (affectedPlugins.isEmpty())
 			avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHint, new Object[] {culpritName, category.getDisplayName()});
 		else
 			avoidHint= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_messageAvoidanceHintWithWarning, new Object[] {culpritName, category.getDisplayName(), toString(affectedPlugins)});
-        
+
 		String message= status.getMessage();
         // inlined from MessageDialog.openError
         MessageDialog dialog = new MessageDialog(JavaPlugin.getActiveWorkbenchShell(), title, null /* default image */, message, MessageDialog.ERROR, new String[] { IDialogConstants.OK_LABEL }, 0) {
@@ -421,7 +421,7 @@ public final class CompletionProposalComputerRegistry {
 
 	/**
 	 * Returns the names of contributors affected by disabling a category.
-	 * 
+	 *
 	 * @param category the category that would be disabled
 	 * @param culprit the culprit plug-in, which is not included in the returned list
 	 * @return the names of the contributors other than <code>culprit</code> that contribute to <code>category</code> (element type: {@link String})

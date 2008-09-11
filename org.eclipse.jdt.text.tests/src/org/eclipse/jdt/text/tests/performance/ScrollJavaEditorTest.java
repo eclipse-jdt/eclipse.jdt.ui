@@ -16,13 +16,13 @@ import junit.framework.TestSuite;
 
 /**
  * Measure the time spent while scrolling in the Java editor.
- * 
+ *
  * @since 3.1
  */
 public class ScrollJavaEditorTest extends ScrollEditorTest {
-	
+
 	private static final Class THIS= ScrollJavaEditorTest.class;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -33,7 +33,7 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling page wise in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorPageWise() throws Exception {
@@ -42,7 +42,7 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling line wise in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseMoveCaret2() throws Exception {
@@ -52,7 +52,7 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling and selecting line wise in the
 	 * Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseSelect2() throws Exception {
@@ -62,7 +62,7 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWise2() throws Exception {
@@ -72,7 +72,7 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret in the Java editor, holding the key combination down.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseSelectHoldKeys() throws Exception {
@@ -86,7 +86,7 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret in the Java editor, holding the key combination down.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseHoldKeys() throws Exception {

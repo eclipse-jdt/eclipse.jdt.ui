@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -31,15 +31,15 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.ImportOrganizePreferencePage"; //$NON-NLS-1$
 
-	
+
 	private ImportOrganizeConfigurationBlock fConfigurationBlock;
 
 	public ImportOrganizePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		//setDescription(PreferencesMessages.ImportOrganizePreferencePage_description); 
-		
+		//setDescription(PreferencesMessages.ImportOrganizePreferencePage_description);
+
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.ImportOrganizePreferencePage_title);		 
+		setTitle(PreferencesMessages.ImportOrganizePreferencePage_title);
 	}
 
 	/*
@@ -48,7 +48,7 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new ImportOrganizeConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
-		
+
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.ORGANIZE_IMPORTS_PREFERENCE_PAGE);
 	}
@@ -56,25 +56,25 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
 	}
-	
+
 	protected boolean hasProjectSpecificOptions(IProject project) {
 		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
 	 */
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -84,7 +84,7 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 		}
 		super.dispose();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
 	 */
@@ -94,7 +94,7 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -111,10 +111,10 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
-		}	
+		}
 		return super.performOk();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */
@@ -123,7 +123,7 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.performApply();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
 	 */
@@ -131,7 +131,7 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 		super.setElement(element);
 		setDescription(null); // no description for property page
 	}
-	
+
 
 }
 

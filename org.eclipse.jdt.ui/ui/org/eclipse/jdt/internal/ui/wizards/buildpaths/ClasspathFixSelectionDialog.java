@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  * @since 3.4
  */
 public class ClasspathFixSelectionDialog extends StatusDialog {
-	
+
 	public static boolean openClasspathFixSelectionDialog(Shell parent, final IJavaProject project, final String missingType, IRunnableContext context) {
 		final ClasspathFixProposal[][] classPathFixProposals= { null };
 		try {
@@ -99,12 +99,12 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						if (monitor == null) {
 							monitor= new NullProgressMonitor();
-						}					
+						}
 						monitor.beginTask(NewWizardMessages.ClasspathFixSelectionDialog_process_fix_description, 4);
 						try {
 							ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
 							Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
-							
+
 							PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
 							op.setUndoManager(RefactoringCore.getUndoManager(), change.getName());
 							op.run(new SubProgressMonitor(monitor, 1));
@@ -129,7 +129,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 
 	private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final Object BUILD_PATH_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
-	
+
 
 	private TableViewer fFixSelectionTable;
 	private ClasspathFixProposal fSelectedFix;
@@ -142,17 +142,17 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		super(parent);
 
 		setTitle(NewWizardMessages.ClasspathFixSelectionDialog_dialog_title);
-		
+
 		fClasspathFixProposals= classpathFixProposals;
 		fProject= project;
 		fMissingType= missingType;
 		fSelectedFix= null;
 	}
-	
+
 	protected boolean isResizable() {
 		return true;
 	}
-	
+
 	private Link createLink(Composite composite, ListenerMix listener) {
 		Link link= new Link(composite, SWT.WRAP);
 		GridData layoutData= new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -161,13 +161,13 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		link.addSelectionListener(listener);
 		return link;
 	}
-	
-	
+
+
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-		
+
 		ListenerMix listener= new ListenerMix();
-				
+
 		if (fClasspathFixProposals.length == 0) {
 			Link link= createLink(composite, listener);
 			String[] args= {  BasicElementLabels.getJavaElementName(fMissingType), BasicElementLabels.getJavaElementName(fProject.getElementName()) };
@@ -178,7 +178,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			GridData layoutData= new GridData(SWT.FILL, SWT.CENTER, false, false);
 			layoutData.widthHint= convertWidthInCharsToPixels(80);
 			label.setLayoutData(layoutData);
-			
+
 			String[] args= { BasicElementLabels.getJavaElementName(fMissingType) };
 			label.setText(Messages.format(NewWizardMessages.ClasspathFixSelectionDialog_proposals_message, args));
 
@@ -190,24 +190,24 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			fFixSelectionTable.setInput(fClasspathFixProposals);
 			fFixSelectionTable.setSelection(new StructuredSelection(fClasspathFixProposals[0]));
 			fFixSelectionTable.addSelectionChangedListener(listener);
-			
+
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 			gridData.heightHint= convertHeightInCharsToPixels(4);
 			gridData.widthHint= convertWidthInCharsToPixels(50);
-			
+
 			fFixSelectionTable.getControl().setLayoutData(gridData);
-			
+
 			Link link= createLink(composite, listener);
 			link.setText(Messages.format(NewWizardMessages.ClasspathFixSelectionDialog_open_buld_path_dialog_message, BasicElementLabels.getJavaElementName(fProject.getElementName())));
-			
+
 			performSelectionChanged();
 		}
-		
+
 		Dialog.applyDialogFont(composite);
-		
+
 		return composite;
 	}
-		
+
 
 	protected final void configureBuildPathPressed() {
 		cancelPressed();
@@ -230,18 +230,18 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		}
 		updateStatus(status);
 	}
-	
-	
+
+
 	protected final void performDoubleClick() {
 		if (fSelectedFix != null) {
 			okPressed();
 		}
 	}
-	
+
 	public ClasspathFixProposal getSelectedClasspathFix() {
 		return fSelectedFix;
 	}
-	
+
 	private class ListenerMix implements IDoubleClickListener, ISelectionChangedListener, SelectionListener {
 
 		public void doubleClick(DoubleClickEvent event) {
@@ -260,9 +260,9 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			configureBuildPathPressed();
 		}
 	}
-	
+
 	private static class ClasspathFixLabelProvider extends LabelProvider {
-		
+
 		public Image getImage(Object element) {
 			if (element instanceof ClasspathFixProposal) {
 				ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;
@@ -270,7 +270,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			}
 			return null;
 		}
-		
+
 		public String getText(Object element) {
 			if (element instanceof ClasspathFixProposal) {
 				ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;

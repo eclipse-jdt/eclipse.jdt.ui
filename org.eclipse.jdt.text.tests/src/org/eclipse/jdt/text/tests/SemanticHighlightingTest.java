@@ -18,9 +18,9 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
-	
+
 	private static final Class THIS= SemanticHighlightingTest.class;
-	
+
 	public static Test suite() {
 		return new SemanticHighlightingTestSetup(new TestSuite(THIS), "/SHTest/src/SHTest.java");
 	}
@@ -53,7 +53,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testStaticFieldHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.STATIC_FIELD);
 		Position[] expected= new Position[] {
@@ -66,7 +66,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testFieldHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.FIELD);
 		Position[] expected= new Position[] {
@@ -90,7 +90,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testNumberHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.NUMBER);
 		Position[] expected= new Position[] {
@@ -105,7 +105,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testMethodDeclarationHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.METHOD_DECLARATION);
 		Position[] expected= new Position[] {
@@ -119,7 +119,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testStaticMethodInvocationHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.STATIC_METHOD_INVOCATION);
 		Position[] expected= new Position[] {
@@ -129,7 +129,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	/*
 	 * [syntax highlighting] 'Abstract Method Invocation' highlighting also matches declaration
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=73353
@@ -143,7 +143,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testInheritedMethodInvocationHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.INHERITED_METHOD_INVOCATION);
 		Position[] expected= new Position[] {
@@ -154,7 +154,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testLocalVariableDeclarationHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION);
 		Position[] expected= new Position[] {
@@ -170,7 +170,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testLocalVariableHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
 		Position[] expected= new Position[] {
@@ -193,7 +193,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testParameterVariableHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.PARAMETER_VARIABLE);
 		Position[] actual= getSemanticHighlightingPositions();
@@ -225,7 +225,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testTypeArgumentHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.TYPE_ARGUMENT);
 		Position[] actual= getSemanticHighlightingPositions();
@@ -235,7 +235,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testInterfaceHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.INTERFACE);
 		Position[] actual= getSemanticHighlightingPositions();
@@ -246,7 +246,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testEnumHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.ENUM);
 		Position[] actual= getSemanticHighlightingPositions();
@@ -256,7 +256,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testAnnotationHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.ANNOTATION);
 		Position[] actual= getSemanticHighlightingPositions();
@@ -267,7 +267,7 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);
 	}
-	
+
 	public void testClassHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.CLASS);
 		Position[] actual= getSemanticHighlightingPositions();

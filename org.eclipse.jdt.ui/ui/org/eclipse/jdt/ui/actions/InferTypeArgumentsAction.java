@@ -36,13 +36,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Infers type arguments for raw references to generic types.
- *  
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  *
  * @since 3.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class InferTypeArgumentsAction extends SelectionDispatchAction {
@@ -51,9 +51,9 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public InferTypeArgumentsAction(JavaEditor editor) {
@@ -61,30 +61,30 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	/**
 	 * Creates a new {@link InferTypeArgumentsAction}. The action requires
-	 * that the selection provided by the site's selection provider is of type 
+	 * that the selection provided by the site's selection provider is of type
 	 * {@link org.eclipse.jface.viewers.IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public InferTypeArgumentsAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.InferTypeArgumentsAction_label); 
+		setText(RefactoringMessages.InferTypeArgumentsAction_label);
 	}
-	
+
     /*
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -120,10 +120,10 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 			if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
 				RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(elements, getShell());
 			} else {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 
@@ -137,15 +137,15 @@ public class InferTypeArgumentsAction extends SelectionDispatchAction {
 		IJavaElement[] array= new IJavaElement[] {element};
 		try {
 			if (element != null && RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(array)){
-				RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(array, getShell());	
+				RefactoringExecutionStarter.startInferTypeArgumentsRefactoring(array, getShell());
 			} else {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable); 
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.InferTypeArgumentsAction_unavailable);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
-	
+
 	private static IJavaElement[] getSelectedElements(IStructuredSelection selection){
 		List list= selection.toList();
 		IJavaElement[] elements= new IJavaElement[list.size()];

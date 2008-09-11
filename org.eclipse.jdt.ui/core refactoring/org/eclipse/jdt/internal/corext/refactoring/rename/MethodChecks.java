@@ -41,11 +41,11 @@ public class MethodChecks {
 	//no instances
 	private MethodChecks(){
 	}
-	
+
 	/**
 	 * Returns <code>true</code> iff the method could be a virtual method,
 	 * i.e. if it is not a constructor, is private, or is static.
-	 * 
+	 *
 	 * @param method a method
 	 * @return <code>true</code> iff the method could a virtual method
 	 * @throws JavaModelException
@@ -53,17 +53,17 @@ public class MethodChecks {
 	public static boolean isVirtual(IMethod method) throws JavaModelException {
 		if (method.isConstructor())
 			return false;
-		if (JdtFlags.isPrivate(method))	
+		if (JdtFlags.isPrivate(method))
 			return false;
-		if (JdtFlags.isStatic(method))	
+		if (JdtFlags.isStatic(method))
 			return false;
-		return true;	
-	}	
-	
+		return true;
+	}
+
 	/**
 	 * Returns <code>true</code> iff the method could be a virtual method,
 	 * i.e. if it is not a constructor, is private, or is static.
-	 * 
+	 *
 	 * @param methodBinding a method
 	 * @return <code>true</code> iff the method could a virtual method
 	 */
@@ -74,32 +74,32 @@ public class MethodChecks {
 			return false;
 		if (Modifier.isStatic(methodBinding.getModifiers()))
 			return false;
-		return true;	
+		return true;
 	}
-	
+
 	public static RefactoringStatus checkIfOverridesAnother(IMethod method, ITypeHierarchy hierarchy) throws JavaModelException {
 		IMethod overrides= MethodChecks.overridesAnotherMethod(method, hierarchy);
 		if (overrides == null)
 			return null;
 
 		RefactoringStatusContext context= JavaStatusContext.create(overrides);
-		String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides, 
+		String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides,
 				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaElementLabels.getElementLabel(overrides.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, overrides);
 	}
-	
+
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, hierarchy, monitor);
-			
+
 		if (inInterface == null)
 			return null;
 
 		RefactoringStatusContext context= JavaStatusContext.create(inInterface);
-		String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements, 
+		String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements,
 				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaElementLabels.getElementLabel(inInterface.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, inInterface);
 	}
-	
+
 	public static IMethod isDeclaredInInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(isVirtual(method));
 		IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
@@ -135,7 +135,7 @@ public class MethodChecks {
 		else
 			return null;
 	}
-	
+
 	/**
 	 * Locates the topmost method of an override ripple and returns it. If none
 	 * is found, null is returned.
@@ -156,7 +156,7 @@ public class MethodChecks {
 		if (!declaringType.isInterface()) {
 			if ((hierarchy == null) || !declaringType.equals(hierarchy.getType()))
 				hierarchy= declaringType.newTypeHierarchy(monitor);
-			
+
 			IMethod inInterface= isDeclaredInInterface(method, hierarchy, monitor);
 			if (inInterface != null && !inInterface.equals(method))
 				topmostMethod= inInterface;

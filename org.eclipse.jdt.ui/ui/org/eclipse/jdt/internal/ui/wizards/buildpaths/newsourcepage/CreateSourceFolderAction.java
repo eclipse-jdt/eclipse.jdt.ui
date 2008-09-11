@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.JFaceResources;
@@ -53,45 +53,45 @@ public class CreateSourceFolderAction extends BuildpathModifierAction {
 	public CreateSourceFolderAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
-	
+
 	public CreateSourceFolderAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
     }
-	
+
 	private CreateSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.CREATE_FOLDER);
-		
-		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
-		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
-		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
+
+		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2);
+		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description);
+		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDetailedDescription() {
 	    return NewWizardMessages.PackageExplorerActionGroup_FormText_createNewSourceFolder;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
 		Shell shell= getShell();
-	
+
 		try {
 			IJavaProject javaProject= (IJavaProject)getSelectedElements().get(0);
-			
+
             CPListElement newEntrie= new CPListElement(javaProject, IClasspathEntry.CPE_SOURCE);
             CPListElement[] existing= CPListElement.createFromExisting(javaProject);
             boolean isProjectSrcFolder= CPListElement.isProjectSourceFolder(existing, javaProject);
-			
+
             AddSourceFolderWizard wizard= new AddSourceFolderWizard(existing, newEntrie, getOutputLocation(javaProject), false, false, false, isProjectSrcFolder, isProjectSrcFolder);
 			wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(javaProject));
-			
+
 			WizardDialog dialog= new WizardDialog(shell, wizard);
 			PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
 			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
@@ -99,31 +99,31 @@ public class CreateSourceFolderAction extends BuildpathModifierAction {
 			int res= dialog.open();
 			if (res == Window.OK) {
 				BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-				
+
 				ArrayList newEntries= wizard.getExistingEntries();
 				delta.setNewEntries((CPListElement[])newEntries.toArray(new CPListElement[newEntries.size()]));
-				
+
 				IResource resource= wizard.getCreatedElement().getCorrespondingResource();
 				delta.addCreatedResource(resource);
-					
+
 				delta.setDefaultOutputLocation(wizard.getOutputLocation());
-					
+
 				informListeners(delta);
-				
+
 				selectAndReveal(new StructuredSelection(wizard.getCreatedElement()));
 			}
-			
+
 			notifyResult(res == Window.OK);
 		} catch (CoreException e) {
-			String title= NewWizardMessages.AbstractOpenWizardAction_createerror_title; 
-			String message= NewWizardMessages.AbstractOpenWizardAction_createerror_message; 
+			String title= NewWizardMessages.AbstractOpenWizardAction_createerror_title;
+			String message= NewWizardMessages.AbstractOpenWizardAction_createerror_message;
 			ExceptionHandler.handle(e, shell, title, message);
 		}
 	}
 
     private IPath getOutputLocation(IJavaProject javaProject) {
     	try {
-			return javaProject.getOutputLocation();		
+			return javaProject.getOutputLocation();
 		} catch (CoreException e) {
 			IProject project= javaProject.getProject();
 			IPath projPath= project.getFullPath();
@@ -134,10 +134,10 @@ public class CreateSourceFolderAction extends BuildpathModifierAction {
     protected boolean canHandle(IStructuredSelection selection) {
     	if (selection.size() != 1)
     		return false;
-    		
+
     	if (!(selection.getFirstElement() instanceof IJavaProject))
     		return false;
-    	
+
     	return true;
-    }	
+    }
 }

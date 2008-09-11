@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
 
 /**
  * Wizard for the rename type parameter refactoring.
@@ -23,11 +23,11 @@ public final class RenameTypeParameterWizard extends RenameRefactoringWizard {
 
 	/**
 	 * Creates a new rename type parameter wizard.
-	 * 
+	 *
 	 * @param refactoring
 	 *        the refactoring to create the wizard for
 	 */
 	public RenameTypeParameterWizard(Refactoring refactoring) {
-		super(refactoring, RefactoringMessages.RenameTypeParameterWizard_defaultPageTitle, RefactoringMessages.RenameTypeParameterWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR, IJavaHelpContextIds.RENAME_TYPE_PARAMETER_WIZARD_PAGE); 
+		super(refactoring, RefactoringMessages.RenameTypeParameterWizard_defaultPageTitle, RefactoringMessages.RenameTypeParameterWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR, IJavaHelpContextIds.RENAME_TYPE_PARAMETER_WIZARD_PAGE);
 	}
 }

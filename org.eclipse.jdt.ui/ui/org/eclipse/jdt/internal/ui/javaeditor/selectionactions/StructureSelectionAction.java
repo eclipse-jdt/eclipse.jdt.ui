@@ -118,14 +118,14 @@ public abstract class StructureSelectionAction extends Action {
 	 * @param sr the current type root
 	 * @param selAnalyzer the selection analyzer
 	 * @return return the new selection range
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException;
 
 	protected final ITextSelection getTextSelection() {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}
-	
+
 	// -- helper methods for subclasses to fit a node range into the source range
 
 	protected static ISourceRange getLastCoveringNodeRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException {

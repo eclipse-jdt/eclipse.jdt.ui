@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
@@ -44,17 +44,17 @@ public class PropertyFileDocumentModel {
         parsePropertyDocument(document);
         fLineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
     }
-    
+
     /**
 	 * @return the line delimiter used by the document described by this model
 	 */
     public String getLineDelimiter() {
 		return fLineDelimiter;
 	}
-    
+
     /**
 	 * Return the key value pair in this model with the key <code>key</code>
-	 * 
+	 *
 	 * @param key the key of the pair
 	 * @return the pair with the key or <b>null</b> if no such pair.
 	 */
@@ -69,11 +69,11 @@ public class PropertyFileDocumentModel {
     }
 
     private InsertEdit insert(KeyValuePair keyValuePair) {
-        KeyValuePairModell keyValuePairModell = new KeyValuePairModell(keyValuePair); 
+        KeyValuePairModell keyValuePairModell = new KeyValuePairModell(keyValuePair);
         int index = findInsertPosition(keyValuePairModell);
         KeyValuePairModell insertHere = (KeyValuePairModell) fKeyValuePairs.get(index);
         int offset = insertHere.fOffset;
-        
+
         String extra= ""; //$NON-NLS-1$
         if (insertHere instanceof LastKeyValuePair && ((LastKeyValuePair)insertHere).needsNewLine()) {
         	extra= fLineDelimiter;
@@ -95,7 +95,7 @@ public class PropertyFileDocumentModel {
 				insertHere.fLeadingWhiteSpaces= 0;
 			}
         }
-        
+
         keyValuePairModell.fOffset= offset;
         fKeyValuePairs.add(index, keyValuePairModell);
         return new InsertEdit(offset, extra + keyValuePairModell.getKeyValueText());
@@ -104,12 +104,12 @@ public class PropertyFileDocumentModel {
     /**
      * Inserts the given key value pairs into this model at appropriate
      * positions. Records all required text changes in the given change
-     * 
+     *
      * @param keyValuePairs the key value pairs to insert
-     * @param change the change to use to record text changes 
+     * @param change the change to use to record text changes
      */
     public void insert(KeyValuePair[] keyValuePairs, TextChange change) {
-    	
+
         ArrayList sorted= new ArrayList(Arrays.asList(keyValuePairs));
         Collections.sort(sorted, new Comparator() {
 			public int compare(Object o1, Object o2) {
@@ -118,28 +118,28 @@ public class PropertyFileDocumentModel {
 				return Collator.getInstance().compare(p1.fKey, p2.fKey);
 			}
         });
-        
-        for (int i = 0; i < sorted.size(); i++) {            
+
+        for (int i = 0; i < sorted.size(); i++) {
             KeyValuePair curr= (KeyValuePair) sorted.get(i);
 			InsertEdit insertEdit= insert(curr);
-            
-            String message= Messages.format(NLSMessages.NLSPropertyFileModifier_add_entry, BasicElementLabels.getJavaElementName(curr.getKey())); 
+
+            String message= Messages.format(NLSMessages.NLSPropertyFileModifier_add_entry, BasicElementLabels.getJavaElementName(curr.getKey()));
 			TextChangeCompatibility.addTextEdit(change, message, insertEdit);
-        }        
+        }
     }
-    
+
     public DeleteEdit remove(String key) {
     	for (Iterator iter = fKeyValuePairs.iterator(); iter.hasNext();) {
             KeyValuePairModell keyValuePair = (KeyValuePairModell) iter.next();
             if (keyValuePair.fKey.equals(key)) {
             	KeyValuePairModell next = (KeyValuePairModell) iter.next();
             	return new DeleteEdit(keyValuePair.fOffset, next.fOffset - keyValuePair.fOffset);
-            }            
+            }
         }
         return null;
     }
-    
-    public ReplaceEdit replace(KeyValuePair toReplace, KeyValuePair replaceWith) {     
+
+    public ReplaceEdit replace(KeyValuePair toReplace, KeyValuePair replaceWith) {
         for (Iterator iter = fKeyValuePairs.iterator(); iter.hasNext();) {
             KeyValuePairModell keyValuePair = (KeyValuePairModell) iter.next();
             if (keyValuePair.fKey.equals(toReplace.getKey())) {
@@ -147,11 +147,11 @@ public class PropertyFileDocumentModel {
                 KeyValuePairModell next = (KeyValuePairModell) iter.next();
                 int range = next.fOffset - keyValuePair.fOffset;
             	return new ReplaceEdit(keyValuePair.fOffset, range, newText);
-            }            
+            }
         }
         return null;
     }
-    
+
     private int findInsertPosition(KeyValuePairModell keyValuePair) {
     	ArrayList keys= new ArrayList();
         for (int i= 0; i < fKeyValuePairs.size(); i++) {
@@ -160,18 +160,18 @@ public class PropertyFileDocumentModel {
             	keys.add(element.getKey());
         }
         int insertIndex= NLSUtil.getInsertionPosition(keyValuePair.getKey(), keys);
-        
+
         if (insertIndex < fKeyValuePairs.size() - 1) {
             insertIndex++;
         }
-        
+
         return insertIndex;
-    }    
+    }
 
     private void parsePropertyDocument(IDocument document) {
         fKeyValuePairs = new ArrayList();
-      
-        SimpleLineReader reader = new SimpleLineReader(document);        
+
+        SimpleLineReader reader = new SimpleLineReader(document);
         int offset = 0;
         String line = reader.readLine();
         int leadingWhiteSpaces = 0;
@@ -199,29 +199,29 @@ public class PropertyFileDocumentModel {
 		}
         LastKeyValuePair lastKeyValuePair = new LastKeyValuePair(offset, needsNewLine);
 		fKeyValuePairs.add(lastKeyValuePair);
-    } 
-    
+    }
+
     private int getIndexOfSeparationCharacter(String line) {
         int minIndex = -1;
         int indexOfEven = line.indexOf('=');
         int indexOfColumn = line.indexOf(':');
         int indexOfBlank = line.indexOf(' ');
-        
+
         if ((indexOfEven != -1) && (indexOfColumn != -1)) {
-            minIndex = Math.min(indexOfEven, indexOfColumn);            
+            minIndex = Math.min(indexOfEven, indexOfColumn);
         } else {
             minIndex = Math.max(indexOfEven, indexOfColumn);
         }
-        
+
         if ((minIndex != -1) && (indexOfBlank != -1)) {
-            minIndex = Math.min(minIndex, indexOfBlank);            
+            minIndex = Math.min(minIndex, indexOfBlank);
         } else {
             minIndex = Math.max(minIndex, indexOfBlank);
         }
-        
-        return minIndex;        
-    }  
-    
+
+        return minIndex;
+    }
+
     public static String unwindEscapeChars(String s){
 		StringBuffer sb= new StringBuffer(s.length());
 		int length= s.length();
@@ -245,7 +245,7 @@ public class PropertyFileDocumentModel {
 	        		case '\n' :
 	        			return "\\n";//$NON-NLS-1$
 	        		case '\f' :
-	        			return "\\f";//$NON-NLS-1$	
+	        			return "\\f";//$NON-NLS-1$
 	        		case '\r' :
 	        			return "\\r";//$NON-NLS-1$
 
@@ -254,17 +254,17 @@ public class PropertyFileDocumentModel {
 //      			return "\\\"";//$NON-NLS-1$
 //      			case '\'' :
 //      			return "\\\'";//$NON-NLS-1$
-	        			
+
 	        		case '\\' :
 	        			return "\\\\";//$NON-NLS-1$
-	        		
+
 //      			This is only done when writing to the .properties file in #unwindValue(String)
 //      			case '!':
 //      			return "\\!";//$NON-NLS-1$
 //      			case '#':
 //      			return "\\#";//$NON-NLS-1$
-	        			
-	        		default: 
+
+	        		default:
 	        			if (((c < 0x0020) || (c > 0x007e))){
 	        				return new StringBuffer()
 							.append('\\')
@@ -273,10 +273,10 @@ public class PropertyFileDocumentModel {
 							.append(toHex((c >>  8) & 0xF))
 							.append(toHex((c >>  4) & 0xF))
 							.append(toHex( c        & 0xF)).toString();
-	        				
+
 	        			} else
 	        				return String.valueOf(c);
-	        	}		
+	        	}
 	        }
 
 	private static char toHex(int halfByte) {
@@ -308,7 +308,7 @@ public class PropertyFileDocumentModel {
 			buf.append('\\');
 		    buf.append(str.charAt(i));
 		}
-		buf.append(str.substring(firstNonWhiteSpace));        
+		buf.append(str.substring(firstNonWhiteSpace));
 		return buf.toString();
 	}
 
@@ -324,17 +324,17 @@ public class PropertyFileDocumentModel {
 		return s.length();
 	}
 
-	private static class KeyValuePairModell extends KeyValuePair {        
+	private static class KeyValuePairModell extends KeyValuePair {
 
         int fOffset;
         int fLeadingWhiteSpaces;
 
         public KeyValuePairModell(String key, String value, int offset, int leadingWhiteSpaces) {
-            super(key, value);             
+            super(key, value);
             fOffset = offset;
             fLeadingWhiteSpaces = leadingWhiteSpaces;
         }
-        
+
         public KeyValuePairModell(KeyValuePair keyValuePair) {
             super(keyValuePair.fKey, keyValuePair.fValue);
         }
@@ -351,7 +351,7 @@ public class PropertyFileDocumentModel {
     private static class LastKeyValuePair extends KeyValuePairModell {
 
     	private boolean fNeedsNewLine;
-    	
+
         public LastKeyValuePair(int offset, boolean needsNewLine) {
             super("zzzzzzz", "key", offset, 0); //$NON-NLS-1$ //$NON-NLS-2$
             fNeedsNewLine= needsNewLine;

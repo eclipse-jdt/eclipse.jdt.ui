@@ -29,7 +29,7 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 
 	private ASTMatchingFragmentFinder(ASTFragment toMatch) {
 		super(true);
-		fFragmentToMatch= toMatch;	
+		fFragmentToMatch= toMatch;
 	}
 	private IASTFragment[] findMatches(ASTNode scope) {
 		fMatches.clear();
@@ -39,15 +39,15 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 	private IASTFragment[] getMatches() {
 		return (IASTFragment[]) fMatches.toArray(new IASTFragment[fMatches.size()]);
 	}
-	
+
 	public boolean visit(Javadoc node) {
 		return false;
 	}
-	
+
 	protected boolean visitNode(ASTNode node) {
 		IASTFragment[] localMatches= fFragmentToMatch.getMatchingFragmentsWithNode(node);
 		for(int i= 0; i < localMatches.length; i++) {
-			fMatches.add(localMatches[i]);	
+			fMatches.add(localMatches[i]);
 		}
 		return true;
 	}

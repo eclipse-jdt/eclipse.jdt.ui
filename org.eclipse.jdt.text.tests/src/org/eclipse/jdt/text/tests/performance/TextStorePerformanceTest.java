@@ -27,7 +27,7 @@ import org.eclipse.jface.text.ITextStore;
 
 
 /**
- * 
+ *
  * @since 3.2
  */
 public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 {
@@ -45,7 +45,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 			faust = "";
 			x.printStackTrace();
 		}
-		
+
 		FAUST1 = faust;
 		FAUST100 = faust.substring(0, 100).intern();
 		FAUST500 = faust.substring(0, 500).intern();
@@ -94,7 +94,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 				fTextStore.replace(offset, 0, ";");
 		meter.stop();
 	}
-	
+
 	public void measureTypingReplaceInSmallFile(PerformanceMeter meter) {
 		fTextStore.set(FAUST500);
 		int offset = 12;
@@ -104,7 +104,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 				fTextStore.replace(offset, 0, ";");
 		meter.stop();
 	}
-	
+
 	public void measureInsertAtStart(PerformanceMeter meter) {
 		fTextStore.set(FAUST1);
 		meter.start();

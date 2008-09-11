@@ -12,6 +12,11 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,11 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
-
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -65,7 +65,7 @@ public class BuildPathDialog extends StatusDialog {
 
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText(Messages.format(JavaUIMessages.BuildPathDialog_title, BasicElementLabels.getJavaElementName(fProject.getElementName()))); 
+		shell.setText(Messages.format(JavaUIMessages.BuildPathDialog_title, BasicElementLabels.getJavaElementName(fProject.getElementName())));
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -78,7 +78,7 @@ public class BuildPathDialog extends StatusDialog {
 		fBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0, false, null);
 		fBlock.init(fProject, null, null);
 		fBlock.createControl(result).setLayoutData(new GridData(GridData.FILL_BOTH));
-		applyDialogFont(result);		
+		applyDialogFont(result);
 		return result;
 	}
 
@@ -97,15 +97,15 @@ public class BuildPathDialog extends StatusDialog {
 		Shell shell= getShell();
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
-				fBlock.configureJavaProject(monitor); 
+				fBlock.configureJavaProject(monitor);
 			}
 		};
 		IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable); // lock on root
 		try {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, op);
 		} catch (InvocationTargetException e) {
-			String title= PreferencesMessages.BuildPathDialog_error_title; 
-			String message= PreferencesMessages.BuildPathDialog_error_message; 
+			String title= PreferencesMessages.BuildPathDialog_error_title;
+			String message= PreferencesMessages.BuildPathDialog_error_message;
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InterruptedException e) {
 			// cancelled

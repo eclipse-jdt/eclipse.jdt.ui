@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -27,7 +27,7 @@ public final class CodeAssistAdvancedPreferencePage extends PropertyAndPreferenc
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new CodeAssistAdvancedConfigurationBlock(getNewStatusChangedListener(), container);
-		
+
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
 	}
@@ -47,7 +47,7 @@ public final class CodeAssistAdvancedPreferencePage extends PropertyAndPreferenc
 	protected String getPropertyPageID() {
 		return null;
 	}
-	
+
 		/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -57,7 +57,7 @@ public final class CodeAssistAdvancedPreferencePage extends PropertyAndPreferenc
 		}
 		super.dispose();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -74,10 +74,10 @@ public final class CodeAssistAdvancedPreferencePage extends PropertyAndPreferenc
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
-		}	
+		}
 		return super.performOk();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */

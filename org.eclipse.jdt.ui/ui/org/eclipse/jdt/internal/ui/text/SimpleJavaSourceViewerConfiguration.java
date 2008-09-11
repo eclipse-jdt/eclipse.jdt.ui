@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
  * This simple source viewer configuration basically provides syntax coloring
  * and disables all other features like code assist, quick outlines, hyperlinking, etc.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfiguration {
@@ -55,7 +55,7 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 		super(colorManager, preferenceStore, editor, partitioning);
 		fConfigureFormatter= configureFormatter;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 	 */

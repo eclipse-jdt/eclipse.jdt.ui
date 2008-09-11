@@ -72,7 +72,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public FullConstraintCreator(){
 		this(new ConstraintVariableFactory(), new TypeConstraintFactory());
 	}
-	
+
 	public FullConstraintCreator(IConstraintVariableFactory cFactory,
 								 ITypeConstraintFactory tFactory) {
 		Assert.isTrue(cFactory != null);
@@ -84,19 +84,19 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public IContext getContext() {
 		return fContext;
 	}
-	
+
 	public void setContext(IContext context) {
 		fContext= context;
 	}
-	
+
 	public ITypeConstraintFactory getConstraintFactory(){
 		return fTypeConstraintFactory;
 	}
-	
+
 	public IConstraintVariableFactory getConstraintVariableFactory(){
 		return fConstraintVariableFactory;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayInitializer)
 	 */
@@ -113,7 +113,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 					fConstraintVariableFactory.makeExpressionOrTypeVariable(each, getContext()),
 					typeVariable);
 			constraints.addAll(Arrays.asList(c));
-		}		
+		}
 		return (ITypeConstraint[])constraints.toArray(new ITypeConstraint[constraints.size()]);
 	}
 
@@ -122,7 +122,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 */
 	public ITypeConstraint[] create(Assignment assignment){
 		return fTypeConstraintFactory.createSubtypeConstraint(
-				fConstraintVariableFactory.makeExpressionOrTypeVariable(assignment.getRightHandSide(), getContext()), 
+				fConstraintVariableFactory.makeExpressionOrTypeVariable(assignment.getRightHandSide(), getContext()),
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(assignment.getLeftHandSide(), getContext()));
 	}
 
@@ -132,7 +132,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public ITypeConstraint[] create(CastExpression castExpression){
 		Expression expression= castExpression.getExpression();
 		Type type= castExpression.getType();
-		ITypeConstraint[] definesConstraint= fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(castExpression, getContext()), 
+		ITypeConstraint[] definesConstraint= fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(castExpression, getContext()),
 				                                                                        fConstraintVariableFactory.makeTypeVariable(castExpression.getType()));
 		if (isClassBinding(expression.resolveTypeBinding()) && isClassBinding(type.resolveBinding())){
 			ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(expression, getContext());
@@ -147,27 +147,27 @@ public class FullConstraintCreator extends ConstraintCreator{
 				constraints.addAll(Arrays.asList(c2));
 				return (ITypeConstraint[])constraints.toArray(new ITypeConstraint[constraints.size()]);
 			}
-		} else 
+		} else
 			return definesConstraint;
 	}
-	
+
 	public ITypeConstraint[] create(CatchClause node) {
 		SingleVariableDeclaration exception= node.getException();
 		ConstraintVariable nameVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(exception.getName(), getContext());
-		
+
 		ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(
 				nameVariable,
 				fConstraintVariableFactory.makeTypeVariable(exception.getType()));
-		
+
 		ITypeBinding throwable= node.getAST().resolveWellKnownType("java.lang.Throwable"); //$NON-NLS-1$
 		ITypeConstraint[] catchBound= fTypeConstraintFactory.createSubtypeConstraint(
 				nameVariable,
 				fConstraintVariableFactory.makeRawBindingVariable(throwable));
-		
+
 		ArrayList result= new ArrayList();
 		result.addAll(Arrays.asList(defines));
 		result.addAll(Arrays.asList(catchBound));
-		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
+		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
 
 
@@ -184,7 +184,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 			ConstraintVariable typeVar= fConstraintVariableFactory.makeRawBindingVariable(instanceCreation.resolveTypeBinding());
 			result.addAll(Arrays.asList(fTypeConstraintFactory.createDefinesConstraint(constructorVar, typeVar)));
 		}
-		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
+		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
 
 	/* (non-Javadoc)
@@ -206,7 +206,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		SimpleName name= access.getName();
 		IBinding binding= name.resolveBinding();
 		if (! (binding instanceof IVariableBinding))
-			return new ITypeConstraint[0];	
+			return new ITypeConstraint[0];
 		IVariableBinding vb= (IVariableBinding)binding;
 		return createConstraintsForAccessToField(vb, expression, access);
 	}
@@ -254,7 +254,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		result.addAll(Arrays.asList(constraints3));
 		return (ITypeConstraint[])result.toArray(new ITypeConstraint[result.size()]);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
@@ -313,13 +313,13 @@ public class FullConstraintCreator extends ConstraintCreator{
 		result.addAll(Arrays.asList(getArgumentConstraints(arguments, methodBinding)));
 		if (invocation.getExpression() != null){
 			if(MethodChecks.isVirtual(methodBinding)){
-				IMethodBinding[] rootDefs= getRootDefs(methodBinding);		
+				IMethodBinding[] rootDefs= getRootDefs(methodBinding);
 				Assert.isTrue(rootDefs.length > 0);
 				ConstraintVariable expressionVar= fConstraintVariableFactory.makeExpressionOrTypeVariable(invocation.getExpression(), getContext());
 				if (rootDefs.length == 1){
 					result.addAll(Arrays.asList(fTypeConstraintFactory.createSubtypeConstraint(expressionVar, fConstraintVariableFactory.makeDeclaringTypeVariable(rootDefs[0]))));
-				}else{	
-					Collection/*<ITypeConstraint>*/ constraints= new ArrayList(); 
+				}else{
+					Collection/*<ITypeConstraint>*/ constraints= new ArrayList();
 					for (int i= 0; i < rootDefs.length; i++) {
 						ConstraintVariable rootDefTypeVar= fConstraintVariableFactory.makeDeclaringTypeVariable(rootDefs[i]);
 						ITypeConstraint[] tc= fTypeConstraintFactory.createSubtypeConstraint(expressionVar, rootDefTypeVar);
@@ -350,8 +350,8 @@ public class FullConstraintCreator extends ConstraintCreator{
 			IVariableBinding vb= (IVariableBinding)nameBinding;
 			if (vb.isField())
 				return createConstraintsForAccessToField(vb, qualifier, qualifiedName);
-		} //TODO other bindings 
-		return new ITypeConstraint[0];			
+		} //TODO other bindings
+		return new ITypeConstraint[0];
 	}
 
 	/* (non-Javadoc)
@@ -360,13 +360,13 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public ITypeConstraint[] create(ReturnStatement returnStatement){
 		if (returnStatement.getExpression() == null)
 			return new ITypeConstraint[0];
-		
+
 		ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeReturnTypeVariable(returnStatement);
 		return fTypeConstraintFactory.createSubtypeConstraint(
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(returnStatement.getExpression(), getContext()),
 				returnTypeVariable);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
 	 */
@@ -375,7 +375,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getName(), getContext()),
 				fConstraintVariableFactory.makeTypeVariable(svd.getType()));
 		if (svd.getInitializer() == null)
-			return defines;	
+			return defines;
 		ITypeConstraint[] constraints = fTypeConstraintFactory.createSubtypeConstraint(
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getInitializer(), getContext()),
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(svd.getName(), getContext()));
@@ -403,7 +403,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		result.addAll(Arrays.asList(getArgumentConstraints(arguments, methodBinding)));
 		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperFieldAccess)
 	 */
@@ -411,11 +411,11 @@ public class FullConstraintCreator extends ConstraintCreator{
 		SimpleName name= access.getName();
 		IBinding binding= name.resolveBinding();
 		if (! (binding instanceof IVariableBinding))
-			return new ITypeConstraint[0];	
+			return new ITypeConstraint[0];
 		IVariableBinding vb= (IVariableBinding)binding;
 		return createConstraintsForAccessToField(vb, null, access);
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperMethodInvocation)
 	 */
@@ -437,7 +437,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		ConstraintVariable declaringType= fConstraintVariableFactory.makeRawBindingVariable(expression.resolveTypeBinding());//TODO fix this - can't use Decl(M) because 'this' can live outside of methods
 		return fTypeConstraintFactory.createDefinesConstraint(thisExpression, declaringType);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationExpression)
 	 */
@@ -450,7 +450,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 */
 	public ITypeConstraint[] create(VariableDeclarationFragment vdf){
 		if (vdf.getInitializer() == null)
-			return new ITypeConstraint[0];	
+			return new ITypeConstraint[0];
 		return fTypeConstraintFactory.createSubtypeConstraint(
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(vdf.getInitializer(), getContext()),
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(vdf.getName(), getContext()));
@@ -465,7 +465,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 
 
 	//--------- private helpers ----------------//
-	
+
 	private Collection getConstraintsForFieldDeclaringTypes(FieldDeclaration fd) {
 		Collection result= new ArrayList(fd.fragments().size());
 		for (Iterator iter= fd.fragments().iterator(); iter.hasNext();) {
@@ -478,7 +478,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return result;
 	}
-	
+
 	private Collection getConstraintsForHiding(FieldDeclaration fd) {
 		Collection result= new ArrayList();
 		for (Iterator iter= fd.fragments().iterator(); iter.hasNext();) {
@@ -486,7 +486,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return result;
 	}
-	
+
 	private Collection getConstraintsForHiding(VariableDeclarationFragment fragment) {
 		Collection result= new ArrayList();
 		IVariableBinding fieldBinding= fragment.resolveBinding();
@@ -502,7 +502,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return result;
 	}
-	
+
 	private ITypeConstraint[] getConstraintsFromFragmentList(List fragments, Type type) {
 		int size= fragments.size();
 		ConstraintVariable typeVariable= fConstraintVariableFactory.makeTypeVariable(type);
@@ -522,7 +522,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
-	
+
 	private Collection getConstraintsForOverriding(IMethodBinding overriddingMethod) {
 		Collection result= new ArrayList();
 		Set declaringSupertypes= getDeclaringSuperTypes(overriddingMethod);
@@ -549,7 +549,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return result;
 	}
-	
+
 	private ITypeConstraint[] getReturnTypeConstraint(Expression invocation, IMethodBinding methodBinding){
 		if (methodBinding == null || methodBinding.isConstructor() || methodBinding.getReturnType().isPrimitive())
 			return new ITypeConstraint[0];
@@ -557,17 +557,17 @@ public class FullConstraintCreator extends ConstraintCreator{
 		ConstraintVariable invocationVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(invocation, getContext());
 		return fTypeConstraintFactory.createDefinesConstraint(invocationVariable, returnTypeVariable);
 	}
-	
+
 	private ITypeConstraint[] getArgumentConstraints(List arguments, IMethodBinding methodBinding) {
 		List result= new ArrayList(arguments.size());
-		
+
 		if (methodBinding.isVarargs()) {
 			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 			final int nParams= parameterTypes.length;
 			final int nArgs= arguments.size();
 			Assert.isTrue(nArgs >= nParams - 1); // there may be zero args for the vararg parameter
 			Assert.isTrue(nParams >= 1); // at least one parameter for a vararg method
-			
+
 			int i= 0;
 			// add the normal argument constraints up to the last one
 			for (; i < nParams - 1; i++) {
@@ -577,10 +577,10 @@ public class FullConstraintCreator extends ConstraintCreator{
 				ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
 				result.addAll(Arrays.asList(argConstraint));
 			}
-			
+
 			// create argument constraints for all arguments wrapped into the vararg parameter
 			boolean directArray= false;
-			
+
 			// a) there is exactly one remaining argument -> be careful as it may be a direct array param
 
 // This is currently not used by Generalize Type Declaration as it does not support array types:
@@ -595,7 +595,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 //					//XXX there should be a constraint that logically ORs the direct array and element type constraints
 //				}
 //			}
-			
+
 			// b) there are zero ore more than one arguments remaining
 			if (!directArray && i < nArgs) {
 				// get the component type of the vararg-array
@@ -610,7 +610,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 					result.addAll(Arrays.asList(argConstraint));
 				}
 			}
-			
+
 		} else {
 			for (int i= 0, n= arguments.size(); i < n; i++) {
 				Expression argument= (Expression) arguments.get(i);
@@ -620,10 +620,10 @@ public class FullConstraintCreator extends ConstraintCreator{
 				result.addAll(Arrays.asList(argConstraint));
 			}
 		}
-		
-		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
+
+		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
-	
+
 	private static Type getTypeParent(ArrayInitializer arrayInitializer) {
 		if (arrayInitializer.getParent() instanceof ArrayCreation){
 			return ((ArrayCreation)arrayInitializer.getParent()).getType().getElementType();
@@ -631,7 +631,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 			return getTypeParent((ArrayInitializer) arrayInitializer.getParent());
 		} else if (arrayInitializer.getParent() instanceof VariableDeclaration){
 			VariableDeclaration parent= (VariableDeclaration)arrayInitializer.getParent();
-			
+
 			if (parent.getParent() instanceof VariableDeclarationStatement){
 				Type type= ((VariableDeclarationStatement)parent.getParent()).getType();
 				return ASTNodes.getElementType(type);
@@ -646,7 +646,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		Assert.isTrue(false);//array initializers are allowed in only 2 places
 		return null;
 	}
-	
+
 	private ITypeConstraint[] createOrOrSubtypeConstraint(ConstraintVariable var1, ConstraintVariable var2){
 		ITypeConstraint[] c1= fTypeConstraintFactory.createSubtypeConstraint(var1, var2);
 		ITypeConstraint[] c2= fTypeConstraintFactory.createSubtypeConstraint(var2, var1);
@@ -655,7 +655,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return new ITypeConstraint[]{ fTypeConstraintFactory.createCompositeOrTypeConstraint(new ITypeConstraint[]{c1[0], c2[0]}) };
 	}
-	
+
 	private ITypeConstraint[] createConstraintsForAccessToField(IVariableBinding fieldBinding, Expression qualifier, Expression accessExpression){
 		Assert.isTrue(fieldBinding.isField());
 		ITypeConstraint[] defines= fTypeConstraintFactory.createDefinesConstraint(
@@ -666,7 +666,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		ITypeConstraint[] subType= fTypeConstraintFactory.createSubtypeConstraint(
 				fConstraintVariableFactory.makeExpressionOrTypeVariable(qualifier, getContext()),
 				fConstraintVariableFactory.makeDeclaringTypeVariable(fieldBinding));
-		
+
 		if (defines.length == 0){
 			return subType;
 		} else if (subType.length == 0){
@@ -675,14 +675,14 @@ public class FullConstraintCreator extends ConstraintCreator{
 			return new ITypeConstraint[]{defines[0], subType[0]};
 		}
 	}
-	
+
 	private static IVariableBinding findField(IVariableBinding fieldBinding, ITypeBinding type) {
 		if (fieldBinding.getDeclaringClass().equals(type))
 			return fieldBinding;
 		return Bindings.findFieldInType(type, fieldBinding.getName());
 	}
-	
-	/* 
+
+	/*
 	 * return Set of ITypeBindings
 	 */
 	private static Set getDeclaringSuperTypes(IVariableBinding fieldBinding) {
@@ -695,7 +695,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return result;
 	}
-	
+
 	//--- RootDef ----//
 	protected static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
 		Set/*<ITypeBinding>*/ declaringSuperTypes= getDeclaringSuperTypes(methodBinding);
@@ -705,14 +705,14 @@ public class FullConstraintCreator extends ConstraintCreator{
 			if (! containsASuperType(type, declaringSuperTypes))
 				result.add(findMethod(methodBinding, type));
 		}
-		
+
 		if (result.size() == 0){
 			result.add(methodBinding);
 		}
 		return (IMethodBinding[]) result.toArray(new IMethodBinding[result.size()]);
 	}
-	
-	/* 
+
+	/*
 	 * @param declaringSuperTypes Set of ITypeBindings
 	 * @return <code>true</code> iff <code>declaringSuperTypes</code> contains a type
 	 * 		which is a strict supertype of <code>type</code>
@@ -725,8 +725,8 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return false;
 	}
-	
-	/* 
+
+	/*
 	 * return Set of ITypeBindings
 	 */
 	protected static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
@@ -743,7 +743,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		}
 		return result;
 	}
-	
+
 	protected static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
 		if (methodBinding.getDeclaringClass().equals(type))
 			return methodBinding;
@@ -753,5 +753,5 @@ public class FullConstraintCreator extends ConstraintCreator{
 	private static boolean isClassBinding(ITypeBinding typeBinding){
 		return typeBinding != null && typeBinding.isClass();
 	}
-	
+
 }

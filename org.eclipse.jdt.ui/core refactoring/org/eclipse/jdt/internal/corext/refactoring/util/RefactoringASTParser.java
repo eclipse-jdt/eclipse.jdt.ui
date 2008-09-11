@@ -35,11 +35,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 public class RefactoringASTParser {
 
 	private ASTParser fParser;
-	
+
 	public RefactoringASTParser(int level) {
 		fParser= ASTParser.newParser(level);
 	}
-	
+
 	public CompilationUnit parse(ITypeRoot typeRoot, boolean resolveBindings) {
 		return parse(typeRoot, resolveBindings, null);
 	}
@@ -82,7 +82,7 @@ public class RefactoringASTParser {
 		CompilationUnit newCUNode= (CompilationUnit) fParser.createAST(pm);
 		return newCUNode;
 	}
-	
+
 	/**
 	 * @param newCfSource the source
 	 * @param originalCf the class file to get the name and project from
@@ -102,12 +102,12 @@ public class RefactoringASTParser {
 		CompilationUnit newCUNode= (CompilationUnit) fParser.createAST(pm);
 		return newCUNode;
 	}
-	
+
 	/**
 	 * Tries to get the shared AST from the ASTProvider.
 	 * If the shared AST is not available, parses the type root with a
 	 * RefactoringASTParser that uses settings similar to the ASTProvider.
-	 * 
+	 *
 	 * @param typeRoot the type root
 	 * @param resolveBindings TODO
 	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
@@ -131,7 +131,7 @@ public class RefactoringASTParser {
 		}
 		return null;
 	}
-	
+
 	public static Map getCompilerOptions(IJavaElement element) {
 		IJavaProject project= element.getJavaProject();
 		Map options= project.getOptions(true);
@@ -146,7 +146,7 @@ public class RefactoringASTParser {
 				options.put(key, "ignore"); //$NON-NLS-1$
 			}
 		}
-		options.put(JavaCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$		
+		options.put(JavaCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$
 		return options;
 	}
 }

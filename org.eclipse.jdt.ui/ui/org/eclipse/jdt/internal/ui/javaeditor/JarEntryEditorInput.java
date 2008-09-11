@@ -93,9 +93,9 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 			IJarEntryResource jarEntry= (IJarEntryResource)fJarEntryFile;
 			IPackageFragmentRoot root= jarEntry.getPackageFragmentRoot();
 			IPath fullPath= root.getPath().append(fJarEntryFile.getFullPath());
-			return BasicElementLabels.getPathLabel(fullPath, root.isExternal());		
+			return BasicElementLabels.getPathLabel(fullPath, root.isExternal());
 		}
-		
+
 		IPath fullPath= fJarEntryFile.getFullPath();
 		if (fullPath == null)
 			return null;

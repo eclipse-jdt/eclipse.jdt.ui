@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -104,7 +104,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Refactoring processor for the push down refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class PushDownRefactoringProcessor extends HierarchyProcessor {
@@ -303,7 +303,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Creates a new push down refactoring processor.
-	 * 
+	 *
 	 * @param members
 	 *            the members to pull up
 	 */
@@ -324,7 +324,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	/**
 	 * Creates a new push down refactoring processor from refactoring arguments.
-	 * 
+	 *
 	 * @param arguments
 	 *            the refactoring arguments
 	 * @param status
@@ -468,9 +468,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), result);
 			if (result.hasFatalError())
 				return result;
-			
+
 			Checks.addModifiedFilesToChecker(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), context);
-			
+
 			return result;
 		} finally {
 			monitor.done();

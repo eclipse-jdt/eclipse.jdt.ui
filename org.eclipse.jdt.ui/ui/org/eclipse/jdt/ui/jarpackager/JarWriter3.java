@@ -32,6 +32,8 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 
@@ -49,8 +51,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
@@ -67,7 +67,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * <p>
  * Clients may subclass.
  * </p>
- * 
+ *
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.2
  */
@@ -117,14 +117,14 @@ public class JarWriter3 {
 			throw JarPackagerUtil.createCoreException(exception.getLocalizedMessage(), exception);
 		}
 	}
-	
+
 	/**
 	 * Creates the directory entries for the given path and writes it to the
 	 * current archive.
-	 * 
+	 *
 	 * @param destinationPath
 	 *            the path to add
-	 * 
+	 *
 	 * @throws IOException
 	 *             if an I/O error has occurred
 	 */
@@ -151,19 +151,19 @@ public class JarWriter3 {
 			fJarOutputStream.putNextEntry((JarEntry) directories.get(i));
 		}
 	}
-	
+
 	/**
 	 * Creates the directory entries for the given path and writes it to the
 	 * current archive.
-	 * 
+	 *
 	 * @param resource
 	 *            the resource for which the parent directories are to be added
 	 * @param destinationPath
 	 *            the path to add
-	 * 
+	 *
 	 * @throws IOException
 	 *             if an I/O error has occurred
-	 * @throws CoreException 
+	 * @throws CoreException
 	 *             if accessing the resource failes
 	 */
 	protected void addDirectories(IResource resource, IPath destinationPath) throws IOException, CoreException {
@@ -199,20 +199,20 @@ public class JarWriter3 {
 			fJarOutputStream.putNextEntry((JarEntry) directories.get(i));
 		}
 	}
-	
+
 	/**
 	 * Creates a new JarEntry with the passed path and contents, and writes it
 	 * to the current archive.
 	 *
 	 * @param	resource			the file to write
 	 * @param	path				the path inside the archive
-	 * 
+	 *
      * @throws	IOException			if an I/O error has occurred
 	 * @throws	CoreException 		if the resource can-t be accessed
 	 */
 	protected void addFile(IFile resource, IPath path) throws IOException, CoreException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
-		byte[] readBuffer= new byte[4096];             
+		byte[] readBuffer= new byte[4096];
 
 		if (fJarPackage.isCompressed())
 			newEntry.setMethod(ZipEntry.DEFLATED);
@@ -229,7 +229,7 @@ public class JarWriter3 {
 			if (info.exists())
 				lastModified= info.getLastModified();
 		}
-		
+
 		// Set modification time
 		newEntry.setTime(lastModified);
 
@@ -241,17 +241,17 @@ public class JarWriter3 {
 	/**
 	 * Write the given entry describing the given content to the
 	 * current archive
-	 * 
+	 *
 	 * @param   entry            the entry to write
 	 * @param   content          the content to write
-	 * 
+	 *
 	 * @throws IOException       If an I/O error occurred
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	protected void addEntry(JarEntry entry, InputStream content) throws IOException {
 		byte[] readBuffer= new byte[4096];
-		try {		
+		try {
 			fJarOutputStream.putNextEntry(entry);
 			int count;
 			while ((count= content.read(readBuffer, 0, readBuffer.length)) != -1)
@@ -272,7 +272,7 @@ public class JarWriter3 {
 
 	/**
 	 * Creates a new JAR file entry containing the refactoring history.
-	 * 
+	 *
 	 * @param data
 	 *            the jar package data
 	 * @param path
@@ -335,7 +335,7 @@ public class JarWriter3 {
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR
 	 * then a dialog will ask the user again.
-	 * 
+	 *
 	 * @param	parent	the parent for the dialog,
 	 * 			or <code>null</code> if no dialog should be presented
 	 * @return	<code>true</code> if it is OK to create the JAR
@@ -349,7 +349,7 @@ public class JarWriter3 {
 				return true;
 			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fJarPackage.getAbsoluteJarLocation(), true);
 		}
-					
+
 		// Test if directory exists
 		String path= file.getAbsolutePath();
 		int separatorIndex = path.lastIndexOf(File.separator);
@@ -367,7 +367,7 @@ public class JarWriter3 {
 
 	/**
 	 * Closes the archive and does all required cleanup.
-	 * 
+	 *
 	 * @throws CoreException
 	 *             to signal any other unusual termination. This can also be
 	 *             used to return information in the status object.
@@ -408,7 +408,7 @@ public class JarWriter3 {
 
 	/**
 	 * Writes the passed resource to the current archive.
-	 * 
+	 *
 	 * @param resource
 	 *            the file to be written
 	 * @param destinationPath
@@ -426,16 +426,16 @@ public class JarWriter3 {
 			// Ensure full path is visible
 			String message= null;
 			if (ex.getLocalizedMessage() != null)
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {BasicElementLabels.getPathLabel(resource.getFullPath(), false), ex.getLocalizedMessage()}); 
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {BasicElementLabels.getPathLabel(resource.getFullPath(), false), ex.getLocalizedMessage()});
 			else
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(resource.getFullPath(), false)); 
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(resource.getFullPath(), false));
 			throw JarPackagerUtil.createCoreException(message, ex);
-		}					
+		}
 	}
 
 	/**
 	 * Writes the meta file to the JAR file.
-	 * 
+	 *
 	 * @param data
 	 *            the jar package data
 	 * @param file

@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -29,10 +29,10 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 
 public class ReorgQueries implements IReorgQueries {
-	
+
 	private final Wizard fWizard;
-	private final Shell fShell;	
-		
+	private final Shell fShell;
+
 	public ReorgQueries(Wizard wizard){
 		Assert.isNotNull(wizard);
 		fWizard= wizard;
@@ -53,7 +53,7 @@ public class ReorgQueries implements IReorgQueries {
 		else
 			return fShell;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries#createYesYesToAllNoNoToAllQuery(java.lang.String)
 	 */
@@ -67,7 +67,7 @@ public class ReorgQueries implements IReorgQueries {
 	public IConfirmQuery createYesNoQuery(String dialogTitle, boolean allowCancel, int queryID) {
 		return new YesNoQuery(getShell(), allowCancel, dialogTitle);
 	}
-	
+
 	public IConfirmQuery createSkipQuery(String dialogTitle, int queryID) {
 		return new SkipQuery(getShell(), dialogTitle);
 	}
@@ -78,21 +78,21 @@ public class ReorgQueries implements IReorgQueries {
 		private boolean fNoToAll= false;
 		private final Shell fShell;
 		private final String fDialogTitle;
-		
+
 		YesYesToAllNoNoToAllQuery(Shell parent, boolean allowCancel, String dialogTitle){
 			fShell= parent;
 			fDialogTitle= dialogTitle;
 			fAllowCancel= allowCancel;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String)
 		 */
 		public boolean confirm(final String question) throws OperationCanceledException {
-			if (fYesToAll) 
+			if (fYesToAll)
 				return true;
 
-			if (fNoToAll) 
+			if (fNoToAll)
 				return false;
 
 			final int[] result= new int[1];
@@ -104,10 +104,10 @@ public class ReorgQueries implements IReorgQueries {
 		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String, java.lang.Object[])
 		 */
 		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
-			if (fYesToAll) 
+			if (fYesToAll)
 				return true;
 
-			if (fNoToAll) 
+			if (fNoToAll)
 				return false;
 
 			final int[] result= new int[1];
@@ -119,17 +119,17 @@ public class ReorgQueries implements IReorgQueries {
 			return new Runnable() {
 				public void run() {
 					int[] resultId= getResultIDs();
- 
+
 					MessageDialog dialog= new MessageDialog(
-						fShell, 
-						fDialogTitle, 
+						fShell,
+						fDialogTitle,
 						null,
 						question,
 						MessageDialog.QUESTION,
 						getButtonLabels(),
 						0);
 					dialog.open();
-					
+
 					if (dialog.getReturnCode() == -1) { //MessageDialog closed without choice => cancel | no
 						//see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=48400
 						result[0]= fAllowCancel ? IDialogConstants.CANCEL_ID : IDialogConstants.NO_ID;
@@ -171,7 +171,7 @@ public class ReorgQueries implements IReorgQueries {
 				}
 			};
 		}
-		
+
 		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
 			return new Runnable() {
 				public void run() {
@@ -192,7 +192,7 @@ public class ReorgQueries implements IReorgQueries {
 
 		private boolean getResult(int[] result) throws OperationCanceledException {
 			switch(result[0]){
-				case IDialogConstants.YES_TO_ALL_ID: 
+				case IDialogConstants.YES_TO_ALL_ID:
 					fYesToAll= true;
 					return true;
 				case IDialogConstants.YES_ID:
@@ -210,7 +210,7 @@ public class ReorgQueries implements IReorgQueries {
 			}
 		}
 	}
-	
+
 	private static class YesNoQuery implements IConfirmQuery{
 
 		private final Shell fShell;
@@ -245,15 +245,15 @@ public class ReorgQueries implements IReorgQueries {
 			return new Runnable() {
 				public void run() {
 					MessageDialog dialog= new MessageDialog(
-						fShell, 
-						fDialogTitle, 
+						fShell,
+						fDialogTitle,
 						null,
 						question,
 						MessageDialog.QUESTION,
 						getButtonLabels(),
 						0);
 					dialog.open();
-					
+
 					switch (dialog.getReturnCode()) {
 						case -1 : //MessageDialog closed without choice => cancel | no
 							//see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=48400
@@ -285,7 +285,7 @@ public class ReorgQueries implements IReorgQueries {
 				}
 			};
 		}
-		
+
 		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
 			return new Runnable() {
 				public void run() {
@@ -303,7 +303,7 @@ public class ReorgQueries implements IReorgQueries {
 				}
 			};
 		}
-		
+
 		private boolean getResult(int[] result) throws OperationCanceledException {
 			switch(result[0]){
 				case IDialogConstants.YES_ID:
@@ -318,7 +318,7 @@ public class ReorgQueries implements IReorgQueries {
 			}
 		}
 	}
-	
+
 	private static class SkipQuery implements IConfirmQuery{
 
 		private final Shell fShell;
@@ -353,15 +353,15 @@ public class ReorgQueries implements IReorgQueries {
 			return new Runnable() {
 				public void run() {
 					MessageDialog dialog= new MessageDialog(
-						fShell, 
-						fDialogTitle, 
+						fShell,
+						fDialogTitle,
 						null,
 						question,
 						MessageDialog.QUESTION,
 						getButtonLabels(),
 						0);
 					dialog.open();
-					
+
 					switch (dialog.getReturnCode()) {
 						case -1 : //MessageDialog closed without choice => cancel | no
 							//see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=48400
@@ -373,7 +373,7 @@ public class ReorgQueries implements IReorgQueries {
 				}
 
 				private String[] getButtonLabels() {
-					return new String[] {IDialogConstants.SKIP_LABEL, ReorgMessages.ReorgQueries_skip_all, IDialogConstants.CANCEL_LABEL}; 
+					return new String[] {IDialogConstants.SKIP_LABEL, ReorgMessages.ReorgQueries_skip_all, IDialogConstants.CANCEL_LABEL};
 				}
 			};
 		}
@@ -395,7 +395,7 @@ public class ReorgQueries implements IReorgQueries {
 			}
 		}
 	}
-	
+
 	private static final class YesNoListDialog extends ListDialog {
 		private final boolean fYesToAllNoToAll;
 		private YesNoListDialog(Shell parent, boolean includeYesToAllNoToAll) {

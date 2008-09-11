@@ -18,9 +18,9 @@ public interface ICleanUpTabPage extends IModifyDialogTabPage {
 	/**
 	 * The kind of clean up options this page will
 	 * modify.
-	 * 
+	 *
 	 * @param kind the kind
-	 * 
+	 *
 	 * @see ICleanUp#DEFAULT_CLEAN_UP_OPTIONS
 	 * @see ICleanUp#DEFAULT_SAVE_ACTION_OPTIONS
 	 */

@@ -37,18 +37,18 @@ import org.eclipse.jdt.core.Signature;
  * </p>
  * <p>
  * References take the form:
- * 
+ *
  * <pre>
  *        elementRef := typeRef | fieldRef | methodRef
  *        typeRef := projectName '/' fullyQualifiedTypeName
  *        fieldRef := typeRef '#' fieldName
  *        methodRef := typeRef '#' methodName '(' parameterSignatures ')'
  * </pre>
- * 
+ *
  * where <code>parameterSignatures</code> uses the signature format documented
  * in the {@link org.eclipse.jdt.core.Signature Signature} class.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public class JavaElementReferenceConverter extends AbstractParameterValueConverter {
@@ -122,7 +122,7 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 	/**
 	 * Throws a <code>ParameterValueConversionException</code> if the java
 	 * element reference string does not meet some well-formedness condition.
-	 * 
+	 *
 	 * @param assertion
 	 *            a boolean check for well-formedness
 	 * @throws ParameterValueConversionException
@@ -136,7 +136,7 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 	/**
 	 * Throws a <code>ParameterValueConversionException</code> if the java
 	 * element reference string identifies an element that does not exist.
-	 * 
+	 *
 	 * @param javaElement
 	 *            an element to check for existence
 	 * @throws ParameterValueConversionException

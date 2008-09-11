@@ -42,13 +42,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Action that introduces an indirection for a certain method. This action may be invoked
  * on source or binary methods or method invocations with or without attached source.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.2
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class IntroduceIndirectionAction extends SelectionDispatchAction {
@@ -58,7 +58,7 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public IntroduceIndirectionAction(JavaEditor editor) {
@@ -68,8 +68,8 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>IntroduceIndirectionAction</code>. 
-	 * 
+	 * Creates a new <code>IntroduceIndirectionAction</code>.
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public IntroduceIndirectionAction(IWorkbenchSite site) {
@@ -104,7 +104,7 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {

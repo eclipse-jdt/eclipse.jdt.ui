@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 public class CompilationUnitEntry implements IAdaptable {
-	
+
 	private final String fMessage;
 	private final ICompilationUnit fCompilationUnit;
 
@@ -31,7 +31,7 @@ public class CompilationUnitEntry implements IAdaptable {
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-	
+
 	public Object getAdapter(Class adapter) {
 		if (ICompilationUnit.class.equals(adapter))
 			return getCompilationUnit();

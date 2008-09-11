@@ -44,13 +44,13 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY);
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING);
-	
+
 	private static final Key PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION);
 
 	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS);
 	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY);
 	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING);
-	
+
 
 	// values
 	private static final String ERROR= JavaCore.ERROR;
@@ -59,16 +59,16 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 
 	private static final String ENABLED= JavaCore.ENABLED;
 	private static final String DISABLED= JavaCore.DISABLED;
-	
+
 	private static final String PUBLIC= JavaCore.PUBLIC;
 	private static final String PROTECTED= JavaCore.PROTECTED;
 	private static final String DEFAULT= JavaCore.DEFAULT;
 	private static final String PRIVATE= JavaCore.PRIVATE;
-	
+
 	private static final String NO_TAG= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_NO_TAG;
 	private static final String ALL_STANDARD_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_ALL_STANDARD_TAGS;
 	private static final String RETURN_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_RETURN_TAG;
-	
+
 	private PixelConverter fPixelConverter;
 	private Composite fJavadocComposite;
 
@@ -79,7 +79,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		super(context, project, getKeys(), container);
 		fBlockEnableState= null;
 	}
-	
+
 	private static Key[] getKeys() {
 		Key[] keys= new Key[] {
 				PREF_JAVADOC_SUPPORT,
@@ -92,7 +92,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			};
 		return keys;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
@@ -101,85 +101,85 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		setShell(parent.getShell());
 
 		Composite javadocComposite= createJavadocTabContent(parent);
-		
+
 		validateSettings(null, null, null);
-	
+
 		return javadocComposite;
 	}
-	
+
 	private Composite createJavadocTabContent(Composite folder) {
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
-		
+
 		String[] errorWarningIgnoreLabels= new String[] {
 				PreferencesMessages.JavadocProblemsConfigurationBlock_error,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_warning,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore
 		};
-		
+
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
 		String[] disabledEnabled= new String[] { DISABLED, ENABLED };
-		
+
 		String[] visibilities= new String[] { PUBLIC, PROTECTED, DEFAULT, PRIVATE  };
-		
+
 		String[] visibilitiesLabels= new String[] {
 				PreferencesMessages.JavadocProblemsConfigurationBlock_public,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_protected,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_default,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_private
 		};
-		
+
 		String[] missingTagValues= { ALL_STANDARD_TAGS, RETURN_TAGS, NO_TAG };
 		String[] missingTagLabels= new String[] {
 				PreferencesMessages.JavadocProblemsConfigurationBlock_allStandardTags,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_returnTag,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore
 		};
-		
+
 		int nColumns= 3;
-				
+
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
-		
+
 		Composite outer= sc1.getBody();
-		
+
 		GridLayout layout = new GridLayout();
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		outer.setLayout(layout);
-		
+
 		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label;
 		addCheckBox(outer, label, PREF_JAVADOC_SUPPORT, enabledDisabled, 0);
-		
+
 		layout = new GridLayout();
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
 		//layout.marginWidth= 0;
-				
+
 		Composite composite= new Composite(outer, SWT.NONE);
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, true));
-		
+
 		fJavadocComposite= composite;
-		
+
 		Label description= new Label(composite, SWT.WRAP);
 		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description);
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
 		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
-			
+
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
-		
+
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_label;
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-		
+
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_visibility_label;
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
 
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_label;
 		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS, enabledDisabled, indent);
-		
+
 		Composite validateTagComposite= new Composite(composite, SWT.NONE);
 		GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		gridData.horizontalIndent= indent;
@@ -189,37 +189,37 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		gridLayout.marginHeight= 0;
 		gridLayout.marginWidth= 0;
 		validateTagComposite.setLayout(gridLayout);
-		
+
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_not_visible_ref_label;
 		addCheckBox(validateTagComposite, label, PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, enabledDisabled, indent);
-		
+
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_deprecated_label;
 		addCheckBox(validateTagComposite, label, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF, enabledDisabled, indent);
-		
+
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_tag_description;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION, missingTagValues, missingTagLabels, indent);
-		
+
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_visibility_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
-		
+
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_overriding_label;
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, disabledEnabled, indent);
-		
+
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_visibility_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, visibilities, visibilitiesLabels, indent);
-		
+
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_overriding_label;
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, disabledEnabled, indent);
 
 		return sc1;
 	}
-	
+
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
@@ -228,7 +228,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		if (!areSettingsEnabled()) {
 			return;
 		}
-		
+
 		if (changedKey != null) {
 			if (PREF_PB_INVALID_JAVADOC.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||
@@ -244,7 +244,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		}
 		fContext.statusChanged(new StatusInfo());
 	}
-	
+
 	private void updateEnableStates() {
 		boolean enableJavadoc= checkValue(PREF_JAVADOC_SUPPORT, ENABLED);
 		enableConfigControls(enableJavadoc);
@@ -252,24 +252,24 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		if (enableJavadoc) {
 			boolean enableInvalidTagsErrors= !checkValue(PREF_PB_INVALID_JAVADOC, IGNORE);
 			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS).setEnabled(enableInvalidTagsErrors);
-			
+
 			boolean enableInvalidTagsDetailsErrors= enableInvalidTagsErrors && checkValue(PREF_PB_INVALID_JAVADOC_TAGS, ENABLED);
 			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF).setEnabled(enableInvalidTagsDetailsErrors);
 			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF).setEnabled(enableInvalidTagsDetailsErrors);
-			
+
 			setComboEnabled(PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, enableInvalidTagsErrors);
 			setComboEnabled(PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION, enableInvalidTagsErrors);
-			
+
 			boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
 			getCheckBox(PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING).setEnabled(enableMissingTagsErrors);
 			setComboEnabled(PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, enableMissingTagsErrors);
-			
+
 			boolean enableMissingCommentsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_COMMENTS, IGNORE);
 			getCheckBox(PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING).setEnabled(enableMissingCommentsErrors);
 			setComboEnabled(PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, enableMissingCommentsErrors);
 		}
 	}
-			
+
 	protected void enableConfigControls(boolean enable) {
 		if (enable) {
 			if (fBlockEnableState != null) {
@@ -282,8 +282,8 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			}
 		}
 	}
-	
-	
+
+
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		String title= PreferencesMessages.JavadocProblemsConfigurationBlock_needsbuild_title;
 		String message;
@@ -294,5 +294,5 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		}
 		return new String[] { title, message };
 	}
-	
+
 }

@@ -13,9 +13,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -24,6 +21,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * Workspace runnable to add unimplemented methods.
- * 
+ *
  * @since 3.1
  */
 public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
@@ -83,7 +83,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 
 	/**
 	 * Creates a new add unimplemented methods operation.
-	 * 
+	 *
 	 * @param astRoot the compilation unit AST node
 	 * @param type the type to add the methods to
 	 * @param methodsToImplement the method bindings to implement or <code>null</code> to implement all unimplemented methods
@@ -103,7 +103,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 		if (!(node instanceof AnonymousClassDeclaration || node instanceof AbstractTypeDeclaration)) {
 			throw new IllegalArgumentException("type has to map to a type declaration in the AST"); //$NON-NLS-1$
 		}
-		
+
 		fType= type;
 		fInsertPos= insertPos;
 		fASTRoot= astRoot;
@@ -111,18 +111,18 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 		fSave= save;
 		fApply= apply;
 		fImports= imports;
-		
+
 		fDoCreateComments= StubUtility.doAddComments(astRoot.getJavaElement().getJavaProject());
 	}
-	
+
 	public void setCreateComments(boolean createComments) {
 		fDoCreateComments= createComments;
 	}
-	
-	
+
+
 	/**
 	 * Returns the qualified names of the generated imports.
-	 * 
+	 *
 	 * @return the generated imports
 	 */
 	public final String[] getCreatedImports() {
@@ -134,7 +134,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 
 	/**
 	 * Returns the method binding keys for which a method has been generated.
-	 * 
+	 *
 	 * @return the method binding keys
 	 */
 	public final String[] getCreatedMethods() {
@@ -145,7 +145,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 
 	/**
 	 * Returns the scheduling rule for this operation.
-	 * 
+	 *
 	 * @return the scheduling rule
 	 */
 	public final ISchedulingRule getSchedulingRule() {
@@ -163,15 +163,15 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			monitor.setTaskName(CodeGenerationMessages.AddUnimplementedMethodsOperation_description);
 			fCreatedMethods.clear();
 			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getJavaElement();
-			
+
 			AST ast= fASTRoot.getAST();
-			
+
 			ASTRewrite astRewrite= ASTRewrite.create(ast);
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
-			
+
 			ITypeBinding currTypeBinding= fType;
 			ListRewrite memberRewriter= null;
-			
+
 			ASTNode node= fASTRoot.findDeclaringNode(currTypeBinding);
 			if (node instanceof AnonymousClassDeclaration) {
 				memberRewriter= astRewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
@@ -182,17 +182,17 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 				throw new IllegalArgumentException();
 				// not possible, we checked this in the constructor
 			}
-			
+
 			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 			settings.createComments= fDoCreateComments;
 
 			ASTNode insertion= getNodeToInsertBefore(memberRewriter);
-			
+
 			IMethodBinding[] methodsToImplement= fMethodsToImplement;
 			if (methodsToImplement == null) {
 				methodsToImplement= StubUtility2.getUnimplementedMethods(currTypeBinding);
 			}
-			
+
 			ImportRewriteContext context= null;
 			int insertionPosition= fInsertPos;
 			if (insertionPosition == -1 && fASTRoot.types().size() > 0) {
@@ -215,14 +215,14 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 				}
 			}
 			MultiTextEdit edit= new MultiTextEdit();
-			
+
 			TextEdit importEdits= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
 			fCreatedImports= importRewrite.getCreatedImports();
 			if (fImports) {
 				edit.addChild(importEdits);
 			}
 			edit.addChild(astRewrite.rewriteAST());
-			
+
 			if (fApply) {
 				JavaModelUtil.applyEdit(cu, edit, fSave, new SubProgressMonitor(monitor, 1));
 			}
@@ -230,7 +230,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			monitor.done();
 		}
 	}
-		
+
 	private ASTNode getNodeToInsertBefore(ListRewrite rewriter) {
 		if (fInsertPos != -1) {
 			List members= rewriter.getOriginalList();
@@ -243,5 +243,5 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 		}
 		return null;
 	}
-		
+
 }

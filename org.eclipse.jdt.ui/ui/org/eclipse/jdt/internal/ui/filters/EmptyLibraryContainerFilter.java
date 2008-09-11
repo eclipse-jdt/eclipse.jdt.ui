@@ -18,11 +18,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 /**
  * The library container filter is a filter used to determine whether
- * library containers are shown that are empty or have all children filtered out by other filters. 
+ * library containers are shown that are empty or have all children filtered out by other filters.
  * The filter is only applicable on a {@link ProblemTreeViewer}
  */
 public class EmptyLibraryContainerFilter extends ViewerFilter {
-	
+
 	/* (non-Javadoc)
 	 * Method declared on ViewerFilter.
 	 */

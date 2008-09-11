@@ -17,7 +17,7 @@ import org.eclipse.core.resources.IResource;
  * marker changes. Used to update error ticks.
  */
 public interface IProblemChangedListener {
-	
+
 	/**
 	 * Called when problems changed. This call is posted in an aynch exec, therefore passed
 	 * resources must not exist.
@@ -27,5 +27,5 @@ public interface IProblemChangedListener {
 	 * <code>false</code>, the change came from an annotation model modification.
 	 */
 	void problemsChanged(IResource[] changedResources, boolean isMarkerChange);
-	
+
 }

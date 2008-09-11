@@ -81,7 +81,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	private final ITypeBinding fTypeBinding;
 
 	private VariableDeclarationFragment fExistingFragment;
-	
+
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 
@@ -90,7 +90,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		if (typeBinding.isWildcardType()) {
 			typeBinding= ASTResolving.normalizeWildcardType(typeBinding, true, node.getAST());
 		}
-		
+
 		fTypeBinding= typeBinding;
 		if (variableKind == LOCAL) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description);
@@ -109,7 +109,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		fNodeToAssign= parameter;
 		fTypeBinding= typeBinding;
 		fExistingFragment= existingFragment;
-		
+
 		if (existingFragment == null) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description);
 		} else {
@@ -131,7 +131,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		AST ast= fNodeToAssign.getAST();
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
+
 		createImportRewrite((CompilationUnit) fNodeToAssign.getRoot());
 
 		String[] varNames= suggestLocalVariableNames(fTypeBinding, expression);
@@ -144,13 +144,13 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDeclFrag.setInitializer((Expression) rewrite.createCopyTarget(expression));
 
 		Type type= evaluateType(ast);
-		
+
 		if (ASTNodes.isControlStatementBody(fNodeToAssign.getLocationInParent())) {
 			Block block= ast.newBlock();
 			block.statements().add(rewrite.createMoveTarget(fNodeToAssign));
 			rewrite.replace(fNodeToAssign, block, null);
 		}
-		
+
 		if (needsSemicolon(expression)) {
 			VariableDeclarationStatement varStatement= ast.newVariableDeclarationStatement(newDeclFrag);
 			varStatement.setType(type);
@@ -168,7 +168,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 		return rewrite;
 	}
-	
+
 	private boolean needsSemicolon(Expression expression) {
 		if ((expression.getParent().getFlags() & ASTNode.RECOVERED) != 0) {
 			try {
@@ -195,7 +195,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		createImportRewrite((CompilationUnit) fNodeToAssign.getRoot());
-		
+
 		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(fNodeToAssign);
 		Block body;
 		if (bodyDecl instanceof MethodDeclaration) {
@@ -273,7 +273,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		if (fExistingFragment != null) {
 			return fExistingFragment;
 		}
-		
+
 		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
 		List decls= (List) newTypeDecl.getStructuralProperty(property);
 		AST ast= newTypeDecl.getAST();
@@ -291,16 +291,16 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		Type type= evaluateType(ast);
 		newDecl.setType(type);
 		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
-		
+
 		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, newDecl.modifiers(), false);
 
 		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
 		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);
-		
+
 		return newDeclFrag;
 	}
-	
-	
+
+
 	private Type evaluateType(AST ast) {
 		ITypeBinding[] proposals= ASTResolving.getRelaxingTypes(ast, fTypeBinding);
 		for (int i= 0; i < proposals.length; i++) {

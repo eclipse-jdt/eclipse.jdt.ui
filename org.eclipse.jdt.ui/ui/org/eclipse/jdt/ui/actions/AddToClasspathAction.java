@@ -47,14 +47,14 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
  * Action to add a JAR to the classpath of its parent project.
- * Action is applicable to selections containing archives (JAR or zip) 
- * 
+ * Action is applicable to selections containing archives (JAR or zip)
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class AddToClasspathAction extends SelectionDispatchAction {
@@ -63,16 +63,16 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	 * Creates a new <code>AddToClasspathAction</code>. The action requires that
 	 * the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public AddToClasspathAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.AddToClasspathAction_label); 
-		setToolTipText(ActionMessages.AddToClasspathAction_toolTip); 
+		setText(ActionMessages.AddToClasspathAction_label);
+		setToolTipText(ActionMessages.AddToClasspathAction_toolTip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_TO_CLASSPATH_ACTION);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
@@ -86,7 +86,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	private static boolean checkEnabled(IStructuredSelection selection) throws JavaModelException {
 		if (selection.isEmpty())
 			return false;
@@ -105,30 +105,30 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 		IResource resource= (IResource)element.getAdapter(IResource.class);
 		if (! (resource instanceof IFile) || ! ArchiveFileFilter.isArchivePath(resource.getFullPath(), true))
 			return null;
-		
+
 		IJavaProject project= JavaCore.create(resource.getProject());
 		if (project != null && project.exists() && (project.findPackageFragmentRoot(resource.getFullPath()) == null))
 			return (IFile) resource;
 		return null;
 	}
-			
+
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
 	public void run(IStructuredSelection selection) {
 		try {
-			final IFile[] files= getJARFiles(selection);	
-			
+			final IFile[] files= getJARFiles(selection);
+
 			IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) throws CoreException {
-					monitor.beginTask(ActionMessages.AddToClasspathAction_progressMessage, files.length); 
+					monitor.beginTask(ActionMessages.AddToClasspathAction_progressMessage, files.length);
 					for (int i= 0; i < files.length; i++) {
 						monitor.subTask(BasicElementLabels.getPathLabel(files[i].getFullPath(), false));
 						IJavaProject project= JavaCore.create(files[i].getProject());
 						addToClassPath(project, files[i].getFullPath(), new SubProgressMonitor(monitor, 1));
 					}
 				}
-				
+
 				private void addToClassPath(IJavaProject project, IPath jarPath, IProgressMonitor monitor) throws JavaModelException {
 					if (monitor.isCanceled())
 						throw new OperationCanceledException();
@@ -138,23 +138,23 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 					newEntries[entries.length]= JavaCore.newLibraryEntry(jarPath, null, null, false);
 					project.setRawClasspath(newEntries, monitor);
 				}
-			};	
-			
+			};
+
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(operation));
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), 
-				ActionMessages.AddToClasspathAction_error_title,  
-				ActionMessages.AddToClasspathAction_error_message); 
+			ExceptionHandler.handle(e, getShell(),
+				ActionMessages.AddToClasspathAction_error_title,
+				ActionMessages.AddToClasspathAction_error_message);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), 
-					ActionMessages.AddToClasspathAction_error_title,  
-					ActionMessages.AddToClasspathAction_error_message); 
+			ExceptionHandler.handle(e, getShell(),
+					ActionMessages.AddToClasspathAction_error_title,
+					ActionMessages.AddToClasspathAction_error_message);
 		} catch (InterruptedException e) {
 			// canceled
 		}
 
 	}
-	
+
 	private static IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {
 		ArrayList list= new ArrayList();
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {

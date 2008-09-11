@@ -16,9 +16,9 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
  * A manifest provider creates manifest files.
- * 
+ *
  * Clients may implement this interface.
- * 
+ *
  * @see java.util.jar.Manifest
  * @since 2.0
  */
@@ -26,18 +26,18 @@ public interface IManifestProvider {
 
 	/**
 	 * Creates a manifest as defined by the <code>JarPackage</code>.
-	 * 
+	 *
 	 * @param	jarPackage		the JAR package specification
 	 * @return  the created manifest
 	 * @throws	CoreException	if access to any resource described by the JAR package has failed
-	 */	
+	 */
 	Manifest create(JarPackageData jarPackage) throws CoreException;
 
 	/**
 	 * Creates a default manifest.
-	 * 
+	 *
 	 * @param manifestVersion	a string denoting the manifest version
 	 * @return the created manifest
-	 */	
+	 */
 	Manifest createDefault(String manifestVersion);
 }

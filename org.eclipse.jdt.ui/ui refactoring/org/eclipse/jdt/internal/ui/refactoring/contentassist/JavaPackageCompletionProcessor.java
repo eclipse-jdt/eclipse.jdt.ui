@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
@@ -42,7 +41,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 
 public class JavaPackageCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
-	
+
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private CompletionProposalComparator fComparator;
 	private ILabelProvider fLabelProvider;
@@ -56,10 +55,10 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	public JavaPackageCompletionProcessor() {
 	    this(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
 	}
-	
+
     /**
      * Creates a <code>JavaPackageCompletionProcessor</code>.
-     * The Processor uses the given <code>ILabelProvider</code> to show text and icons for the 
+     * The Processor uses the given <code>ILabelProvider</code> to show text and icons for the
      * possible completions.
      * @param labelProvider Used for the popups.
      */
@@ -135,7 +134,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 		Arrays.sort(proposals, fComparator);
 		return proposals;
 	}
-	
+
 	public void setPackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot) {
 		fPackageFragmentRoot= packageFragmentRoot;
 	}

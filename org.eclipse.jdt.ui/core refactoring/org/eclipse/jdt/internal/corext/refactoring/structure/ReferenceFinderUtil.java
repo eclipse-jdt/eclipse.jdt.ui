@@ -37,25 +37,25 @@ import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class ReferenceFinderUtil {
-	
+
 	private ReferenceFinderUtil(){
 		//no instances
 	}
 
 	//----- referenced types -
-	
+
 	public static IType[] getTypesReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchMatch[] results= getTypeReferencesIn(elements, null, pm);
 		Set referencedTypes= extractElements(results, IJavaElement.TYPE);
-		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);	
+		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);
 	}
-	
+
 	public static IType[] getTypesReferencedIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		SearchMatch[] results= getTypeReferencesIn(elements, owner, pm);
 		Set referencedTypes= extractElements(results, IJavaElement.TYPE);
-		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);	
+		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);
 	}
-	
+
 	private static SearchMatch[] getTypeReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List referencedTypes= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
@@ -65,22 +65,22 @@ public class ReferenceFinderUtil {
 		pm.done();
 		return (SearchMatch[]) referencedTypes.toArray(new SearchMatch[referencedTypes.size()]);
 	}
-	
+
 	private static List getTypeReferencesIn(IJavaElement element, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
 		SearchEngine engine= owner != null ? new SearchEngine(owner) : new SearchEngine();
 		engine.searchDeclarationsOfReferencedTypes(element, requestor, pm);
 		return requestor.getResults();
 	}
-	
+
 	//----- referenced fields ----
-	
+
 	public static IField[] getFieldsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchMatch[] results= getFieldReferencesIn(elements, null, pm);
 		Set referencedFields= extractElements(results, IJavaElement.FIELD);
 		return (IField[]) referencedFields.toArray(new IField[referencedFields.size()]);
 	}
-	
+
 	public static IField[] getFieldsReferencedIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		SearchMatch[] results= getFieldReferencesIn(elements, owner, pm);
 		Set referencedFields= extractElements(results, IJavaElement.FIELD);
@@ -96,28 +96,28 @@ public class ReferenceFinderUtil {
 		pm.done();
 		return (SearchMatch[]) referencedFields.toArray(new SearchMatch[referencedFields.size()]);
 	}
-	
+
 	private static List getFieldReferencesIn(IJavaElement element, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
 		SearchEngine engine= owner != null ? new SearchEngine(owner) : new SearchEngine();
 		engine.searchDeclarationsOfAccessedFields(element, requestor, pm);
 		return requestor.getResults();
 	}
-	
+
 	//----- referenced methods ----
-	
+
 	public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		SearchMatch[] results= getMethodReferencesIn(elements, null, pm);
 		Set referencedMethods= extractElements(results, IJavaElement.METHOD);
 		return (IMethod[]) referencedMethods.toArray(new IMethod[referencedMethods.size()]);
 	}
-	
+
 	public static IMethod[] getMethodsReferencedIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		SearchMatch[] results= getMethodReferencesIn(elements, owner, pm);
 		Set referencedMethods= extractElements(results, IJavaElement.METHOD);
 		return (IMethod[]) referencedMethods.toArray(new IMethod[referencedMethods.size()]);
 	}
-	
+
 	private static SearchMatch[] getMethodReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List referencedMethods= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
@@ -127,14 +127,14 @@ public class ReferenceFinderUtil {
 		pm.done();
 		return (SearchMatch[]) referencedMethods.toArray(new SearchMatch[referencedMethods.size()]);
 	}
-	
+
 	private static List getMethodReferencesIn(IJavaElement element, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
 		SearchEngine engine= owner != null ? new SearchEngine(owner) : new SearchEngine();
 		engine.searchDeclarationsOfSentMessages(element, requestor, pm);
 		return requestor.getResults();
 	}
-	
+
 	public static ITypeBinding[] getTypesReferencedInDeclarations(MethodDeclaration[] methods) {
 		Set typesUsed= new HashSet();
 		for (int i= 0; i < methods.length; i++) {
@@ -142,7 +142,7 @@ public class ReferenceFinderUtil {
 		}
 		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
 	}
-		
+
 	//set of ITypeBindings
 	public static Set getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) {
 		if (methodDeclaration == null)
@@ -155,13 +155,13 @@ public class ReferenceFinderUtil {
 			if (binding != null)
 				result.add(binding);
 		}
-				
+
 		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
 			binding = ((SingleVariableDeclaration)iter.next()).getType().resolveBinding();
 			if (binding != null)
-				result.add(binding); 
+				result.add(binding);
 		}
-			
+
 		for (Iterator iter= methodDeclaration.thrownExceptions().iterator(); iter.hasNext();) {
 			binding = ((Name)iter.next()).resolveTypeBinding();
 			if (binding != null)
@@ -169,8 +169,8 @@ public class ReferenceFinderUtil {
 		}
 		return result;
 	}
-		
-	/// private helpers 	
+
+	/// private helpers
 	private static Set extractElements(SearchMatch[] searchResults, int elementType) {
 		Set elements= new HashSet();
 		for (int i= 0; i < searchResults.length; i++) {
@@ -179,5 +179,5 @@ public class ReferenceFinderUtil {
 				elements.add(el);
 		}
 		return elements;
-	}	
+	}
 }

@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.StyledString;
@@ -62,14 +62,14 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 
 	/**
 	 * Updates the replacement string.
-	 * 
-	 * @param document the document  
+	 *
+	 * @param document the document
 	 * @param trigger the trigger
 	 * @param offset the offset
 	 * @param impRewrite the import rewrite
-	 * @return <code>true</code> if the string got updated 
-	 * @throws CoreException 
-	 * @throws BadLocationException 
+	 * @return <code>true</code> if the string got updated
+	 * @throws CoreException
+	 * @throws BadLocationException
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		// avoid adding imports when inside imports container

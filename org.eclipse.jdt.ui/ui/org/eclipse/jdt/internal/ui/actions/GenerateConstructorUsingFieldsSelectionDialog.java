@@ -115,7 +115,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		fGenConstructorSettings= dialogSettings.getSection(SETTINGS_SECTION);
 		if (fGenConstructorSettings == null) {
 			fGenConstructorSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-			fGenConstructorSettings.put(OMIT_SUPER, false); 
+			fGenConstructorSettings.put(OMIT_SUPER, false);
 		}
 
 		final boolean isEnum= type.isEnum();
@@ -126,7 +126,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 
 	Composite addSuperClassConstructorChoices(Composite composite) {
 		Label label= new Label(composite, SWT.NONE);
-		label.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_sort_constructor_choices_label); 
+		label.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_sort_constructor_choices_label);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
 
@@ -175,7 +175,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.GENERATE_CONSTRUCTOR_USING_FIELDS_SELECTION_DIALOG);
 	}
-	
+
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -253,14 +253,14 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	 */
 	protected Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.WRAP);
-		link.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_template_link_message); 
+		link.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_template_link_message);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 			}
 		});
-		link.setToolTipText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_template_link_tooltip); 
-		
+		link.setToolTipText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_template_link_tooltip);
+
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 		link.setLayoutData(gridData);
@@ -275,7 +275,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		omitSuperComposite.setLayout(layout);
 
 		fOmitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
-		fOmitSuperButton.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_omit_super); 
+		fOmitSuperButton.setText(ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_omit_super);
 		fOmitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		fOmitSuperButton.addSelectionListener(new SelectionListener() {
@@ -323,8 +323,8 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		int numButtons= 2; // up, down
 		fButtonControls= new Button[numButtons];
 		fButtonsEnabled= new boolean[numButtons];
-		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_up_button, false); 
-		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_down_button, false); 
+		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_up_button, false);
+		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.GenerateConstructorUsingFieldsSelectionDialog_down_button, false);
 		boolean defaultState= false;
 		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.UP_INDEX].setEnabled(defaultState);
 		fButtonControls[GenerateConstructorUsingFieldsSelectionDialog.DOWN_INDEX].setEnabled(defaultState);

@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -47,7 +47,7 @@ abstract class JarPackageActionDelegate implements IObjectActionDelegate {
 			return fShell;
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(org.eclipse.jface.action.IAction, org.eclipse.ui.IWorkbenchPart)
 	 */

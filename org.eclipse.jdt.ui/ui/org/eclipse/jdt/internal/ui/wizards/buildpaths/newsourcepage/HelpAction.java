@@ -22,15 +22,15 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  * Action to get help.
  */
 public class HelpAction extends Action {
-    
+
     public HelpAction() {
         super();
         setImageDescriptor(JavaPluginImages.DESC_OBJS_HELP);
-        setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_label); 
-        setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_tooltip); 
+        setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_label);
+        setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_tooltip);
     }
-    
+
     public void run() {
-        PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_link); 
+        PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Help_link);
     }
 }

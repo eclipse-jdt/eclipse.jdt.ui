@@ -29,7 +29,7 @@ import org.eclipse.jface.text.ITextStore;
 
 /**
  * A performance test for IDocument implementations.
- * 
+ *
  * @since 3.3
  */
 public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTestCase2 {
@@ -47,7 +47,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	protected static final Map LOCAL_FINGERPRINTS= new HashMap();
 	protected static final Map DEGRADATION_COMMENTS= new HashMap();
 
-	
+
 	static {
 		String faust;
 		try {
@@ -59,7 +59,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		FAUST1 = faust;
 		FAUST100 = faust.substring(0, 100).intern();
 		FAUST500 = faust.substring(0, 500).intern();
-		
+
 		// Set local fingerprints
 		LOCAL_FINGERPRINTS.put("measureDeleteInsert", "Document: delete and insert");
 		LOCAL_FINGERPRINTS.put("measureInsertAtStart", "Document: insert at beginning");
@@ -67,7 +67,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		LOCAL_FINGERPRINTS.put("measureRandomReplace", "Document: random replace");
 		LOCAL_FINGERPRINTS.put("measureRepeatedReplace", "Document: repeated replace");
 	}
-	
+
 
 	abstract protected IDocument createDocument();
 
@@ -80,7 +80,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	protected final Map getLocalFingerprints() {
 		return LOCAL_FINGERPRINTS;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getDegradations()
 	 */
@@ -92,12 +92,12 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		super.setUp();
 		fDocument = createDocument();
 	}
-	
+
 	protected void tearDown() throws Exception {
 		fDocument= null;
 		super.tearDown();
 	}
-	
+
 	/* modification */
 
 	public void measureSet(PerformanceMeter meter) {
@@ -126,7 +126,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 				fDocument.replace(offset, 0, ";");
 		meter.stop();
 	}
-	
+
 	public void measureTypingReplaceInSmallFile(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST500);
 		int offset = 12;
@@ -136,7 +136,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 				fDocument.replace(offset, 0, ";");
 		meter.stop();
 	}
-	
+
 	public void measureInsertAtStart(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST1);
 		meter.start();
@@ -193,7 +193,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	}
 
 	/* text store read access */
-	
+
 	public void measureGetChar(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST1);
 		int length = fDocument.getLength();
@@ -240,7 +240,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	}
 
 	/* line tracker read access */
-	
+
 	public void measureLineByOffset(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST1);
 		int chars= FAUST1.length();
@@ -250,7 +250,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 				fDocument.getLineOfOffset(offset);
 		meter.stop();
 	}
-	
+
 	public void measureLineInfoByOffset(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST1);
 		int chars= FAUST1.length();
@@ -270,7 +270,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 				fDocument.getLineOffset(line);
 		meter.stop();
 	}
-	
+
 	public void measureLineInfoByIndex(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST1);
 		int lines= fDocument.getNumberOfLines();
@@ -280,7 +280,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 				fDocument.getLineInformation(line);
 		meter.stop();
 	}
-	
+
 	public void measureLineLengthByIndex(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST1);
 		int lines= fDocument.getNumberOfLines();
@@ -290,7 +290,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 				fDocument.getLineLength(line);
 		meter.stop();
 	}
-	
+
 	public void measureLineDelimiterByIndex(PerformanceMeter meter) throws BadLocationException {
 		fDocument.set(FAUST1);
 		int lines= fDocument.getNumberOfLines();
@@ -300,7 +300,7 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 				fDocument.getLineDelimiter(line);
 		meter.stop();
 	}
-	
+
 	public void measureGetNumberOfLines(PerformanceMeter meter) {
 		fDocument.set(FAUST1);
 		int lines= fDocument.getNumberOfLines();

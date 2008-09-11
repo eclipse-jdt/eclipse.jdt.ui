@@ -17,21 +17,21 @@ class IfFlowInfo extends FlowInfo {
 			return;
 		mergeAccessModeSequential(info, context);
 	}
-	
+
 	public void merge(FlowInfo thenPart, FlowInfo elsePart, FlowContext context) {
 		if (thenPart == null && elsePart == null)
 			return;
-		
+
 		GenericConditionalFlowInfo cond= new GenericConditionalFlowInfo();
 		if (thenPart != null)
 			cond.merge(thenPart, context);
-			
+
 		if (elsePart != null)
 			cond.merge(elsePart, context);
-			
+
 		if (thenPart == null || elsePart == null)
 			cond.mergeEmptyCondition(context);
-			
+
 		mergeSequential(cond, context);
 	}
 }

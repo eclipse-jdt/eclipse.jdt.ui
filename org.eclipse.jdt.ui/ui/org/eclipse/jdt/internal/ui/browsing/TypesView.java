@@ -58,8 +58,8 @@ public class TypesView extends JavaBrowsingPart {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.T_CATEGORY,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */

@@ -18,12 +18,12 @@ import org.eclipse.jdt.core.Signature;
 
 /**
  * Utilities for Signature operations.
- * 
+ *
  * @see Signature
  * @since 3.1
  */
 public final class SignatureUtil {
-	
+
 	/**
 	 * The signature of the null type. This type does not really exist in the
 	 * type system. It represents the bound of type variables that have no lower
@@ -48,11 +48,11 @@ public final class SignatureUtil {
 	private SignatureUtil() {
 		// do not instantiate
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if <code>signature</code> is the
 	 * signature of the <code>java.lang.Object</code> type.
-	 * 
+	 *
 	 * @param signature the signature
 	 * @return <code>true</code> if <code>signature</code> is the
 	 *         signature of the <code>java.lang.Object</code> type,
@@ -61,13 +61,13 @@ public final class SignatureUtil {
 	public static boolean isJavaLangObject(String signature) {
 		return OBJECT_SIGNATURE.equals(signature);
 	}
-	
+
 	/**
 	 * Returns the upper bound of a type signature. Returns the signature of <code>java.lang.Object</code> if
 	 * <code>signature</code> is a lower bound (<code>? super T</code>); returns
 	 * the signature of the type <code>T</code> of an upper bound (<code>? extends T</code>)
 	 * or <code>signature</code> itself if it is not a bound signature.
-	 * 
+	 *
 	 * @param signature the signature
 	 * @return the upper bound signature of <code>signature</code>
 	 */
@@ -80,21 +80,21 @@ public final class SignatureUtil {
 	 * <code>signature</code> is a lower bound (<code>? super T</code>); returns
 	 * the signature of the type <code>T</code> of an upper bound (<code>? extends T</code>)
 	 * or <code>signature</code> itself if it is not a bound signature.
-	 * 
+	 *
 	 * @param signature the signature
 	 * @return the upper bound signature of <code>signature</code>
 	 */
 	public static char[] getUpperBound(char[] signature) {
 		if (signature.length < 1)
 			return signature;
-		
+
 		if (signature[0] == Signature.C_STAR)
 			return OBJECT_SIGNATURE_ARRAY;
-		
+
 		int superIndex= indexOf(signature, Signature.C_SUPER);
 		if (superIndex == 0)
 			return OBJECT_SIGNATURE_ARRAY;
-		
+
 		if (superIndex != -1) {
 			char afterSuper= signature[superIndex + 1];
 			if (afterSuper == Signature.C_STAR) {
@@ -104,7 +104,7 @@ public final class SignatureUtil {
 				System.arraycopy(signature, superIndex + 2, type, superIndex + 1, signature.length - superIndex - 2);
 				return getUpperBound(type);
 			}
-				
+
 			if (afterSuper == Signature.C_EXTENDS) {
 				int typeEnd= typeEnd(signature, superIndex + 1);
 				char[] type= new char[signature.length - (typeEnd - superIndex - 1)];
@@ -113,15 +113,15 @@ public final class SignatureUtil {
 				System.arraycopy(signature, typeEnd, type, superIndex + 1, signature.length - typeEnd);
 				return getUpperBound(type);
 			}
-				
+
 		}
-		
+
 		if (signature[0] == Signature.C_EXTENDS) {
 			char[] type= new char[signature.length - 1];
 			System.arraycopy(signature, 1, type, 0, signature.length - 1);
 			return type;
 		}
-		
+
 		return signature;
 	}
 
@@ -130,7 +130,7 @@ public final class SignatureUtil {
 	 * signature if <code>signature</code> is a wildcard or upper bound (<code>? extends T</code>);
 	 * returns the signature of the type <code>T</code> of a lower bound (<code>? super T</code>)
 	 * or <code>signature</code> itself if it is not a bound signature.
-	 * 
+	 *
 	 * @param signature the signature
 	 * @return the lower bound signature of <code>signature</code>
 	 */
@@ -143,39 +143,39 @@ public final class SignatureUtil {
 	 * signature if <code>signature</code> is a wildcard or upper bound (<code>? extends T</code>);
 	 * returns the signature of the type <code>T</code> of a lower bound (<code>? super T</code>)
 	 * or <code>signature</code> itself if it is not a bound signature.
-	 * 
+	 *
 	 * @param signature the signature
 	 * @return the lower bound signature of <code>signature</code>
 	 */
 	public static char[] getLowerBound(char[] signature) {
 		if (signature.length < 1)
 			return signature;
-		
+
 		if (signature.length == 1 && signature[0] == Signature.C_STAR)
 			return signature;
-		
+
 		int superIndex= indexOf(signature, Signature.C_EXTENDS);
 		if (superIndex == 0)
 			return NULL_TYPE_SIGNATURE_ARRAY;
-		
+
 		if (superIndex != -1) {
 			char afterSuper= signature[superIndex + 1];
 			if (afterSuper == Signature.C_STAR || afterSuper == Signature.C_EXTENDS)
 				// impossible captured type
 				return NULL_TYPE_SIGNATURE_ARRAY;
 		}
-		
+
 		char[][] typeArguments= Signature.getTypeArguments(signature);
 		for (int i= 0; i < typeArguments.length; i++)
 			if (Arrays.equals(typeArguments[i], NULL_TYPE_SIGNATURE_ARRAY))
 				return NULL_TYPE_SIGNATURE_ARRAY;
-		
+
 		if (signature[0] == Signature.C_SUPER) {
 			char[] type= new char[signature.length - 1];
 			System.arraycopy(signature, 1, type, 0, signature.length - 1);
 			return type;
 		}
-		
+
 		return signature;
 	}
 
@@ -190,7 +190,7 @@ public final class SignatureUtil {
 	/**
 	 * Returns the fully qualified type name of the given signature, with any
 	 * type parameters and arrays erased.
-	 * 
+	 *
 	 * @param signature the signature
 	 * @return the fully qualified type name of the signature
 	 * @throws IllegalArgumentException if the signature is syntactically incorrect
@@ -200,11 +200,11 @@ public final class SignatureUtil {
 		signature= Signature.getElementType(signature);
 		return Signature.toString(signature);
 	}
-	
+
 	/**
 	 * Returns the qualified signature corresponding to
 	 * <code>signature</code>.
-	 * 
+	 *
 	 * @param signature the signature to qualify
 	 * @param context the type inside which an unqualified type will be
 	 *        resolved to find the qualifier, or <code>null</code> if no
@@ -214,7 +214,7 @@ public final class SignatureUtil {
 	public static String qualifySignature(final String signature, final IType context) {
 		if (context == null)
 			return signature;
-		
+
 		String qualifier= Signature.getSignatureQualifier(signature);
 		if (qualifier.length() > 0)
 			return signature;
@@ -223,9 +223,9 @@ public final class SignatureUtil {
 		String erasure= Signature.getTypeErasure(elementType);
 		String simpleName= Signature.getSignatureSimpleName(erasure);
 		String genericSimpleName= Signature.getSignatureSimpleName(elementType);
-		
+
 		int dim= Signature.getArrayCount(signature);
-		
+
 		try {
 			String[][] strings= context.resolveType(simpleName);
 			if (strings != null && strings.length > 0)
@@ -233,17 +233,17 @@ public final class SignatureUtil {
 		} catch (JavaModelException e) {
 			// ignore - not found
 		}
-		
+
 		if (qualifier.length() == 0)
 			return signature;
-		
+
 		String qualifiedType= Signature.toQualifiedName(new String[] {qualifier, genericSimpleName});
 		String qualifiedSignature= Signature.createTypeSignature(qualifiedType, true);
 		String newSignature= Signature.createArraySignature(qualifiedSignature, dim);
-		
+
 		return newSignature;
 	}
-	
+
 	/**
 	 * Takes a method signature
 	 * <code>[&lt; typeVariableName : formalTypeDecl &gt;] ( paramTypeSig1* ) retTypeSig</code>
@@ -255,21 +255,21 @@ public final class SignatureUtil {
 	 * TODO this is a temporary workaround for
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83600
 	 * </p>
-	 * 
+	 *
 	 * @param signature the method signature to convert
 	 * @return the signature with no bounded types
 	 */
 	public static char[] unboundedSignature(char[] signature) {
 		if (signature == null || signature.length < 2)
 			return signature;
-		
+
 		final boolean BUG_83600= true;
 		// XXX the signatures from CompletionRequestor contain a superfluous '+'
 		// before type parameters to parameter types
 		if (BUG_83600) {
 			signature= fix83600(signature);
 		}
-		
+
 		StringBuffer res= new StringBuffer("("); //$NON-NLS-1$
 		char[][] parameters= Signature.getParameterTypes(signature);
 		for (int i= 0; i < parameters.length; i++) {
@@ -285,14 +285,14 @@ public final class SignatureUtil {
 	 * TODO this is a temporary workaround for
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83600 and
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=85293
-	 * 
+	 *
 	 * @param signature the method signature to convert
 	 * @return the fixed signature
 	 */
 	public static char[] fix83600(char[] signature) {
 		if (signature == null || signature.length < 2)
 			return signature;
-		
+
 		return Signature.removeCapture(signature);
 	}
 

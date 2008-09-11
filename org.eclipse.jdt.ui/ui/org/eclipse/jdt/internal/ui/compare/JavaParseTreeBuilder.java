@@ -82,12 +82,12 @@ class JavaParseTreeBuilder extends ASTVisitor {
     public void endVisit(EnumDeclaration node) {
         pop();
     }
-    
+
 	public boolean visit(AnnotationTypeDeclaration node) {
 		push(JavaNode.ANNOTATION, node.getName().toString(), node.getStartPosition(), node.getLength());
         return true;
 	}
-	
+
 	public void endVisit(AnnotationTypeDeclaration node) {
 		pop();
 	}
@@ -96,7 +96,7 @@ class JavaParseTreeBuilder extends ASTVisitor {
         push(JavaNode.METHOD, getSignature(node), node.getStartPosition(), node.getLength());
         return true;
 	}
-	
+
 	public void endVisit(AnnotationTypeMemberDeclaration node) {
 		pop();
 	}
@@ -154,7 +154,7 @@ class JavaParseTreeBuilder extends ASTVisitor {
     public void endVisit(EnumConstantDeclaration node) {
         pop();
     }
-    
+
     // private stuff
 
     /**

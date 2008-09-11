@@ -16,9 +16,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.ReplaceEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -32,8 +29,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.ReplaceEdit;
+
 import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,14 +50,14 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
 class TextMatchUpdater {
-	
-	private static final String TEXT_EDIT_LABEL= RefactoringCoreMessages.TextMatchUpdater_update; 
-	
+
+	private static final String TEXT_EDIT_LABEL= RefactoringCoreMessages.TextMatchUpdater_update;
+
 	private static final GroupCategorySet TEXTUAL_MATCHES= new GroupCategorySet(
 		new GroupCategory("org.eclipse.jdt.internal.corext.textualMatches", //$NON-NLS-1$
-			RefactoringCoreMessages.TextMatchUpdater_textualMatches_name, 
+			RefactoringCoreMessages.TextMatchUpdater_textualMatches_name,
 			RefactoringCoreMessages.TextMatchUpdater_textualMatches_description));
-	
+
 	private final IJavaSearchScope fScope;
 	private final TextChangeManager fManager;
 	private final SearchResultGroup[] fReferences;
@@ -66,7 +66,7 @@ class TextMatchUpdater {
 	private final RefactoringScanner fScanner;
 	private final String fNewName;
 	private final int fCurrentNameLength;
-	
+
 	private TextMatchUpdater(TextChangeManager manager, IJavaSearchScope scope, String currentName, String currentQualifier, String newName, SearchResultGroup[] references, boolean onlyQualified){
 		Assert.isNotNull(manager);
 		Assert.isNotNull(scope);
@@ -89,12 +89,12 @@ class TextMatchUpdater {
 		new TextMatchUpdater(manager, scope, processor.getCurrentElementName(), processor.getCurrentElementQualifier(), processor.getNewElementName(), references, false).updateTextMatches(pm);
 	}
 
-	private void updateTextMatches(IProgressMonitor pm) throws JavaModelException {	
+	private void updateTextMatches(IProgressMonitor pm) throws JavaModelException {
 		try{
 			IProject[] projectsInScope= getProjectsInScope();
-			
+
 			pm.beginTask("", projectsInScope.length); //$NON-NLS-1$
-			
+
 			for (int i =0 ; i < projectsInScope.length; i++){
 				if (pm.isCanceled())
 					throw new OperationCanceledException();
@@ -102,27 +102,27 @@ class TextMatchUpdater {
 			}
 		} finally{
 			pm.done();
-		}		
+		}
 	}
 
 	private IProject[] getProjectsInScope() {
 		IPath[] enclosingProjects= fScope.enclosingProjectsAndJars();
 		Set enclosingProjectSet= new HashSet();
 		enclosingProjectSet.addAll(Arrays.asList(enclosingProjects));
-		
+
 		ArrayList projectsInScope= new ArrayList();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i =0 ; i < projects.length; i++){
 			if (enclosingProjectSet.contains(projects[i].getFullPath()))
 				projectsInScope.add(projects[i]);
 		}
-		
+
 		return (IProject[]) projectsInScope.toArray(new IProject[projectsInScope.size()]);
 	}
 
 	private void addTextMatches(IResource resource, IProgressMonitor pm) throws JavaModelException{
 		try{
-			String task= RefactoringCoreMessages.TextMatchUpdater_searching + resource.getFullPath(); 
+			String task= RefactoringCoreMessages.TextMatchUpdater_searching + resource.getFullPath();
 			if (resource instanceof IFile){
 				IJavaElement element= JavaCore.create(resource);
 				// don't start pm task (flickering label updates; finally {pm.done()} is enough)
@@ -133,27 +133,27 @@ class TextMatchUpdater {
 				if (! fScope.encloses(element))
 					return;
 				addCuTextMatches((ICompilationUnit) element);
-				
+
 			} else if (resource instanceof IContainer){
 				IResource[] members= ((IContainer) resource).members();
-				pm.beginTask(task, members.length); 
+				pm.beginTask(task, members.length);
 				pm.subTask(task);
 				for (int i = 0; i < members.length; i++) {
 					if (pm.isCanceled())
 						throw new OperationCanceledException();
-					
+
 					addTextMatches(members[i], new SubProgressMonitor(pm, 1));
-				}	
+				}
 			}
 		} catch (JavaModelException e){
-			throw e;	
+			throw e;
 		} catch (CoreException e){
-			throw new JavaModelException(e);	
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
-		}	
+		}
 	}
-	
+
 	private void addCuTextMatches(ICompilationUnit cu) throws JavaModelException{
 		fScanner.scan(cu);
 		Set matches= fScanner.getMatches(); //Set of TextMatch
@@ -162,9 +162,9 @@ class TextMatchUpdater {
 
 		removeReferences(cu, matches);
 		if (matches.size() != 0)
-			addTextUpdates(cu, matches); 
+			addTextUpdates(cu, matches);
 	}
-	
+
 	private void removeReferences(ICompilationUnit cu, Set matches) {
 		for (int i= 0; i < fReferences.length; i++) {
 			SearchResultGroup group= fReferences[i];

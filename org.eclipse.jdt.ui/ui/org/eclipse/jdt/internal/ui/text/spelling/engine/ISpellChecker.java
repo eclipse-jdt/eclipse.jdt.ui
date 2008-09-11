@@ -55,7 +55,7 @@ public interface ISpellChecker {
 	/**
 	 * Checks the spelling with the spell check iterator. Implementations must
 	 * be thread safe as this may be called inside a reconciler thread.
-	 * 
+	 *
 	 * @param listener the spell event listener
 	 * @param iterator the iterator to use for spell checking
 	 */
@@ -99,7 +99,7 @@ public interface ISpellChecker {
 	 *                   The dictionary to remove
 	 */
 	void removeDictionary(ISpellDictionary dictionary);
-	
+
 	/**
 	 * Returns the current locale of the spell check engine.
 	 *

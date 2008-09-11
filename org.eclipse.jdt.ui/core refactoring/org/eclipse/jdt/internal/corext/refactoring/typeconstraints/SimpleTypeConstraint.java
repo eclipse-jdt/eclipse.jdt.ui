@@ -13,11 +13,11 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 import org.eclipse.core.runtime.Assert;
 
 public final class SimpleTypeConstraint implements ITypeConstraint {
-	
+
 	private final ConstraintVariable fLeft;
 	private final ConstraintVariable fRight;
 	private final ConstraintOperator fOperator;
-	
+
 	/* package */ SimpleTypeConstraint(ConstraintVariable left, ConstraintVariable right, ConstraintOperator operator) {
 		Assert.isNotNull(left);
 		Assert.isNotNull(right);
@@ -26,7 +26,7 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 		fRight= right;
 		fOperator= operator;
 	}
-	
+
 	public  ConstraintVariable getLeft() {
 		return fLeft;
 	}
@@ -59,7 +59,7 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 	public  boolean isSimpleTypeConstraint() {
 		return true;
 	}
-	
+
 	public boolean isSubtypeConstraint(){
 		return fOperator.isSubtypeOperator();
 	}
@@ -74,5 +74,5 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 
 	public boolean isDefinesConstraint(){
 		return fOperator.isDefinesOperator();
-	}	
+	}
 }

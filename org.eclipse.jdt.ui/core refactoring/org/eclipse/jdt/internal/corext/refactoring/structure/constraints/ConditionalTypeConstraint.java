@@ -31,7 +31,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 
 	/**
 	 * Creates a new conditional type constraint.
-	 * 
+	 *
 	 * @param expressionVariable the expression type constraint variable
 	 * @param thenVariable the then type constraint variable
 	 * @param elseVariable the else type constraint variable
@@ -57,7 +57,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 
 	/**
 	 * Returns the expression type constraint variable.
-	 * 
+	 *
 	 * @return the expression type constraint variable
 	 */
 	public final ConstraintVariable2 getExpression() {
@@ -89,6 +89,6 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#toString()
 	 */
 	public final String toString() {
-		return fThenVariable.toString() + " <?= " + fElseVariable.toString(); //$NON-NLS-1$ 
+		return fThenVariable.toString() + " <?= " + fElseVariable.toString(); //$NON-NLS-1$
 	}
 }

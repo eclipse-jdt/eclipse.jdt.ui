@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 
 public class RefactoringScanner {
-	
+
 	private static int NO_MATCH= 0;
 	private static int MATCH_QUALIFIED= 1;
 	private static int MATCH_UNQUALIFIED= 2;
@@ -53,18 +53,18 @@ public class RefactoringScanner {
 
 	private final String fName;
 	private final String fQualifier;
-	
+
 	private IScanner fScanner;
 	private Set fMatches; //Set<TextMatch>
 
-	
+
 	public RefactoringScanner(String name, String qualifier) {
 		Assert.isNotNull(name);
 		Assert.isNotNull(qualifier);
 		fName= name;
 		fQualifier= qualifier;
 	}
-	
+
 	public void scan(ICompilationUnit cu)	throws JavaModelException {
 		char[] chars= cu.getBuffer().getCharacters();
 		fMatches= new HashSet();
@@ -76,7 +76,7 @@ public class RefactoringScanner {
 //			fNoFlyZone= importContainer.getSourceRange();
 //		else
 //			fNoFlyZone= null;
-		
+
 		doScan();
 		fScanner= null;
 	}
@@ -106,7 +106,7 @@ public class RefactoringScanner {
 			}
 		} catch (InvalidInputException e){
 			//ignore
-		}	
+		}
 	}
 
 	private static boolean isWholeWord(String value, int from, int to){
@@ -124,7 +124,7 @@ public class RefactoringScanner {
 		}
 		return true;
 	}
-	
+
 	private void parseCurrentToken() {
 		// only works for references without whitespace
 		String value = new String(fScanner.getRawTokenSource());
@@ -146,12 +146,12 @@ public class RefactoringScanner {
 		if (qualifierAfter < 0)
 			// there is absolutely nothing before the name itself in the string
 			return MATCH_UNQUALIFIED;
-		
+
 		char charBeforeName= value.charAt(qualifierAfter);
 		if (! isQualifierSeparator(charBeforeName))
 			// the char before the name is not a # or . - should not get here anyway
 			return MATCH_UNQUALIFIED; // NO_MATCH ?
-		
+
 		boolean canFinish= charBeforeName == '#';
 		// work through the qualifier from back to front
 		for (int i= 0; i < fQualifier.length() ; i++) {
@@ -159,13 +159,13 @@ public class RefactoringScanner {
 			if (qualifierCharPos < 0)
 				// the position does not exist, return OK if last read char was a non-separator
 				return canFinish ? MATCH_UNQUALIFIED : NO_MATCH;
-			
+
 			char qualifierChar= value.charAt(qualifierCharPos);
 			char goalQualifierChar= fQualifier.charAt(fQualifier.length() - 1 - i);
 			if (qualifierChar != goalQualifierChar)
 				// the chars do not match. return OK if last read char was a non-separator and the current one a non-qualifier
 				return (canFinish && !isQualifierPart(qualifierChar)) ? MATCH_UNQUALIFIED : NO_MATCH;
-			
+
 			canFinish= ! isQualifierSeparator(qualifierChar);
 		}
 		int beforeQualifierPos= qualifierAfter - fQualifier.length() - 1;
@@ -188,7 +188,7 @@ public class RefactoringScanner {
 				}
 			}
 			return MATCH_QUALIFIED;
-			
+
 		}
 		return MATCH_QUALIFIED;
 	}
@@ -202,7 +202,7 @@ public class RefactoringScanner {
 	}
 
 	private void addMatch(int matchStart, int matchCode) {
-		fMatches.add(new TextMatch(matchStart, matchCode == MATCH_QUALIFIED));		
+		fMatches.add(new TextMatch(matchStart, matchCode == MATCH_QUALIFIED));
 	}
 
 	/**

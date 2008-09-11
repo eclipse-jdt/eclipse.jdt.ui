@@ -78,19 +78,19 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_JAVA_PROJECT_PROCESSOR;
 	}
-	
+
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fProject);
 	}
-	
+
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameJavaProjectRefactoring_rename;
 	}
-	
+
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fProject);
 	}
-	
+
 	public Object[] getElements() {
 		return new Object[] {fProject};
 	}
@@ -99,13 +99,13 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		IPath newPath= fProject.getPath().removeLastSegments(1).append(getNewElementName());
 		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().findMember(newPath));
 	}
-	
+
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fProject, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
-	
+
 	protected IFile[] getChangedFiles() throws CoreException {
 		IFile projectFile= fProject.getProject().getFile(".project"); //$NON-NLS-1$
 		if (projectFile != null && projectFile.exists()) {
@@ -113,13 +113,13 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		}
 		return new IFile[0];
 	}
-	
+
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_ALL;
 	}
-	
+
 	//---- IReferenceUpdating --------------------------------------
-		
+
 	public boolean canEnableUpdateReferences() {
 		return true;
 	}
@@ -131,49 +131,49 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 	public boolean getUpdateReferences() {
 		return fUpdateReferences;
 	}
-		
+
 	//---- IRenameProcessor ----------------------------------------------
-	
+
 	public String getCurrentElementName() {
 		return fProject.getElementName();
 	}
-	
+
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return new RefactoringStatus();
 	}
-	
+
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= RefactoringStatus.create(ResourcesPlugin.getWorkspace().validateName(newName, IResource.PROJECT));
 		if (result.hasFatalError())
 			return result;
-		
+
 		if (projectNameAlreadyExists(newName))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectRefactoring_already_exists); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectRefactoring_already_exists);
 		if (projectFolderAlreadyExists(newName))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectProcessor_folder_already_exists); 
-		
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectProcessor_folder_already_exists);
+
 		return new RefactoringStatus();
 	}
-	
+
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			if (isReadOnly()){
-				String message= Messages.format(RefactoringCoreMessages.RenameJavaProjectRefactoring_read_only, 
+				String message= Messages.format(RefactoringCoreMessages.RenameJavaProjectRefactoring_read_only,
 						BasicElementLabels.getJavaElementName(fProject.getElementName()));
 				return RefactoringStatus.createErrorStatus(message);
 			}
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
-		}	
+		}
 	}
-	
+
 	private boolean isReadOnly() {
 		return Resources.isReadOnly(fProject.getResource());
 	}
-	
+
 	private boolean projectNameAlreadyExists(String newName){
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(newName).exists();
 	}

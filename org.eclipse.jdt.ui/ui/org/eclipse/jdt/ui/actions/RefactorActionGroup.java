@@ -14,15 +14,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.widgets.Menu;
+
 import org.eclipse.core.commands.operations.IUndoContext;
 
 import org.eclipse.core.runtime.PerformanceStats;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.events.MenuAdapter;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.widgets.Menu;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -66,22 +66,22 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 /**
  * Action group that adds refactor actions (for example 'Rename', 'Move')
  * to a context menu and the global menu bar.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class RefactorActionGroup extends ActionGroup {
-	
+
 	private static final String PERF_REFACTOR_ACTION_GROUP= "org.eclipse.jdt.ui/perf/explorer/RefactorActionGroup"; //$NON-NLS-1$
 
 	/**
 	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.refactoring.menu</code>).
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public static final String MENU_ID= "org.eclipse.jdt.ui.refactoring.menu"; //$NON-NLS-1$
@@ -89,7 +89,7 @@ public class RefactorActionGroup extends ActionGroup {
 	/**
 	 * Pop-up menu: id of the reorg group of the refactor sub menu (value
 	 * <code>reorgGroup</code>).
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public static final String GROUP_REORG= "reorgGroup"; //$NON-NLS-1$
@@ -97,7 +97,7 @@ public class RefactorActionGroup extends ActionGroup {
 	/**
 	 * Pop-up menu: id of the type group of the refactor sub menu (value
 	 * <code>typeGroup</code>).
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public static final String GROUP_TYPE= "typeGroup"; //$NON-NLS-1$
@@ -105,15 +105,15 @@ public class RefactorActionGroup extends ActionGroup {
 	/**
 	 * Pop-up menu: id of the coding group of the refactor sub menu (value
 	 * <code>codingGroup</code>).
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public static final String GROUP_CODING= "codingGroup"; //$NON-NLS-1$
-	
+
 	/**
 	 * Pop-up menu: id of the coding group 2 of the refactor sub menu (value
 	 * <code>codingGroup2</code>).
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static final String GROUP_CODING2= "codingGroup2"; //$NON-NLS-1$
@@ -121,27 +121,27 @@ public class RefactorActionGroup extends ActionGroup {
 	/**
 	 * Pop-up menu: id of the reorg group 2 of the refactor sub menu (value
 	 * <code>reorgGroup2</code>).
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public static final String GROUP_REORG2= "reorgGroup2"; //$NON-NLS-1$
-	
+
 	/**
 	 * Pop-up menu: id of the type group 2 of the refactor sub menu (value
 	 * <code>typeGroup2</code>).
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public static final String GROUP_TYPE2= "typeGroup2"; //$NON-NLS-1$
-	
+
 	/**
 	 * Pop-up menu: id of the type group 2 of the refactor sub menu (value
 	 * <code>typeGroup3</code>).
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public static final String GROUP_TYPE3= "typeGroup3"; //$NON-NLS-1$
-	
+
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
@@ -152,7 +152,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fModifyParametersAction;
 	private SelectionDispatchAction fConvertAnonymousToNestedAction;
 	private SelectionDispatchAction fConvertNestedToTopAction;
-	
+
 	private SelectionDispatchAction fPullUpAction;
 	private SelectionDispatchAction fPushDownAction;
 	private SelectionDispatchAction fExtractInterfaceAction;
@@ -160,7 +160,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fChangeTypeAction;
 	private SelectionDispatchAction fUseSupertypeAction;
 	private SelectionDispatchAction fInferTypeArgumentsAction;
-	
+
 	private SelectionDispatchAction fInlineAction;
 //	private SelectionDispatchAction fReplaceInvocationsAction;
 	private SelectionDispatchAction fIntroduceIndirectionAction;
@@ -173,13 +173,13 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fIntroduceFactoryAction;
 	private SelectionDispatchAction fConvertLocalToFieldAction;
 	private SelectionDispatchAction fSelfEncapsulateField;
-	
+
 	private UndoRedoActionGroup fUndoRedoActionGroup;
-	
+
 	private final List fActions= new ArrayList();
-	
+
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
-	
+
 	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
 		public RefactorQuickAccessAction(JavaEditor editor) {
 			super(editor, QUICK_MENU_ID);
@@ -188,7 +188,7 @@ public class RefactorActionGroup extends ActionGroup {
 			fillQuickMenu(menu);
 		}
 	}
-	
+
 	private JDTQuickMenuAction fQuickAccessAction;
 	private IHandlerActivation fQuickAccessHandlerActivation;
 	private IHandlerService fHandlerService;
@@ -202,42 +202,42 @@ public class RefactorActionGroup extends ActionGroup {
 	private Action fNoActionAvailable= new NoActionAvailable();
 
 	private final ISelectionProvider fSelectionProvider;
-		
+
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
 	 * that the selection provided by the part's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 */
 	public RefactorActionGroup(IViewPart part) {
 		this(part.getSite(), null);
-		
+
 		IUndoContext workspaceContext= (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
 		fUndoRedoActionGroup= new UndoRedoActionGroup(part.getViewSite(), workspaceContext, true);
-		
+
 		installQuickAccessAction();
 	}
-	
+
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The action requires
 	 * that the selection provided by the page's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param page the page that owns this action group
 	 */
 	public RefactorActionGroup(Page page) {
 		this(page.getSite(), null);
-		
+
 		installQuickAccessAction();
 	}
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
 	 * @param groupName the group name to add the actions to
 	 * @param binary <code>true</code> if the action group is used in a binary environment, <code>false</code> otherwise
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public RefactorActionGroup(JavaEditor editor, String groupName, boolean binary) {
@@ -253,24 +253,24 @@ public class RefactorActionGroup extends ActionGroup {
 
 		ISelectionProvider provider= editor.getSelectionProvider();
 		ISelection selection= provider.getSelection();
-		
+
 		if (!fBinary) {
 			fRenameAction= new RenameAction(editor);
 			initAction(fRenameAction, selection, IJavaEditorActionDefinitionIds.RENAME_ELEMENT);
 			editor.setAction("RenameElement", fRenameAction); //$NON-NLS-1$
-			
+
 			fMoveAction= new MoveAction(editor);
 			initAction(fMoveAction, selection, IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
 			editor.setAction("MoveElement", fMoveAction); //$NON-NLS-1$
-			
+
 			fModifyParametersAction= new ModifyParametersAction(editor);
 			initAction(fModifyParametersAction, selection, IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
 			editor.setAction("ModifyParameters", fModifyParametersAction); //$NON-NLS-1$
-	
+
 			fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
 			initUpdatingAction(fConvertAnonymousToNestedAction, provider, null, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
 			editor.setAction("ConvertAnonymousToNested", fConvertAnonymousToNestedAction); //$NON-NLS-1$
-	
+
 			fConvertNestedToTopAction= new ConvertNestedToTopAction(editor);
 			initAction(fConvertNestedToTopAction, selection, IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
 			editor.setAction("MoveInnerToTop", fConvertNestedToTopAction); //$NON-NLS-1$
@@ -278,27 +278,27 @@ public class RefactorActionGroup extends ActionGroup {
 			fPullUpAction= new PullUpAction(editor);
 			initAction(fPullUpAction, selection, IJavaEditorActionDefinitionIds.PULL_UP);
 			editor.setAction("PullUp", fPullUpAction); //$NON-NLS-1$
-	
+
 			fPushDownAction= new PushDownAction(editor);
 			initAction(fPushDownAction, selection, IJavaEditorActionDefinitionIds.PUSH_DOWN);
 			editor.setAction("PushDown", fPushDownAction); //$NON-NLS-1$
-	
+
 			fExtractSupertypeAction= new ExtractSuperClassAction(editor);
 			initAction(fExtractSupertypeAction, selection, ExtractSuperClassAction.EXTRACT_SUPERTYPE);
 			editor.setAction("ExtractSupertype", fExtractSupertypeAction); //$NON-NLS-1$
-	
+
 			fExtractInterfaceAction= new ExtractInterfaceAction(editor);
 			initAction(fExtractInterfaceAction, selection, IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 			editor.setAction("ExtractInterface", fExtractInterfaceAction); //$NON-NLS-1$
-			
+
 			fExtractClassAction= new ExtractClassAction(editor);
 			initAction(fExtractClassAction, selection, IJavaEditorActionDefinitionIds.EXTRACT_CLASS);
 			editor.setAction("ExtractClass", fExtractClassAction); //$NON-NLS-1$
-	
+
 			fChangeTypeAction= new ChangeTypeAction(editor);
 			initUpdatingAction(fChangeTypeAction, provider, null, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
 			editor.setAction("ChangeType", fChangeTypeAction); //$NON-NLS-1$
-	
+
 			fInferTypeArgumentsAction= new InferTypeArgumentsAction(editor);
 			initAction(fInferTypeArgumentsAction, selection, IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
 			editor.setAction("InferTypeArguments", fInferTypeArgumentsAction); //$NON-NLS-1$
@@ -306,31 +306,31 @@ public class RefactorActionGroup extends ActionGroup {
 			fExtractMethodAction= new ExtractMethodAction(editor);
 			initUpdatingAction(fExtractMethodAction, provider, null, selection, IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
 			editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
-	
+
 			fExtractTempAction= new ExtractTempAction(editor);
 			initUpdatingAction(fExtractTempAction, provider, null, selection, IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
 			editor.setAction("ExtractLocalVariable", fExtractTempAction); //$NON-NLS-1$
-	
+
 			fExtractConstantAction= new ExtractConstantAction(editor);
 			initUpdatingAction(fExtractConstantAction, provider, null, selection, IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
 			editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
-	
+
 			fIntroduceParameterAction= new IntroduceParameterAction(editor);
 			initUpdatingAction(fIntroduceParameterAction, provider, null, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
 			editor.setAction("IntroduceParameter", fIntroduceParameterAction); //$NON-NLS-1$
-	
+
 			fIntroduceFactoryAction= new IntroduceFactoryAction(editor);
 			initUpdatingAction(fIntroduceFactoryAction, provider, null, selection, IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
 			editor.setAction("IntroduceFactory", fIntroduceFactoryAction); //$NON-NLS-1$
-	
+
 			fConvertLocalToFieldAction= new ConvertLocalToFieldAction(editor);
 			initUpdatingAction(fConvertLocalToFieldAction, provider, null, selection, IJavaEditorActionDefinitionIds.PROMOTE_LOCAL_VARIABLE);
 			editor.setAction("PromoteTemp", fConvertLocalToFieldAction); //$NON-NLS-1$
-	
+
 			fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
 			initAction(fSelfEncapsulateField, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 			editor.setAction("SelfEncapsulateField", fSelfEncapsulateField); //$NON-NLS-1$
-			
+
 			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(editor);
 			initAction(fIntroduceParameterObjectAction, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT);
 			editor.setAction("IntroduceParameterObjectAction", fIntroduceParameterObjectAction); //$NON-NLS-1$
@@ -346,9 +346,9 @@ public class RefactorActionGroup extends ActionGroup {
 		fInlineAction= new InlineAction(editor);
 		initAction(fInlineAction, selection, IJavaEditorActionDefinitionIds.INLINE);
 		editor.setAction("Inline", fInlineAction); //$NON-NLS-1$
-		
+
 		installQuickAccessAction();
-		
+
 		stats.endRun();
 	}
 
@@ -356,11 +356,11 @@ public class RefactorActionGroup extends ActionGroup {
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
 	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param selectionProvider the selection provider used instead of the
 	 *  page selection provider.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public RefactorActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
@@ -371,51 +371,51 @@ public class RefactorActionGroup extends ActionGroup {
 		fSite= site;
 		fSelectionProvider= selectionProvider == null ? fSite.getSelectionProvider() : selectionProvider;
 		ISelection selection= fSelectionProvider.getSelection();
-		
+
 		if (!fBinary) {
-			
+
 			fMoveAction= new MoveAction(fSite);
 			initUpdatingAction(fMoveAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
-	
+
 			fRenameAction= new RenameAction(fSite);
 			initUpdatingAction(fRenameAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.RENAME_ELEMENT);
-	
+
 			fModifyParametersAction= new ModifyParametersAction(fSite);
 			initUpdatingAction(fModifyParametersAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
-	
+
 			fPullUpAction= new PullUpAction(fSite);
 			initUpdatingAction(fPullUpAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.PULL_UP);
-	
+
 			fPushDownAction= new PushDownAction(fSite);
 			initUpdatingAction(fPushDownAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.PUSH_DOWN);
-		
+
 			fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
 			initUpdatingAction(fSelfEncapsulateField, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
-	
+
 			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(fSite);
 			initUpdatingAction(fIntroduceParameterObjectAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT);
-			
+
 			fExtractSupertypeAction= new ExtractSuperClassAction(fSite);
 			initUpdatingAction(fExtractSupertypeAction, fSelectionProvider, selectionProvider, selection, ExtractSuperClassAction.EXTRACT_SUPERTYPE);
-	
+
 			fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
 			initUpdatingAction(fExtractInterfaceAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
-	
+
 			fExtractClassAction= new ExtractClassAction(fSite);
 			initUpdatingAction(fExtractClassAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.EXTRACT_CLASS);
-			
+
 			fChangeTypeAction= new ChangeTypeAction(fSite);
 			initUpdatingAction(fChangeTypeAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
-	
+
 			fConvertNestedToTopAction= new ConvertNestedToTopAction(fSite);
 			initUpdatingAction(fConvertNestedToTopAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
-	
+
 			fInferTypeArgumentsAction= new InferTypeArgumentsAction(fSite);
 			initUpdatingAction(fInferTypeArgumentsAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
-	
+
 			fIntroduceFactoryAction= new IntroduceFactoryAction(fSite);
 			initUpdatingAction(fIntroduceFactoryAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
-	
+
 			fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(fSite);
 			initUpdatingAction(fConvertAnonymousToNestedAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
 		}
@@ -424,17 +424,17 @@ public class RefactorActionGroup extends ActionGroup {
 
 		fUseSupertypeAction= new UseSupertypeAction(fSite);
 		initUpdatingAction(fUseSupertypeAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
-		
+
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(fSite);
 		initUpdatingAction(fIntroduceIndirectionAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
-		
+
 		stats.endRun();
-		
+
 		// FIXME, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=213335
 		//installQuickAccessAction();
-		
+
 	}
-	
+
 	private void installQuickAccessAction() {
 		fHandlerService= (IHandlerService)fSite.getService(IHandlerService.class);
 		if (fHandlerService != null) {
@@ -442,15 +442,15 @@ public class RefactorActionGroup extends ActionGroup {
 			fQuickAccessHandlerActivation= fHandlerService.activateHandler(fQuickAccessAction.getActionDefinitionId(), new ActionHandler(fQuickAccessAction));
 		}
 	}
-	
+
 	private void initAction(SelectionDispatchAction action, ISelection selection, String actionDefinitionId){
 		initUpdatingAction(action, null, null, selection, actionDefinitionId);
 	}
-	
+
 	/**
 	 * Sets actionDefinitionId, updates enablement, adds to fActions,
 	 * and adds selection changed listener if provider is not <code>null</code>.
-	 * 
+	 *
 	 * @param action
 	 * @param provider can be <code>null</code>
 	 * @param specialProvider a sepectil selection provider or <code>null</code>
@@ -466,7 +466,7 @@ public class RefactorActionGroup extends ActionGroup {
 			action.setSpecialSelectionProvider(specialProvider);
 		fActions.add(action);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -502,17 +502,17 @@ public class RefactorActionGroup extends ActionGroup {
 			fUndoRedoActionGroup.fillActionBars(actionBars);
 		}
 	}
-	
+
 	/**
 	 * Retargets the File actions with the corresponding refactoring actions.
-	 * 
+	 *
 	 * @param actionBars the action bar to register the move and rename action with
 	 */
 	public void retargetFileMenuActions(IActionBars actionBars) {
 		actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), fRenameAction);
 		actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), fMoveAction);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -520,7 +520,7 @@ public class RefactorActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 		addRefactorSubmenu(menu);
 	}
-	
+
 	/*
 	 * @see ActionGroup#dispose()
 	 */
@@ -559,12 +559,12 @@ public class RefactorActionGroup extends ActionGroup {
 		}
 		super.dispose();
 	}
-	
+
 	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
 		if (action != null)
 			provider.removeSelectionChangedListener(action);
 	}
-	
+
 	private void addRefactorSubmenu(IMenuManager menu) {
 		String menuText= ActionMessages.RefactorMenu_label;
 		if (fQuickAccessAction != null) {
@@ -591,7 +591,7 @@ public class RefactorActionGroup extends ActionGroup {
 				menu.appendToGroup(fGroupName, refactorSubmenu);
 		}
 	}
-	
+
 	private int fillRefactorMenu(IMenuManager refactorSubmenu) {
 		int added= 0;
 		refactorSubmenu.add(new Separator(GROUP_REORG));
@@ -613,24 +613,24 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
 		added+= addAction(refactorSubmenu, fPullUpAction);
 		added+= addAction(refactorSubmenu, fPushDownAction);
-		
+
 		refactorSubmenu.add(new Separator(GROUP_TYPE2));
 		added+= addAction(refactorSubmenu, fExtractClassAction);
 		added+= addAction(refactorSubmenu, fIntroduceParameterObjectAction);
-		
+
 		refactorSubmenu.add(new Separator(GROUP_CODING2));
 		added+= addAction(refactorSubmenu, fIntroduceIndirectionAction);
 		added+= addAction(refactorSubmenu, fIntroduceFactoryAction);
 		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
 		added+= addAction(refactorSubmenu, fSelfEncapsulateField);
 //		added+= addAction(refactorSubmenu, fReplaceInvocationsAction);
-		
+
 		refactorSubmenu.add(new Separator(GROUP_TYPE3));
 		added+= addAction(refactorSubmenu, fChangeTypeAction);
 		added+= addAction(refactorSubmenu, fInferTypeArgumentsAction);
 		return added;
 	}
-	
+
 	private int addAction(IMenuManager menu, IAction action) {
 		if (action != null && action.isEnabled()) {
 			menu.add(action);
@@ -638,7 +638,7 @@ public class RefactorActionGroup extends ActionGroup {
 		}
 		return 0;
 	}
-	
+
 	private void refactorMenuShown(IMenuManager refactorSubmenu) {
 		// we know that we have an MenuManager since we created it in
 		// addRefactorSubmenu.
@@ -650,7 +650,7 @@ public class RefactorActionGroup extends ActionGroup {
 		});
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		JavaTextSelection javaSelection= new JavaTextSelection(getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
-		
+
 		for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 			SelectionDispatchAction action= (SelectionDispatchAction)iter.next();
 			action.update(javaSelection);
@@ -659,7 +659,7 @@ public class RefactorActionGroup extends ActionGroup {
 		if (fillRefactorMenu(refactorSubmenu) == 0)
 			refactorSubmenu.add(fNoActionAvailable);
 	}
-	
+
 	private void refactorMenuHidden() {
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
@@ -667,20 +667,20 @@ public class RefactorActionGroup extends ActionGroup {
 			action.update(textSelection);
 		}
 	}
-	
+
 	private ITypeRoot getEditorInput() {
 		return JavaUI.getEditorInputTypeRoot(fEditor.getEditorInput());
 	}
-	
+
 	private IDocument getDocument() {
 		return JavaUI.getDocumentProvider().getDocument(fEditor.getEditorInput());
 	}
-	
+
 	private void fillQuickMenu(IMenuManager menu) {
 		if (fEditor != null) {
 			if (fEditor.isBreadcrumbActive())
 				return;
-			
+
 			ITypeRoot element= getEditorInput();
 			if (element == null || !ActionUtil.isOnBuildPath(element)) {
 				menu.add(fNoActionAvailable);
@@ -688,7 +688,7 @@ public class RefactorActionGroup extends ActionGroup {
 			}
 			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 			JavaTextSelection javaSelection= new JavaTextSelection(element, getDocument(), textSelection.getOffset(), textSelection.getLength());
-			
+
 			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 				((SelectionDispatchAction)iter.next()).update(javaSelection);
 			}
@@ -696,7 +696,7 @@ public class RefactorActionGroup extends ActionGroup {
 			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 				((SelectionDispatchAction)iter.next()).update(textSelection);
 			}
-			
+
 		} else {
 			ISelection selection= fSelectionProvider.getSelection();
 			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {

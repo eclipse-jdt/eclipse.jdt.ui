@@ -38,7 +38,7 @@ public class SelectionUtil {
 	/**
 	 * Returns the selected element if the selection consists of a single
 	 * element only.
-	 * 
+	 *
 	 * @param s the selection
 	 * @return the selected first element or null
 	 */
@@ -61,12 +61,12 @@ public class SelectionUtil {
 	 * <code>ISetSelectionTarget</code>, either directly or as an adapter. If
 	 * so, tells the part to select and reveal the specified resources.
 	 * </p>
-	 * 
+	 *
 	 * @param resources the resources to be selected and revealed
 	 * @param window the workbench window to select and reveal the resource
-	 * 
+	 *
 	 * @see ISetSelectionTarget
-	 * 
+	 *
 	 * @see org.eclipse.ui.wizards.newresource.BasicNewResourceWizard#selectAndReveal(IResource,
 	 *      IWorkbenchWindow)
 	 */

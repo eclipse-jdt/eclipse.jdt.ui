@@ -55,16 +55,16 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 	public IncludeToBuildpathAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
-	
+
 	public IncludeToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
     }
-	
+
 	private IncludeToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.INCLUDE);
-		
+
 		fContext= context;
-		
+
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_INCLUDE_ON_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Unexclude_tooltip);
@@ -77,22 +77,22 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
-		
+
 		if (getSelectedElements().size() != 1)
 			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Unexclude;
-		
+
 		IResource resource= (IResource) getSelectedElements().get(0);
         String name= ClasspathModifier.escapeSpecialChars(BasicElementLabels.getResourceName(resource));
-		
+
         if (resource instanceof IContainer) {
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFolder, name);
         } else if (resource instanceof IFile) {
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFile, name);
         }
-        
+
         return null;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -126,7 +126,7 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 2 * elements.size()); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 2 * elements.size());
 
 			List entries= ClasspathModifier.getExistingEntries(project);
 			for (int i= 0; i < elements.size(); i++) {
@@ -139,11 +139,11 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 			}
 
 			ClasspathModifier.commitClassPath(entries, project, new SubProgressMonitor(monitor, 4));
-			
+
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
         	informListeners(delta);
-			
+
 			List resultElements= ClasspathModifier.getCorrespondingElements(elements, project);
 			return resultElements;
 		} finally {

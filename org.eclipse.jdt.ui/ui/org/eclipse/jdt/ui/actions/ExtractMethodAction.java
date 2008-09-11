@@ -31,24 +31,24 @@ import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
  * Extracts the code selected inside a compilation unit editor into a new method.
  * Necessary arguments, exceptions and returns values are computed and an
  * appropriate method signature is generated.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
- */ 
+ */
 public class ExtractMethodAction extends SelectionDispatchAction {
 
 	private final JavaEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public ExtractMethodAction(JavaEditor editor) {
@@ -61,7 +61,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(selection.getLength() == 0 ? false : fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
@@ -69,16 +69,16 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection the Java text selection (internal type)
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		setEnabled(RefactoringAvailabilityTester.isExtractMethodAvailable(selection));
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;

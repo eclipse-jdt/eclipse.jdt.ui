@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class SelectionConverter {
 
 	private static final IJavaElement[] EMPTY_RESULT= new IJavaElement[0];
-	
+
 	private SelectionConverter() {
 		// no instance
 	}
@@ -67,7 +67,7 @@ public class SelectionConverter {
 	 * </ul>
 	 * @param part the part
 	 * @return the selection
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public static IStructuredSelection getStructuredSelection(IWorkbenchPart part) throws JavaModelException {
 		if (part instanceof JavaEditor)
@@ -81,7 +81,7 @@ public class SelectionConverter {
 		return StructuredSelection.EMPTY;
 	}
 
-	
+
 	/**
 	 * Converts the given structured selection into an array of Java elements.
 	 * An empty array is returned if one of the elements stored in the structured
@@ -108,14 +108,14 @@ public class SelectionConverter {
 		if (editor == null)
 			return false;
 		return getInput(editor) != null;
-		
+
 	}
-		
+
 	public static IJavaElement[] codeResolveOrInputForked(JavaEditor editor) throws InvocationTargetException, InterruptedException {
 		ITypeRoot input= getInput(editor);
 		if (input == null)
 			return EMPTY_RESULT;
-		
+
 		ITextSelection selection= (ITextSelection)editor.getSelectionProvider().getSelection();
 		IJavaElement[] result= performForkedCodeResolve(input, selection);
 		if (result.length == 0) {
@@ -123,18 +123,18 @@ public class SelectionConverter {
 		}
 		return result;
 	}
-				
+
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {
 		return codeResolve(editor, true);
 	}
-		
+
 	/**
 	 * Perform a code resolve at the current selection of an editor
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the resolved elements
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 * @since 3.2
 	 */
 	public static IJavaElement[] codeResolve(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
@@ -143,15 +143,15 @@ public class SelectionConverter {
 			return codeResolve(input, (ITextSelection) editor.getSelectionProvider().getSelection());
 		return EMPTY_RESULT;
 	}
-	
+
 	/**
 	 * Perform a code resolve in a separate thread.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the resolved elements
-	 * @throws InterruptedException 
-	 * @throws InvocationTargetException 
+	 * @throws InterruptedException
+	 * @throws InvocationTargetException
 	 * @since 3.2
 	 */
 	public static IJavaElement[] codeResolveForked(JavaEditor editor, boolean primaryOnly) throws InvocationTargetException, InterruptedException {
@@ -160,18 +160,18 @@ public class SelectionConverter {
 			return performForkedCodeResolve(input, (ITextSelection) editor.getSelectionProvider().getSelection());
 		return EMPTY_RESULT;
 	}
-			
+
 	public static IJavaElement getElementAtOffset(JavaEditor editor) throws JavaModelException {
 		return getElementAtOffset(editor, true);
 	}
-	
+
 	/**
 	 * Returns the element surrounding the selection of the given editor.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the element surrounding the current selection
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 * @since 3.2
 	 */
 	private static IJavaElement getElementAtOffset(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
@@ -180,7 +180,7 @@ public class SelectionConverter {
 			return getElementAtOffset(input, (ITextSelection) editor.getSelectionProvider().getSelection());
 		return null;
 	}
-	
+
 	public static IType getTypeAtOffset(JavaEditor editor) throws JavaModelException {
 		IJavaElement element= SelectionConverter.getElementAtOffset(editor);
 		IType type= (IType)element.getAncestor(IJavaElement.TYPE);
@@ -191,14 +191,14 @@ public class SelectionConverter {
 		}
 		return type;
 	}
-	
+
 	public static ITypeRoot getInput(JavaEditor editor) {
 		return getInput(editor, true);
 	}
-	
+
 	/**
 	 * Returns the input element of the given editor
-	 * 
+	 *
 	 * @param editor the Java editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the type root which is the editor input
@@ -209,11 +209,11 @@ public class SelectionConverter {
 			return null;
 		return EditorUtility.getEditorInputJavaElement(editor, primaryOnly);
 	}
-	
+
 	public static ITypeRoot getInputAsTypeRoot(JavaEditor editor) {
 		return SelectionConverter.getInput(editor);
 	}
-	
+
 	public static ICompilationUnit getInputAsCompilationUnit(JavaEditor editor) {
 		Object editorInput= SelectionConverter.getInput(editor);
 		if (editorInput instanceof ICompilationUnit)
@@ -256,7 +256,7 @@ public class SelectionConverter {
 			}
 			return EMPTY_RESULT;
 	}
-	
+
 	public static IJavaElement getElementAtOffset(ITypeRoot input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
 			JavaModelUtil.reconcile((ICompilationUnit) input);
@@ -266,7 +266,7 @@ public class SelectionConverter {
 			return input;
 		return ref;
 	}
-	
+
 //	public static IJavaElement[] resolveSelectedElements(IJavaElement input, ITextSelection selection) throws JavaModelException {
 //		IJavaElement enclosing= resolveEnclosingElement(input, selection);
 //		if (enclosing == null)
@@ -277,14 +277,14 @@ public class SelectionConverter {
 //		if (selection.getOffset() == sr.getOffset() && selection.getLength() == sr.getLength())
 //			return new IJavaElement[] {enclosing};
 //	}
-	
+
 	public static IJavaElement resolveEnclosingElement(JavaEditor editor, ITextSelection selection) throws JavaModelException {
 		ITypeRoot input= getInput(editor);
 		if (input != null)
 			return resolveEnclosingElement(input, selection);
 		return null;
 	}
-	
+
 	public static IJavaElement resolveEnclosingElement(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		IJavaElement atOffset= null;
 		if (input instanceof ICompilationUnit) {
@@ -319,7 +319,7 @@ public class SelectionConverter {
 
 	/**
 	 * Shows a dialog for resolving an ambiguous Java element. Utility method that can be called by subclasses.
-	 * 
+	 *
 	 * @param elements the elements to select from
 	 * @param shell the parent shell
 	 * @param title the title of the selection dialog
@@ -332,17 +332,17 @@ public class SelectionConverter {
 			return null;
 		if (nResults == 1)
 			return elements[0];
-		
+
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT;
-						
+
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
 		dialog.setTitle(title);
 		dialog.setMessage(message);
 		dialog.setElements(elements);
-		
+
 		if (dialog.open() == Window.OK) {
 			return (IJavaElement) dialog.getFirstResult();
-		}		
+		}
 		return null;
 	}
 }

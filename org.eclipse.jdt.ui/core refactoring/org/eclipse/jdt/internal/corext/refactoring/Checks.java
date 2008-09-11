@@ -76,13 +76,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * This class defines a set of reusable static checks methods.
  */
 public class Checks {
-	
+
 	/*
 	 * no instances
 	 */
 	private Checks(){
 	}
-	
+
 	/* Constants returned by checkExpressionIsRValue */
 	public static final int IS_RVALUE= 0;
 	public static final int NOT_RVALUE_MISC= 1;
@@ -105,7 +105,7 @@ public class Checks {
 				Messages.format(RefactoringCoreMessages.Checks_constructor_name,
 				new Object[] {JavaElementUtil.createMethodSignature(method), JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) } ));
 	}
-		
+
 	/**
 	 * Checks if the given name is a valid Java field name.
 	 *
@@ -141,7 +141,7 @@ public class Checks {
 	public static RefactoringStatus checkIdentifier(String name, IJavaElement context) {
 		return checkName(name, JavaConventionsUtil.validateIdentifier(name, context));
 	}
-	
+
 	/**
 	 * Checks if the given name is a valid Java method name.
 	 *
@@ -157,7 +157,7 @@ public class Checks {
 		else
 			return status;
 	}
-		
+
 	/**
 	 * Checks if the given name is a valid Java type name.
 	 *
@@ -173,7 +173,7 @@ public class Checks {
 		else
 			return checkName(name, JavaConventionsUtil.validateJavaTypeName(name, context));
 	}
-	
+
 	/**
 	 * Checks if the given name is a valid Java package name.
 	 *
@@ -185,7 +185,7 @@ public class Checks {
 	public static RefactoringStatus checkPackageName(String name, IJavaElement context) {
 		return checkName(name, JavaConventionsUtil.validatePackageName(name, context));
 	}
-	
+
 	/**
 	 * Checks if the given name is a valid compilation unit name.
 	 *
@@ -197,7 +197,7 @@ public class Checks {
 	public static RefactoringStatus checkCompilationUnitName(String name, IJavaElement context) {
 		return checkName(name, JavaConventionsUtil.validateCompilationUnitName(name, context));
 	}
-	
+
 	/**
 	 * Returns ok status if the new name is ok. This is when no other file with that name exists.
 	 * @param cu
@@ -212,7 +212,7 @@ public class Checks {
 		else
 			return new RefactoringStatus();
 	}
-		
+
 	public static boolean startsWithUpperCase(String s) {
 		if (s == null)
 			return false;
@@ -222,7 +222,7 @@ public class Checks {
 			//workaround for JDK bug (see 26529)
 			return s.charAt(0) == Character.toUpperCase(s.charAt(0));
 	}
-		
+
 	public static boolean startsWithLowerCase(String s){
 		if (s == null)
 			return false;
@@ -236,7 +236,7 @@ public class Checks {
 	public static boolean resourceExists(IPath resourcePath){
 		return ResourcesPlugin.getWorkspace().getRoot().findMember(resourcePath) != null;
 	}
-	
+
 	public static boolean isTopLevel(IType type){
 		return type.getDeclaringType() == null;
 	}
@@ -248,7 +248,7 @@ public class Checks {
 	public static boolean isTopLevelType(IMember member){
 		return  member.getElementType() == IJavaElement.TYPE && isTopLevel((IType) member);
 	}
-	
+
 	public static boolean isInsideLocalType(IType type) throws JavaModelException {
 		while (type != null) {
 			if (type.isLocal())
@@ -266,21 +266,21 @@ public class Checks {
 	public static RefactoringStatus checkForMainAndNativeMethods(ICompilationUnit cu) throws JavaModelException {
 		return checkForMainAndNativeMethods(cu.getTypes());
 	}
-	
+
 	public static RefactoringStatus checkForMainAndNativeMethods(IType[] types) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < types.length; i++)
 			result.merge(checkForMainAndNativeMethods(types[i]));
 		return result;
 	}
-	
+
 	public static RefactoringStatus checkForMainAndNativeMethods(IType type) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkForMainAndNativeMethods(type.getMethods()));
 		result.merge(checkForMainAndNativeMethods(type.getTypes()));
 		return result;
 	}
-	
+
 	private static RefactoringStatus checkForMainAndNativeMethods(IMethod[] methods) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < methods.length; i++) {
@@ -299,9 +299,9 @@ public class Checks {
 		}
 		return result;
 	}
-	
+
 	//---- New method name checking -------------------------------------------------------------
-	
+
 	/**
 	 * Checks if the new method is already used in the given type.
 	 * @param type
@@ -320,7 +320,7 @@ public class Checks {
 				JavaStatusContext.create(method));
 		return result;
 	}
-	
+
 	/**
 	 * Checks if the new method somehow conflicts with an already existing method in
 	 * the hierarchy. The following checks are done:
@@ -362,7 +362,7 @@ public class Checks {
 		}
 		return result;
 	}
-	
+
 	//---- Selection checks --------------------------------------------------------------------
 
 	public static boolean isExtractableExpression(ASTNode[] selectedNodes, ASTNode coveringNode) {
@@ -412,7 +412,7 @@ public class Checks {
 	/**
 	 * Returns a fatal error in case the name is empty. In all other cases, an
 	 * error based on the given status is returned.
-	 * 
+	 *
 	 * @param name a name
 	 * @param status a status
 	 * @return RefactoringStatus based on the given status or the name, if
@@ -425,7 +425,7 @@ public class Checks {
 
 		if (status.isOK())
 			return result;
-		
+
 		switch (status.getSeverity()){
 			case IStatus.ERROR:
 				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
@@ -437,7 +437,7 @@ public class Checks {
 				return new RefactoringStatus();
 		}
 	}
-	
+
 	/**
 	 * Finds a method in a type
 	 * This searches for a method with the same name and signature. Parameter types are only
@@ -452,7 +452,7 @@ public class Checks {
 	public static IMethod findMethod(String name, int parameterCount, boolean isConstructor, IType type) throws JavaModelException {
 		return findMethod(name, parameterCount, isConstructor, type.getMethods());
 	}
-	
+
 	/**
 	 * Finds a method in a type.
 	 * Searches for a method with the same name and the same parameter count.
@@ -478,7 +478,7 @@ public class Checks {
 	public static IMethod findMethod(IMethod method, IMethod[] methods) throws JavaModelException {
 		return findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), methods);
 	}
-	
+
 	public static IMethod findMethod(String name, int parameters, boolean isConstructor, IMethod[] methods) throws JavaModelException {
 		for (int i= methods.length-1; i >= 0; i--) {
 			IMethod curr= methods[i];
@@ -524,7 +524,7 @@ public class Checks {
 		}
 		return null;
 	}
-				
+
 	/*
 	 * Compare two parameter signatures
 	 */
@@ -543,9 +543,9 @@ public class Checks {
 		}
 		return false;
 	}
-	
+
 	//---------------------
-	
+
 	public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException{
 		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(member.getCompilationUnit().getResource());
 		if (cu == null)
@@ -554,7 +554,7 @@ public class Checks {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_cu_not_parsed);
 		return new RefactoringStatus();
 	}
-	
+
 	/**
 	 * From SearchResultGroup[] passed as the parameter
 	 * this method removes all those that correspond to a non-parsable ICompilationUnit
@@ -581,25 +581,25 @@ public class Checks {
 			}
 			result.add(grouped[i]);
 		}
-		
+
 		if ((!wasEmpty) && result.isEmpty())
 			status.addFatalError(RefactoringCoreMessages.Checks_all_excluded);
-		
+
 		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
 	}
-	
+
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < grouped.length; i++)
 			checkCompileErrorsInAffectedFile(result, grouped[i].getResource());
 		return result;
 	}
-	
+
 	public static void checkCompileErrorsInAffectedFile(RefactoringStatus result, IResource resource) throws JavaModelException {
 		if (hasCompileErrors(resource))
 			result.addWarning(Messages.format(RefactoringCoreMessages.Checks_cu_has_compile_errors, BasicElementLabels.getPathLabel(resource.getFullPath(), false)));
 	}
-	
+
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] references, IResource declaring) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < references.length; i++){
@@ -612,7 +612,7 @@ public class Checks {
 			checkCompileErrorsInAffectedFile(result, declaring);
 		return result;
 	}
-	
+
 	private static boolean hasCompileErrors(IResource resource) throws JavaModelException {
 		try {
 			IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
@@ -627,30 +627,30 @@ public class Checks {
 			throw new JavaModelException(e);
 		}
 	}
-	
+
 	//------
 	public static boolean isReadOnly(Object element) throws JavaModelException{
 		if (element instanceof IResource)
 			return isReadOnly((IResource)element);
-		
+
 		if (element instanceof IJavaElement) {
 			if ((element instanceof IPackageFragmentRoot) && isClasspathDelete((IPackageFragmentRoot)element))
 				return false;
 			return isReadOnly(((IJavaElement)element).getResource());
 		}
-		
+
 		Assert.isTrue(false, "not expected to get here");	 //$NON-NLS-1$
 		return false;
 	}
-	
+
 	public static boolean isReadOnly(IResource res) throws JavaModelException {
 		ResourceAttributes attributes= res.getResourceAttributes();
 		if (attributes != null && attributes.isReadOnly())
 			return true;
-		
+
 		if (! (res instanceof IContainer))
 			return false;
-		
+
 		IContainer container= (IContainer)res;
 		try {
 			IResource[] children= container.members();
@@ -665,7 +665,7 @@ public class Checks {
 			throw new JavaModelException(e);
 		}
 	}
-	
+
 	public static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) {
 		IResource res= pkgRoot.getResource();
 		if (res == null)
@@ -673,13 +673,13 @@ public class Checks {
 		IProject definingProject= res.getProject();
 		if (res.getParent() != null && pkgRoot.isArchive() && ! res.getParent().equals(definingProject))
 			return true;
-		
+
 		IProject occurringProject= pkgRoot.getJavaProject().getProject();
 		return !definingProject.equals(occurringProject);
 	}
-	
+
 	//-------- validateEdit checks ----
-	
+
 	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify, Object context) {
 		RefactoringStatus result= new RefactoringStatus();
 		IStatus status= Resources.checkInSync(filesToModify);
@@ -694,17 +694,17 @@ public class Checks {
 		}
 		return result;
 	}
-	
+
 	public static void addModifiedFilesToChecker(IFile[] filesToModify, CheckConditionsContext context) {
 		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
-		
+
 		for (int i= 0; i < filesToModify.length; i++) {
 			deltaFactory.change(filesToModify[i]);
 		}
 	}
-	
-	
+
+
 	public static RefactoringStatus validateEdit(ICompilationUnit unit, Object context) {
 		IResource resource= unit.getPrimary().getResource();
 		RefactoringStatus result= new RefactoringStatus();
@@ -750,11 +750,11 @@ public class Checks {
 			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_binary, getJavaElementName(javaElement)));
 		return result;
 	}
-	
+
 	private static String getJavaElementName(IJavaElement element) {
 		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
 	}
-	
+
 	public static boolean isAvailable(IJavaElement javaElement) throws JavaModelException {
 		if (javaElement == null)
 			return false;
@@ -834,7 +834,7 @@ public class Checks {
 			pm.done();
 		}
 	}
-		
+
 	/**
 	 * @param e
 	 * @return int
@@ -848,7 +848,7 @@ public class Checks {
 				return NOT_RVALUE_MISC;
 			}
 		}
-		
+
 		ITypeBinding tb= e.resolveTypeBinding();
 		if (tb == null)
 			return NOT_RVALUE_MISC;

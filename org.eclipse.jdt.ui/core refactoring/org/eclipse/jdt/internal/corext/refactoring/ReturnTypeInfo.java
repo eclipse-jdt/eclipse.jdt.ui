@@ -16,11 +16,11 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public class ReturnTypeInfo {
-	
+
 	private final String fOldTypeName;
 	private String fNewTypeName;
 	private ITypeBinding fNewTypeBinding;
-	
+
 	public ReturnTypeInfo(String returnType) {
 		fOldTypeName= returnType;
 		fNewTypeName= returnType;
@@ -29,11 +29,11 @@ public class ReturnTypeInfo {
 	public String getOldTypeName() {
 		return fOldTypeName;
 	}
-	
+
 	public String getNewTypeName() {
 		return fNewTypeName;
 	}
-	
+
 	public void setNewTypeName(String type){
 		Assert.isNotNull(type);
 		fNewTypeName= type;
@@ -42,7 +42,7 @@ public class ReturnTypeInfo {
 	public ITypeBinding getNewTypeBinding() {
 		return fNewTypeBinding;
 	}
-	
+
 	public void setNewTypeBinding(ITypeBinding typeBinding){
 		fNewTypeBinding= typeBinding;
 	}
@@ -50,7 +50,7 @@ public class ReturnTypeInfo {
 	public boolean isTypeNameChanged() {
 		return !fOldTypeName.equals(fNewTypeName);
 	}
-	
+
 	public String toString() {
 		return fOldTypeName + " -> " + fNewTypeName; //$NON-NLS-1$
 	}

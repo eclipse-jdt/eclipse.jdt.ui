@@ -51,29 +51,29 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
  * Displays a set of available links to modify or adjust the project.
- * The links contain a short description about the consequences of 
+ * The links contain a short description about the consequences of
  * this action.
- * 
+ *
  * The content depends on the selection made on the project.
- * If selection changes, then the <code>HintTextGroup</code> will be 
- * notified through the <code>IPackageExplorerActionListener</code> interface. 
+ * If selection changes, then the <code>HintTextGroup</code> will be
+ * notified through the <code>IPackageExplorerActionListener</code> interface.
  */
 public final class HintTextGroup implements ISelectionChangedListener {
-	    
+
     private Composite fTopComposite;
     private DialogPackageExplorerActionGroup fActionGroup;
     private List fNewFolders;
     private HashMap fImageMap;
-    
+
     public HintTextGroup() {
         fNewFolders= new ArrayList();
         fImageMap= new HashMap();
     }
-    
+
     public Composite createControl(Composite parent) {
         fTopComposite= new Composite(parent, SWT.NONE);
         fTopComposite.setFont(parent.getFont());
-        
+
         GridData gridData= new GridData(GridData.FILL_BOTH);
         PixelConverter converter= new PixelConverter(parent);
         gridData.heightHint= converter.convertHeightInCharsToPixels(12);
@@ -96,36 +96,36 @@ public final class HintTextGroup implements ISelectionChangedListener {
         });
         return fTopComposite;
     }
-    
+
     private Shell getShell() {
         return JavaPlugin.getActiveWorkbenchShell();
     }
-    
+
     /**
-     * An action group managing the actions needed by 
+     * An action group managing the actions needed by
      * the <code>HintTextGroup</code>.
-     * 
+     *
      * Note: This method has to be called on initialization.
-     * Calling this method in the constructor is not 
-     * possible because the actions might need a reference to 
+     * Calling this method in the constructor is not
+     * possible because the actions might need a reference to
      * this class.
-     * 
-     * @param actionGroup the action group containing the necessary 
+     *
+     * @param actionGroup the action group containing the necessary
      * actions
-     * 
+     *
      * @see DialogPackageExplorerActionGroup
      */
     public void setActionGroup(DialogPackageExplorerActionGroup actionGroup) {
         fActionGroup= actionGroup;
     }
-    
+
     /**
      * Creates a form text.
-     * 
+     *
      * @param parent the parent to put the form text on
      * @param text the form text to be displayed
      * @return the created form text
-     * 
+     *
      * @see FormToolkit#createFormText(org.eclipse.swt.widgets.Composite, boolean)
      */
     private FormText createFormText(Composite parent, String text) {
@@ -148,10 +148,10 @@ public final class HintTextGroup implements ISelectionChangedListener {
 	        toolkit.dispose();
 		}
     }
-    
+
     /**
      * Create a label with a hyperlink and a picture.
-     * 
+     *
      * @param parent the parent widget of the label
      * @param text the text of the label
      * @param action the action to be executed if the hyperlink is activated
@@ -169,25 +169,25 @@ public final class HintTextGroup implements ISelectionChangedListener {
             public void linkActivated(HyperlinkEvent e) {
                 action.run();
             }
-            
+
         });
     }
-    
+
     /**
      * Handle folder creation. This includes:
      * <li>Set the selection of the <code>fPackageExplorer</code>
      * to the result object, unless the result object is <code>
      * null</code></li>
      * <li>Add the created folder to the list of new folders</li>
-     * <li>Adjust the text of <code>fOutputLocationField</code> 
-     * and add the project's new output location to the list of 
+     * <li>Adjust the text of <code>fOutputLocationField</code>
+     * and add the project's new output location to the list of
      * new folders, if necessary
-     * 
-     * In this case, the list consists only of one element on which the 
+     *
+     * In this case, the list consists only of one element on which the
      * new folder has been created
-     *  
-     * @param result a list with only one element to be selected by the 
-     * <code>fPackageExplorer</code>, or an empty list if creation was 
+     *
+     * @param result a list with only one element to be selected by the
+     * <code>fPackageExplorer</code>, or an empty list if creation was
      * aborted
      */
     void handleFolderCreation(List result) {
@@ -199,15 +199,15 @@ public final class HintTextGroup implements ISelectionChangedListener {
             }
         }
     }
-    
+
     public List getCreatedResources() {
     	return fNewFolders;
     }
-        
+
 	public void resetCreatedResources() {
 		fNewFolders.clear();
 	}
-	
+
 	/**
      * {@inheritDoc}
      */
@@ -220,32 +220,32 @@ public final class HintTextGroup implements ISelectionChangedListener {
  	}
 
     private void handlePostSelectionChange(StructuredSelection selection) {
-    	
+
     	BuildpathModifierAction[] actions= fActionGroup.getHintTextGroupActions();
     	String[] descriptions= new String[actions.length];
     	for (int i= 0; i < actions.length; i++) {
 	        descriptions[i]= actions[i].getDetailedDescription();
         }
-    	
+
         // Get the child composite of the top composite
         Composite childComposite= (Composite)fTopComposite.getData();
-        
+
         // Dispose old composite (if necessary)
         if (childComposite != null && childComposite.getParent() != null)
             childComposite.getParent().dispose();
-      
+
     	PixelConverter converter= new PixelConverter(fTopComposite);
-    	
+
         // Create new composite
         ScrolledPageContent spc= new ScrolledPageContent(fTopComposite, SWT.V_SCROLL);
         spc.getVerticalBar().setIncrement(5);
-        
+
         GridData gridData= new GridData(GridData.FILL_BOTH);
-        
+
         gridData.heightHint= converter.convertHeightInCharsToPixels(12);
         gridData.widthHint= converter.convertWidthInCharsToPixels(25);
         spc.setLayoutData(gridData);
-        
+
         childComposite= spc.getBody();
         TableWrapLayout tableWrapLayout= new TableWrapLayout();
 		tableWrapLayout.leftMargin= 0;
@@ -255,25 +255,25 @@ public final class HintTextGroup implements ISelectionChangedListener {
         gridData.heightHint= converter.convertHeightInCharsToPixels(12);
         gridData.widthHint= converter.convertWidthInCharsToPixels(25);
         childComposite.setLayoutData(gridData);
-        
+
 		fTopComposite.setData(childComposite);
-        
+
         if (noContextHelpAvailable(actions)) {
             String noAction= noAction(selection);
-            createFormText(childComposite, Messages.format(NewWizardMessages.HintTextGroup_NoAction, noAction)); 
+            createFormText(childComposite, Messages.format(NewWizardMessages.HintTextGroup_NoAction, noAction));
             fTopComposite.layout(true);
             return;
         }
-        
+
         for (int i= 0; i < actions.length; i++) {
         	createLabel(childComposite, descriptions[i], actions[i]);
         }
-        
+
 
         fTopComposite.layout(true);
         spc.reflow(true);
     }
-    
+
     private String noAction(ISelection selection) {
     	if (selection instanceof StructuredSelection) {
     		return noAction(((StructuredSelection)selection).toList());
@@ -285,27 +285,27 @@ public final class HintTextGroup implements ISelectionChangedListener {
 	private String noAction(List selectedElements) {
 		if (selectedElements.size() == 0)
 			return NewWizardMessages.PackageExplorerActionGroup_NoAction_NullSelection;
-		
+
 		if (selectedElements.size() == 1)
 			return NewWizardMessages.PackageExplorerActionGroup_NoAction_NoReason;
-		
+
 		return NewWizardMessages.PackageExplorerActionGroup_NoAction_MultiSelection;
     }
-	    
+
     /**
-     * Check if for the current type of selection, no context specific actions can 
+     * Check if for the current type of selection, no context specific actions can
      * be applied. Note: this does not mean, that there are NO actions available at all.<p>
-     * 
-     * For example: if the default package is selected, there is no specific action for this kind 
-     * of selection as no operations are allowed on the default package. Nevertheless, the 
-     * <code>PackageExplorerActionEvent</code> will return at least one action that allows to 
-     * link to an existing folder in the file system, but this operation is always available 
-     * and does not add any supporting information to the current selection. Therefore, 
-     * it can be filtered and the correct answer to the user is that there is no specific 
+     *
+     * For example: if the default package is selected, there is no specific action for this kind
+     * of selection as no operations are allowed on the default package. Nevertheless, the
+     * <code>PackageExplorerActionEvent</code> will return at least one action that allows to
+     * link to an existing folder in the file system, but this operation is always available
+     * and does not add any supporting information to the current selection. Therefore,
+     * it can be filtered and the correct answer to the user is that there is no specific
      * action for the default package.
-     * 
+     *
      * @param actions an array of provided actions
-     * @return <code>true</code> if there is at least one action that allows context 
+     * @return <code>true</code> if there is at least one action that allows context
      * sensitive operations, <code>false</code> otherwise.
      */
     private boolean noContextHelpAvailable(BuildpathModifierAction[] actions) {
@@ -319,7 +319,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
         if (actions.length == 2) {
             int idLink= Integer.parseInt(actions[0].getId());
             int idReset= Integer.parseInt(actions[1].getId());
-            if (idReset == BuildpathModifierAction.RESET_ALL && 
+            if (idReset == BuildpathModifierAction.RESET_ALL &&
                 idLink == BuildpathModifierAction.CREATE_LINK)
                 return true;
         }

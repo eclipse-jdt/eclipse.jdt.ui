@@ -11,11 +11,14 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.ui.PartInitException;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -36,11 +39,11 @@ public abstract class UndoEditorTest extends TextPerformanceTestCase {
 		EditorTestHelper.closeAllEditors();
 		fPerformanceMeter.dispose();
 	}
-	
+
 	protected void measureUndo(IFile file) throws PartInitException {
 		AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(file, true);
 		editor.showChangeInformation(false); // TODO: remove when undo does no longer trigger timing issue
-		
+
 		IAction selectAll= editor.getAction(ITextEditorActionConstants.SELECT_ALL);
 		IAction shiftRight= editor.getAction(ITextEditorActionConstants.SHIFT_RIGHT);
 		IAction undo= editor.getAction(ITextEditorActionConstants.UNDO);

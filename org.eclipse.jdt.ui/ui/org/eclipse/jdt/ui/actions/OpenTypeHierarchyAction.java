@@ -54,44 +54,44 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
  * <p>
  * The action is applicable to selections containing elements of type
  * <code>IType</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenTypeHierarchyAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Creates a new <code>OpenTypeHierarchyAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public OpenTypeHierarchyAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.OpenTypeHierarchyAction_label); 
-		setToolTipText(ActionMessages.OpenTypeHierarchyAction_tooltip); 
-		setDescription(ActionMessages.OpenTypeHierarchyAction_description); 
+		setText(ActionMessages.OpenTypeHierarchyAction_label);
+		setToolTipText(ActionMessages.OpenTypeHierarchyAction_tooltip);
+		setDescription(ActionMessages.OpenTypeHierarchyAction_description);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_HIERARCHY_ACTION);
 	}
-	
+
 	/**
 	 * Creates a new <code>OpenTypeHierarchyAction</code>. The action requires
 	 * that the selection provided by the given selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
-	 * @param provider a special selection provider which is used instead 
+	 * @param provider a special selection provider which is used instead
 	 *  of the site's selection provider or <code>null</code> to use the site's
 	 *  selection provider
-	 * 
+	 *
 	 * @since 3.2
 	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This API will be
 	 * removed after 3.2 M5.
@@ -101,11 +101,11 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
         setSpecialSelectionProvider(provider);
     }
 
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OpenTypeHierarchyAction(JavaEditor editor) {
@@ -113,7 +113,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -126,16 +126,16 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(isEnabled(selection));
 	}
-	
+
 	private boolean isEnabled(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;
 		Object input= selection.getFirstElement();
-		
-		
+
+
 		if (input instanceof LogicalPackage)
 			return true;
-		
+
 		if (!(input instanceof IJavaElement))
 			return false;
 		switch (((IJavaElement)input).getElementType()) {
@@ -148,7 +148,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			case IJavaElement.JAVA_PROJECT:
 			case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.PACKAGE_DECLARATION:
-			case IJavaElement.IMPORT_DECLARATION:	
+			case IJavaElement.IMPORT_DECLARATION:
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.COMPILATION_UNIT:
 				return true;
@@ -157,15 +157,15 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 				return false;
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
 		IJavaElement input= SelectionConverter.getInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
-			return;		
-		
+			return;
+
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
 			if (elements == null)
@@ -173,7 +173,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			List candidates= new ArrayList(elements.length);
 			for (int i= 0; i < elements.length; i++) {
 				IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(elements[i]);
-				if (resolvedElements != null)	
+				if (resolvedElements != null)
 					candidates.addAll(Arrays.asList(resolvedElements));
 			}
 			run((IJavaElement[])candidates.toArray(new IJavaElement[candidates.size()]));
@@ -183,7 +183,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			// cancelled
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -191,7 +191,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		if (selection.size() != 1)
 			return;
 		Object input= selection.getFirstElement();
-		
+
 		if (input instanceof LogicalPackage) {
 			IPackageFragment[] fragments= ((LogicalPackage)input).getFragments();
 			if (fragments.length == 0)
@@ -200,8 +200,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		}
 
 		if (!(input instanceof IJavaElement)) {
-			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_element); 
-			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status); 
+			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_element);
+			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 			return;
 		}
 		IJavaElement element= (IJavaElement) input;
@@ -213,7 +213,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		if (status.isOK()) {
 			run((IJavaElement[]) result.toArray(new IJavaElement[result.size()]));
 		} else {
-			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status); 
+			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 		}
 	}
 
@@ -228,13 +228,13 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		}
 		OpenTypeHierarchyUtil.open(elements, getSite().getWorkbenchWindow());
 	}
-	
+
 	private static String getDialogTitle() {
-		return ActionMessages.OpenTypeHierarchyAction_dialog_title; 
+		return ActionMessages.OpenTypeHierarchyAction_dialog_title;
 	}
-	
+
 	private static IStatus compileCandidates(List result, IJavaElement elem) {
-		IStatus ok= new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$		
+		IStatus ok= new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 		try {
 			switch (elem.getElementType()) {
 				case IJavaElement.INITIALIZER:
@@ -250,11 +250,11 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 						result.add(elem);
 						return ok;
 					}
-					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_resources); 
+					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_resources);
 				case IJavaElement.PACKAGE_DECLARATION:
 					result.add(elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT));
 					return ok;
-				case IJavaElement.IMPORT_DECLARATION:	
+				case IJavaElement.IMPORT_DECLARATION:
 					IImportDeclaration decl= (IImportDeclaration) elem;
 					if (decl.isOnDemand()) {
 						elem= JavaModelUtil.findTypeContainer(elem.getJavaProject(), Signature.getQualifier(elem.getElementName()));
@@ -268,7 +268,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_unknown_import_decl);
 				case IJavaElement.CLASS_FILE:
 					result.add(((IClassFile)elem).getType());
-					return ok;				
+					return ok;
 				case IJavaElement.COMPILATION_UNIT:
 					ICompilationUnit cu= (ICompilationUnit)elem;
 					IType[] types= cu.getTypes();
@@ -276,15 +276,15 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 						result.addAll(Arrays.asList(types));
 						return ok;
 					}
-					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_types); 
+					return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_types);
 			}
 		} catch (JavaModelException e) {
 			return e.getStatus();
 		}
-		return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_valid_java_element); 
+		return createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_valid_java_element);
 	}
-	
+
 	private static IStatus createStatus(String message) {
 		return new Status(IStatus.INFO, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, null);
-	}			
+	}
 }

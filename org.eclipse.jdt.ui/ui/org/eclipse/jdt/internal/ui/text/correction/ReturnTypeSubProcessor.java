@@ -146,7 +146,7 @@ public class ReturnTypeSubProcessor {
 			Expression expr= returnStatement.getExpression();
 			if (expr != null) {
 				AST ast= astRoot.getAST();
-				
+
 				ITypeBinding binding= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
 				if (binding == null) {
 					binding= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
@@ -154,7 +154,7 @@ public class ReturnTypeSubProcessor {
 				if (binding.isWildcardType()) {
 					binding= ASTResolving.normalizeWildcardType(binding, true, ast);
 				}
-				
+
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 
 				ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -219,7 +219,7 @@ public class ReturnTypeSubProcessor {
 			decl.accept(eval);
 
 			AST ast= astRoot.getAST();
-			
+
 			ITypeBinding typeBinding= eval.getTypeBinding(decl.getAST());
 			typeBinding= Bindings.normalizeTypeBinding(typeBinding);
 			if (typeBinding == null) {
@@ -228,13 +228,13 @@ public class ReturnTypeSubProcessor {
 			if (typeBinding.isWildcardType()) {
 				typeBinding= ASTResolving.normalizeWildcardType(typeBinding, true, ast);
 			}
-			
+
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_missingreturntype_description, BindingLabelProvider.getBindingLabel(typeBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-			
+
 			ImportRewrite imports= proposal.createImportRewrite(astRoot);
 
 			Type type= imports.addImport(typeBinding, ast);

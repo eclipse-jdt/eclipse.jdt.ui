@@ -65,8 +65,8 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		RefactoringStatus initStatus= initialize(refactoringArguments);
 		status.merge(initStatus);
 	}
-	
-	
+
+
 	public boolean canChildrenBeDestinations(IReorgDestination destination) {
 		return fCopyPolicy.canChildrenBeDestinations(destination);
 	}
@@ -196,7 +196,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		fExecutionLog= fCopyPolicy.getReorgExecutionLog();
 		return result;
 	}
-	
+
 	public RefactoringStatus setDestination(IReorgDestination destination) throws JavaModelException {
 		fCopyPolicy.setDestination(destination);
 		return fCopyPolicy.verifyDestination(destination);

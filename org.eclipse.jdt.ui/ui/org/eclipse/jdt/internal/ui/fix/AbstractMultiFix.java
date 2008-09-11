@@ -89,9 +89,9 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	}
 
 	/**
-	 * Returns unique problem locations. All locations in result 
+	 * Returns unique problem locations. All locations in result
 	 * have an id element <code>problemIds</code>.
-	 * 
+	 *
 	 * @param problems the problems to filter
 	 * @param problemIds the ids of the resulting problem locations
 	 * @return problem locations

@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Name;
@@ -57,7 +57,7 @@ class SimpleFragment extends ASTFragment {
 	public ASTNode getAssociatedNode() {
 		return fNode;
 	}
-	
+
 	public void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup) {
 		if (replacement instanceof Name && fNode.getParent() instanceof ParenthesizedExpression) {
 			// replace including the parenthesized expression around it
@@ -81,5 +81,5 @@ class SimpleFragment extends ASTFragment {
 		SimpleFragment other= (SimpleFragment) obj;
 		return fNode.equals(other.fNode);
 	}
-	
+
 }

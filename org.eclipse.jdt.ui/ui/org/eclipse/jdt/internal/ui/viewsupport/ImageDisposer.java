@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 
 /**
@@ -22,18 +22,18 @@ import org.eclipse.swt.graphics.Image;
  * contol.addWidgetListener(new ImageDisposer(myImage));
  */
 public class ImageDisposer implements DisposeListener {
-	
+
 	private Image[] fImages;
-		
+
 	public ImageDisposer(Image image) {
 		this(new Image[] { image });
 	}
-	
+
 	public ImageDisposer(Image[] images) {
 		Assert.isNotNull(images);
-		fImages= images;		
+		fImages= images;
 	}
-	
+
 	/*
 	 * @see WidgetListener#widgetDisposed
 	 */

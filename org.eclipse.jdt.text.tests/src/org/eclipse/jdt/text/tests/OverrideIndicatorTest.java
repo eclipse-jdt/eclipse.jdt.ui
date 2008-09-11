@@ -18,6 +18,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+
 import org.eclipse.swt.custom.StyledText;
 
 import org.eclipse.core.runtime.IPath;
@@ -34,36 +36,34 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.PartInitException;
 
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 
 /**
  * Tests the Java Editor's override indicator feature.
- * 
+ *
  * @since 3.1
  */
 public class OverrideIndicatorTest extends TestCase {
-	
+
 	private static final String OVERRIDE_INDICATOR_ANNOTATION= "org.eclipse.jdt.ui.overrideIndicator";
-	
+
 	private JavaEditor fEditor;
 	private IDocument fDocument;
 	private IAnnotationModel fAnnotationModel;
 	private StyledText fTextWidget;
 	private Annotation[] fOverrideAnnotations;
 
-	
+
 	public static Test setUpTest(Test someTest) {
 		return new JUnitProjectTestSetup(someTest);
 	}
-	
+
 	public static Test suite() {
 		return setUpTest(new TestSuite(OverrideIndicatorTest.class));
 	}
-	
-	
+
+
 	protected void setUp() throws Exception {
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
@@ -73,7 +73,7 @@ public class OverrideIndicatorTest extends TestCase {
 		assertNotNull(fDocument);
 		fAnnotationModel= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
@@ -81,7 +81,7 @@ public class OverrideIndicatorTest extends TestCase {
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 	}
-	
+
 	private JavaEditor openJavaEditor(IPath path) {
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 		assertTrue(file != null && file.exists());
@@ -92,7 +92,7 @@ public class OverrideIndicatorTest extends TestCase {
 			return null;
 		}
 	}
-	
+
 	public void testCountOverrideIndicators() {
 		int count= 0;
 		long timeOut= System.currentTimeMillis() + 60000;
@@ -102,7 +102,7 @@ public class OverrideIndicatorTest extends TestCase {
 			count= fOverrideAnnotations.length;
 			if (count > 0)
 				break;
-			
+
 			synchronized (this) {
 				try {
 					wait(200);
@@ -124,7 +124,7 @@ public class OverrideIndicatorTest extends TestCase {
 		}
 		assertEquals(2, count);
 	}
-	
+
 	public void testOverrideIndicatorText() {
 		testCountOverrideIndicators();
 		for (int i= 0; i < fOverrideAnnotations.length; i++) {

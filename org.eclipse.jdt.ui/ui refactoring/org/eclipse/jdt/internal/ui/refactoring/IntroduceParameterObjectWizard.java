@@ -17,8 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -34,6 +32,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -219,7 +219,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			createSignaturePreview(group);
 
 			validateRefactoring();
-			
+
 			setControl(result);
 		}
 
@@ -450,7 +450,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			gridData.horizontalSpan= 2;
 			gridData.verticalIndent= 5;
 			l.setLayoutData(gridData);
-			
+
 			TableLayoutComposite layoutComposite= new TableLayoutComposite(result, SWT.NONE);
 			layoutComposite.addColumnData(new ColumnWeightData(40, convertWidthInCharsToPixels(20), true));
 			layoutComposite.addColumnData(new ColumnWeightData(60, convertWidthInCharsToPixels(20), true));
@@ -525,7 +525,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 							tv.refresh(selected);
 							updateSignaturePreview();
 						}
-							
+
 					}
 				}
 			});
@@ -711,7 +711,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterObjectWizard_error_title, RefactoringMessages.IntroduceParameterObjectWizard_error_description);
 			}
 		}
-		
+
 		public void dispose() {
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
@@ -721,7 +721,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			settings.put(IntroduceParameterObjectInputPage.CREATE_TOP_LEVEL_SETTING, fProcessor.isCreateAsTopLevel());
 			super.dispose();
 		}
-		
+
 		protected boolean getBooleanSetting(String key, boolean defaultValue) {
 			String update= getRefactoringSettings().get(key);
 			if (update != null)

@@ -15,12 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
@@ -28,6 +22,12 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -60,14 +60,14 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	private final Clipboard fClipboard;
 	private boolean fAutoRepeatOnFailure= false;
-	
+
 	public CopyToClipboardAction(IWorkbenchSite site) {
 		this(site, null);
 	}
 
 	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
-		setText(ReorgMessages.CopyToClipboardAction_text); 
+		setText(ReorgMessages.CopyToClipboardAction_text);
 		setDescription(ReorgMessages.CopyToClipboardAction_description);
 		fClipboard= clipboard;
 		ISharedImages workbenchImages= getWorkbenchSharedImages();
@@ -82,7 +82,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	public void setAutoRepeatOnFailure(boolean autorepeatOnFailure){
 		fAutoRepeatOnFailure= autorepeatOnFailure;
 	}
-	
+
 	private static ISharedImages getWorkbenchSharedImages() {
 		return JavaPlugin.getDefault().getWorkbench().getSharedImages();
 	}
@@ -108,10 +108,10 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (elements.size() == resources.length + javaElements.length && canEnable(resources, javaElements)) 
+			if (elements.size() == resources.length + javaElements.length && canEnable(resources, javaElements))
 				doRun(resources, javaElements);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), ReorgMessages.CopyToClipboardAction_2, ReorgMessages.CopyToClipboardAction_3); 
+			ExceptionHandler.handle(e, getShell(), ReorgMessages.CopyToClipboardAction_2, ReorgMessages.CopyToClipboardAction_3);
 		}
 	}
 
@@ -133,16 +133,16 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) {
 		return new CopyToClipboardEnablementPolicy(resources, javaElements).canEnable();
 	}
-	
+
 	//----------------------------------------------------------------------------------------//
-	
+
 	private static class ClipboardCopier{
 		private final boolean fAutoRepeatOnFailure;
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
 		private final Shell fShell;
 		private final ILabelProvider fLabelProvider;
-		
+
 		private ClipboardCopier(IResource[] resources, IJavaElement[] javaElements, Shell shell, boolean autoRepeatOnFailure) {
 			Assert.isNotNull(resources);
 			Assert.isNotNull(javaElements);
@@ -165,13 +165,13 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			ICompilationUnit[] cusOfMainTypes= ReorgUtils.getCompilationUnits(mainTypes);
 			IResource[] resourcesOfMainTypes= ReorgUtils.getResources(cusOfMainTypes);
 			addFileNames(fileNames, resourcesOfMainTypes);
-			
+
 			IResource[] cuResources= ReorgUtils.getResources(getCompilationUnits(fJavaElements));
 			addFileNames(fileNames, cuResources);
 
 			IResource[] resourcesForClipboard= ReorgUtils.union(fResources, ReorgUtils.union(cuResources, resourcesOfMainTypes));
 			IJavaElement[] javaElementsForClipboard= ReorgUtils.union(fJavaElements, cusOfMainTypes);
-			
+
 			TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsForClipboard);
 			String[] fileNameArray= (String[]) fileNames.toArray(new String[fileNames.size()]);
 			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources, 0, clipboard);
@@ -230,7 +230,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				// not a file system path. skip file.
 			}
 		}
-		
+
 		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements, TypedSource[] typedSources, int repeat, Clipboard clipboard) {
 			final int repeat_max_count= 10;
 			try{
@@ -246,11 +246,11 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 						// do nothing.
 					}
 				}
-				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, ReorgMessages.CopyToClipboardAction_4, ReorgMessages.CopyToClipboardAction_5)) 
+				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, ReorgMessages.CopyToClipboardAction_4, ReorgMessages.CopyToClipboardAction_5))
 					copyToClipboard(resources, fileNames, names, javaElements, typedSources, repeat + 1, clipboard);
 			}
 		}
-		
+
 		private static Transfer[] createDataTypeArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, TypedSource[] typedSources) {
 			List result= new ArrayList(4);
 			if (resources.length != 0)
@@ -261,7 +261,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				result.add(FileTransfer.getInstance());
 			if (typedSources.length != 0)
 				result.add(TypedSourceTransfer.getInstance());
-			result.add(TextTransfer.getInstance());			
+			result.add(TextTransfer.getInstance());
 			return (Transfer[]) result.toArray(new Transfer[result.size()]);
 		}
 
@@ -284,7 +284,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				JavaElementLabelProvider.SHOW_VARIABLE
 				+ JavaElementLabelProvider.SHOW_PARAMETERS
 				+ JavaElementLabelProvider.SHOW_TYPE
-			);		
+			);
 		}
 		private String getName(IResource resource){
 			return fLabelProvider.getText(resource);
@@ -293,7 +293,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			return fLabelProvider.getText(javaElement);
 		}
 	}
-	
+
 	private static class CopyToClipboardEnablementPolicy {
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
@@ -329,15 +329,15 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private static boolean canCopyToClipboard(IJavaElement element) {
 			if (element == null || ! element.exists())
 				return false;
-				
-			if (JavaElementUtil.isDefaultPackage(element))		
+
+			if (JavaElementUtil.isDefaultPackage(element))
 				return false;
-			
+
 			return true;
 		}
 
 		private static boolean canCopyToClipboard(IResource resource) {
-			return 	resource != null && 
+			return 	resource != null &&
 					resource.exists() &&
 					! resource.isPhantom() &&
 					resource.getType() != IResource.ROOT;

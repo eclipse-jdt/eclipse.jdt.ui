@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 
 /**
  * Test Suite org.eclipse.jdt.text.tests.spelling.
- * 
+ *
  * @since 3.0
  */
 public class SpellingTestSuite {

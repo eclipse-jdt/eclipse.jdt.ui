@@ -19,9 +19,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.navigator.ILinkHelper;
-
 import org.eclipse.ui.ide.ResourceUtil;
+import org.eclipse.ui.navigator.ILinkHelper;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;

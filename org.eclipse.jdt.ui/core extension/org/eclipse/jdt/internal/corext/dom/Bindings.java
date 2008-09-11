@@ -50,7 +50,7 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class Bindings {
-	
+
 	public static final String ARRAY_LENGTH_FIELD_BINDING_STRING= "(array type):length";//$NON-NLS-1$
 	private Bindings() {
 		// No instance
@@ -67,7 +67,7 @@ public class Bindings {
 		return b1.isEqualTo(b2);
 	}
 
-	
+
 	/**
 	 * Checks if the declarations of two bindings are equals.
 	 * Also works across binding environments.
@@ -80,7 +80,7 @@ public class Bindings {
 			return false;
 		return getDeclaration(b1).isEqualTo(getDeclaration(b2));
 	}
-	
+
 	/**
 	 * Checks if the two arrays of bindings have the same length and
 	 * their elements are equal. Uses
@@ -94,7 +94,7 @@ public class Bindings {
 		if (b1 == b2)
 			return true;
 		if (b2 == null)
-			return false;		
+			return false;
 		if (b1.length != b2.length)
 			return false;
 		for (int i= 0; i < b1.length; i++) {
@@ -103,7 +103,7 @@ public class Bindings {
 		}
 		return true;
 	}
-	
+
 	public static int hashCode(IBinding binding){
 		Assert.isNotNull(binding);
 		String key= binding.getKey();
@@ -111,7 +111,7 @@ public class Bindings {
 			return binding.hashCode();
 		return key.hashCode();
 	}
-	
+
 	/**
 	 * Note: this method is for debugging and testing purposes only.
 	 * There are tests whose pre-computed test results rely on the returned String's format.
@@ -139,8 +139,8 @@ public class Bindings {
 		StringBuffer result= new StringBuffer();
 		result.append(variableBinding.getDeclaringClass().getName());
 		result.append(':');
-		result.append(variableBinding.getName());				
-		return result.toString();		
+		result.append(variableBinding.getName());
+		return result.toString();
 	}
 
 	private static String asString(IMethodBinding method) {
@@ -160,11 +160,11 @@ public class Bindings {
 		result.append(')');
 		return result.toString();
 	}
-	
+
 	public static String getTypeQualifiedName(ITypeBinding type) {
 		List result= new ArrayList(5);
 		createName(type, false, result);
-		
+
 		StringBuffer buffer= new StringBuffer();
 		for (int i= 0; i < result.size(); i++) {
 			if (i > 0) {
@@ -179,7 +179,7 @@ public class Bindings {
 	 * Returns the fully qualified name of the specified type binding.
 	 * <p>
 	 * If the binding resolves to a generic type, the fully qualified name of the raw type is returned.
-	 * 
+	 *
 	 * @param type the type binding to get its fully qualified name
 	 * @return the fully qualified name
 	 */
@@ -206,15 +206,15 @@ public class Bindings {
 				if (declaring == null) {
 					return binding.getName(); // array.length
 				}
-				
+
 				break;
 			default:
 				return binding.getName();
 		}
 		return JavaModelUtil.concatenateName(getRawQualifiedName(declaring), binding.getName());
-	}	
-	
-	
+	}
+
+
 	private static void createName(ITypeBinding type, boolean includePackage, List list) {
 		ITypeBinding baseType= type;
 		if (type.isArray()) {
@@ -235,22 +235,22 @@ public class Bindings {
 			list.add(type.getName());
 		} else {
 			list.add("$local$"); //$NON-NLS-1$
-		}		
-	}	
-	
-	
+		}
+	}
+
+
 	public static String[] getNameComponents(ITypeBinding type) {
 		List result= new ArrayList(5);
 		createName(type, false, result);
 		return (String[]) result.toArray(new String[result.size()]);
 	}
-	
+
 	public static String[] getAllNameComponents(ITypeBinding type) {
 		List result= new ArrayList(5);
 		createName(type, true, result);
 		return (String[]) result.toArray(new String[result.size()]);
 	}
-	
+
 	public static ITypeBinding getTopLevelType(ITypeBinding type) {
 		ITypeBinding parent= type.getDeclaringClass();
 		while (parent != null) {
@@ -259,12 +259,12 @@ public class Bindings {
 		}
 		return type;
 	}
-	
+
 	/**
 	 * Checks whether the passed type binding is a runtime exception.
-	 * 
+	 *
 	 * @param thrownException the type binding
-	 * 
+	 *
 	 * @return <code>true</code> if the passed type binding is a runtime exception;
 	 * 	otherwise <code>false</code> is returned
 	 */
@@ -273,7 +273,7 @@ public class Bindings {
 			return false;
 		return findTypeInHierarchy(thrownException, "java.lang.RuntimeException") != null; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Finds the field specified by <code>fieldName<code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such field exits.
@@ -292,11 +292,11 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the field specified by <code>fieldName</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such field
-	 * exists. If the field is defined in more than one super type only the first match is 
+	 * exists. If the field is defined in more than one super type only the first match is
 	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the field in
 	 * @param fieldName The name of the field to find
@@ -310,7 +310,7 @@ public class Bindings {
 		if (superClass != null) {
 			field= findFieldInHierarchy(superClass, fieldName);
 			if (field != null)
-				return field;			
+				return field;
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
@@ -320,13 +320,13 @@ public class Bindings {
 		}
 		return null;
 	}
-		
+
 	/**
 	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
-	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only 
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only
 	 *  the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
@@ -345,11 +345,11 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
-	 * exists. If the method is defined in more than one super type only the first match is 
+	 * exists. If the method is defined in more than one super type only the first match is
 	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
@@ -364,7 +364,7 @@ public class Bindings {
 		if (superClass != null) {
 			method= findMethodInHierarchy(superClass, methodName, parameters);
 			if (method != null)
-				return method;			
+				return method;
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
@@ -374,7 +374,7 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
@@ -398,11 +398,11 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
-	 * exists. If the method is defined in more than one super type only the first match is 
+	 * exists. If the method is defined in more than one super type only the first match is
 	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type the type to search the method in
 	 * @param methodName The name of the method to find
@@ -417,7 +417,7 @@ public class Bindings {
 		if (superClass != null) {
 			method= findMethodInHierarchy(superClass, methodName, parameters);
 			if (method != null)
-				return method;			
+				return method;
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
@@ -427,7 +427,7 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method<code>.
 	 * Returns <code>null</code> if no such method exits.
@@ -443,10 +443,10 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds a method in the hierarchy of <code>type</code> that is overridden by </code>binding</code>.
-	 * Returns <code>null</code> if no such method exists. If the method is defined in more than one super type only the first match is 
+	 * Returns <code>null</code> if no such method exists. If the method is defined in more than one super type only the first match is
 	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the method in
 	 * @param binding The method that overrides
@@ -460,7 +460,7 @@ public class Bindings {
 		if (superClass != null) {
 			method= findOverriddenMethodInHierarchy(superClass, binding);
 			if (method != null)
-				return method;			
+				return method;
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
@@ -470,8 +470,8 @@ public class Bindings {
 		}
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Finds the method that is overridden by the given method. The search is bottom-up, so this
 	 * returns the nearest defining/declaring method.
@@ -484,7 +484,7 @@ public class Bindings {
 		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || overriding.isConstructor()) {
 			return null;
 		}
-		
+
 		ITypeBinding type= overriding.getDeclaringClass();
 		if (type.getSuperclass() != null) {
 			IMethodBinding res= findOverriddenMethodInHierarchy(type.getSuperclass(), overriding);
@@ -503,8 +503,8 @@ public class Bindings {
 		}
 		return null;
 	}
-	
-	
+
+
 	public static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
 		int otherflags= member.getModifiers();
 		ITypeBinding declaringType= member.getDeclaringClass();
@@ -512,10 +512,10 @@ public class Bindings {
 			return true;
 		} else if (Modifier.isPrivate(otherflags)) {
 			return false;
-		}		
+		}
 		return declaringType != null && pack == declaringType.getPackage();
 	}
-		
+
 	/**
 	 * Returns all super types (classes and interfaces) for the given type.
 	 * @param type The type to get the supertypes of.
@@ -527,7 +527,7 @@ public class Bindings {
 		result.remove(type);
 		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
 	}
-	
+
 	private static void collectSuperTypes(ITypeBinding curr, Set collection) {
 		if (collection.add(curr)) {
 			ITypeBinding[] interfaces= curr.getInterfaces();
@@ -543,7 +543,7 @@ public class Bindings {
 
 	/**
 	 * Method to visit a type hierarchy defined by a given type.
-	 * 
+	 *
 	 * @param type the type which hierarchy is to be visited
 	 * @param visitor the visitor
 	 * @return <code>false</code> if the visiting got interrupted
@@ -558,7 +558,7 @@ public class Bindings {
 
 	/**
 	 * Method to visit a interface hierarchy defined by a given type.
-	 * 
+	 *
 	 * @param type the type which interface hierarchy is to be visited
 	 * @param visitor the visitor
 	 * @return <code>false</code> if the visiting got interrupted
@@ -575,7 +575,7 @@ public class Bindings {
 
 	/**
 	 * Method to visit a super class hierarchy defined by a given type.
-	 * 
+	 *
 	 * @param type the type which super class hierarchy is to be visited
 	 * @param visitor the visitor
 	 * @return <code>false</code> if the visiting got interrupted
@@ -591,7 +591,7 @@ public class Bindings {
 
 	/**
 	 * Tests whether the two methods are erasure-equivalent.
-	 * @param method the first method 
+	 * @param method the first method
 	 * @param methodName the name of the second method
 	 * @param parameters the parameters of the second parameters
 	 * @return return <code>true</code> if the two bindings are equal
@@ -601,7 +601,7 @@ public class Bindings {
 	public static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;
-			
+
 		ITypeBinding[] methodParameters= method.getParameterTypes();
 		if (methodParameters.length != parameters.length)
 			return false;
@@ -636,26 +636,26 @@ public class Bindings {
 	 * 		Note that subsignature is <em>not</em> symmetric!
 	 */
 	public static boolean isSubsignature(IMethodBinding overriding, IMethodBinding overridden) {
-		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution		
+		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution
 		if (!overriding.getName().equals(overridden.getName()))
 			return false;
-			
+
 		ITypeBinding[] m1Params= overriding.getParameterTypes();
 		ITypeBinding[] m2Params= overridden.getParameterTypes();
 		if (m1Params.length != m2Params.length)
 			return false;
-		
+
 		ITypeBinding[] m1TypeParams= overriding.getTypeParameters();
 		ITypeBinding[] m2TypeParams= overridden.getTypeParameters();
 		if (m1TypeParams.length != m2TypeParams.length
 				&& m1TypeParams.length != 0) //non-generic m1 can override a generic m2
 			return false;
-		
+
 		//m1TypeParameters.length == (m2TypeParameters.length || 0)
 		if (m2TypeParams.length != 0) {
 			//Note: this branch does not 100% adhere to the spec and may report some false positives.
 			// Full compliance would require major duplication of compiler code.
-			
+
 			//Compare type parameter bounds:
 			for (int i= 0; i < m1TypeParams.length; i++) {
 				// loop over m1TypeParams, which is either empty, or equally long as m2TypeParams
@@ -677,9 +677,9 @@ public class Bindings {
 					return false;
 			}
 			return true;
-			
+
 		} else {
-			// m1TypeParams.length == m2TypeParams.length == 0  
+			// m1TypeParams.length == m2TypeParams.length == 0
 			if (equals(m1Params, m2Params))
 				return true;
 			for (int i= 0; i < m1Params.length; i++) {
@@ -721,7 +721,7 @@ public class Bindings {
 		int count= typeBounds.length;
 		if (count == 0)
 			return Collections.EMPTY_SET;
-		
+
 		Set result= new HashSet(typeBounds.length);
 		for (int i= 0; i < typeBounds.length; i++) {
 			ITypeBinding bound= typeBounds[i];
@@ -795,14 +795,14 @@ public class Bindings {
 			ITypeBinding res= findTypeInHierarchy(superInterfaces[i], fullyQualifiedTypeName);
 			if (res != null) {
 				return res;
-			}			
+			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the binding of the variable written in an Assignment.
-	 * @param assignment The assignment 
+	 * @param assignment The assignment
 	 * @return The binding or <code>null</code> if no bindings are available.
 	 */
 	public static IVariableBinding getAssignedVariable(Assignment assignment) {
@@ -811,7 +811,7 @@ public class Bindings {
 			case ASTNode.SIMPLE_NAME:
 				return (IVariableBinding) ((SimpleName) leftHand).resolveBinding();
 			case ASTNode.QUALIFIED_NAME:
-				return (IVariableBinding) ((QualifiedName) leftHand).getName().resolveBinding();				
+				return (IVariableBinding) ((QualifiedName) leftHand).getName().resolveBinding();
 			case ASTNode.FIELD_ACCESS:
 				return ((FieldAccess) leftHand).resolveFieldBinding();
 			case ASTNode.SUPER_FIELD_ACCESS:
@@ -820,7 +820,7 @@ public class Bindings {
 				return null;
 		}
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the given type is a super type of a candidate.
 	 * <code>true</code> is returned if the two type bindings are identical (TODO)
@@ -842,13 +842,13 @@ public class Bindings {
 				return true;
 			}
 		}
-		
+
 		if (possibleSuperType.isInterface()) {
 			ITypeBinding[] superInterfaces= type.getInterfaces();
 			for (int i= 0; i < superInterfaces.length; i++) {
 				if (isSuperType(possibleSuperType, superInterfaces[i])) {
 					return true;
-				}			
+				}
 			}
 		}
 		return false;
@@ -882,7 +882,7 @@ public class Bindings {
 	 */
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
 		method= method.getMethodDeclaration();
-		
+
 		IMethod[] candidates= type.getMethods();
 		for (int i= 0; i < candidates.length; i++) {
 			IMethod candidate= candidates[i];
@@ -891,10 +891,10 @@ public class Bindings {
 			}
 		}
 		return null;
-	}			
+	}
 
 	//---- Helper methods to convert a method ---------------------------------------------
-	
+
 	private static boolean sameParameters(IMethodBinding method, IMethod candidate) throws JavaModelException {
 		ITypeBinding[] methodParamters= method.getParameterTypes();
 		String[] candidateParameters= candidate.getParameterTypes();
@@ -913,23 +913,23 @@ public class Bindings {
 	private static boolean sameParameter(ITypeBinding type, String candidate, IType scope) throws JavaModelException {
 		if (type.getDimensions() != Signature.getArrayCount(candidate))
 			return false;
-			
+
 		// Normalizes types
 		if (type.isArray())
 			type= type.getElementType();
 		candidate= Signature.getElementType(candidate);
-		
+
 		if ((Signature.getTypeSignatureKind(candidate) == Signature.BASE_TYPE_SIGNATURE) != type.isPrimitive()) {
 			return false;
 		}
-			
+
 		if (type.isPrimitive() || type.isTypeVariable()) {
 			return type.getName().equals(Signature.toString(candidate));
 		} else {
 			// normalize (quick hack until binding.getJavaElement works)
 			candidate= Signature.getTypeErasure(candidate);
 			type= type.getErasure();
-			
+
 			if (candidate.charAt(Signature.getArrayCount(candidate)) == Signature.C_RESOLVED) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
 			} else {
@@ -950,9 +950,9 @@ public class Bindings {
 	}
 
 	/**
-	 * Normalizes a type binding received from an expression to a type binding that can be used in a declaration signature. 
+	 * Normalizes a type binding received from an expression to a type binding that can be used in a declaration signature.
 	 * Anonymous types are normalized, to the super class or interface. For null or void bindings
-	 * <code>null</code> is returned. 
+	 * <code>null</code> is returned.
 	 * @param binding the binding to normalize
 	 * @return the normalized binding
 	 */
@@ -972,7 +972,7 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	public static boolean isVoidType(ITypeBinding binding) {
 		return "void".equals(binding.getName()); //$NON-NLS-1$
 	}
@@ -983,7 +983,7 @@ public class Bindings {
 	 * null bindings Object is returned.
 	 * @param binding binding to normalize
 	 * @param ast current ast
-	 * 
+	 *
 	 * @return the normalized type to be used in declarations
 	 */
 	public static ITypeBinding normalizeForDeclarationUse(ITypeBinding binding, AST ast) {
@@ -1017,7 +1017,7 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the type binding of the node's type context or null if the node is an annotation, type parameter or super type declaration of a tope level type.
 	 * The result of this method is equal to the result of {@link #getBindingOfParentType(ASTNode)} for nodes in the type's body.
@@ -1044,7 +1044,7 @@ public class Bindings {
 		return null;
 	}
 
-	
+
 	public static String getRawName(ITypeBinding binding) {
 		String name= binding.getName();
 		if (binding.isParameterizedType() || binding.isGenericType()) {
@@ -1055,19 +1055,19 @@ public class Bindings {
 		}
 		return name;
 	}
-	
+
 
 	public static String getRawQualifiedName(ITypeBinding binding) {
 		final String EMPTY= ""; //$NON-NLS-1$
-		
+
 		if (binding.isAnonymous() || binding.isLocal()) {
-			return EMPTY; 
+			return EMPTY;
 		}
-		
+
 		if (binding.isPrimitive() || binding.isNullType() || binding.isTypeVariable()) {
 			return binding.getName();
 		}
-		
+
 		if (binding.isArray()) {
 			String elementTypeQualifiedName = getRawQualifiedName(binding.getElementType());
 			if (elementTypeQualifiedName.length() != 0) {
@@ -1101,7 +1101,7 @@ public class Bindings {
 		}
 		return EMPTY;
 	}
-	
+
 
 	/**
 	 * Tests if the given node is a declaration, not a instance of a generic type, method or field.
@@ -1120,8 +1120,8 @@ public class Bindings {
 		}
 		return true;
 	}
-	
-	
+
+
 	public static IBinding getDeclaration(IBinding binding) {
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
@@ -1155,13 +1155,13 @@ public class Bindings {
 
 		if (!overridden.isConstructor() || !overridable.isConstructor())
 			return false;
-		
+
 		if (overridden.isDefaultConstructor())
 			return false;
-		
+
 		return areSubTypeCompatible(overridden, overridable);
 	}
-	
+
 	/**
 	 * @param overridden the overridden method
 	 * @param overridable the overriding method
@@ -1179,18 +1179,18 @@ public class Bindings {
 	}
 
 	private static boolean areSubTypeCompatible(IMethodBinding overridden, IMethodBinding overridable) {
-		
+
 		if (overridden.getParameterTypes().length != overridable.getParameterTypes().length)
 			return false;
-		
+
 		ITypeBinding overriddenReturn= overridden.getReturnType();
 		ITypeBinding overridableReturn= overridable.getReturnType();
 		if (overriddenReturn == null || overridableReturn == null)
 			return false;
-		
+
 		if (!overriddenReturn.getErasure().isSubTypeCompatible(overridableReturn.getErasure()))
 			return false;
-		
+
 		ITypeBinding[] overriddenTypes= overridden.getParameterTypes();
 		ITypeBinding[] overridableTypes= overridable.getParameterTypes();
 		Assert.isTrue(overriddenTypes.length == overridableTypes.length);
@@ -1218,7 +1218,7 @@ public class Bindings {
 	/**
 	 * Returns the boxed type binding according to JLS3 5.1.7, or the original binding if
 	 * the given type is not a primitive type.
-	 * 
+	 *
 	 * @param type a type binding
 	 * @param ast an AST to resolve the boxed type
 	 * @return the boxed type, or the original type if no boxed type found
@@ -1238,30 +1238,30 @@ public class Bindings {
 	private static String getBoxedTypeName(String primitiveName) {
 		if ("long".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Long"; //$NON-NLS-1$
-		
+
 		else if ("int".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Integer"; //$NON-NLS-1$
-		
+
 		else if ("short".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Short"; //$NON-NLS-1$
-		
+
 		else if ("char".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Character"; //$NON-NLS-1$
-		
+
 		else if ("byte".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Byte"; //$NON-NLS-1$
-		
+
 		else if ("boolean".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Boolean"; //$NON-NLS-1$
-		
+
 		else if ("float".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Float"; //$NON-NLS-1$
-		
+
 		else if ("double".equals(primitiveName)) //$NON-NLS-1$
 			return "java.lang.Double"; //$NON-NLS-1$
-		
-		else 
+
+		else
 			return null;
 	}
-	
+
 }

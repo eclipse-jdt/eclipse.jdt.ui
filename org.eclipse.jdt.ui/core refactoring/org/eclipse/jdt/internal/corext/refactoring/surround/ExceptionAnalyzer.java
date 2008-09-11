@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
 	private Selection fSelection;
-	
+
 	private static class ExceptionComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			int d1= getDepth((ITypeBinding)o1);
@@ -57,12 +57,12 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 			return result;
 		}
 	}
-	
+
 	private ExceptionAnalyzer(Selection selection) {
 		Assert.isNotNull(selection);
 		fSelection= selection;
 	}
-	
+
 	public static ITypeBinding[] perform(BodyDeclaration enclosingNode, Selection selection) {
 		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(selection);
 		enclosingNode.accept(analyzer);
@@ -88,40 +88,40 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (!isSelected(node) || exception == null || Bindings.isRuntimeException(exception)) // Safety net for null bindings when compiling fails.
 			return true;
-		
+
 		addException(exception);
 		return true;
 	}
-	
+
 	public boolean visit(MethodInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveMethodBinding());
 	}
-	
+
 	public boolean visit(SuperMethodInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveMethodBinding());
 	}
-	
+
 	public boolean visit(ClassInstanceCreation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveConstructorBinding());
 	}
-	
+
 	public boolean visit(ConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveConstructorBinding());
 	}
-	
+
 	public boolean visit(SuperConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(node.resolveConstructorBinding());
-	}	
+	}
 
 	private boolean handleExceptions(IMethodBinding binding) {
 		if (binding == null)
@@ -132,7 +132,7 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		}
 		return true;
 	}
-		
+
 	private boolean isSelected(ASTNode node) {
 		return fSelection.getVisitSelectionMode(node) == Selection.SELECTED;
 	}

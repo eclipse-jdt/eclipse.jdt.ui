@@ -10,20 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 public class InlineMethodWizard extends RefactoringWizard {
-	
+
 	/* package */ static final String DIALOG_SETTING_SECTION= "InlineMethodWizard"; //$NON-NLS-1$
-	
+
 	public InlineMethodWizard(InlineMethodRefactoring ref){
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		setDefaultPageTitle(RefactoringMessages.InlineMethodWizard_page_title);  
+		setDefaultPageTitle(RefactoringMessages.InlineMethodWizard_page_title);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 

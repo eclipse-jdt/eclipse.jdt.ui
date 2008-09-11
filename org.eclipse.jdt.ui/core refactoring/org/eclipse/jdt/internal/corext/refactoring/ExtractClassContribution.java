@@ -32,7 +32,7 @@ public class ExtractClassContribution extends JavaRefactoringContribution {
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
 		return new ExtractClassDescriptor(project, description, comment, arguments, flags);
 	}
-	
+
 	public RefactoringDescriptor createDescriptor() {
 		return new ExtractClassDescriptor();
 	}

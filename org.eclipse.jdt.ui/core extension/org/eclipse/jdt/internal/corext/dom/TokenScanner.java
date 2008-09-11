@@ -29,18 +29,18 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
- * Wraps a scanner and offers convenient methods for finding tokens 
+ * Wraps a scanner and offers convenient methods for finding tokens
  */
 public class TokenScanner {
-	
+
 	public static final int END_OF_FILE= 20001;
 	public static final int LEXICAL_ERROR= 20002;
 	public static final int DOCUMENT_ERROR= 20003;
-	
+
 	private IScanner fScanner;
 	private IDocument fDocument;
 	private int fEndPosition;
-	
+
 	/**
 	 * Creates a TokenScanner
 	 * @param scanner The scanner to be wrapped. The scanner has to support line information
@@ -49,7 +49,7 @@ public class TokenScanner {
 	public TokenScanner(IScanner scanner) {
 		this(scanner, null);
 	}
-	
+
 	/**
 	 * Creates a TokenScanner
 	 * @param scanner The scanner to be wrapped
@@ -60,7 +60,7 @@ public class TokenScanner {
 		fEndPosition= fScanner.getSource().length - 1;
 		fDocument= document;
 	}
-	
+
 	/**
 	 * Creates a TokenScanner
 	 * @param document The textbuffer to create the scanner on
@@ -74,7 +74,7 @@ public class TokenScanner {
 		fDocument= document;
 		fEndPosition= fScanner.getSource().length - 1;
 	}
-	
+
 	/**
 	 * Creates a TokenScanner
 	 * @param typeRoot The type root to scan on
@@ -93,8 +93,8 @@ public class TokenScanner {
 		fScanner.setSource(buffer.getCharacters());
 		fDocument= null; // use scanner for line information
 		fEndPosition= fScanner.getSource().length - 1;
-	}	
-		
+	}
+
 	/**
 	 * Returns the wrapped scanner
 	 * @return IScanner
@@ -102,7 +102,7 @@ public class TokenScanner {
 	public IScanner getScanner() {
 		return fScanner;
 	}
-	
+
 	/**
 	 * Sets the scanner offset to the given offset.
 	 * @param offset The offset to set
@@ -110,27 +110,27 @@ public class TokenScanner {
 	public void setOffset(int offset) {
 		fScanner.resetTo(offset, fEndPosition);
 	}
-	
+
 	/**
 	 * @return Returns the offset after the current token
-	 */	
+	 */
 	public int getCurrentEndOffset() {
 		return fScanner.getCurrentTokenEndPosition() + 1;
 	}
 
 	/**
 	 * @return Returns the start offset of the current token
-	 */		
+	 */
 	public int getCurrentStartOffset() {
 		return fScanner.getCurrentTokenStartPosition();
 	}
-	
+
 	/**
 	 * @return Returns the length of the current token
-	 */	
+	 */
 	public int getCurrentLength() {
 		return getCurrentEndOffset() - getCurrentStartOffset();
-	}	
+	}
 
 	/**
 	 * Reads the next token.
@@ -148,12 +148,12 @@ public class TokenScanner {
 					throw new CoreException(createError(END_OF_FILE, "End Of File", null)); //$NON-NLS-1$
 				}
 			} catch (InvalidInputException e) {
-				throw new CoreException(createError(LEXICAL_ERROR, e.getMessage(), e)); 
+				throw new CoreException(createError(LEXICAL_ERROR, e.getMessage(), e));
 			}
 		} while (ignoreComments && isComment(curr));
 		return curr;
 	}
-	
+
 	/**
 	 * Reads the next token.
 	 * @param ignoreComments If set, comments will be overread.
@@ -167,12 +167,12 @@ public class TokenScanner {
 			try {
 				curr= fScanner.getNextToken();
 			} catch (InvalidInputException e) {
-				throw new CoreException(createError(LEXICAL_ERROR, e.getMessage(), e)); 
+				throw new CoreException(createError(LEXICAL_ERROR, e.getMessage(), e));
 			}
 		} while (ignoreComments && isComment(curr));
 		return curr;
-	}	
-	
+	}
+
 	/**
 	 * Reads the next token from the given offset.
 	 * @param offset The offset to start reading from.
@@ -180,37 +180,37 @@ public class TokenScanner {
 	 * @return Returns the token id.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */		
+	 */
 	public int readNext(int offset, boolean ignoreComments) throws CoreException {
 		setOffset(offset);
 		return readNext(ignoreComments);
 	}
-	
+
 	/**
 	 * Reads the next token from the given offset and returns the start offset of the token.
 	 * @param offset The offset to start reading from.
 	 * @param ignoreComments If set, comments will be overread
-	 * @return Returns the start position of the next token. 
+	 * @return Returns the start position of the next token.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */	
+	 */
 	public int getNextStartOffset(int offset, boolean ignoreComments) throws CoreException {
 		readNext(offset, ignoreComments);
 		return getCurrentStartOffset();
 	}
-	
+
 	/**
 	 * Reads the next token from the given offset and returns the offset after the token.
 	 * @param offset The offset to start reading from.
 	 * @param ignoreComments If set, comments will be overread
-	 * @return Returns the end position of the next token. 
+	 * @return Returns the end position of the next token.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */		
+	 */
 	public int getNextEndOffset(int offset, boolean ignoreComments) throws CoreException {
 		readNext(offset, ignoreComments);
 		return getCurrentEndOffset();
-	}		
+	}
 
 	/**
 	 * Reads until a token is reached.
@@ -222,7 +222,7 @@ public class TokenScanner {
 		int curr= 0;
 		do {
 			curr= readNext(false);
-		} while (curr != tok); 
+		} while (curr != tok);
 	}
 
 	/**
@@ -231,7 +231,7 @@ public class TokenScanner {
 	 * @param offset The offset to start reading from.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */			
+	 */
 	public void readToToken(int tok, int offset) throws CoreException {
 		setOffset(offset);
 		readToToken(tok);
@@ -241,28 +241,28 @@ public class TokenScanner {
 	 * Reads from the given offset until a token is reached and returns the start offset of the token.
 	 * @param token The token to be found.
 	 * @param startOffset The offset to start reading from.
-	 * @return Returns the start position of the found token. 
+	 * @return Returns the start position of the found token.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */	
+	 */
 	public int getTokenStartOffset(int token, int startOffset) throws CoreException {
 		readToToken(token, startOffset);
 		return getCurrentStartOffset();
-	}	
+	}
 
 	/**
 	 * Reads from the given offset until a token is reached and returns the offset after the token.
 	 * @param token The token to be found.
 	 * @param startOffset Offset to start reading from
-	 * @return Returns the end position of the found token. 
+	 * @return Returns the end position of the found token.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */		
+	 */
 	public int getTokenEndOffset(int token, int startOffset) throws CoreException {
 		readToToken(token, startOffset);
 		return getCurrentEndOffset();
 	}
-	
+
 	/**
 	 * Reads from the given offset until a token is reached and returns the offset after the previous token.
 	 * @param token The token to be found.
@@ -270,7 +270,7 @@ public class TokenScanner {
 	 * @return Returns the end offset of the token previous to the given token.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */		
+	 */
 	public int getPreviousTokenEndOffset(int token, int startOffset) throws CoreException {
 		setOffset(startOffset);
 		int res= startOffset;
@@ -281,22 +281,22 @@ public class TokenScanner {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * Evaluates the start offset of comments directly ahead of a token specified by its start offset
-	 * 
-	 * @param lastPos An offset to before the node start offset. Can be 0 but better is the end location of the previous node. 
+	 *
+	 * @param lastPos An offset to before the node start offset. Can be 0 but better is the end location of the previous node.
 	 * @param nodeStart Start offset of the node to find the comments for.
 	 * @return Returns the start offset of comments directly ahead of a token.
 	 * @exception CoreException Thrown when a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */		
+	 */
 	public int getTokenCommentStart(int lastPos, int nodeStart) throws CoreException {
 		setOffset(lastPos);
 
 		int prevEndPos= lastPos;
 		int prevEndLine= prevEndPos > 0 ? getLineOfOffset(prevEndPos - 1) : 0;
 		int nodeLine= getLineOfOffset(nodeStart);
-		
+
 		int res= -1;
 
 		int curr= readNextWithEOF(false);
@@ -311,12 +311,12 @@ public class TokenScanner {
 			} else {
 				res= -1;
 			}
-			
+
 			if (curr == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 				prevEndLine= currStartLine;
 			} else {
 				prevEndLine= getLineOfOffset(getCurrentEndOffset() - 1);
-			}					
+			}
 			curr= readNextWithEOF(false);
 			currStartPos= getCurrentStartOffset();
 			currStartLine= getLineOfOffset(currStartPos);
@@ -326,10 +326,10 @@ public class TokenScanner {
 		}
 		if (currStartLine - prevEndLine > 1) {
 			return nodeStart;
-		}			
+		}
 		return res;
 	}
-	
+
 	/**
 	 * Looks for comments after a node and returns the end position of the comment still belonging to the node.
 	 * @param nodeEnd The end position of the node
@@ -338,7 +338,7 @@ public class TokenScanner {
 	 * @return Returns returns the end position of the comment still belonging to the node.
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
-	 */		
+	 */
 	public int getTokenCommentEnd(int nodeEnd, int nextTokenStart) throws CoreException {
 		// assign comments to the previous comments as long they are all on the same line as the
 		// node end position or if they are on the next line but there is a separation from the next
@@ -353,15 +353,15 @@ public class TokenScanner {
 		// cc/*
 		// /*dd*/
 		// public void d...
-		
+
 		int prevEndLine= getLineOfOffset(nodeEnd - 1);
 		int prevEndPos= nodeEnd;
 		int res= nodeEnd;
 		boolean sameLineComment= true;
-		
+
 		setOffset(nodeEnd);
-		
-		
+
+
 		int curr= readNextWithEOF(false);
 		while (curr == ITerminalSymbols.TokenNameCOMMENT_LINE || curr == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
 			int currStartLine= getLineOfOffset(getCurrentStartOffset());
@@ -397,19 +397,19 @@ public class TokenScanner {
 		}
 		return res;
 	}
-	
+
 	public int getLineOfOffset(int offset) throws CoreException {
 		if (fDocument != null) {
 			try {
 				return fDocument.getLineOfOffset(offset);
 			} catch (BadLocationException e) {
 				String message= "Illegal offset: " + offset; //$NON-NLS-1$
-				throw new CoreException(createError(DOCUMENT_ERROR, message, e)); 
+				throw new CoreException(createError(DOCUMENT_ERROR, message, e));
 			}
 		}
 		return getScanner().getLineNumber(offset);
 	}
-	
+
 	public int getLineEnd(int line) throws CoreException {
 		if (fDocument != null) {
 			try {
@@ -417,17 +417,17 @@ public class TokenScanner {
 				return region.getOffset() + region.getLength();
 			} catch (BadLocationException e) {
 				String message= "Illegal line: " + line; //$NON-NLS-1$
-				throw new CoreException(createError(DOCUMENT_ERROR, message, e)); 
+				throw new CoreException(createError(DOCUMENT_ERROR, message, e));
 			}
 		}
 		return getScanner().getLineEnd(line);
-	}			
+	}
 
 	public static boolean isComment(int token) {
-		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC 
+		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC
 			|| token == ITerminalSymbols.TokenNameCOMMENT_LINE;
 	}
-	
+
 	public static boolean isModifier(int token) {
 		switch (token) {
 			case ITerminalSymbols.TokenNamepublic:
@@ -446,7 +446,7 @@ public class TokenScanner {
 				return false;
 		}
 	}
-	
+
 	private IStatus createError(int code, String message, Throwable e) {
 		return JavaUIStatus.createError(code, message, e);
 	}

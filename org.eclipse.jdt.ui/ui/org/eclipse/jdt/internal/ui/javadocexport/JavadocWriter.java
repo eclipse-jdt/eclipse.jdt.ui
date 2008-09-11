@@ -27,6 +27,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -38,14 +42,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 public class JavadocWriter {
-	
+
 	private static final char PATH_SEPARATOR= '/'; // use forward slash for all platforms
-	
+
 	private final IJavaProject[] fJavaProjects;
 	private final IPath fBasePath;
 
@@ -53,7 +53,7 @@ public class JavadocWriter {
 	 * Create a JavadocWriter.
 	 * @param basePath The base path to which all path will be made relative (if
 	 * possible). If <code>null</code>, paths are not made relative.
-	 * @param projects 
+	 * @param projects
 	 */
 	public JavadocWriter(IPath basePath, IJavaProject[] projects) {
 		fBasePath= basePath;
@@ -80,7 +80,7 @@ public class JavadocWriter {
 
 		Element xmlJavadocDesc= document.createElement("javadoc"); //$NON-NLS-1$
 		javadocTarget.appendChild(xmlJavadocDesc);
-		
+
 		if (!store.isFromStandard())
 			xmlWriteDoclet(store, document, xmlJavadocDesc);
 		else
@@ -88,7 +88,7 @@ public class JavadocWriter {
 
 		return xmlJavadocDesc;
 	}
-	
+
 	/**
 	 * Writes the document to the given stream.
 	 * It is the client's responsibility to close the output stream.
@@ -158,7 +158,7 @@ public class JavadocWriter {
 		if (title.length() > 0)
 			xmlJavadocDesc.setAttribute(store.TITLE, title);
 
-		
+
 		String vmArgs= store.getVMParams();
 		String additionalArgs= store.getAdditionalParams();
 		if (vmArgs.length() + additionalArgs.length() > 0) {
@@ -192,11 +192,11 @@ public class JavadocWriter {
 
 	private String getPathString(IPath[] paths) {
 		StringBuffer buf= new StringBuffer();
-		
+
 		for (int i= 0; i < paths.length; i++) {
 			if (buf.length() != 0) {
 				buf.append(File.pathSeparatorChar);
-			}			
+			}
 			buf.append(getPathString(paths[i]));
 		}
 
@@ -233,7 +233,7 @@ public class JavadocWriter {
 		IPath workspaceLoc= ResourcesPlugin.getWorkspace().getRoot().getLocation();
 		if (workspaceLoc.segmentCount() <= matchingSegments && workspaceLoc.isPrefixOf(fullPath)) {
 			return getRelativePath(fullPath, matchingSegments);
-		}		
+		}
 		return fullPath.toOSString();
 	}
 
@@ -277,11 +277,11 @@ public class JavadocWriter {
 		doclet.setAttribute(store.PATH, store.getDocletPath());
 
 		String str= store.getOverview();
-		if (str.length() > 0) 
+		if (str.length() > 0)
 			xmlJavadocDesc.setAttribute(store.OVERVIEW, str);
 
 		str= store.getAdditionalParams();
-		if (str.length() > 0) 
+		if (str.length() > 0)
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 
 	}

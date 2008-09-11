@@ -27,25 +27,25 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 
     private NewAnnotationWizardPage fPage;
     private boolean fOpenEditorOnFinish;
-	
+
 	public NewAnnotationCreationWizard(NewAnnotationWizardPage page, boolean openEditorOnFinish) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWANNOT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewAnnotationCreationWizard_title);
-		
+
 		fPage= page;
 		fOpenEditorOnFinish= openEditorOnFinish;
 	}
-	
+
 	public NewAnnotationCreationWizard() {
 		this(null, true);
 	}
 
 	/*
 	 * @see Wizard#addPages
-	 */	
+	 */
 	public void addPages() {
-		super.addPages();		
+		super.addPages();
 		if (fPage == null) {
 			fPage= new NewAnnotationWizardPage();
 			fPage.init(getSelection());
@@ -53,7 +53,7 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 		addPage(fPage);
 
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#canRunForked()
 	 */
@@ -67,7 +67,7 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createType(monitor); // use the full progress monitor
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
@@ -81,15 +81,15 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 				if (fOpenEditorOnFinish) {
 					openResource((IFile) resource);
 				}
-			}	
+			}
 		}
 		return res;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
 	 */
 	public IJavaElement getCreatedElement() {
 		return fPage.getCreatedType();
-	}	
+	}
 }

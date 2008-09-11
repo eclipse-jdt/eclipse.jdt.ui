@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -58,12 +58,12 @@ public class NewNameQueries implements INewNameQueries {
 		fShell= null;
 		fWizard= null;
 	}
-	
+
 	public NewNameQueries(Wizard wizard) {
 		fWizard= wizard;
 		fShell= null;
 	}
-	
+
 	public NewNameQueries(Shell shell) {
 		fShell = shell;
 		fWizard= null;
@@ -73,7 +73,7 @@ public class NewNameQueries implements INewNameQueries {
 		Assert.isTrue(fWizard == null || fShell == null);
 		if (fWizard != null)
 			return fWizard.getContainer().getShell();
-			
+
 		if (fShell != null)
 			return fShell;
 		return JavaPlugin.getActiveWorkbenchShell();
@@ -81,27 +81,27 @@ public class NewNameQueries implements INewNameQueries {
 
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
 		String[] keys= { BasicElementLabels.getJavaElementName(JavaCore.removeJavaLikeExtension(cu.getElementName()))};
-		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell());
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) {
 		String[] keys= { BasicElementLabels.getResourceName(res)};
-		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
 		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, getShell());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) {
 		String[] keys= {JavaElementLabels.getElementLabel(pack, JavaElementLabels.ALL_DEFAULT)};
-		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
 		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, getShell());
 	}
 
 	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 		String[] keys= {JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT)};
-		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
+		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
 		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, getShell());
 	}
 
@@ -145,16 +145,16 @@ public class NewNameQueries implements INewNameQueries {
 				if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
 				if (res.getParent().findMember(newText) != null)
-					return ReorgMessages.ReorgQueries_resourceWithThisNameAlreadyExists; 
+					return ReorgMessages.ReorgQueries_resourceWithThisNameAlreadyExists;
 				if (! res.getParent().getFullPath().isValidSegment(newText))
-					return ReorgMessages.ReorgQueries_invalidNameMessage; 
+					return ReorgMessages.ReorgQueries_invalidNameMessage;
 				IStatus status= res.getParent().getWorkspace().validateName(newText, res.getType());
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
-					
+
 				if (res.getName().equalsIgnoreCase(newText))
-					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage; 
-					
+					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
+
 				return null;
 			}
 		};
@@ -167,7 +167,7 @@ public class NewNameQueries implements INewNameQueries {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
 				String newCuName= JavaModelUtil.getRenamedCUName(cu, newText);
-				IStatus status= JavaConventionsUtil.validateCompilationUnitName(newCuName, cu);	
+				IStatus status= JavaConventionsUtil.validateCompilationUnitName(newCuName, cu);
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
 				RefactoringStatus refStatus;
@@ -176,9 +176,9 @@ public class NewNameQueries implements INewNameQueries {
 					return refStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 
 				if (cu.getElementName().equalsIgnoreCase(newCuName))
-					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage; 
-				
-				return null;	
+					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
+
+				return null;
 			}
 		};
 		return validator;
@@ -193,7 +193,7 @@ public class NewNameQueries implements INewNameQueries {
 			}
 		};
 	}
-	
+
 	private static IInputValidator createPackageNameValidator(final IPackageFragment pack) {
 		IInputValidator validator= new IInputValidator(){
 			public String isValid(String newText) {
@@ -202,22 +202,22 @@ public class NewNameQueries implements INewNameQueries {
 				IStatus status= JavaConventionsUtil.validatePackageName(newText, pack);
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
-				
+
 				IJavaElement parent= pack.getParent();
 				try {
-					if (parent instanceof IPackageFragmentRoot){ 
+					if (parent instanceof IPackageFragmentRoot){
 						if (! RenamePackageProcessor.isPackageNameOkInRoot(newText, (IPackageFragmentRoot)parent))
-							return ReorgMessages.ReorgQueries_packagewithThatNameexistsMassage;	 
-					}	
+							return ReorgMessages.ReorgQueries_packagewithThatNameexistsMassage;
+					}
 				} catch (CoreException e) {
 					return INVALID_NAME_NO_MESSAGE;
 				}
 				if (pack.getElementName().equalsIgnoreCase(newText))
-					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage; 
-					
+					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
+
 				return null;
 			}
-		};	
+		};
 		return validator;
-	}			
+	}
 }

@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import com.ibm.icu.text.Bidi;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
+import com.ibm.icu.text.Bidi;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
@@ -28,6 +26,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -418,9 +418,9 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		// Use LEFT_TO_RIGHT unless otherwise specified.
 		if ((styles & SWT.RIGHT_TO_LEFT) == 0 && (styles & SWT.LEFT_TO_RIGHT) == 0)
 			styles |= SWT.LEFT_TO_RIGHT;
-		
+
 		final int baseLevel= (styles & SWT.RIGHT_TO_LEFT) != 0 ? Bidi.DIRECTION_RIGHT_TO_LEFT : Bidi.DIRECTION_LEFT_TO_RIGHT;
-		
+
 		super.createControl(parent, styles);
 
 		fBackspaceManager= new SmartBackspaceManager();
@@ -596,7 +596,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @return <code>true</code> if the character level is odd and the base
 	 *         level is even OR the character level is even and the base level
 	 *         is odd, and return <code>false</code> otherwise.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static boolean isMismatchingLevel(int level, int baseLevel) {
@@ -610,7 +610,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * This is a performance optimization to reduce the computation of
 	 * the text presentation triggered by <code>setVisibleDocument(IDocument)</code>.
 	 * </p>
-	 * 
+	 *
 	 * @see #setVisibleDocument(IDocument)
 	 * @since 3.1
 	 */
@@ -618,7 +618,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		Assert.isTrue(!fIsSetVisibleDocumentDelayed);
 		fIsSetVisibleDocumentDelayed= true;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -638,7 +638,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			if (current != null && current != previous)
 				return;
 		}
-		
+
 		super.setVisibleDocument(document);
 	}
 

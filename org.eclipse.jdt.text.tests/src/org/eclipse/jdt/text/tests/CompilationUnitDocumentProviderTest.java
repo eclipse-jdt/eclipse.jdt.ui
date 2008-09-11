@@ -42,20 +42,20 @@ import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 
 
 public class CompilationUnitDocumentProviderTest extends TestCase {
-	
+
 	private IJavaProject fJavaProject;
 	private IProject fLinkedProject;
 
 	public CompilationUnitDocumentProviderTest(String name) {
 		super(name);
 	}
-			
+
 	private void setupProject() throws CoreException, JavaModelException {
 		fJavaProject= JavaProjectHelper.createJavaProject("P", "bin");
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		IPackageFragment pack= root.createPackageFragment("testA.testB", true, null);
-		
+
 		ICompilationUnit cu= pack.getCompilationUnit("A.java");
 		IType type= cu.createType("public class A {\n}\n", null, true, null);
 		type.createMethod("public void a() {}\n", null, true, null);
@@ -64,17 +64,17 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 
 	/**
 	 * Removes the test java project.
-	 * 
+	 *
 	 * @throws CoreException if deletion fails
 	 */
 	protected void tearDown() throws CoreException {
 		if (fJavaProject != null)
 			JavaProjectHelper.delete(fJavaProject);
-		
+
 		if (fLinkedProject != null)
 			ResourceHelper.delete(fLinkedProject, false);
 	}
-				
+
 	public void test1() throws Exception {
 		setupProject();
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(new Path("/P/src/testA/testB/A.java"));
@@ -92,21 +92,21 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		IFile file= root.getFile(new Path("/P/src2/test1/test2/C.java"));
 		checkFile(file);
 	}
-	
+
 	public void test3() throws Exception {
 		fLinkedProject= ResourceHelper.createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
 		assertNotNull(fLinkedProject);
 		assertTrue(fLinkedProject.exists());
-		
+
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IFile file= root.getFile(new Path("/P2/test1/test2/C.java"));
 		checkFile(file);
 	}
-	
+
 	public void testNewFile() throws Exception {
 		setupProject();
 		String source= "// some source";
-		
+
 		IFolder folder= ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path("/P/src/testA/testB/"));
 		IPackageFragment frag= (IPackageFragment)JavaCore.create(folder);
 		ICompilationUnit cu= frag.getCompilationUnit("New.java");
@@ -116,19 +116,19 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		cu.reconcile(ICompilationUnit.NO_AST, true, null, null);
 		cu.commitWorkingCopy(true, null);
 		cu.discardWorkingCopy();
-		
+
 		cu= frag.getCompilationUnit("New.java");
-		
+
 		assertEquals(source, cu.getSource());
 	}
-	
+
 	private void checkFile(IFile file) throws CoreException {
 		assertNotNull(file);
 		IEditorInput input= new FileEditorInput(file);
-		
+
 		ICompilationUnitDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 		assertNotNull(provider);
-		
+
 		provider.connect(input);
 		assertNotNull(provider.getDocument(input));
 		assertNotNull(provider.getAnnotationModel(input));

@@ -17,13 +17,13 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 /**
  * A alphabetic proposal based sorter.
- * 
+ *
  * @since 3.2
  */
 public final class AlphabeticSorter extends AbstractProposalSorter {
 
 	private final CompletionProposalComparator fComparator= new CompletionProposalComparator();
-	
+
 	public AlphabeticSorter() {
 		fComparator.setOrderAlphabetically(true);
 	}

@@ -16,9 +16,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -35,6 +32,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -63,6 +63,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.model.WorkbenchViewerComparator;
+
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -81,14 +82,14 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * The page for setting the properties file editor preferences.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-	
-	
+
+
 	private static class SourcePreviewerUpdater {
-		
+
 		/**
 		 * Creates a Java source preview updater for the given viewer, configuration and preference store.
 		 *
@@ -135,8 +136,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			preferenceStore.addPropertyChangeListener(propertyChangeListener);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Item in the highlighting color list.
 	 */
@@ -161,10 +162,10 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		private String fUnderlineKey;
 		/** Item color */
 		private Color fItemColor;
-		
+
 		/**
 		 * Initialize the item with the given values.
-		 * 
+		 *
 		 * @param displayName the display name
 		 * @param colorKey the color preference key
 		 * @param boldKey the bold preference key
@@ -182,14 +183,14 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			fUnderlineKey= underlineKey;
 			fItemColor= itemColor;
 		}
-		
+
 		/**
 		 * @return the bold preference key
 		 */
 		public String getBoldKey() {
 			return fBoldKey;
 		}
-		
+
 		/**
 		 * @return the italic preference key
 		 */
@@ -203,7 +204,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		public String getStrikethroughKey() {
 			return fStrikethroughKey;
 		}
-		
+
 		/**
 		 * @return the underline preference key
 		 * @since 3.1
@@ -211,21 +212,21 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		public String getUnderlineKey() {
 			return fUnderlineKey;
 		}
-		
+
 		/**
 		 * @return the color preference key
 		 */
 		public String getColorKey() {
 			return fColorKey;
 		}
-		
+
 		/**
 		 * @return the display name
 		 */
 		public String getDisplayName() {
 			return fDisplayName;
 		}
-		
+
 		/**
 		 * @return the item color
 		 */
@@ -233,7 +234,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			return fItemColor;
 		}
 	}
-	
+
 	/**
 	 * Color list label provider.
 	 */
@@ -245,7 +246,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		public String getText(Object element) {
 			return ((HighlightingColorListItem)element).getDisplayName();
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 		 */
@@ -260,7 +261,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Color list content provider.
 	 */
@@ -285,25 +286,25 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
-	
+
 	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	/**
 	 * Preference key suffix for italic preferences.
 	 */
 	private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
-	
+
 	/**
 	 * Preference key suffix for strikethrough preferences.
 	 * @since 3.1
 	 */
 	private static final String STRIKETHROUGH= PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
-	
+
 	/**
 	 * Preference key suffix for underline preferences.
 	 * @since 3.1
 	 */
 	private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
-	
+
 	/** The keys of the overlay store. */
 	private final String[][] fSyntaxColorListModel= new String[][] {
 		{ PreferencesMessages.PropertiesFileEditorPreferencePage_key, PreferenceConstants.PROPERTIES_FILE_COLORING_KEY },
@@ -312,9 +313,9 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		{ PreferencesMessages.PropertiesFileEditorPreferencePage_argument, PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT },
 		{ PreferencesMessages.PropertiesFileEditorPreferencePage_comment, PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT }
 	};
-	
+
 	private OverlayPreferenceStore fOverlayStore;
-	
+
 	private ColorSelector fSyntaxForegroundColorEditor;
 	private Button fBoldCheckBox;
 
@@ -322,21 +323,21 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Check box for italic preference.
 	 */
 	private Button fItalicCheckBox;
-	
+
 	/**
 	 * Check box for strikethrough preference.
 	 * @since 3.1
 	 */
 	private Button fStrikethroughCheckBox;
-	
+
 	/**
 	 * Check box for underline preference.
 	 * @since 3.1
 	 */
 	private Button fUnderlineCheckBox;
-	
+
 	private SourceViewer fPreviewViewer;
-	
+
 	/**
 	 * Tells whether the fields are initialized.
 	 */
@@ -350,24 +351,24 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Highlighting color list viewer
 	 */
 	private TableViewer fHighlightingColorListViewer;
-	
+
 	/**
 	 * The color manager.
 	 */
 	private IColorManager fColorManager;
-	
+
 
 	/**
 	 * Creates a new preference page.
 	 */
 	public PropertiesFileEditorPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		
+
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
 	}
-	
+
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		
+
 		ArrayList overlayKeys= new ArrayList();
 
 		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
@@ -378,12 +379,12 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + STRIKETHROUGH));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + UNDERLINE));
 		}
-		
+
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
 	}
-	
+
 	/*
 	 * @see IWorkbenchPreferencePage#init()
 	 */
@@ -436,7 +437,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		fHighlightingColorListViewer.getControl().setLayoutData(gd);
-						
+
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -444,11 +445,11 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		layout.numColumns= 2;
 		stylesComposite.setLayout(layout);
 		stylesComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
-		
+
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
-		
+
 		label= new Label(stylesComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_color);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -459,52 +460,52 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		foregroundColorButton.setLayoutData(gd);
-		
+
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fBoldCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_bold);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
-		
+
 		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fItalicCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_italic);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
-		
+
 		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fStrikethroughCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_strikethrough);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fStrikethroughCheckBox.setLayoutData(gd);
-		
+
 		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
 		fUnderlineCheckBox.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_underline);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
 		gd.horizontalSpan= 2;
 		fUnderlineCheckBox.setLayoutData(gd);
-		
+
 		label= new Label(parent, SWT.LEFT);
 		label.setText(PreferencesMessages.PropertiesFileEditorPreferencePage_preview);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Control previewer= createPreviewer(parent);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(20);
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
 
-		
+
 		fHighlightingColorListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}
 		});
-		
+
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -524,7 +525,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				fOverlayStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
 			}
 		});
-				
+
 		fItalicCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -534,7 +535,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
-		
+
 		fStrikethroughCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -544,7 +545,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				fOverlayStore.setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
 			}
 		});
-		
+
 		fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -554,14 +555,14 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				fOverlayStore.setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
 			}
 		});
-		
+
 		parent.layout();
-		
+
 		return parent;
 	}
-	
+
 	private Control createPreviewer(Composite parent) {
-		
+
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, JavaPlugin.getDefault().getCombinedPreferenceStore()});
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
 		fColorManager= new JavaColorManager(false);
@@ -571,7 +572,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		fPreviewViewer.getTextWidget().setFont(font);
 		new SourcePreviewerUpdater(fPreviewViewer, configuration, store);
 		fPreviewViewer.setEditable(false);
-		
+
 		String content= loadPreviewContentFromFile("PropertiesFileEditorColorSettingPreviewCode.txt"); //$NON-NLS-1$
 		IDocument document= new Document(content);
 		PropertiesFileDocumentSetupParticipant.setupDocument(document);
@@ -593,13 +594,13 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		layout.marginWidth= 0;
 		contents.setLayout(layout);
 		contents.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		createHeader(contents);
-		
+
 		createSyntaxPage(contents);
 
 		initialize();
-		
+
 		Dialog.applyDialogFont(contents);
 		return contents;
 	}
@@ -617,17 +618,17 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
 		link.setToolTipText(PreferencesMessages.PropertiesFileEditorPreferencePage_link_tooltip);
 
-		
+
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
 		link.setLayoutData(gridData);
-		
+
 		addFiller(contents);
 	}
 
 	private void addFiller(Composite composite) {
 		PixelConverter pixelConverter= new PixelConverter(composite);
-		
+
 		Label filler= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
@@ -636,16 +637,16 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	}
 
 	private void initialize() {
-		
+
 		initializeFields();
-		
+
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
 			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, fSyntaxColorListModel[i][1] + STRIKETHROUGH, fSyntaxColorListModel[i][1] + UNDERLINE, null));
 
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);
 		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
 	}
-	
+
 	private void initializeFields() {
         fFieldsInitialized= true;
         updateStatus(new StatusInfo());
@@ -659,12 +660,12 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		JavaPlugin.getDefault().savePluginPreferences();
 		return true;
 	}
-	
+
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		
+
 		fOverlayStore.loadDefaults();
 
 		initializeFields();
@@ -675,22 +676,22 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		fPreviewViewer.invalidateTextPresentation();
 	}
-	
+
 	/*
 	 * @see DialogPage#dispose()
 	 */
 	public void dispose() {
-		
+
 		if (fOverlayStore != null) {
 			fOverlayStore.stop();
 			fOverlayStore= null;
 		}
-		
+
 		fColorManager.dispose();
 
 		super.dispose();
 	}
-	
+
 	private String loadPreviewContentFromFile(String filename) {
 		String line;
 		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
@@ -711,18 +712,18 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		}
 		return buffer.toString();
 	}
-	
+
 	void updateStatus(IStatus status) {
 		if (!fFieldsInitialized)
 			return;
-		
+
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
-	
+
 	/**
 	 * Returns the current highlighting color list item.
-	 * 
+	 *
 	 * @return the current highlighting color list item
 	 */
 	private HighlightingColorListItem getHighlightingColorListItem() {

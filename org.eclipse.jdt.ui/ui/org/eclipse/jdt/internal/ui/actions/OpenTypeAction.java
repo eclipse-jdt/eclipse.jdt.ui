@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -58,13 +58,13 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	public void run() {
 		runWithEvent(null);
 	}
-	
+
 	public void runWithEvent(Event e) {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		if (! doCreateProjectFirstOnEmptyWorkspace(parent)) {
 			return;
 		}
-		
+
 		SelectionDialog dialog;
 		if (e != null && e.stateMask == SWT.MOD1) {
 			// use old open type dialog when MOD1 (but no other modifier) is down:
@@ -111,8 +111,8 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	protected boolean doCreateProjectFirstOnEmptyWorkspace(Shell parent) {
 		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 		if (workspaceRoot.getProjects().length == 0) {
-			String title= JavaUIMessages.OpenTypeAction_dialogTitle; 
-			String message= JavaUIMessages.OpenTypeAction_createProjectFirst; 
+			String title= JavaUIMessages.OpenTypeAction_dialogTitle;
+			String message= JavaUIMessages.OpenTypeAction_createProjectFirst;
 			if (MessageDialog.openQuestion(parent, title, message)) {
 				new NewProjectAction().run();
 				return workspaceRoot.getProjects().length != 0;
@@ -121,7 +121,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		}
 		return true;
 	}
-	
+
 	// ---- IWorkbenchWindowActionDelegate
 	// ------------------------------------------------
 
@@ -140,14 +140,14 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	public void selectionChanged(IAction action, ISelection selection) {
 		// do nothing. Action doesn't depend on selection.
 	}
-	
+
 	// ---- IActionDelegate2
 	// ------------------------------------------------
 
 	public void runWithEvent(IAction action, Event event) {
 		runWithEvent(event);
 	}
-	
+
 	public void init(IAction action) {
 		// do nothing.
 	}

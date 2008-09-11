@@ -13,13 +13,13 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.text.edits.MalformedTreeException;
 
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.window.Window;
@@ -68,7 +68,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
 public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
-	
+
 	private final String fDeclarationSignature;
 	private final IType fSuperType;
 
@@ -92,14 +92,14 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 	private String createDummyType(String name) throws JavaModelException {
 		StringBuffer buffer= new StringBuffer();
-		
+
 		buffer.append("abstract class "); //$NON-NLS-1$
 		buffer.append(name);
 		if (fSuperType.isInterface())
 			buffer.append(" implements "); //$NON-NLS-1$
 		else
 			buffer.append(" extends "); //$NON-NLS-1$
-				
+
 		if (fDeclarationSignature != null)
 			buffer.append(Signature.toString(fDeclarationSignature));
 		else
@@ -125,7 +125,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 			// creates a type that extends the super type
 			String dummyClassContent= createDummyType(name);
-			
+
 			StringBuffer workingCopyContents= new StringBuffer(fCompilationUnit.getSource());
 			int insertPosition;
 			if (sameUnit) {
@@ -145,29 +145,29 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				 */
 				workingCopyContents.insert(insertPosition, dummyClassContent + "\n\n"); //$NON-NLS-1$
 			}
-			
+
 			workingCopy.getBuffer().setContents(workingCopyContents.toString());
 
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setResolveBindings(true);
 			parser.setStatementsRecovery(true);
 			parser.setSource(workingCopy);
-			
+
 			CompilationUnit astRoot= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 			ASTNode newType= NodeFinder.perform(astRoot, insertPosition, dummyClassContent.length());
 			if (!(newType instanceof AbstractTypeDeclaration))
 				return null;
-				
+
 			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) newType;
 			ITypeBinding dummyTypeBinding= declaration.resolveBinding();
 			if (dummyTypeBinding == null)
 				return null;
-				
+
 			IMethodBinding[] bindings= StubUtility2.getOverridableMethods(astRoot.getAST(), dummyTypeBinding, true);
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fSuperType.getJavaProject());
-			
+
 			IMethodBinding[] methodsToOverride= null;
-			
+
 			IType type= null;
 			if (!fSuperType.isInterface() && !fSuperType.isAnnotation()) {
 				IJavaElement typeElement= dummyTypeBinding.getJavaElement();
@@ -208,19 +208,19 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			}
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			ITrackedNodePosition trackedDeclaration= rewrite.track(declaration);
-			
+
 			ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			for (int i= 0; i < methodsToOverride.length; i++) {
 				IMethodBinding curr= methodsToOverride[i];
 				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, null, curr, dummyTypeBinding.getName(), settings, dummyTypeBinding.isInterface());
 				rewriter.insertFirst(stub, null);
 			}
-			
+
 
 			IDocument document= new Document(workingCopy.getSource());
 			try {
 				rewrite.rewriteAST().apply(document);
-				
+
 				int bodyStart= trackedDeclaration.getStartPosition() + dummyClassContent.indexOf('{');
 				int bodyEnd= trackedDeclaration.getStartPosition() + trackedDeclaration.getLength();
 				return document.get(bodyStart, bodyEnd - bodyStart);
@@ -271,9 +271,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		String newBody= createNewBody(impRewrite);
 		if (newBody == null)
 			return false;
-		
+
 		buf.append(newBody);
-		
+
 		if (document.getChar(offset) != ')')
 			buf.append(';');
 
@@ -297,7 +297,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		}
 		return true;
 	}
-	
+
 	/*
 	 * @see ICompletionProposalExtension#getContextInformationPosition()
 	 * @since 3.4
@@ -307,7 +307,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			setContextInformation(computeContextInformation());
 		return fContextInformationPosition;
 	}
-	
+
 
 	/*
 	 * @see ICompletionProposal#getContextInformation()
@@ -325,7 +325,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			fContextInformationPosition= getReplacementOffset() - 1;
 			if (!(proposalInfo instanceof MemberProposalInfo))
 				return null;
-			
+
 			CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
 			// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
@@ -345,7 +345,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	/**
 	 * Returns <code>true</code> if the method being inserted has at least one parameter. Note
 	 * that this does not say anything about whether the argument list should be inserted.
-	 * 
+	 *
 	 * @return <code>true</code> if the method has any parameters, <code>false</code> if it has no parameters
 	 * @since 3.4
 	 */
@@ -353,7 +353,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		ProposalInfo proposalInfo= getProposalInfo();
 		if (!(proposalInfo instanceof MemberProposalInfo))
 			return false;
-		
+
 		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
 		return Signature.getParameterCount(proposal.getSignature()) > 0;
 	}

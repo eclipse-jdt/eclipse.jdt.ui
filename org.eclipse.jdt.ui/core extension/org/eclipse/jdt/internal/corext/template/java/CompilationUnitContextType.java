@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.Signature;
  * Compilation unit context type.
  */
 public abstract class CompilationUnitContextType extends TemplateContextType {
-	
+
 	protected static class ReturnType extends TemplateVariableResolver {
 	 	public ReturnType() {
 	 	 	super("return_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_return_type);  //$NON-NLS-1$
@@ -55,10 +55,10 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		}
 		protected String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
-			
+
 			return (unit == null) ? null : unit.getElementName();
 		}
-	 	
+
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
 		 */
@@ -66,19 +66,19 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			return resolve(context) != null;
 		}
 	}
-	
+
 	protected static class PrimaryTypeName extends TemplateVariableResolver {
 		public PrimaryTypeName() {
 			super("primary_type_name", JavaTemplateMessages.CompilationUnitContextType_variable_description_primary_type_name);  //$NON-NLS-1$
-			
+
 		}
 		protected String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
-			if (unit == null) 
+			if (unit == null)
 				return null;
 			return JavaCore.removeJavaLikeExtension(unit.getElementName());
 		}
-	 	
+
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
 		 */
@@ -89,16 +89,16 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 
 	protected static class EnclosingJavaElement extends TemplateVariableResolver {
 		protected final int fElementType;
-		
+
 		public EnclosingJavaElement(String name, String description, int elementType) {
 			super(name, description);
 			fElementType= elementType;
 		}
 		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(fElementType);
-			return (element == null) ? null : element.getElementName();			
+			return (element == null) ? null : element.getElementName();
 		}
-	 	
+
 		/*
 		 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#isUnambiguous(org.eclipse.jface.text.templates.TemplateContext)
 		 */
@@ -106,7 +106,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			return resolve(context) != null;
 		}
 	}
-	
+
 	protected static class Method extends EnclosingJavaElement {
 		public Method() {
 			super("enclosing_method", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method, IJavaElement.METHOD);  //$NON-NLS-1$
@@ -129,13 +129,13 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		public Package() {
 			super("enclosing_package", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_package, IJavaElement.PACKAGE_FRAGMENT);  //$NON-NLS-1$
 		}
-	}	
+	}
 
 	protected static class Project extends EnclosingJavaElement {
 		public Project() {
 			super("enclosing_project", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_project, IJavaElement.JAVA_PROJECT);  //$NON-NLS-1$
 		}
-	}	
+	}
 /*
 	protected static class Project2 extends TemplateVariableResolver {
 		public Project2() {
@@ -145,7 +145,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			ICompilationUnit unit= ((JavaContext) context).getUnit();
 			return (unit == null) ? null : unit.getJavaProject().getElementName();
 		}
-	}	
+	}
 */
 	protected static class Arguments extends TemplateVariableResolver {
 		public Arguments() {
@@ -155,19 +155,19 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
-				
+
 			IMethod method= (IMethod) element;
-			
+
 			try {
 				String[] arguments= method.getParameterNames();
 				StringBuffer buffer= new StringBuffer();
-				
+
 				for (int i= 0; i < arguments.length; i++) {
 					if (i > 0)
 						buffer.append(", "); //$NON-NLS-1$
-					buffer.append(arguments[i]);				
+					buffer.append(arguments[i]);
 				}
-				
+
 				return buffer.toString();
 
 			} catch (JavaModelException e) {
@@ -176,7 +176,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		}
 	}
 
-/*	
+/*
 	protected static class Line extends TemplateVariableResolver {
 		public Line() {
 			super("line", TemplateMessages.getString("CompilationUnitContextType.variable.description.line"));
@@ -185,13 +185,13 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			return ((JavaTemplateContext) context).guessLineNumber();
 		}
 	}
-*/	
+*/
 
 	/*
 	 * @see ContextType#ContextType(String)
 	 */
 	public CompilationUnitContextType(String id) {
-		super(id);	
+		super(id);
 	}
 
 	public CompilationUnitContextType() {
@@ -204,12 +204,12 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplateVariable[])
 	 */
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
-		// check for multiple cursor variables		
+		// check for multiple cursor variables
 		for (int i= 0; i < variables.length; i++) {
 			TemplateVariable var= variables[i];
 			if (var.getType().equals(GlobalTemplateVariables.Cursor.NAME)) {
 				if (var.getOffsets().length > 1) {
-					throw new TemplateException(JavaTemplateMessages.ContextType_error_multiple_cursor_variables); 
+					throw new TemplateException(JavaTemplateMessages.ContextType_error_multiple_cursor_variables);
 				}
 			}
 		}

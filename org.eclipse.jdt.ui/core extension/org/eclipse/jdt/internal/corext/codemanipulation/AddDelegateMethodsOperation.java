@@ -13,9 +13,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +22,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -46,7 +46,7 @@ import org.eclipse.jdt.ui.CodeStyleConfiguration;
 
 /**
  * Workspace runnable to add delegate methods.
- * 
+ *
  * @since 3.1
  */
 public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
@@ -93,7 +93,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Creates a new add delegate methods operation.
-	 * 
+	 *
 	 * @param astRoot the AST of the current compilation unit
 	 * @param delegatesToCreate the delegates to create
 	 * @param insert the insertion point, or <code>null</code>
@@ -115,7 +115,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the method binding keys for which a method has been generated.
-	 * 
+	 *
 	 * @return the method binding keys
 	 */
 	public final String[] getCreatedMethods() {
@@ -126,7 +126,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the resulting text edit.
-	 * 
+	 *
 	 * @return the resulting text edit
 	 */
 	public final TextEdit getResultingEdit() {
@@ -135,7 +135,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the scheduling rule for this operation.
-	 * 
+	 *
 	 * @return the scheduling rule
 	 */
 	public final ISchedulingRule getSchedulingRule() {

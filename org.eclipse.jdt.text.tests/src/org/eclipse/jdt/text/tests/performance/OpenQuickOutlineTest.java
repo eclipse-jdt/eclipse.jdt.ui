@@ -14,29 +14,31 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.IAction;
+
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
-import org.eclipse.jface.action.IAction;
-import org.eclipse.test.performance.PerformanceMeter;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-
 public class OpenQuickOutlineTest extends OpenQuickControlTest {
-	
+
 	private static final Class THIS= OpenQuickOutlineTest.class;
-	
+
 	private boolean fWasOutlineViewShown;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fWasOutlineViewShown= EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID, false);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (fWasOutlineViewShown)

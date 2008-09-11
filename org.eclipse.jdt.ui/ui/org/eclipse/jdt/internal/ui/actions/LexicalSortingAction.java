@@ -42,11 +42,11 @@ public class LexicalSortingAction extends Action {
 		fViewer= viewer;
 		fDropSupport= dropSupport;
 		fPreferenceKey= "LexicalSortingAction." + id + ".isChecked"; //$NON-NLS-1$ //$NON-NLS-2$
-		setText(JavaBrowsingMessages.LexicalSortingAction_label); 
+		setText(JavaBrowsingMessages.LexicalSortingAction_label);
 		JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
-		setToolTipText(JavaBrowsingMessages.LexicalSortingAction_tooltip); 
-		setDescription(JavaBrowsingMessages.LexicalSortingAction_description); 
-		boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey); 
+		setToolTipText(JavaBrowsingMessages.LexicalSortingAction_tooltip);
+		setDescription(JavaBrowsingMessages.LexicalSortingAction_description);
+		boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey);
 		valueChanged(checked, false);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
 	}
@@ -68,7 +68,7 @@ public class LexicalSortingAction extends Action {
 				}
 			}
 		});
-		
+
 		if (store)
 			JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on);
 	}

@@ -22,11 +22,11 @@ import org.eclipse.swt.widgets.Event;
  * @since 3.1
  */
 public class SWTEventHelper {
-	
+
 	public static void pressKeyCode(Display display, int keyCode) {
 		pressKeyCode(display, keyCode, true);
 	}
-	
+
 	public static void pressKeyCode(Display display, int keyCode, boolean runEventQueue) {
 		keyCodeDown(display, keyCode, runEventQueue);
 		keyCodeUp(display, keyCode, runEventQueue);
@@ -35,7 +35,7 @@ public class SWTEventHelper {
 	public static void pressKeyCodeCombination(Display display, int[] keyCodes) {
 		pressKeyCodeCombination(display, keyCodes, true);
 	}
-	
+
 	public static void pressKeyCodeCombination(Display display, int[] keyCodes, boolean runEventQueue) {
 		for (int i= 0; i < keyCodes.length; i++)
 			keyCodeDown(display, keyCodes[i], runEventQueue);
@@ -46,7 +46,7 @@ public class SWTEventHelper {
 	public static void keyCodeDown(Display display, int keyCode) {
 		keyCodeEvent(display, SWT.KeyDown, keyCode, true);
 	}
-	
+
 	public static void keyCodeDown(Display display, int keyCode, boolean runEventQueue) {
 		keyCodeEvent(display, SWT.KeyDown, keyCode, runEventQueue);
 	}
@@ -54,7 +54,7 @@ public class SWTEventHelper {
 	public static void keyCodeUp(Display display, int keyCode) {
 		keyCodeEvent(display, SWT.KeyUp, keyCode, true);
 	}
-	
+
 	public static void keyCodeUp(Display display, int keyCode, boolean runEventQueue) {
 		keyCodeEvent(display, SWT.KeyUp, keyCode, runEventQueue);
 	}
@@ -65,11 +65,11 @@ public class SWTEventHelper {
 		fgKeyCodeEvent.keyCode= keyCode;
 		postEvent(display, fgKeyCodeEvent, runEventQueue);
 	}
-	
+
 	public static void pressKeyChar(Display display, char keyChar) {
 		pressKeyChar(display, keyChar, true);
 	}
-	
+
 	public static void pressKeyChar(Display display, char keyChar, boolean runEventQueue) {
 		keyCharDown(display, keyChar, runEventQueue);
 		keyCharUp(display, keyChar, runEventQueue);
@@ -78,7 +78,7 @@ public class SWTEventHelper {
 	public static void pressKeyCharCombination(Display display, char[] keyChars) {
 		pressKeyCharCombination(display, keyChars, true);
 	}
-	
+
 	public static void pressKeyCharCombination(Display display, char[] keyChars, boolean runEventQueue) {
 		for (int i= 0; i < keyChars.length; i++)
 			keyCharDown(display, keyChars[i], runEventQueue);
@@ -111,9 +111,9 @@ public class SWTEventHelper {
 
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
-			
+
 	}
-	
+
 	private static Event fgMouseMoveEvent= new Event();
 	public static void mouseMoveEvent(Display display, int x, int y, boolean runEventQueue) {
 		fgMouseMoveEvent.type= SWT.MouseMove;
@@ -121,7 +121,7 @@ public class SWTEventHelper {
 		fgMouseMoveEvent.y= y;
 		postEvent(display, fgMouseMoveEvent, runEventQueue);
 	}
-	
+
 	public static void mouseDownEvent(Display display, int button, boolean runEventQueue) {
 		mouseButtonEvent(display, SWT.MouseDown, button, runEventQueue);
 	}

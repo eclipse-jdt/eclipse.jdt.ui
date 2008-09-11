@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefac
 
 /**
  * Refactoring contribution for the Convert Member Type to Top Level refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class MoveMemberTypeRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class MoveMemberTypeRefactoringContribution extends JavaRefactoring
 	public RefactoringDescriptor createDescriptor() {
 		return new ConvertMemberTypeDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ConvertMemberTypeDescriptor(project, description, comment, arguments, flags);
 	}

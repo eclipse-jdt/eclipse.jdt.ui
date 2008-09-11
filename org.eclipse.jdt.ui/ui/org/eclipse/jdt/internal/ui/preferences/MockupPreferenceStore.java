@@ -24,7 +24,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
  * All methods except firing, adding and removing listeners throw
  * an {@link java.lang.UnsupportedOperationException}.
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class MockupPreferenceStore implements IPreferenceStore {
@@ -63,7 +63,7 @@ public class MockupPreferenceStore implements IPreferenceStore {
 	/**
 	 * Fires a property change event with the given source, property name, old and new value. Used
 	 * when the event source should be different from this mockup preference store.
-	 * @param source The event source 
+	 * @param source The event source
 	 * @param name The property name
 	 * @param oldValue The property's old value
 	 * @param newValue The property's new value

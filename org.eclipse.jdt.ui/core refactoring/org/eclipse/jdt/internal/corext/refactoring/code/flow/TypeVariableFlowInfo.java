@@ -17,6 +17,6 @@ class TypeVariableFlowInfo extends FlowInfo {
 	public TypeVariableFlowInfo(ITypeBinding binding, FlowContext context) {
 		super(NO_RETURN);
 		addTypeVariable(binding);
-	}	
+	}
 }
 

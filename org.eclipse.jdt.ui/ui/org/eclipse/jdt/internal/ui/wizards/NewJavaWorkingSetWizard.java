@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage;
 
 public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
-	
+
 	private JavaWorkingSetPage fPage;
 	private IStructuredSelection fSelection;
 
@@ -61,7 +61,7 @@ public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
 		IWorkingSet ws= fPage.getSelection();
 		if (ws != null) {
 			PlatformUI.getWorkbench().getWorkingSetManager().addWorkingSet(ws);
-			
+
 			PackageExplorerPart explorer= getActivePackageExplorer();
 			if (explorer != null) {
 				if (explorer.getRootMode() == PackageExplorerPart.WORKING_SETS_AS_ROOTS) {

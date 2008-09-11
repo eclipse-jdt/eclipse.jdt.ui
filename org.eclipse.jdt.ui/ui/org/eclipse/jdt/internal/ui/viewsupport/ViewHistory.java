@@ -22,26 +22,26 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 
 /**
- * 
+ *
  */
 public abstract class ViewHistory {
 
 	/**
 	 * Configure the history List action.
 	 * Clients typically want to set a text and an image.
-	 * 
+	 *
 	 * @param action the action
 	 */
 	public abstract void configureHistoryListAction(IAction action);
-	
+
 	/**
 	 * Configure the history drop down action.
 	 * Clients typically want to set a tooltip and an image.
-	 * 
+	 *
 	 * @param action the action
 	 */
 	public abstract void configureHistoryDropDownAction(IAction action);
-	
+
 	/**
 	 * @return action to clear history entries, or <code>null</code>
 	 */
@@ -52,42 +52,42 @@ public abstract class ViewHistory {
 	public abstract String getHistoryListDialogMessage();
 
 	public abstract Shell getShell();
-	
-	
+
+
 	/**
 	 * @return An unmodifiable list of history entries, can be empty. The list
 	 *         is sorted by age, youngest first.
 	 */
 	public abstract List getHistoryEntries();
-	
+
 	/**
 	 * @return the active entry from the history
 	 */
 	public abstract Object getCurrentEntry();
-	
+
 	/**
 	 * @param entry the entry to activate, or <code>null</code> if none should be active
 	 */
 	public abstract void setActiveEntry(Object entry);
-	
+
 	/**
 	 * @param remainingEntries all the remaining history entries, can be empty
 	 * @param activeEntry the entry to activate, or <code>null</code> if none should be active
 	 */
 	public abstract void setHistoryEntries(List remainingEntries, Object activeEntry);
-	
+
 	/**
 	 * @param element the element to render
 	 * @return the image descriptor for the given element, or <code>null</code>
 	 */
 	public abstract ImageDescriptor getImageDescriptor(Object element);
-	
+
 	/**
 	 * @param element the element to render
 	 * @return the label text for the given element
 	 */
 	public abstract String getText(Object element);
-	
+
 	/**
 	 * @return a history drop down action, ready for inclusion in a view toolbar
 	 */
@@ -96,7 +96,7 @@ public abstract class ViewHistory {
 	}
 
 	public abstract void addMenuEntries(MenuManager manager);
-	
+
 	public abstract String getMaxEntriesMessage();
 	public abstract int getMaxEntries();
 	public abstract void setMaxEntries(int maxEntries);

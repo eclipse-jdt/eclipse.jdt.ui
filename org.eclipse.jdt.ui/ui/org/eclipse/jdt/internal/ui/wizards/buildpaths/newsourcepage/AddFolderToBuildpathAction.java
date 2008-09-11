@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,8 +30,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -72,31 +72,31 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 	public AddFolderToBuildpathAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
-	
+
 	public AddFolderToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
     }
-	
+
 	private AddFolderToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.ADD_SEL_SF_TO_BP);
-		
+
 		fContext= context;
-		
+
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_ADD_AS_SOURCE_FOLDER);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
-		
+
 		if (getSelectedElements().size() != 1)
 			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath;
-		
+
 		Object obj= getSelectedElements().get(0);
 		String elementLabel= JavaElementLabels.getTextLabel(obj, JavaElementLabels.ALL_DEFAULT);
 		if (obj instanceof IJavaProject) {
@@ -106,7 +106,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 		} else if (obj instanceof IResource) {
 			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, elementLabel);
 		}
-		
+
 		return null;
 	}
 
@@ -137,7 +137,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			final IPath newDefaultOutputLocation;
 			final boolean removeOldClassFiles;
 			IPath projPath= project.getProject().getFullPath();
-			if (!(getSelectedElements().size() == 1 && getSelectedElements().get(0) instanceof IJavaProject) && //if only the project should be added, then the query does not need to be executed 
+			if (!(getSelectedElements().size() == 1 && getSelectedElements().get(0) instanceof IJavaProject) && //if only the project should be added, then the query does not need to be executed
 					(outputLocation.equals(projPath) || defaultOutputLocation.segmentCount() == 1)) {
 
 
@@ -147,8 +147,8 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 					removeProjectFromClasspath= outputFolderQuery.removeProjectFromClasspath();
 
 					if (BuildPathsBlock.hasClassfiles(project.getProject()) && outputLocation.equals(projPath)) {
-						String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title; 
-						String message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, BasicElementLabels.getPathLabel(projPath, false)); 
+						String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title;
+						String message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, BasicElementLabels.getPathLabel(projPath, false));
 						MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 						int answer= dialog.open();
 						if (answer == 0) {
@@ -198,14 +198,14 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 	private List addToClasspath(List elements, IJavaProject project, IPath outputLocation, boolean removeProjectFromClasspath, boolean removeOldClassFiles, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (!project.getProject().hasNature(JavaCore.NATURE_ID)) {
 			StatusInfo rootStatus= new StatusInfo();
-			rootStatus.setError(NewWizardMessages.ClasspathModifier_Error_NoNatures); 
+			rootStatus.setError(NewWizardMessages.ClasspathModifier_Error_NoNatures);
 			throw new CoreException(rootStatus);
 		}
-		
+
 		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, elements.size() + 4); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, elements.size() + 4);
 			IWorkspaceRoot workspaceRoot= JavaPlugin.getWorkspace().getRoot();
-			
+
 			if (removeOldClassFiles) {
 				IResource res= workspaceRoot.findMember(project.getOutputLocation());
 				if (res instanceof IContainer && BuildPathsBlock.hasClassfiles(res)) {
@@ -214,7 +214,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			}
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
-        	
+
 			if (!project.getOutputLocation().equals(outputLocation)) {
 				project.setOutputLocation(outputLocation, new SubProgressMonitor(monitor, 1));
 				delta.setDefaultOutputLocation(outputLocation);
@@ -246,7 +246,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			ClasspathModifier.setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
 
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
-			
+
         	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
 
@@ -282,7 +282,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 					IPackageFragment fragment= (IPackageFragment)element;
 					if (ClasspathModifier.isDefaultFragment(fragment))
 	                    return false;
-	                
+
 					if (ClasspathModifier.isInExternalOrArchive(fragment))
 	                    return false;
 				} else if (element instanceof IFolder) {

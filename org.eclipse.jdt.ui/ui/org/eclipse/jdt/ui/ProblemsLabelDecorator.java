@@ -60,11 +60,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * <b>Important</b>: Although this decorator implements ILightweightLabelDecorator, do not contribute this
  * class as a decorator to the <code>org.eclipse.ui.decorators</code> extension. Only use this class in your
  * own views and label providers.
- * 
+ *
  * @since 2.0
  */
 public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
-	
+
 	/**
 	 * This is a special <code>LabelProviderChangedEvent</code> carrying additional
 	 * information whether the event origins from a maker change.
@@ -76,7 +76,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	public static class ProblemsLabelChangedEvent extends LabelProviderChangedEvent {
 
 		private static final long serialVersionUID= 1L;
-		
+
 		private boolean fMarkerChange;
 
 		/**
@@ -89,12 +89,12 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			super(eventSource, changedResource);
 			fMarkerChange= isMarkerChange;
 		}
-		
+
 		/**
 		 * Returns whether this event origins from marker changes. If <code>false</code> an annotation
 		 * model change is the origin. In this case viewers not displaying working copies can ignore these
 		 * events.
-		 * 
+		 *
 		 * @return if this event origins from a marker change.
 		 */
 		public boolean isMarkerChange() {
@@ -109,7 +109,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
 	private IProblemChangedListener fProblemChangedListener;
-	
+
 	private ListenerList fListeners;
 	private ISourceRange fCachedRange;
 
@@ -123,7 +123,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param registry The registry to use or <code>null</code> to use the Java plugin's image
 	 *            registry
 	 * @noreference This constructor is not intended to be referenced by clients.
@@ -132,14 +132,14 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		fRegistry= registry;
 		fProblemChangedListener= null;
 	}
-	
+
 	private ImageDescriptorRegistry getRegistry() {
 		if (fRegistry == null) {
 			fRegistry= fUseNewRegistry ? new ImageDescriptorRegistry() : JavaPlugin.getImageDescriptorRegistry();
 		}
 		return fRegistry;
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see ILabelDecorator#decorateText(String, Object)
@@ -166,9 +166,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	/**
 	 * Computes the adornment flags for the given element.
-	 * 
+	 *
 	 * @param obj the element to compute the flags for
-	 * 
+	 *
 	 * @return the adornment flags
 	 */
 	protected int computeAdornmentFlags(Object obj) {
@@ -223,7 +223,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			if (e.getStatus().getCode() == IResourceStatus.MARKER_NOT_FOUND) {
 				return 0;
 			}
-			
+
 			JavaPlugin.log(e);
 		}
 		return 0;
@@ -265,7 +265,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		return false;
 	}
-	
+
 	private IAnnotationModel isInJavaAnnotationModel(ICompilationUnit original) {
 		if (original.isWorkingCopy()) {
 			FileEditorInput editorInput= new FileEditorInput((IFile) original.getResource());
@@ -273,8 +273,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		return null;
 	}
-	
-	
+
+
 	private int getErrorTicksFromAnnotationModel(IAnnotationModel model, ISourceReference sourceElement) throws CoreException {
 		int info= 0;
 		Iterator iter= model.getAnnotationIterator();
@@ -292,7 +292,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		return info;
 	}
-			
+
 	private IMarker isAnnotationInRange(IAnnotationModel model, Annotation annot, ISourceReference sourceElement) throws CoreException {
 		if (annot instanceof MarkerAnnotation) {
 			if (sourceElement == null || isInside(model.getPosition(annot), sourceElement)) {
@@ -304,18 +304,18 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		return null;
 	}
-	
+
 	private boolean isInside(Position pos, ISourceReference sourceElement) throws CoreException {
 		return pos != null && isInside(pos.getOffset(), sourceElement);
 	}
-	
+
 	/**
 	 * Tests if a position is inside the source range of an element.
 	 * @param pos Position to be tested.
 	 * @param sourceElement Source element (must be a IJavaElement)
 	 * @return boolean Return <code>true</code> if position is located inside the source element.
 	 * @throws CoreException Exception thrown if element range could not be accessed.
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	protected boolean isInside(int pos, ISourceReference sourceElement) throws CoreException {
@@ -329,7 +329,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#dispose()
 	 */
@@ -349,7 +349,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	public boolean isLabelProperty(Object element, String property) {
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#addListener(ILabelProviderListener)
 	 */
@@ -380,7 +380,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			}
 		}
 	}
-	
+
 	private void fireProblemsChanged(IResource[] changedResources, boolean isMarkerChange) {
 		if (fListeners != null && !fListeners.isEmpty()) {
 			LabelProviderChangedEvent event= new ProblemsLabelChangedEvent(this, changedResources, isMarkerChange);
@@ -390,7 +390,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			}
 		}
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
 	 */

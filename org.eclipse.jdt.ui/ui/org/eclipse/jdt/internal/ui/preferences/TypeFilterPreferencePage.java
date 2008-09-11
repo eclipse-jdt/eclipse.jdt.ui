@@ -55,10 +55,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 public class TypeFilterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String TYPE_FILTER_PREF_PAGE_ID= "org.eclipse.jdt.ui.preferences.TypeFilterPreferencePage"; //$NON-NLS-1$
-	
+
 	private static final String PREF_FILTER_ENABLED= PreferenceConstants.TYPEFILTER_ENABLED;
 	private static final String PREF_FILTER_DISABLED= PreferenceConstants.TYPEFILTER_DISABLED;
-	
+
 	private static String[] unpackOrderList(String str) {
 		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
 		int nTokens= tok.countTokens();
@@ -68,7 +68,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		}
 		return res;
 	}
-	
+
 	private static String packOrderList(List orderList) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < orderList.size(); i++) {
@@ -76,8 +76,8 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 			buf.append(';');
 		}
 		return buf.toString();
-	}	
-		
+	}
+
 	private class TypeFilterAdapter implements IListAdapter, IDialogFieldListener {
 
 		private boolean canEdit(ListDialogField field) {
@@ -94,14 +94,14 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 
         public void dialogFieldChanged(DialogField field) {
         }
-        
+
         public void doubleClicked(ListDialogField field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
         }
 	}
-	
+
 	private static final int IDX_ADD= 0;
 	private static final int IDX_ADD_PACKAGE= 1;
 	private static final int IDX_EDIT= 2;
@@ -110,36 +110,36 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	private static final int IDX_DESELECT= 6;
 
 	private CheckedListDialogField fFilterListField;
-	
+
 	public TypeFilterPreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.TypeFilterPreferencePage_description); 
-	
-		String[] buttonLabels= new String[] { 
-			PreferencesMessages.TypeFilterPreferencePage_add_button, 
-			PreferencesMessages.TypeFilterPreferencePage_addpackage_button, 
-			PreferencesMessages.TypeFilterPreferencePage_edit_button, 
-			PreferencesMessages.TypeFilterPreferencePage_remove_button, 
+		setDescription(PreferencesMessages.TypeFilterPreferencePage_description);
+
+		String[] buttonLabels= new String[] {
+			PreferencesMessages.TypeFilterPreferencePage_add_button,
+			PreferencesMessages.TypeFilterPreferencePage_addpackage_button,
+			PreferencesMessages.TypeFilterPreferencePage_edit_button,
+			PreferencesMessages.TypeFilterPreferencePage_remove_button,
 			/* 4 */  null,
-			PreferencesMessages.TypeFilterPreferencePage_selectall_button, 
-			PreferencesMessages.TypeFilterPreferencePage_deselectall_button, 
+			PreferencesMessages.TypeFilterPreferencePage_selectall_button,
+			PreferencesMessages.TypeFilterPreferencePage_deselectall_button,
 		};
-				
+
 		TypeFilterAdapter adapter= new TypeFilterAdapter();
-		
+
 		fFilterListField= new CheckedListDialogField(adapter, buttonLabels, new LabelProvider());
 		fFilterListField.setDialogFieldListener(adapter);
-		fFilterListField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_list_label); 
+		fFilterListField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_list_label);
 		fFilterListField.setCheckAllButtonIndex(IDX_SELECT);
 		fFilterListField.setUncheckAllButtonIndex(IDX_DESELECT);
 		fFilterListField.setRemoveButtonIndex(IDX_REMOVE);
-		
+
 		fFilterListField.enableButton(IDX_EDIT, false);
-		
+
 		initialize(false);
 	}
-	
+
 	/*
 	 * @see PreferencePage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -147,39 +147,39 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE);
 	}
-	
+
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
-	
+
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		
+
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
-		
+
 		composite.setLayout(layout);
-		
+
 		fFilterListField.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fFilterListField.getLabelControl(null), 2);
 		LayoutUtil.setWidthHint(fFilterListField.getLabelControl(null), convertWidthInCharsToPixels(40));
 		LayoutUtil.setHorizontalGrabbing(fFilterListField.getListControl(null));
-		
+
 		fFilterListField.getTableViewer().setComparator(new ViewerComparator());
-		
+
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	private void initialize(boolean fromDefault) {
 		IPreferenceStore store= getPreferenceStore();
-		
+
 		String enabled= fromDefault ? store.getDefaultString(PREF_FILTER_ENABLED) : store.getString(PREF_FILTER_ENABLED);
 		String disabled= fromDefault ? store.getDefaultString(PREF_FILTER_DISABLED) : store.getString(PREF_FILTER_DISABLED);
-		
+
 		ArrayList res= new ArrayList();
-		
+
 		String[] enabledEntries= unpackOrderList(enabled);
 		for (int i= 0; i < enabledEntries.length; i++) {
 			res.add(enabledEntries[i]);
@@ -188,12 +188,12 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		for (int i= 0; i < disabledEntries.length; i++) {
 			res.add(disabledEntries[i]);
 		}
-		
+
 		fFilterListField.setElements(res);
 		fFilterListField.setCheckedElements(Arrays.asList(enabledEntries));
 	}
-	
-	
+
+
 	private void doButtonPressed(int index) {
 		if (index == IDX_ADD) { // add new
 			List existing= fFilterListField.getElements();
@@ -211,32 +211,32 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 					fFilterListField.setChecked(res[i], true);
 				}
 			}
-			
+
 		} else if (index == IDX_EDIT) { // edit
 			List selected= fFilterListField.getSelectedElements();
 			if (selected.isEmpty()) {
 				return;
 			}
 			String editedEntry= (String) selected.get(0);
-			
+
 			List existing= fFilterListField.getElements();
 			existing.remove(editedEntry);
-			
+
 			TypeFilterInputDialog dialog= new TypeFilterInputDialog(getShell(), existing);
 			dialog.setInitialString(editedEntry);
 			if (dialog.open() == Window.OK) {
 				fFilterListField.replaceElement(editedEntry, dialog.getResult());
 			}
-		}	
+		}
 	}
-	
+
 	private String[] choosePackage() {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 		int flags= PackageSelectionDialog.F_SHOW_PARENTS | PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE | PackageSelectionDialog.F_REMOVE_DUPLICATES;
 		PackageSelectionDialog dialog = new PackageSelectionDialog(getShell(), context, flags , scope);
-		dialog.setTitle(PreferencesMessages.TypeFilterPreferencePage_choosepackage_label); 
-		dialog.setMessage(PreferencesMessages.TypeFilterPreferencePage_choosepackage_description); 
+		dialog.setTitle(PreferencesMessages.TypeFilterPreferencePage_choosepackage_label);
+		dialog.setMessage(PreferencesMessages.TypeFilterPreferencePage_choosepackage_description);
 		dialog.setMultipleSelection(true);
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			Object[] fragments= dialog.getResult();
@@ -248,18 +248,18 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		}
 		return null;
 	}
-	
-	
+
+
 	public void init(IWorkbench workbench) {
 	}
-		
+
     /*
      * @see PreferencePage#performDefaults()
      */
     protected void performDefaults() {
     	initialize(true);
-		
-		super.performDefaults();	
+
+		super.performDefaults();
     }
 
 
@@ -268,11 +268,11 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
      */
     public boolean performOk() {
   		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-  		
+
   		List checked= fFilterListField.getCheckedElements();
   		List unchecked= fFilterListField.getElements();
   		unchecked.removeAll(checked);
-  		
+
   		prefs.setValue(PREF_FILTER_ENABLED, packOrderList(checked));
   		prefs.setValue(PREF_FILTER_DISABLED, packOrderList(unchecked));
   		JavaPlugin.getDefault().savePluginPreferences();

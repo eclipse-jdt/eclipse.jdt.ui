@@ -27,6 +27,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -49,31 +53,27 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 /**
  * Writes a JarPackage to an underlying OutputStream
  */
 public class JarPackageWriter extends Object implements IJarDescriptionWriter {
-	
+
 	private final OutputStream fOutputStream;
 	private final String fEncoding;
-	
+
 	/**
 	 * Create a JarPackageWriter on the given output stream.
 	 * It is the clients responsibility to close the output stream.
-	 * 
-	 * @param outputStream 
-	 * @param encoding 
+	 *
+	 * @param outputStream
+	 * @param encoding
 	 */
 	public JarPackageWriter(OutputStream outputStream, String encoding) {
 		Assert.isNotNull(outputStream);
 		fOutputStream= new BufferedOutputStream(outputStream);
 		fEncoding= encoding;
 	}
-	
+
 	public void write(JarPackageData jarPackage) throws CoreException {
 		try  {
 			writeXML(jarPackage);
@@ -86,8 +86,8 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	/**
 	 * Writes a XML representation of the JAR specification
 	 * to to the underlying stream.
-	 * 
-	 * @param jarPackage 
+	 *
+	 * @param jarPackage
 	 * @exception IOException	if writing to the underlying stream fails
 	 */
 	public void writeXML(JarPackageData jarPackage) throws IOException {
@@ -95,13 +95,13 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		DocumentBuilder docBuilder= null;
 		DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
-		try {   	
+		try {
 	    	docBuilder= factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {
-			throw new IOException(JarPackagerMessages.JarWriter_error_couldNotGetXmlBuilder); 
+			throw new IOException(JarPackagerMessages.JarWriter_error_couldNotGetXmlBuilder);
 		}
 		Document document= docBuilder.newDocument();
-		
+
 		// Create the document
 		Element xmlJarDesc= document.createElement(JarPackagerUtil.DESCRIPTION_EXTENSION);
 		document.appendChild(xmlJarDesc);
@@ -126,7 +126,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 			StreamResult result = new StreamResult(fOutputStream);
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
-			throw new IOException(JarPackagerMessages.JarWriter_error_couldNotTransformToXML); 
+			throw new IOException(JarPackagerMessages.JarWriter_error_couldNotTransformToXML);
 		}
 	}
 
@@ -237,11 +237,11 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 				add((IResource)element, selectedElements, document);
 		}
 	}
-	
+
 	/**
      * Closes this stream.
      * It is the client's responsibility to close the stream.
-     * 
+     *
      * @throws CoreException
      */
     public void close() throws CoreException {
@@ -270,7 +270,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 			element.setAttribute("path", resource.getFullPath().toString()); //$NON-NLS-1$
 		}
 	}
-	
+
 	private void add(IJavaElement javaElement, Element parent, Document document) {
 		Element element= document.createElement("javaElement"); //$NON-NLS-1$
 		parent.appendChild(element);
@@ -291,7 +291,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	public IStatus getStatus() {
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 	}
-		
+
 	private void xmlWriteFatjar(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element fatjar= document.createElement("fatjar"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(fatjar);

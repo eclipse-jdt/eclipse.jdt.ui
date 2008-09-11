@@ -11,12 +11,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
@@ -25,8 +25,8 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Base class for all jar builders. 
- * 
+ * Base class for all jar builders.
+ *
  * @since 3.4
  */
 public abstract class JarBuilder implements IJarBuilder {

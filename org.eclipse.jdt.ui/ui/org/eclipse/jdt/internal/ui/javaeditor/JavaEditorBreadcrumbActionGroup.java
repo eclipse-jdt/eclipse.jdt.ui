@@ -42,11 +42,11 @@ import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAssignementAct
 
 /**
  * Actions to show in the context menu for elements in the {@link JavaEditorBreadcrumb}.
- * 
+ *
  * @since 3.4
  */
 final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
-	
+
 	static final class WorkingSetActionGroup extends ActionGroup {
 
 		private final ConfigureWorkingSetAssignementAction fAssignWorkingSetAction;
@@ -69,9 +69,9 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 				menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fAssignWorkingSetAction);
 		}
 	}
-	
+
 	private static final class BreadcrumbActionGroup extends ActionGroup {
-		
+
 		private static final class GoToEditorAction extends Action {
 
 			private final JavaEditor fJavaEditor;
@@ -89,7 +89,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 				fJavaEditor.getViewer().getTextWidget().setFocus();
 			}
 		}
-		
+
 		private Action fGoToEditor;
 
 		public BreadcrumbActionGroup(JavaEditor javaEditor) {
@@ -104,7 +104,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			super.fillActionBars(actionBars);
 			actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fGoToEditor);
 		}
-		
+
 		/*
 		 * @see org.eclipse.ui.actions.ActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 		 */
@@ -113,7 +113,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGoToEditor);
 		}
 	}
-	
+
 	public JavaEditorBreadcrumbActionGroup(JavaEditor javaEditor, ISelectionProvider selectionProvider) {
 		super(new ActionGroup[] {
 				new BreadcrumbActionGroup(javaEditor),

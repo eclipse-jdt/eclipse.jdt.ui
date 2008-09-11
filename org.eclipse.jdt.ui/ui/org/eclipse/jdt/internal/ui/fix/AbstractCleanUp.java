@@ -35,7 +35,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		if (settings != null)
 			setOptions(new CleanUpOptions(settings));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

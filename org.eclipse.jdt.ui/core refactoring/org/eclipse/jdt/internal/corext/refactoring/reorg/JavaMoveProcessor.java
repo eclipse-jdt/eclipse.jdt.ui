@@ -69,7 +69,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	public boolean canChildrenBeDestinations(IReorgDestination destination) {
 		return fMovePolicy.canChildrenBeDestinations(destination);
 	}
-	
+
 	public boolean canElementBeDestination(IReorgDestination destination) {
 		return fMovePolicy.canElementBeDestination(destination);
 	}
@@ -260,7 +260,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		Assert.isNotNull(queries);
 		fCreateTargetQueries= new MonitoringCreateTargetQueries(queries, fMovePolicy.getCreateTargetExecutionLog());
 	}
-	
+
 	public RefactoringStatus setDestination(IReorgDestination destination) throws JavaModelException {
 		fMovePolicy.setDestination(destination);
 		return fMovePolicy.verifyDestination(destination);

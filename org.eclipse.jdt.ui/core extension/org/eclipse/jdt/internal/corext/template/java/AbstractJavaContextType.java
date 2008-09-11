@@ -64,43 +64,43 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 				if (iterables.length > 0) {
 					jv.setChoices(iterables);
 					jc.markAsUsed(iterables[0].getName());
-					
+
 					if (iterables.length > 1)
 						variable.setUnambiguous(false);
 					else
 						variable.setUnambiguous(isUnambiguous(context));
-					
+
 					return;
 				}
 			}
-			
+
 			super.resolve(variable, context);
 		}
 	}
-	
+
 	protected static class Array extends AbstractIterable {
 		public Array() {
 			super("array", JavaTemplateMessages.JavaContextType_variable_description_array);  //$NON-NLS-1$
 		}
-		
+
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getArrays();
 		}
 	}
-	
+
 	protected static class Iterable extends AbstractIterable {
 		public Iterable() {
 		    super("iterable", JavaTemplateMessages.JavaContextType_variable_description_iterable);  //$NON-NLS-1$
 		}
-		
+
 		protected Variable[] getLocalVariables(JavaContext jc) {
 			return jc.getIterables();
 		}
 	}
-	
+
 	protected static abstract class AbstractIterableType extends TemplateVariableResolver {
 		private String fMasterName;
-		
+
 	    public AbstractIterableType(String type, String desc, String master) {
 	     	super(type, desc);
 	     	fMasterName= master;
@@ -113,7 +113,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 	        	types[i]= iterables[i].getMemberTypeNames()[0];
 			return types;
 	    }
-	    
+
 		abstract protected Variable[] getLocalVariables(JavaContext jc);
 
 		/*
@@ -146,7 +146,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 				}
 
 			}
-			
+
 			super.resolve(variable, context);
 		}
 	}
@@ -159,7 +159,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 			return jc.getArrays();
 		}
 	}
-	
+
 	protected static class IterableType extends AbstractIterableType {
 		public IterableType() {
 	     	super("iterable_type", JavaTemplateMessages.JavaContextType_variable_description_iterable_type, "iterable");  //$NON-NLS-1$ //$NON-NLS-2$
@@ -168,15 +168,15 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 			return jc.getIterables();
 		}
 	}
-	
+
 	protected static abstract class AbstractIterableElement extends TemplateVariableResolver {
 		private String fMasterName;
-		
+
 	    public AbstractIterableElement(String type, String desc, String master) {
 	     	super(type, desc);
 	     	fMasterName= master;
 	    }
-	    
+
 	    protected String[] resolveAll(TemplateContext context) {
 	        JavaContext jc= (JavaContext) context;
 	        Variable[] iterables= getLocalVariables(jc);
@@ -189,7 +189,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 
 	        return elements;
 	    }
-	    
+
 		abstract protected Variable[] getLocalVariables(JavaContext jc);
 
 		/*
@@ -237,7 +237,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 			return jc.getArrays();
 		}
 	}
-	
+
 	protected static class IterableElement extends AbstractIterableElement {
 		public IterableElement() {
 	     	super("iterable_element", JavaTemplateMessages.JavaContextType_variable_description_iterable_element, "iterable");	 //$NON-NLS-1$ //$NON-NLS-2$
@@ -246,7 +246,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 			return jc.getIterables();
 		}
 	}
-	
+
 	protected static class Index extends NameResolver {
 	    public Index() {
 	    	super("int"); //$NON-NLS-1$
@@ -270,7 +270,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 	     	setDescription(JavaTemplateMessages.JavaContextType_variable_description_iterator);
 		}
 	}
-	
+
 	protected static class Todo extends TemplateVariableResolver {
 
 		public Todo() {
@@ -281,7 +281,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 			ICompilationUnit compilationUnit= javaContext.getCompilationUnit();
 			if (compilationUnit == null)
 				return "XXX"; //$NON-NLS-1$
-			
+
 			IJavaProject javaProject= compilationUnit.getJavaProject();
 			String todoTaskTag= StubUtility.getTodoTaskTag(javaProject);
 			if (todoTaskTag == null)
@@ -318,7 +318,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		addResolver(new GlobalTemplateVariables.Year());
 		addResolver(new GlobalTemplateVariables.Time());
 		addResolver(new GlobalTemplateVariables.User());
-		
+
 		// compilation unit
 		addResolver(new File());
 		addResolver(new PrimaryTypeName());
@@ -341,7 +341,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		addResolver(new IterableElement());
 		addResolver(new Todo());
 	}
-	
+
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
@@ -360,13 +360,13 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		initializeContext(javaContext);
 		return javaContext;
 	}
-	
+
 	/**
 	 * Hook to initialize the context
-	 * 
+	 *
 	 * @param context
 	 */
 	protected void initializeContext(JavaContext context) {
 	}
-	
+
 }

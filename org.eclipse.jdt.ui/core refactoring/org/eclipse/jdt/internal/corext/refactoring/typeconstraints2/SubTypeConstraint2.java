@@ -56,6 +56,6 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	 * @see java.lang.Object#toString()
 	 */
 	public final String toString() {
-		return fDescendant.toString() + " <= " + fAncestor.toString(); //$NON-NLS-1$ 
+		return fDescendant.toString() + " <= " + fAncestor.toString(); //$NON-NLS-1$
 	}
 }

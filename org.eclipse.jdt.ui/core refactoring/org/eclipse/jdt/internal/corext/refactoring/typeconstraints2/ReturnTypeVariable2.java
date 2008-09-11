@@ -49,7 +49,7 @@ public final class ReturnTypeVariable2 extends ConstraintVariable2 implements IS
 			return true;
 		if (other.getClass() != ReturnTypeVariable2.class)
 			return false;
-		
+
 		ReturnTypeVariable2 other2= (ReturnTypeVariable2) other;
 		return getKey().equals(other2.getKey());
 	}

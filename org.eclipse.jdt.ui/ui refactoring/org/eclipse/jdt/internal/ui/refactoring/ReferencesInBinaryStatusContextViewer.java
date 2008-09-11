@@ -4,13 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
-
-import com.ibm.icu.text.Collator;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,13 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -37,6 +29,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 public class ReferencesInBinaryStatusContextViewer implements IStatusContextViewer {
-	
+
 	private static class ContentProvider extends StandardJavaElementContentProvider {
 		private Map fChildren= new HashMap();
 		private Set fRoots= new HashSet();
@@ -119,7 +119,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 			}
 		}
 	}
-	
+
 
 	private ViewForm fForm;
 	private CLabel fLabel;
@@ -132,7 +132,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 	 */
 	public void setInput(RefactoringStatusContext input) {
 		ContentProvider contentProvider= new ContentProvider();
-		
+
 		ReferencesInBinaryContext binariesContext= (ReferencesInBinaryContext) input;
 		List matches= binariesContext.getMatches();
 		for (Iterator iter= matches.iterator(); iter.hasNext();) {
@@ -143,14 +143,14 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		}
 		fTreeViewer.setContentProvider(contentProvider);
 		fTreeViewer.setInput(contentProvider);
-		
+
 		fLabel.setText(binariesContext.getDescription());
-		
+
 		fInput= binariesContext;
 		fButton.setEnabled(!matches.isEmpty());
 	}
-	
-	
+
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -158,7 +158,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		fForm= new ViewForm(parent, SWT.BORDER | SWT.FLAT);
 		fForm.marginWidth= 0;
 		fForm.marginHeight= 0;
-		
+
 		fLabel= new CLabel(fForm, SWT.NONE);
 		fLabel.setText(RefactoringMessages.ReferencesInBinaryStatusContextViewer_title);
 		fForm.setTopLeft(fLabel);
@@ -169,8 +169,8 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		composite.setLayout(layout);
-		
-		
+
+
 		fTreeViewer= new TreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		final AppearanceAwareLabelProvider labelProvider= new AppearanceAwareLabelProvider();
 		fTreeViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(labelProvider));
@@ -183,7 +183,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 			}
 		});
 		fTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		fButton= new Button(composite, SWT.PUSH);
 		fButton.setText(RefactoringMessages.ReferencesInBinaryStatusContextViewer_show_as_search_button);
 		GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
@@ -195,9 +195,9 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 			}
 		});
 		fButton.setEnabled(false);
-		
+
 		fForm.setContent(composite);
-		
+
 		Dialog.applyDialogFont(parent);
 	}
 
@@ -212,10 +212,10 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 	public Control getControl() {
 		return fForm;
 	}
-	
+
 
 	static class ReferencesInBinarySearchQuery implements ISearchQuery {
-		
+
 		private final ReferencesInBinaryContext fContext;
 		private ReferencesInBinarySearchResult fResult;
 
@@ -243,10 +243,10 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		public IStatus run(IProgressMonitor monitor) throws OperationCanceledException {
 			fResult.removeAll();
 			List matches= fContext.getMatches();
-			
+
 			NewSearchResultCollector collector= new NewSearchResultCollector(fResult, false);
 			collector.beginReporting();
-			
+
 			for (Iterator iter= matches.iterator(); iter.hasNext();) {
 				try {
 					collector.acceptSearchMatch((SearchMatch) iter.next());
@@ -257,11 +257,11 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 			collector.endReporting();
 			return Status.OK_STATUS;
 		}
-		
+
 	}
-	
+
 	public static class ReferencesInBinarySearchResult extends AbstractJavaSearchResult {
-				
+
 		private final ReferencesInBinarySearchQuery fQuery;
 
 		public ReferencesInBinarySearchResult(ReferencesInBinarySearchQuery query) {
@@ -279,11 +279,11 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		public String getTooltip() {
 			return getLabel();
 		}
-		
+
 		public ISearchQuery getQuery() {
 			return fQuery;
 		}
 	}
-	
-	
+
+
 }

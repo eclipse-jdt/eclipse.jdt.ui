@@ -40,30 +40,30 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 //	- Reference to type inside moved type:
 //	  - if originally resolved by qualification -> no problem
 //	  - if originally resolved by import -> must add import in target too (qualify if import ambiguous)
-	
+
 	public MovedMemberAnalyzer(CompilationUnitRewrite cuRewrite,
 			IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		super(cuRewrite, members, source, target);
 	}
-	
+
 	public boolean targetNeedsSourceImport() {
 		return fNeedsImport;
 	}
-	
+
 	//---- types and fields --------------------------
-		
+
 	public boolean visit(SimpleName node) {
 		if (node.isDeclaration() || isProcessed(node))
 			return super.visit(node);
 		IBinding binding= node.resolveBinding();
 		if (isMovedMember(binding))
 			return super.visit(node);
-			
+
 		if (isSourceAccess(binding))
 			rewrite(node, fSource);
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(QualifiedName node) {
 		IBinding binding= node.resolveBinding();
 		if (isSourceAccess(binding)) {
@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(FieldAccess node) {
 		IBinding binding= node.resolveFieldBinding();
 		if (isSourceAccess(binding)) {
@@ -92,16 +92,16 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 					rewrite(node, fTarget);
 			} else
 				rewrite(node, fSource);
-			
+
 		} else if (isTargetAccess(binding)) {
 			fCuRewrite.getASTRewrite().remove(node.getExpression(), null);
 			fCuRewrite.getImportRemover().registerRemovedNode(node.getExpression());
-		}	
+		}
 		return super.visit(node);
 	}
-	
+
 	//---- method invocations ----------------------------------
-	
+
 	public boolean visit(MethodInvocation node) {
 		IBinding binding= node.resolveMethodBinding();
 		if (isSourceAccess(binding)) {
@@ -110,18 +110,18 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 					rewrite(node, fTarget);
 			} else
 				rewrite(node, fSource);
-			
+
 		} else if (isTargetAccess(binding)) {
 			if (node.getExpression() != null) {
 				fCuRewrite.getASTRewrite().remove(node.getExpression(), null);
 				fCuRewrite.getImportRemover().registerRemovedNode(node.getExpression());
 			}
-		}	
+		}
 		return super.visit(node);
 	}
-	
+
 	//---- javadoc references ----------------------------------
-	
+
 	public boolean visit(MemberRef node) {
 		IBinding binding= node.resolveBinding();
 		if (isSourceAccess(binding)) {
@@ -130,16 +130,16 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 					rewrite(node, fTarget);
 			} else
 				rewrite(node, fSource);
-			
+
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
 			SimpleName replace= (SimpleName)fCuRewrite.getASTRewrite().createCopyTarget(node.getName());
 			fCuRewrite.getASTRewrite().replace(node, replace, null);
 			fCuRewrite.getImportRemover().registerRemovedNode(node);
-		}	
+		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(MethodRef node) {
 		IBinding binding= node.resolveBinding();
 		if (isSourceAccess(binding)) {
@@ -148,39 +148,39 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 					rewrite(node, fTarget);
 			} else
 				rewrite(node, fSource);
-			
+
 		} else if (isTargetAccess(binding)) {
 			// remove qualifier:
 			SimpleName replace= (SimpleName)fCuRewrite.getASTRewrite().createCopyTarget(node.getName());
 			fCuRewrite.getASTRewrite().replace(node, replace, null);
 			fCuRewrite.getImportRemover().registerRemovedNode(node);
-		}	
+		}
 		return super.visit(node);
 	}
 
 	//---- helper methods --------------------------------------
-	
+
 	private boolean isSourceAccess(IBinding binding) {
 		if (binding instanceof IMethodBinding) {
 			IMethodBinding method= (IMethodBinding)binding;
 			return Modifier.isStatic(method.getModifiers()) && Bindings.equals(fSource, method.getDeclaringClass());
 		} else if (binding instanceof ITypeBinding) {
 			ITypeBinding type= (ITypeBinding)binding;
-			return Modifier.isStatic(type.getModifiers()) && Bindings.equals(fSource, type.getDeclaringClass());			
+			return Modifier.isStatic(type.getModifiers()) && Bindings.equals(fSource, type.getDeclaringClass());
 		} else if (binding instanceof IVariableBinding) {
 			IVariableBinding field= (IVariableBinding)binding;
 			return field.isField() && Modifier.isStatic(field.getModifiers()) && Bindings.equals(fSource, field.getDeclaringClass());
 		}
 		return false;
 	}
-	
+
 	private boolean isTargetAccess(IBinding binding) {
 		if (binding instanceof IMethodBinding) {
 			IMethodBinding method= (IMethodBinding)binding;
 			return Modifier.isStatic(method.getModifiers()) && Bindings.equals(fTarget, method.getDeclaringClass());
 		} else if (binding instanceof ITypeBinding) {
 			ITypeBinding type= (ITypeBinding)binding;
-			return Modifier.isStatic(type.getModifiers()) && Bindings.equals(fTarget, type.getDeclaringClass());			
+			return Modifier.isStatic(type.getModifiers()) && Bindings.equals(fTarget, type.getDeclaringClass());
 		} else if (binding instanceof IVariableBinding) {
 			IVariableBinding field= (IVariableBinding)binding;
 			return field.isField() && Modifier.isStatic(field.getModifiers()) && Bindings.equals(fTarget, field.getDeclaringClass());

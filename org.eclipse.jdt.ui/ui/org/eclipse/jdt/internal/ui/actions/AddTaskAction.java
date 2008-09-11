@@ -19,7 +19,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.ui.views.tasklist.TaskPropertiesDialog;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -47,7 +46,7 @@ public class AddTaskAction extends SelectionDispatchAction {
 		dialog.setResource(resource);
 		dialog.open();
 	}
-	
+
 	private IResource getElement(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;
@@ -60,5 +59,5 @@ public class AddTaskAction extends SelectionDispatchAction {
 			return null;
 		}
 		return resource;
-	}	
+	}
 }

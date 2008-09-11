@@ -13,6 +13,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
@@ -24,23 +25,23 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectio
 /**
  * Measures the time to semantically expand the selection in a large file in the
  * Java editor.
- * 
+ *
  * @since 3.1
  */
 public class JavaExpandSelectionTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= JavaExpandSelectionTest.class;
-	
+
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
-	
+
 	private static final int WARM_UP_RUNS= 5;
 
 	private static final int MEASURED_RUNS= 5;
-	
+
 	private static final int LINE= 3347;
-	
+
 	private static final int COLUMN= 38;
-	
+
 	private static final int REPEAT= 10;
 
 	private AbstractTextEditor fEditor;
@@ -56,7 +57,7 @@ public class JavaExpandSelectionTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
@@ -65,7 +66,7 @@ public class JavaExpandSelectionTest extends TextPerformanceTestCase {
 	/**
 	 * Measures the time to semantically expand the selection in a large
 	 * file in the Java editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test() throws Exception {

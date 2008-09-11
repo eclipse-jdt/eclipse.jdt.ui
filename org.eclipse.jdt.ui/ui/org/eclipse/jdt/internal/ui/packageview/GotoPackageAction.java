@@ -34,27 +34,27 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 
 class GotoPackageAction extends Action {
-	
+
 	private PackageExplorerPart fPackageExplorer;
-	
+
 	GotoPackageAction(PackageExplorerPart part) {
-		super(PackagesMessages.GotoPackage_action_label); 
-		setDescription(PackagesMessages.GotoPackage_action_description); 
+		super(PackagesMessages.GotoPackage_action_label);
+		setDescription(PackagesMessages.GotoPackage_action_description);
 		fPackageExplorer= part;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PACKAGE_ACTION);
 	}
- 
-	public void run() { 
+
+	public void run() {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		SelectionDialog dialog= createAllPackagesDialog(shell);
 		dialog.setTitle(getDialogTitle());
-		dialog.setMessage(PackagesMessages.GotoPackage_dialog_message); 
-		dialog.open();		
+		dialog.setMessage(PackagesMessages.GotoPackage_dialog_message);
+		dialog.open();
 		Object[] res= dialog.getResult();
-		if (res != null && res.length == 1) 
+		if (res != null && res.length == 1)
 			gotoPackage((IPackageFragment)res[0]);
 	}
-	
+
 	private SelectionDialog createAllPackagesDialog(Shell shell) {
 		IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
@@ -62,25 +62,25 @@ class GotoPackageAction extends Action {
 		PackageSelectionDialog dialog= new PackageSelectionDialog(shell, progressService, flag, scope);
 		dialog.setFilter(""); //$NON-NLS-1$
 		dialog.setIgnoreCase(false);
-		dialog.setMultipleSelection(false);		
+		dialog.setMultipleSelection(false);
 		return dialog;
 	}
-				
+
 	private void gotoPackage(IPackageFragment p) {
 		fPackageExplorer.selectReveal(new StructuredSelection(p));
 		if (!p.equals(getSelectedElement())) {
-			MessageDialog.openInformation(fPackageExplorer.getSite().getShell(), 
-				getDialogTitle(), 
-				Messages.format(PackagesMessages.PackageExplorer_element_not_present, JavaElementLabels.getElementLabel(p, JavaElementLabels.ALL_DEFAULT))); 
+			MessageDialog.openInformation(fPackageExplorer.getSite().getShell(),
+				getDialogTitle(),
+				Messages.format(PackagesMessages.PackageExplorer_element_not_present, JavaElementLabels.getElementLabel(p, JavaElementLabels.ALL_DEFAULT)));
 		}
 	}
-	
+
 	private Object getSelectedElement() {
 		return ((IStructuredSelection)fPackageExplorer.getSite().getSelectionProvider().getSelection()).getFirstElement();
-	}	
-	
-	private String getDialogTitle() {
-		return PackagesMessages.GotoPackage_dialog_title; 
 	}
-	
+
+	private String getDialogTitle() {
+		return PackagesMessages.GotoPackage_dialog_title;
+	}
+
 }

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 public final class ArrayType extends TType {
 	private TType fElementType;
 	private int fDimensions;
-	
+
 	private TType fErasure;
 
 	protected ArrayType(TypeEnvironment environment) {
@@ -54,13 +54,13 @@ public final class ArrayType extends TType {
 	public TType getElementType() {
 		return fElementType;
 	}
-	
+
 	/**
 	 * Returns the component type of this array.
 	 * If getDimensions() is 1, the component type is the element type.
 	 * If getDimensions() is > 1, the component type is an array type
 	 * with element type getElementType() and dimensions getDimensions() - 1.
-	 * 
+	 *
 	 * @return the component type
 	 */
 	public TType getComponentType() {
@@ -69,15 +69,15 @@ public final class ArrayType extends TType {
 		else
 			return fElementType;
 	}
-	
+
 	public int getDimensions() {
 		return fDimensions;
 	}
-	
+
 	public int getKind() {
 		return ARRAY_TYPE;
 	}
-	
+
 	public TType[] getSubTypes() {
 		TType[] subTypes= fElementType.getSubTypes();
 		TType[] result= new TType[subTypes.length];
@@ -86,38 +86,38 @@ public final class ArrayType extends TType {
 		}
 		return result;
 	}
-	
+
 	public TType getErasure() {
 		return fErasure;
 	}
-	
+
 	public boolean doEquals(TType other) {
 		ArrayType arrayType= (ArrayType)other;
 		return fElementType.equals(arrayType.fElementType) && fDimensions == arrayType.fDimensions;
 	}
-	
+
 	public int hashCode() {
 		return fElementType.hashCode() << ARRAY_TYPE_SHIFT;
 	}
-	
+
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
 			case NULL_TYPE: return false;
 			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE: return false;
-			
+
 			case ARRAY_TYPE: return canAssignToArrayType((ArrayType)lhs);
-			
+
 			case GENERIC_TYPE: return false;
 			case STANDARD_TYPE: return isArrayLhsCompatible(lhs);
 			case PARAMETERIZED_TYPE: return false;
 			case RAW_TYPE: return false;
-			
+
 			case UNBOUND_WILDCARD_TYPE:
-			case EXTENDS_WILDCARD_TYPE: 
-			case SUPER_WILDCARD_TYPE: 
+			case EXTENDS_WILDCARD_TYPE:
+			case SUPER_WILDCARD_TYPE:
 				return ((WildcardType)lhs).checkAssignmentBound(this);
-				
+
 			case TYPE_VARIABLE: return false;
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(lhs);
@@ -140,7 +140,7 @@ public final class ArrayType extends TType {
 	private boolean isArrayLhsCompatible(TType lhsElementType) {
 		return lhsElementType.isJavaLangObject() || lhsElementType.isJavaLangCloneable() || lhsElementType.isJavaIoSerializable();
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(fElementType.getPlainPrettySignature());
 		for (int i= 0; i < fDimensions; i++) {
@@ -148,7 +148,7 @@ public final class ArrayType extends TType {
 		}
 		return result.toString();
 	}
-	
+
 	public String getName() {
 		StringBuffer result= new StringBuffer(fElementType.getName());
 		for (int i= 0; i < fDimensions; i++) {

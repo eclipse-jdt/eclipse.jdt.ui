@@ -27,7 +27,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
  * <p>
  * The orderings imposed by a subclass need not be consistent with equals.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public abstract class AbstractProposalSorter implements Comparator {
@@ -44,7 +44,7 @@ public abstract class AbstractProposalSorter implements Comparator {
 	 * <p>
 	 * Clients may override, the default implementation does nothing.
 	 * </p>
-	 * 
+	 *
 	 * @param context the context of the content assist invocation
 	 */
 	public void beginSorting(ContentAssistInvocationContext context) {
@@ -58,7 +58,7 @@ public abstract class AbstractProposalSorter implements Comparator {
 	 * <p>
 	 * The orderings imposed by an implementation need not be consistent with equals.
 	 * </p>
-	 * 
+	 *
 	 * @param p1 the first proposal to be compared
 	 * @param p2 the second proposal to be compared
 	 * @return a negative integer, zero, or a positive integer as the first argument is less than,
@@ -79,7 +79,7 @@ public abstract class AbstractProposalSorter implements Comparator {
 	 * This method delegates to {@link #compare(ICompletionProposal, ICompletionProposal)} and may
 	 * be removed if the class is ever converted to extend
 	 * <code>Comparator&lt;ICompletionProposal&gt;</code>.
-	 * 
+	 *
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	public final int compare(Object o1, Object o2) {

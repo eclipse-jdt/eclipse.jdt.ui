@@ -37,12 +37,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.1
  */
 public final class ProjectTemplateStore {
-	
+
 	private static final String KEY= "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
 
 	private final TemplateStore fInstanceStore;
 	private final TemplateStore fProjectStore;
-	
+
 	public ProjectTemplateStore(IProject project) {
 		fInstanceStore= JavaPlugin.getDefault().getCodeTemplateStore();
 		if (project == null) {
@@ -57,7 +57,7 @@ public final class ProjectTemplateStore {
 				public void add(TemplatePersistenceData data) {
 					internalAdd(data);
 				}
-				
+
 				public void save() throws IOException {
 
 					TemplatePersistenceData[] templateData= ProjectTemplateStore.this.getTemplateData();
@@ -73,14 +73,14 @@ public final class ProjectTemplateStore {
 							return;
 						}
 					}
-					
+
 					projectSettings.setToDefault(KEY);
 					projectSettings.save();
 				}
 			};
 		}
 	}
-	
+
 	public static boolean hasProjectSpecificTempates(IProject project) {
 		String pref= new ProjectScope(project).getNode(JavaUI.ID_PLUGIN).get(KEY, null);
 		if (pref != null && pref.trim().length() > 0) {
@@ -96,8 +96,8 @@ public final class ProjectTemplateStore {
 		}
 		return false;
 	}
-	
-	
+
+
 	public TemplatePersistenceData[] getTemplateData() {
 		if (fProjectStore != null) {
 			return fProjectStore.getTemplateData(true);
@@ -105,27 +105,27 @@ public final class ProjectTemplateStore {
 			return fInstanceStore.getTemplateData(true);
 		}
 	}
-	
+
 	public Template findTemplateById(String id) {
 		Template template= null;
 		if (fProjectStore != null)
 			template= fProjectStore.findTemplateById(id);
 		if (template == null)
 			template= fInstanceStore.findTemplateById(id);
-		
+
 		return template;
 	}
-	
+
 	public void load() throws IOException {
 		if (fProjectStore != null) {
 			fProjectStore.load();
-			
+
 			Set datas= new HashSet();
 			TemplatePersistenceData[] data= fProjectStore.getTemplateData(false);
 			for (int i= 0; i < data.length; i++) {
 				datas.add(data[i].getId());
 			}
-			
+
 			data= fInstanceStore.getTemplateData(false);
 			for (int i= 0; i < data.length; i++) {
 				TemplatePersistenceData orig= data[i];
@@ -137,22 +137,22 @@ public final class ProjectTemplateStore {
 			}
 		}
 	}
-	
+
 	public boolean isProjectSpecific(String id) {
 		if (id == null) {
 			return false;
 		}
-		
+
 		if (fProjectStore == null)
 			return false;
-		
+
 		return fProjectStore.findTemplateById(id) != null;
 	}
-	
-	
+
+
 	public void setProjectSpecific(String id, boolean projectSpecific) {
 		Assert.isNotNull(fProjectStore);
-		
+
 		TemplatePersistenceData data= fProjectStore.getTemplateData(id);
 		if (data == null) {
 			return; // does not exist
@@ -180,7 +180,7 @@ public final class ProjectTemplateStore {
 			fProjectStore.save();
 		}
 	}
-	
+
 	public void revertChanges() throws IOException {
 		if (fProjectStore != null) {
 			// nothing to do

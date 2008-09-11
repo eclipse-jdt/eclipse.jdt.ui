@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalComputer {
@@ -50,7 +50,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		collector.setIgnored(CompletionProposal.TYPE_REF, false);
 		return collector;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -63,7 +63,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 					IType expectedType= javaContext.getExpectedType();
 					if (expectedType != null) {
 						// empty prefix completion - insert LRU types if known, but prune if they already occur in the core list
-						
+
 						// compute minmimum relevance and already proposed list
 						int relevance= Integer.MAX_VALUE;
 						Set proposed= new HashSet();
@@ -82,9 +82,9 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 							String type= (String) it.next();
 							if (proposed.contains(type))
 								continue;
-							
+
 							IJavaCompletionProposal proposal= createTypeProposal(relevance, type, javaContext);
-							
+
 							if (proposal != null)
 								types.add(proposal);
 							relevance++;
@@ -106,7 +106,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		IType type= context.getCompilationUnit().getJavaProject().findType(fullyQualifiedType);
 		if (type == null)
 			return null;
-		
+
 		CompletionProposal proposal= CompletionProposal.create(CompletionProposal.TYPE_REF, context.getInvocationOffset());
 		proposal.setCompletion(fullyQualifiedType.toCharArray());
 		proposal.setDeclarationSignature(type.getPackageFragment().getElementName().toCharArray());
@@ -120,14 +120,14 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		else
 			return new LazyJavaTypeCompletionProposal(proposal, context);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if generic proposals should be allowed,
 	 * <code>false</code> if not. Note that even though code (in a library)
 	 * may be referenced that uses generics, it is still possible that the
 	 * current source does not allow generics.
-	 * 
-	 * @param project the Java project 
+	 *
+	 * @param project the Java project
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not
 	 */
@@ -140,14 +140,14 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 
 		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0;
 	}
-	
+
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		final int contextPosition= context.getInvocationOffset();
-		
+
 		IDocument document= context.getDocument();
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 		int bound= Math.max(-1, contextPosition - 200);
-		
+
 		// try the innermost scope of angle brackets that looks like a generic type argument list
 		try {
 			int pos= contextPosition - 1;
@@ -168,7 +168,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 			} while (true);
 		} catch (BadLocationException x) {
 		}
-		
+
 		return super.guessContextInformationPosition(context);
 	}
 

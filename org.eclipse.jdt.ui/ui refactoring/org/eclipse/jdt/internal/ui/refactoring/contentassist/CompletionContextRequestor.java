@@ -17,9 +17,9 @@ import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 
 
 public abstract class CompletionContextRequestor {
-	
+
 	public abstract StubTypeContext getStubTypeContext();
-	
+
 	public ICompilationUnit getOriginalCu() {
 		return getStubTypeContext().getCuHandle();
 	}
@@ -31,5 +31,5 @@ public abstract class CompletionContextRequestor {
 	public String getAfterString() {
 		return getStubTypeContext().getAfterString();
 	}
-	
+
 }

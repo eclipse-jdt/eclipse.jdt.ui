@@ -25,6 +25,7 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.ui.PreferenceConstants;

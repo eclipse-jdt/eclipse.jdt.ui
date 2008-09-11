@@ -100,7 +100,7 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns the problem arguments or <code>null</code> if no problem arguments can be evaluated.
-	 * 
+	 *
 	 * @return returns the problem arguments or <code>null</code> if no problem
 	 *  arguments can be evaluated.
 	 */
@@ -108,7 +108,7 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns the problem id or <code>-1</code> if no problem id can be evaluated.
-	 * 
+	 *
 	 * @return returns the problem id or <code>-1</code>
 	 */
 	int getId();
@@ -116,9 +116,9 @@ public interface IJavaAnnotation {
 	/**
 	 * Returns the marker type associated to this problem or <code>null<code> if no marker type
 	 * can be evaluated. See also {@link CategorizedProblem#getMarkerType()}.
-	 * 
+	 *
 	 * @return the type of the marker which would be associated to the problem or
-	 * <code>null<code> if no marker type can be evaluated. 
+	 * <code>null<code> if no marker type can be evaluated.
 	 */
 	String getMarkerType();
 }

@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 public class JavaDoc2HTMLTextReaderTester extends TestCase {
 
 	private static final boolean DEBUG= false;
-	
+
 
 	public JavaDoc2HTMLTextReaderTester(String name) {
 		super(name);
@@ -51,7 +51,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 		Reader reader= new JavaDocCommentReader(new MockBuffer(string), 0, string.length());
 		return HTMLPrinter.read(new JavaDoc2HTMLTextReader(reader));
 	}
-	
+
 	private void verify(String string, String expected){
 		String result = getTransformedJavaDoc(string);
 		if (DEBUG)
@@ -77,7 +77,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 		String expected= "<dl><dt>Author:</dt><dd>Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
-	
+
 	public void test3(){
 		//test for bug 14658
 		String string= "/**@author Foo Bar<a href=\"mailto:foobar@eclipse.org\">foobar@eclipse.org</a>\n *@deprecated*/"; //$NON-NLS-1$
@@ -90,7 +90,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 		String expected= "<dl><dt>Author:</dt><dd>Foo Bar</dd><dt>@deprecated</dt><dd></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
-	
+
 	public void test5(){
 		String string= "/**@author Foo Bar\n * @author Baz Fred*/"; //$NON-NLS-1$
 		String expected= "<dl><dt>Author:</dt><dd>Foo Bar</dd><dd>Baz Fred</dd></dl>"; //$NON-NLS-1$
@@ -103,7 +103,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 		verify(string, expected);
 	}
 
-	
+
 	public void test7(){
 		if (false){
 			System.out.println(getClass().getName()+"::" + getName() +" disabled(corner case - @see tag inside <a> tag)"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -149,56 +149,56 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 		String expected= "<dl><dt>Parameters:</dt><dd><b>i</b> fred or <code>null</code></dd></dl>"; //$NON-NLS-1$
 		verify(string, expected);
 	}
-	
+
 	public void test13_withText(){
 		String string= "/**\n * This is a {@linkplain Foo#bar(String, int) test link}. End.*/"; //$NON-NLS-1$
 		String expected= " This is a test link. End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
-	
+
 	public void test13_withoutText(){
 		String string= "/**\n * This is a {@linkplain Foo#bar(String, int)}. End.*/"; //$NON-NLS-1$
 		String expected= " This is a Foo.bar(String, int). End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
-	
+
 	public void test14_withText(){
 		String string= "/**\n * This is a {@link Foo#bar(String, int) test link}. End.*/"; //$NON-NLS-1$
 		String expected= " This is a <code>test link</code>. End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
-	
-	
+
+
 	public void test14_withoutText(){
 		String string= "/**\n * This is a {@link Foo#bar(String, int)}. End.*/"; //$NON-NLS-1$
 		String expected= " This is a <code>Foo.bar(String, int)</code>. End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
-	
+
 	public void test15(){
 		String string= "/**\n * This is a <a href=\"{@docRoot}/test.html\">test link</a>. End.*/"; //$NON-NLS-1$
 		String expected= " This is a <a href=\"/test.html\">test link</a>. End."; //$NON-NLS-1$
 		verify(string, expected);
 	}
-    
+
     public void test16() {
         String string= "/**\n *@param foo {@link Bar bar}*/"; //$NON-NLS-1$
         String expected= "<dl><dt>Parameters:</dt><dd><b>foo</b> <code>bar</code></dd></dl>"; //$NON-NLS-1$
         verify(string, expected);
     }
-    
+
     public void test17(){
     	String string= "/**\n @model name='abc' value='@'\n * @generated*/"; // $NON-NLS-1$
         String expected= "<dl><dt>@model</dt><dd>name='abc' value='@'</dd><dt>@generated</dt><dd></dd></dl>"; //$NON-NLS-1$
         verify(string, expected);
 	}
-    
+
     public void test18(){
     	String string= "/**\n* Method foo.\n* @param bar\n* @custom fooBar\n*/"; // $NON-NLS-1$
         String expected= " Method foo.\n <dl><dt>Parameters:</dt><dd><b>bar</b></dd><dt>@custom</dt><dd>fooBar</dd></dl>"; //$NON-NLS-1$
         verify(string, expected);
 	}
-    
+
     public void test19(){
     	String string= "/**\n @model\n * @generated*/"; // $NON-NLS-1$
         String expected= "<dl><dt>@model</dt><dd></dd><dt>@generated</dt><dd></dd></dl>"; //$NON-NLS-1$
@@ -211,7 +211,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
     	String expected= "This is <code></code>&lt;literal&gt; <code>&amp; code</code>."; //$NON-NLS-1$
     	verify(string, expected);
     }
-    
+
 	public void test21(){
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=70870
 		String string= "/**@see <a href=\"http://foo.bar#baz\">foo</a>*/"; //$NON-NLS-1$
@@ -228,12 +228,12 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 }
 
 class MockBuffer implements IBuffer{
-	
+
 	private StringBuffer fStringBuffer;
 	MockBuffer(String string){
 		fStringBuffer= new StringBuffer(string);
 	}
-	
+
 	public void addBufferChangedListener(IBufferChangedListener listener) {
 	}
 

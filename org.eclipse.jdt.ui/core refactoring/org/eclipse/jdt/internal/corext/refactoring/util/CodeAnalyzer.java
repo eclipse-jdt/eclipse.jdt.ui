@@ -27,7 +27,7 @@ public class CodeAnalyzer extends StatementAnalyzer {
 	public CodeAnalyzer(ICompilationUnit cunit, Selection selection, boolean traverseSelectedNode) throws CoreException {
 		super(cunit, selection, traverseSelectedNode);
 	}
-	
+
 	protected final void checkSelectedNodes() {
 		super.checkSelectedNodes();
 		RefactoringStatus status= getStatus();
@@ -35,7 +35,7 @@ public class CodeAnalyzer extends StatementAnalyzer {
 			return;
 		ASTNode node= getFirstSelectedNode();
 		if (node instanceof ArrayInitializer) {
-			status.addFatalError(RefactoringCoreMessages.CodeAnalyzer_array_initializer, JavaStatusContext.create(fCUnit, node)); 
+			status.addFatalError(RefactoringCoreMessages.CodeAnalyzer_array_initializer, JavaStatusContext.create(fCUnit, node));
 		}
 	}
 }

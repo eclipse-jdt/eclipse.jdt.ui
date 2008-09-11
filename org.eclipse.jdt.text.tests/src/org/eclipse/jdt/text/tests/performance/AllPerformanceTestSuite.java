@@ -22,7 +22,7 @@ public class AllPerformanceTestSuite extends TestSuite {
 	public static Test suite() {
 		return new AllPerformanceTestSuite();
 	}
-	
+
 	public AllPerformanceTestSuite() {
 		// The Debug performance tests must be run separately in debug mode
 		if (true) {

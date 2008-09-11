@@ -32,6 +32,8 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.filesystem.EFS;
 
 import org.eclipse.core.runtime.CoreException;
@@ -50,8 +52,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.ModalContext;
 
@@ -117,7 +117,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private MessageMultiStatus fStatus;
 	private StandardJavaElementContentProvider fJavaElementContentProvider;
 	private boolean fFilesSaved;
-	
+
 	/**
 	 * Creates an instance of this class.
 	 *
@@ -176,7 +176,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private void addWarning(String message, Throwable error) {
 		fStatus.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, error));
 	}
-	
+
 	/**
 	 * Adds a new error to the list with the passed information.
 	 * Normally an error terminates the export operation.
@@ -195,19 +195,19 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private int countSelectedElements() {
 		Set enclosingJavaProjects= new HashSet(10);
 		int count= 0;
-		
+
 		int n= fJarPackage.getElements().length;
 		for (int i= 0; i < n; i++) {
 			Object element= fJarPackage.getElements()[i];
-			
+
 			IJavaProject javaProject= getEnclosingJavaProject(element);
 			if (javaProject != null)
 				enclosingJavaProjects.add(javaProject);
-			
+
 			IResource resource= null;
 			if (element instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)element;
-				resource= je.getResource();			
+				resource= je.getResource();
 				if (resource == null) {
 					if (element instanceof IPackageFragmentRoot) {
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
@@ -239,7 +239,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					count+= getTotalChildCount((IContainer) resource);
 			}
 		}
-		
+
 		if (fJarPackage.areOutputFoldersExported()) {
 			if (!fJarPackage.areJavaFilesExported())
 				count= 0;
@@ -258,10 +258,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 			}
 		}
-		
+
 		return count;
 	}
-	
+
 	private int getClassFileCount(IJavaElement[] children) throws JavaModelException {
 		int result= 0;
 		for (int i= 0; i < children.length; i++) {
@@ -357,7 +357,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					}
 				}
 			}
-			
+
 			if (pkgRoot != null && jProject != null) {
 				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
 				boolean isOnBuildPath;
@@ -365,13 +365,13 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				if (!isOnBuildPath || (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH)))
 					leadSegmentsToRemove--;
 			}
-			
+
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
-			
+
 			if (typeRootElement != null) {
 				exportClassFiles(progressMonitor, typeRootElement, destinationPath);
 			}
-			
+
 			exportResource(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath);
 
 			progressMonitor.worked(1);
@@ -430,7 +430,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (javaElement instanceof IClassFile) {
 			IClassFile classFile= (IClassFile) javaElement;
 			IPath path= classFile.getPath();
-			
+
 			IPath destination= path.removeFirstSegments(classFolderPath.segmentCount()).setDevice(null);
 
 			((IJarBuilderExtension) fJarBuilder).writeFile(path.toFile(), destination);
@@ -477,7 +477,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private void exportContainer(IProgressMonitor progressMonitor, IContainer container) throws InterruptedException {
 		if (container.getType() == IResource.FOLDER && isOutputFolder((IFolder)container))
 			return;
-		
+
 		IResource[] children= null;
 		try {
 			children= container.members();
@@ -589,7 +589,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fJarPackage.areOutputFoldersExported())
 			exportOutputFolders(progressMonitor, enclosingJavaProjects);
 	}
-	
+
 	private IJavaProject getEnclosingJavaProject(Object element) {
 		if (element instanceof IJavaElement) {
 			return ((IJavaElement)element).getJavaProject();
@@ -604,11 +604,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 		return null;
 	}
-	
+
 	private void exportOutputFolders(IProgressMonitor progressMonitor, Set javaProjects) throws InterruptedException {
 		if (javaProjects == null)
 			return;
-		
+
 		Iterator iter= javaProjects.iterator();
 		while (iter.hasNext()) {
 			IJavaProject javaProject= (IJavaProject)iter.next();
@@ -624,7 +624,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 		}
 	}
-	
+
 	private IContainer[] getOutputContainers(IJavaProject javaProject) throws CoreException {
 		Set outputPaths= new HashSet();
 		boolean includeDefaultOutputPath= false;
@@ -641,12 +641,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				}
 			}
 		}
-		
+
 		if (includeDefaultOutputPath) {
 			// Use default output location
 			outputPaths.add(javaProject.getOutputLocation());
 		}
-		
+
 		// Convert paths to containers
 		Set outputContainers= new HashSet(outputPaths.size());
 		Iterator iter= outputPaths.iterator();
@@ -665,7 +665,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 		return (IContainer[])outputContainers.toArray(new IContainer[outputContainers.size()]);
 	}
-	
+
 	/**
 	 * Returns an iterator on a list with files that correspond to the
 	 * passed file and that are on the classpath of its project.
@@ -680,7 +680,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		IFile file= (IFile) typeRootElement.getResource();
 		IJavaProject javaProject= typeRootElement.getJavaProject();
 		IPackageFragmentRoot pkgRoot= JavaModelUtil.getPackageFragmentRoot(typeRootElement);
-		
+
 		// Allow JAR Package to provide its own strategy
 		IFile[] classFiles= fJarPackage.findClassfilesFor(file);
 		if (classFiles != null)
@@ -698,7 +698,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (outputPath == null)
 			// Use default output location
 			outputPath= javaProject.getOutputLocation();
-				
+
 		IContainer outputContainer;
 		if (javaProject.getProject().getFullPath().equals(outputPath))
 			outputContainer= javaProject.getProject();
@@ -720,10 +720,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		IContainer classContainer= outputContainer;
 		if (pathInJar.segmentCount() > 1)
 			classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
-			
+
 		if (fExportedClassContainers.contains(classContainer))
 			return Collections.EMPTY_LIST.iterator();
-		
+
 		if (JavaCore.DO_NOT_GENERATE.equals(javaProject.getOption(JavaCore.COMPILER_SOURCE_FILE_ATTR, true))) {
 			IRegion region= JavaCore.newRegion();
 			region.add(typeRootElement);
@@ -765,7 +765,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * Answers whether the given resource is a Java file.
 	 * The resource must be a file whose file name ends with ".java",
 	 * or an extension defined as Java source.
-	 * 
+	 *
 	 * @param file the file to test
 	 * @return a <code>true<code> if the given resource is a Java file
 	 */
@@ -779,7 +779,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	/**
 	 * Answers whether the given resource is a class file.
 	 * The resource must be a file whose file name ends with ".class".
-	 * 
+	 *
 	 * @param file the file to test
 	 * @return a <code>true<code> if the given resource is a class file
 	 */
@@ -919,7 +919,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	/**
 	 * Exports the resources as specified by the JAR package.
-	 * 
+	 *
 	 * @param	progressMonitor	the progress monitor that displays the progress
 	 * @throws InvocationTargetException thrown when an ecxeption occurred
 	 * @throws InterruptedException thrown when cancelled
@@ -955,10 +955,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				buildProjects(subProgressMonitor);
 			} else
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
-			
+
 			fJarBuilder = fJarPackage.getJarBuilder();
 			fJarBuilder.open(fJarPackage, fParentShell, fStatus);
-			
+
 			exportSelectedElements(progressMonitor);
 			if (getStatus().getSeverity() != IStatus.ERROR) {
 				progressMonitor.subTask(JarPackagerMessages.JarFileExportOperation_savingFiles);
@@ -976,7 +976,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			progressMonitor.done();
 		}
 	}
-	
+
 	private boolean preconditionsOK() {
 		if (!fJarPackage.areGeneratedFilesExported() && !fJarPackage.areJavaFilesExported()) {
 			addError(JarPackagerMessages.JarFileExportOperation_noExportTypeChosen, null);
@@ -1003,7 +1003,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			addError(JarPackagerMessages.JarFileExportOperation_invalidMainClass, null);
 			return false;
 		}
-		
+
 		if (fParentShell != null) {
 			final boolean[] res= { false };
 			fParentShell.getDisplay().syncExec(new Runnable() {
@@ -1033,7 +1033,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				addError(JarPackagerMessages.JarFileExportOperation_errorSavingManifest, ex);
 			}
 		}
-		
+
 		// Save the description
 		if (fJarPackage.isDescriptionSaved()) {
 			try {
@@ -1088,7 +1088,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		} else
 			manifestFile.create(fileInput, true, null);
 	}
-	
+
 	private boolean isAutoBuilding() {
 		return ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding();
 	}
@@ -1120,7 +1120,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	/**
 	 * Tells whether the given resource (or its children) have compile errors.
 	 * The method acts on the current build state and does not recompile.
-	 * 
+	 *
 	 * @param resource the resource to check for errors
 	 * @return <code>true</code> if the resource (and its children) are error free
 	 * @throws CoreException import org.eclipse.core.runtime.CoreException if there's a marker problem
@@ -1137,7 +1137,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	/**
 	 * Tells whether the given resource (or its children) have compile errors.
 	 * The method acts on the current build state and does not recompile.
-	 * 
+	 *
 	 * @param resource the resource to check for errors
 	 * @return <code>true</code> if the resource (and its children) are error free
 	 * @throws CoreException import org.eclipse.core.runtime.CoreException if there's a marker problem

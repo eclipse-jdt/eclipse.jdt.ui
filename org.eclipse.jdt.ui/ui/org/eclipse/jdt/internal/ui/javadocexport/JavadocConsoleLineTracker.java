@@ -22,9 +22,9 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.ui.console.IHyperlink;
+
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.debug.ui.console.IConsole;
 import org.eclipse.debug.ui.console.IConsoleLineTracker;
@@ -38,9 +38,9 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavadocConsoleLineTracker implements IConsoleLineTracker {
-	
+
 	private static class JavadocConsoleHyperLink implements IHyperlink {
-		
+
 		private IPath fExternalPath;
 		private int fLineNumber;
 
@@ -79,7 +79,7 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 							return;
 						}
 					}
-				}	
+				}
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
 			} catch (PartInitException e) {
@@ -88,20 +88,20 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 				JavaPlugin.log(e);
 			}
 		}
-		
+
 		private void revealLine(ITextEditor editor, int lineNumber) throws BadLocationException {
 			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 			IRegion region= document.getLineInformation(lineNumber - 1);
 			editor.selectAndReveal(region.getOffset(), 0);
 		}
-		
+
 	}
-	
+
 
 	private IConsole fConsole;
 
 	/**
-	 * 
+	 *
 	 */
 	public JavadocConsoleLineTracker() {
 	}
@@ -121,12 +121,12 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 			int offset = line.getOffset();
 			int length = line.getLength();
 			String text = fConsole.getDocument().get(offset, length);
-			
+
 			int index1= text.indexOf(':');
 			if (index1 == -1) {
 				return;
 			}
-			
+
 			int lineNumber= -1;
 			IPath path= null;
 			int index2= text.indexOf(':', index1 + 1);
@@ -143,7 +143,7 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 				index1= index2;
 				index2= text.indexOf(':', index1 + 1);
 			}
-			
+
 			if (lineNumber != -1) {
 				JavadocConsoleHyperLink link= new JavadocConsoleHyperLink(path, lineNumber);
 				fConsole.addLink(link, line.getOffset(), index1);

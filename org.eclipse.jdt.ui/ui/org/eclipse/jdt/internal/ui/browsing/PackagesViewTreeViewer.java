@@ -63,7 +63,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 		}
 		super.unmapElement(element, item);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer#isFiltered(java.lang.Object, java.lang.Object, org.eclipse.jface.viewers.ViewerFilter[])
 	 */

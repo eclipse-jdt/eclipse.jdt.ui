@@ -19,29 +19,29 @@ import org.eclipse.ui.PartInitException;
 public class MouseScrollJavaEditorTest extends MouseScrollEditorTest {
 
 	private static final Class THIS= MouseScrollJavaEditorTest.class;
-	
+
 	private static final String THUMB_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
-	
+
 	private static final String AUTO_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
-	
+
 	private static final int WARM_UP_RUNS= 3;
 
 	private static final int MEASURED_RUNS= 3;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	public void testThumbScrollJavaEditor1() throws PartInitException {
 		measureScrolling(new ThumbScrollPoster(), ResourceTestHelper.findFile(THUMB_SCROLLING_FILE));
 	}
-	
+
 	public void testAutoScrollJavaEditor1() throws PartInitException {
 		measureScrolling(new AutoScrollPoster(), ResourceTestHelper.findFile(AUTO_SCROLLING_FILE));
 	}

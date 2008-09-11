@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * to choose that the dialog isn't shown again the next time.
  */
 public class OptionalMessageDialog extends MessageDialog {
-	
+
 	// String constants for widgets
 	private static final String CHECKBOX_TEXT= JavaUIMessages.OptionalMessageDialog_dontShowAgain;
 
@@ -41,7 +41,7 @@ public class OptionalMessageDialog extends MessageDialog {
 	private static final String STORE_ID= "OptionalMessageDialog.hide."; //$NON-NLS-1$
 
 	public static final int NOT_SHOWN= IDialogConstants.CLIENT_ID + 1;
-	
+
 	private final String fId;
 	private final String fCheckBoxText;
 
@@ -50,7 +50,7 @@ public class OptionalMessageDialog extends MessageDialog {
 
 	/**
 	 * Opens the dialog but only if the user hasn't chosen to hide it.
-	 * 
+	 *
 	 * @return the index of the pressed button or {@link SWT#DEFAULT} if the dialog got dismissed
 	 *         without pressing a button (e.g. via Esc) or {{@link #NOT_SHOWN} if the dialog was not
 	 *         shown
@@ -61,7 +61,7 @@ public class OptionalMessageDialog extends MessageDialog {
 
 	/**
 	 * Opens the dialog but only if the user hasn't chosen to hide it.
-	 * 
+	 *
 	 * @return the index of the pressed button or {@link SWT#DEFAULT} if the dialog got dismissed
 	 *         without pressing a button (e.g. via Esc) or {{@link #NOT_SHOWN} if the dialog was not
 	 *         shown
@@ -69,7 +69,7 @@ public class OptionalMessageDialog extends MessageDialog {
 	public static int open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex, String checkboxText) {
 		if (!isDialogEnabled(id))
 			return OptionalMessageDialog.NOT_SHOWN;
-		
+
 		MessageDialog dialog= new OptionalMessageDialog(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex, checkboxText);
 		return dialog.open();
 	}
@@ -92,7 +92,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		fHideDialogCheckBox= new Button(composite, SWT.CHECK | SWT.LEFT);
 		fHideDialogCheckBox.setText(fCheckBoxText);
 		fHideDialogCheckBox.addSelectionListener(new SelectionAdapter() {
@@ -103,12 +103,12 @@ public class OptionalMessageDialog extends MessageDialog {
 		applyDialogFont(fHideDialogCheckBox);
 		return fHideDialogCheckBox;
 	}
-	
+
 	//--------------- Configuration handling --------------
-	
+
 	/**
 	 * Returns this dialog
-	 * 
+	 *
 	 * @return the settings to be used
 	 */
 	private static IDialogSettings getDialogSettings() {
@@ -118,7 +118,7 @@ public class OptionalMessageDialog extends MessageDialog {
 			settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(STORE_ID);
 		return settings;
 	}
-		
+
 	/**
 	 * Answers whether the optional dialog is enabled and should be shown.
 	 */
@@ -126,7 +126,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		IDialogSettings settings= getDialogSettings();
 		return !settings.getBoolean(key);
 	}
-	
+
 	/**
 	 * Sets whether the optional dialog is enabled and should be shown.
 	 */

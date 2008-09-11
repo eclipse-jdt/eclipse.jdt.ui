@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 /**
  * An <code>IFix</code> can calculate a <code>CompilationUnitChange</code>
  * which applied will fix one or several problems in a compilation unit.
- * 
+ *
  * @since 3.2
  */
 public interface IFix {
@@ -26,7 +26,7 @@ public interface IFix {
 	 * A change which applied will fix problems in a compilation
 	 * unit. This must not return <b>null</b> and must not return
 	 * a null change.
-	 * 
+	 *
 	 * @return the change to apply
 	 * @throws CoreException if something went wrong while calculating the change
 	 */

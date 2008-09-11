@@ -33,31 +33,31 @@ import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
 
 
 public class JavaParameterListValidatorTest extends TestCase {
-	
+
 	protected TestTextViewer fTextViewer;
 	protected IDocument fDocument;
 	protected JavaParameterListValidator fValidator;
-	
+
 	public JavaParameterListValidatorTest(String name) {
 		super(name);
 	}
-	
+
 	protected void setUp() {
 		fTextViewer= new TestTextViewer();
 		fDocument= new Document();
 		fValidator= new JavaParameterListValidator();
 	}
-	
+
 	public static Test suite() {
-		return new TestSuite(JavaParameterListValidatorTest.class); 
+		return new TestSuite(JavaParameterListValidatorTest.class);
 	}
-	
+
 	protected void tearDown () {
 		fTextViewer= null;
 		fDocument= null;
 		fValidator= null;
 	}
-	
+
 	public void testParameterStyling() {
 		final String code= "a, b, c, d, e";
 		assertParameterInfoStyles(code, "int a, int b, int c, int d, int e", computeCommaPositions(code));
@@ -67,45 +67,45 @@ public class JavaParameterListValidatorTest extends TestCase {
 		final String code= "a, b, \"foo, bar, and such\", d, e";
 		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
 	}
-	
+
 	public void testParameterStylingWithEscapedString() {
 		final String code= "a, b, \"foo, b\\\"ar, and such\\\\\", d, e";
 		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
 	}
-	
+
 	public void testParameterStylingWithComment() {
 		final String code= "a, b, c /* the ( argument */, d, e";
 		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
 	}
-	
+
 	public void testParameterStylingWithGenerics() {
 		final String code= "new HashMap <String, HashMap<String,Integer[]>>(), p1, p2";
 		assertParameterInfoStyles(code, "Map<String, Map> m, int p1, int p2", computeCommaPositions(code));
 	}
-	
+
 	public void testParameterStylingWithGenericsAndComments() {
 		final String code= "new HashMap <String, /* comment > */HashMap<String,Integer[]>>(), p1, p2";
 		assertParameterInfoStyles(code, "Map<String, Map> m, int p1, int p2", new int[] {64, 68});
 	}
-	
+
 	public void testParameterStylingWithConstants() {
 		final String code= "MAX < MIN, MAX > MIN";
 		assertParameterInfoStyles(code, "boolean b1, boolean b2", new int[] {9});
 	}
-	
+
 	public void testParameterStylingWithGenericsThatLookLikeConstants() {
 		final String code= "new MAX < MIN, MAX >";
 		assertParameterInfoStyles(code, "MAX<?,?>", new int[0]);
 	}
-	
+
 	private void assertParameterInfoStyles(String code, String infostring, int[] argumentCommas) {
 		fDocument.set(code);
 		fTextViewer.setDocument(fDocument);
-		
+
 		int[] parameterCommas= computeCommaPositions(infostring);
 		IContextInformation info= new ContextInformation("context", infostring);
 		fValidator.install(info, fTextViewer, 0);
-		
+
 		TextPresentation p= new TextPresentation();
 		for (int i= 0; i < fDocument.getLength(); i++) {
 			fValidator.updatePresentation(i, p);
@@ -150,7 +150,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 			if (pos != -1)
 				pos++;
 		}
-		
+
 		int[] fields= new int[positions.size()];
 		for (int i= 0; i < fields.length; i++)
 	        fields[i]= ((Integer) positions.get(i)).intValue();
@@ -181,19 +181,19 @@ public class JavaParameterListValidatorTest extends TestCase {
     	}
 	    return -1;
     }
-	
+
 	private TextPresentation createPresentation(int position, int[] parameterCommas, int[] argumentCommas, String contextInfo) {
 		int length= contextInfo.length();
 		TextPresentation p= new TextPresentation();
-		
-		
+
+
 		int boldStart= 0;
 		int boldEnd= length;
-		
+
 		for (int i= 0; i < argumentCommas.length; i++) {
 	        int argumentComma= argumentCommas[i];
 	        int parameterComma= parameterCommas[i];
-	        
+
 	        if (argumentComma < position)
 	        	boldStart= parameterComma + 1;
 	        if (argumentComma >= position) {
@@ -201,20 +201,20 @@ public class JavaParameterListValidatorTest extends TestCase {
 	        	break;
 	        }
         }
-		
+
 		if (boldStart > 0)
 			p.addStyleRange(new StyleRange(0, boldStart, null, null, SWT.NORMAL));
-		
+
 		p.addStyleRange(new StyleRange(boldStart, boldEnd - boldStart, null, null, SWT.BOLD));
-		
+
 		if (boldEnd < length)
 			p.addStyleRange(new StyleRange(boldEnd, length - boldEnd, null, null, SWT.NORMAL));
 
 		// TODO handle no range at all
-		
+
 		return p;
 	}
-	
+
 	private static void assertEquals(TextPresentation expected, TextPresentation actual) {
 		// check lengths
 		assertTrue(expected.getDenumerableRanges() == actual.getDenumerableRanges());
@@ -226,7 +226,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 		while (e1.hasNext())
 			assertEquals(e1.next(), e2.next());
 	}
-	
+
 	protected String print(TextPresentation presentation) {
 		StringBuffer buf= new StringBuffer();
 		if (presentation != null) {
@@ -243,20 +243,20 @@ public class JavaParameterListValidatorTest extends TestCase {
 				buf.append('\n');
 			}
 		}
-		return buf.toString();	
+		return buf.toString();
 	}
 	public void testValidPositions() {
 		assertValidPositions("(a, b, c)");
 	}
-	
+
 	public void testValidPositionsWithComment() {
 		assertValidPositions("(a, b /* the ( argument */, c)");
 	}
-	
+
 	public void testValidPositionsWithString() {
 		assertValidPositions("(a, \"foo, bar, and such\", c)");
 	}
-	
+
 	public void testValidGenericPositions() throws Exception {
 	    assertValidPositions("(new A<T>(), new B<T>())");
     }
@@ -264,38 +264,38 @@ public class JavaParameterListValidatorTest extends TestCase {
 	public void testValidAllPositions() throws Exception {
 		assertValidPositions("(new HashMap<String, HashMap<String,Integer[]>>(), p1, p2)");
 	}
-	
+
 	public void testValidArrayPositions() throws Exception {
 		assertValidPositions("(foo[], bar[13])");
 	}
-	
+
 	/**
 	 * Asserts that the context information is invalid both at both borders of the passed string,
 	 * but valid at each position within the string.
-	 * 
+	 *
 	 * @param code the code to test, typically a parenthesized expression such as
 	 *        <code>(a, b, c)</code>
 	 */
 	private void assertValidPositions(final String code) {
 	    fDocument.set(code + " ");
 		fTextViewer.setDocument(fDocument);
-		
+
 		IContextInformation info= new ContextInformation("context", "info");
 		fValidator.install(info, fTextViewer, 1);
-		
-		assertTrue(!fValidator.isContextInformationValid(0));		
+
+		assertTrue(!fValidator.isContextInformationValid(0));
 		final int length= code.length();
 		final int firstInnerPosition= 1;
 		final int lastInnerPosition= length - 1;
-		
+
 		// forward
 		for (int pos= firstInnerPosition; pos <= lastInnerPosition; pos++)
 			assertTrue(fValidator.isContextInformationValid(pos));
 		assertTrue(!fValidator.isContextInformationValid(length));
-		
+
 		// backward
 		for (int pos= lastInnerPosition; pos >= firstInnerPosition; pos--)
 			assertTrue(fValidator.isContextInformationValid(pos));
-		assertTrue(!fValidator.isContextInformationValid(0));		
+		assertTrue(!fValidator.isContextInformationValid(0));
     }
 }

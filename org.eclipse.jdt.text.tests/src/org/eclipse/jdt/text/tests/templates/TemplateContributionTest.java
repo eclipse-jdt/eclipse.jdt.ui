@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Template contribution tests.
- * 
+ *
  * @since 3.4
  */
 public class TemplateContributionTest extends TestCase {
@@ -47,10 +47,10 @@ public class TemplateContributionTest extends TestCase {
 	private void checkContribution(String resolverContextTypeId, String contextTypeId) throws TemplateException {
 		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
 		TemplateContextType context= registry.getContextType(resolverContextTypeId);
-		
+
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
 		Template[] templates= templateStore.getTemplates(contextTypeId);
-		
+
 		for (int i= 0; i < templates.length; i++) {
 			Template template= templates[i];
 			TemplateTranslator translator= new TemplateTranslator();
@@ -64,7 +64,7 @@ public class TemplateContributionTest extends TestCase {
 			}
 		}
 	}
-	
+
 	public void testJavaContribution() throws Exception {
 		checkContribution(JavaContextType.ID_ALL, JavaContextType.ID_ALL);
 		checkContribution(JavaContextType.ID_ALL, JavaContextType.ID_MEMBERS);
@@ -76,7 +76,7 @@ public class TemplateContributionTest extends TestCase {
 	public void testJavaDocContribution() throws Exception {
 		checkContribution(JavaDocContextType.ID, JavaDocContextType.ID);
 	}
-	
+
 	public void testSWTContributionAll() throws Exception {
 		checkContribution(SWTContextType.ID_ALL, SWTContextType.ID_ALL);
 		checkContribution(SWTContextType.ID_ALL, SWTContextType.ID_MEMBERS);

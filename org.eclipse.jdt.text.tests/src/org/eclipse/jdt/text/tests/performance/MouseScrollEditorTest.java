@@ -11,7 +11,8 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
@@ -19,23 +20,22 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
 public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
-	
+
 	public static abstract class Poster {
-		
+
 		public abstract void initializeFromForeground(StyledText text);
-		
+
 		public abstract void initializeFromBackground();
-		
+
 		public abstract void driveFromBackground();
 	}
-	
+
 	public static class ThumbScrollPoster extends Poster {
 
 		private Display fDisplay;
@@ -54,7 +54,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fThumb.y++, false);
 			SWTEventHelper.mouseDownEvent(fDisplay, 1, false);
 		}
-		
+
 		public void driveFromBackground() {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fThumb.y++, false);
 		}
@@ -63,7 +63,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 	public static class AutoScrollPoster extends Poster {
 
 		private Display fDisplay;
-		
+
 		private Rectangle fTextBounds;
 
 		public void initializeFromForeground(StyledText text) {
@@ -77,7 +77,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fTextBounds.x + 1, fTextBounds.y + fTextBounds.height + 1, false);
 			SWTEventHelper.mouseMoveEvent(fDisplay, fTextBounds.x + 2, fTextBounds.y + fTextBounds.height + 1, false); // needed for GTK
 		}
-		
+
 		public void driveFromBackground() {
 		}
 	}
@@ -91,7 +91,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 	private StyledText fText;
 
 	private int fMaxTopPixel;
-	
+
 	private Poster fPoster;
 
 	private Error fBackgroundError;
@@ -146,22 +146,22 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 		try {
 			IEditorPart editor= EditorTestHelper.openInEditor(file, true);
 			EditorTestHelper.joinJobs(5000, 10000, 100);
-			
+
 			fText= (StyledText) editor.getAdapter(Control.class);
 			fDisplay= fText.getDisplay();
-			
+
 			fText.setTopPixel(Integer.MAX_VALUE);
 			fMaxTopPixel= fText.getTopPixel();
 			fText.setTopPixel(0);
 			EditorTestHelper.joinJobs(100, 1000, 100);
-			
+
 			fPoster= poster;
-			
+
 			int warmUpRuns= getWarmUpRuns();
 			int measuredRuns= getMeasuredRuns();
 			for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 				fPoster.initializeFromForeground(fText);
-				
+
 				fDone= false;
 				new Thread(fThreadRunnable).start();
 				if (i >= warmUpRuns)

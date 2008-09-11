@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
 
@@ -27,32 +27,32 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 
 	private NewInterfaceWizardPage fPage;
 	private boolean fOpenEditorOnFinish;
-	
+
 	public NewInterfaceCreationWizard(NewInterfaceWizardPage page, boolean openEditorOnFinish) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWINT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.NewInterfaceCreationWizard_title); 
-		
+		setWindowTitle(NewWizardMessages.NewInterfaceCreationWizard_title);
+
 		fPage= page;
 		fOpenEditorOnFinish= openEditorOnFinish;
 	}
-	
+
 	public NewInterfaceCreationWizard() {
 		this(null, true);
 	}
 
 	/*
 	 * @see Wizard#addPages
-	 */	
+	 */
 	public void addPages() {
-		super.addPages();	
+		super.addPages();
 		if (fPage == null) {
 			fPage= new NewInterfaceWizardPage();
 			fPage.init(getSelection());
 		}
 		addPage(fPage);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#canRunForked()
 	 */
@@ -66,7 +66,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createType(monitor); // use the full progress monitor
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
@@ -80,16 +80,16 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 				if (fOpenEditorOnFinish) {
 					openResource((IFile) resource);
 				}
-			}	
+			}
 		}
 		return res;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
 	 */
 	public IJavaElement getCreatedElement() {
 		return fPage.getCreatedType();
-	}	
-	
+	}
+
 }

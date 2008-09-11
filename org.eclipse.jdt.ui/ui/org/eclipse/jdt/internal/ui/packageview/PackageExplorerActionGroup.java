@@ -88,7 +88,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private static final String FRAME_ACTION_SEPARATOR_ID= "FRAME_ACTION_SEPARATOR_ID"; //$NON-NLS-1$
 	private static final String FRAME_ACTION_GROUP_ID= "FRAME_ACTION_GROUP_ID"; //$NON-NLS-1$
-	
+
 	private PackageExplorerPart fPart;
 
 	private FrameList fFrameList;
@@ -97,39 +97,39 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	private ForwardAction fForwardAction;
 	private UpAction fUpAction;
 	private boolean fFrameActionsShown;
-	
-	
+
+
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
 	private GotoResourceAction fGotoResourceAction;
 	private CollapseAllAction fCollapseAllAction;
 	private SelectAllAction fSelectAllAction;
-	
-	
+
+
 	private ToggleLinkingAction fToggleLinkingAction;
 
 	private RefactorActionGroup fRefactorActionGroup;
 	private NavigateActionGroup fNavigateActionGroup;
 	private ViewActionGroup fViewActionGroup;
-	
+
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
 	private IAction fGotoRequiredProjectAction;
 
 	private ProjectActionGroup fProjectActionGroup;
- 	
+
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
 		fFrameActionsShown= false;
 		TreeViewer viewer= part.getTreeViewer();
-		
+
 		IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				doWorkingSetChanged(event);
 			}
 		};
-		
+
 		IWorkbenchPartSite site = fPart.getSite();
 		setGroups(new ActionGroup[] {
 			new NewWizardsActionGroup(site),
@@ -146,10 +146,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(fPart)
 		});
-		
+
 
 		fViewActionGroup.fillFilters(viewer);
-		
+
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		fFrameList= new FrameList(frameSource);
 		frameSource.connectTo(fFrameList);
@@ -163,16 +163,16 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 				fPart.updateToolbar();
 			}
 		});
-		
+
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
 		fGotoResourceAction= new GotoResourceAction(fPart);
-		
+
 		fCollapseAllAction= new CollapseAllAction(fPart.getTreeViewer());
 		fCollapseAllAction.setActionDefinitionId(CollapseAllHandler.COMMAND_ID);
 		fToggleLinkingAction = new ToggleLinkingAction(fPart);
 		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
-		
+
 		fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
 		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
 	}
@@ -180,7 +180,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	public void dispose() {
 		super.dispose();
 	}
-	
+
 
 	//---- Persistent state -----------------------------------------------------------------------
 
@@ -188,7 +188,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fViewActionGroup.restoreState(memento);
 		fCustomFiltersActionGroup.restoreState(memento);
 	}
-	
+
 	/* package */ void saveFilterAndSorterState(IMemento memento) {
 		fViewActionGroup.saveState(memento);
 		fCustomFiltersActionGroup.saveState(memento);
@@ -213,9 +213,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_TYPE, fGotoTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_PACKAGE, fGotoPackageAction);
 		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
-		
+
 		fRefactorActionGroup.retargetFileMenuActions(actionBars);
-       
+
 		IHandlerService handlerService= (IHandlerService) fPart.getViewSite().getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
@@ -234,9 +234,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		toolBar.add(fToggleLinkingAction);
 		toolBar.update(true);
 	}
-	
+
 	public void updateToolBar(IToolBarManager toolBar) {
-		
+
 		boolean hasBeenFrameActionsShown= fFrameActionsShown;
 		fFrameActionsShown= fBackAction.isEnabled() || fUpAction.isEnabled() || fForwardAction.isEnabled();
 		if (fFrameActionsShown != hasBeenFrameActionsShown) {
@@ -254,7 +254,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			toolBar.update(true);
 		}
 	}
-	
+
 	/* package */ void fillViewMenu(IMenuManager menu) {
 		menu.add(new Separator());
 		menu.add(fToggleLinkingAction);
@@ -268,24 +268,24 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();
 		Object element= selection.getFirstElement();
-		
+
 		if (element instanceof ClassPathContainer.RequiredProjectWrapper)
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fGotoRequiredProjectAction);
-		
+
 		addGotoMenu(menu, element, size);
-		
+
 		addOpenNewWindowAction(menu, element);
-		
+
 		super.fillContextMenu(menu);
 	}
-	
+
 	 private void addGotoMenu(IMenuManager menu, Object element, int size) {
 		boolean enabled= size == 1 && fPart.getTreeViewer().isExpandable(element) && (isGoIntoTarget(element) || element instanceof IContainer);
 		fZoomInAction.setEnabled(enabled);
 		if (enabled)
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 	}
-	
+
 	private boolean isGoIntoTarget(Object element) {
 		if (element == null)
 			return false;
@@ -304,12 +304,12 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
 		if (element instanceof IJavaElement) {
 			element= ((IJavaElement)element).getResource();
-			
+
 		}
 		// fix for 64890 Package explorer out of sync when open/closing projects [package explorer] 64890
 		if (element instanceof IProject && !((IProject)element).isOpen())
 			return;
-		
+
 		if (!(element instanceof IContainer))
 			return;
 		menu.appendToGroup(
@@ -354,7 +354,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	/**
 	 * Called by Package Explorer.
-	 * 
+	 *
 	 * @param event the open event
 	 * @param activate <code>true</code> if the opened editor should be activated
 	 */
@@ -366,11 +366,11 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			return;
 		}
 	}
-	
+
 	/* package */ void handleKeyEvent(KeyEvent event) {
 		if (event.stateMask != 0)
 			return;
-		
+
 		if (event.keyCode == SWT.BS) {
 			if (fUpAction != null && fUpAction.isEnabled()) {
 				fUpAction.run();
@@ -378,7 +378,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			}
 		}
 	}
-	
+
 	private void doWorkingSetChanged(PropertyChangeEvent event) {
 		if (ViewActionGroup.MODE_CHANGED.equals(event.getProperty())) {
 			fPart.rootModeChanged(((Integer)event.getNewValue()).intValue());
@@ -403,13 +403,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			}
 		} else {
 			IWorkingSet workingSet= (IWorkingSet) event.getNewValue();
-			
+
 			String workingSetLabel= null;
 			if (workingSet != null)
 				workingSetLabel= BasicElementLabels.getWorkingSetLabel(workingSet);
 			fPart.setWorkingSetLabel(workingSetLabel);
 			fPart.updateTitle();
-	
+
 			String property= event.getProperty();
 			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
 				TreeViewer viewer= fPart.getTreeViewer();
@@ -438,11 +438,11 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	public ViewActionGroup getWorkingSetActionGroup() {
 	    return fViewActionGroup;
 	}
-	
+
 	public CustomFiltersActionGroup getCustomFilterActionGroup() {
 	    return fCustomFiltersActionGroup;
 	}
-	
+
 	public FrameList getFrameList() {
 		return fFrameList;
 	}

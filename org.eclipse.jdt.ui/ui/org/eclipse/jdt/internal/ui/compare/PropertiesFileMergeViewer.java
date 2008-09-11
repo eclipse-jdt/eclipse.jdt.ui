@@ -13,9 +13,6 @@ package org.eclipse.jdt.internal.ui.compare;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.compare.CompareConfiguration;
-import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -23,6 +20,9 @@ import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceView
 
 /**
  * Properties file merge viewer.
- * 
+ *
  * @since 3.1
  */
 public class PropertiesFileMergeViewer extends TextMergeViewer {
@@ -47,13 +47,13 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	public PropertiesFileMergeViewer(Composite parent, CompareConfiguration configuration) {
 		super(parent, SWT.LEFT_TO_RIGHT, configuration);
 	}
-	
+
 	/*
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#configureTextViewer(org.eclipse.jface.text.TextViewer)
 	 */
 	protected void configureTextViewer(TextViewer textViewer) {
 		if (textViewer instanceof SourceViewer) {
-			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();			
+			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
 			if (tools != null)
 				((SourceViewer)textViewer).configure(getSourceViewerConfiguration(tools));
 		}
@@ -70,7 +70,7 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return new FastPartitioner(new PropertiesFilePartitionScanner(), IPropertiesFilePartitions.PARTITIONS);
 	}
-	
+
 	/*
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#getDocumentPartitioning()
 	 * @since 3.3
@@ -83,6 +83,6 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 	 * @see org.eclipse.compare.contentmergeviewer.ContentMergeViewer#getTitle()
 	 */
 	public String getTitle() {
-		return CompareMessages.PropertiesFileMergeViewer_title; 
+		return CompareMessages.PropertiesFileMergeViewer_title;
 	}
 }

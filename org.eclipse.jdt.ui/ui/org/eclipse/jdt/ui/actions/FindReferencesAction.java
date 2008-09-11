@@ -40,22 +40,22 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 /**
  * Finds references of the selected element in the workspace.
  * The action is applicable to selections representing a Java element.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindReferencesAction extends FindAction {
 
 	/**
-	 * Creates a new <code>FindReferencesAction</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>FindReferencesAction</code>. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesAction(IWorkbenchSite site) {
@@ -65,32 +65,32 @@ public class FindReferencesAction extends FindAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindReferencesAction(JavaEditor editor) {
 		super(editor);
 	}
-	
+
 	Class[] getValidTypes() {
 		return new Class[] { ICompilationUnit.class, IType.class, IMethod.class, IField.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class, ILocalVariable.class, ITypeParameter.class };
 	}
-	
+
 	void init() {
-		setText(SearchMessages.Search_FindReferencesAction_label); 
-		setToolTipText(SearchMessages.Search_FindReferencesAction_tooltip); 
+		setText(SearchMessages.Search_FindReferencesAction_label);
+		setToolTipText(SearchMessages.Search_FindReferencesAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
 	int getLimitTo() {
 		return IJavaSearchConstants.REFERENCES;
-	}	
-	
+	}
+
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		boolean isInsideJRE= factory.isInsideJRE(element);
-		
+
 		IJavaSearchScope scope= factory.createWorkspaceScope(isInsideJRE);
 		String description= factory.getWorkspaceScopeDescription(isInsideJRE);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);

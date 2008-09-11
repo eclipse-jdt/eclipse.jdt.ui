@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import com.ibm.icu.text.Collator;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
+
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -82,15 +82,15 @@ import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OrganizeImportsAction extends SelectionDispatchAction {
 
 	private static final OrganizeImportComparator ORGANIZE_IMPORT_COMPARATOR= new OrganizeImportComparator();
-	
+
 	private JavaEditor fEditor;
 	/** <code>true</code> if the query dialog is showing. */
 	private boolean fIsQueryShowing= false;
@@ -112,70 +112,70 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				action.setEnabled(false);
 		}
 	}
-	
+
 	private static final class OrganizeImportComparator implements Comparator {
-		
+
 		public int compare(Object o1, Object o2) {
 			if (((String)o1).equals(o2))
 				return 0;
-			
+
 			History history= QualifiedTypeNameHistory.getDefault();
-			
+
 			int pos1= history.getPosition(o1);
 			int pos2= history.getPosition(o2);
-			
+
 			if (pos1 == pos2)
 				return Collator.getInstance().compare(o1, o2);
-			
+
 			if (pos1 > pos2) {
 				return -1;
 			} else {
 				return 1;
 			}
 		}
-		
+
 	}
 
 	/**
 	 * Creates a new <code>OrganizeImportsAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public OrganizeImportsAction(IWorkbenchSite site) {
 		super(site);
-		
+
 		fCleanUpDelegate= new MultiOrganizeImportAction(site);
-		
-		setText(ActionMessages.OrganizeImportsAction_label); 
-		setToolTipText(ActionMessages.OrganizeImportsAction_tooltip); 
+
+		setText(ActionMessages.OrganizeImportsAction_label);
+		setToolTipText(ActionMessages.OrganizeImportsAction_tooltip);
 		setDescription(ActionMessages.OrganizeImportsAction_description);
 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);					
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);
 	}
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OrganizeImportsAction(JavaEditor editor) {
 		super(editor.getEditorSite());
-		
+
 		fEditor= editor;
 		fCleanUpDelegate= new MultiOrganizeImportAction(editor);
-		
-		setText(ActionMessages.OrganizeImportsAction_label); 
-		setToolTipText(ActionMessages.OrganizeImportsAction_tooltip); 
+
+		setText(ActionMessages.OrganizeImportsAction_label);
+		setToolTipText(ActionMessages.OrganizeImportsAction_tooltip);
 		setDescription(ActionMessages.OrganizeImportsAction_description);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);
 
 		setEnabled(fCleanUpDelegate.isEnabled());
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -183,7 +183,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -191,7 +191,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -206,10 +206,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		IJavaElement element= JavaUI.getEditorInputJavaElement(editor.getEditorInput());
 		if (!(element instanceof ICompilationUnit))
 			return null;
-		
+
 		return (ICompilationUnit)element;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -223,7 +223,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			fCleanUpDelegate.run(selection);
 		}
 	}
-	
+
 	/**
 	 * Perform organize import on multiple compilation units. No editors are opened.
 	 * @param cus The compilation units to run on
@@ -231,13 +231,13 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		if (cus.length == 0)
 			return;
-		
-		fCleanUpDelegate.run(new StructuredSelection(cus));	
+
+		fCleanUpDelegate.run(new StructuredSelection(cus));
 	}
 
 	/**
 	 * Runs the organize import action on a single compilation unit
-	 * 
+	 *
 	 * @param cu The compilation unit to process
 	 */
 	public void run(ICompilationUnit cu) {
@@ -275,7 +275,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		if (target != null) {
 			target.beginCompoundChange();
 		}
-		
+
 		IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 		IRunnableContext context= getSite().getWorkbenchWindow();
 		if (context == null) {
@@ -296,7 +296,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				setStatusBarMessage(getOrganizeInfo(op), editor);
 			}
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
+			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message);
 		} catch (InterruptedException e) {
 		} finally {
 			deregisterHelper(helper, editor);
@@ -305,16 +305,16 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			}
 		}
 	}
-	
+
 	private String getOrganizeInfo(OrganizeImportsOperation op) {
 		int nImportsAdded= op.getNumberOfImportsAdded();
 		if (nImportsAdded >= 0) {
-			return Messages.format(ActionMessages.OrganizeImportsAction_summary_added, String.valueOf(nImportsAdded)); 
+			return Messages.format(ActionMessages.OrganizeImportsAction_summary_added, String.valueOf(nImportsAdded));
 		} else {
-			return Messages.format(ActionMessages.OrganizeImportsAction_summary_removed, String.valueOf(-nImportsAdded)); 
+			return Messages.format(ActionMessages.OrganizeImportsAction_summary_removed, String.valueOf(-nImportsAdded));
 		}
 	}
-		
+
 	private IChooseImportQuery createChooseImportQuery(final JavaEditor editor) {
 		return new IChooseImportQuery() {
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
@@ -322,13 +322,13 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			}
 		};
 	}
-	
+
 	private TypeNameMatch[] doChooseImports(TypeNameMatch[][] openChoices, final ISourceRange[] ranges, final JavaEditor editor) {
 		// remember selection
 		ISelection sel= editor.getSelectionProvider().getSelection();
 		TypeNameMatch[] result= null;
 		ILabelProvider labelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
-		
+
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider) {
 			protected void handleSelectionChanged() {
 				super.handleSelectionChanged();
@@ -337,12 +337,12 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			}
 		};
 		fIsQueryShowing= true;
-		dialog.setTitle(ActionMessages.OrganizeImportsAction_selectiondialog_title); 
+		dialog.setTitle(ActionMessages.OrganizeImportsAction_selectiondialog_title);
 		dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message);
 		dialog.setElements(openChoices);
 		dialog.setComparator(ORGANIZE_IMPORT_COMPARATOR);
 		if (dialog.open() == Window.OK) {
-			Object[] res= dialog.getResult();			
+			Object[] res= dialog.getResult();
 			result= new TypeNameMatch[res.length];
 			for (int i= 0; i < res.length; i++) {
 				Object[] array= (Object[]) res[i];
@@ -360,19 +360,19 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		fIsQueryShowing= false;
 		return result;
 	}
-	
+
 	private void doListSelectionChanged(int page, ISourceRange[] ranges, JavaEditor editor) {
 		if (ranges != null && page >= 0 && page < ranges.length) {
 			ISourceRange range= ranges[page];
 			editor.selectAndReveal(range.getOffset(), range.getLength());
 		}
 	}
-	
+
 	private void setStatusBarMessage(String message, JavaEditor editor) {
 		IStatusLineManager manager= editor.getEditorSite().getActionBars().getStatusLineManager();
 		manager.setMessage(message);
 	}
-	
+
 	private IEditingSupport createViewerHelper() {
 		return new IEditingSupport() {
 			public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
@@ -381,10 +381,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			public boolean ownsFocusShell() {
 				return fIsQueryShowing;
 			}
-			
+
 		};
 	}
-	
+
 	private void registerHelper(IEditingSupport helper, JavaEditor editor) {
 		ISourceViewer viewer= editor.getViewer();
 		if (viewer instanceof IEditingSupportRegistry) {

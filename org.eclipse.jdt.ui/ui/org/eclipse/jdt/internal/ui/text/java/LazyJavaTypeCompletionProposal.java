@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -64,13 +64,13 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		fCompilationUnit= context.getCompilationUnit();
 		fQualifiedName= null;
 	}
-	
+
 	public final String getQualifiedTypeName() {
 		if (fQualifiedName == null)
 			fQualifiedName= String.valueOf(Signature.toCharArray(Signature.getTypeErasure(fProposal.getSignature())));
 		return fQualifiedName;
 	}
-	
+
 	protected final String getSimpleTypeName() {
 		if (fSimpleName == null)
 			fSimpleName= Signature.getSimpleName(getQualifiedTypeName());
@@ -86,12 +86,12 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		/* No import rewriting ever from within the import section. */
 		if (isImportCompletion())
 	        return replacement;
-		
+
 		/* Always use the simple name for non-formal javadoc references to types. */
 		// TODO fix
 		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 			 return getSimpleTypeName();
-		
+
 		String qualifiedTypeName= getQualifiedTypeName();
  		if (qualifiedTypeName.indexOf('.') == -1)
  			// default package - no imports needed
@@ -109,7 +109,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			if (dotIndex != -1 && qualifiedTypeName.toLowerCase().startsWith(prefix.substring(0, dotIndex + 1).toLowerCase()))
 				return qualifiedTypeName;
 		}
-		
+
 		/*
 		 * The replacement does not contain a qualification (e.g. an inner type qualified by its
 		 * parent) - use the replacement directly.
@@ -119,20 +119,20 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				return getSimpleTypeName(); // don't use the braces added for javadoc link proposals
 			return replacement;
 		}
-		
+
 		/* Add imports if the preference is on. */
 		fImportRewrite= createImportRewrite();
 		if (fImportRewrite != null) {
 			return fImportRewrite.addImport(qualifiedTypeName, fImportContext);
 		}
-		
+
 		// fall back for the case we don't have an import rewrite (see allowAddingImports)
-		
+
 		/* No imports for implicit imports. */
 		if (fCompilationUnit != null && JavaModelUtil.isImplicitImport(Signature.getQualifier(qualifiedTypeName), fCompilationUnit)) {
 			return Signature.getSimpleName(qualifiedTypeName);
 		}
-		
+
 		/* Default: use the fully qualified type name. */
 		return qualifiedTypeName;
 	}
@@ -141,7 +141,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		char[] completion= fProposal.getCompletion();
 		if (completion.length == 0)
 			return false;
-		
+
 		char last= completion[completion.length - 1];
 		/*
 		 * Proposals end in a semicolon when completing types in normal imports or when completing
@@ -186,7 +186,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				setReplacementString(replacement.toString());
 				trigger= '\0';
 			}
-			
+
 			super.apply(document, trigger, offset);
 
 			if (fImportRewrite != null && fImportRewrite.hasRecordedChanges()) {
@@ -194,10 +194,10 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				fImportRewrite.rewriteImports(new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
-			
+
 			if (insertClosingParenthesis)
 				setUpLinkedMode(document, ')');
-			
+
 			rememberSelection();
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -218,16 +218,16 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			replacement.append(SPACE);
 
 		setCursorPosition(replacement.length());
-		
+
 		if (prefs.afterOpeningParen)
 			replacement.append(SPACE);
-		
+
 		replacement.append(RPAREN);
 	}
 
 	/**
 	 * Remembers the selection in the content assist history.
-	 * 
+	 *
 	 * @throws JavaModelException if anything goes wrong
 	 * @since 3.2
 	 */
@@ -236,7 +236,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		IType rhs= (IType) getJavaElement();
 		if (lhs != null && rhs != null)
 			JavaPlugin.getDefault().getContentAssistHistory().remember(lhs, rhs);
-		
+
 		QualifiedTypeNameHistory.remember(getQualifiedTypeName());
 	}
 
@@ -260,7 +260,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * <p>
 	 * Subclasses may extend.
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> if imports may be added, <code>false</code> if not
 	 */
 	protected boolean allowAddingImports() {
@@ -270,11 +270,11 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 //				return false;
 			if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 				return false;
-			
+
 			if (!isJavadocProcessingEnabled())
 				return false;
 		}
-		
+
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		return preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
 	}
@@ -301,27 +301,27 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 */
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		String prefix= getPrefix(document, completionOffset);
-		
+
 		String completion;
 		// return the qualified name if the prefix is already qualified
 		if (prefix.indexOf('.') != -1)
 			completion= getQualifiedTypeName();
 		else
 			completion= getSimpleTypeName();
-		
+
 		if (isCamelCaseMatching())
 			return getCamelCaseCompound(prefix, completion);
 
 		return completion;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeTriggerCharacters()
 	 */
 	protected char[] computeTriggerCharacters() {
 		return isInJavadoc() ? JDOC_TYPE_TRIGGERS : TYPE_TRIGGERS;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeProposalInfo()
 	 */
@@ -341,7 +341,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		// try fast sort string to avoid display string creation
 		return getSimpleTypeName() + Character.MIN_VALUE + getQualifiedTypeName();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()
 	 */
@@ -349,10 +349,10 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		/*
 		 * There are two histories: the RHS history remembers types used for the current expected
 		 * type (left hand side), while the type history remembers recently used types in general).
-		 * 
+		 *
 		 * The presence of an RHS ranking is a much more precise sign for relevance as it proves the
 		 * subtype relationship between the proposed type and the expected type.
-		 * 
+		 *
 		 * The "recently used" factor (of either the RHS or general history) is less important, it should
 		 * not override other relevance factors such as if the type is already imported etc.
 		 */
@@ -362,10 +362,10 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		int recencyBoost= Math.round((rhsHistoryRank + typeHistoryRank) * 5);
 		int rhsBoost= rhsHistoryRank > 0.0f ? 50 : 0;
 		int baseRelevance= super.computeRelevance();
-		
+
 		return baseRelevance +  rhsBoost + recencyBoost;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeContextInformation()
 	 * @since 3.3
@@ -375,7 +375,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		char[][] typeParameters= Signature.getTypeArguments(signature);
 		if (typeParameters.length == 0)
 			return super.computeContextInformation();
-		
+
 		ProposalContextInformation contextInformation= new ProposalContextInformation(fProposal);
 		if (fContextInformationPosition != 0 && fProposal.getCompletion().length == 0)
 			contextInformation.setContextInformationPosition(fContextInformationPosition);

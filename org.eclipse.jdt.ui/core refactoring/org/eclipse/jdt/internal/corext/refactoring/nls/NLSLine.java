@@ -27,11 +27,11 @@ public class NLSLine {
 		Assert.isTrue(fLineNumber >= 0);
 		fElements= new ArrayList();
 	}
-	
+
 	public int getLineNumber() {
 		return fLineNumber;
 	}
-	
+
 	/**
 	 * Adds a NLS element to this line.
 	 */
@@ -39,23 +39,23 @@ public class NLSLine {
 		Assert.isNotNull(element);
 		fElements.add(element);
 	}
-	
+
 	public NLSElement[] getElements() {
 		return (NLSElement[]) fElements.toArray(new NLSElement[fElements.size()]);
 	}
-	
+
 	public NLSElement get(int index) {
 		return (NLSElement)fElements.get(index);
 	}
-	
+
 	public boolean exists(int index) {
 		return index >= 0 && index < fElements.size();
 	}
-	
+
 	public int size(){
 		return fElements.size();
 	}
-	
+
 	/* non javaDoc
 	 * only for debugging
 	 * @see Object#toString()

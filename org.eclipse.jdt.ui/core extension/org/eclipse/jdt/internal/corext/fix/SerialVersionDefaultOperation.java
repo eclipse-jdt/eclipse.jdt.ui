@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
  * Proposal for a default serial version id.
- * 
+ *
  * @since 3.1
  */
 public final class SerialVersionDefaultOperation extends AbstractSerialVersionOperation {
@@ -31,7 +31,7 @@ public final class SerialVersionDefaultOperation extends AbstractSerialVersionOp
 
 	/**
 	 * Creates a new serial version default proposal.
-	 * 
+	 *
 	 * @param unit
 	 *            the compilation unit
 	 * @param nodes

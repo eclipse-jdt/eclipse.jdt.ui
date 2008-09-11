@@ -40,16 +40,16 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
 /**
  * The clean up registry provides a set of clean ups
  * and there corresponding UI representatives.
- * 
+ *
  * @since 3.4
  */
 public class CleanUpRegistry {
-	
+
 	public static abstract class CleanUpTabPageDescriptor {
-		
+
 		private String fName;
 		private String fId;
-		
+
 		/**
 		 * @param id a unique id of the page described by this
 		 * @param name a human readable name of the page
@@ -65,23 +65,23 @@ public class CleanUpRegistry {
 		public String getId() {
 			return fId;
 		}
-		
+
 		/**
 		 * @return the name of the tab
 		 */
 		public String getName() {
 			return fName;
 		}
-		
+
 		/**
 		 * @return new instance of a tab page
 		 */
 		public abstract ICleanUpTabPage createTabPage();
 	}
-	
+
 	private ICleanUp[] fCleanUps;
 	private CleanUpTabPageDescriptor[] fPageDescriptors;
-	
+
 	/**
 	 * @return a set of registered clean ups.
 	 */
@@ -97,35 +97,35 @@ public class CleanUpRegistry {
 		ensurePagesRegistered();
 		return fPageDescriptors;
 	}
-	
+
 	/**
 	 * Returns the default options for the specified clean up kind.
-	 * 
+	 *
 	 * @param kind the kind of clean up for which to retrieve the options
 	 * @return the default options
-	 * 
+	 *
 	 * @see ICleanUp#DEFAULT_CLEAN_UP_OPTIONS
 	 * @see ICleanUp#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
 	public MapCleanUpOptions getDefaultOptions(int kind) {
 		MapCleanUpOptions result= new MapCleanUpOptions();
-		
+
 		ICleanUp[] cleanUps= getCleanUps();
-		
+
 		for (int i= 0; i < cleanUps.length; i++) {
 			CleanUpOptions options= cleanUps[i].getDefaultOptions(kind);
 			result.addAll(options);
 		}
-		
+
 		return result;
 	}
-	
+
 	private synchronized void ensureCleanUpRegistered() {
 		if (fCleanUps != null)
 			return;
-		
+
 		ArrayList result= new ArrayList();
-		
+
 		result.add(new CodeStyleCleanUp());
 		result.add(new ControlStatementsCleanUp());
 		result.add(new ConvertLoopCleanUp());
@@ -140,46 +140,46 @@ public class CleanUpRegistry {
 		result.add(new SortMembersCleanUp());
 		result.add(new ImportsCleanUp());
 		result.add(new CodeFormatCleanUp());
-		
+
 		fCleanUps= (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);
 	}
-	
+
 	private synchronized void ensurePagesRegistered() {
 		if (fPageDescriptors != null)
 			return;
-		
+
 		ArrayList result= new ArrayList();
-		
+
 		result.add(new CleanUpTabPageDescriptor(CodeStyleTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle) {
 			public ICleanUpTabPage createTabPage() {
 				return new CodeStyleTabPage();
 			}
 		});
-		
+
 		result.add(new CleanUpTabPageDescriptor(MemberAccessesTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses) {
 			public ICleanUpTabPage createTabPage() {
 				return new MemberAccessesTabPage();
 			}
 		});
-		
+
 		result.add(new CleanUpTabPageDescriptor(UnnecessaryCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode) {
 			public ICleanUpTabPage createTabPage() {
 				return new UnnecessaryCodeTabPage();
 			}
 		});
-		
+
 		result.add(new CleanUpTabPageDescriptor(MissingCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode) {
 			public ICleanUpTabPage createTabPage() {
 				return new MissingCodeTabPage();
 			}
 		});
-		
+
 		result.add(new CleanUpTabPageDescriptor(CodeFormatingTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating) {
 			public ICleanUpTabPage createTabPage() {
 				return new CodeFormatingTabPage();
 			}
 		});
-		
+
 		fPageDescriptors= (CleanUpTabPageDescriptor[]) result.toArray(new CleanUpTabPageDescriptor[result.size()]);
 	}
 

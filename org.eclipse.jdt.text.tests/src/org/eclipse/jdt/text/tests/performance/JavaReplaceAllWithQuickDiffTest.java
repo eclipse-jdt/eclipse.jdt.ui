@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 
 /**
  * Measures the time to replaceAll in a large file with Quick Diff enabled.
- * 
+ *
  * @since 3.1
  */
 public class JavaReplaceAllWithQuickDiffTest extends AbstractJavaReplaceAllTest {
@@ -29,11 +29,11 @@ public class JavaReplaceAllWithQuickDiffTest extends AbstractJavaReplaceAllTest 
 	protected boolean isQuickDiffEnabled() {
 		return true;
 	}
-	
+
 	public void test() throws Exception {
 		// XXX: Removing from fingerprint as it is unstable
 //		setShortName("Replace All in Java editor (with quick diff)");
 		super.test();
 	}
-	
+
 }

@@ -53,7 +53,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			drawImage(getImageData(fBase), 0, 0);
 			drawImage(getImageData(JavaPluginImages.DESC_OVR_FOCUS), 0, 0);
 		}
-		
+
 		private ImageData getImageData(ImageDescriptor descriptor) {
 			ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
 			if (data == null) {
@@ -62,7 +62,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			}
 			return data;
 		}
-		
+
 		protected Point getSize() {
 			return JavaElementImageProvider.BIG_SIZE;
 		}
@@ -71,18 +71,18 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		public boolean equals(Object object) {
 			return object != null && FocusDescriptor.class.equals(object.getClass()) && ((FocusDescriptor)object).fBase.equals(fBase);
-		}		
+		}
 	}
 
 	private Color fSpecialColor;
 
 	private ViewerFilter fFilter;
-	
+
 	private TypeHierarchyLifeCycle fHierarchy;
-	
+
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS | JavaElementLabels.USE_RESOLVED, DEFAULT_IMAGEFLAGS);
-		
+
 		fHierarchy= lifeCycle;
 		fFilter= null;
 	}
@@ -105,12 +105,12 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (fFilter != null && !fFilter.select(null, null, type)) {
 			return true;
 		}
-		
+
 		IJavaElement input= fHierarchy.getInputElement();
 		if (input == null || input.getElementType() == IJavaElement.TYPE) {
 			return false;
 		}
-			
+
 		IJavaElement parent= type.getAncestor(input.getElementType());
 		if (input.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			if (parent == null || parent.getElementName().equals(input.getElementName())) {
@@ -121,10 +121,10 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return true;
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
-	 */ 
+	 */
 	public Image getImage(Object element) {
 		Image result= null;
 		if (element instanceof IType) {
@@ -146,12 +146,12 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (hierarchy == null) {
 			return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.BIG_SIZE);
 		}
-		
+
 		int flags= hierarchy.getCachedFlags(type);
 		if (flags == -1) {
 			return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.BIG_SIZE);
 		}
-		
+
 		boolean isInterface= Flags.isInterface(flags);
 		IType declaringType= type.getDeclaringType();
 		boolean isInner= declaringType != null;
@@ -168,7 +168,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 				}
 			}
 		}
-		
+
 		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, isInInterfaceOrAnnotation, flags, isDifferentScope(type));
 
 		int adornmentFlags= 0;
@@ -184,10 +184,10 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (Flags.isDeprecated(flags)) {
 			adornmentFlags |= JavaElementImageDescriptor.DEPRECATED;
 		}
-		
+
 		return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
@@ -201,8 +201,8 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			return JFaceResources.getColorRegistry().get(JFacePreferences.QUALIFIER_COLOR);
 		}
 		return null;
-	}	
-	
-	
+	}
+
+
 
 }

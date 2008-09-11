@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -26,7 +28,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class LocalTypeAnalyzer extends ASTVisitor {
 
@@ -37,7 +38,7 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 	private String fSelectedTypeReferenced;
 
 	//---- Analyzing statements ----------------------------------------------------------------
-	
+
 	public static RefactoringStatus perform(BodyDeclaration declaration, Selection selection) {
 		LocalTypeAnalyzer analyzer= new LocalTypeAnalyzer(selection);
 		declaration.accept(analyzer);
@@ -91,17 +92,17 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 				if (fBeforeTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsBefore, binding))
-					fBeforeTypeReferenced= RefactoringCoreMessages.LocalTypeAnalyzer_local_type_from_outside; 
+					fBeforeTypeReferenced= RefactoringCoreMessages.LocalTypeAnalyzer_local_type_from_outside;
 				break;
 			case Selection.AFTER:
 				if (fSelectedTypeReferenced != null)
 					break;
 				if (checkBinding(fTypeDeclarationsSelected, binding))
-					fSelectedTypeReferenced= RefactoringCoreMessages.LocalTypeAnalyzer_local_type_referenced_outside; 
+					fSelectedTypeReferenced= RefactoringCoreMessages.LocalTypeAnalyzer_local_type_referenced_outside;
 				break;
 		}
 	}
-	
+
 	private boolean checkBinding(List declarations, ITypeBinding binding) {
 		for (Iterator iter= declarations.iterator(); iter.hasNext();) {
 			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)iter.next();
@@ -111,7 +112,7 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 		}
 		return false;
 	}
-	
+
 	private void check(RefactoringStatus status) {
 		if (fBeforeTypeReferenced != null)
 			status.addFatalError(fBeforeTypeReferenced);

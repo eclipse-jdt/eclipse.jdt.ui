@@ -14,16 +14,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.core.expressions.EvaluationContext;
 import org.eclipse.core.expressions.EvaluationResult;
 import org.eclipse.core.expressions.Expression;
 import org.eclipse.core.expressions.ExpressionConverter;
 import org.eclipse.core.expressions.ExpressionTagNames;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelMarker;
@@ -47,12 +47,12 @@ public final class ContributedProcessorDescriptor {
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
-	
+
 	private static final String REQUIRED_SOURCE_LEVEL= "requiredSourceLevel"; //$NON-NLS-1$
-	
+
 	private static final String HANDLED_MARKER_TYPES= "handledMarkerTypes"; //$NON-NLS-1$
 	private static final String MARKER_TYPE= "markerType"; //$NON-NLS-1$
-	
+
 	public ContributedProcessorDescriptor(IConfigurationElement element, boolean testMarkerTypes) {
 		fConfigurationElement= element;
 		fProcessorInstance= null;
@@ -100,7 +100,7 @@ public final class ContributedProcessorDescriptor {
 				return false;
 			}
 		}
-		
+
 		if (fStatus != null) {
 			return fStatus.booleanValue();
 		}
@@ -125,7 +125,7 @@ public final class ContributedProcessorDescriptor {
 		fStatus= Boolean.FALSE;
 		return false;
 	}
-	
+
 	public Object getProcessor(ICompilationUnit cunit, Class expectedType) {
 		if (matches(cunit)) {
 			if (fProcessorInstance == null) {
@@ -150,9 +150,9 @@ public final class ContributedProcessorDescriptor {
 		}
 		return null;
 	}
-	
+
 	public boolean canHandleMarkerType(String markerType) {
 		return fHandledMarkerTypes == null || fHandledMarkerTypes.contains(markerType);
 	}
-	
+
 }

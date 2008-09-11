@@ -15,9 +15,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.ISharedImages;
 
@@ -63,17 +63,17 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectio
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
- * 
+ *
  */
 public class SuppressWarningsSubProcessor {
-	
+
 	private static final String ADD_SUPPRESSWARNINGS_ID= "org.eclipse.jdt.ui.correction.addSuppressWarnings"; //$NON-NLS-1$
 
 	public static final boolean hasSuppressWarningsProposal(int problemId) {
 		return CorrectionEngine.getWarningToken(problemId) != null; // Suppress warning annotations
 	}
-	
-	
+
+
 	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		if (problem.isError()) {
 			return;
@@ -81,7 +81,7 @@ public class SuppressWarningsSubProcessor {
 		if (JavaCore.DISABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, true))) {
 			return;
 		}
-		
+
 		String warningToken= CorrectionEngine.getWarningToken(problem.getProblemId());
 		if (warningToken == null) {
 			return;
@@ -92,7 +92,7 @@ public class SuppressWarningsSubProcessor {
 				return; // only one at a time
 			}
 		}
-		
+
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node == null) {
 			return;
@@ -112,9 +112,9 @@ public class SuppressWarningsSubProcessor {
 				node= node.getParent();
 			}
 		}
-		
+
 		ASTNode target= ASTResolving.findParentBodyDeclaration(node);
-		if (target instanceof Initializer) { 
+		if (target instanceof Initializer) {
 			target= ASTResolving.findParentBodyDeclaration(target.getParent());
 		}
 		if (target == null) {
@@ -127,17 +127,17 @@ public class SuppressWarningsSubProcessor {
 			addSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3, proposals);
 		}
 	}
-	
+
 	private static String getFirstFragmentName(List fragments) {
 		if (fragments.size() > 0) {
 			return ((VariableDeclarationFragment) fragments.get(0)).getName().getIdentifier();
 		}
 		return new String();
 	}
-	
-	
+
+
 	private static class SuppressWarningsProposal extends ASTRewriteCorrectionProposal {
-		
+
 		private final String fWarningToken;
 		private final ASTNode fNode;
 		private final ChildListPropertyDescriptor fProperty;
@@ -149,34 +149,34 @@ public class SuppressWarningsSubProcessor {
 			fProperty= property;
 			setCommandId(ADD_SUPPRESSWARNINGS_ID);
 		}
-		
+
 		/**
 		 * @return Returns the warningToken.
 		 */
 		public String getWarningToken() {
 			return fWarningToken;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 		 */
 		protected ASTRewrite getRewrite() throws CoreException {
 			AST ast= fNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			
+
 			StringLiteral newStringLiteral= ast.newStringLiteral();
 			newStringLiteral.setLiteralValue(fWarningToken);
-			
+
 			Annotation existing= findExistingAnnotation((List) fNode.getStructuralProperty(fProperty));
 			if (existing == null) {
 				ListRewrite listRewrite= rewrite.getListRewrite(fNode, fProperty);
-				
+
 				SingleMemberAnnotation newAnnot= ast.newSingleMemberAnnotation();
 				String importString= createImportRewrite((CompilationUnit) fNode.getRoot()).addImport("java.lang.SuppressWarnings"); //$NON-NLS-1$
 				newAnnot.setTypeName(ast.newName(importString));
 
 				newAnnot.setValue(newStringLiteral);
-				
+
 				listRewrite.insertFirst(newAnnot, null);
 			} else if (existing instanceof SingleMemberAnnotation) {
 				SingleMemberAnnotation annotation= (SingleMemberAnnotation) existing;
@@ -193,11 +193,11 @@ public class SuppressWarningsSubProcessor {
 					pair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
 					pair.setValue(newStringLiteral);
 					listRewrite.insertFirst(pair, null);
-				}	
+				}
 			}
 			return rewrite;
 		}
-		
+
 		private static boolean addSuppressArgument(ASTRewrite rewrite, Expression value, StringLiteral newStringLiteral) {
 			if (value instanceof ArrayInitializer) {
 				ListRewrite listRewrite= rewrite.getListRewrite(value, ArrayInitializer.EXPRESSIONS_PROPERTY);
@@ -212,7 +212,7 @@ public class SuppressWarningsSubProcessor {
 			}
 			return true;
 		}
-		
+
 		private static Expression findValue(List keyValues) {
 			for (int i= 0, len= keyValues.size(); i < len; i++) {
 				MemberValuePair curr= (MemberValuePair) keyValues.get(i);
@@ -222,7 +222,7 @@ public class SuppressWarningsSubProcessor {
 			}
 			return null;
 		}
-		
+
 		private static Annotation findExistingAnnotation(List modifiers) {
 			for (int i= 0, len= modifiers.size(); i < len; i++) {
 				Object curr= modifiers.get(i);
@@ -244,7 +244,7 @@ public class SuppressWarningsSubProcessor {
 			return null;
 		}
 	}
-	
+
 	private static void addSuppressWarningsProposal(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection proposals) {
 
 		ChildListPropertyDescriptor property= null;
@@ -270,7 +270,7 @@ public class SuppressWarningsSubProcessor {
 				property= EnumDeclaration.MODIFIERS2_PROPERTY;
 				name= ((EnumDeclaration) node).getName().getIdentifier();
 				break;
-			case ASTNode.FIELD_DECLARATION:	
+			case ASTNode.FIELD_DECLARATION:
 				property= FieldDeclaration.MODIFIERS2_PROPERTY;
 				name= getFirstFragmentName(((FieldDeclaration) node).fragments());
 				break;
@@ -294,7 +294,7 @@ public class SuppressWarningsSubProcessor {
 				JavaPlugin.logErrorMessage("SuppressWarning quick fix: wrong node kind: " + node.getNodeType()); //$NON-NLS-1$
 				return;
 		}
-		
+
 		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, new String[] { warningToken, BasicElementLabels.getJavaElementName(name) });
 		ASTRewriteCorrectionProposal proposal= new SuppressWarningsProposal(warningToken, label, cu, node, property, relevance);
 
@@ -312,10 +312,10 @@ public class SuppressWarningsSubProcessor {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (!(coveringNode instanceof StringLiteral))
 			return;
-		
+
 		AST ast= coveringNode.getAST();
 		StringLiteral literal= (StringLiteral) coveringNode;
-		
+
 		String literalValue= literal.getLiteralValue();
 		String[] allWarningTokens= CorrectionEngine.getAllWarningTokens();
 		for (int i= 0; i < allWarningTokens.length; i++) {
@@ -338,15 +338,15 @@ public class SuppressWarningsSubProcessor {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(coveringNode instanceof StringLiteral))
 			return;
-		
+
 		StringLiteral literal= (StringLiteral) coveringNode;
-		
+
 		if (coveringNode.getParent() instanceof MemberValuePair) {
 			coveringNode= coveringNode.getParent();
 		}
-		
+
 		ASTNode parent= coveringNode.getParent();
-		
+
 		ASTRewrite rewrite= ASTRewrite.create(coveringNode.getAST());
 		if (parent instanceof SingleMemberAnnotation) {
 			rewrite.remove(parent, null);

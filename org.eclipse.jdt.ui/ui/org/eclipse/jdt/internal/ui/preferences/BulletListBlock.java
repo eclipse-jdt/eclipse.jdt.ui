@@ -31,17 +31,17 @@ public class BulletListBlock extends Composite {
 	private StyledText fStyledText;
 	private boolean fEnabled;
 	private String fText;
-	
+
 	public BulletListBlock(Composite parent, int style) {
 		super(parent, style);
 		fEnabled= true;
 		fText= ""; //$NON-NLS-1$
-		
+
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		setLayout(layout);
-		
+
 		createControl(this);
 	}
 
@@ -51,11 +51,11 @@ public class BulletListBlock extends Composite {
 		Cursor arrowCursor= fStyledText.getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
 		fStyledText.setCursor(arrowCursor);
 		fStyledText.setCaret(null);
-		
+
 		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		fStyledText.setLayoutData(data);
 		configureStyledText(fText, fEnabled);
-		
+
 		return fStyledText;
 	}
 
@@ -63,14 +63,14 @@ public class BulletListBlock extends Composite {
 		fText= text;
 		configureStyledText(fText, fEnabled);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean getEnabled() {
 		return fEnabled;
 	}
-	
+
 	public void setEnabled(boolean enabled) {
 		fEnabled= enabled;
 		configureStyledText(fText, fEnabled);
@@ -79,20 +79,20 @@ public class BulletListBlock extends Composite {
 	private void configureStyledText(String text, boolean enabled) {
 		if (fStyledText == null)
 			return;
-		
+
 		fStyledText.setText(text);
 		int count= fStyledText.getCharCount();
 		if (count == 0)
 			return;
-		
+
 		Color foreground= enabled ? null : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		fStyledText.setStyleRange(new StyleRange(0, count, foreground, null));
-					
+
 		StyleRange styleRange= new StyleRange(0, count, foreground, null);
 		styleRange.metrics= new GlyphMetrics(0, 0, 20);
 		fStyledText.setLineBullet(0, fStyledText.getLineCount(), new Bullet(styleRange));
-		
+
 		fStyledText.setEnabled(enabled);
 	}
 }

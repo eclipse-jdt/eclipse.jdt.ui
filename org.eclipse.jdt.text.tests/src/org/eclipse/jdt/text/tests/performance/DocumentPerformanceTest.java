@@ -18,7 +18,7 @@ import org.eclipse.jface.text.IDocument;
 
 /**
  * Tests {@link Document} as it comes out of the box.
- * 
+ *
  * @since 3.3
  */
 public class DocumentPerformanceTest extends AbstractDocumentPerformanceTest {

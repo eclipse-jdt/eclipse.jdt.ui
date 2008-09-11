@@ -73,7 +73,7 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 
 	/**
 	 * Handles the compiler task tags property change event.
-	 * 
+	 *
 	 * @return  <code>true</code> if the task tags got updated
 	 */
 	protected boolean updateTaskTags() {
@@ -91,7 +91,7 @@ public class TaskTagDictionary extends AbstractSpellDictionary implements IPrope
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#stripNonLetters(java.lang.String)
 	 * @since 3.3

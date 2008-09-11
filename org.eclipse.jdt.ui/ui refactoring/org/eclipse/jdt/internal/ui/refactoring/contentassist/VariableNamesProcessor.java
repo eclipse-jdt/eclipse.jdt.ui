@@ -14,19 +14,19 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-
-import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -37,9 +37,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 public class VariableNamesProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 
 	private String fErrorMessage;
-	
+
 	private String[] fTempNameProposals;
-	
+
 	private ImageDescriptorRegistry fImageRegistry;
 	private ImageDescriptor fProposalImageDescriptor;
 
@@ -50,7 +50,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 		fProposalImageDescriptor= JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE;
 
 	}
-	
+
 	public void setProposalImageDescriptor(ImageDescriptor proposalImageDescriptor) {
 		fProposalImageDescriptor= proposalImageDescriptor;
 	}
@@ -113,7 +113,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 		if (fTempNameProposals.length == 0)
 			return null;
 		String input= contentAssistSubject.getDocument().get();
-		
+
 		ArrayList proposals= new ArrayList();
 		String prefix= input.substring(0, documentOffset);
 		Image image= fImageRegistry.get(fProposalImageDescriptor);
@@ -124,7 +124,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 			JavaCompletionProposal proposal= new JavaCompletionProposal(tempName, 0, input.length(), image, tempName, 0);
 			proposals.add(proposal);
 		}
-		fErrorMessage= proposals.size() > 0 ? null : JavaUIMessages.JavaEditor_codeassist_noCompletions; 
+		fErrorMessage= proposals.size() > 0 ? null : JavaUIMessages.JavaEditor_codeassist_noCompletions;
 		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 

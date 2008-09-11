@@ -53,13 +53,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
  * that is in the workspace.</p>
  * <p>
  * An instance of this registry can be received through a call to {@link JavaPlugin#getSaveParticipantRegistry()}.</p>
- * 
+ *
  * @since 3.3
  */
 public final class SaveParticipantRegistry {
 
 	private static final IPostSaveListener[] EMPTY_ARRAY= new IPostSaveListener[0];
-    
+
 	/** The map of descriptors, indexed by their identifiers. */
 	private Map fDescriptors;
 
@@ -119,7 +119,7 @@ public final class SaveParticipantRegistry {
 			}
 		};
 		map.put(desc.getId(), desc);
-				
+
 		fDescriptors= map;
 	}
 
@@ -128,22 +128,22 @@ public final class SaveParticipantRegistry {
 
 	/**
 	 * Checks weather there are enabled or disabled post save listener in the given context.
-	 * 
+	 *
 	 * @param context to context to check, not null
 	 * @return true if there are settings in context
 	 */
 	public synchronized boolean hasSettingsInScope(IScopeContext context) {
 		ensureRegistered();
-	
+
     	for (Iterator iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
 	        SaveParticipantDescriptor descriptor= (SaveParticipantDescriptor)iterator.next();
 	        if (descriptor.getPreferenceConfiguration().hasSettingsInScope(context))
 	        	return true;
     	}
-    	
+
     	return false;
     }
-	
+
 	public IPostSaveListener[] getEnabledPostSaveListeners(IProject project) {
 	    return getEnabledPostSaveListeners(new ProjectScope(project));
     }
@@ -157,7 +157,7 @@ public final class SaveParticipantRegistry {
 	 */
 	public synchronized IPostSaveListener[] getEnabledPostSaveListeners(IScopeContext context) {
 		ensureRegistered();
-		
+
 		ArrayList result= null;
 		for (Iterator iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
 			SaveParticipantDescriptor descriptor= (SaveParticipantDescriptor)iterator.next();
@@ -168,7 +168,7 @@ public final class SaveParticipantRegistry {
 				result.add(descriptor.getPostSaveListener());
 			}
 		}
-		
+
 		if (result == null) {
 			return EMPTY_ARRAY;
 		} else {
@@ -179,7 +179,7 @@ public final class SaveParticipantRegistry {
 	/**
 	 * Tells whether one of the active post save listeners needs to
 	 * be informed about the changed region in this save cycle.
-	 * 
+	 *
 	 * @param unit the unit which is about to be saved
 	 * @return true if the change regions need do be determined
 	 * @throws CoreException
@@ -188,28 +188,28 @@ public final class SaveParticipantRegistry {
 	public static boolean isChangedRegionsRequired(final ICompilationUnit unit) throws CoreException {
 		String message= SaveParticipantMessages.SaveParticipantRegistry_needsChangedRegionFailed;
 		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, message, null);
-	
+
 		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
 		try {
 			final boolean result[]= new boolean[] {false};
 			for (int i= 0; i < listeners.length; i++) {
 				final IPostSaveListener listener= listeners[i];
 				SafeRunner.run(new ISafeRunnable() {
-		
+
 					public void run() throws Exception {
 						if (listener.needsChangedRegions(unit))
 							result[0]= true;
 					}
-					
+
 					public void handleException(Throwable ex) {
 						String msg= Messages.format("The save participant ''{0}'' caused an exception.", new String[] { listener.getId() }); //$NON-NLS-1$
 						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, ex));
-						
+
 						final String participantName= listener.getName();
 						msg= Messages.format(SaveParticipantMessages.SaveParticipantRegistry_needsChangedRegionCausedException, new String[] { participantName, ex.toString() });
 						errorStatus.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, msg, null));
 					}
-					
+
 				});
 				if (result[0])
 					return true;
@@ -218,8 +218,8 @@ public final class SaveParticipantRegistry {
 			if (!errorStatus.isOK())
 				throw new CoreException(errorStatus);
 		}
-		
+
 		return false;
 	}
-	
+
 }

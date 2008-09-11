@@ -11,9 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
 
 public class FileEntry implements IAdaptable {
 
@@ -24,7 +25,7 @@ public class FileEntry implements IAdaptable {
 		fPropertiesFile= propertiesFile;
 		fMessage= message;
 	}
-	
+
 	public IFile getPropertiesFile() {
 		return fPropertiesFile;
 	}
@@ -32,11 +33,11 @@ public class FileEntry implements IAdaptable {
 	public String getMessage() {
 		return fMessage;
 	}
-	
+
 	public String toString() {
 		return fMessage;
 	}
-	
+
 	public Object getAdapter(Class adapter) {
 		if (IResource.class.equals(adapter))
 			return fPropertiesFile;

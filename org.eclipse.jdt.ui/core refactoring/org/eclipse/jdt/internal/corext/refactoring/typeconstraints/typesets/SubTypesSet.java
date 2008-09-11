@@ -97,7 +97,7 @@ public class SubTypesSet extends TypeSet {
 					return st2;
 			}
 		}
-		
+
 		if (s2 instanceof SuperTypesSet) {
 			SuperTypesSet st2= (SuperTypesSet) s2;
 

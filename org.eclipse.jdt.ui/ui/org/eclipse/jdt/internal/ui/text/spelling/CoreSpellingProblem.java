@@ -26,7 +26,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	// spelling 'marker type' name. Only virtual as spelling problems are never persisted in markers.
 	// marker type is used in the quickFixProcessor extension point
 	public static final String MARKER_TYPE= "org.eclipse.jdt.ui.internal.spelling"; //$NON-NLS-1$
-	
+
 	/** The end offset of the problem */
 	private int fSourceEnd= 0;
 
@@ -93,7 +93,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 			prefix= fDocument.get(line.getOffset(), fSourceStart - line.getOffset());
 			int postfixStart= fSourceEnd + 1;
 			postfix= fDocument.get(postfixStart, line.getOffset() + line.getLength() - postfixStart);
-			
+
 		} catch (BadLocationException exception) {
 			// Do nothing
 		}
@@ -176,14 +176,14 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	public void setSourceLineNumber(int lineNumber) {
 		fLineNumber= lineNumber;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.core.compiler.CategorizedProblem#getCategoryID()
 	 */
 	public int getCategoryID() {
 		return CAT_JAVADOC;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.core.compiler.CategorizedProblem#getMarkerType()
 	 */

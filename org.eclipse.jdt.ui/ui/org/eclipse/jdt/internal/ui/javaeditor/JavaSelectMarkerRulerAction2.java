@@ -23,6 +23,7 @@ import org.eclipse.jface.text.source.VerticalRulerEvent;
 
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -88,7 +89,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 
 	/**
 	 * Checks whether the given annotation is a breakpoint annotation.
-	 * 
+	 *
 	 * @param annotation
 	 * @return <code>true</code> if the annotation is a breakpoint annotation
 	 */

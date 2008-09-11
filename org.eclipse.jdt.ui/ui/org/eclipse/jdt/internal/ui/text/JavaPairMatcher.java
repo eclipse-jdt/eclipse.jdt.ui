@@ -45,10 +45,10 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 			return null;
 		}
 	}
-	
+
 	/*
 	 * Performs the actual work of matching for #match(IDocument, int).
-	 */ 
+	 */
 	private IRegion performMatch(IDocument document, int offset) throws BadLocationException {
 		if (offset < 0 || document == null) return null;
 		final char prevChar= document.getChar(Math.max(offset - 1, 0));
@@ -69,7 +69,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	 * Returns true if the character at the specified offset is a
 	 * less-than sign, rather than an type parameter list open
 	 * angle bracket.
-	 * 
+	 *
 	 * @param document a document
 	 * @param offset an offset within the document
 	 * @return true if the character at the specified offset is not

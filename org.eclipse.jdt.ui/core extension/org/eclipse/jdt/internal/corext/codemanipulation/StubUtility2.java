@@ -67,7 +67,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 
 /**
  * Utilities for code generation based on ast rewrite.
- * 
+ *
  * @since 3.1
  */
 public final class StubUtility2 {
@@ -667,7 +667,7 @@ public final class StubUtility2 {
 		final String name= NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
 		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
 	}
-	
+
 	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding) {
 		return getUnimplementedMethods(typeBinding, false);
 	}
@@ -766,13 +766,13 @@ public final class StubUtility2 {
 
 	/**
 	 * Evaluates the insertion position of a new node.
-	 * 
+	 *
 	 * @param listRewrite The list rewriter to which the new node will be added
 	 * @param sibling The Java element before which the new element should be added.
 	 * @return the AST node of the list to insert before or null to insert as last.
 	 * @throws JavaModelException thrown if accessing the Java element failed
 	 */
-	
+
 	public static ASTNode getNodeToInsertBefore(ListRewrite listRewrite, IJavaElement sibling) throws JavaModelException {
 		if (sibling instanceof IMember) {
 			ISourceRange sourceRange= ((IMember) sibling).getSourceRange();
@@ -791,7 +791,7 @@ public final class StubUtility2 {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Creates a new stub utility.
 	 */

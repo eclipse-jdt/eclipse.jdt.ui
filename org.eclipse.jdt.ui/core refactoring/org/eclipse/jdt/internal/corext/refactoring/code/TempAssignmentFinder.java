@@ -24,56 +24,56 @@ import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 public class TempAssignmentFinder extends ASTVisitor{
 	private ASTNode fFirstAssignment;
 	private IVariableBinding fTempBinding;
-	
+
 	TempAssignmentFinder(VariableDeclaration tempDeclaration){
 		fTempBinding= tempDeclaration.resolveBinding();
 	}
-	
+
 	private boolean isNameReferenceToTemp(Name name){
 		return fTempBinding == name.resolveBinding();
 	}
-		
+
 	private boolean isAssignmentToTemp(Assignment assignment){
 		if (fTempBinding == null)
 			return false;
-			
+
 		if (! (assignment.getLeftHandSide() instanceof Name))
 			return false;
 		Name ref= (Name)assignment.getLeftHandSide();
 		return isNameReferenceToTemp(ref);
 	}
-	
+
 	boolean hasAssignments(){
 		return fFirstAssignment != null;
 	}
-	
+
 	ASTNode getFirstAssignment(){
 		return fFirstAssignment;
 	}
-	
+
 	//-- visit methods
-	
+
 	public boolean visit(Assignment assignment) {
 		if (! isAssignmentToTemp(assignment))
 			return true;
-		
+
 		fFirstAssignment= assignment;
 		return false;
 	}
-	
+
 	public boolean visit(PostfixExpression postfixExpression) {
 		if (postfixExpression.getOperand() == null)
 			return true;
 		if (! (postfixExpression.getOperand() instanceof SimpleName))
-			return true;	
-		SimpleName simpleName= (SimpleName)postfixExpression.getOperand();	
+			return true;
+		SimpleName simpleName= (SimpleName)postfixExpression.getOperand();
 		if (! isNameReferenceToTemp(simpleName))
 			return true;
-		
+
 		fFirstAssignment= postfixExpression;
-		return false;	
+		return false;
 	}
-	
+
 	public boolean visit(PrefixExpression prefixExpression) {
 		if (prefixExpression.getOperand() == null)
 			return true;
@@ -82,11 +82,11 @@ public class TempAssignmentFinder extends ASTVisitor{
 		if (! prefixExpression.getOperator().equals(Operator.DECREMENT) &&
 			! prefixExpression.getOperator().equals(Operator.INCREMENT))
 			return true;
-		SimpleName simpleName= (SimpleName)prefixExpression.getOperand();	
+		SimpleName simpleName= (SimpleName)prefixExpression.getOperand();
 		if (! isNameReferenceToTemp(simpleName))
 			return true;
-		
+
 		fFirstAssignment= prefixExpression;
-		return false;	
+		return false;
 	}
 }

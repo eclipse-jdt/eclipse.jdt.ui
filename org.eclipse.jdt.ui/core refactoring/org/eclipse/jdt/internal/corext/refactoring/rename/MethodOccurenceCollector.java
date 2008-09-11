@@ -41,22 +41,22 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 				&& match.getAccuracy() == SearchMatch.A_INACCURATE) {
 			return; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=156491
 		}
-		
+
 		if (match.isImplicit()) { // see bug 94062
 			collectMatch(match);
 			return;
 		}
-		
+
 		int start= match.getOffset();
 		int length= match.getLength();
 		String matchText= unit.getBuffer().getText(start, length);
-		
+
 		//direct match:
 		if (fName.equals(matchText)) {
 			collectMatch(match);
 			return;
 		}
-					
+
 		//Not a standard reference -- use scanner to find last identifier token before left parenthesis:
 		IScanner scanner= getScanner(unit);
 		scanner.setSource(matchText.toCharArray());
@@ -73,7 +73,7 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 			}
 		} catch (InvalidInputException e){
 			//ignore
-		}	
+		}
 		if (simpleNameStart != -1) {
 			match.setOffset(start + simpleNameStart);
 			match.setLength(simpleNameEnd + 1 - simpleNameStart);

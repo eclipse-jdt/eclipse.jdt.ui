@@ -23,6 +23,12 @@ import java.util.StringTokenizer;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.xml.sax.SAXException;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -64,11 +70,6 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 public class JavadocOptionsManager {
 
 	private IFile fXmlfile;
@@ -76,8 +77,8 @@ public class JavadocOptionsManager {
 	private StatusInfo fWizardStatus;
 
 	private String[] fJavadocCommandHistory;
-	
-	
+
+
 	private IJavaElement[] fSelectedElements;
 	private IJavaElement[] fInitialElements;
 
@@ -90,7 +91,7 @@ public class JavadocOptionsManager {
 	private String fVMParams;
 	private String fOverview;
 	private String fTitle;
-	
+
 	private String[] fHRefs;
 
 	private IPath[] fSourcepath;
@@ -105,11 +106,11 @@ public class JavadocOptionsManager {
 	private boolean fAuthor;
 	private boolean fVersion;
 	private boolean fUse;
-	
+
 	private String fSource;
 
 	private boolean fOpenInBrowser;
-	
+
 	private RecentSettingsStore fRecentSettings;
 
 	//add-on for multi-project version
@@ -137,7 +138,7 @@ public class JavadocOptionsManager {
 	public final String SOURCEPATH= "sourcepath"; //$NON-NLS-1$
 	public final String CLASSPATH= "classpath"; //$NON-NLS-1$
 	public final String DESTINATION= "destdir"; //$NON-NLS-1$
-	public final String OPENINBROWSER= "openinbrowser"; //$NON-NLS-1$	
+	public final String OPENINBROWSER= "openinbrowser"; //$NON-NLS-1$
 
 	public final String VISIBILITY= "access"; //$NON-NLS-1$
 	public final String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
@@ -153,28 +154,28 @@ public class JavadocOptionsManager {
 	public final String FROMSTANDARD= "fromStandard"; //$NON-NLS-1$
 	public final String ANTPATH= "antpath"; //$NON-NLS-1$
 	public final String SOURCE= "source"; //$NON-NLS-1$
-	
+
 	private final String SECTION_JAVADOC= "javadoc"; //$NON-NLS-1$
 
 	private static final String JAVADOC_COMMAND_HISTORY= "javadoc_command_history"; //$NON-NLS-1$
-	
+
 	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List currSelection) {
 		fXmlfile= xmlJavadocFile;
 		fWizardStatus= new StatusInfo();
 
-		IDialogSettings javadocSection= dialogSettings.getSection(SECTION_JAVADOC); 
-		
-		String commandHistory= null; 
+		IDialogSettings javadocSection= dialogSettings.getSection(SECTION_JAVADOC);
+
+		String commandHistory= null;
 		if (javadocSection != null) {
 			commandHistory= javadocSection.get(JAVADOC_COMMAND_HISTORY);
 		}
 		if (commandHistory == null || commandHistory.length() == 0) {
-			commandHistory= initJavadocCommandDefault(); 
+			commandHistory= initJavadocCommandDefault();
 		}
 		fJavadocCommandHistory= arrayFromFlatString(commandHistory);
-		
+
 		fRecentSettings= new RecentSettingsStore(javadocSection);
-		
+
 		if (xmlJavadocFile != null) {
 			try {
 				JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents());
@@ -183,15 +184,15 @@ public class JavadocOptionsManager {
 					loadFromXML(element);
 					return;
 				}
-				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectCE_warning); 
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectCE_warning);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
-				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectCE_warning); 
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectCE_warning);
 			} catch (IOException e) {
 				JavaPlugin.log(e);
-				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectIOE_warning); 
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectIOE_warning);
 			} catch (SAXException e) {
-				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectSAXE_warning); 
+				fWizardStatus.setWarning(JavadocExportMessages.JavadocOptionsManager_antfileincorrectSAXE_warning);
 			}
 		}
 		if (javadocSection != null) {
@@ -221,11 +222,11 @@ public class JavadocOptionsManager {
 		}
 		return null;
 	}
-	
-	
+
+
 	private void loadFromDialogStore(IDialogSettings settings, List sel) {
 		fInitialElements= getInitialElementsFromSelection(sel);
-		
+
 		IJavaProject project= getSingleProjectFromInitialSelection();
 
 		fAccess= settings.get(VISIBILITY);
@@ -244,7 +245,7 @@ public class JavadocOptionsManager {
 			fDocletname= ""; //$NON-NLS-1$
 		}
 
-		
+
 		if (project != null) {
 			fAntpath= getRecentSettings().getAntpath(project);
 		} else {
@@ -254,7 +255,7 @@ public class JavadocOptionsManager {
 			}
 		}
 
-		
+
 		if (project != null) {
 			fDestination= getRecentSettings().getDestination(project);
 		} else {
@@ -275,7 +276,7 @@ public class JavadocOptionsManager {
 		fVMParams= settings.get(VMOPTIONS);
 		if (fVMParams == null)
 			fVMParams= ""; //$NON-NLS-1$
-		
+
 		fAdditionalParams= settings.get(EXTRAOPTIONS);
 		if (fAdditionalParams == null)
 			fAdditionalParams= ""; //$NON-NLS-1$
@@ -294,12 +295,12 @@ public class JavadocOptionsManager {
 		fNotree= loadBoolean(settings.get(NOTREE));
 		fSplitindex= loadBoolean(settings.get(SPLITINDEX));
 		fOpenInBrowser= loadBoolean(settings.get(OPENINBROWSER));
-		
+
 		fSource= settings.get(SOURCE);
 		if (project != null) {
 			fSource= project.getOption(JavaCore.COMPILER_SOURCE, true);
 		}
-		
+
 		if (project != null) {
 			fHRefs= getRecentSettings().getHRefs(project);
 		} else {
@@ -311,7 +312,7 @@ public class JavadocOptionsManager {
 	//loads defaults for wizard (nothing is stored)
 	private void loadDefaults(List sel) {
 		fInitialElements= getInitialElementsFromSelection(sel);
-		
+
 		IJavaProject project= getSingleProjectFromInitialSelection();
 
 		if (project != null) {
@@ -323,7 +324,7 @@ public class JavadocOptionsManager {
 			fDestination= ""; //$NON-NLS-1$
 			fHRefs= new String[0];
 		}
-		
+
 		fAccess= PUBLIC;
 
 		fDocletname= ""; //$NON-NLS-1$
@@ -366,7 +367,7 @@ public class JavadocOptionsManager {
 		fDocletname= ""; //$NON-NLS-1$
 		fDocletpath= ""; //$NON-NLS-1$
 
-		if (destination.length() == 0) { 
+		if (destination.length() == 0) {
 			NodeList list= element.getChildNodes();
 			for (int i= 0; i < list.getLength(); i++) {
 				Node child= list.item(i);
@@ -383,9 +384,9 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
-		
+
 		fInitialElements= getSelectedElementsFromAnt(element);
-		
+
 
 		//find all the links stored in the ant script
 		NodeList children= element.getChildNodes();
@@ -406,7 +407,7 @@ public class JavadocOptionsManager {
 
 		fStylesheet= element.getAttribute(STYLESHEETFILE);
 		fTitle= element.getAttribute(TITLE);
-		
+
 
 		StringBuffer additionals= new StringBuffer();
 		StringBuffer vmargs= new StringBuffer();
@@ -429,7 +430,7 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
-		
+
 		fAdditionalParams= additionals.toString();
 		fVMParams= vmargs.toString();
 		fOverview= element.getAttribute(OVERVIEW);
@@ -443,15 +444,15 @@ public class JavadocOptionsManager {
 		fNoindex= loadBoolean(element.getAttribute(NOINDEX));
 		fNotree= loadBoolean(element.getAttribute(NOTREE));
 		fSplitindex= loadBoolean(element.getAttribute(SPLITINDEX));
-		
-		fSource= element.getAttribute(SOURCE); 
+
+		fSource= element.getAttribute(SOURCE);
 	}
 
 	/*
 	 * Method creates an absolute path to the project. If the path is already
 	 * absolute it returns the path. If it encounters any difficulties in
 	 * creating the absolute path, the method returns null.
-	 * 
+	 *
 	 * @param path
 	 * @return IPath
 	 */
@@ -469,17 +470,17 @@ public class JavadocOptionsManager {
 		}
 		return path;
 	}
-	
+
 	private IContainer[] getSourceContainers(Element element) {
 		String sourcePaths= element.getAttribute(SOURCEPATH);
-		
+
 		if (sourcePaths.endsWith(File.pathSeparator)) {
 			sourcePaths += '.';
 		}
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		
+
 		ArrayList res= new ArrayList();
-		
+
 		String[] strings= sourcePaths.split(File.pathSeparator);
 		for (int i= 0; i < strings.length; i++) {
 			IPath path= makeAbsolutePathFromRelative(new Path(strings[i].trim()));
@@ -489,10 +490,10 @@ public class JavadocOptionsManager {
 					res.add(containers[k]);
 				}
 			}
-			
+
 		}
 		return (IContainer[]) res.toArray(new IContainer[res.size()]);
-	}	
+	}
 
 	private IJavaElement[] getSelectedElementsFromAnt(Element element) {
 		List res= new ArrayList();
@@ -501,7 +502,7 @@ public class JavadocOptionsManager {
 		String packagenames= element.getAttribute(PACKAGENAMES);
 		if (packagenames != null) {
 			IContainer[] containers= getSourceContainers(element);
-			
+
 			StringTokenizer tokenizer= new StringTokenizer(packagenames, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				IPath relPackagePath= new Path(tokenizer.nextToken().trim().replace('.', '/'));
@@ -522,7 +523,7 @@ public class JavadocOptionsManager {
 		String sourcefiles= element.getAttribute(SOURCEFILES);
 		if (sourcefiles != null) {
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			
+
 			StringTokenizer tokenizer= new StringTokenizer(sourcefiles, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				String name= tokenizer.nextToken().trim();
@@ -551,7 +552,7 @@ public class JavadocOptionsManager {
 		return fJavadocCommandHistory;
 	}
 
-	
+
 	//it is possible that the package list is empty
 	public StatusInfo getWizardStatus() {
 		return fWizardStatus;
@@ -600,7 +601,7 @@ public class JavadocOptionsManager {
 	public String getAdditionalParams() {
 		return fAdditionalParams;
 	}
-	
+
 	public String getVMParams() {
 		return fVMParams;
 	}
@@ -620,7 +621,7 @@ public class JavadocOptionsManager {
 	public boolean doOpenInBrowser() {
 		return fOpenInBrowser;
 	}
-	
+
 	public String[] getHRefs() {
 		return fHRefs;
 	}
@@ -651,7 +652,7 @@ public class JavadocOptionsManager {
 
 	private boolean loadBoolean(String value) {
 
-		if (value == null || value.length() == 0) 
+		if (value == null || value.length() == 0)
 			return false;
 		else {
 			if (value.equals("true")) //$NON-NLS-1$
@@ -660,7 +661,7 @@ public class JavadocOptionsManager {
 				return false;
 		}
 	}
-	
+
 	private String flatPathList(IPath[] paths) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < paths.length; i++) {
@@ -671,7 +672,7 @@ public class JavadocOptionsManager {
 		}
 		return buf.toString();
 	}
-	
+
 	private String flatStringList(String[] paths) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < paths.length; i++) {
@@ -682,7 +683,7 @@ public class JavadocOptionsManager {
 		}
 		return buf.toString();
 	}
-	
+
 	private String[] arrayFromFlatString(String str) {
 		StringTokenizer tok= new StringTokenizer(str, File.pathSeparator);
 		String[] res= new String[tok.countTokens()];
@@ -691,14 +692,14 @@ public class JavadocOptionsManager {
 		}
 		return res;
 	}
-	
+
 
 	public IStatus getArgumentArray(List vmArgs, List toolArgs) {
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, JavadocExportMessages.JavadocOptionsManager_status_title, null);
-		
+
 		//bug 38692
 		vmArgs.add(getJavadocCommandHistory()[0]);
-		
+
 		if (fFromStandard) {
 			toolArgs.add("-d"); //$NON-NLS-1$
 			toolArgs.add(fDestination);
@@ -708,12 +709,12 @@ public class JavadocOptionsManager {
 			toolArgs.add("-docletpath"); //$NON-NLS-1$
 			toolArgs.add(fDocletpath);
 		}
-		
+
 		if (fSourcepath.length > 0) {
 			toolArgs.add("-sourcepath"); //$NON-NLS-1$
 			toolArgs.add(flatPathList(fSourcepath));
 		}
-		
+
 		if (fClasspath.length > 0) {
 			toolArgs.add("-classpath"); //$NON-NLS-1$
 			toolArgs.add(flatPathList(fClasspath));
@@ -723,9 +724,9 @@ public class JavadocOptionsManager {
 		if (fFromStandard) {
 			if (fSource.length() > 0 && !fSource.equals("-")) { //$NON-NLS-1$
 				toolArgs.add("-source"); //$NON-NLS-1$
-				toolArgs.add(fSource); 
+				toolArgs.add(fSource);
 			}
-			
+
 			if (fUse)
 				toolArgs.add("-use"); //$NON-NLS-1$
 			if (fVersion)
@@ -745,26 +746,26 @@ public class JavadocOptionsManager {
 			if (fSplitindex)
 				toolArgs.add("-splitindex"); //$NON-NLS-1$
 
-			if (fTitle.length() != 0) { 
+			if (fTitle.length() != 0) {
 				toolArgs.add("-doctitle"); //$NON-NLS-1$
 				toolArgs.add(fTitle);
 			}
 
 
-			if (fStylesheet.length() != 0) { 
+			if (fStylesheet.length() != 0) {
 				toolArgs.add("-stylesheetfile"); //$NON-NLS-1$
 				toolArgs.add(fStylesheet);
 			}
-			
+
 			for (int i= 0; i < fHRefs.length; i++) {
 				toolArgs.add("-link"); //$NON-NLS-1$
 				toolArgs.add(fHRefs[i]);
 			}
-			
+
 		} //end standard options
 
 		if (fAdditionalParams.length() + fVMParams.length() != 0) {
-			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); 
+			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams);
 			String[] vmArgsArray= tokens.getVMArgumentsArray();
 			for (int i= 0; i < vmArgsArray.length; i++) {
 				vmArgs.add(vmArgsArray[i]);
@@ -775,8 +776,8 @@ public class JavadocOptionsManager {
 			}
 		}
 		addProxyOptions(vmArgs);
-		
-		if (fOverview.length() != 0) { 
+
+		if (fOverview.length() != 0) {
 			toolArgs.add("-overview"); //$NON-NLS-1$
 			toolArgs.add(fOverview);
 		}
@@ -799,7 +800,7 @@ public class JavadocOptionsManager {
 		}
 		return status;
 	}
-	
+
 	private void addProxyOptions(List vmOptions) {
 		// bug 74132
 		String hostPrefix= "-J-Dhttp.proxyHost="; //$NON-NLS-1$
@@ -812,21 +813,21 @@ public class JavadocOptionsManager {
 		}
 		String proxyHost= System.getProperty("http.proxyHost"); //$NON-NLS-1$
 		if (proxyHost != null) {
-			vmOptions.add(hostPrefix + proxyHost); 
+			vmOptions.add(hostPrefix + proxyHost);
 		}
-		
+
 		String proxyPort= System.getProperty("http.proxyPort"); //$NON-NLS-1$
 		if (proxyPort != null) {
-			vmOptions.add(portPrefix + proxyPort); 
+			vmOptions.add(portPrefix + proxyPort);
 		}
 	}
-	
+
 	public Element createXML(IJavaProject[] projects) throws CoreException {
 		if (fAntpath.length() > 0) {
 			try {
 				IPath filePath= Path.fromOSString(fAntpath);
 				IPath directoryPath= filePath.removeLastSegments(1);
-				
+
 				IPath basePath= null;
 				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 				if (root.findFilesForLocation(filePath).length > 0) {
@@ -835,13 +836,13 @@ public class JavadocOptionsManager {
 				JavadocWriter writer= new JavadocWriter(basePath, projects);
 				return writer.createXML(this);
 			} catch (ParserConfigurationException e) {
-				String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
+				String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 			}
 		}
 		return null;
 	}
-	
+
 
 	public File writeXML(Element javadocElement) throws CoreException {
 		FileOutputStream objectStreamOutput= null;
@@ -854,17 +855,17 @@ public class JavadocOptionsManager {
 			IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.ant.core.antBuildFile"); //$NON-NLS-1$
 			if (type != null)
 				encoding= type.getDefaultCharset();
-			
+
 			file.getParentFile().mkdirs();
-		
+
 			objectStreamOutput= new FileOutputStream(file);
 			JavadocWriter.writeDocument(javadocElement, encoding, objectStreamOutput);
 			return file;
 		} catch (IOException e) {
-			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
+			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} catch (TransformerException e) {
-			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
+			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} finally {
 			if (objectStreamOutput != null) {
@@ -884,8 +885,8 @@ public class JavadocOptionsManager {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 			store.setValue(PreferenceConstants.JAVADOC_COMMAND, fJavadocCommandHistory[0]);
 		}
-		
-		
+
+
 		settings.put(FROMSTANDARD, fFromStandard);
 
 		settings.put(DOCLETNAME, fDocletname);
@@ -905,19 +906,19 @@ public class JavadocOptionsManager {
 		settings.put(OPENINBROWSER, fOpenInBrowser);
 		settings.put(SOURCE, fSource);
 
-		if (fAntpath.length() != 0) 
+		if (fAntpath.length() != 0)
 			settings.put(ANTPATH, fAntpath);
-		if (fDestination.length() != 0) 
+		if (fDestination.length() != 0)
 			settings.put(DESTINATION, fDestination);
-		if (fAdditionalParams.length() != 0) 
+		if (fAdditionalParams.length() != 0)
 			settings.put(EXTRAOPTIONS, fAdditionalParams);
-		if (fVMParams.length() != 0) 
+		if (fVMParams.length() != 0)
 			settings.put(VMOPTIONS, fVMParams);
-		if (fOverview.length() != 0) 
+		if (fOverview.length() != 0)
 			settings.put(OVERVIEW, fOverview);
-		if (fStylesheet.length() != 0) 
+		if (fStylesheet.length() != 0)
 			settings.put(STYLESHEETFILE, fStylesheet);
-		if (fTitle.length() != 0) 
+		if (fTitle.length() != 0)
 			settings.put(TITLE, fTitle);
 
 		if (checkedProjects.length == 1) {
@@ -925,7 +926,7 @@ public class JavadocOptionsManager {
 		}
 		getRecentSettings().store(settings);
 	}
-		
+
 	public void setJavadocCommandHistory(String[] javadocCommandHistory) {
 		fJavadocCommandHistory= javadocCommandHistory;
 	}
@@ -956,7 +957,7 @@ public class JavadocOptionsManager {
 	public void setAdditionalParams(String params) {
 		fAdditionalParams= params;
 	}
-	
+
 	public void setVMParams(String params) {
 		fVMParams= params;
 	}
@@ -987,7 +988,7 @@ public class JavadocOptionsManager {
 	public void setOpenInBrowser(boolean openInBrowser) {
 		fOpenInBrowser= openInBrowser;
 	}
-	
+
 	public void setHRefs(String[] hrefs) {
 		fHRefs= hrefs;
 	}
@@ -1013,11 +1014,11 @@ public class JavadocOptionsManager {
 		else if (flag.equals(NONAVBAR))
 			fNonavbar= value;
 	}
-	
+
 	public void setSource(String source) {
 		fSource= source;
 	}
-	
+
 	public String getSource() {
 		return fSource;
 	}
@@ -1112,7 +1113,7 @@ public class JavadocOptionsManager {
 		fRecentSettings.setProjectSettings(project, fDestination, fAntpath, fHRefs);
 	}
 
-	
+
 	private static String initJavadocCommandDefault() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		String cmd= store.getString(PreferenceConstants.JAVADOC_COMMAND);	// old location
@@ -1120,14 +1121,14 @@ public class JavadocOptionsManager {
 			store.setToDefault(PreferenceConstants.JAVADOC_COMMAND);
 			return cmd;
 		}
-		
+
 		File file= findJavaDocCommand();
 		if (file != null) {
 			return file.getPath();
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
 
 	private static File findJavaDocCommand() {
 		IVMInstall install= JavaRuntime.getDefaultVMInstall();
@@ -1137,7 +1138,7 @@ public class JavadocOptionsManager {
 				return res;
 			}
 		}
-		
+
 		IVMInstallType[] jreTypes= JavaRuntime.getVMInstallTypes();
 		for (int i= 0; i < jreTypes.length; i++) {
 			IVMInstallType jreType= jreTypes[i];

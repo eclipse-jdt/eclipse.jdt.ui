@@ -25,6 +25,7 @@ import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
@@ -88,14 +89,14 @@ public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletio
 			fSelectedRegion= new Region(baseOffset + replacement.length(), 0);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal#needsLinkedMode()
 	 */
 	protected boolean needsLinkedMode() {
 		return false; // we handle it ourselves
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
@@ -111,14 +112,14 @@ public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletio
 		int count= parameterNames.length;
 		fArgumentOffsets= new int[count];
 		fArgumentLengths= new int[count];
-		
+
 		FormatterPrefs prefs= getFormatterPrefs();
-		
+
 		setCursorPosition(buffer.length());
-		
+
 		if (prefs.afterOpeningParen)
 			buffer.append(SPACE);
-		
+
 		for (int i= 0; i != count; i++) {
 			if (i != 0) {
 				if (prefs.beforeComma)
@@ -127,12 +128,12 @@ public final class FilledArgumentNamesMethodProposal extends JavaMethodCompletio
 				if (prefs.afterComma)
 					buffer.append(SPACE);
 			}
-			
+
 			fArgumentOffsets[i]= buffer.length();
 			buffer.append(parameterNames[i]);
 			fArgumentLengths[i]= parameterNames[i].length;
 		}
-		
+
 		if (prefs.beforeClosingParen)
 			buffer.append(SPACE);
 

@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 
 /**
  * Measures the time to replaceAll in a large file with Quick Diff disabled.
- * 
+ *
  * @since 3.1
  */
 public class JavaReplaceAllTest extends AbstractJavaReplaceAllTest {
@@ -29,5 +29,5 @@ public class JavaReplaceAllTest extends AbstractJavaReplaceAllTest {
 	protected boolean isQuickDiffEnabled() {
 		return false;
 	}
-	
+
 }

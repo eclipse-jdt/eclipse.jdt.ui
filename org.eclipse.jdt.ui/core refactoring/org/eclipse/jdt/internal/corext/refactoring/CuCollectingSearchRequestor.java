@@ -32,7 +32,7 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 
 	private IJavaProject fProjectCache;
 	private IScanner fScannerCache;
-	
+
 	public CuCollectingSearchRequestor() {
 		this(null);
 	}
@@ -45,36 +45,36 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 		IJavaProject project= unit.getJavaProject();
 		if (project.equals(fProjectCache))
 			return fScannerCache;
-		
+
 		fProjectCache= project;
 		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
 		String complianceLevel= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		fScannerCache= ToolFactory.createScanner(false, false, false, sourceLevel, complianceLevel);
 		return fScannerCache;
 	}
-	
+
 	/**
 	 * This is an internal method. Do not call from subclasses!
 	 * Use {@link #collectMatch(SearchMatch)} instead.
-	 * @param match 
-	 * @throws CoreException 
+	 * @param match
+	 * @throws CoreException
 	 * @deprecated
 	 */
 	public final void acceptSearchMatch(SearchMatch match) throws CoreException {
 		if (filterMatch(match))
 			return;
-		
+
 		ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
 		if (unit != null) {
 			acceptSearchMatch(unit, match);
 		}
 	}
-	
+
 	/**
 	 * Handles the given match in the given compilation unit.
 	 * The default implementation accepts all matches.
 	 * Subclasses can override and call {@link #collectMatch(SearchMatch)} to collect matches.
-	 *  
+	 *
 	 * @param unit the enclosing CU of the match, never <code>null</code>
 	 * @param match the match
 	 * @throws CoreException if something bad happens

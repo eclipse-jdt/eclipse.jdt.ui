@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import org.eclipse.text.edits.ReplaceEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -52,7 +52,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	 * <p>
 	 * This constructor is only invoked by <code>RenameTypeProcessor</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param method the method
 	 * @param manager the change manager
 	 * @param categorySet the group category set
@@ -71,7 +71,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 
 	/**
 	 * Creates a new rename method processor from scripting arguments
-	 * 
+	 *
 	 * @param method the method, or <code>null</code> if invoked by scripting
 	 * @param arguments the arguments
 	 * @param status the resulting status
@@ -81,13 +81,13 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		RefactoringStatus initializeStatus= initialize(arguments);
 		status.merge(initializeStatus);
 	}
-	
+
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameNonVirtualMethodAvailable(getMethod());
 	}
-	
+
 	//----------- preconditions --------------
-	
+
 	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
@@ -95,26 +95,26 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			result.merge(super.doCheckFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
 			if (result.hasFatalError())
 				return result;
-			
+
 			final IMethod method= getMethod();
 			final IType declaring= method.getDeclaringType();
 			final String name= getNewElementName();
 			IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(
 				new SubProgressMonitor(pm, 1), declaring.newTypeHierarchy(new SubProgressMonitor(pm, 1)), method, name);
-			
+
 			for (int i= 0; i < hierarchyMethods.length; i++) {
 				IMethod hierarchyMethod= hierarchyMethods[i];
 				RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 				if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 					String message= Messages.format(
-						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines, 
+						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines,
 						new String[]{BasicElementLabels.getJavaElementName(declaring.getFullyQualifiedName('.')), BasicElementLabels.getJavaElementName(name)});
-					result.addError(message, context);				
+					result.addError(message, context);
 				}else {
 					String message= Messages.format(
-						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines2, 
+						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines2,
 						new String[]{BasicElementLabels.getJavaElementName(declaring.getFullyQualifiedName('.')), BasicElementLabels.getJavaElementName(name)});
-					result.addWarning(message, context);				
+					result.addWarning(message, context);
 				}
 			}
 			return result;
@@ -122,7 +122,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			pm.done();
 		}
 	}
-	
+
 	/*
 	 * @see RenameMethodProcessor#addOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.core.runtime.IProgressMonitor, RefactoringStatus)
 	 */
@@ -134,7 +134,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			addReferenceUpdates(manager, pm);
 		pm.worked(1);
 	}
-	
+
 	private ICompilationUnit getDeclaringCU() {
 		return getMethod().getCompilationUnit();
 	}
@@ -166,7 +166,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
 		addTextEdit(manager.get(getDeclaringCU()), editName, replaceEdit);
 	}
-	
+
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) {
 		SearchResultGroup[] grouped= getOccurrences();
 		for (int i= 0; i < grouped.length; i++) {
@@ -180,9 +180,9 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 					ReplaceEdit replaceEdit= createReplaceEdit(match, cu);
 					String editName= RefactoringCoreMessages.RenamePrivateMethodRefactoring_update;
 					addTextEdit(change, editName, replaceEdit);
-				}				
+				}
 			}
-		}	
+		}
 		pm.done();
 	}
 

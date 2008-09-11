@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactori
 
 /**
  * Refactoring contribution for the extract interface refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ChangeTypeRefactoringContribution extends JavaRefactoringContribution {
@@ -39,11 +39,11 @@ public final class ChangeTypeRefactoringContribution extends JavaRefactoringCont
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		return new ChangeTypeRefactoring(arguments, status);
 	}
-	
+
 	public RefactoringDescriptor createDescriptor() {
 		return new GeneralizeTypeDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new GeneralizeTypeDescriptor(project, description, comment, arguments, flags);
 	}

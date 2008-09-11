@@ -38,10 +38,10 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class CopyCallHierarchyAction extends Action {
     private static final char INDENTATION= '\t';
-    
+
     private CallHierarchyViewPart fView;
     private CallHierarchyViewer fViewer;
-	
+
 	private final Clipboard fClipboard;
 
 	public CopyCallHierarchyAction(CallHierarchyViewPart view, Clipboard clipboard, CallHierarchyViewer viewer) {
@@ -57,7 +57,7 @@ class CopyCallHierarchyAction extends Action {
         Object element = SelectionUtil.getSingleElement(getSelection());
         return element != null;
     }
-    
+
     private ISelection getSelection() {
         ISelectionProvider provider = fView.getSite().getSelectionProvider();
 
@@ -67,7 +67,7 @@ class CopyCallHierarchyAction extends Action {
 
         return null;
     }
-    
+
 	/*
 	 * @see IAction#run()
 	 */
@@ -90,7 +90,7 @@ class CopyCallHierarchyAction extends Action {
 
 	/**
 	 * Adds the specified {@link TreeItem}'s text to the StringBuffer.
-	 * 
+	 *
 	 * @param item the tree item
 	 * @param indent the indent size
 	 * @param buf the string buffer
@@ -102,7 +102,7 @@ class CopyCallHierarchyAction extends Action {
 
         buf.append(item.getText());
         buf.append('\n');
-        
+
         if (item.getExpanded()) {
             TreeItem[] items= item.getItems();
             for (int i= 0; i < items.length; i++) {
@@ -123,7 +123,7 @@ class CopyCallHierarchyAction extends Action {
 				line= bufferedReader.readLine();
 				if (line != null && line.length() != 0)
 					printWriter.println();
-					
+
 			}
 		} catch (IOException e) {
 			return in; // return the call hierarchy unfiltered

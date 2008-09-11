@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *      IBM Corporation - initial API and implementation 
+ *      IBM Corporation - initial API and implementation
  * 		Sebastian Davids <sdavids@gmx.de> - Fix for bug 19346 - Dialog font
  *   	should be activated and used by other components.
  *******************************************************************************/
@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,6 +32,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -100,7 +100,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			return BasicElementLabels.getWorkingSetLabel(workingSet);
 		}
 	}
-	
+
 	private class Filter extends ViewerFilter {
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			IWorkingSet ws= (IWorkingSet)element;
@@ -149,8 +149,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, IWorkingSet[] activeWorkingSets) {
 		super(parentShell);
-		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title); 
-		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message); 
+		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
+		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message);
 		fAllWorkingSets= new ArrayList(allWorkingSets.length);
 		fActiveWorkingSets= Arrays.asList(activeWorkingSets);
 		Filter filter= new Filter();
@@ -162,7 +162,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	/**
 	 * Returns the selected working sets
-	 * 
+	 *
 	 * @return the selected working sets
 	 */
 	public IWorkingSet[] getSelection() {
@@ -171,14 +171,14 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	/**
 	 * Sets the initial selection
-	 * 
+	 *
 	 * @param workingSets the initial selection
 	 */
 	public void setSelection(IWorkingSet[] workingSets) {
 		fResult= workingSets;
 		setInitialSelections(workingSets);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -188,7 +188,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		updateButtonAvailability();
 		return control;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -259,8 +259,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		data.grabExcessHorizontalSpace= true;
 		composite.setData(data);
 
-		fNewButton= createButton(buttonComposite, nextButtonId++, 
-			WorkingSetMessages.WorkingSetConfigurationDialog_new_label, false); 
+		fNewButton= createButton(buttonComposite, nextButtonId++,
+			WorkingSetMessages.WorkingSetConfigurationDialog_new_label, false);
 		fNewButton.setFont(composite.getFont());
 		fNewButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -268,8 +268,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			}
 		});
 
-		fEditButton= createButton(buttonComposite, nextButtonId++, 
-			WorkingSetMessages.WorkingSetConfigurationDialog_edit_label, false); 
+		fEditButton= createButton(buttonComposite, nextButtonId++,
+			WorkingSetMessages.WorkingSetConfigurationDialog_edit_label, false);
 		fEditButton.setFont(composite.getFont());
 		fEditButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -277,8 +277,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			}
 		});
 
-		fRemoveButton= createButton(buttonComposite, nextButtonId++, 
-			WorkingSetMessages.WorkingSetConfigurationDialog_remove_label, false); 
+		fRemoveButton= createButton(buttonComposite, nextButtonId++,
+			WorkingSetMessages.WorkingSetConfigurationDialog_remove_label, false);
 		fRemoveButton.setFont(composite.getFont());
 		fRemoveButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -297,7 +297,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		buttons.setLayout(layout);
 
 		fUpButton= new Button(buttons, SWT.PUSH);
-		fUpButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_up_label); 
+		fUpButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_up_label);
 		fUpButton.setFont(parent.getFont());
 		setButtonLayoutData(fUpButton);
 		fUpButton.addSelectionListener(new SelectionAdapter() {
@@ -307,7 +307,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		});
 
 		fDownButton= new Button(buttons, SWT.PUSH);
-		fDownButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_down_label); 
+		fDownButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_down_label);
 		fDownButton.setFont(parent.getFont());
 		setButtonLayoutData(fDownButton);
 		fDownButton.addSelectionListener(new SelectionAdapter() {
@@ -315,9 +315,9 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				moveDown(((IStructuredSelection)fTableViewer.getSelection()).toList());
 			}
 		});
-		
+
 		fSelectAll= new Button(buttons, SWT.PUSH);
-		fSelectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_selectAll_label); 
+		fSelectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_selectAll_label);
 		fSelectAll.setFont(parent.getFont());
 		setButtonLayoutData(fSelectAll);
 		fSelectAll.addSelectionListener(new SelectionAdapter() {
@@ -325,9 +325,9 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				selectAll();
 			}
 		});
-		
+
 		fDeselectAll= new Button(buttons, SWT.PUSH);
-		fDeselectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_deselectAll_label); 
+		fDeselectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_deselectAll_label);
 		fDeselectAll.setFont(parent.getFont());
 		setButtonLayoutData(fDeselectAll);
 		fDeselectAll.addSelectionListener(new SelectionAdapter() {
@@ -400,7 +400,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		// save the original working set values for restoration when selection
 		// dialog is cancelled.
 		if (firstEdit) {
-			originalWorkingSet= 
+			originalWorkingSet=
 				PlatformUI.getWorkbench().getWorkingSetManager().
 				createWorkingSet(editWorkingSet.getName(), editWorkingSet.getElements());
 		} else {
@@ -426,7 +426,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	/**
 	 * Overrides method in Dialog
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.Dialog#open()
 	 */
 	public int open() {
@@ -530,7 +530,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			fDownButton.setEnabled(canMoveDown());
 		}
 	}
-	
+
 	private boolean areAllGlobalWorkingSets(IStructuredSelection selection) {
 		Set globals= new HashSet(Arrays.asList(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets()));
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
@@ -539,7 +539,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 		return true;
 	}
-	
+
 	private void moveUp(List toMoveUp) {
 		if (toMoveUp.size() > 0) {
 			setElements(moveUp(fAllWorkingSets, toMoveUp));
@@ -609,13 +609,13 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 		return false;
 	}
-	
+
 	//---- select / deselect --------------------------------------------------
-	
+
 	private void selectAll() {
 		fTableViewer.setAllChecked(true);
 	}
-	
+
 	private void deselectAll() {
 		fTableViewer.setAllChecked(false);
 	}

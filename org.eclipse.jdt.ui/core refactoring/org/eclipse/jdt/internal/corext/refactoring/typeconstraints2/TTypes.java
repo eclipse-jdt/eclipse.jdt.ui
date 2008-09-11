@@ -19,34 +19,34 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
 
 public class TTypes {
-	
+
 	private static class AllSupertypesIterator implements Iterator {
 		private final Stack fWorklist;
-		
+
 		public AllSupertypesIterator(TType type) {
 			fWorklist= new Stack();
 			pushSupertypes(type);
 		}
-	
+
 		public boolean hasNext() {
 			return ! fWorklist.empty();
 		}
-	
+
 		public Object next() {
 			TType result= (TType) fWorklist.pop();
 			pushSupertypes(result);
 			return result;
 		}
-	
+
 		private void pushSupertypes(TType type) {
 			if (type.isJavaLangObject())
 				return;
-			
+
 			if (type.isTypeVariable() || type.isCaptureType()) {
 				TType[] bounds= ((AbstractTypeVariable) type).getBounds();
 				for (int i= 0; i < bounds.length; i++)
 					fWorklist.push(bounds[i].getTypeDeclaration());
-			
+
 			} else {
 				TType superclass= type.getSuperclass();
 				if (superclass == null) {
@@ -60,38 +60,38 @@ public class TTypes {
 					fWorklist.push(interfaces[i].getTypeDeclaration());
 			}
 		}
-	
+
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
+
 	private static class AllSubtypesIterator implements Iterator {
 		private final Stack fWorklist;
-		
+
 		public AllSubtypesIterator(TType type) {
 			fWorklist= new Stack();
 			fWorklist.push(type.getTypeDeclaration());
 		}
-	
+
 		public boolean hasNext() {
 			return ! fWorklist.empty();
 		}
-	
+
 		public Object next() {
 			TType result= (TType) fWorklist.pop();
 			TType[] subTypes= result.getSubTypes();
 			for (int i= 0; i < subTypes.length; i++)
 				fWorklist.push(subTypes[i].getTypeDeclaration());
-			
+
 			return result;
 		}
-	
+
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
+
 	private TTypes() {
 		// no instances
 	}
@@ -113,7 +113,7 @@ public class TTypes {
 	public static Iterator getAllSuperTypesIterator(TType type) {
 		return new AllSupertypesIterator(type);
 	}
-	
+
 	/**
 	 * @param rhs
 	 * @param lhs
@@ -125,7 +125,7 @@ public class TTypes {
 			HierarchyType rhsGeneric= (HierarchyType) rhs.getTypeDeclaration();
 			HierarchyType lhsGeneric= (HierarchyType) lhs.getTypeDeclaration();
 			return lhs.isJavaLangObject() || rhsGeneric.equals(lhsGeneric) || rhsGeneric.isSubType(lhsGeneric);
-			
+
 		} else if (rhs.isTypeVariable()) {
 			if (rhs.canAssignTo(lhs))
 				return true;
@@ -135,10 +135,10 @@ public class TTypes {
 					return true;
 			}
 			return lhs.isJavaLangObject();
-			
+
 		} else {
 			return rhs.canAssignTo(lhs);
 		}
 	}
-	
+
 }

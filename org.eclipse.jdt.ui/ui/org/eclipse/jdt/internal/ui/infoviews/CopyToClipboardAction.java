@@ -23,6 +23,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;

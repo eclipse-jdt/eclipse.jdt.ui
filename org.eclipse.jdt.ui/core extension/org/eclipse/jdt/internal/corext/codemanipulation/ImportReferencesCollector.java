@@ -56,15 +56,15 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class ImportReferencesCollector extends GenericVisitor {
 
 	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
-		collect(node, project, rangeLimit, false, resultingTypeImports, resultingStaticImports);		
+		collect(node, project, rangeLimit, false, resultingTypeImports, resultingStaticImports);
 	}
-	
+
 	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, boolean skipMethodBodies, Collection resultingTypeImports, Collection resultingStaticImports) {
 		ASTNode root= node.getRoot();
 		CompilationUnit astRoot= root instanceof CompilationUnit ? (CompilationUnit) root : null;
 		node.accept(new ImportReferencesCollector(project, astRoot, rangeLimit, skipMethodBodies, resultingTypeImports, resultingStaticImports));
 	}
-	
+
 	private CompilationUnit fASTRoot;
 	private Region fSubRange;
 	private Collection/*<Name>*/ fTypeImports;
@@ -82,7 +82,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		fASTRoot= astRoot; // can be null
 		fSkipMethodBodies= skipMethodBodies;
 	}
-	
+
 	private static boolean processJavadocComments(CompilationUnit astRoot) {
 		 // don't visit Javadoc for 'package-info' (bug 216432)
 		if (astRoot != null && astRoot.getTypeRoot() != null) {
@@ -90,7 +90,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return true;
 	}
-		
+
 	private boolean isAffected(ASTNode node) {
 		if (fSubRange == null) {
 			return true;
@@ -99,14 +99,14 @@ public class ImportReferencesCollector extends GenericVisitor {
 		int offset= fSubRange.getOffset();
 		return nodeStart + node.getLength() > offset && offset + fSubRange.getLength() >  nodeStart;
 	}
-	
-	
+
+
 	private void addReference(SimpleName name) {
 		if (isAffected(name)) {
 			fTypeImports.add(name);
 		}
-	}			
-	
+	}
+
 	private void typeRefFound(Name node) {
 		if (node != null) {
 			while (node.isQualifiedName()) {
@@ -122,30 +122,30 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		IBinding binding= node.resolveBinding();
 		if (binding == null || binding.getKind() == IBinding.TYPE) {
-			// if the binding is null, we cannot determine if 
+			// if the binding is null, we cannot determine if
 			// we have a type binding or not, so we will assume
 			// we do.
 			addReference((SimpleName) node);
 		}
 	}
-	
+
 	private void possibleStaticImportFound(Name name) {
 		if (fStaticImports == null || fASTRoot == null) {
 			return;
 		}
-		
+
 		while (name.isQualifiedName()) {
 			name= ((QualifiedName) name).getQualifier();
 		}
 		if (!isAffected(name)) {
 			return;
 		}
-		
+
 		IBinding binding= name.resolveBinding();
 		if (binding == null || binding instanceof ITypeBinding || !Modifier.isStatic(binding.getModifiers()) || ((SimpleName) name).isDeclaration()) {
 			return;
 		}
-		
+
 		if (binding instanceof IVariableBinding) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			if (varBinding.isField()) {
@@ -168,27 +168,27 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 
 	}
-	
+
 	private void doVisitChildren(List elements) {
 		int nElements= elements.size();
 		for (int i= 0; i < nElements; i++) {
 			((ASTNode) elements.get(i)).accept(this);
 		}
 	}
-	
+
 	private void doVisitNode(ASTNode node) {
 		if (node != null) {
 			node.accept(this);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visitNode(org.eclipse.jdt.core.dom.ASTNode)
 	 */
 	protected boolean visitNode(ASTNode node) {
 		return isAffected(node);
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(ArrayType)
 	 */
@@ -204,7 +204,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		typeRefFound(node.getName());
 		return false;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(QualifiedType)
 	 */
@@ -212,7 +212,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		// nothing to do here, let the qualifier be visited
 		return true;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(QualifiedName)
 	 */
@@ -220,7 +220,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		possibleTypeRefFound(node); // possible ref
 		possibleStaticImportFound(node);
 		return false;
-	}		
+	}
 
 	/*
 	 * @see ASTVisitor#visit(ImportDeclaration)
@@ -228,7 +228,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	public boolean visit(ImportDeclaration node) {
 		return false;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(PackageDeclaration)
 	 */
@@ -238,7 +238,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			doVisitChildren(node.annotations());
 		}
 		return false;
-	}				
+	}
 
 	/*
 	 * @see ASTVisitor#visit(ThisExpression)
@@ -260,7 +260,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		} else if (selector != null) {
 			possibleStaticImportFound(selector);
 		}
-	}			
+	}
 
 	/*
 	 * @see ASTVisitor#visit(ClassInstanceCreation)
@@ -288,17 +288,17 @@ public class ImportReferencesCollector extends GenericVisitor {
 
 	/*
 	 * @see ASTVisitor#visit(SuperConstructorInvocation)
-	 */		
+	 */
 	public boolean visit(SuperConstructorInvocation node) {
 		if (!isAffected(node)) {
 			return false;
 		}
-		
+
 		evalQualifyingExpression(node.getExpression(), null);
 		doVisitChildren(node.typeArguments());
 		doVisitChildren(node.arguments());
-		return false;	
-	}		
+		return false;
+	}
 
 	/*
 	 * @see ASTVisitor#visit(FieldAccess)
@@ -307,7 +307,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		evalQualifyingExpression(node.getExpression(), node.getName());
 		return false;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(SimpleName)
 	 */
@@ -316,7 +316,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		possibleStaticImportFound(node);
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
 	 */
@@ -324,7 +324,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		typeRefFound(node.getTypeName());
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
 	 */
@@ -333,7 +333,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		doVisitChildren(node.values());
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
 	 */
@@ -352,7 +352,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return true;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(MethodDeclaration)
 	 */
@@ -361,12 +361,12 @@ public class ImportReferencesCollector extends GenericVisitor {
 			return false;
 		}
 		doVisitNode(node.getJavadoc());
-		
+
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			doVisitChildren(node.modifiers());
 			doVisitChildren(node.typeParameters());
 		}
-		
+
 		if (!node.isConstructor()) {
 			doVisitNode(node.getReturnType2());
 		}
@@ -380,7 +380,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return false;
 	}
-	
+
 	public boolean visit(TagElement node) {
 		String tagName= node.getTagName();
 		List list= node.fragments();
@@ -402,7 +402,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return false;
 	}
-	
+
 	public boolean visit(MemberRef node) {
 		Name qualifier= node.getQualifier();
 		if (qualifier != null) {
@@ -410,7 +410,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return false;
 	}
-	
+
 	public boolean visit(MethodRef node) {
 		Name qualifier= node.getQualifier();
 		if (qualifier != null) {

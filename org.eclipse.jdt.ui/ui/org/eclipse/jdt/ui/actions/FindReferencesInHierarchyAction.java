@@ -36,22 +36,22 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 /**
  * Finds references of the selected element in its hierarchy.
  * The action is applicable to selections representing a Java element.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindReferencesInHierarchyAction extends FindReferencesAction {
 
 	/**
-	 * Creates a new <code>FindReferencesInHierarchyAction</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>FindReferencesInHierarchyAction</code>. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesInHierarchyAction(IWorkbenchSite site) {
@@ -61,20 +61,20 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindReferencesInHierarchyAction(JavaEditor editor) {
 		super(editor);
 	}
-	
+
 	Class[] getValidTypes() {
 		return new Class[] { ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class, ITypeParameter.class };
 	}
-	
+
 	void init() {
-		setText(SearchMessages.Search_FindHierarchyReferencesAction_label); 
-		setToolTipText(SearchMessages.Search_FindHierarchyReferencesAction_tooltip); 
+		setText(SearchMessages.Search_FindHierarchyReferencesAction_label);
+		setToolTipText(SearchMessages.Search_FindHierarchyReferencesAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_REF);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}

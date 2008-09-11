@@ -75,12 +75,12 @@ class FiltersDialog extends StatusDialog {
         createNamesArea(composite);
         new Label(composite, SWT.NONE);         // Filler
         createMaxCallDepthArea(composite);
-            
+
         updateUIFromFilter();
-        
+
         return composite;
     }
-    
+
     private void createMaxCallDepthArea(Composite parent) {
         Composite composite= new Composite(parent, SWT.NONE);
         composite.setFont(parent.getFont());
@@ -91,7 +91,7 @@ class FiltersDialog extends StatusDialog {
         Label label= new Label(composite, SWT.NONE);
         label.setFont(composite.getFont());
 		label.setText(CallHierarchyMessages.FiltersDialog_maxCallDepth);
-        
+
         fMaxCallDepth = new Text(composite, SWT.SINGLE | SWT.BORDER);
         fMaxCallDepth.setFont(composite.getFont());
         fMaxCallDepth.setTextLimit(6);
@@ -109,7 +109,7 @@ class FiltersDialog extends StatusDialog {
     private void createNamesArea(Composite parent) {
         fFilterOnNames = createCheckbox(parent,
                 CallHierarchyMessages.FiltersDialog_filterOnNames, true);
-        
+
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
         fNames.setFont(parent.getFont());
         fNames.addModifyListener(new ModifyListener() {
@@ -121,7 +121,7 @@ class FiltersDialog extends StatusDialog {
         GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
         gridData.widthHint = convertWidthInCharsToPixels(60);
         fNames.setLayoutData(gridData);
-        
+
         fNamesHelpText= new Label(parent, SWT.LEFT);
         fNamesHelpText.setFont(parent.getFont());
         fNamesHelpText.setText(CallHierarchyMessages.FiltersDialog_filterOnNamesSubCaption);
@@ -140,7 +140,7 @@ class FiltersDialog extends StatusDialog {
     private Button createCheckbox(Composite parent, String text, boolean grabRow) {
         Button button = new Button(parent, SWT.CHECK);
         button.setFont(parent.getFont());
-        
+
         if (grabRow) {
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
             button.setLayoutData(gridData);
@@ -164,7 +164,7 @@ class FiltersDialog extends StatusDialog {
         fNames.setEnabled(fFilterOnNames.getSelection());
         fNamesHelpText.setEnabled(fFilterOnNames.getSelection());
     }
-    
+
     /**
      * Updates the given filter from the UI state.
      */
@@ -175,7 +175,7 @@ class FiltersDialog extends StatusDialog {
         CallHierarchy.getDefault().setFilters(fNames.getText());
         CallHierarchy.getDefault().setFilterEnabled(fFilterOnNames.getSelection());
     }
-    
+
     /**
      * Updates the UI state from the given filter.
      */
@@ -185,7 +185,7 @@ class FiltersDialog extends StatusDialog {
       fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
       updateEnabledState();
     }
-    
+
 	/**
      * Updates the filter from the UI state.
      * Must be done here rather than by extending open()
@@ -199,7 +199,7 @@ class FiltersDialog extends StatusDialog {
                 fMaxCallDepth.showSelection();
             }
         }
-        
+
         updateFilterFromUI();
         super.okPressed();
     }
@@ -208,7 +208,7 @@ class FiltersDialog extends StatusDialog {
         String text= fMaxCallDepth.getText();
         if (text.length() == 0)
             return false;
-            
+
         try {
             int maxCallDepth= Integer.parseInt(text);
 
@@ -217,7 +217,7 @@ class FiltersDialog extends StatusDialog {
             return false;
         }
     }
-    
+
     private void validateInput() {
         StatusInfo status= new StatusInfo();
         if (!isMaxCallDepthValid()) {

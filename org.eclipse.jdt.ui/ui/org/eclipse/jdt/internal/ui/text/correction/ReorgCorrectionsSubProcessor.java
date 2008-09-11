@@ -231,22 +231,22 @@ public class ReorgCorrectionsSubProcessor {
 		};
 		proposals.add(proposal);
 	}
-	
+
 	public static class ClasspathFixCorrectionProposal extends CUCorrectionProposal {
 
 		private final int fOffset;
 		private final int fLength;
 		private final String fMissingType;
-		
+
 		private TextEdit fResultingEdit;
-		
+
 		public ClasspathFixCorrectionProposal(ICompilationUnit cu, int offset, int length, String missingType) {
 			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fOffset= offset;
 			fLength= length;
 			fMissingType= missingType;
 		}
-		
+
 		public void apply(IDocument document) {
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 			if (context == null) {
@@ -270,23 +270,23 @@ public class ReorgCorrectionsSubProcessor {
 				}
 			}
 		}
-		
+
 		protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
 			if (fResultingEdit != null) {
 				editRoot.addChild(fResultingEdit);
 			}
 		}
-				
+
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(fMissingType));
 		}
 	}
-	
+
 	public static void addProjectSetupFixProposal(IInvocationContext context, IProblemLocation problem, String missingType, Collection proposals) {
 		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit(), problem.getOffset(), problem.getLength(), missingType));
 	}
-	
-	
+
+
 	public static void importNotFoundProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -306,14 +306,14 @@ public class ReorgCorrectionsSubProcessor {
 			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
 			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, name, kind, 5, proposals);
 		}
-		
+
 		String name= ASTNodes.asString(importDeclaration.getName());
 		if (importDeclaration.isOnDemand()) {
 			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
 		}
 		addProjectSetupFixProposal(context, problem, name, proposals);
 	}
-			
+
 	private static final class OpenBuildPathCorrectionProposal extends ChangeCorrectionProposal {
 		private final IProject fProject;
 		private final IBinding fReferencedType;

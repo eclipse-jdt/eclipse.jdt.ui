@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 
 public class SearchBrokenNLSKeysUtil {
-	
+
 	public static void search(String scopeName, IType[] accessorClasses, IFile[] propertieFiles) {
 		NLSSearchQuery query= new NLSSearchQuery(accessorClasses, propertieFiles, SearchEngine.createWorkspaceScope(), scopeName);
 		NewSearchUI.runQueryInBackground(query);

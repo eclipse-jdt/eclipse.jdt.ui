@@ -31,15 +31,15 @@ import org.eclipse.jdt.core.JavaCore;
  * Note: Folder which are direct children of a Java element
  * are already filtered by the Java Model.
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class OutputFolderFilter extends ViewerFilter {
-	
+
 	/**
 	 * Returns the result of this filter, when applied to the
 	 * given element.
-	 * 
+	 *
 	 * @param viewer the viewer
 	 * @param parent the parent
 	 * @param element the element to test
@@ -53,17 +53,17 @@ public class OutputFolderFilter extends ViewerFilter {
 			try {
 				if (!proj.hasNature(JavaCore.NATURE_ID))
 					return true;
-				
+
 				IJavaProject jProject= JavaCore.create(folder.getProject());
 				if (jProject == null || !jProject.exists())
 					return true;
-				
+
 				// Check default output location
 				IPath defaultOutputLocation= jProject.getOutputLocation();
 				IPath folderPath= folder.getFullPath();
 				if (defaultOutputLocation != null && defaultOutputLocation.equals(folderPath))
 					return false;
-				
+
 				// Check output location for each class path entry
 				IClasspathEntry[] cpEntries= jProject.getRawClasspath();
 				for (int i= 0, length= cpEntries.length; i < length; i++) {

@@ -32,7 +32,7 @@ public class ListDialog extends SelectionDialog {
 	private Object fInput;
 	private TableViewer fTableViewer;
 	private boolean fAddCancelButton;
-	
+
 	public ListDialog(Shell parent) {
 		super(parent);
 		fAddCancelButton= false;
@@ -41,11 +41,11 @@ public class ListDialog extends SelectionDialog {
 	public void setInput(Object input) {
 		fInput= input;
 	}
-	
+
 	public void setContentProvider(IStructuredContentProvider sp){
 		fContentProvider= sp;
 	}
-	
+
 	public void setLabelProvider(ILabelProvider lp){
 		fLabelProvider= lp;
 	}
@@ -53,25 +53,25 @@ public class ListDialog extends SelectionDialog {
 	public void setAddCancelButton(boolean addCancelButton) {
 		fAddCancelButton= addCancelButton;
 	}
-	
+
 	public TableViewer getTableViewer(){
 		return fTableViewer;
 	}
-			
+
 	public boolean hasFilters(){
 		return fTableViewer.getFilters() != null && fTableViewer.getFilters().length != 0;
 	}
-	
+
 	protected Label createMessageArea(Composite composite) {
 		Label label = new Label(composite,SWT.WRAP);
-		label.setText(getMessage()); 
+		label.setText(getMessage());
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(55);
 		label.setLayoutData(gd);
 		applyDialogFont(label);
 		return label;
 	}
-	
+
 	protected Control createDialogArea(Composite container) {
 		Composite parent= (Composite) super.createDialogArea(container);
 		createMessageArea(parent);
@@ -84,19 +84,19 @@ public class ListDialog extends SelectionDialog {
 		gd.widthHint= convertWidthInCharsToPixels(55);
 		gd.heightHint= convertHeightInCharsToPixels(15);
 		table.setLayoutData(gd);
-		applyDialogFont(parent);		
+		applyDialogFont(parent);
 		return parent;
 	}
-	
+
 	protected void createButtonsForButtonBar(Composite parent) {
 		if (! fAddCancelButton)
 			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		else
-			super.createButtonsForButtonBar(parent);	
-	}	
-	
+			super.createButtonsForButtonBar(parent);
+	}
+
 	protected int getTableStyle() {
 		return SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER;
 	}
-}	
+}
 

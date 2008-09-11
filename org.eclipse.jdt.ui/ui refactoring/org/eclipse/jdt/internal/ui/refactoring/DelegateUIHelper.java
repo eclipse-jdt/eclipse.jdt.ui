@@ -25,9 +25,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * This is a helper class to keep a consistent design between refactorings
  * capable of creating delegates.
- * 
+ *
  * @since 3.2
- * 
+ *
  */
 public class DelegateUIHelper {
 

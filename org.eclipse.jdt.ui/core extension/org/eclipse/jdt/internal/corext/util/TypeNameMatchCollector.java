@@ -25,11 +25,11 @@ public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 		Assert.isNotNull(collection);
 		fCollection= collection;
 	}
-	
+
 	private boolean inScope(TypeNameMatch match) {
 		return !TypeFilter.isFiltered(match);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
 	 */

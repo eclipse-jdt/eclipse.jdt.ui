@@ -51,7 +51,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 	private ReplaceInvocationsRefactoring fRefactoring;
 
 	private static final long LABEL_FLAGS= JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS;
-	
+
 	public ReplaceInvocationsInputPage() {
 		super(PAGE_NAME);
 	}
@@ -59,24 +59,24 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		fRefactoring= (ReplaceInvocationsRefactoring) getRefactoring();
-		
+
 		Composite result= new Composite(parent, SWT.NONE);
 		setControl(result);
 		GridLayout layout= new GridLayout();
 		result.setLayout(layout);
 
 		createMethodSignature(result);
-		
+
 		Label separator= new Label(parent, SWT.NONE);
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, false, false);
 		gridData.heightHint= 5;
 		separator.setLayoutData(gridData);
-		
+
 		Label bodyLabel= new Label(result, SWT.NONE);
 		bodyLabel.setText(RefactoringMessages.ReplaceInvocationsInputPage_replaceInvocationsBy);
-		
+
 		createBody(result);
-		
+
 		Button replaceAll= new Button(result, SWT.CHECK);
 		replaceAll.setText(RefactoringMessages.ReplaceInvocationsInputPage_replaceAll);
 		boolean canSingle= fRefactoring.canReplaceSingle();
@@ -89,7 +89,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 				changeMode(all ? ReplaceInvocationsRefactoring.Mode.REPLACE_ALL : ReplaceInvocationsRefactoring.Mode.REPLACE_SINGLE);
 			}
 		});
-		
+
 		Dialog.applyDialogFont(result);
 	}
 
@@ -102,7 +102,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		String signatureLabel= JavaElementLabels.getElementLabel(fRefactoring.getMethod(), LABEL_FLAGS);
 		signatureViewer.setDocument(new Document(signatureLabel));
 		signatureViewer.setEditable(false);
-		
+
 		Control signatureControl= signatureViewer.getControl();
 		PixelConverter pixelConverter= new PixelConverter(signatureControl);
 		GridData gdata= new GridData(GridData.FILL_HORIZONTAL);
@@ -118,7 +118,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		Document bodyDocument= new Document(getInitialBody());
 		bodyEditor.setDocument(bodyDocument);
 		bodyEditor.setEditable(true);
-		
+
 		Control bodyControl= bodyEditor.getControl();
 		PixelConverter pixelConverter= new PixelConverter(bodyControl);
 		GridData gdata= new GridData(GridData.FILL_BOTH);
@@ -126,7 +126,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		gdata.minimumHeight= pixelConverter.convertHeightInCharsToPixels(5);
 		bodyControl.setLayoutData(gdata);
 		bodyControl.setFocus();
-		
+
 		bodyDocument.addDocumentListener(new IDocumentListener() {
 			public void documentAboutToBeChanged(DocumentEvent event) {
 			}
@@ -140,11 +140,11 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 			}
 		});
 	}
-	
+
 	private String getInitialBody() {
 		//TODO
 		return ""; //$NON-NLS-1$
-		
+
 	}
 
 	private void changeMode(ReplaceInvocationsRefactoring.Mode mode) {
@@ -155,5 +155,5 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 			status= RefactoringStatus.createFatalErrorStatus(e.getMessage());
 		}
 		setPageComplete(status);
-	}	
+	}
 }

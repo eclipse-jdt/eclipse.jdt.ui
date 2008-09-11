@@ -533,7 +533,7 @@ public final class RefactoringMessages extends NLS {
 	public static String IntroduceParameterObjectWizard_fieldname_title;
 
 	public static String IntroduceParameterObjectWizard_fields_selection_label;
-	
+
 	public static String IntroduceParameterObjectWizard_type_already_exists_in_package_info;
 
 	public static String IntroduceParameterObjectWizard_method_group;
@@ -1055,7 +1055,7 @@ public final class RefactoringMessages extends NLS {
 	public static String SelfEncapsulateFieldInputPage_useexistingsetter_label;
 
 	public static String SelfEncapsulateFieldInputPage_useexistinggetter_label;
-	
+
 
 	static {
 		reloadMessages();

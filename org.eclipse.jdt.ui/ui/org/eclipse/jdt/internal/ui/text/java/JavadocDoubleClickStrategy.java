@@ -11,8 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.java;
 
-import com.ibm.icu.text.BreakIterator;
 import java.text.CharacterIterator;
+
+import com.ibm.icu.text.BreakIterator;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;

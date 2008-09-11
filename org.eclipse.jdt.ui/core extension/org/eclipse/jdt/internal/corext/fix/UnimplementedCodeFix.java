@@ -12,8 +12,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -21,7 +20,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
@@ -135,7 +135,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 							String dialogTitle= CorrectionMessages.UnimplementedMethodsCorrectionProposal_description;
 							IStatus status= getStatus();
 							ErrorDialog.openError(shell, dialogTitle, CorrectionMessages.UnimplementedCodeFix_DependenciesErrorMessage, status);
-							
+
 							return new NullChange();
 						}
 					};
@@ -178,7 +178,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (selectedNode.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) { // bug 200016
 			selectedNode= selectedNode.getParent();
 		}
-		
+
 		if (selectedNode.getLocationInParent() == EnumConstantDeclaration.NAME_PROPERTY) {
 			selectedNode= selectedNode.getParent();
 		}
@@ -210,7 +210,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 			return false;
 		} else if (typeNode instanceof EnumConstantDeclaration) {
-			return false;                                                                                                                                      
+			return false;
 		} else {
 			return true;
 		}

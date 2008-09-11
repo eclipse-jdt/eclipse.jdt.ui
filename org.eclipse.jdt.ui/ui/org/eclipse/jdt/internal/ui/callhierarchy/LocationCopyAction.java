@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IViewSite;
+
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
@@ -41,17 +42,17 @@ class LocationCopyAction extends Action {
 		fClipboard= clipboard;
 		fViewSite= viewSite;
 		fLocationViewer= locationViewer;
-		
+
 		setText(CallHierarchyMessages.LocationCopyAction_copy);
 		setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
-		
+
 		locationViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				setEnabled(! event.getSelection().isEmpty());
 			}
 		});
 	}
-	
+
 	public void run() {
 		IStructuredSelection selection= (IStructuredSelection) fLocationViewer.getSelection();
 		StringBuffer buf= new StringBuffer();
@@ -63,12 +64,12 @@ class LocationCopyAction extends Action {
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 		try {
 			fClipboard.setContents(
-					new String[]{ CopyCallHierarchyAction.convertLineTerminators(buf.toString()) }, 
+					new String[]{ CopyCallHierarchyAction.convertLineTerminators(buf.toString()) },
 					new Transfer[]{ plainTextTransfer });
 		} catch (SWTError e){
-			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;
-			if (MessageDialog.openQuestion(fViewSite.getShell(), CallHierarchyMessages.CopyCallHierarchyAction_problem, CallHierarchyMessages.CopyCallHierarchyAction_clipboard_busy))  
+			if (MessageDialog.openQuestion(fViewSite.getShell(), CallHierarchyMessages.CopyCallHierarchyAction_problem, CallHierarchyMessages.CopyCallHierarchyAction_clipboard_busy))
 				run();
 		}
 	}

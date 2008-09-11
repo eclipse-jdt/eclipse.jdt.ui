@@ -38,24 +38,24 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Extract a new interface from a class and tries to use the interface instead 
- * of the concrete class where possible. 
+ * Extract a new interface from a class and tries to use the interface instead
+ * of the concrete class where possible.
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ExtractInterfaceAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ExtractInterfaceAction(JavaEditor editor) {
@@ -68,17 +68,17 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	 * Creates a new <code>ExtractInterfaceAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public ExtractInterfaceAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.ExtractInterfaceAction_Extract_Interface); 
+		setText(RefactoringMessages.ExtractInterfaceAction_Extract_Interface);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_INTERFACE_ACTION);
 	}
-	
+
 	//---- structured selection -------------------------------------------
-	
+
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
@@ -105,7 +105,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 				RefactoringExecutionStarter.startExtractInterfaceRefactoring(singleSelectedType, getShell());
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 
@@ -115,11 +115,11 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection the Java text selection (internal type)
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -129,7 +129,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	/*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
@@ -141,11 +141,11 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 					return;
 				RefactoringExecutionStarter.startExtractInterfaceRefactoring(type, getShell());
 			} else {
-				String unavailable= RefactoringMessages.ExtractInterfaceAction_To_activate; 
-				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, unavailable); 
+				String unavailable= RefactoringMessages.ExtractInterfaceAction_To_activate;
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, unavailable);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 }

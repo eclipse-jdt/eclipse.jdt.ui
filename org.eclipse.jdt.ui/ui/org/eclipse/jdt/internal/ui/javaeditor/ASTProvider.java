@@ -62,13 +62,13 @@ public final class ASTProvider {
 	 * @deprecated Use {@link SharedASTProvider#WAIT_ACTIVE_ONLY} instead.
 	 */
 	public static final WAIT_FLAG WAIT_ACTIVE_ONLY= SharedASTProvider.WAIT_ACTIVE_ONLY;
-	
+
 	/**
 	 * @deprecated Use {@link SharedASTProvider#WAIT_NO} instead.
 	 */
 	public static final WAIT_FLAG WAIT_NO= SharedASTProvider.WAIT_NO;
-	
-	
+
+
 	/**
 	 * Tells whether this class is in debug mode.
 	 * @since 3.0
@@ -218,17 +218,17 @@ public final class ASTProvider {
 	private boolean fIsReconciling;
 	private IWorkbenchPart fActiveEditor;
 
-	
+
 	/**
 	 * Returns the Java plug-in's AST provider.
-	 * 
+	 *
 	 * @return the AST provider
 	 * @since 3.2
 	 */
 	public static ASTProvider getASTProvider() {
 		return JavaPlugin.getDefault().getASTProvider();
 	}
-	
+
 	/**
 	 * Creates a new AST provider.
 	 */
@@ -369,7 +369,7 @@ public final class ASTProvider {
 
 	/**
 	 * Caches the given compilation unit AST for the given Java element.
-	 * 
+	 *
 	 * @param ast the ast
 	 * @param javaElement the java element
 	 */
@@ -400,7 +400,7 @@ public final class ASTProvider {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must synchronize all access to its nodes.
 	 * </p>
-	 * 
+	 *
 	 * @param input the Java element, must not be <code>null</code>
 	 * @param waitFlag {@link SharedASTProvider#WAIT_YES}, {@link SharedASTProvider#WAIT_NO} or
 	 *            {@link SharedASTProvider#WAIT_ACTIVE_ONLY}
@@ -410,7 +410,7 @@ public final class ASTProvider {
 	public CompilationUnit getAST(ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		if (input == null || waitFlag == null)
 			throw new IllegalArgumentException("input or wait flag are null"); //$NON-NLS-1$
-		
+
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
 
@@ -519,10 +519,10 @@ public final class ASTProvider {
 	private static CompilationUnit createAST(final ITypeRoot input, final IProgressMonitor progressMonitor) {
 		if (!hasSource(input))
 			return null;
-		
+
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
-		
+
 		final ASTParser parser = ASTParser.newParser(SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(SHARED_AST_STATEMENT_RECOVERY);
@@ -533,7 +533,7 @@ public final class ASTProvider {
 			return null;
 
 		final CompilationUnit root[]= new CompilationUnit[1];
-		
+
 		SafeRunner.run(new ISafeRunnable() {
 			public void run() {
 				try {
@@ -542,7 +542,7 @@ public final class ASTProvider {
 					if (DEBUG)
 						System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "creating AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
-					
+
 					//mark as unmodifiable
 					ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
 				} catch (OperationCanceledException ex) {
@@ -556,10 +556,10 @@ public final class ASTProvider {
 		});
 		return root[0];
 	}
-	
+
 	/**
 	 * Checks whether the given Java element has accessible source.
-	 * 
+	 *
 	 * @param je the Java element to test
 	 * @return <code>true</code> if the element has source
 	 * @since 3.2
@@ -567,7 +567,7 @@ public final class ASTProvider {
 	private static boolean hasSource(ITypeRoot je) {
 		if (je == null || !je.exists())
 			return false;
-		
+
 		try {
 			return je.getBuffer() != null;
 		} catch (JavaModelException ex) {
@@ -576,7 +576,7 @@ public final class ASTProvider {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Disposes this AST provider.
 	 */
@@ -625,6 +625,6 @@ public final class ASTProvider {
 		else
 			return Thread.currentThread().toString();
 	}
-	
+
 }
 

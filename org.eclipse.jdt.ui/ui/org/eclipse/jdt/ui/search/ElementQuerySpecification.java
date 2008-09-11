@@ -21,11 +21,11 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * <p>
  * This class is not intended to be instantiated or subclassed by clients.
  * </p>
- * 
+ *
  * @see org.eclipse.jdt.ui.search.QuerySpecification
  *
  * @since 3.0
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -43,7 +43,7 @@ public class ElementQuerySpecification extends QuerySpecification {
 		super(limitTo, scope, scopeDescription);
 		fElement= javaElement;
 	}
-	
+
 	/**
 	 * Returns the element to search for.
 	 * @return The element to search for.

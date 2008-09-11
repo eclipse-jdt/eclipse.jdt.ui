@@ -44,24 +44,24 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Action to generalize the type of a local or field declaration or the
  * return type of a method declaration.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ChangeTypeAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ChangeTypeAction(JavaEditor editor) {
@@ -74,17 +74,17 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	 * Creates a new <code>ChangeTypeAction</code>. The action requires that
 	 * the selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public ChangeTypeAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.ChangeTypeAction_label); 
-		setToolTipText(RefactoringMessages.ChangeTypeAction_tooltipText); 
-		setDescription(RefactoringMessages.ChangeTypeAction_description); 
+		setText(RefactoringMessages.ChangeTypeAction_label);
+		setToolTipText(RefactoringMessages.ChangeTypeAction_tooltipText);
+		setDescription(RefactoringMessages.ChangeTypeAction_description);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CHANGE_TYPE_ACTION);
 	}
-	
+
 	//---- structured selection ---------------------------------------------
 
 	public void selectionChanged(IStructuredSelection selection) {
@@ -105,18 +105,18 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 			ISourceRange range= member.getNameRange();
 			RefactoringExecutionStarter.startChangeTypeRefactoring(member.getCompilationUnit(), getShell(), range.getOffset(), range.getLength());
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.ChangeTypeAction_dialog_title, RefactoringMessages.ChangeTypeAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.ChangeTypeAction_dialog_title, RefactoringMessages.ChangeTypeAction_exception);
 		}
 	}
 
 	private static IMember getMember(IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() != 1)
 			return null;
-		
+
 		Object element= selection.getFirstElement();
 		if (!(element instanceof IMember))
 			return null;
-		
+
 		if (element instanceof IMethod) {
 			IMethod method= (IMethod)element;
 			String returnType= method.getReturnType();
@@ -130,7 +130,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	}
 
 	//---- text selection ------------------------------------------------------------
-	
+
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
@@ -141,7 +141,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection the java text selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {

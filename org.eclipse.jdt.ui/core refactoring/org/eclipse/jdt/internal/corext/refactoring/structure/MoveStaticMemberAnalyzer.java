@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -35,12 +37,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /* package */ class MoveStaticMemberAnalyzer extends ASTVisitor {
 
 	protected RefactoringStatus fStatus;
-	
+
 	protected ITypeBinding fSource;
 	protected ITypeBinding fTarget;
 	protected CompilationUnitRewrite fCuRewrite;
@@ -49,9 +50,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected boolean fNeedsImport;
 
 	protected Set fProcessed;
-	
-	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.MoveMembersRefactoring_referenceUpdate; 
-	
+
+	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.MoveMembersRefactoring_referenceUpdate;
+
 	public MoveStaticMemberAnalyzer(CompilationUnitRewrite cuRewrite, IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		super(true);
 		fStatus= new RefactoringStatus();
@@ -61,15 +62,15 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		fTarget= target;
 		fProcessed= new HashSet();
 	}
-	
+
 	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
-	
+
 	protected boolean isProcessed(ASTNode node) {
 		return fProcessed.contains(node);
 	}
-	
+
 	protected void rewrite(SimpleName node, ITypeBinding type) {
 		AST ast= node.getAST();
 		Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
@@ -81,12 +82,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		fProcessed.add(node);
 		fNeedsImport= true;
 	}
-	
+
 	protected void rewrite(QualifiedName node, ITypeBinding type) {
 		rewriteName(node.getQualifier(), type);
 		fProcessed.add(node.getName());
 	}
-	
+
 	protected void rewrite(FieldAccess node, ITypeBinding type) {
 		Expression exp= node.getExpression();
 		if (exp == null) {
@@ -102,7 +103,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		}
 		fProcessed.add(node.getName());
 	}
-	
+
 	protected void rewrite(MethodInvocation node, ITypeBinding type) {
 		Expression exp= node.getExpression();
 		if (exp == null) {
@@ -118,7 +119,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		}
 		fProcessed.add(node.getName());
 	}
-	
+
 	protected void rewrite(MemberRef node, ITypeBinding type) {
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
@@ -132,7 +133,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		}
 		fProcessed.add(node.getName());
 	}
-	
+
 	protected void rewrite(MethodRef node, ITypeBinding type) {
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
@@ -157,7 +158,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		}
 		if (fullyQualified) {
 			fCuRewrite.getASTRewrite().replace(
-				name, 
+				name,
 				ASTNodeFactory.newName(creator, type.getQualifiedName()),
 				fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fCuRewrite.getImportRemover().registerRemovedNode(name);
@@ -166,14 +167,14 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 			Name n= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().replace(
-				name, 
+				name,
 				n,
 				fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fCuRewrite.getImportRemover().registerRemovedNode(name);
 			fNeedsImport= true;
 		}
 	}
-			
+
 	private void rewriteExpression(ASTNode node, Expression exp, ITypeBinding type) {
 		fCuRewrite.getASTRewrite().replace(exp, fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST()), fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 		fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
@@ -181,18 +182,18 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		fNeedsImport= true;
 		nonStaticAccess(node);
 	}
-	
+
 	protected void nonStaticAccess(ASTNode node) {
-		fStatus.addWarning(RefactoringCoreMessages.MoveStaticMemberAnalyzer_nonStatic,  
+		fStatus.addWarning(RefactoringCoreMessages.MoveStaticMemberAnalyzer_nonStatic,
 			JavaStatusContext.create(fCuRewrite.getCu(), node));
 	}
-	
+
 	protected boolean isStaticAccess(Expression exp, ITypeBinding type) {
 		if (!(exp instanceof Name))
 			return false;
 		return Bindings.equals(type, ((Name)exp).resolveBinding());
-	} 
-	
+	}
+
 	protected boolean isMovedMember(IBinding binding) {
 		if (binding == null)
 			return false;

@@ -70,14 +70,14 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 /**
  * Helper class to adjust the visibilities of members with respect to a reference element.
- * 
+ *
  * @since 3.1
  */
 public final class MemberVisibilityAdjustor {
 
 	/**
 	 * The visibility group category set.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static final GroupCategorySet SET_VISIBILITY_ADJUSTMENTS= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.visibilityAdjustments", //$NON-NLS-1$
@@ -100,7 +100,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Creates a new incoming member visibility adjustment.
-		 * 
+		 *
 		 * @param member the member which is adjusted
 		 * @param keyword the keyword representing the adjusted visibility
 		 * @param status the associated status, or <code>null</code>
@@ -116,7 +116,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Returns the visibility keyword.
-		 * 
+		 *
 		 * @return the visibility keyword
 		 */
 		public final ModifierKeyword getKeyword() {
@@ -125,7 +125,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Returns the adjusted member.
-		 * 
+		 *
 		 * @return the adjusted member
 		 */
 		public final IMember getMember() {
@@ -134,7 +134,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Returns the associated refactoring status.
-		 * 
+		 *
 		 * @return the associated refactoring status
 		 */
 		public final RefactoringStatus getStatus() {
@@ -143,7 +143,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Does the visibility adjustment need rewriting?
-		 * 
+		 *
 		 * @return <code>true</code> if it needs rewriting, <code>false</code> otherwise
 		 */
 		public final boolean needsRewriting() {
@@ -152,7 +152,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Rewrites the visibility adjustment.
-		 * 
+		 *
 		 * @param adjustor the java element visibility adjustor
 		 * @param rewrite the AST rewrite to use
 		 * @param root the root of the AST used in the rewrite
@@ -232,7 +232,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Determines whether the visibility adjustment needs rewriting.
-		 * 
+		 *
 		 * @param rewriting <code>true</code> if it needs rewriting, <code>false</code> otherwise
 		 */
 		public final void setNeedsRewriting(final boolean rewriting) {
@@ -245,7 +245,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Rewrites the visibility adjustment.
-		 * 
+		 *
 		 * @param adjustor the java element visibility adjustor
 		 * @param monitor the progress monitor to use
 		 * @throws JavaModelException if an error occurs
@@ -258,7 +258,7 @@ public final class MemberVisibilityAdjustor {
 
 		/**
 		 * Creates a new outgoing member visibility adjustment.
-		 * 
+		 *
 		 * @param member the member which is adjusted
 		 * @param keyword the keyword representing the adjusted visibility
 		 * @param status the associated status
@@ -289,7 +289,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns the label for the specified java element.
-	 * 
+	 *
 	 * @param element the element to get the label for
 	 * @return the label for the element
 	 */
@@ -300,7 +300,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns the label for the specified visibility keyword.
-	 * 
+	 *
 	 * @param keyword the keyword to get the label for, or <code>null</code> for default visibility
 	 * @return the label for the keyword
 	 */
@@ -318,7 +318,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns the message string for the specified member.
-	 * 
+	 *
 	 * @param member the member to get the string for
 	 * @return the string for the member
 	 */
@@ -334,7 +334,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Do the specified modifiers represent a lower visibility than the required threshold?
-	 * 
+	 *
 	 * @param modifiers the modifiers to test
 	 * @param threshold the visibility threshold to compare with
 	 * @return <code>true</code> if the visibility is lower than required, <code>false</code> otherwise
@@ -352,7 +352,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Does the specified modifier keyword represent a lower visibility than the required threshold?
-	 * 
+	 *
 	 * @param keyword the visibility keyword to test, or <code>null</code> for default visibility
 	 * @param threshold the visibility threshold keyword to compare with, or <code>null</code> to compare with default visibility
 	 * @return <code>true</code> if the visibility is lower than required, <code>false</code> otherwise
@@ -365,7 +365,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Is the specified severity a refactoring status severity?
-	 * 
+	 *
 	 * @param severity the severity to test
 	 * @return <code>true</code> if it is a refactoring status severity, <code>false</code> otherwise
 	 */
@@ -375,7 +375,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Is the specified modifier keyword a visibility keyword?
-	 * 
+	 *
 	 * @param keyword the keyword to test, or <code>null</code>
 	 * @return <code>true</code> if it is a visibility keyword, <code>false</code> otherwise
 	 */
@@ -385,7 +385,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Is the specified modifier a visibility modifier?
-	 * 
+	 *
 	 * @param modifier the keyword to test
 	 * @return <code>true</code> if it is a visibility modifier, <code>false</code> otherwise
 	 */
@@ -395,7 +395,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Converts a given modifier keyword into a visibility flag.
-	 * 
+	 *
 	 * @param keyword the keyword to convert
 	 * @return the visibility flag
 	 */
@@ -412,7 +412,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Does the specified member need further visibility adjustment?
-	 * 
+	 *
 	 * @param member the member to test
 	 * @param threshold the visibility threshold to test for
 	 * @param adjustments the map of members to visibility adjustments
@@ -432,7 +432,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Does the specified member need further visibility adjustment?
-	 * 
+	 *
 	 * @param member the member to test
 	 * @param threshold the visibility threshold to test for, or <code>null</code> for default visibility
 	 * @param adjustments the map of members to visibility adjustments
@@ -488,7 +488,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Creates a new java element visibility adjustor.
-	 * 
+	 *
 	 * @param referencing the referencing element used to compute the visibility
 	 * @param referenced the referenced member which causes the visibility changes
 	 */
@@ -502,7 +502,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Adjusts the visibility of the specified member.
-	 * 
+	 *
 	 * @param element the "source" point from which to calculate the visibility
 	 * @param referencedMovedElement the moved element which may be adjusted in visibility
 	 * @param monitor the progress monitor to use
@@ -521,9 +521,9 @@ public final class MemberVisibilityAdjustor {
 	/**
 	 * Check whether anyone accesses the members of the moved type from the
 	 * outside. Those may need to have their visibility adjusted.
-	 * @param member 
-	 * @param monitor 
-	 * @throws JavaModelException 
+	 * @param member
+	 * @param monitor
+	 * @throws JavaModelException
 	 */
 	private void adjustMemberVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 
@@ -586,13 +586,13 @@ public final class MemberVisibilityAdjustor {
 	/**
 	 * Adjusts the visibility of the member based on the incoming references
 	 * represented by the specified search result groups.
-	 * 
+	 *
 	 * If there is at least one reference to the moved element from outside the
 	 * moved element, visibility must be increased such that the moved element
 	 * (fReferenced) is still visible at the target from all references. This
 	 * effectively means that the old element (fReferenced) must be visible from
 	 * the new location (fReferencing).
-	 * 
+	 *
 	 * @param groups the search result groups representing the references
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if the java elements could not be accessed
@@ -626,7 +626,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Adjusts the visibility of the referenced field found in a compilation unit.
-	 * 
+	 *
 	 * @param field the referenced field to adjust
 	 * @param threshold the visibility threshold, or <code>null</code> for default visibility
 	 * @throws JavaModelException if an error occurs
@@ -636,13 +636,13 @@ public final class MemberVisibilityAdjustor {
 		//bug 100555 (moving inner class to top level class; taking private fields with you)
 		final IType declaring= field.getDeclaringType();
 		if (declaring != null && declaring.equals(fReferenced)) return;
-		if (hasLowerVisibility(field.getFlags(), keywordToVisibility(threshold)) && needsVisibilityAdjustment(field, threshold)) 
+		if (hasLowerVisibility(field.getFlags(), keywordToVisibility(threshold)) && needsVisibilityAdjustment(field, threshold))
 			adjustOutgoingVisibility(field, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning);
 	}
 
 	/**
 	 * Adjusts the visibility of the referenced body declaration.
-	 * 
+	 *
 	 * @param member the member where to adjust the visibility
 	 * @param threshold the visibility keyword representing the required visibility, or <code>null</code> for default visibility
 	 * @param template the message template to use
@@ -660,7 +660,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Adjusts the visibilities of the referenced element from the search match found in a compilation unit.
-	 * 
+	 *
 	 * @param match the search match representing the element declaration
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if the visibility could not be determined
@@ -694,7 +694,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Adjusts the visibilities of the outgoing references from the member represented by the specified search result groups.
-	 * 
+	 *
 	 * @param groups the search result groups representing the references
 	 * @param monitor the progress monitor to us
 	 * @throws JavaModelException if the visibility could not be determined
@@ -729,7 +729,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Adjusts the visibilities of the referenced and referencing elements.
-	 * 
+	 *
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if an error occurs during search
 	 */
@@ -741,7 +741,7 @@ public final class MemberVisibilityAdjustor {
 			engine.setScope(fScope);
 			engine.setStatus(fStatus);
 			engine.setOwner(fOwner);
-			if (fIncoming) { 
+			if (fIncoming) {
 				// check calls to the referenced (moved) element, adjust element
 				// visibility if necessary.
 				engine.searchPattern(new SubProgressMonitor(monitor, 1));
@@ -774,7 +774,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Computes the visibility threshold for the referenced element.
-	 * 
+	 *
 	 * @param referencing the referencing element
 	 * @param referenced the referenced element
 	 * @param monitor the progress monitor to use
@@ -859,7 +859,7 @@ public final class MemberVisibilityAdjustor {
 							keyword= thresholdTypeToMethod((IType) referencing, methodReferenced, monitor);
 							break;
 						}
-						case IJavaElement.FIELD: 
+						case IJavaElement.FIELD:
 						case IJavaElement.METHOD: {
 							final IMember member= (IMember) referencing;
 							if (methodReferenced.getDeclaringType().equals(member.getDeclaringType()))
@@ -892,7 +892,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Computes the visibility threshold for the referenced element.
-	 * 
+	 *
 	 * @param referencing the referencing element
 	 * @param referenced the referenced element
 	 * @param monitor the progress monitor to use
@@ -1001,7 +1001,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns the existing visibility adjustments (element type: Map <IMember, IVisibilityAdjustment>).
-	 * 
+	 *
 	 * @return the visibility adjustments
 	 */
 	public final Map getAdjustments() {
@@ -1010,7 +1010,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns a compilation unit rewrite for the specified compilation unit.
-	 * 
+	 *
 	 * @param unit the compilation unit to get the rewrite for
 	 * @return the rewrite for the compilation unit
 	 */
@@ -1027,7 +1027,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns a cached type hierarchy for the specified type.
-	 * 
+	 *
 	 * @param type the type to get the hierarchy for
 	 * @param monitor the progress monitor to use
 	 * @return the type hierarchy
@@ -1057,7 +1057,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Does the specified member need further visibility adjustment?
-	 * 
+	 *
 	 * @param member the member to test
 	 * @param threshold the visibility threshold to test for
 	 * @return <code>true</code> if the member needs further adjustment, <code>false</code> otherwise
@@ -1069,7 +1069,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Rewrites the computed adjustments for the specified compilation unit.
-	 * 
+	 *
 	 * @param unit the compilation unit to rewrite the adjustments
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if an error occurs during search
@@ -1096,7 +1096,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Rewrites the computed adjustments.
-	 * 
+	 *
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if an error occurs during search
 	 */
@@ -1124,7 +1124,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the existing visibility adjustments to be taken into account (element type: Map <IMember, IVisibilityAdjustment>).
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to take no existing adjustments into account.
-	 * 
+	 *
 	 * @param adjustments the existing adjustments to set
 	 */
 	public final void setAdjustments(final Map adjustments) {
@@ -1136,7 +1136,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the severity of failure messages.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is a status with value {@link RefactoringStatus#ERROR}.
-	 * 
+	 *
 	 * @param severity the severity of failure messages
 	 */
 	public final void setFailureSeverity(final int severity) {
@@ -1147,7 +1147,7 @@ public final class MemberVisibilityAdjustor {
 	 * Determines whether incoming references should be adjusted.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to adjust incoming references.
-	 * 
+	 *
 	 * @param incoming <code>true</code> if incoming references should be adjusted, <code>false</code> otherwise
 	 */
 	public final void setIncoming(final boolean incoming) {
@@ -1158,7 +1158,7 @@ public final class MemberVisibilityAdjustor {
 	 * Determines whether outgoing references should be adjusted.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to adjust outgoing references.
-	 * 
+	 *
 	 * @param outgoing <code>true</code> if outgoing references should be adjusted, <code>false</code> otherwise
 	 */
 	public final void setOutgoing(final boolean outgoing) {
@@ -1169,7 +1169,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the AST rewrite to use for member visibility adjustments.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use a compilation unit rewrite.
-	 * 
+	 *
 	 * @param rewrite the AST rewrite to set
 	 * @param root the root of the AST used in the rewrite
 	 */
@@ -1183,7 +1183,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the compilation unit rewrites used by this adjustor (element type: Map <ICompilationUnit, CompilationUnitRewrite>).
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use no existing rewrites.
-	 * 
+	 *
 	 * @param rewrites the map of compilation units to compilation unit rewrites to set
 	 */
 	public final void setRewrites(final Map rewrites) {
@@ -1195,7 +1195,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the incoming search scope used by this adjustor.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is the whole workspace as scope.
-	 * 
+	 *
 	 * @param scope the search scope to set
 	 */
 	public final void setScope(final IJavaSearchScope scope) {
@@ -1207,7 +1207,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the working copy owner used by this adjustor.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use none.
-	 * 
+	 *
 	 * @param owner the working copy owner, or <code>null</code> to use none
 	 */
 	public final void setOwner(final WorkingCopyOwner owner) {
@@ -1218,7 +1218,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the refactoring status used by this adjustor.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is a fresh status with status {@link RefactoringStatus#OK}.
-	 * 
+	 *
 	 * @param status the refactoring status to set
 	 */
 	public final void setStatus(final RefactoringStatus status) {
@@ -1230,7 +1230,7 @@ public final class MemberVisibilityAdjustor {
 	 * Sets the severity of visibility messages.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is a status with value {@link RefactoringStatus#WARNING}.
-	 * 
+	 *
 	 * @param severity the severity of visibility messages
 	 */
 	public final void setVisibilitySeverity(final int severity) {
@@ -1240,7 +1240,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns the visibility threshold from a type to a field.
-	 * 
+	 *
 	 * @param referencing the referencing type
 	 * @param referenced the referenced field
 	 * @param monitor the progress monitor to use
@@ -1274,7 +1274,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns the visibility threshold from a type to a method.
-	 * 
+	 *
 	 * @param referencing the referencing type
 	 * @param referenced the referenced method
 	 * @param monitor the progress monitor to use
@@ -1311,7 +1311,7 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Returns the visibility threshold from a type to another type.
-	 * 
+	 *
 	 * @param referencing the referencing type
 	 * @param referenced the referenced type
 	 * @param monitor the progress monitor to use

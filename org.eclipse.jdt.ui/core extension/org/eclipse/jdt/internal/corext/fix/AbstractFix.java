@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.IStatus;
 
 
 public abstract class AbstractFix implements IFix, IProposableFix, ILinkedFix {
-	
+
 	private final String fDisplayString;
-	
+
 	protected AbstractFix(String displayString) {
 		fDisplayString= displayString;
 	}

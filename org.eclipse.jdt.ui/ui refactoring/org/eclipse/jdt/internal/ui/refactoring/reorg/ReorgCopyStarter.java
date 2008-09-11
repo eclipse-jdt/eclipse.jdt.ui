@@ -12,11 +12,11 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 
@@ -40,10 +40,10 @@ public class ReorgCopyStarter {
 	public static ReorgCopyStarter create(IJavaElement[] javaElements, IResource[] resources, IReorgDestination destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
-		
+
 		if (destination == null)
 			return null;
-		
+
 		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
 		if (!copyPolicy.canEnable())
 			return null;

@@ -30,18 +30,18 @@ public class InferTypeArgumentsUpdate {
 		public List/*<CollectionElementVariable2>*/ getDeclarations() {
 			return fDeclarations;
 		}
-		
+
 		public List/*<CastVariable2>*/ getCastsToRemove() {
 			return fCastsToRemove;
 		}
 	}
-	
+
 	private HashMap/*<ICompilationUnit, CuUpdate>*/ fUpdates= new HashMap();
-	
+
 	public HashMap/*<ICompilationUnit, CuUpdate>*/ getUpdates() {
 		return fUpdates;
 	}
-	
+
 	public void addDeclaration(CollectionElementVariable2 elementCv) {
 		ICompilationUnit cu= elementCv.getCompilationUnit();
 		if (cu == null)
@@ -68,5 +68,5 @@ public class InferTypeArgumentsUpdate {
 		}
 		return update;
 	}
-	
+
 }

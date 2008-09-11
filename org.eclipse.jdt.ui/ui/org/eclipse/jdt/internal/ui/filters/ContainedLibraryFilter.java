@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
  * a Java internal library is shown
  */
 public class ContainedLibraryFilter extends ViewerFilter {
-	
+
 	/* (non-Javadoc)
 	 * Method declared on ViewerFilter.
 	 */

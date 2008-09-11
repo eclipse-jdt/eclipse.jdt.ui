@@ -16,11 +16,11 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ui.PartInitException;
 
@@ -57,19 +57,19 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	private static final String SHORT_NAME_FIRST_RUN= "Open Java editor (first in session)";
 
 	private static final int WARM_UP_RUNS= 10;
-	
+
 	private static final int MEASURED_RUNS= 50;
-	
+
 	private static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
-	
+
 	private static final String FILE_PREFIX= "TextLayout";
-	
+
 	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX;
-	
+
 	private static final String FILE_SUFFIX= ".java";
 
 	private static final String LARGE_FILE= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
-	
+
 	public OpenJavaEditorTest() {
 		super();
 	}
@@ -96,7 +96,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 		suite.addTest(new OpenJavaEditorTest("testOpenEditor6"));
 		return new PerformanceTestSetup(new Setup(suite));
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
@@ -106,7 +106,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
@@ -116,23 +116,23 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	}
 
 	public void testOpenFirstEditor() throws Exception {
-		PerformanceMeter performanceMeter= createPerformanceMeterForSummary(SHORT_NAME_FIRST_RUN, Dimension.ELAPSED_PROCESS); 
+		PerformanceMeter performanceMeter= createPerformanceMeterForSummary(SHORT_NAME_FIRST_RUN, Dimension.ELAPSED_PROCESS);
 		measureOpenInEditor(new IFile[] { ResourceTestHelper.findFile(PREFIX + FILE_SUFFIX) }, performanceMeter, false);
 	}
-	
+
 	public void testOpenJavaEditor1() throws Exception {
 		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter(), false);
 		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), createPerformanceMeter(), false);
 	}
-	
+
 	public void testOpenJavaEditor2() throws Exception {
 		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter(), false);
-		PerformanceMeter performanceMeter= createPerformanceMeter(); 
+		PerformanceMeter performanceMeter= createPerformanceMeter();
 		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), performanceMeter, false);
 	}
-	
+
 	public void testOpenEditor3() throws Exception {
-		PerformanceMeter performanceMeter= createPerformanceMeter(); 
+		PerformanceMeter performanceMeter= createPerformanceMeter();
 		measureOpenInEditor(LARGE_FILE, true, true, performanceMeter);
 	}
 
@@ -147,7 +147,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	public void testOpenEditor6() throws Exception {
 		measureOpenInEditor(LARGE_FILE, false, false, createPerformanceMeter());
 	}
-	
+
 	protected void measureOpenInEditor(String file, boolean enableFolding, boolean showOutline, PerformanceMeter performanceMeter) throws PartInitException {
 		boolean shown= EditorTestHelper.isViewShown(EditorTestHelper.OUTLINE_VIEW_ID);
 		try {

@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  * Operation, which run, creates structurally equivalent stub types for a list
  * of binary package fragments.
- * 
+ *
  * @since 3.2
  */
 public class StubCreationOperation extends AbstractCodeCreationOperation {
@@ -38,7 +38,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 
 	/**
 	 * Creates a new stub creation operation.
-	 * 
+	 *
 	 * @param uri
 	 *            the URI where to output the stubs
 	 * @param packages
@@ -50,7 +50,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 
 	/**
 	 * Creates a new stub creation operation.
-	 * 
+	 *
 	 * @param uri
 	 *            the URI where to output the stubs
 	 * @param packages
@@ -73,7 +73,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 
 	/**
 	 * Runs the stub generation on the specified class file.
-	 * 
+	 *
 	 * @param file
 	 *            the class file
 	 * @param parent

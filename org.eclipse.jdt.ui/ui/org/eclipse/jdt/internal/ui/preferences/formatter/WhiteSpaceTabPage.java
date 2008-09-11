@@ -55,23 +55,23 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 public class WhiteSpaceTabPage extends FormatterTabPage {
-	
-    
+
+
     /**
      * Encapsulates a view of the options tree which is structured by
      * syntactical element.
      */
-	
+
 	private final class SyntaxComponent implements ISelectionChangedListener, ICheckStateListener, IDoubleClickListener {
 
 	    private final String PREF_NODE_KEY= JavaUI.ID_PLUGIN + "formatter_page.white_space_tab_page.node"; //$NON-NLS-1$
-	    
+
 	    private final List fIndexedNodeList;
 		private final List fTree;
-		
+
 		private ContainerCheckedTreeViewer fTreeViewer;
 		private Composite fComposite;
-		
+
 	    private Node fLastSelected= null;
 
 	    public SyntaxComponent() {
@@ -79,14 +79,14 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 			fTree= new WhiteSpaceOptions().createAltTree(fWorkingValues);
 			WhiteSpaceOptions.makeIndexForNodes(fTree, fIndexedNodeList);
 		}
-	    
+
 		public void createContents(final int numColumns, final Composite parent) {
 			fComposite= new Composite(parent, SWT.NONE);
 			fComposite.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, SWT.DEFAULT));
 			fComposite.setLayout(createGridLayout(numColumns, false));
-		    
-            createLabel(numColumns, fComposite, FormatterMessages.WhiteSpaceTabPage_insert_space); 
-            
+
+            createLabel(numColumns, fComposite, FormatterMessages.WhiteSpaceTabPage_insert_space);
+
 	        fTreeViewer= new ContainerCheckedTreeViewer(fComposite, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
 			fTreeViewer.setContentProvider(new ITreeContentProvider() {
 				public Object[] getElements(Object inputElement) {
@@ -96,7 +96,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 					return ((Node)parentElement).getChildren().toArray();
 				}
 				public Object getParent(Object element) {
-				    return ((Node)element).getParent(); 
+				    return ((Node)element).getParent();
 				}
 				public boolean hasChildren(Object element) {
 					return ((Node)element).hasChildren();
@@ -108,7 +108,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 			fTreeViewer.getControl().setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, SWT.DEFAULT));
 			fDefaultFocusManager.add(fTreeViewer.getControl());
 	    }
-		
+
 		public void initialize() {
 			fTreeViewer.addCheckStateListener(this);
 			fTreeViewer.addSelectionChangedListener(this);
@@ -117,7 +117,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 		    restoreSelection();
 		    refreshState();
 		}
-		
+
 		public void refreshState() {
 		    final ArrayList checked= new ArrayList(100);
 		    for (Iterator iter= fTree.iterator(); iter.hasNext();)
@@ -177,29 +177,29 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
                 fTreeViewer.setExpandedState(node, !fTreeViewer.getExpandedState(node));
             }
         }
-        
+
         public Control getControl() {
             return fComposite;
         }
 	}
-	
-	
-	
+
+
+
 	private final class JavaElementComponent implements ISelectionChangedListener, ICheckStateListener {
-	    
-	    private final String PREF_INNER_INDEX= JavaUI.ID_PLUGIN + "formatter_page.white_space.java_view.inner"; //$NON-NLS-1$ 
+
+	    private final String PREF_INNER_INDEX= JavaUI.ID_PLUGIN + "formatter_page.white_space.java_view.inner"; //$NON-NLS-1$
 		private final String PREF_OPTION_INDEX= JavaUI.ID_PLUGIN + "formatter_page.white_space.java_view.option"; //$NON-NLS-1$
-		
+
 	    private final ArrayList fIndexedNodeList;
 	    private final ArrayList fTree;
-	    
+
 	    private InnerNode fLastSelected;
-	    
+
 	    private TreeViewer fInnerViewer;
 	    private CheckboxTableViewer fOptionsViewer;
-	    
+
 	    private Composite fComposite;
-	    
+
 	    public JavaElementComponent() {
 			fIndexedNodeList= new ArrayList();
 			fTree= new WhiteSpaceOptions().createTreeByJavaElement(fWorkingValues);
@@ -207,16 +207,16 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 	    }
 
 	    public void createContents(int numColumns, Composite parent) {
-			
+
 			fComposite= new Composite(parent, SWT.NONE);
 			fComposite.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, SWT.DEFAULT));
 			fComposite.setLayout(createGridLayout(numColumns, false));
-			
-            createLabel(numColumns, fComposite, FormatterMessages.WhiteSpaceTabPage_insert_space, GridData.HORIZONTAL_ALIGN_BEGINNING); 
-			
+
+            createLabel(numColumns, fComposite, FormatterMessages.WhiteSpaceTabPage_insert_space, GridData.HORIZONTAL_ALIGN_BEGINNING);
+
 			final SashForm sashForm= new SashForm(fComposite, SWT.VERTICAL);
 			sashForm.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH, SWT.DEFAULT));
-			
+
 			fInnerViewer= new TreeViewer(sashForm, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
 
 			fInnerViewer.setContentProvider(new ITreeContentProvider() {
@@ -246,33 +246,33 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
 				public void dispose() {}
 			});
-			
+
 			fInnerViewer.setLabelProvider(new LabelProvider());
-			
+
 			final GridData innerGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, SWT.DEFAULT);
 			innerGd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
 			fInnerViewer.getControl().setLayoutData(innerGd);
-			
+
 			fOptionsViewer= CheckboxTableViewer.newCheckList(sashForm, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
 			fOptionsViewer.setContentProvider(new ArrayContentProvider());
 			fOptionsViewer.setLabelProvider(new LabelProvider());
-			
+
 			final GridData optionsGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, SWT.DEFAULT);
 			optionsGd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
 			fOptionsViewer.getControl().setLayoutData(optionsGd);
-	        
+
 			fDefaultFocusManager.add(fInnerViewer.getControl());
 	        fDefaultFocusManager.add(fOptionsViewer.getControl());
-			
+
 			fInnerViewer.setInput(fTree);
 		}
-	    
+
 	    public void refreshState() {
 	    	if (fLastSelected != null) {
 	    		innerViewerChanged(fLastSelected);
 	    	}
 	    }
-	    
+
 	    public void initialize() {
 	        fInnerViewer.addSelectionChangedListener(this);
 	        fOptionsViewer.addSelectionChangedListener(this);
@@ -280,7 +280,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 	        restoreSelections();
 	        refreshState();
 	    }
-	    
+
 	    private void restoreSelections() {
 	        Node node;
 	        final int innerIndex= getValidatedIndex(PREF_INNER_INDEX);
@@ -290,7 +290,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 			    fInnerViewer.setSelection(new StructuredSelection(new Object[] {node}));
 			    fLastSelected= (InnerNode)node;
 			}
-			
+
 	        final int optionIndex= getValidatedIndex(PREF_OPTION_INDEX);
 			node= (Node)fIndexedNodeList.get(optionIndex);
 			if (node instanceof OptionNode) {
@@ -298,7 +298,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 			}
 
 	    }
-	    
+
 	    private int getValidatedIndex(String key) {
 			int index;
 			try {
@@ -307,11 +307,11 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 				index= 0;
 			}
 			if (index < 0 || index > fIndexedNodeList.size() - 1) {
-				index= 0; 
+				index= 0;
 			}
 			return index;
 	    }
-	    
+
 	    public Control getControl() {
 	        return fComposite;
 	    }
@@ -324,10 +324,10 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 
             final Node selected= (Node)selection.getFirstElement();
 
-            if (selected == null || selected == fLastSelected) 
+            if (selected == null || selected == fLastSelected)
 			    return;
-            
-            
+
+
             if (event.getSource() == fInnerViewer && selected instanceof InnerNode) {
                 fLastSelected= (InnerNode)selected;
                 fDialogSettings.put(PREF_INNER_INDEX, selected.index);
@@ -336,29 +336,29 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
             else if (event.getSource() == fOptionsViewer && selected instanceof OptionNode)
                 fDialogSettings.put(PREF_OPTION_INDEX, selected.index);
         }
-	
+
         private void innerViewerChanged(InnerNode selectedNode) {
-            
+
 			final List children= selectedNode.getChildren();
-			
+
 			final ArrayList optionsChildren= new ArrayList();
 			for (final Iterator iter= children.iterator(); iter.hasNext();) {
 			    final Object o= iter.next();
 			    if (o instanceof OptionNode) optionsChildren.add(o);
 			}
-			
+
 			fOptionsViewer.setInput(optionsChildren.toArray());
-			
+
 			for (final Iterator iter= optionsChildren.iterator(); iter.hasNext();) {
 			    final OptionNode child= (OptionNode)iter.next();
                     fOptionsViewer.setChecked(child, child.getChecked());
 			}
-			
+
 			fPreview.clear();
 			fPreview.addAll(selectedNode.getSnippets());
 			doUpdatePreview();
         }
-        
+
         public void checkStateChanged(CheckStateChangedEvent event) {
 			final OptionNode option= (OptionNode)event.getElement();
 			if (option != null)
@@ -367,8 +367,8 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 			notifyValuesModified();
         }
 	}
-	
-	
+
+
 
 	/**
 	 * This component switches between the two view and is responsible for delegating
@@ -377,20 +377,20 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 	private final class SwitchComponent extends SelectionAdapter {
 	    private final String PREF_VIEW_KEY= JavaUI.ID_PLUGIN + "formatter_page.white_space_tab_page.view"; //$NON-NLS-1$
 	    private final String [] fItems= new String [] {
-	        FormatterMessages.WhiteSpaceTabPage_sort_by_java_element, 
+	        FormatterMessages.WhiteSpaceTabPage_sort_by_java_element,
 	        FormatterMessages.WhiteSpaceTabPage_sort_by_syntax_element
 	    };
-	    
-	    private Combo fSwitchCombo; 
+
+	    private Combo fSwitchCombo;
 	    private PageBook fPageBook;
 	    private final SyntaxComponent fSyntaxComponent;
 	    private final JavaElementComponent fJavaElementComponent;
-	    
+
 	    public SwitchComponent() {
 	        fSyntaxComponent= new SyntaxComponent();
 	        fJavaElementComponent= new JavaElementComponent();
 	    }
-	    
+
         public void widgetSelected(SelectionEvent e) {
             final int index= fSwitchCombo.getSelectionIndex();
             if (index == 0) {
@@ -398,7 +398,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
     		    fJavaElementComponent.refreshState();
                 fPageBook.showPage(fJavaElementComponent.getControl());
             }
-            else if (index == 1) { 
+            else if (index == 1) {
     		    fDialogSettings.put(PREF_VIEW_KEY, true);
     		    fSyntaxComponent.refreshState();
                 fPageBook.showPage(fSyntaxComponent.getControl());
@@ -406,20 +406,20 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
         }
 
         public void createContents(int numColumns, Composite parent) {
-             
+
             fPageBook= new PageBook(parent, SWT.NONE);
             fPageBook.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH, SWT.DEFAULT));
-            
-            fJavaElementComponent.createContents(numColumns, fPageBook);		
+
+            fJavaElementComponent.createContents(numColumns, fPageBook);
             fSyntaxComponent.createContents(numColumns, fPageBook);
-            
+
             fSwitchCombo= new Combo(parent, SWT.READ_ONLY);
     		SWTUtil.setDefaultVisibleItemCount(fSwitchCombo);
             final GridData gd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_END, SWT.DEFAULT);
             fSwitchCombo.setLayoutData(gd);
             fSwitchCombo.setItems(fItems);
         }
-        
+
         public void initialize() {
             fSwitchCombo.addSelectionListener(this);
     	    fJavaElementComponent.initialize();
@@ -440,12 +440,12 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 			}
         }
 	}
-	
 
-	
-	
+
+
+
 	private final SwitchComponent fSwitchComponent;
-	protected final IDialogSettings fDialogSettings; 
+	protected final IDialogSettings fDialogSettings;
 
 	protected SnippetPreview fPreview;
 
@@ -468,7 +468,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
 	protected void initializePage() {
         fSwitchComponent.initialize();
 	}
-	
+
     protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new SnippetPreview(fWorkingValues, parent);
         return fPreview;

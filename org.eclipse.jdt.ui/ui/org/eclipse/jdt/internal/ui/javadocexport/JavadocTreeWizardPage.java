@@ -17,15 +17,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.ModifyEvent;
@@ -42,6 +33,15 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -91,7 +91,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private Label fDocletTypeLabel;
 	private Label fDestinationLabel;
 	private CLabel fDescriptionLabel;
-	
+
 	private String fVisibilitySelection;
 
 	private JavadocOptionsManager fStore;
@@ -112,11 +112,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	/**
 	 * Constructor for JavadocTreeWizardPage.
 	 * @param pageName
-	 * @param store 
+	 * @param store
 	 */
 	protected JavadocTreeWizardPage(String pageName, JavadocOptionsManager store) {
 		super(pageName);
-		setDescription(JavadocExportMessages.JavadocTreeWizardPage_javadoctreewizardpage_description); 
+		setDescription(JavadocExportMessages.JavadocTreeWizardPage_javadoctreewizardpage_description);
 
 		fStore= store;
 
@@ -149,11 +149,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JAVADOC_TREE_PAGE);
 	}
-	
+
 	protected void createJavadocCommandSet(Composite composite) {
-		
+
 		final int numColumns= 2;
-		
+
 		GridLayout layout= createGridLayout(numColumns);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -161,7 +161,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		group.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
 		group.setLayout(layout);
 
-		createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_javadoccommand_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, numColumns, 0)); 
+		createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_javadoccommand_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, numColumns, 0));
 		fJavadocCommandText= createCombo(group, SWT.NONE, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 1, 0));
 
 		fJavadocCommandText.addModifyListener(new ModifyListener() {
@@ -170,7 +170,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		final Button javadocCommandBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.JavadocTreeWizardPage_javadoccommand_button_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0)); 
+		final Button javadocCommandBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.JavadocTreeWizardPage_javadoccommand_button_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0));
 		SWTUtil.setButtonDimensionHint(javadocCommandBrowserButton);
 
 		javadocCommandBrowserButton.addSelectionListener(new SelectionAdapter() {
@@ -179,13 +179,13 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 	}
-	
 
-	
-	
+
+
+
 	protected void createInputGroup(Composite composite) {
 
-		createLabel(composite, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_checkboxtreeandlistgroup_label, createGridData(6)); 
+		createLabel(composite, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_checkboxtreeandlistgroup_label, createGridData(6));
 		Composite c= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
@@ -194,7 +194,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		layout.marginHeight= 0;
 		c.setLayout(layout);
 		c.setLayoutData(createGridData(GridData.FILL_BOTH, 6, 0));
-		
+
 		ITreeContentProvider treeContentProvider= new JavadocProjectContentProvider();
 		ITreeContentProvider listContentProvider= new JavadocMemberContentProvider();
 		fInputGroup= new CheckboxTreeAndListGroup(c, this, treeContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), listContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), SWT.NONE, convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(7));
@@ -205,10 +205,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 		fInputGroup.setTreeComparator(new JavaElementComparator());
-		
+
 		SWTUtil.setAccessibilityText(fInputGroup.getTree(), JavadocExportMessages.JavadocTreeWizardPage_tree_accessibility_message);
 		SWTUtil.setAccessibilityText(fInputGroup.getTable(), JavadocExportMessages.JavadocTreeWizardPage_table_accessibility_message);
-		
+
 		IJavaElement[] elements= fStore.getInitialElements();
 		setTreeChecked(elements);
 		if (elements.length > 0) {
@@ -227,11 +227,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		visibilityGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
 		visibilityGroup.setLayout(visibilityLayout);
 
-		createLabel(visibilityGroup, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_visibilitygroup_label, createGridData(GridData.FILL_HORIZONTAL, 4, 0)); 
-		fPrivateVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_privatebutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0)); 
-		fPackageVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_packagebutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0)); 
-		fProtectedVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_protectedbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0)); 
-		fPublicVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_publicbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0)); 
+		createLabel(visibilityGroup, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_visibilitygroup_label, createGridData(GridData.FILL_HORIZONTAL, 4, 0));
+		fPrivateVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_privatebutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fPackageVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_packagebutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fProtectedVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_protectedbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fPublicVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_publicbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 
 		fDescriptionLabel= new CLabel(visibilityGroup, SWT.LEFT);
 		fDescriptionLabel.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, convertWidthInCharsToPixels(3) -  3)); // INDENT of CLabel
@@ -240,7 +240,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PRIVATE;
-					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_privatevisibilitydescription_label); 
+					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_privatevisibilitydescription_label);
 				}
 			}
 		});
@@ -248,7 +248,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PACKAGE;
-					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_packagevisibledescription_label); 
+					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_packagevisibledescription_label);
 				}
 			}
 		});
@@ -256,7 +256,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PROTECTED;
-					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_protectedvisibilitydescription_label); 
+					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_protectedvisibilitydescription_label);
 				}
 			}
 		});
@@ -265,7 +265,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PUBLIC;
-					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_publicvisibilitydescription_label); 
+					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_publicvisibilitydescription_label);
 				}
 			}
 		});
@@ -278,23 +278,23 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fVisibilitySelection= fStore.getAccess();
 		fPrivateVisibility.setSelection(fVisibilitySelection.equals(fStore.PRIVATE));
 		if (fPrivateVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_privatevisibilitydescription_label); 
+			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_privatevisibilitydescription_label);
 
 		fProtectedVisibility.setSelection(fVisibilitySelection.equals(fStore.PROTECTED));
 		if (fProtectedVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_protectedvisibilitydescription_label); 
+			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_protectedvisibilitydescription_label);
 
 		fPackageVisibility.setSelection(fVisibilitySelection.equals(fStore.PACKAGE));
 		if (fPackageVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_packagevisibledescription_label); 
+			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_packagevisibledescription_label);
 
 		fPublicVisibility.setSelection(fVisibilitySelection.equals(fStore.PUBLIC));
 		if (fPublicVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_publicvisibilitydescription_label); 
+			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_publicvisibilitydescription_label);
 	}
 
 	private void createOptionsSet(Composite composite) {
-		
+
 		final int numColumns= 4;
 
 		final GridLayout layout= createGridLayout(numColumns);
@@ -304,9 +304,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		group.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
 		group.setLayout(layout);
 
-		fStandardButton= createButton(group, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_standarddocletbutton_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0)); 
+		fStandardButton= createButton(group, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_standarddocletbutton_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0));
 
-		fDestinationLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_destinationfield_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3))); 
+		fDestinationLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_destinationfield_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, convertWidthInCharsToPixels(3)));
 		fDestinationText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 2, 0));
 		((GridData) fDestinationText.getLayoutData()).widthHint= 0;
 		fDestinationText.addModifyListener(new ModifyListener() {
@@ -315,28 +315,28 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fDestinationBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.JavadocTreeWizardPage_destinationbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); 
+		fDestinationBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.JavadocTreeWizardPage_destinationbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fDestinationBrowserButton);
 
 		//Option to use custom doclet
-		fCustomButton= createButton(group, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_customdocletbutton_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0)); 
-		
+		fCustomButton= createButton(group, SWT.RADIO, JavadocExportMessages.JavadocTreeWizardPage_customdocletbutton_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns, 0));
+
 		//For Entering location of custom doclet
-		fDocletTypeLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletnamefield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3))); 
+		fDocletTypeLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletnamefield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3)));
 		fDocletTypeText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns - 1, 0));
 		((GridData) fDocletTypeText.getLayoutData()).widthHint= 0;
-		
-		
+
+
 		fDocletTypeText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				doValidation(CUSTOMSTATUS);
 			}
 		});
 
-		fDocletLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletpathfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3))); 
+		fDocletLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletpathfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, convertWidthInCharsToPixels(3)));
 		fDocletText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns - 1, 0));
 		((GridData) fDocletText.getLayoutData()).widthHint= 0;
-		
+
 		fDocletText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				doValidation(CUSTOMSTATUS);
@@ -359,8 +359,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		});
 		fDestinationBrowserButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				String text= handleFolderBrowseButtonPressed(fDestinationText.getText(), JavadocExportMessages.JavadocTreeWizardPage_destinationbrowsedialog_title, 
-				   		JavadocExportMessages.JavadocTreeWizardPage_destinationbrowsedialog_label); 
+				String text= handleFolderBrowseButtonPressed(fDestinationText.getText(), JavadocExportMessages.JavadocTreeWizardPage_destinationbrowsedialog_title,
+				   		JavadocExportMessages.JavadocTreeWizardPage_destinationbrowsedialog_label);
 				fDestinationText.setText(text);
 			}
 		});
@@ -382,7 +382,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			fDestinationText.setEnabled(false);
 			fDestinationBrowserButton.setEnabled(false);
 			fDestinationLabel.setEnabled(false);
-			
+
 		} else {
 			fStandardButton.setSelection(true);
 			fDestinationText.setText(fStore.getDestination());
@@ -393,7 +393,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			fDocletTypeText.setEnabled(false);
 			fDocletTypeLabel.setEnabled(false);
 		}
-		
+
 		fJavadocCommandText.setItems(fStore.getJavadocCommandHistory());
 		fJavadocCommandText.select(0);
 	}
@@ -403,7 +403,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * to the CheckedTree. List can contain multiple projects and elements from
 	 * different projects. If the list of seletected elements is empty a default
 	 * project is selected.
-	 * @param sourceElements 
+	 * @param sourceElements
 	 */
 	private void setTreeChecked(IJavaElement[] sourceElements) {
 		for (int i= 0; i < sourceElements.length; i++) {
@@ -459,10 +459,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			IJavaProject curr= javaProjects[j];
 			try {
 				IPath outputLocation= null;
-				
+
 				// Not really clear yet what to do here for EFS. See bug
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=113233.
-				
+
 				// However if the output location is not local it is currently
 				// not part of JavaRuntime.computeDefaultRuntimeClassPath either
 				// so it will be simply not added to the result which would be
@@ -486,9 +486,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	/**
-	 * Gets a list of elements to generated javadoc for from each project. 
+	 * Gets a list of elements to generated javadoc for from each project.
 	 * Javadoc can be generated for either a IPackageFragment or a ICompilationUnit.
-	 * @param projects 
+	 * @param projects
 	 * @return source elements
 	 */
 	private IJavaElement[] getSourceElements(IJavaProject[] projects) {
@@ -574,7 +574,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fStore.setClasspath(getClassPath(checkedProjects));
 		fStore.setAccess(fVisibilitySelection);
 		fStore.setSelectedElements(getSourceElements(checkedProjects));
-		
+
 		ArrayList commands= new ArrayList();
 		commands.add(fJavadocCommandText.getText()); // must be first
 		String[] items= fJavadocCommandText.getItems();
@@ -600,10 +600,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		}
 		return (IJavaProject[]) res.toArray(new IJavaProject[res.size()]);
 	}
-	
+
 	protected void doValidation(int validate) {
 
-		
+
 		switch (validate) {
 			case PREFERENCESTATUS :
 				fPreferenceStatus= new StatusInfo();
@@ -618,12 +618,12 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					String doclet= fDocletTypeText.getText();
 					String docletPath= fDocletText.getText();
 					if (doclet.length() == 0) {
-						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_nodocletname_error); 
+						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_nodocletname_error);
 
 					} else if (JavaConventions.validateJavaTypeName(doclet, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3).matches(IStatus.ERROR)) {
-						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletname_error); 
+						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletname_error);
 					} else if ((docletPath.length() == 0) || !validDocletPath(docletPath)) {
-						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletpath_error); 
+						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletpath_error);
 					}
 					updateStatus(findMostSevereStatus());
 				}
@@ -635,14 +635,14 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					fDocletStatus= new StatusInfo();
 					String dest= fDestinationText.getText();
 					if (dest.length() == 0) {
-						fDestinationStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_nodestination_error); 
+						fDestinationStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_nodestination_error);
 					}
 					File file= new File(dest);
 					if (!Path.ROOT.isValidPath(dest) || file.isFile()) {
-						fDestinationStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddestination_error); 
+						fDestinationStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddestination_error);
 					}
 					if (new File(dest, "package-list").exists() || new File(dest, "index.html").exists()) //$NON-NLS-1$//$NON-NLS-2$
-						fDestinationStatus.setWarning(JavadocExportMessages.JavadocTreeWizardPage_warning_mayoverwritefiles); 
+						fDestinationStatus.setWarning(JavadocExportMessages.JavadocTreeWizardPage_warning_mayoverwritefiles);
 					updateStatus(findMostSevereStatus());
 				}
 				break;
@@ -652,32 +652,32 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				fTreeStatus= new StatusInfo();
 
 				if (!fInputGroup.getAllCheckedListItems().hasNext())
-					fTreeStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invalidtreeselection_error); 
+					fTreeStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invalidtreeselection_error);
 				updateStatus(findMostSevereStatus());
 
 				break;
-				
+
 			case JAVADOCSTATUS:
 				fJavadocStatus= new StatusInfo();
 				String text= fJavadocCommandText.getText();
 				if (text.length() == 0) {
-					fJavadocStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_javadoccmd_error_enterpath);  
+					fJavadocStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_javadoccmd_error_enterpath);
 				} else {
 					File file= new File(text);
 					if (!file.isFile()) {
-						fJavadocStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_javadoccmd_error_notexists);  
+						fJavadocStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_javadoccmd_error_notexists);
 					}
 				}
 				updateStatus(findMostSevereStatus());
 				break;
 		} //end switch
-		
-		
+
+
 	}
-	
+
 	protected void browseForJavadocCommand() {
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(JavadocExportMessages.JavadocTreeWizardPage_javadoccmd_dialog_title); 
+		dialog.setText(JavadocExportMessages.JavadocTreeWizardPage_javadoccmd_dialog_title);
 		String dirName= fJavadocCommandText.getText();
 		dialog.setFileName(dirName);
 		String selectedDirectory= dialog.open();
@@ -695,7 +695,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			fJavadocCommandText.select(0);
 		}
 	}
-	
+
 
 	private boolean validDocletPath(String docletPath) {
 		StringTokenizer tokens= new StringTokenizer(docletPath, ";"); //$NON-NLS-1$

@@ -23,29 +23,29 @@ public class JavaWordIteratorTest extends BreakIteratorTest {
 	protected void setUp() throws Exception {
 		fBreakIterator= new JavaWordIterator();
 	}
-	
+
 	public void testNext1() {
 		assertNextPositions("word word", new int[] { 5, 9 });
 	}
-	
+
 	public void testNext2() {
 		assertNextPositions("wordWord word", new int[] { 4, 9, 13 });
 	}
-	
+
 	public void testNextSpace() {
 		assertNextPositions(" word ", new int[] { 1, 6 });
 	}
-	
+
 	public void testNextParen() {
 		assertNextPositions("word(params)", new int[] { 4, 5, 11, 12 });
 	}
-	
+
 	public void testNextLn() {
 		String s= new String("word \n" +
 				"  word2");
 		assertNextPositions(s, new int[] { 5, 6, 8, 13 });
 	}
-	
+
 	public void testMultiNextLn() {
 		String s= new String("word \n" +
 				"\n" +
@@ -53,7 +53,7 @@ public class JavaWordIteratorTest extends BreakIteratorTest {
 				"  word2");
 		assertNextPositions(s, new int[] { 5, 6, 7, 8, 10, 15 });
 	}
-	
+
 	public void testMultiNextLn2() {
 		String s= new String("word \r\n" +
 				"\r\n" +
@@ -66,33 +66,33 @@ public class JavaWordIteratorTest extends BreakIteratorTest {
 		String s= new String("   _isURLConnection_   ");
 		assertNextPositions(s, new int[] { 3, 6, 9, 23 });
 	}
-	
+
 	public void testPrevious1() {
 		String s= new String("word word");
 		assertPreviousPositions(s, new int[] { 0, 5 });
 	}
-	
+
 	public void testPrevious2() {
 		String s= new String("wordWord word");
 		assertPreviousPositions(s, new int[] { 0, 4, 9 });
 	}
-	
+
 	public void testPreviousSpace() {
 		String s= new String(" word ");
 		assertPreviousPositions(s, new int[] { 1 });
 	}
-	
+
 	public void testPreviousParen() {
 		String s= new String("word(params)");
 		assertPreviousPositions(s, new int[] { 0, 4, 5, 11 });
 	}
-	
+
 	public void testPreviousLn() {
 		String s= new String("word \n" +
 				"  word2");
 		assertPreviousPositions(s, new int[] { 0, 5, 6, 8 });
 	}
-	
+
 	public void testMultiPreviousLn() {
 		String s= new String("word \n" +
 				"\n" +
@@ -100,7 +100,7 @@ public class JavaWordIteratorTest extends BreakIteratorTest {
 				"  word2");
 		assertPreviousPositions(s, new int[] { 0, 5, 6, 7, 8, 10 });
 	}
-	
+
 	public void testMultiPreviousLn2() {
 		String s= new String("word \r\n" +
 				"\r\n" +

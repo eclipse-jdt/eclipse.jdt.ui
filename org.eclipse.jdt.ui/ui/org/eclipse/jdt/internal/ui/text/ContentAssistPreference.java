@@ -122,7 +122,7 @@ public class ContentAssistPreference {
 
 	/**
 	 * Configure the given content assistant from the given store.
-	 * 
+	 *
 	 * @param assistant the content assistant
 	 * @param store the preference store
 	 */
@@ -151,10 +151,10 @@ public class ContentAssistPreference {
 
 		enabled= store.getBoolean(PREFIX_COMPLETION);
 		assistant.enablePrefixCompletion(enabled);
-		
+
 		enabled= store.getBoolean(USE_COLORED_LABELS);
 		assistant.enableColoredLabels(enabled);
-		
+
 
 		configureJavaProcessor(assistant, store);
 		configureJavaDocProcessor(assistant, store);
@@ -197,7 +197,7 @@ public class ContentAssistPreference {
 	/**
 	 * Changes the configuration of the given content assistant according to the given property
 	 * change event and the given preference store.
-	 * 
+	 *
 	 * @param assistant the content assistant
 	 * @param store the preference store
 	 * @param event the property change event

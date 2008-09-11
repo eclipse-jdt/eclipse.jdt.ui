@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 75800: [call hierarchy] should allow searches for fields
@@ -30,10 +30,10 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 class HistoryAction extends Action {
-	
+
 	private static long LABEL_FLAGS= JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.T_TYPE_PARAMETERS;
 	private static long LABEL_MULTI_FLAGS= 0L;
-	
+
 	private CallHierarchyViewPart fView;
 	private IMember[] fMembers;
 
@@ -75,22 +75,22 @@ class HistoryAction extends Action {
         	case 0:
         		Assert.isTrue(false);
         		return null;
-        		
+
         	case 1:
         		return JavaElementLabels.getElementLabel(members[0], LABEL_FLAGS);
-        	
+
         	case 2:
         		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_2,
         				new String[] { getShortLabel(members[0]), getShortLabel(members[1]) });
-        		
+
         	case 3:
         		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_3,
         				new String[] { getShortLabel(members[0]), getShortLabel(members[1]), getShortLabel(members[2]) });
-        		
+
         	default:
         		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_more,
         				new String[] { getShortLabel(members[0]), getShortLabel(members[1]), getShortLabel(members[2]) });
-		} 
+		}
     }
 
 	private static String getShortLabel(IMember member) {

@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -35,13 +37,11 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 
-import org.osgi.service.prefs.BackingStoreException;
-
 /**
  * The model for the set of profiles which are available in the workbench.
  */
 public abstract class ProfileManager extends Observable {
-	
+
     public static final class KeySet {
 
 		private final List fKeys;
@@ -66,21 +66,21 @@ public abstract class ProfileManager extends Observable {
      * to differentiate it from a built-in profile.
      */
 	public final static String ID_PREFIX= "_"; //$NON-NLS-1$
-	
+
 	/**
-	 * Represents a profile with a unique ID, a name and a map 
+	 * Represents a profile with a unique ID, a name and a map
 	 * containing the code formatter settings.
 	 */
 	public static abstract class Profile implements Comparable {
-		
+
 		public abstract String getName();
 		public abstract Profile rename(String name, ProfileManager manager);
-		
+
 		public abstract Map getSettings();
 		public abstract void setSettings(Map settings);
-		
+
 		public abstract int getVersion();
-		
+
 		public boolean hasEqualSettings(Map otherMap, Collection allKeys) {
 			Map settings= getSettings();
 			for (Iterator iter= allKeys.iterator(); iter.hasNext(); ){
@@ -97,22 +97,22 @@ public abstract class ProfileManager extends Observable {
 			}
 			return true;
 		}
-		
+
 		public abstract boolean isProfileToSave();
-		
+
 		public abstract String getID();
-		
+
 		public boolean isSharedProfile() {
 			return false;
 		}
-		
+
 		public boolean isBuiltInProfile() {
 			return false;
 		}
 	}
-	
+
 	/**
-	 * Represents a built-in profile. The state of a built-in profile 
+	 * Represents a built-in profile. The state of a built-in profile
 	 * cannot be changed after instantiation.
 	 */
 	public static final class BuiltInProfile extends Profile {
@@ -122,7 +122,7 @@ public abstract class ProfileManager extends Observable {
 		private final int fOrder;
 		private final int fCurrentVersion;
 		private final String fProfileKind;
-		
+
 		public BuiltInProfile(String ID, String name, Map settings, int order, int currentVersion, String profileKind) {
 			fName= name;
 			fID= ID;
@@ -131,29 +131,29 @@ public abstract class ProfileManager extends Observable {
 			fCurrentVersion= currentVersion;
 			fProfileKind= profileKind;
 		}
-		
-		public String getName() { 
-			return fName;	
+
+		public String getName() {
+			return fName;
 		}
-		
+
 		public Profile rename(String name, ProfileManager manager) {
 			final String trimmed= name.trim();
 		 	CustomProfile newProfile= new CustomProfile(trimmed, fSettings, fCurrentVersion, fProfileKind);
 		 	manager.addProfile(newProfile);
 			return newProfile;
 		}
-		
+
 		public Map getSettings() {
 			return fSettings;
 		}
-	
+
 		public void setSettings(Map settings) {
 		}
-	
-		public String getID() { 
-			return fID; 
+
+		public String getID() {
+			return fID;
 		}
-		
+
 		public final int compareTo(Object o) {
 			if (o instanceof BuiltInProfile) {
 				return fOrder - ((BuiltInProfile)o).fOrder;
@@ -164,7 +164,7 @@ public abstract class ProfileManager extends Observable {
 		public boolean isProfileToSave() {
 			return false;
 		}
-		
+
 		public boolean isBuiltInProfile() {
 			return true;
 		}
@@ -172,7 +172,7 @@ public abstract class ProfileManager extends Observable {
         public int getVersion() {
 	        return fCurrentVersion;
         }
-	
+
 	}
 
 	/**
@@ -191,27 +191,27 @@ public abstract class ProfileManager extends Observable {
 			fVersion= version;
 			fKind= kind;
 		}
-		
+
 		public String getName() {
 			return fName;
 		}
-		
+
 		public Profile rename(String name, ProfileManager manager) {
 			final String trimmed= name.trim();
-			if (trimmed.equals(getName())) 
+			if (trimmed.equals(getName()))
 				return this;
-			
+
 			String oldID= getID(); // remember old id before changing name
 			fName= trimmed;
-			
+
 			manager.profileRenamed(this, oldID);
 			return this;
 		}
 
-		public Map getSettings() { 
+		public Map getSettings() {
 			return fSettings;
 		}
-		
+
 		public void setSettings(Map settings) {
 			if (settings == null)
 				throw new IllegalArgumentException();
@@ -220,15 +220,15 @@ public abstract class ProfileManager extends Observable {
 				fManager.profileChanged(this);
 			}
 		}
-		
-		public String getID() { 
+
+		public String getID() {
 			return ID_PREFIX + fName;
 		}
-		
+
 		public void setManager(ProfileManager profileManager) {
 			fManager= profileManager;
 		}
-		
+
 		public ProfileManager getManager() {
 			return fManager;
 		}
@@ -236,11 +236,11 @@ public abstract class ProfileManager extends Observable {
 		public int getVersion() {
 			return fVersion;
 		}
-		
+
 		public void setVersion(int version)	{
 			fVersion= version;
 		}
-		
+
 		public int compareTo(Object o) {
 			if (o instanceof SharedProfile) {
 				return -1;
@@ -250,7 +250,7 @@ public abstract class ProfileManager extends Observable {
 			}
 			return 1;
 		}
-		
+
 		public boolean isProfileToSave() {
 			return true;
 		}
@@ -260,37 +260,37 @@ public abstract class ProfileManager extends Observable {
         }
 
 	}
-	
+
 	public final class SharedProfile extends CustomProfile {
-		
+
 		public SharedProfile(String oldName, Map options, int version, String profileKind) {
 			super(oldName, options, version, profileKind);
 		}
-		
+
 		public Profile rename(String name, ProfileManager manager) {
 			CustomProfile profile= new CustomProfile(name.trim(), getSettings(), getVersion(), getKind());
 
 			manager.profileReplaced(this, profile);
 			return profile;
 		}
-				
-		public String getID() { 
+
+		public String getID() {
 			return SHARED_PROFILE;
 		}
-		
+
 		public final int compareTo(Object o) {
 			return 1;
 		}
-		
+
 		public boolean isProfileToSave() {
 			return false;
 		}
-		
+
 		public boolean isSharedProfile() {
 			return true;
 		}
 	}
-	
+
 
 	/**
 	 * The possible events for observers listening to this class.
@@ -300,38 +300,38 @@ public abstract class ProfileManager extends Observable {
 	public final static int PROFILE_RENAMED_EVENT= 3;
 	public final static int PROFILE_CREATED_EVENT= 4;
 	public final static int SETTINGS_CHANGED_EVENT= 5;
-	
-	
+
+
 	/**
 	 * The key of the preference where the selected profile is stored.
 	 */
 	private final String fProfileKey;
-	
+
 	/**
 	 * The key of the preference where the version of the current settings is stored
 	 */
 	private final String fProfileVersionKey;
 
-	
+
 	private final static String SHARED_PROFILE= "org.eclipse.jdt.ui.default.shared"; //$NON-NLS-1$
-	
-	
+
+
 	/**
 	 * A map containing the available profiles, using the IDs as keys.
 	 */
 	private final Map fProfiles;
-	
+
 	/**
 	 * The available profiles, sorted by name.
 	 */
 	private final List fProfilesByName;
-	
+
 
 	/**
-	 * The currently selected profile. 
+	 * The currently selected profile.
 	 */
 	private Profile fSelected;
-	
+
 
 	/**
 	 * The keys of the options to be saved with each profile
@@ -344,26 +344,26 @@ public abstract class ProfileManager extends Observable {
 	/**
 	 * Create and initialize a new profile manager.
 	 * @param profiles Initial custom profiles (List of type <code>CustomProfile</code>)
-	 * @param profileVersioner 
+	 * @param profileVersioner
 	 */
 	public ProfileManager(
-			List profiles, 
-			IScopeContext context, 
-			PreferencesAccess preferencesAccess, 
+			List profiles,
+			IScopeContext context,
+			PreferencesAccess preferencesAccess,
 			IProfileVersioner profileVersioner,
 			KeySet[] keySets,
 			String profileKey,
 			String profileVersionKey) {
-		
+
 		fPreferencesAccess= preferencesAccess;
 		fProfileVersioner= profileVersioner;
 		fKeySets= keySets;
 		fProfileKey= profileKey;
 		fProfileVersionKey= profileVersionKey;
-		
+
 		fProfiles= new HashMap();
 		fProfilesByName= new ArrayList();
-	
+
 		for (final Iterator iter = profiles.iterator(); iter.hasNext();) {
 			final Profile profile= (Profile) iter.next();
 			if (profile instanceof CustomProfile) {
@@ -372,29 +372,29 @@ public abstract class ProfileManager extends Observable {
 			fProfiles.put(profile.getID(), profile);
 			fProfilesByName.add(profile);
 		}
-		
+
 		Collections.sort(fProfilesByName);
-		
+
 		String profileId= getSelectedProfileId(fPreferencesAccess.getInstanceScope());
-		
+
 		Profile profile= (Profile) fProfiles.get(profileId);
 		if (profile == null) {
 			profile= getDefaultProfile();
 		}
 		fSelected= profile;
-		
+
 		if (context.getName() == ProjectScope.SCOPE && hasProjectSpecificSettings(context)) {
 			Map map= readFromPreferenceStore(context, profile);
 			if (map != null) {
-				
+
 				List allKeys= new ArrayList();
 				for (int i= 0; i < fKeySets.length; i++) {
 			        allKeys.addAll(fKeySets[i].getKeys());
 		        }
 		        Collections.sort(allKeys);
-				
+
 				Profile matching= null;
-			
+
 				String projProfileId= context.getNode(JavaUI.ID_PLUGIN).get(fProfileKey, null);
 				if (projProfileId != null) {
 					Profile curr= (Profile) fProfiles.get(projProfileId);
@@ -442,7 +442,7 @@ public abstract class ProfileManager extends Observable {
 	/**
 	 * Notify observers with a message. The message must be one of the following:
 	 * @param message Message to send out
-	 * 
+	 *
 	 * @see #SELECTION_CHANGED_EVENT
 	 * @see #PROFILE_DELETED_EVENT
 	 * @see #PROFILE_RENAMED_EVENT
@@ -453,7 +453,7 @@ public abstract class ProfileManager extends Observable {
 		setChanged();
 		notifyObservers(new Integer(message));
 	}
-	
+
 	public static boolean hasProjectSpecificSettings(IScopeContext context, KeySet[] keySets) {
 		for (int i= 0; i < keySets.length; i++) {
 	        KeySet keySet= keySets[i];
@@ -468,7 +468,7 @@ public abstract class ProfileManager extends Observable {
         }
 		return false;
 	}
-	
+
 	public boolean hasProjectSpecificSettings(IScopeContext context) {
 		return hasProjectSpecificSettings(context, fKeySets);
 	}
@@ -480,7 +480,7 @@ public abstract class ProfileManager extends Observable {
 	private Map readFromPreferenceStore(IScopeContext context, Profile workspaceProfile) {
 		final Map profileOptions= new HashMap();
 		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
-				
+
 		int version= uiPrefs.getInt(fProfileVersionKey, fProfileVersioner.getFirstVersion());
 		if (version != fProfileVersioner.getCurrentVersion()) {
 			Map allOptions= new HashMap();
@@ -491,7 +491,7 @@ public abstract class ProfileManager extends Observable {
 			fProfileVersioner.update(profile);
 			return profile.getSettings();
 		}
-		
+
 		boolean hasValues= false;
 		for (int i= 0; i < fKeySets.length; i++) {
 	        KeySet keySet= fKeySets[i];
@@ -507,7 +507,7 @@ public abstract class ProfileManager extends Observable {
 				profileOptions.put(key, val);
 			}
         }
-		
+
 		if (!hasValues) {
 			return null;
 		}
@@ -515,8 +515,8 @@ public abstract class ProfileManager extends Observable {
 		setLatestCompliance(profileOptions);
 		return profileOptions;
 	}
-	
-	
+
+
 	/**
 	 * @param uiPrefs
 	 * @param allOptions
@@ -534,7 +534,7 @@ public abstract class ProfileManager extends Observable {
 		} catch (BackingStoreException e) {
 			// ignore
 		}
-		
+
 	}
 
 	private boolean updatePreferences(IEclipsePreferences prefs, List keys, Map profileOptions) {
@@ -555,38 +555,38 @@ public abstract class ProfileManager extends Observable {
 		}
 		return hasChanges;
 	}
-	
-	
+
+
 	/**
-	 * Update all formatter settings with the settings of the specified profile. 
+	 * Update all formatter settings with the settings of the specified profile.
 	 * @param profile The profile to write to the preference store
 	 */
 	private void writeToPreferenceStore(Profile profile, IScopeContext context) {
 		final Map profileOptions= profile.getSettings();
-		
+
 		for (int i= 0; i < fKeySets.length; i++) {
 	        updatePreferences(context.getNode(fKeySets[i].getNodeName()), fKeySets[i].getKeys(), profileOptions);
         }
-		
+
 		final IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 		if (uiPrefs.getInt(fProfileVersionKey, 0) != fProfileVersioner.getCurrentVersion()) {
 			uiPrefs.putInt(fProfileVersionKey, fProfileVersioner.getCurrentVersion());
 		}
-		
+
 		if (context.getName() == InstanceScope.SCOPE) {
 			uiPrefs.put(fProfileKey, profile.getID());
 		} else if (context.getName() == ProjectScope.SCOPE && !profile.isSharedProfile()) {
 			uiPrefs.put(fProfileKey, profile.getID());
 		}
 	}
-	
-		
-	/** 
-	 * Get an immutable list as view on all profiles, sorted alphabetically. Unless the set 
-	 * of profiles has been modified between the two calls, the sequence is guaranteed to 
+
+
+	/**
+	 * Get an immutable list as view on all profiles, sorted alphabetically. Unless the set
+	 * of profiles has been modified between the two calls, the sequence is guaranteed to
 	 * correspond to the one returned by <code>getSortedNames</code>.
 	 * @return a list of elements of type <code>Profile</code>
-	 * 
+	 *
 	 * @see #getSortedDisplayNames()
 	 */
 	public List getSortedProfiles() {
@@ -594,12 +594,12 @@ public abstract class ProfileManager extends Observable {
 	}
 
 	/**
-	 * Get the names of all profiles stored in this profile manager, sorted alphabetically. Unless the set of 
-	 * profiles has been modified between the two calls, the sequence is guaranteed to correspond to the one 
+	 * Get the names of all profiles stored in this profile manager, sorted alphabetically. Unless the set of
+	 * profiles has been modified between the two calls, the sequence is guaranteed to correspond to the one
 	 * returned by <code>getSortedProfiles</code>.
 	 * @return All names, sorted alphabetically
-	 * @see #getSortedProfiles()  
-	 */	
+	 * @see #getSortedProfiles()
+	 */
 	public String[] getSortedDisplayNames() {
 		final String[] sortedNames= new String[fProfilesByName.size()];
 		int i= 0;
@@ -609,16 +609,16 @@ public abstract class ProfileManager extends Observable {
 		}
 		return sortedNames;
 	}
-	
+
 	/**
 	 * Get the profile for this profile id.
 	 * @param ID The profile ID
-	 * @return The profile with the given ID or <code>null</code> 
+	 * @return The profile with the given ID or <code>null</code>
 	 */
 	public Profile getProfile(String ID) {
 		return (Profile)fProfiles.get(ID);
 	}
-	
+
 	/**
 	 * Activate the selected profile, update all necessary options in
 	 * preferences and save profiles to disk.
@@ -628,16 +628,16 @@ public abstract class ProfileManager extends Observable {
 			writeToPreferenceStore(fSelected, scopeContext);
 		}
 	}
-	
+
 	public void clearAllSettings(IScopeContext context) {
 		for (int i= 0; i < fKeySets.length; i++) {
 	        updatePreferences(context.getNode(fKeySets[i].getNodeName()), fKeySets[i].getKeys(), Collections.EMPTY_MAP);
         }
-		
+
 		final IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 		uiPrefs.remove(fProfileKey);
 	}
-	
+
 	/**
 	 * Get the currently selected profile.
 	 * @return The currently selected profile.
@@ -673,11 +673,11 @@ public abstract class ProfileManager extends Observable {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Add a new custom profile to this profile manager.
 	 * @param profile The profile to add
-	 */	
+	 */
 	public void addProfile(CustomProfile profile) {
 		profile.setManager(this);
 		final CustomProfile oldProfile= (CustomProfile)fProfiles.get(profile.getID());
@@ -692,27 +692,27 @@ public abstract class ProfileManager extends Observable {
 		fSelected= profile;
 		notifyObservers(PROFILE_CREATED_EVENT);
 	}
-	
+
 	/**
 	 * Delete the currently selected profile from this profile manager. The next profile
 	 * in the list is selected.
 	 * @return true if the profile has been successfully removed, false otherwise.
 	 */
 	public boolean deleteSelected() {
-		if (!(fSelected instanceof CustomProfile)) 
+		if (!(fSelected instanceof CustomProfile))
 			return false;
-		
+
 		return deleteProfile((CustomProfile)fSelected);
 	}
 
 	public boolean deleteProfile(CustomProfile profile) {
 	    int index= fProfilesByName.indexOf(profile);
-		
+
 		fProfiles.remove(profile.getID());
 		fProfilesByName.remove(profile);
-		
+
 		profile.setManager(null);
-		
+
 		if (index >= fProfilesByName.size())
 			index--;
 		fSelected= (Profile) fProfilesByName.get(index);
@@ -720,12 +720,12 @@ public abstract class ProfileManager extends Observable {
 		if (!profile.isSharedProfile()) {
 			updateProfilesWithName(profile.getID(), null, false);
 		}
-		
+
 		notifyObservers(PROFILE_DELETED_EVENT);
 		return true;
     }
 
-	
+
 	public void profileRenamed(CustomProfile profile, String oldID) {
 		fProfiles.remove(oldID);
 		fProfiles.put(profile.getID(), profile);
@@ -733,36 +733,36 @@ public abstract class ProfileManager extends Observable {
 		if (!profile.isSharedProfile()) {
 			updateProfilesWithName(oldID, profile, false);
 		}
-		
+
 		Collections.sort(fProfilesByName);
 		notifyObservers(PROFILE_RENAMED_EVENT);
 	}
-	
+
 	public void profileReplaced(CustomProfile oldProfile, CustomProfile newProfile) {
 		fProfiles.remove(oldProfile.getID());
 		fProfiles.put(newProfile.getID(), newProfile);
 		fProfilesByName.remove(oldProfile);
 		fProfilesByName.add(newProfile);
 		Collections.sort(fProfilesByName);
-		
+
 		if (!oldProfile.isSharedProfile()) {
 			updateProfilesWithName(oldProfile.getID(), null, false);
 		}
-		
+
 		setSelected(newProfile);
 		notifyObservers(PROFILE_CREATED_EVENT);
 		notifyObservers(SELECTION_CHANGED_EVENT);
 	}
-	
+
 	public void profileChanged(CustomProfile profile) {
 		if (!profile.isSharedProfile()) {
 			updateProfilesWithName(profile.getID(), profile, true);
 		}
-		
+
 		notifyObservers(SETTINGS_CHANGED_EVENT);
 	}
-	
-	
+
+
 	protected void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i= 0; i < projects.length; i++) {
@@ -781,14 +781,14 @@ public abstract class ProfileManager extends Observable {
 				}
 			}
 		}
-		
+
 		IScopeContext instanceScope= fPreferencesAccess.getInstanceScope();
 		final IEclipsePreferences uiPrefs= instanceScope.getNode(JavaUI.ID_PLUGIN);
 		if (newProfile != null && oldName.equals(uiPrefs.get(fProfileKey, null))) {
 			writeToPreferenceStore(newProfile, instanceScope);
 		}
 	}
-	
+
 	private static void setLatestCompliance(Map map) {
 		JavaModelUtil.set50ComplianceOptions(map);
 	}

@@ -101,13 +101,13 @@ public class TypeContextChecker {
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= returnTypeInfo;
 		}
-		
+
 		public RefactoringStatus[] checkAndResolveMethodTypes() throws CoreException {
 			RefactoringStatus[] results= new MethodTypesSyntaxChecker(fMethod, fParameterInfos, fReturnTypeInfo).checkSyntax();
 			for (int i= 0; i < results.length; i++)
 				if (results[i] != null && results[i].hasFatalError())
 					return results;
-			
+
 			int parameterCount= fParameterInfos.size();
 			String[] types= new String[parameterCount + 1];
 			for (int i= 0; i < parameterCount; i++)
@@ -115,16 +115,16 @@ public class TypeContextChecker {
 			types[parameterCount]= fReturnTypeInfo.getNewTypeName();
 			RefactoringStatus[] semanticsResults= new RefactoringStatus[parameterCount + 1];
 			ITypeBinding[] typeBindings= resolveBindings(types, semanticsResults, true);
-			
+
 			boolean needsSecondPass= false;
 			for (int i= 0; i < types.length; i++)
 				if (typeBindings[i] == null || ! semanticsResults[i].isOK())
 					needsSecondPass= true;
-			
+
 			RefactoringStatus[] semanticsResults2= new RefactoringStatus[parameterCount + 1];
 			if (needsSecondPass)
 				typeBindings= resolveBindings(types, semanticsResults2, false);
-			
+
 			for (int i= 0; i < fParameterInfos.size(); i++) {
 				ParameterInfo parameterInfo= (ParameterInfo) fParameterInfos.get(i);
 				if (!parameterInfo.isResolve())
@@ -148,7 +148,7 @@ public class TypeContextChecker {
 				else
 					results[parameterCount].merge(semanticsResults2[parameterCount]);
 			}
-			
+
 			return results;
 		}
 
@@ -156,12 +156,12 @@ public class TypeContextChecker {
 			//TODO: split types into parameterTypes and returnType
 			int parameterCount= types.length - 1;
 			ITypeBinding[] typeBindings= new ITypeBinding[types.length];
-			
+
 			StringBuffer cuString= new StringBuffer();
 			cuString.append(fStubTypeContext.getBeforeString());
 			int offsetBeforeMethodName= appendMethodDeclaration(cuString, types, parameterCount);
 			cuString.append(fStubTypeContext.getAfterString());
-			
+
 			// need a working copy to tell the parser where to resolve (package visible) types
 			ICompilationUnit wc= fMethod.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
@@ -183,7 +183,7 @@ public class TypeContextChecker {
 				for (int i= 0; i < types.length; i++) {
 					Type type= typeNodes[i];
 					if (type == null) {
-						String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_couldNotResolveType, BasicElementLabels.getJavaElementName(types[i])); 
+						String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_couldNotResolveType, BasicElementLabels.getJavaElementName(types[i]));
 						results[i]= RefactoringStatus.createErrorStatus(msg);
 						continue;
 					}
@@ -231,10 +231,10 @@ public class TypeContextChecker {
 				}
 				cuString.append("> "); //$NON-NLS-1$
 			}
-			
+
 			cuString.append(types[parameterCount]).append(' ');
 			int offsetBeforeMethodName= cuString.length();
-			cuString.append(METHOD_NAME).append('('); 
+			cuString.append(METHOD_NAME).append('(');
 			for (int i= 0; i < parameterCount; i++) {
 				if (i > 0)
 					cuString.append(',');
@@ -290,15 +290,15 @@ public class TypeContextChecker {
 					return JavaModelUtil.concatenateName(fqns[0][0], fqns[0][1]);
 				} else if (fqns.length > 1){
 					String[] keys= { BasicElementLabels.getJavaElementName(elementTypeName), String.valueOf(fqns.length)};
-					String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys); 
+					String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys);
 					status.addError(msg);
 					return elementTypeName;
 				}
 			}
-			
+
 			List typeRefsFound= findTypeInfos(elementTypeName, declaringType, pm);
 			if (typeRefsFound.size() == 0){
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_not_unique, BasicElementLabels.getJavaElementName(elementTypeName)); 
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_not_unique, BasicElementLabels.getJavaElementName(elementTypeName));
 				status.addError(msg);
 				return elementTypeName;
 			} else if (typeRefsFound.size() == 1){
@@ -307,7 +307,7 @@ public class TypeContextChecker {
 			} else {
 				Assert.isTrue(typeRefsFound.size() > 1);
 				String[] keys= {BasicElementLabels.getJavaElementName(elementTypeName), String.valueOf(typeRefsFound.size())};
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys); 
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys);
 				status.addError(msg);
 				return elementTypeName;
 			}
@@ -320,7 +320,7 @@ public class TypeContextChecker {
 			TypeNameMatchCollector requestor= new TypeNameMatchCollector(collectedInfos);
 			int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 			new SearchEngine().searchAllTypeNames(null, matchMode, typeName.toCharArray(), matchMode, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, pm);
-			
+
 			List result= new ArrayList();
 			for (Iterator iter= collectedInfos.iterator(); iter.hasNext();) {
 				TypeNameMatch curr= (TypeNameMatch) iter.next();
@@ -341,19 +341,19 @@ public class TypeContextChecker {
 		}
 
 	}
-	
+
 	private static class MethodTypesSyntaxChecker {
-	
+
 		private final IMethod fMethod;
 		private final List/*<ParameterInfo>*/ fParameterInfos;
 		private final ReturnTypeInfo fReturnTypeInfo;
-	
+
 		public MethodTypesSyntaxChecker(IMethod method, List/*<ParameterInfo>*/ parameterInfos, ReturnTypeInfo returnTypeInfo) {
 			fMethod= method;
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= returnTypeInfo;
 		}
-		
+
 		public RefactoringStatus[] checkSyntax() {
 			int parameterCount= fParameterInfos.size();
 			RefactoringStatus[] results= new RefactoringStatus[parameterCount + 1];
@@ -365,32 +365,32 @@ public class TypeContextChecker {
 			}
 			return results;
 		}
-		
+
 		private RefactoringStatus checkParameterTypeSyntax(ParameterInfo info) {
 			if (!info.isAdded() && !info.isTypeNameChanged() && !info.isDeleted())
 				return null;
 			return TypeContextChecker.checkParameterTypeSyntax(info.getNewTypeName(), fMethod.getJavaProject());
 		}
-		
+
 		private RefactoringStatus checkReturnTypeSyntax() {
 			String newTypeName= fReturnTypeInfo.getNewTypeName();
 			if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
-				String msg= RefactoringCoreMessages.TypeContextChecker_return_type_not_empty; 
+				String msg= RefactoringCoreMessages.TypeContextChecker_return_type_not_empty;
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			List problemsCollector= new ArrayList(0);
 			Type parsedType= parseType(newTypeName, fMethod.getJavaProject(), problemsCollector);
 			if (parsedType == null) {
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type, BasicElementLabels.getJavaElementName(newTypeName)); 
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type, BasicElementLabels.getJavaElementName(newTypeName));
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			if (problemsCollector.size() == 0)
 				return null;
-			
+
 			RefactoringStatus result= new RefactoringStatus();
 			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
 				String[] keys= new String[]{ BasicElementLabels.getJavaElementName(newTypeName), BasicElementLabels.getJavaElementName((String) iter.next())};
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type_syntax, keys); 
+				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type_syntax, keys);
 				result.addError(msg);
 			}
 			return result;
@@ -399,14 +399,14 @@ public class TypeContextChecker {
 		private static boolean isVoidArrayType(Type type){
 			if (! type.isArrayType())
 				return false;
-			
+
 			ArrayType arrayType= (ArrayType)type;
 			if (! arrayType.getComponentType().isPrimitiveType())
 				return false;
 			PrimitiveType primitiveType= (PrimitiveType)arrayType.getComponentType();
 			return (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID);
 		}
-	
+
 	}
 
 	private static Type parseType(String typeString, IJavaProject javaProject, List/*<IProblem>*/ problemsCollector) {
@@ -414,12 +414,12 @@ public class TypeContextChecker {
 			return null;
 		if (! typeString.trim().equals(typeString))
 			return null;
-	
+
 		StringBuffer cuBuff= new StringBuffer();
 		cuBuff.append("interface A{"); //$NON-NLS-1$
 		int offset= cuBuff.length();
 		cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
-	
+
 		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(cuBuff.toString().toCharArray());
 		p.setProject(javaProject);
@@ -438,7 +438,7 @@ public class TypeContextChecker {
 			for (int i= 0; i < problems.length; i++)
 				problemsCollector.add(problems[i].getMessage());
 		}
-		
+
 		String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
 		if (typeString.equals(typeNodeRange))
 			return type;
@@ -464,46 +464,46 @@ public class TypeContextChecker {
 		MethodTypesSyntaxChecker checker= new MethodTypesSyntaxChecker(method, parameterInfos, returnTypeInfo);
 		return checker.checkSyntax();
 	}
-	
+
 	public static RefactoringStatus checkParameterTypeSyntax(String type, IJavaProject project) {
 		String newTypeName= ParameterInfo.stripEllipsis(type.trim()).trim();
 		String typeLabel= BasicElementLabels.getJavaElementName(type);
-		
+
 		if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
-			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, typeLabel); 
+			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, typeLabel);
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
-		
+
 		if (ParameterInfo.isVarargs(type) && ! JavaModelUtil.is50OrHigher(project)) {
-			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_no_vararg_below_50, typeLabel); 
+			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_no_vararg_below_50, typeLabel);
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
-		
+
 		List problemsCollector= new ArrayList(0);
 		Type parsedType= parseType(newTypeName, project, problemsCollector);
 		boolean valid= parsedType != null;
 		if (valid && parsedType instanceof PrimitiveType)
 			valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
 		if (! valid) {
-			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_name, BasicElementLabels.getJavaElementName(newTypeName)); 
+			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_name, BasicElementLabels.getJavaElementName(newTypeName));
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
 		if (problemsCollector.size() == 0)
 			return null;
-		
+
 		RefactoringStatus result= new RefactoringStatus();
 		for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
 			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_syntax,
-					new String[]{BasicElementLabels.getJavaElementName(newTypeName), BasicElementLabels.getJavaElementName((String) iter.next())}); 
+					new String[]{BasicElementLabels.getJavaElementName(newTypeName), BasicElementLabels.getJavaElementName((String) iter.next())});
 			result.addError(msg);
 		}
 		return result;
 	}
-	
+
 	public static StubTypeContext createStubTypeContext(ICompilationUnit cu, CompilationUnit root, int focalPosition) throws CoreException {
 		StringBuffer bufBefore= new StringBuffer();
 		StringBuffer bufAfter= new StringBuffer();
-		
+
 		int introEnd= 0;
 		PackageDeclaration pack= root.getPackage();
 		if (pack != null)
@@ -514,7 +514,7 @@ public class TypeContextChecker {
 			introEnd= lastImport.getStartPosition() + lastImport.getLength();
 		}
 		bufBefore.append(cu.getBuffer().getText(0, introEnd));
-		
+
 		fillWithTypeStubs(bufBefore, bufAfter, focalPosition, root.types());
 		bufBefore.append(' ');
 		bufAfter.insert(0, ' ');
@@ -566,11 +566,11 @@ public class TypeContextChecker {
 				buf.append("}\n"); //$NON-NLS-1$
 				continue;
 			}
-			
+
 			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) bodyDeclaration;
 			buf= decl.getStartPosition() < focalPosition ? bufBefore : bufAfter;
 			appendModifiers(buf, decl.modifiers());
-			
+
 			if (decl instanceof TypeDeclaration) {
 				TypeDeclaration type= (TypeDeclaration) decl;
 				buf.append(type.isInterface() ? "interface " : "class "); //$NON-NLS-1$//$NON-NLS-2$
@@ -582,12 +582,12 @@ public class TypeContextChecker {
 				}
 				List superInterfaces= type.superInterfaceTypes();
 				appendSuperInterfaces(buf, superInterfaces);
-				
+
 			} else if (decl instanceof AnnotationTypeDeclaration) {
 				AnnotationTypeDeclaration annotation= (AnnotationTypeDeclaration) decl;
 				buf.append("@interface "); //$NON-NLS-1$
 				buf.append(annotation.getName().getIdentifier());
-				
+
 			} else if (decl instanceof EnumDeclaration) {
 				EnumDeclaration enumDecl= (EnumDeclaration) decl;
 				buf.append("enum "); //$NON-NLS-1$
@@ -595,7 +595,7 @@ public class TypeContextChecker {
 				List superInterfaces= enumDecl.superInterfaceTypes();
 				appendSuperInterfaces(buf, superInterfaces);
 			}
-			
+
 			buf.append("{\n"); //$NON-NLS-1$
 			if (decl instanceof EnumDeclaration)
 				buf.append(";\n"); //$NON-NLS-1$
@@ -645,11 +645,11 @@ public class TypeContextChecker {
 	public static StubTypeContext createSuperInterfaceStubTypeContext(String typeName, IType enclosingType, IPackageFragment packageFragment) {
 		return createSupertypeStubTypeContext(typeName, true, enclosingType, packageFragment);
 	}
-	
+
 	public static StubTypeContext createSuperClassStubTypeContext(String typeName, IType enclosingType, IPackageFragment packageFragment) {
 		return createSupertypeStubTypeContext(typeName, false, enclosingType, packageFragment);
 	}
-	
+
 	private static StubTypeContext createSupertypeStubTypeContext(String typeName, boolean isInterface, IType enclosingType, IPackageFragment packageFragment) {
 		StubTypeContext stubTypeContext;
 		String prolog= "class " + typeName + (isInterface ? " implements " : " extends "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -659,12 +659,12 @@ public class TypeContextChecker {
 				ICompilationUnit cu= enclosingType.getCompilationUnit();
 				ISourceRange typeSourceRange= enclosingType.getSourceRange();
 				int focalPosition= typeSourceRange.getOffset() + typeSourceRange.getLength() - 1; // before closing brace
-	
+
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setSource(cu);
 				parser.setFocalPosition(focalPosition);
 				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
-	
+
 				stubTypeContext= createStubTypeContext(cu, compilationUnit, focalPosition);
 				stubTypeContext= new StubTypeContext(stubTypeContext.getCuHandle(),
 						stubTypeContext.getBeforeString() + prolog,
@@ -673,11 +673,11 @@ public class TypeContextChecker {
 				JavaPlugin.log(e);
 				stubTypeContext= new StubTypeContext(null, null, null);
 			}
-			
+
 		} else if (packageFragment != null) {
 			ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessor.DUMMY_CU_NAME);
 			stubTypeContext= new StubTypeContext(cu, "package " + packageFragment.getElementName() + ";" + prolog, epilog);  //$NON-NLS-1$//$NON-NLS-2$
-			
+
 		} else {
 			stubTypeContext= new StubTypeContext(null, null, null);
 		}
@@ -696,7 +696,7 @@ public class TypeContextChecker {
 		if (! superType.trim().equals(superType)) {
 			return null;
 		}
-	
+
 		StringBuffer cuBuff= new StringBuffer();
 		if (isInterface)
 			cuBuff.append("class __X__ implements "); //$NON-NLS-1$
@@ -704,7 +704,7 @@ public class TypeContextChecker {
 			cuBuff.append("class __X__ extends "); //$NON-NLS-1$
 		int offset= cuBuff.length();
 		cuBuff.append(superType).append(" {}"); //$NON-NLS-1$
-	
+
 		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(cuBuff.toString().toCharArray());
 		Map options= new HashMap();
@@ -721,7 +721,7 @@ public class TypeContextChecker {
 			return null;
 		}
 		Type type= (Type) selected;
-		
+
 		String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
 		if (! superType.equals(typeNodeRange)){
 			return null;
@@ -734,7 +734,7 @@ public class TypeContextChecker {
 		cuString.append(superClassContext.getBeforeString());
 		cuString.append(superclass);
 		cuString.append(superClassContext.getAfterString());
-		
+
 		try {
 			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
@@ -760,7 +760,7 @@ public class TypeContextChecker {
 
 	public static ITypeBinding[] resolveSuperInterfaces(String[] interfaces, IType typeHandle, StubTypeContext superInterfaceContext) {
 		ITypeBinding[] result= new ITypeBinding[interfaces.length];
-		
+
 		int[] interfaceOffsets= new int[interfaces.length];
 		StringBuffer cuString= new StringBuffer();
 		cuString.append(superInterfaceContext.getBeforeString());
@@ -772,7 +772,7 @@ public class TypeContextChecker {
 				cuString.append(", "); //$NON-NLS-1$
 		}
 		cuString.append(superInterfaceContext.getAfterString());
-		
+
 		try {
 			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {

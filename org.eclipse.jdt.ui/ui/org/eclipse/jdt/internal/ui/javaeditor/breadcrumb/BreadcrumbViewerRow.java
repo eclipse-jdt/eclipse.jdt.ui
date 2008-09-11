@@ -23,7 +23,7 @@ import org.eclipse.jface.viewers.ViewerRow;
 
 /**
  * A viewer row for the breadcrumb viewer.
- * 
+ *
  * @since 3.4
  */
 class BreadcrumbViewerRow extends ViewerRow {
@@ -35,7 +35,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	private final BreadcrumbItem fItem;
 	private final BreadcrumbViewer fViewer;
 
-	
+
 	public BreadcrumbViewerRow(BreadcrumbViewer viewer, BreadcrumbItem item) {
 		fViewer= viewer;
 		fItem= item;

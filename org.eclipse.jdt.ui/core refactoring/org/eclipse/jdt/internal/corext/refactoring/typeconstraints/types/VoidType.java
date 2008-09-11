@@ -26,7 +26,7 @@ public final class VoidType extends TType {
 	public TType[] getSubTypes() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	protected boolean doEquals(TType type) {
 		return true;
 	}

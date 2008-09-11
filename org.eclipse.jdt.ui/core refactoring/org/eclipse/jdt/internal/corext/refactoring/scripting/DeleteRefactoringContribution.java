@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 
 /**
  * Refactoring contribution for the delete refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class DeleteRefactoringContribution extends JavaRefactoringContribution {
@@ -41,11 +41,11 @@ public final class DeleteRefactoringContribution extends JavaRefactoringContribu
 		JavaDeleteProcessor processor= new JavaDeleteProcessor(arguments, status);
 		return new DeleteRefactoring(processor);
 	}
-	
+
 	public RefactoringDescriptor createDescriptor() {
 		return new DeleteDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new DeleteDescriptor(project, description, comment, arguments, flags);
 	}

@@ -19,7 +19,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 /**
  * A relevance based sorter.
- * 
+ *
  * @since 3.2
  */
 public final class RelevanceSorter extends AbstractProposalSorter {
@@ -28,7 +28,7 @@ public final class RelevanceSorter extends AbstractProposalSorter {
 
 	public RelevanceSorter() {
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.AbstractProposalSorter#compare(org.eclipse.jface.text.contentassist.ICompletionProposal, org.eclipse.jface.text.contentassist.ICompletionProposal)
 	 */

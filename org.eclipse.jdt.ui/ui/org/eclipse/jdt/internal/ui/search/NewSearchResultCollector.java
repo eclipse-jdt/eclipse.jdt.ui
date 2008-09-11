@@ -31,7 +31,7 @@ public class NewSearchResultCollector extends SearchRequestor {
 		fSearch= search;
 		fIgnorePotentials= ignorePotentials;
 	}
-	
+
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		IJavaElement enclosingElement= (IJavaElement) match.getElement();
 		if (enclosingElement != null) {

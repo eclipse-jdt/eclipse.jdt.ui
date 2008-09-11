@@ -42,7 +42,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	public OccurrencesSearchResult(OccurrencesSearchQuery query) {
 		fQuery= query;
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
@@ -66,11 +66,11 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		if (editorInput instanceof IFileEditorInput)  {
 			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
 			return computeContainedMatches(result, fileEditorInput.getFile());
-			
+
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
 			IClassFile classFile= classFileEditorInput.getClassFile();
-			
+
 			Object[] elements= getElements();
 			if (elements.length == 0)
 				return NO_MATCHES;
@@ -81,7 +81,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		}
 		return NO_MATCHES;
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#getFile(java.lang.Object)
 	 */
@@ -98,7 +98,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		else
 			return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#isShownInEditor(org.eclipse.search.ui.text.Match, org.eclipse.ui.IEditorPart)
 	 */
@@ -115,10 +115,10 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			return ((IClassFileEditorInput)editorInput).getClassFile().equals(je);
 		}
-		
+
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getLabel()
 	 */
@@ -150,7 +150,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	public IFileMatchAdapter getFileMatchAdapter() {
 		return this;
 	}
-	
+
 	public IEditorMatchAdapter getEditorMatchAdapter() {
 		return this;
 	}

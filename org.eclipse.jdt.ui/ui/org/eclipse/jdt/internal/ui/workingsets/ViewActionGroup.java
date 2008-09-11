@@ -35,14 +35,14 @@ public class ViewActionGroup extends ActionGroup {
 
 	private static final int SHOW_PROJECTS= PackageExplorerPart.PROJECTS_AS_ROOTS;
 	private static final int SHOW_WORKING_SETS= PackageExplorerPart.WORKING_SETS_AS_ROOTS;
-	
+
 	public static final String MODE_CHANGED= ViewActionGroup.class.getName() + ".mode_changed"; //$NON-NLS-1$
-	
+
 	private static final Integer INT_SHOW_PROJECTS= new Integer(SHOW_PROJECTS);
 	private static final Integer INT_SHOW_WORKING_SETS= new Integer(SHOW_WORKING_SETS);
-	
+
 	private IPropertyChangeListener fChangeListener;
-	
+
 	private int fMode;
 	private IMenuManager fMenuManager;
 	private IWorkingSetActionGroup fActiveActionGroup;
@@ -65,14 +65,14 @@ public class ViewActionGroup extends ActionGroup {
 
 		ISelectionProvider selectionProvider= site.getSelectionProvider();
 		selectionProvider.addSelectionChangedListener(fWorkingSetAssignementAction);
-		
+
 		fMode= mode;
 		if (fMode == SHOW_WORKING_SETS)
 			fActiveActionGroup= fShowActionGroup;
 		else
 			fActiveActionGroup= fFilterActionGroup;
 	}
-	
+
 	public void dispose() {
 		fFilterActionGroup.dispose();
 		fShowActionGroup.dispose();
@@ -81,12 +81,12 @@ public class ViewActionGroup extends ActionGroup {
 		selectionProvider.removeSelectionChangedListener(fWorkingSetAssignementAction);
 		super.dispose();
 	}
-	
+
 	public void setWorkingSetModel(WorkingSetModel model) {
 		fShowActionGroup.setWorkingSetMode(model);
 		fWorkingSetAssignementAction.setWorkingSetModel(model);
 	}
-	
+
 	public void fillContextMenu(IMenuManager menu) {
 		if (fWorkingSetAssignementAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fWorkingSetAssignementAction);
@@ -104,20 +104,20 @@ public class ViewActionGroup extends ActionGroup {
 			fActiveActionGroup= fFilterActionGroup;
 		((ActionGroup)fActiveActionGroup).fillActionBars(actionBars);
 	}
-	
-	private void fillViewMenu(IMenuManager menu) { 
-		IMenuManager showMenu= new MenuManager(WorkingSetMessages.ViewActionGroup_show_label); 
+
+	private void fillViewMenu(IMenuManager menu) {
+		IMenuManager showMenu= new MenuManager(WorkingSetMessages.ViewActionGroup_show_label);
 		fillShowMenu(showMenu);
 		menu.add(showMenu);
 		menu.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));
 	}
-	
+
 	private void fillShowMenu(IMenuManager menu) {
 		ViewAction projects= new ViewAction(this, SHOW_PROJECTS);
-		projects.setText(WorkingSetMessages.ViewActionGroup_projects_label); 
+		projects.setText(WorkingSetMessages.ViewActionGroup_projects_label);
 		menu.add(projects);
 		ViewAction workingSets= new ViewAction(this, SHOW_WORKING_SETS);
-		workingSets.setText(WorkingSetMessages.ViewActionGroup_workingSets_label); 
+		workingSets.setText(WorkingSetMessages.ViewActionGroup_workingSets_label);
 		menu.add(workingSets);
 		if (fMode == SHOW_PROJECTS) {
 			projects.setChecked(true);
@@ -134,7 +134,7 @@ public class ViewActionGroup extends ActionGroup {
 			viewer.removeFilter(workingSetFilter);
 		}
 	}
-	
+
 	public void setMode(int mode) {
 		fMode= mode;
 		fActiveActionGroup.cleanViewMenu(fMenuManager);
@@ -151,7 +151,7 @@ public class ViewActionGroup extends ActionGroup {
 		if(fChangeListener != null)
 			fChangeListener.propertyChange(event);
 	}
-	
+
 	public WorkingSetFilterActionGroup getFilterGroup() {
 		return fFilterActionGroup;
 	}

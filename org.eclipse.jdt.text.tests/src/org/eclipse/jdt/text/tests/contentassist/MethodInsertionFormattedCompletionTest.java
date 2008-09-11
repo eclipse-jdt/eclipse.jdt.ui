@@ -15,13 +15,13 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 /**
- * 
+ *
  * @since 3.2
  */
 public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTest {
@@ -38,7 +38,7 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	public static Test suite() {
 		return new CompletionTestSetup(allTests());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */
@@ -55,53 +55,53 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	public void testThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|", "hashCode(", "this.hashCode ( )|");
 	}
-	
+
 	public void testMethod() throws Exception {
 		assertMethodBodyProposal("h", "hashCode(", "hashCode ( )");
 	}
-	
+
 	public void testMethodWithParam() throws Exception {
 		if (true) {
 			// FIXME
 			System.out.println("disabled due to formatter - context info interation");
 			return;
 		}
-			
+
 		assertMethodBodyProposal("e", "equals(", "equals ( |)");
 	}
-	
+
 	/* inserting */
-	
+
 	public void testInsertThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|class", "hashCode(", "this.hashCode ( )|class");
 	}
-	
+
 	public void testInsertMethod() throws Exception {
 		assertMethodBodyProposal("h|foobar", "hashCode(", "hashCode ( )|foobar");
 	}
-	
+
 	public void testInsertMethodWithParam() throws Exception {
 		if (true) {
 			// FIXME
 			System.out.println("disabled due to formatter - context info interation");
 			return;
 		}
-			
+
 		assertMethodBodyProposal("e|foobar", "equals(", "equals ( |)foobar");
 	}
-	
+
 	public void testFormattedMethodWithParameterFilling1() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		addMembers("private java.util.List fList;");
 		assertMethodBodyProposal("fList.", "add(O", "fList.add ( |arg0| )");
 	}
-	
+
 	public void testFormattedMethodWithParameterFilling2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		addMembers("private java.util.List fList;");
 		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |arg0|, arg1 )");
 	}
-	
+
 	public void testFormattedMethodWithParameterGuessing1() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
@@ -116,8 +116,8 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
 		addMembers("private java.util.List fList;");
 		addLocalVariables("int foo= 3; Object obj= null;\n");
-		
+
 		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |foo|, obj )");
 	}
-	
+
 }

@@ -41,25 +41,25 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 
 public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
-	
+
 	private final IRunnableContext fContext;
 	private final IJavaProject fJavaProject;
 
-	
+
 	public ResetAllOutputFoldersAction(IRunnableContext context, IJavaProject project, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context, project);
     }
 
 	public ResetAllOutputFoldersAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, IJavaProject javaProject) {
 		super(site, selectionTarget, BuildpathModifierAction.RESET_ALL_OUTPUT_FOLDERS);
-		
+
 		fContext= context;
 		fJavaProject= javaProject;
-		
+
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -74,7 +74,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
-					resetOutputFolders(fJavaProject, monitor);					
+					resetOutputFolders(fJavaProject, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
@@ -91,13 +91,13 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         } catch (InterruptedException e) {
         }
 	}
-	
+
 	private List resetOutputFolders(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetOutputFolder, roots.length + 10); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetOutputFolder, roots.length + 10);
 			List entries= new ArrayList();
 			for (int i= 0; i < roots.length; i++) {
 				monitor.worked(1);
@@ -114,12 +114,12 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 			monitor.done();
 		}
 	}
-	
+
 	private List reset(List selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 	    if (monitor == null)
         	monitor= new NullProgressMonitor();
         try {
-        	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size()); 
+        	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size());
         	List entries= ClasspathModifier.getExistingEntries(project);
         	List result= new ArrayList();
         	for (int i= 0; i < selection.size(); i++) {
@@ -141,19 +141,19 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         			result.add(outputFolder);
         		}
         	}
-        
+
         	ClasspathModifier.commitClassPath(entries, project, null);
-        	
+
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries((CPListElement[])entries.toArray(new CPListElement[entries.size()]));
         	informListeners(delta);
-        	
+
         	return result;
         } finally {
         	monitor.done();
         }
     }
-	
+
 	protected boolean canHandle(IStructuredSelection elements) {
 		return true;
 	}

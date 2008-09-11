@@ -291,7 +291,7 @@ public class ASTResolving {
 			if (node.getLocationInParent() == AssertStatement.EXPRESSION_PROPERTY) {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			}
-			return parent.getAST().resolveWellKnownType("java.lang.String"); //$NON-NLS-1$			
+			return parent.getAST().resolveWellKnownType("java.lang.String"); //$NON-NLS-1$
 		case ASTNode.SINGLE_MEMBER_ANNOTATION: {
 			IMethodBinding annotMember= findAnnotationMember((Annotation) parent, "value"); //$NON-NLS-1$
 			if (annotMember != null) {
@@ -313,7 +313,7 @@ public class ASTResolving {
 
 		return null;
 	}
-	
+
 	private static IMethodBinding findAnnotationMember(Annotation annotation, String name) {
 		ITypeBinding annotBinding= annotation.resolveTypeBinding();
 		if (annotBinding != null) {
@@ -523,7 +523,7 @@ public class ASTResolving {
 	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List arguments, final IBinding context) {
 		final int nArgs= arguments.size();
 		final ArrayList result= new ArrayList();
-		
+
 		// test if selector is a object method
 		ITypeBinding binding= searchRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 		IMethodBinding[] objectMethods= binding.getDeclaredMethods();
@@ -542,7 +542,7 @@ public class ASTResolving {
 				if (node == null) {
 					return true;
 				}
-				
+
 				if (!fVisitedBindings.add(node.getKey())) {
 					return true;
 				}
@@ -552,7 +552,7 @@ public class ASTResolving {
 				if (context != null && !isUseableTypeInContext(node, context, false)) {
 					return true;
 				}
-				
+
 				IMethodBinding[] methods= node.getDeclaredMethods();
 				for (int i= 0; i < methods.length; i++) {
 					IMethodBinding meth= methods[i];
@@ -565,17 +565,17 @@ public class ASTResolving {
 		});
 		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
 	}
-	
+
 	public static void visitAllBindings(ASTNode astRoot, TypeBindingVisitor visitor) {
 		try {
 			astRoot.accept(new AllBindingsVisitor(visitor));
 		} catch (AllBindingsVisitor.VisitCancelledException e) {
 		}
 	}
-	
+
 	private static class AllBindingsVisitor extends GenericVisitor {
 		private final TypeBindingVisitor fVisitor;
-		
+
 		private static class VisitCancelledException extends RuntimeException {
 			private static final long serialVersionUID= 1L;
 		}
@@ -610,20 +610,20 @@ public class ASTResolving {
 			}
 			node= node.getParent();
 		} while (node != null);
-		
+
 		return null;
 	}
-	
+
 	public static BodyDeclaration findParentBodyDeclaration(ASTNode node) {
 		while ((node != null) && (!(node instanceof BodyDeclaration))) {
 			node= node.getParent();
 		}
 		return (BodyDeclaration) node;
 	}
-	
+
 	public static BodyDeclaration findParentBodyDeclaration(ASTNode node, boolean treatModifiersOutside) {
 		StructuralPropertyDescriptor lastLocation= null;
-		
+
 		while (node != null) {
 			if (node instanceof BodyDeclaration) {
 				BodyDeclaration decl= (BodyDeclaration) node;
@@ -637,7 +637,7 @@ public class ASTResolving {
 		}
 		return (BodyDeclaration) node;
 	}
-	
+
 
 	public static CompilationUnit findParentCompilationUnit(ASTNode node) {
 		return (CompilationUnit) findAncestor(node, ASTNode.COMPILATION_UNIT);
@@ -645,10 +645,10 @@ public class ASTResolving {
 
 	/**
 	 * Finds the parent type of a node.
-	 * 
+	 *
 	 * @param node the node inside the type to find
 	 * @param treatModifiersOutside if set, modifiers are not part of their type, but of the type's parent
-	 * @return returns either a AbstractTypeDeclaration or an AnonymousTypeDeclaration 
+	 * @return returns either a AbstractTypeDeclaration or an AnonymousTypeDeclaration
 	 */
 	public static ASTNode findParentType(ASTNode node, boolean treatModifiersOutside) {
 		StructuralPropertyDescriptor lastLocation= null;
@@ -667,7 +667,7 @@ public class ASTResolving {
 		}
 		return null;
 	}
-	
+
 	public static ASTNode findParentType(ASTNode node) {
 		return findParentType(node, false);
 	}
@@ -727,7 +727,7 @@ public class ASTResolving {
 		}
 		return false;
 	}
-	
+
 	public static boolean isInsideModifiers(ASTNode node) {
 		while (node != null && !(node instanceof BodyDeclaration)) {
 			if (node instanceof Annotation) {
@@ -797,13 +797,13 @@ public class ASTResolving {
 		}
 		return kinds;
 	}
-	
-	
+
+
 	private static int internalGetPossibleTypeKinds(ASTNode node) {
 		int kind= SimilarElementsRequestor.ALL_TYPES;
 
 		int mask= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
-		
+
 		ASTNode parent= node.getParent();
 		while (parent instanceof QualifiedName) {
 			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
@@ -932,7 +932,7 @@ public class ASTResolving {
 		}
 		return (ITypeBinding[]) res.toArray(new ITypeBinding[res.size()]);
 	}
-	
+
 	public static ITypeBinding[] getRelaxingTypes(AST ast, ITypeBinding type) {
 		ArrayList res= new ArrayList();
 		res.add(type);
@@ -975,7 +975,7 @@ public class ASTResolving {
 			collectRelaxingTypes(res, binding);
 		}
 	}
-	
+
 	public static String[] getUsedVariableNames(ASTNode node) {
 		CompilationUnit root= (CompilationUnit) node.getRoot();
 		Collection res= (new ScopeAnalyzer(root)).getUsedVariableNames(node.getStartPosition(), node.getLength());
@@ -1053,7 +1053,7 @@ public class ASTResolving {
 		if (type.isCapture()) {
 			type= type.getWildcard();
 		}
-		
+
 		if (type.isWildcardType()) {
 			if (noWildcards) {
 				return false;
@@ -1064,14 +1064,14 @@ public class ASTResolving {
 		}
 		return true;
 	}
-		
+
 	/**
 	 * Use this method before creating a type for a wildcard. Either to assign a wildcard to a new type or for a type to be assigned.
-	 * 
+	 *
 	 * @param wildcardType the wildcard type to normalize
 	 * @param isBindingToAssign If true, then a new receiver type is searched (X x= s), else the type of a sender (R r= x)
 	 * @param ast th current AST
-	 * @return Returns the normalized binding or null when only the 'null' binding 
+	 * @return Returns the normalized binding or null when only the 'null' binding
 	 */
 	public static ITypeBinding normalizeWildcardType(ITypeBinding wildcardType, boolean isBindingToAssign, AST ast) {
 		ITypeBinding bound= wildcardType.getBound();
@@ -1083,7 +1083,7 @@ public class ASTResolving {
 			if (bound == null || wildcardType.isUpperbound()) {
 				return null;
 			}
-		}			
+		}
 		return bound;
 	}
 

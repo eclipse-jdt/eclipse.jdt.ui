@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.team.ui.mapping.SynchronizationStateTester;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,17 +25,15 @@ import org.eclipse.core.resources.mapping.ResourceTraversal;
 import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.IDecorationContext;
 
-import org.eclipse.team.ui.mapping.SynchronizationStateTester;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 public class HierarchicalDecorationContext {
-	
+
 	private static IDecorationContext fgContext= null;
-	
+
 	public static IDecorationContext getContext() {
 		if (fgContext == null) {
 			DecorationContext context= new DecorationContext();
@@ -42,7 +42,7 @@ public class HierarchicalDecorationContext {
 		}
 		return fgContext;
 	}
-		
+
 	private static final class HierarchicalSynchronizationStateTester extends SynchronizationStateTester {
 
 		public HierarchicalSynchronizationStateTester() {
@@ -65,7 +65,7 @@ public class HierarchicalDecorationContext {
 			return super.getState(element, stateMask, monitor);
 		}
 	}
-	
+
 	private static final class HierarchicalPackageFragementResourceMapping extends JavaElementResourceMapping {
 		private final IPackageFragment fPack;
 		private HierarchicalPackageFragementResourceMapping(IPackageFragment fragment) {

@@ -21,6 +21,7 @@ import org.eclipse.jface.text.source.Annotation;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IAnnotationImageProvider;
 
 import org.eclipse.jdt.ui.PreferenceConstants;

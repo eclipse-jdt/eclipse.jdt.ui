@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
-
 public class RenameSourceFolderWizard extends RenameRefactoringWizard {
-	
+
 	public RenameSourceFolderWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.RenameSourceFolder_defaultPageTitle, 
-			RefactoringMessages.RenameSourceFolder_inputPage_description, 
+			RefactoringMessages.RenameSourceFolder_defaultPageTitle,
+			RefactoringMessages.RenameSourceFolder_inputPage_description,
 			JavaPluginImages.DESC_WIZBAN_REFACTOR,
 			IJavaHelpContextIds.RENAME_SOURCE_FOLDER_WIZARD_PAGE);
 	}

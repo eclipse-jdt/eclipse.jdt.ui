@@ -13,6 +13,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
@@ -22,13 +23,13 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 /**
  * Measures the time to comment/uncomment a large compilation unit.
- * 
+ *
  * @since 3.1
  */
 public class ToggleCommentTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= ToggleCommentTest.class;
-	
+
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
 	private static final int WARM_UP_RUNS= 3;
@@ -36,7 +37,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 	private static final int MEASURED_RUNS= 3;
 
 	private ITextEditor fEditor;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -48,7 +49,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

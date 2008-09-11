@@ -29,10 +29,10 @@ public final class PullUpWizard extends RefactoringWizard {
 
 	/**
 	 * Creates a new pull up wizard.
-	 * 
+	 *
 	 * @param processor
-	 *           the processor 
-	 * 
+	 *           the processor
+	 *
 	 * @param refactoring
 	 *            the pull up refactoring
 	 */

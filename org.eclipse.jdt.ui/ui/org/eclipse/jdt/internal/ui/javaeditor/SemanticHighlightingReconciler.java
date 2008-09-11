@@ -14,13 +14,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextInputListener;
@@ -74,28 +74,28 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			}
 			return true;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BooleanLiteral)
 		 */
 		public boolean visit(BooleanLiteral node) {
 			return visitLiteral(node);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CharacterLiteral)
 		 */
 		public boolean visit(CharacterLiteral node) {
 			return visitLiteral(node);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NumberLiteral)
 		 */
 		public boolean visit(NumberLiteral node) {
 			return visitLiteral(node);
 		}
-		
+
 		private boolean visitLiteral(Expression node) {
 			fToken.update(node);
 			for (int i= 0, n= fJobSemanticHighlightings.length; i < n; i++) {
@@ -240,32 +240,32 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		fJobPresenter= fPresenter;
 		fJobSemanticHighlightings= fSemanticHighlightings;
 		fJobHighlightings= fHighlightings;
-		
+
 		try {
 			if (fJobPresenter == null || fJobSemanticHighlightings == null || fJobHighlightings == null)
 				return;
-			
+
 			fJobPresenter.setCanceled(progressMonitor.isCanceled());
-			
+
 			if (ast == null || fJobPresenter.isCanceled())
 				return;
-			
+
 			ASTNode[] subtrees= getAffectedSubtrees(ast);
 			if (subtrees.length == 0)
 				return;
-			
+
 			startReconcilingPositions();
-			
+
 			if (!fJobPresenter.isCanceled())
 				reconcilePositions(subtrees);
-			
+
 			TextPresentation textPresentation= null;
 			if (!fJobPresenter.isCanceled())
 				textPresentation= fJobPresenter.createPresentation(fAddedPositions, fRemovedPositions);
-			
+
 			if (!fJobPresenter.isCanceled())
 				updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
-			
+
 			stopReconcilingPositions();
 		} finally {
 			fJobPresenter= null;
@@ -410,7 +410,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				fJob.cancel();
 				fJob= null;
 			}
-			
+
 			if (element != null) {
 				fJob= new Job(JavaEditorMessages.SemanticHighlighting_job) {
 					protected IStatus run(IProgressMonitor monitor) {
@@ -460,10 +460,10 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		if (newInput != null)
 			scheduleJob();
 	}
-	
+
 	/**
 	 * Refreshes the highlighting.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public void refresh() {

@@ -74,11 +74,11 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  * As addition to the {@link JavaCapabilityConfigurationPage}, the wizard page does an
  * early project creation (so that linked folders can be defined) and, if an
  * existing external location was specified, detects the class path.
- * 
+ *
  * <p>
  * Clients may instantiate or subclass.
  * </p>
- * 
+ *
  * @since 3.4
  */
 public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage {
@@ -100,7 +100,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 	/**
 	 * Constructor for the {@link NewJavaProjectWizardPageTwo}.
-	 * 
+	 *
 	 * @param mainPage the first page of the wizard
 	 */
 	public NewJavaProjectWizardPageTwo(NewJavaProjectWizardPageOne mainPage) {
@@ -141,8 +141,8 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			setFocus();
 		}
 	}
-	
-	
+
+
 
 	private boolean hasExistingContent(URI realLocation) throws CoreException {
 		IFileStore file= EFS.getStore(realLocation);
@@ -173,8 +173,8 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			getContainer().run(true, false, new WorkspaceModifyDelegatingOperation(op));
 			return op.infoStatus;
 		} catch (InvocationTargetException e) {
-			final String title= NewWizardMessages.NewJavaProjectWizardPageTwo_error_title; 
-			final String message= NewWizardMessages.NewJavaProjectWizardPageTwo_error_message; 
+			final String title= NewWizardMessages.NewJavaProjectWizardPageTwo_error_title;
+			final String message= NewWizardMessages.NewJavaProjectWizardPageTwo_error_message;
 			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch  (InterruptedException e) {
 			// cancel pressed
@@ -203,7 +203,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_initialize, 7); 
+			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_initialize, 7);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -232,17 +232,17 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			try {
 				createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 2));
 			} catch (CoreException e) {
-				if (e.getStatus().getCode() == IResourceStatus.FAILED_READ_METADATA) {					
+				if (e.getStatus().getCode() == IResourceStatus.FAILED_READ_METADATA) {
 					result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.NewJavaProjectWizardPageTwo_DeleteCorruptProjectFile_message, e.getLocalizedMessage()));
 
 					deleteProjectFile(realLocation);
 					if (fCurrProject.exists())
 						fCurrProject.delete(true, null);
 
-					createProject(fCurrProject, fCurrProjectLocation, null);					
+					createProject(fCurrProject, fCurrProjectLocation, null);
 				} else {
 					throw e;
-				}	
+				}
 			}
 
 			if (monitor.isCanceled()) {
@@ -261,7 +261,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	 * Evaluates the new build path and output folder according to the settings on the first page.
 	 * The resulting build path is set by calling {@link #init(IJavaProject, IPath, IClasspathEntry[], boolean)}.
 	 * Clients can override this method.
-	 * 
+	 *
 	 * @param javaProject the new project which is already created when this method is called.
 	 * @param monitor the progress monitor
 	 * @throws CoreException thrown when initializing the build path failed
@@ -278,7 +278,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			IProject project= javaProject.getProject();
 
 			if (fKeepContent) {
-				if (!project.getFile(FILENAME_CLASSPATH).exists()) { 
+				if (!project.getFile(FILENAME_CLASSPATH).exists()) {
 					final ClassPathDetector detector= new ClassPathDetector(fCurrProject, new SubProgressMonitor(monitor, 2));
 					entries= detector.getClasspath();
 					outputLocation= detector.getOutputLocation();
@@ -377,11 +377,11 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		if (file.fetchInfo().exists()) {
 			IFileStore projectFile= file.getChild(FILENAME_PROJECT);
 			if (projectFile.fetchInfo().exists()) {
-				fDotProjectBackup= createBackup(projectFile, "project-desc"); //$NON-NLS-1$ 
+				fDotProjectBackup= createBackup(projectFile, "project-desc"); //$NON-NLS-1$
 			}
 			IFileStore classpathFile= file.getChild(FILENAME_CLASSPATH);
 			if (classpathFile.fetchInfo().exists()) {
-				fDotClasspathBackup= createBackup(classpathFile, "classpath-desc"); //$NON-NLS-1$ 
+				fDotClasspathBackup= createBackup(classpathFile, "classpath-desc"); //$NON-NLS-1$
 			}
 		}
 	}
@@ -396,7 +396,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				copyFile(fDotProjectBackup, projectFile, new SubProgressMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_project, e); 
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_project, e);
 			throw new CoreException(status);
 		}
 		try {
@@ -406,7 +406,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				copyFile(fDotClasspathBackup, classpathFile, new SubProgressMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_classpath, e); 
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_classpath, e);
 			throw new CoreException(status);
 		}
 	}
@@ -417,9 +417,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			copyFile(source, bak);
 			return bak;
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, Messages.format(NewWizardMessages.NewJavaProjectWizardPageTwo_problem_backup, name), e); 
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, Messages.format(NewWizardMessages.NewJavaProjectWizardPageTwo_problem_backup, name), e);
 			throw new CoreException(status);
-		} 
+		}
 	}
 
 	private void copyFile(IFileStore source, File target) throws IOException, CoreException {
@@ -434,7 +434,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		copyFile(is, os);
 	}
 
-	private void copyFile(InputStream is, OutputStream os) throws IOException {		
+	private void copyFile(InputStream is, OutputStream os) throws IOException {
 		try {
 			byte[] buffer = new byte[8192];
 			while (true) {
@@ -455,14 +455,14 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 	/**
 	 * Called from the wizard on finish.
-	 * 
+	 *
 	 * @param monitor the progress monitor
 	 * @throws CoreException thrown when the project creation or configuration failed
 	 * @throws InterruptedException thrown when the user cancelled the project creation
 	 */
 	public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
-			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_create, 3); 
+			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_create, 3);
 			if (fCurrProject == null) {
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
@@ -490,9 +490,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 	/**
 	 * Creates the provisional project on which the wizard is working on. The provisional project is typically
-	 * created when the page is entered the first time. The early project creation is required to configure linked folders. 
-	 * 
-	 * @return the provisional project 
+	 * created when the page is entered the first time. The early project creation is required to configure linked folders.
+	 *
+	 * @return the provisional project
 	 */
 	protected IProject createProvisonalProject() {
 		IStatus status= changeToNewProject();
@@ -501,12 +501,12 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		}
 		return fCurrProject;
 	}
-	
+
 	/**
 	 * Removes the provisional project. The provisional project is typically removed when the user cancels the wizard or goes
 	 * back to the first page.
 	 */
-	protected void removeProvisonalProject() { 
+	protected void removeProvisonalProject() {
 		if (!fCurrProject.exists()) {
 			fCurrProject= null;
 			return;
@@ -521,9 +521,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		try {
 			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op));
 		} catch (InvocationTargetException e) {
-			final String title= NewWizardMessages.NewJavaProjectWizardPageTwo_error_remove_title; 
-			final String message= NewWizardMessages.NewJavaProjectWizardPageTwo_error_remove_message; 
-			ExceptionHandler.handle(e, getShell(), title, message);		
+			final String title= NewWizardMessages.NewJavaProjectWizardPageTwo_error_remove_title;
+			final String message= NewWizardMessages.NewJavaProjectWizardPageTwo_error_remove_message;
+			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch  (InterruptedException e) {
 			// cancel pressed
 		}
@@ -534,7 +534,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		if (monitor == null || noProgressMonitor) {
 			monitor= new NullProgressMonitor();
 		}
-		monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_remove, 3); 
+		monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_remove, 3);
 		try {
 			try {
 				URI projLoc= fCurrProject.getLocationURI();
@@ -566,5 +566,5 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		if (fCurrProject != null) {
 			removeProvisonalProject();
 		}
-	}      
+	}
 }

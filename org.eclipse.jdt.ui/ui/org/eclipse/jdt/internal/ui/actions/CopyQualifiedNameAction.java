@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
@@ -25,6 +21,10 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class CopyQualifiedNameAction extends SelectionDispatchAction {
-	
+
 	private static final long LABEL_FLAGS= new Long(JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.CU_QUALIFIED | JavaElementLabels.CF_QUALIFIED).longValue();
 
     //TODO: Make API
@@ -95,20 +95,20 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 	public CopyQualifiedNameAction(IWorkbenchSite site) {
 		super(site);
-		
+
 		setText(ActionMessages.CopyQualifiedNameAction_ActionName);
 		setToolTipText(ActionMessages.CopyQualifiedNameAction_ToolTipText);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_COPY_QUALIFIED_NAME);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection.toArray()));
 	}
-	
+
 	public void selectionChanged(ITextSelection selection) {
 		//Must not create an AST
 	}
@@ -122,26 +122,26 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 		return false;
 	}
-	
+
 	private boolean isValidElement(Object element) {
 		if (element instanceof IMember)
 			return true;
-		
+
 		if (element instanceof IClassFile)
 			return true;
-		
+
 		if (element instanceof ICompilationUnit)
 			return true;
-		
+
 		if (element instanceof IPackageDeclaration)
 			return true;
-		
+
 		if (element instanceof IImportDeclaration)
 			return true;
-		
+
 		if (element instanceof IPackageFragment)
 			return true;
-		
+
 		if (element instanceof IPackageFragmentRoot)
 			return true;
 
@@ -150,15 +150,15 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 		if (element instanceof IResource)
 			return true;
-		
+
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
      * @see org.eclipse.jface.action.Action#run()
      */
     public void run() {
-    	
+
     	try {
 			Object[] elements= getSelectedElements();
 			if (elements == null) {
@@ -168,7 +168,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
 			Object[] data= null;
 			Transfer[] dataTypes= null;
-			
+
 			if (elements.length == 1) {
 				Object element= elements[0];
 				String qualifiedName= getQualifiedName(element);
@@ -177,7 +177,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 					resource= ((IJavaElement) element).getCorrespondingResource();
 				else
 					resource= (IResource) element;
-				
+
 				if (resource != null) {
 					IPath location= resource.getLocation();
 					if (location != null) {
@@ -201,7 +201,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				data= new Object[] {buf.toString()};
 				dataTypes= new Transfer[] {TextTransfer.getInstance()};
 			}
-			
+
 			Clipboard clipboard= new Clipboard(getShell().getDisplay());
 			try {
 				clipboard.setContents(data, dataTypes);
@@ -223,13 +223,13 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	private String getQualifiedName(Object element) throws JavaModelException {
 		if (element instanceof IResource)
 			return ((IResource) element).getFullPath().toString();
-		
+
 		if (element instanceof IPackageFragmentRoot || element instanceof ITypeRoot) {
 			IResource resource= ((IJavaElement) element).getCorrespondingResource();
 			if (resource != null)
 				return getQualifiedName(resource);
 		}
-		
+
 		return JavaElementLabels.getTextLabel(element, LABEL_FLAGS);
 	}
 
@@ -238,14 +238,14 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
     		IJavaElement element= getSelectedElement(fEditor);
     		if (element == null)
     			return null;
-    		
+
     		return new IJavaElement[] {element};
     	}
-    	
+
     	ISelection selection= getSelection();
     	if (!(selection instanceof IStructuredSelection))
     		return null;
-    	
+
     	List result= new ArrayList();
     	for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 			Object element= iter.next();
@@ -254,7 +254,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		}
     	if (result.isEmpty())
     		return null;
-    	
+
 		return result.toArray(new Object[result.size()]);
 	}
 
@@ -262,15 +262,15 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		ISourceViewer viewer= editor.getViewer();
 		if (viewer == null)
 			return null;
-		
+
 		Point selectedRange= viewer.getSelectedRange();
 		int length= selectedRange.y;
 		int offset= selectedRange.x;
-		
+
 		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element == null)
 			return null;
-		
+
 		CompilationUnit ast= SharedASTProvider.getAST(element, SharedASTProvider.WAIT_YES, null);
 		if (ast == null)
 			return null;
@@ -278,7 +278,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		NodeFinder finder= new NodeFinder(offset, length);
 		ast.accept(finder);
 		ASTNode node= finder.getCoveringNode();
-		
+
 		IBinding binding= null;
 		if (node instanceof Name) {
 			binding= ((Name)node).resolveBinding();
@@ -309,7 +309,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		} else if (node instanceof VariableDeclaration) {
 			binding= ((VariableDeclaration)node).resolveBinding();
 		}
-			
+
 		if (binding != null)
 			return binding.getJavaElement();
 

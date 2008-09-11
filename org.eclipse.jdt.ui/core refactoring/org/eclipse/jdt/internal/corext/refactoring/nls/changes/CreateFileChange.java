@@ -97,7 +97,7 @@ public class CreateFileChange extends ResourceChange {
 	public void setName(String name) {
 		fChangeName= name;
 	}
-	
+
 	protected void setSource(String source) {
 		fSource= source;
 	}
@@ -121,19 +121,19 @@ public class CreateFileChange extends ResourceChange {
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
-		
+
 		URI location= file.getLocationURI();
 		if (location == null) {
 			result.addFatalError(Messages.format(
-				NLSChangesMessages.CreateFileChange_error_unknownLocation, 
+				NLSChangesMessages.CreateFileChange_error_unknownLocation,
 				BasicElementLabels.getPathLabel(file.getFullPath(), false)));
 			return result;
 		}
-		
+
 		IFileInfo jFile= EFS.getStore(location).fetchInfo();
 		if (jFile.exists()) {
 			result.addFatalError(Messages.format(
-				NLSChangesMessages.CreateFileChange_error_exists, 
+				NLSChangesMessages.CreateFileChange_error_exists,
 				BasicElementLabels.getPathLabel(file.getFullPath(), false)));
 			return result;
 		}
@@ -144,7 +144,7 @@ public class CreateFileChange extends ResourceChange {
 
 		InputStream is= null;
 		try {
-			pm.beginTask(NLSChangesMessages.createFile_creating_resource, 3); 
+			pm.beginTask(NLSChangesMessages.createFile_creating_resource, 3);
 
 			initializeEncoding();
 			IFile file= getOldFile(new SubProgressMonitor(pm, 1));

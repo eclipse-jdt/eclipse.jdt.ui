@@ -27,25 +27,25 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
- * Finds declarations of the selected element in the enclosing project 
+ * Finds declarations of the selected element in the enclosing project
  * of the selected element.
  * The action is applicable to selections representing a Java element.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
-	
+
 	/**
-	 * Creates a new <code>FindDeclarationsInProjectAction</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>FindDeclarationsInProjectAction</code>. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FindDeclarationsInProjectAction(IWorkbenchSite site) {
@@ -55,24 +55,24 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindDeclarationsInProjectAction(JavaEditor editor) {
 		super(editor);
 	}
-	
+
 	void init() {
-		setText(SearchMessages.Search_FindDeclarationsInProjectAction_label); 
-		setToolTipText(SearchMessages.Search_FindDeclarationsInProjectAction_tooltip); 
+		setText(SearchMessages.Search_FindDeclarationsInProjectAction_label);
+		setToolTipText(SearchMessages.Search_FindDeclarationsInProjectAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_PROJECT_ACTION);
 	}
-	
+
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		JavaEditor editor= getEditor();
-		
+
 		IJavaSearchScope scope;
 		String description;
 		boolean isInsideJRE= true;

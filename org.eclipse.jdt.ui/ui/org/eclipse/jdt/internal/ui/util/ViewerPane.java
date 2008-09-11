@@ -25,37 +25,37 @@ import org.eclipse.jface.action.ToolBarManager;
  * <P>
  */
 public class ViewerPane extends ViewForm {
-	
+
 	private ToolBarManager fToolBarManager;
 
 	public ViewerPane(Composite parent, int style) {
 		super(parent, style);
-		
+
 		marginWidth= 0;
 		marginHeight= 0;
-		
+
 		CLabel label= new CLabel(this, SWT.NONE);
 		setTopLeft(label);
-		
+
 		ToolBar tb= new ToolBar(this, SWT.FLAT);
 		setTopCenter(tb);
 		fToolBarManager= new ToolBarManager(tb);
 	}
-	
+
 	/**
 	 * Sets the receiver's title text.
 	 * @param label the label
 	 */
 	public void setText(String label) {
 		CLabel cl= (CLabel) getTopLeft();
-		cl.setText(label);		
+		cl.setText(label);
 	}
-	
+
 	public String getText() {
 		CLabel cl= (CLabel) getTopLeft();
 		return cl.getText();
 	}
-	
+
 	/**
 	 * Sets the receiver's title image.
 	 * @param image the image
@@ -64,12 +64,12 @@ public class ViewerPane extends ViewForm {
 		CLabel cl= (CLabel) getTopLeft();
 		cl.setImage(image);
 	}
-	
+
 	public Image getImage() {
 		CLabel cl= (CLabel) getTopLeft();
 		return cl.getImage();
 	}
-	
+
 	public ToolBarManager getToolBarManager() {
 		return fToolBarManager;
 	}

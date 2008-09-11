@@ -18,13 +18,13 @@ import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 /**
  * This action toggles whether the type hierarchy links its selection to the active
  * editor.
- * 
+ *
  * @since 2.1
  */
 public class ToggleLinkingAction extends AbstractToggleLinkingAction {
-	
+
 	private ITypeHierarchyViewPart fHierarchyViewPart;
-	
+
 	/**
 	 * Constructs a new action.
 	 * @param part the type hierarchy part

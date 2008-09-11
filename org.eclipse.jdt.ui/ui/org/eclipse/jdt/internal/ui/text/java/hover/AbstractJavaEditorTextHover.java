@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import org.eclipse.swt.widgets.Shell;
 
-
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -92,10 +91,10 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		return JavaWordFinder.findWord(textViewer.getDocument(), offset);
 	}
-	
+
 	/**
 	 * Returns the Java elements at the given hover region.
-	 * 
+	 *
 	 * @param textViewer the text viewer
 	 * @param hoverRegion the hover region
 	 * @return the array with the Java elements or <code>null</code>
@@ -109,7 +108,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		 */
 		if (hoverRegion.getLength() == 0)
 			return null;
-		
+
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
 			try {
@@ -144,7 +143,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			}
 		};
 	}
-	
+
 	protected ITypeRoot getEditorInputJavaElement() {
 		IEditorPart editor= getEditor();
 		if (editor != null)

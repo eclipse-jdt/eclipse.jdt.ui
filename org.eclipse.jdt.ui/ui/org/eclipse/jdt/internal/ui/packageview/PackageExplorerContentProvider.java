@@ -60,34 +60,34 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
- 
+
 /**
  * Content provider for the PackageExplorer.
- * 
+ *
  * <p>
  * Since 2.1 this content provider can provide the children for flat or hierarchical
  * layout.
  * </p>
- * 
+ *
  * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
  */
 public class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener, IPropertyChangeListener {
-	
+
 	protected static final int ORIGINAL= 0;
 	protected static final int PARENT= 1 << 0;
 	protected static final int GRANT_PARENT= 1 << 1;
 	protected static final int PROJECT= 1 << 2;
-	
+
 	private TreeViewer fViewer;
 	private Object fInput;
 	private boolean fIsFlatLayout;
 	private boolean fShowLibrariesNode;
 	private boolean fFoldPackages;
-	
+
 	private Collection fPendingUpdates;
-	
+
 	private UIJob fUpdateJob;
-		
+
 	/**
 	 * Creates a new content provider for Java elements.
 	 * @param provideMembers if set, members of compilation units and class files are shown
@@ -99,18 +99,18 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		fFoldPackages= arePackagesFoldedInHierarchicalLayout();
 		fPendingUpdates= null;
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-		
+
 		fUpdateJob= null;
 	}
-	
+
 	private boolean arePackagesFoldedInHierarchicalLayout(){
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER);
 	}
-			
+
 	protected Object getViewerInput() {
 		return fInput;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on IElementChangedListener.
 	 */
@@ -171,7 +171,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		fUpdateJob.schedule();
 	}
-	
+
 	/**
 	 * Run all of the runnables that are the widget updates. Must be called in the display thread.
 	 */
@@ -188,14 +188,14 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		}
 	}
-	
+
 	private void runUpdates(Collection runnables) {
 		Iterator runnableIterator = runnables.iterator();
 		while (runnableIterator.hasNext()){
 			((Runnable) runnableIterator.next()).run();
 		}
 	}
-	
+
 
 	private boolean inputDeleted(Collection runnables) {
 		if (fInput == null)
@@ -228,7 +228,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (fIsFlatLayout) {
 			return super.getPackageFragmentRootContent(root);
 		}
-		
+
 		// hierarchical package mode
 		ArrayList result= new ArrayList();
 		getHierarchicalPackageChildren(root, null, result);
@@ -240,7 +240,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		return result.toArray();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageContent(org.eclipse.jdt.core.IPackageFragment)
 	 */
@@ -248,10 +248,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (fIsFlatLayout) {
 			return super.getPackageContent(fragment);
 		}
-		
+
 		// hierarchical package mode
 		ArrayList result= new ArrayList();
-		
+
 		getHierarchicalPackageChildren((IPackageFragmentRoot) fragment.getParent(), fragment, result);
 		Object[] nonPackages= super.getPackageContent(fragment);
 		if (result.isEmpty())
@@ -261,7 +261,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		return result.toArray();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getFolderContent(org.eclipse.core.resources.IFolder)
 	 */
@@ -269,10 +269,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (fIsFlatLayout) {
 			return super.getFolderContent(folder);
 		}
-		
+
 		// hierarchical package mode
 		ArrayList result= new ArrayList();
-		
+
 		getHierarchicalPackagesInFolder(folder, result);
 		Object[] others= super.getFolderContent(folder);
 		if (result.isEmpty())
@@ -282,8 +282,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		return result.toArray();
 	}
-	
-	
+
+
 	public Object[] getChildren(Object parentElement) {
 		try {
 			if (parentElement instanceof IJavaModel)
@@ -291,29 +291,29 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 			if (parentElement instanceof PackageFragmentRootContainer)
 				return getContainerPackageFragmentRoots((PackageFragmentRootContainer)parentElement);
-				
+
 			if (parentElement instanceof IProject) {
 				IProject project= (IProject) parentElement;
 				if (project.isAccessible())
 					return project.members();
 				return NO_CHILDREN;
 			}
-			
+
 			return super.getChildren(parentElement);
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRoots(org.eclipse.jdt.core.IJavaProject)
 	 */
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
-			
+
 		List result= new ArrayList();
-		
+
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
@@ -336,11 +336,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				}
 			}
 		}
-		
+
 		if (fShowLibrariesNode) {
 			result.add(new LibraryContainer(project));
 		}
-		
+
 		// separate loop to make sure all containers are on the classpath
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
 		for (int i= 0; i < rawClasspath.length; i++) {
@@ -372,7 +372,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			// up the parent for package fragment roots so that they refer
 			// to the container and containers refer to the project
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			
+
 			try {
 				IClasspathEntry entry= root.getRawClasspathEntry();
 				int entryKind= entry.getEntryKind();
@@ -407,7 +407,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	// hierarchical packages
 	/**
 	 * Returns the hierarchical packages inside a given fragment or root.
-	 * 
+	 *
 	 * @param parent the parent package fragment root
 	 * @param fragment the package to get the children for or 'null' to get the children of the root
 	 * @param result Collection where the resulting elements are added
@@ -430,7 +430,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the hierarchical packages inside a given folder.
 	 * @param folder The parent folder
@@ -484,7 +484,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		return parent;
 	}
-	
+
 	private static IPackageFragment getFolded(IJavaElement[] children, IPackageFragment pack) throws JavaModelException {
 		while (isEmpty(pack)) {
 			IPackageFragment collapsed= findSinglePackageChild(pack, children);
@@ -495,11 +495,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		return pack;
 	}
-		
+
 	private static boolean isEmpty(IPackageFragment fragment) throws JavaModelException {
 		return !fragment.containsJavaResources() && fragment.getNonJavaResources().length == 0;
 	}
-	
+
 	private static IPackageFragment findSinglePackageChild(IPackageFragment fragment, IJavaElement[] children) {
 		String prefix= fragment.getElementName() + '.';
 		int prefixLen= prefix.length();
@@ -517,13 +517,13 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		return found;
 	}
-	
+
 	// ------ delta processing ------
 
 	/**
 	 * Processes a delta recursively. When more than two children are affected the
 	 * tree is fully refreshed starting at this node.
-	 * 
+	 *
 	 * @param delta the delta to process
 	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
 	 * @return true is returned if the conclusion is to refresh a parent of an element. In that case no siblings need
@@ -531,19 +531,19 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 * @throws JavaModelException thrown when the access to an element failed
 	 */
 	private boolean processDelta(IJavaElementDelta delta, Collection runnables) throws JavaModelException {
-	
+
 		int kind= delta.getKind();
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
 		int elementType= element.getElementType();
-		
-		
+
+
 		if (elementType != IJavaElement.JAVA_MODEL && elementType != IJavaElement.JAVA_PROJECT) {
 			IJavaProject proj= element.getJavaProject();
 			if (proj == null || !proj.getProject().isOpen()) // TODO: Not needed if parent already did the 'open' check!
 				return false;
 		}
-		
+
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
 			if ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == IJavaElementDelta.F_CONTENT) {
 				if (!fIsFlatLayout) {
@@ -557,7 +557,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postRefresh(internalGetParent(element), PARENT, element, runnables);
 				return true;
 			}
-			
+
 			if (!fIsFlatLayout) {
 				if (kind == IJavaElementDelta.REMOVED) {
 					final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
@@ -587,27 +587,27 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				return false;
 			}
 		}
-		
+
 		if (elementType == IJavaElement.COMPILATION_UNIT) {
 			ICompilationUnit cu= (ICompilationUnit) element;
 			if (!JavaModelUtil.isPrimary(cu)) {
 				return false;
 			}
-						
+
 			if (!getProvideMembers() && cu.isWorkingCopy() && kind == IJavaElementDelta.CHANGED) {
 				return false;
 			}
-			
+
 			if (kind == IJavaElementDelta.CHANGED && !isStructuralCUChange(flags)) {
 				return false; // test moved ahead
 			}
-			
+
 			if (!isOnClassPath(cu)) { // TODO: isOnClassPath expensive! Should be put after all cheap tests
 				return false;
 			}
-			
+
 		}
-		
+
 		if (elementType == IJavaElement.JAVA_PROJECT) {
 			// handle open and closing of a project
 			if ((flags & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0) {
@@ -627,7 +627,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				return false;
 			}
 		}
-	
+
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object parent= internalGetParent(element);
 			if (element instanceof IPackageFragment) {
@@ -636,7 +636,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					postRefresh(parent, PARENT, element, runnables);
 				return true;
 			}
-			
+
 			postRemove(element, runnables);
 			if (parent instanceof IPackageFragment)
 				postUpdateIcon((IPackageFragment)parent, runnables);
@@ -649,7 +649,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 			return false;
 		}
-	
+
 		if (kind == IJavaElementDelta.ADDED) {
 			Object parent= internalGetParent(element);
 			// we are filtering out empty subpackages, so we
@@ -673,7 +673,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postAdd(parent, element, runnables);
 			}
 		}
-	
+
 		if (elementType == IJavaElement.COMPILATION_UNIT || elementType == IJavaElement.CLASS_FILE) {
 			if (kind == IJavaElementDelta.CHANGED) {
 				// isStructuralCUChange already performed above
@@ -682,7 +682,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 			return false;
 		}
-		
+
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 			// the contents of an external JAR or class folder has changed
 			if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) {
@@ -694,30 +694,30 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postRefresh(internalGetParent(element), PARENT, element, runnables);
 				return true;
 			}
-			
+
 			// the source attachment of a JAR has changed
 			if ((flags & (IJavaElementDelta.F_SOURCEATTACHED | IJavaElementDelta.F_SOURCEDETACHED)) != 0)
 				postUpdateIcon(element, runnables);
-			
+
 			if (isClassPathChange(delta)) {
 				 // throw the towel and do a full refresh of the affected java project.
 				postRefresh(element.getJavaProject(), PROJECT, element, runnables);
 				return true;
 			}
 		}
-		
+
 		handleAffectedChildren(delta, element, runnables);
 		return false;
 	}
-	
+
 	private static boolean isStructuralCUChange(int flags) {
 		// No refresh on working copy creation (F_PRIMARY_WORKING_COPY)
 		return (flags & IJavaElementDelta.F_CHILDREN) != 0 || (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
 	}
-	
+
 	/* package */ void handleAffectedChildren(IJavaElementDelta delta, IJavaElement element, Collection runnables) throws JavaModelException {
 		int count= 0;
-		
+
 		IResourceDelta[] resourceDeltas= delta.getResourceDeltas();
 		if (resourceDeltas != null) {
 			for (int i= 0; i < resourceDeltas.length; i++) {
@@ -768,7 +768,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		}
 	}
-	
+
 	protected void processAffectedChildren(IJavaElementDelta[] affectedChildren, Collection runnables) throws JavaModelException {
 		for (int i= 0; i < affectedChildren.length; i++) {
 			processDelta(affectedChildren[i], runnables);
@@ -806,11 +806,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private IJavaElement findAddedElement(IJavaElementDelta delta) {
 		if (delta.getKind() == IJavaElementDelta.ADDED)
 			return delta.getElement();
-		
+
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		for (int i= 0; i < affectedChildren.length; i++)
 			return findAddedElement(affectedChildren[i]);
-			
+
 		return null;
 	}
 
@@ -830,7 +830,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	/**
 	 * Process a resource delta.
-	 * 
+	 *
 	 * @param delta the delta to process
 	 * @param parent the parent
 	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
@@ -839,12 +839,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private boolean processResourceDelta(IResourceDelta delta, Object parent, Collection runnables) {
 		int status= delta.getKind();
 		int flags= delta.getFlags();
-		
+
 		IResource resource= delta.getResource();
 		// filter out changes affecting the output folder
 		if (resource == null)
 			return false;
-			
+
 		// this could be optimized by handling all the added children in the parent
 		if ((status & IResourceDelta.REMOVED) != 0) {
 			if (parent instanceof IPackageFragment) {
@@ -878,7 +878,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			return true;
 		}
 		IResourceDelta[] resourceDeltas= delta.getAffectedChildren();
-		
+
 		int count= 0;
 		for (int i= 0; i < resourceDeltas.length; i++) {
 			int kind= resourceDeltas[i].getKind();
@@ -897,15 +897,15 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		return false;
 	}
-	
+
 	public void setIsFlatLayout(boolean state) {
 		fIsFlatLayout= state;
 	}
-	
+
 	public void setShowLibrariesNode(boolean state) {
 		fShowLibrariesNode= state;
 	}
-	
+
 	private void postRefresh(Object root, int relation, Object affectedElement, Collection runnables) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
@@ -916,10 +916,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		augmentElementToRefresh(toRefresh, relation, affectedElement);
 		postRefresh(toRefresh, true, runnables);
 	}
-	
+
 	/**
 	 * Can be implemented by subclasses to add additional elements to refresh
-	 * 
+	 *
 	 * @param toRefresh the elements to refresh
 	 * @param relation the relation to the affected element ({@link #GRANT_PARENT}, {@link #PARENT}, {@link #ORIGINAL}, {@link #PROJECT})
 	 * @param affectedElement the affected element
@@ -982,8 +982,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		});
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */

@@ -16,6 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.osgi.framework.Bundle;
+
+import org.eclipse.swt.SWT;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -24,16 +28,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.SWT;
-
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-
-import org.osgi.framework.Bundle;
 
 /**
  * Describes a Java editor text hover.
@@ -63,8 +62,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns all Java editor text hovers contributed to the workbench.
-	 * 
-	 * @return an array with the contributed text hovers 
+	 *
+	 * @return an array with the contributed text hovers
 	 */
 	public static JavaEditorTextHoverDescriptor[] getContributedHovers() {
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
@@ -100,8 +99,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Creates a new Java Editor text hover descriptor from the given configuration element.
-	 * 
-	 * @param element the configuration element 
+	 *
+	 * @param element the configuration element
 	 */
 	private JavaEditorTextHoverDescriptor(IConfigurationElement element) {
 		Assert.isNotNull(element);
@@ -110,8 +109,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Creates the Java editor text hover.
-	 * 
-	 * @return the text hover 
+	 *
+	 * @return the text hover
 	 */
 	public IJavaEditorTextHover createTextHover() {
  		String pluginId = fElement.getContributor().getName();
@@ -131,8 +130,8 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the hover's id.
-	 * 
-	 * @return the id 
+	 *
+	 * @return the id
 	 */
 	public String getId() {
 			return fElement.getAttribute(ID_ATTRIBUTE);
@@ -140,7 +139,7 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the hover's class name.
-	 * 
+	 *
 	 * @return the class name
 	 */
 	public String getHoverClassName() {
@@ -149,7 +148,7 @@ public class JavaEditorTextHoverDescriptor {
 
 	/**
 	 * Returns the hover's label.
-	 * 
+	 *
 	 * @return the label
 	 */
 	public String getLabel() {

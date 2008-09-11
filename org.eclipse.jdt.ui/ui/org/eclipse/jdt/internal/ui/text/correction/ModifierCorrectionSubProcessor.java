@@ -306,7 +306,7 @@ public class ModifierCorrectionSubProcessor {
 			String label= null;
 			int problemId= problem.getProblemId();
 
-			
+
 			int excludedModifiers= 0;
 			int includedModifiers= 0;
 
@@ -377,17 +377,17 @@ public class ModifierCorrectionSubProcessor {
 					Assert.isTrue(false, "not supported"); //$NON-NLS-1$
 					return;
 			}
-			
+
 			if (label == null)
 				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_removeinvalidmodifiers_description, methodName);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
-			
+
 			if (problemId == IProblem.IllegalModifierCombinationFinalVolatileForField) {
 				proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_removefinal_description, cu, binding, selectedNode, 0, Modifier.FINAL, relevance + 1, image));
 			}
-			
+
 			if (problemId == IProblem.UnexpectedStaticModifierForField && binding instanceof IVariableBinding) {
 				ITypeBinding declClass= ((IVariableBinding) binding).getDeclaringClass();
 				if (declClass.isMember()) {
@@ -641,7 +641,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}
-	
+
 	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IProposableFix fix= Java50Fix.createAddOverrideAnnotationFix(context.getASTRoot(), problem);
 		if (fix != null) {
@@ -653,7 +653,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal);
 		}
 	}
-	
+
 	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IProposableFix fix= Java50Fix.createAddDeprectatedAnnotation(context.getASTRoot(), problem);
 		if (fix != null) {
@@ -665,9 +665,9 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal);
 		}
 	}
-	
+
 	public static void addOverridingDeprecatedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		
+
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -693,13 +693,13 @@ public class ModifierCorrectionSubProcessor {
 			newTag.setTagName(TagElement.TAG_DEPRECATED);
 			JavadocTagsSubProcessor.insertTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
 		}
-		
+
 		String label= CorrectionMessages.ModifierCorrectionSubProcessor_overrides_deprecated_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 15, image);
 		proposals.add(proposal);
 	}
-		
+
 	public static void removeOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -716,7 +716,7 @@ public class ModifierCorrectionSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 			proposals.add(proposal);
-			
+
 			QuickAssistProcessor.getCreateInSuperClassProposals(context, methodDecl.getName(), proposals);
 		}
 	}
@@ -738,9 +738,9 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.SYNCHRONIZED, 0, 5, image));
 		}
 	}
-	
+
 	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
-	
+
 	private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroup.Proposal {
 
 		private final int fModifier;
@@ -793,16 +793,16 @@ public class ModifierCorrectionSubProcessor {
 			}
 		}
 	}
-	
+
 	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List modifiers, boolean inInterface) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
-			
+
 			LinkedProposalPositionGroup positionGroup= linkedProposalModel.getPositionGroup(KEY_MODIFIER, true);
 			positionGroup.addPosition(rewrite.track(modifier), false);
 			positionGroup.addProposal(new ModifierLinkedModeProposal(selected, 10));
-			
+
 			// add all others
 			int[] flagValues= inInterface ? new int[] { Modifier.PUBLIC, 0 } : new int[] { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
 			for (int i= 0; i < flagValues.length; i++) {
@@ -810,9 +810,9 @@ public class ModifierCorrectionSubProcessor {
 					positionGroup.addProposal(new ModifierLinkedModeProposal(flagValues[i], 9 - i));
 				}
 			}
-		} 
+		}
 	}
-	
+
 	private static Modifier findVisibilityModifier(List modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
 			Object curr= modifiers.get(i);
@@ -826,7 +826,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		return null;
 	}
-	
+
 	private static Annotation findAnnotation(String qualifiedTypeName, List modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
 			Object curr= modifiers.get(i);
@@ -840,5 +840,5 @@ public class ModifierCorrectionSubProcessor {
 		}
 		return null;
 	}
-	
+
 }

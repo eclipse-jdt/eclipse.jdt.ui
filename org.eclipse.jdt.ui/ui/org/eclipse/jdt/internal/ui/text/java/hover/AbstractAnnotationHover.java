@@ -12,14 +12,6 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyledText;
@@ -47,6 +39,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
@@ -77,6 +77,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
@@ -99,7 +100,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	/**
 	 * An annotation info contains information about an {@link Annotation}
 	 * It's used as input for the {@link AbstractAnnotationHover.AnnotationInformationControl}
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	protected static class AnnotationInfo {
@@ -116,7 +117,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/**
 		 * Create completion proposals which can resolve the given annotation at
 		 * the given position. Returns an empty array if no such proposals exist.
-		 * 
+		 *
 		 * @return the proposals or an empty array
 		 */
 		public ICompletionProposal[] getCompletionProposals() {
@@ -125,7 +126,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 		/**
 		 * Adds actions to the given toolbar.
-		 * 
+		 *
 		 * @param manager the toolbar manager to add actions to
 		 * @param infoControl the information control
 		 */
@@ -139,7 +140,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * The annotation information control shows informations about a given
 	 * {@link AbstractAnnotationHover.AnnotationInfo}. It can also show a toolbar
 	 * and a list of {@link ICompletionProposal}s.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static class AnnotationInformationControl extends AbstractInformationControl implements IInformationControlExtension2 {
@@ -151,18 +152,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 		public AnnotationInformationControl(Shell parentShell, String statusFieldText) {
 			super(parentShell, statusFieldText);
-			
+
 			fMarkerAnnotationAccess= new DefaultMarkerAnnotationAccess();
 			create();
 		}
 
 		public AnnotationInformationControl(Shell parentShell, ToolBarManager toolBarManager) {
 			super(parentShell, toolBarManager);
-			
+
 			fMarkerAnnotationAccess= new DefaultMarkerAnnotationAccess();
 			create();
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.IInformationControl#setInformation(java.lang.String)
 		 */
@@ -179,14 +180,14 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			disposeDeferredCreatedContent();
 			deferredCreateContent();
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.IInformationControlExtension#hasContents()
 		 */
 		public boolean hasContents() {
 			return fInput != null;
 		}
-		
+
 		private AnnotationInfo getAnnotationInfo() {
 			return fInput;
 		}
@@ -208,7 +209,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				disposeDeferredCreatedContent();
 			super.setVisible(visible);
 		}
-		
+
 		protected void disposeDeferredCreatedContent() {
 			Control[] children= fParent.getChildren();
 			for (int i= 0; i < children.length; i++) {
@@ -230,7 +231,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			layout.marginHeight= 0;
 			fParent.setLayout(layout);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.AbstractInformationControl#computeSizeHint()
 		 */
@@ -242,10 +243,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				return preferedSize;
 
 			Point constrainedSize= getShell().computeSize(constrains.x, SWT.DEFAULT, true);
-			
+
 			int width= Math.min(preferedSize.x, constrainedSize.x);
 			int height= Math.max(preferedSize.y, constrainedSize.y);
-			
+
 			return new Point(width, height);
 		}
 
@@ -267,7 +268,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 */
 		protected void deferredCreateContent() {
 			fillToolbar();
-			
+
 			createAnnotationInformation(fParent, getAnnotationInfo().annotation);
 			setColorAndFont(fParent, fParent.getForeground(), fParent.getBackground(), JFaceResources.getDialogFont());
 
@@ -282,7 +283,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			control.setForeground(foreground);
 			control.setBackground(background);
 			control.setFont(font);
-			
+
 			if (control instanceof Composite) {
 				Control[] children= ((Composite) control).getChildren();
 				for (int i= 0; i < children.length; i++) {
@@ -372,14 +373,14 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 			scrolledComposite.setContent(composite);
 			setColorAndFont(scrolledComposite, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
-			
+
 			Point contentSize= composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			composite.setSize(contentSize);
-			
+
 			Point constraints= getSizeConstraints();
 			if (constraints != null && contentSize.x < constraints.x) {
 				ScrollBar horizontalBar= scrolledComposite.getHorizontalBar();
-				
+
 				int scrollBarHeight;
 				if (horizontalBar == null) {
 					Point scrollSize= scrolledComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
@@ -541,7 +542,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		public HoverControlCreator(IInformationControlCreator presenterControlCreator) {
 			fPresenterControlCreator= presenterControlCreator;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -555,7 +556,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				}
 			};
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
 		 */
@@ -569,10 +570,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Action to configure the annotation preferences.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static final class ConfigureAnnotationsAction extends Action {
@@ -594,12 +595,12 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 */
 		public void run() {
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			
+
 			Object data= null;
 			AnnotationPreference preference= getAnnotationPreference(fAnnotation);
 			if (preference != null)
 				data= preference.getPreferenceLabel();
-			
+
 			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
 			PreferencesUtil.createPreferenceDialogOn(shell, "org.eclipse.ui.editors.preferencePages.Annotations", null, data).open(); //$NON-NLS-1$
 		}
@@ -611,22 +612,22 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 	/**
 	 * The hover control creator.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private IInformationControlCreator fHoverControlCreator;
 	/**
 	 * The presentation control creator.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private IInformationControlCreator fPresenterControlCreator;
-	
-	
+
+
 	public AbstractAnnotationHover(boolean allAnnotations) {
 		fAllAnnotations= allAnnotations;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
@@ -659,7 +660,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			else
 				parent= model.getAnnotationIterator();
 			Iterator e= new JavaAnnotationIterator(parent, fAllAnnotations);
-			
+
 			int layer= -1;
 			Annotation annotation= null;
 			Position position= null;

@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Filters synthetic members
- * 
+ *
  * @since 3.1
  */
 public class SyntheticMembersFilter extends ViewerFilter {

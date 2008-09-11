@@ -49,7 +49,7 @@ public class OpenAndExpand extends SelectionDispatchAction {
 		fOpenAction.run();
 		if(getSelection() != null && getSelection() instanceof IStructuredSelection)
 			expand(((IStructuredSelection)getSelection()).getFirstElement());
-		
+
 	}
 
 	public void run(ISelection selection) {
@@ -79,7 +79,7 @@ public class OpenAndExpand extends SelectionDispatchAction {
 	public void runWithEvent(Event event) {
 		fOpenAction.runWithEvent(event);
 	}
-	
+
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
 		fOpenAction.addPropertyChangeListener(listener);
 	}
@@ -265,5 +265,5 @@ public class OpenAndExpand extends SelectionDispatchAction {
 			fViewer.setExpandedState(target, !fViewer.getExpandedState(target));
 	}
 
-	 
+
 }

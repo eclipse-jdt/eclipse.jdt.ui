@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IProject;
 
 public class RefactoringProcessors {
-	
+
 	public static String[] getNatures(IProject[] projects) throws CoreException {
 		Set result= new HashSet();
 		for (int i= 0; i < projects.length; i++) {

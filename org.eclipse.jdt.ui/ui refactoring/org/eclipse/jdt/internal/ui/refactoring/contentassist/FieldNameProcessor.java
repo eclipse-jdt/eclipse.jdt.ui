@@ -14,13 +14,14 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -106,7 +107,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 		if (fFieldNameProposals.length == 0)
 			return null;
 		String input= contentAssistSubject.getDocument().get();
-		
+
 		ArrayList proposals= new ArrayList();
 		String prefix= input.substring(0, documentOffset);
 		ImageDescriptor imageDescriptor= JavaElementImageProvider.getFieldImageDescriptor(false, fRefactoring.getVisibility());
@@ -118,7 +119,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 			JavaCompletionProposal proposal= new JavaCompletionProposal(tempName, 0, input.length(), image, tempName, 0);
 			proposals.add(proposal);
 		}
-		fErrorMessage= proposals.size() > 0 ? null : JavaUIMessages.JavaEditor_codeassist_noCompletions; 
+		fErrorMessage= proposals.size() > 0 ? null : JavaUIMessages.JavaEditor_codeassist_noCompletions;
 		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 

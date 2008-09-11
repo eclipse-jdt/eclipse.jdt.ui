@@ -28,31 +28,31 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+
+import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 
 
 public class JavadocUtil {
-	
+
 	private JavadocUtil() {
 		// static-only
 	}
-	
+
 	//TODO: is a copy of ChangeSignatureRefactoring.DeclarationUpdate#createParamTag(..)
 	public static TagElement createParamTag(String parameterName, AST ast, IJavaProject javaProject) {
 		TagElement paramNode= ast.newTagElement();
 		paramNode.setTagName(TagElement.TAG_PARAM);
-	
+
 		SimpleName simpleName= ast.newSimpleName(parameterName);
 		paramNode.fragments().add(simpleName);
-	
+
 		TextElement textElement= ast.newTextElement();
 		String text= StubUtility.getTodoTaskTag(javaProject);
 		if (text != null)
 			textElement.setText(text); //TODO: use template with {@todo} ...
 		paramNode.fragments().add(textElement);
-		
+
 		return paramNode;
 	}
 
@@ -75,8 +75,8 @@ public class JavadocUtil {
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Adds a "param" javadoc tag for a new last parameter if necessary.
 	 * @param parameterName
@@ -89,7 +89,7 @@ public class JavadocUtil {
 			ASTRewrite astRewrite, IJavaProject javaProject, TextEditGroup groupDescription) {
 		if (! shouldAddParamJavadoc(methodDeclaration))
 			return;
-		
+
 		ListRewrite tagsRewrite= astRewrite.getListRewrite(methodDeclaration.getJavadoc(), Javadoc.TAGS_PROPERTY);
 		HashSet leadingNames= new HashSet();
 		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {

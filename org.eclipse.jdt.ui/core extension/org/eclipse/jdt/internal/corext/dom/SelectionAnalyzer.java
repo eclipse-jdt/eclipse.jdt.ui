@@ -15,60 +15,60 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Expression;
-
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
 
 
 /**
  * Maps a selection to a set of AST nodes.
  */
 public class SelectionAnalyzer extends GenericVisitor {
-	
+
 	private Selection fSelection;
 	private boolean fTraverseSelectedNode;
 	private ASTNode fLastCoveringNode;
-	
+
 	// Selected nodes
 	private List fSelectedNodes;
-	
+
 	public SelectionAnalyzer(Selection selection, boolean traverseSelectedNode) {
 		super(true);
 		Assert.isNotNull(selection);
 		fSelection= selection;
 		fTraverseSelectedNode= traverseSelectedNode;
 	}
-	
+
 	public boolean hasSelectedNodes() {
 		return fSelectedNodes != null && !fSelectedNodes.isEmpty();
 	}
-	
+
 	public ASTNode[] getSelectedNodes() {
 		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
 			return new ASTNode[0];
 		return (ASTNode[]) fSelectedNodes.toArray(new ASTNode[fSelectedNodes.size()]);
 	}
-	
+
 	public ASTNode getFirstSelectedNode() {
 		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
 			return null;
 		return (ASTNode)fSelectedNodes.get(0);
 	}
-	
+
 	public ASTNode getLastSelectedNode() {
 		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
 			return null;
 		return (ASTNode)fSelectedNodes.get(fSelectedNodes.size() - 1);
 	}
-	
+
 	public boolean isExpressionSelected() {
 		if (!hasSelectedNodes())
 			return false;
 		return fSelectedNodes.get(0) instanceof Expression;
 	}
-	
+
 	public IRegion getSelectedNodeRange() {
 		if (fSelectedNodes == null || fSelectedNodes.isEmpty())
 			return null;
@@ -77,17 +77,17 @@ public class SelectionAnalyzer extends GenericVisitor {
 		int start= firstNode.getStartPosition();
 		return new Region(start, lastNode.getStartPosition() + lastNode.getLength() - start);
 	}
-	
+
 	public ASTNode getLastCoveringNode() {
 		return fLastCoveringNode;
 	}
-	
+
 	protected Selection getSelection() {
 		return fSelection;
 	}
-	
+
 	//--- node management ---------------------------------------------------------
-	
+
 	protected boolean visitNode(ASTNode node) {
 		// The selection lies behind the node.
 		if (fSelection.liesOutside(node)) {
@@ -109,16 +109,16 @@ public class SelectionAnalyzer extends GenericVisitor {
 		// to the statement. So dive into it to check if sub nodes are fully covered.
 		return true;
 	}
-	
+
 	protected void reset() {
 		fSelectedNodes= null;
 	}
-	
+
 	protected void handleFirstSelectedNode(ASTNode node) {
 		fSelectedNodes= new ArrayList(5);
 		fSelectedNodes.add(node);
 	}
-	
+
 	protected void handleNextSelectedNode(ASTNode node) {
 		if (getFirstSelectedNode().getParent() == node.getParent()) {
 			fSelectedNodes.add(node);
@@ -128,12 +128,12 @@ public class SelectionAnalyzer extends GenericVisitor {
 	protected boolean handleSelectionEndsIn(ASTNode node) {
 		return false;
 	}
-	
+
 	protected List internalGetSelectedNodes() {
 		return fSelectedNodes;
 	}
-	
+
 	private boolean isFirstNode() {
 		return fSelectedNodes == null;
-	}	
+	}
 }

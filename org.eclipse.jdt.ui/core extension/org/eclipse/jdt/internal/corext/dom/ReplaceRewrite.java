@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -23,15 +23,15 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 
 public class ReplaceRewrite {
-	
+
 	protected ASTRewrite fRewrite;
 	protected ASTNode[] fToReplace;
 	protected StructuralPropertyDescriptor fDescriptor;
-	
+
 	public static ReplaceRewrite create(ASTRewrite rewrite, ASTNode[] nodes) {
 		return new ReplaceRewrite(rewrite, nodes);
 	}
-	
+
 	protected ReplaceRewrite(ASTRewrite rewrite, ASTNode[] nodes) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(nodes);
@@ -43,7 +43,7 @@ public class ReplaceRewrite {
 			Assert.isTrue(fDescriptor instanceof ChildListPropertyDescriptor);
 		}
 	}
-	
+
 	public void replace(ASTNode[] replacements, TextEditGroup description) {
 		if (fToReplace.length == 1) {
 			if (replacements.length == 1) {
@@ -63,7 +63,7 @@ public class ReplaceRewrite {
 	protected void handleOneMany(ASTNode[] replacements, TextEditGroup description) {
 		handleManyMany(replacements, description);
 	}
-	
+
 	protected void handleManyMany(ASTNode[] replacements, TextEditGroup description) {
 		ListRewrite container= fRewrite.getListRewrite(fToReplace[0].getParent(), (ChildListPropertyDescriptor)fDescriptor);
 		if (fToReplace.length == replacements.length) {

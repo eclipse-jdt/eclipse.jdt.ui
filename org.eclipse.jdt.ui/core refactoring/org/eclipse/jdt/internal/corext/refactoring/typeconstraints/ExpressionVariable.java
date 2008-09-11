@@ -25,12 +25,12 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 public final class ExpressionVariable extends ConstraintVariable {
-	
+
 	private final CompilationUnitRange fRange;
 	private final String fSource;
 	private final IBinding fExpressionBinding;
 	private final int fExpressionType;
-		
+
 	public ExpressionVariable(Expression expression){
 		super(expression.resolveTypeBinding());
 		fSource= expression.toString();
@@ -40,18 +40,18 @@ public final class ExpressionVariable extends ConstraintVariable {
 		fExpressionBinding= resolveBinding(expression);
 		fExpressionType= expression.getNodeType();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		return "[" + fSource + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	public CompilationUnitRange getCompilationUnitRange() {
 		return fRange;
 	}
-	
+
 	public int getExpressionType() {
 		return fExpressionType;
 	}
@@ -59,7 +59,7 @@ public final class ExpressionVariable extends ConstraintVariable {
 	public IBinding getExpressionBinding() {
 		return fExpressionBinding;
 	}
-	
+
 	public static IBinding resolveBinding(Expression expression){
 		if (expression instanceof Name)
 			return ((Name)expression).resolveBinding();
@@ -79,5 +79,5 @@ public final class ExpressionVariable extends ConstraintVariable {
 			return resolveBinding(((ConditionalExpression)expression).getThenExpression());
 		return null;
 	}
-	
+
 }

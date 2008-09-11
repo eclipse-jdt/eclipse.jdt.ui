@@ -16,9 +16,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 /**
  * This is the interface expected of extensions to the extension point
  * <code>org.eclipse.jdt.ui.queryParticipants</code>.
- * <p> 
- * A <code>IQueryParticipant</code> is called during the execution of a 
- * Java search query. It can report matches via an {@link ISearchRequestor} and 
+ * <p>
+ * A <code>IQueryParticipant</code> is called during the execution of a
+ * Java search query. It can report matches via an {@link ISearchRequestor} and
  * may contribute a {@link IMatchPresentation} to help render the elements it contributes.
  * </p>
  * <p>
@@ -31,7 +31,7 @@ public interface IQueryParticipant {
 	/**
 	 * Executes the search described by the given <code>querySpecification</code>. Matches are reported
 	 * to the given <code>requester</code>.
-	 * The interpretation of what a given Java search (e.g. "References to class Foo") means is up to the 
+	 * The interpretation of what a given Java search (e.g. "References to class Foo") means is up to the
 	 * participant.
 	 * @param requestor The requester to report matches to.
 	 * @param querySpecification The specification of the query to run.

@@ -26,17 +26,17 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 
 public class PackageExplorerOpenActionProvider extends CommonActionProvider {
-	
+
 
 	private IAction fOpenAndExpand;
 	private OpenEditorActionGroup fOpenGroup;
 
 	private boolean fInViewPart = false;
 
-	public void fillActionBars(IActionBars actionBars) { 
-		if (fInViewPart) { 
-			fOpenGroup.fillActionBars(actionBars); 
-			
+	public void fillActionBars(IActionBars actionBars) {
+		if (fInViewPart) {
+			fOpenGroup.fillActionBars(actionBars);
+
 			if (fOpenAndExpand == null && fOpenGroup.getOpenAction().isEnabled()) // TODO: is not updated!
 				actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, fOpenGroup.getOpenAction());
 			else if (fOpenAndExpand != null && fOpenAndExpand.isEnabled())
@@ -50,7 +50,7 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 		if (fInViewPart) {
 			if (fOpenGroup.getOpenAction().isEnabled()) {
 				fOpenGroup.fillContextMenu(menu);
-			} 
+			}
 		}
 	}
 
@@ -59,24 +59,24 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 		ICommonViewerWorkbenchSite workbenchSite = null;
 		if (site.getViewSite() instanceof ICommonViewerWorkbenchSite)
 			workbenchSite = (ICommonViewerWorkbenchSite) site.getViewSite();
- 
+
 		if (workbenchSite != null) {
 			if (workbenchSite.getPart() != null && workbenchSite.getPart() instanceof IViewPart) {
 				IViewPart viewPart = (IViewPart) workbenchSite.getPart();
 
-				fOpenGroup = new OpenEditorActionGroup(viewPart); 
+				fOpenGroup = new OpenEditorActionGroup(viewPart);
 
 				if (site.getStructuredViewer() instanceof TreeViewer)
 					fOpenAndExpand = new OpenAndExpand(workbenchSite.getSite(), (OpenAction) fOpenGroup.getOpenAction(), (TreeViewer) site.getStructuredViewer());
 				fInViewPart = true;
-			} 
-		} 
+			}
+		}
 	}
 
 	public void setContext(ActionContext context) {
 		super.setContext(context);
 		if (fInViewPart) {
-			fOpenGroup.setContext(context); 
+			fOpenGroup.setContext(context);
 		}
 	}
 

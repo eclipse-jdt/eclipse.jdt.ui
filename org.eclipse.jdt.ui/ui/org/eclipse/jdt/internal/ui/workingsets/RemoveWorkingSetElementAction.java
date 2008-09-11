@@ -30,9 +30,9 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 
 	public RemoveWorkingSetElementAction(IWorkbenchSite site) {
 		super(site);
-		setText(WorkingSetMessages.RemoveWorkingSetElementAction_label); 
+		setText(WorkingSetMessages.RemoveWorkingSetElementAction_label);
 	}
-	
+
 	public void selectionChanged(IStructuredSelection selection) {
 		IWorkingSet workingSet= getWorkingSet(selection);
 		setEnabled(workingSet != null && !OthersWorkingSetUpdater.ID.equals(workingSet.getId()));
@@ -64,7 +64,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		}
 		return result;
 	}
-	
+
 	public void run(IStructuredSelection selection) {
 		IWorkingSet ws= getWorkingSet(selection);
 		if (ws == null)
@@ -75,7 +75,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 			Object object= iter.next();
 			if (object instanceof IAdaptable) {
 				IAdaptable[] adaptedElements= ws.adaptElements(new IAdaptable[] {(IAdaptable)object});
-				if (adaptedElements.length == 1) {					
+				if (adaptedElements.length == 1) {
 					elements.remove(adaptedElements[0]);
 				}
 			}

@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * @since 3.3
  */
 public class DisableSpellCheckingProposal implements IJavaCompletionProposal {
-	
+
 	/** The invocation context */
 	private IInvocationContext fContext;
 

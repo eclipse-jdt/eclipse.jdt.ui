@@ -37,27 +37,27 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (exception == null)		// Safety net for null bindings when compiling fails.
 			return true;
-		
+
 		addException(exception);
 		return true;
 	}
-	
+
 	public boolean visit(MethodInvocation node) {
 		return handleExceptions((IMethodBinding)node.getName().resolveBinding());
 	}
-	
+
 	public boolean visit(SuperMethodInvocation node) {
 		return handleExceptions((IMethodBinding)node.getName().resolveBinding());
 	}
-	
+
 	public boolean visit(ClassInstanceCreation node) {
 		return handleExceptions(node.resolveConstructorBinding());
 	}
-	
+
 	private boolean handleExceptions(IMethodBinding binding) {
 		if (binding == null)
 			return true;
 		addExceptions(binding.getExceptionTypes());
 		return true;
-	}	
+	}
 }

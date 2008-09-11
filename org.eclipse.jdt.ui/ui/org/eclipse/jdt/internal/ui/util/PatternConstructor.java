@@ -17,7 +17,7 @@ import java.util.regex.PatternSyntaxException;
  *
  */
 public class PatternConstructor {
-	
+
 
 	private PatternConstructor() {
 		// don't instantiate
@@ -34,15 +34,15 @@ public class PatternConstructor {
 	 */
 	public static Pattern createPattern(String pattern, boolean isCaseSensitive, boolean isRegexSearch) throws PatternSyntaxException {
 		if (!isRegexSearch) {
-			pattern=  asRegEx(pattern, new StringBuffer()).toString();			
+			pattern=  asRegEx(pattern, new StringBuffer()).toString();
 		}
-		
+
 		if (!isCaseSensitive)
 			return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.MULTILINE);
-		
+
 		return Pattern.compile(pattern, Pattern.MULTILINE);
 	}
-	
+
 	/**
 	 * Creates a pattern element from the pattern string which is either a reg-ex expression or in our old
 	 * 'StringMatcher' format.
@@ -66,22 +66,22 @@ public class PatternConstructor {
 		}
 		return createPattern(pattern.toString(), isCaseSensitive, true);
 	}
-	
-	
+
+
 	/**
 	 * Translates a StringMatcher pattern (using '*' and '?') to a regex pattern string
 	 * @param stringMatcherPattern a pattern using '*' and '?'
 	 * @param out string buffer
 	 * @return string buffer
 	 */
-	private static StringBuffer asRegEx(String stringMatcherPattern, StringBuffer out) {	
+	private static StringBuffer asRegEx(String stringMatcherPattern, StringBuffer out) {
 		boolean escaped= false;
 		boolean quoting= false;
-		
+
 		int i= 0;
 		while (i < stringMatcherPattern.length()) {
 			char ch= stringMatcherPattern.charAt(i++);
-			
+
 			if (ch == '*' && !escaped) {
 				if (quoting) {
 					out.append("\\E"); //$NON-NLS-1$
@@ -100,8 +100,8 @@ public class PatternConstructor {
 				continue;
 			} else if (ch == '\\' && !escaped) {
 				escaped= true;
-				continue;								
-				
+				continue;
+
 			} else if (ch == '\\' && escaped) {
 				escaped= false;
 				if (quoting) {
@@ -109,9 +109,9 @@ public class PatternConstructor {
 					quoting= false;
 				}
 				out.append("\\\\"); //$NON-NLS-1$
-				continue;								
+				continue;
 			}
-			
+
 			if (!quoting) {
 				out.append("\\Q"); //$NON-NLS-1$
 				quoting= true;
@@ -120,11 +120,11 @@ public class PatternConstructor {
 				out.append('\\');
 			out.append(ch);
 			escaped= ch == '\\';
-			
+
 		}
 		if (quoting)
 			out.append("\\E"); //$NON-NLS-1$
-		
+
 		return out;
 	}
 

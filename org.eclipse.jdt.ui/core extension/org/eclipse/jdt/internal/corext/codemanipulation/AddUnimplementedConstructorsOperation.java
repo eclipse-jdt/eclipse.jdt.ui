@@ -13,9 +13,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -24,6 +21,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * Workspace runnable to add unimplemented constructors.
- * 
+ *
  * @since 3.1
  */
 public final class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable {
@@ -89,7 +89,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Creates a new add unimplemented constructors operation.
-	 * 
+	 *
 	 * @param astRoot the compilation unit AST node
 	 * @param type the type to add the methods to
 	 * @param constructorsToImplement the method binding keys to implement
@@ -109,7 +109,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		if (!(node instanceof AnonymousClassDeclaration || node instanceof AbstractTypeDeclaration)) {
 			throw new IllegalArgumentException("type has to map to a type declaration in the AST"); //$NON-NLS-1$
 		}
-		
+
 		fType= type;
 		fInsertPos= insertPos;
 		fASTRoot= astRoot;
@@ -117,7 +117,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		fSave= save;
 		fApply= apply;
 		fImports= imports;
-		
+
 		fCreateComments= StubUtility.doAddComments(astRoot.getJavaElement().getJavaProject());
 		fVisibility= Modifier.PUBLIC;
 		fOmitSuper= false;
@@ -125,7 +125,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Returns the method binding keys for which a constructor has been generated.
-	 * 
+	 *
 	 * @return the method binding keys
 	 */
 	public String[] getCreatedConstructors() {
@@ -136,7 +136,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Returns the qualified names of the generated imports.
-	 * 
+	 *
 	 * @return the generated imports
 	 */
 	public String[] getCreatedImports() {
@@ -145,7 +145,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Returns the scheduling rule for this operation.
-	 * 
+	 *
 	 * @return the scheduling rule
 	 */
 	public ISchedulingRule getSchedulingRule() {
@@ -154,7 +154,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Returns the visibility of the constructors.
-	 * 
+	 *
 	 * @return the visibility
 	 */
 	public int getVisibility() {
@@ -163,7 +163,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Returns whether the super call should be omitted.
-	 * 
+	 *
 	 * @return <code>true</code> to omit the super call, <code>false</code> otherwise
 	 */
 	public boolean isOmitSuper() {
@@ -189,15 +189,15 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			monitor.setTaskName(CodeGenerationMessages.AddUnimplementedMethodsOperation_description);
 			fCreatedMethods.clear();
 			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getJavaElement();
-			
+
 			AST ast= fASTRoot.getAST();
-			
+
 			ASTRewrite astRewrite= ASTRewrite.create(ast);
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
-			
+
 			ITypeBinding currTypeBinding= fType;
 			ListRewrite memberRewriter= null;
-			
+
 			ASTNode node= fASTRoot.findDeclaringNode(currTypeBinding);
 			if (node instanceof AnonymousClassDeclaration) {
 				memberRewriter= astRewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
@@ -208,17 +208,17 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 				throw new IllegalArgumentException();
 				// not possible, we checked this in the constructor
 			}
-			
+
 			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 			settings.createComments= fCreateComments;
 
 			ASTNode insertion= getNodeToInsertBefore(memberRewriter);
-			
+
 			IMethodBinding[] toImplement= fConstructorsToImplement;
 			if (toImplement == null) {
 				toImplement= StubUtility2.getVisibleConstructors(currTypeBinding, true, true);
 			}
-			
+
 			int deprecationCount= 0;
 			for (int i= 0; i < toImplement.length; i++) {
 				if (toImplement[i].isDeprecated())
@@ -239,14 +239,14 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 				}
 			}
 			MultiTextEdit edit= new MultiTextEdit();
-			
+
 			TextEdit importEdits= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
 			fCreatedImports= importRewrite.getCreatedImports();
 			if (fImports) {
 				edit.addChild(importEdits);
 			}
 			edit.addChild(astRewrite.rewriteAST());
-			
+
 			if (fApply) {
 				JavaModelUtil.applyEdit(cu, edit, fSave, new SubProgressMonitor(monitor, 1));
 			}
@@ -257,7 +257,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Determines whether the super call should be omitted.
-	 * 
+	 *
 	 * @param omit <code>true</code> to omit the super call, <code>false</code> otherwise
 	 */
 	public void setOmitSuper(final boolean omit) {
@@ -266,13 +266,13 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 	/**
 	 * Determines the visibility of the constructors.
-	 * 
+	 *
 	 * @param visibility the visibility
 	 */
 	public void setVisibility(final int visibility) {
 		fVisibility= visibility;
 	}
-	
+
 	private ASTNode getNodeToInsertBefore(ListRewrite rewriter) {
 		if (fInsertPos != -1) {
 			List members= rewriter.getOriginalList();

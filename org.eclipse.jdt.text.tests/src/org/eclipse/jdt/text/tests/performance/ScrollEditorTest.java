@@ -24,15 +24,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public abstract class ScrollEditorTest extends TextPerformanceTestCase {
-	
+
 	private static final int WARM_UP_RUNS= 3;
-	
+
 	private static final int MEASURED_RUNS= 3;
-	
+
 	private static final String PAGE_SCROLLING_FILE= PerformanceTestSetup.STYLED_TEXT;
-	
+
 	private static final String LINE_SCROLLING_FILE= PerformanceTestSetup.TEXT_LAYOUT;
-	
+
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
 	private static final int[] CTRL_DOWN= new int[] { SWT.CTRL, SWT.ARROW_DOWN };
 	private static final int[] PG_DOWN= new int[] { SWT.PAGE_DOWN };
@@ -40,7 +40,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	private static final int[] DOWN= new int[] { SWT.ARROW_DOWN };
 	private static final int[] SHIFT_DOWN= new int[] { SWT.SHIFT, SWT.ARROW_DOWN };
 	private static final int[] PG_UP= new int[] { SWT.PAGE_UP };
-	
+
 	protected abstract static class ScrollingMode {
 		public ScrollingMode(int[] scroll_combo, int[] home_combo) {
 			super();
@@ -55,7 +55,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			return false;
 		}
 	}
-	
+
 	protected static final ScrollingMode PAGE_WISE= new ScrollingMode(PG_DOWN, CTRL_HOME) {
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines / visibleLines;
@@ -118,14 +118,14 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			return true;
 		}
 	};
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.bringToTop();
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		// wait a little and consume any incoming events
 		DisplayHelper.sleep(Display.getCurrent(),8000);
@@ -134,7 +134,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 
 	/**
 	 * Sets up the editor.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @throws Exception if setup fails
 	 */
@@ -142,12 +142,12 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 
 	/**
 	 * Asserts the editor.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @throws Exception if something goes wrong during the assertion
 	 */
 	protected void assertEditor(AbstractTextEditor editor) throws Exception { }
-	
+
 	protected void measure(ScrollingMode mode) throws Exception {
 		measure(mode, createPerformanceMeter(), getWarmUpRuns(), getMeasuredRuns());
 	}
@@ -192,14 +192,14 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		final int numberOfLines= text.getLineCount();
 		final int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 		int operations= mode.computeOperations(numberOfLines, visibleLinesInViewport);
-		
+
 		DisplayWaiter waiter= new DisplayWaiter(display, true);
 		try {
 			for (int i= 0; i < runs; i++) {
 				// 0: assert that we are at the top and the selection at 0
 				assertTrue("editor must be scrolled to the top before starting", text.getTopIndex() == 0);
 				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0 && text.getSelection().y == 0);
-				
+
 				// 1: post scroll events
 				long delay= 3000;
 				Timeout timeout= waiter.restart(delay);
@@ -217,7 +217,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				performanceMeter.stop();
 				waiter.hold();
 				assertFalse("Failed to receive event within " + delay + "ms.", timeout.hasTimedOut());
-				
+
 				// 2: wait until the events have been swallowed
 				timeout= waiter.restart(2000);
 				while (!timeout.hasTimedOut() && text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1) {
@@ -225,7 +225,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				}
 				waiter.hold();
 				assertFalse("Never scrolled to the bottom within 2000ms.\nTopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, timeout.hasTimedOut());
-				
+
 				// 3: go back home
 				timeout= waiter.restart(2000);
 				SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO, false);
@@ -234,47 +234,47 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				}
 				waiter.hold();
 				assertFalse("Never went back to the top within 2000ms.", timeout.hasTimedOut());
-				
+
 				waiter.hold();
 			}
 		} finally {
 			waiter.stop();
 		}
 	}
-	
+
 	private void measureHolding(final StyledText text, ScrollingMode mode, PerformanceMeter performanceMeter, int runs) {
 		Display display= EditorTestHelper.getActiveDisplay();
 		final int numberOfLines= text.getLineCount();
 		final int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
-		
+
 		DisplayWaiter waiter= new DisplayWaiter(display, true);
 		try {
 			for (int i= 0; i < runs; i++) {
 				// 0: assert that we are at the top and the selection at 0
 				assertTrue("editor must be scrolled to the top before starting", text.getTopIndex() == 0);
 				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0 && text.getSelection().y == 0);
-				
+
 				// 1: post scroll events
 				long delay= 3000;
 				Timeout timeout= waiter.restart(delay);
 				performanceMeter.start();
-				
+
 				final int[] keyCodes= mode.SCROLL_COMBO;
 				// press keys
 				for (int j= 0; j < keyCodes.length; j++) {
 					SWTEventHelper.keyCodeDown(display, keyCodes[j], false);
 				}
-				
+
 				int topIndex= 0;
 				while (!timeout.hasTimedOut()) {
 					sleepAndRun(display);
-					
+
 					final int currentTopIndex= text.getTopIndex();
 
 					// we're done when we've scrolled to the bottom
 					if (currentTopIndex >= numberOfLines - 1 - visibleLinesInViewport)
 						break;
-					
+
 					// if a lot of events were processed in above loop
 					// we might have timed out. This is ok as long as the top
 					// index is moving, i.e. we're not stuck or someone else
@@ -289,16 +289,16 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 					}
 				}
 				waiter.hold();
-				
+
 				// lift keys in reverse order
 				for (int j= keyCodes.length - 1; j >= 0; j--) {
 					SWTEventHelper.keyCodeUp(display, keyCodes[j], false);
 				}
 				sleepAndRun(display);
-				
+
 				performanceMeter.stop();
 				assertFalse("Never scrolled to the bottom, last event received " + delay + "ms ago, topIndex: " + text.getTopIndex(), timeout.hasTimedOut());
-				
+
 				// 2: go back home
 				timeout= waiter.restart(2000);
 				SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO, false);
@@ -306,7 +306,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 					sleepAndRun(display);
 				}
 				waiter.hold();
-				
+
 				assertFalse("Never went back to the top within 2000ms.", timeout.hasTimedOut());
 			}
 		} finally {

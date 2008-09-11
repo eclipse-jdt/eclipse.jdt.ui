@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
 /**
  * Resolves to the lower bound of a type argument of another template variable.
- * 
+ *
  * @since 3.3
  */
 public class TypeVariableResolver extends TemplateVariableResolver {
@@ -47,7 +47,7 @@ public class TypeVariableResolver extends TemplateVariableResolver {
 			super.resolve(variable, context);
 			return;
 		}
-		
+
 		JavaContext jc= (JavaContext) context;
 		String reference= (String) params.get(0);
 		int index= 0;
@@ -62,11 +62,11 @@ public class TypeVariableResolver extends TemplateVariableResolver {
 		if (refVar instanceof JavaVariable) {
 			JavaVariable jvar= (JavaVariable) refVar;
 			resolve(mv, jvar, index, jc);
-			
+
 			return;
 		}
-		
-		
+
+
 		super.resolve(variable, context);
 	}
 
@@ -85,8 +85,8 @@ public class TypeVariableResolver extends TemplateVariableResolver {
 			mv.setKey(master.getCurrentChoice());
 		} else {
 			super.resolve(mv, context);
-			return; 
+			return;
 		}
 	}
-	
+
 }

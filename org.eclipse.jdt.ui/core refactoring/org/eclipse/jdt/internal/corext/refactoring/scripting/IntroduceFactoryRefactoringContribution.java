@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactor
 
 /**
  * Refactoring contribution for the introduce factory refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class IntroduceFactoryRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class IntroduceFactoryRefactoringContribution extends JavaRefactori
 	public RefactoringDescriptor createDescriptor() {
 		return new IntroduceFactoryDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new IntroduceFactoryDescriptor(project, description, comment, arguments, flags);
 	}

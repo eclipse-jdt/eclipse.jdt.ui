@@ -15,11 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,6 +23,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -109,22 +109,22 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 	 * only set if initial mode is REPLACE_SINGLE
 	 */
 	private final int fSelectionLength;
-	
+
 	private ASTNode fSelectionNode;
 	/**
 	 * only set after checkInitialConditions
 	 */
 	private IMethod fMethod;
-	
+
 	private String fBody;
 	private String[] fParameterNames;
-	
+
 	private SourceProvider fSourceProvider; // resolved once in checkInitialConditions
 	private TargetProvider fTargetProvider; // flexible
-	
+
 	private TextChangeManager fChangeManager;
 	private IMethodBinding fMethodBinding;
-	
+
 	public ReplaceInvocationsRefactoring(ITypeRoot typeRoot, int offset, int length) {
 		fSelectionTypeRoot= typeRoot;
 		fSelectionStart= offset;
@@ -137,24 +137,24 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		fSelectionStart= -1;
 		fSelectionLength= -1;
 	}
-	
+
     public ReplaceInvocationsRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this(null, 0, 0);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
     }
-	
+
 	public String getName() {
 		return RefactoringCoreMessages.ReplaceInvocationsRefactoring_name;
 	}
-	
+
 	/*
 	 * Only to be called after {@link #checkInitialConditions(IProgressMonitor)}
 	 */
 	public boolean canReplaceSingle() {
 		return fSelectionNode instanceof MethodInvocation;
 	}
-	
+
 	/*
 	 * Only to be called after {@link #checkInitialConditions(IProgressMonitor)}
 	 */
@@ -169,29 +169,29 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		}
 		return fTargetProvider.checkActivation();
 	}
-	
+
 	public void setBody(String body, String[] parameterNames) {
 		//TODO: validate parameter name count and body
 		fBody= body;
 		fParameterNames= parameterNames;
 	}
-	
+
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		// TargetProvider must get an untampered AST with original invocation node
 		// SourceProvider must get a tweaked AST with method body / parameter names replaced
-		
+
 		RefactoringStatus result= new RefactoringStatus();
-		
+
 		if (fMethod == null) {
 			if (! (fSelectionTypeRoot instanceof ICompilationUnit))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_cannot_replace_in_binary);
-			
+
 			ICompilationUnit cu= (ICompilationUnit) fSelectionTypeRoot;
 			CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(cu, true);
 			fSelectionNode= getTargetNode(cu, root, fSelectionStart, fSelectionLength);
 			if (fSelectionNode == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_select_method_to_apply);
-			
+
 			if (fSelectionNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) fSelectionNode;
 				fTargetProvider= TargetProvider.create(methodDeclaration);
@@ -204,7 +204,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			if (fMethodBinding == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration);
 			fMethod= (IMethod) fMethodBinding.getJavaElement();
-			
+
 		} else {
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setProject(fMethod.getJavaProject());
@@ -212,21 +212,21 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			fMethodBinding= (IMethodBinding) bindings[0];
 			if (fMethodBinding == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration);
-			
+
 			fTargetProvider= TargetProvider.create(fMethodBinding);
 		}
-		
+
 		result.merge(fTargetProvider.checkActivation());
 		return result;
 	}
-	
+
 	private SourceProvider resolveSourceProvider(IMethodBinding methodBinding, RefactoringStatus status) throws JavaModelException {
 		final IMethod method= (IMethod) methodBinding.getJavaElement();
-		
+
 		ITypeRoot typeRoot;
 		IDocument source;
 		CompilationUnit methodDeclarationAstRoot;
-		
+
 		ICompilationUnit methodCu= (method).getCompilationUnit();
 		if (methodCu != null) {
 			typeRoot= methodCu;
@@ -255,9 +255,9 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 				JavaPlugin.log(e);
 			}
 			source= document;
-			
+
 			methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(source.get(), methodCu, true, true, null);
-			
+
 		} else {
 			IClassFile classFile= method.getClassFile();
 			//TODO: use source if available?
@@ -280,7 +280,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 					}
 				}
 			};
-			
+
 			String stub= stubCreator.createStub(classFile.getType(), null);
 			source= new Document(stub);
 			methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(stub, classFile, true, true, null);
@@ -294,7 +294,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			return null;
 		}
 	}
-	
+
 	/*
 	 * @return an invocation or declaration node
 	 */
@@ -328,30 +328,30 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		}
 		return null;
 	}
-	
+
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 20); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
-		
+
 		fSourceProvider= resolveSourceProvider(fMethodBinding, result);
 		if (result.hasFatalError())
 			return result;
-		
+
 		result.merge(fSourceProvider.checkActivation());
 		if (result.hasFatalError())
 			return result;
-		
+
 		fSourceProvider.initialize();
 		fTargetProvider.initialize();
-		
+
 		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_searching);
 		RefactoringStatus searchStatus= new RefactoringStatus();
 		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fSourceProvider.getMethodName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(searchStatus, binaryRefs, new SubProgressMonitor(pm, 1));
 		binaryRefs.addErrorIfNecessary(searchStatus);
-		
+
 		if (searchStatus.hasFatalError()) {
 			result.merge(searchStatus);
 			return result;
@@ -366,7 +366,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		sub.beginTask("", units.length * 3); //$NON-NLS-1$
 		for (int c= 0; c < units.length; c++) {
 			ICompilationUnit unit= units[c];
-			sub.subTask(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_processing,  BasicElementLabels.getFileName(unit))); 
+			sub.subTask(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_processing,  BasicElementLabels.getFileName(unit)));
 			CallInliner inliner= null;
 			try {
 				boolean added= false;
@@ -381,7 +381,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 					BodyDeclaration body= bodies[b];
 					inliner.initialize(body);
 					RefactoringStatus nestedInvocations= new RefactoringStatus();
-					ASTNode[] invocations= removeNestedCalls(nestedInvocations, unit, 
+					ASTNode[] invocations= removeNestedCalls(nestedInvocations, unit,
 						fTargetProvider.getInvocations(body, new SubProgressMonitor(sub, 2)));
 					for (int i= 0; i < invocations.length; i++) {
 						ASTNode invocation= invocations[i];
@@ -390,9 +390,9 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 							break;
 						if (result.getSeverity() < fTargetProvider.getStatusSeverity()) {
 							added= true;
-							TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.InlineMethodRefactoring_edit_inline); 
+							TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.InlineMethodRefactoring_edit_inline);
 							change.addTextEditGroup(group);
-							result.merge(inliner.perform(group)); 
+							result.merge(inliner.perform(group));
 						}
 					}
 					// do this after we have inlined the method calls. We still want
@@ -409,7 +409,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 						if (edit instanceof MultiTextEdit ? ((MultiTextEdit)edit).getChildrenSize() > 0 : true) {
 							root.addChild(edit);
 							change.addTextEditGroup(
-								new TextEditGroup(RefactoringCoreMessages.InlineMethodRefactoring_edit_import, new TextEdit[] {edit})); 
+								new TextEditGroup(RefactoringCoreMessages.InlineMethodRefactoring_edit_import, new TextEdit[] {edit}));
 						}
 					}
 				}
@@ -450,7 +450,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		arguments.put(ATTRIBUTE_MODE, new Integer(fTargetProvider.isSingle() ? 0 : 1).toString());
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ReplaceInvocationsRefactoring_change_name, fChangeManager.getAllChanges());
 	}
-	
+
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
 		List result= new ArrayList(units.length + 1);
 		IFile file;
@@ -461,7 +461,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		}
 		return (IFile[])result.toArray(new IFile[result.size()]);
 	}
-	
+
 	private IFile getFile(ICompilationUnit unit) {
 		unit= unit.getPrimary();
 		IResource resource= unit.getResource();
@@ -469,10 +469,10 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			return (IFile)resource;
 		return null;
 	}
-	
+
 	private void checkOverridden(RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 9); //$NON-NLS-1$
-		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_checking_overridden); 
+		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_checking_overridden);
 		MethodDeclaration decl= fSourceProvider.getDeclaration();
 		IMethod method= (IMethod) decl.resolveBinding().getJavaElement();
 		if (method == null || Flags.isPrivate(method.getFlags())) {
@@ -489,21 +489,21 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
 	private void checkSubTypes(RefactoringStatus result, IMethod method, IType[] types, IProgressMonitor pm) {
 		checkTypes(
-			result, method, types, 
+			result, method, types,
 			RefactoringCoreMessages.InlineMethodRefactoring_checking_overridden_error,
 			pm);
 	}
-	
+
 	private void checkSuperClasses(RefactoringStatus result, IMethod method, IType[] types, IProgressMonitor pm) {
 		checkTypes(
-			result, method, types, 
+			result, method, types,
 			RefactoringCoreMessages.InlineMethodRefactoring_checking_overrides_error,
 			pm);
 	}
 
 	private void checkSuperInterfaces(RefactoringStatus result, IMethod method, IType[] types, IProgressMonitor pm) {
 		checkTypes(
-			result, method, types, 
+			result, method, types,
 			RefactoringCoreMessages.InlineMethodRefactoring_checking_implements_error,
 			pm);
 	}
@@ -514,12 +514,12 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			IMethod[] overridden= types[i].findMethods(method);
 			if (overridden != null && overridden.length > 0) {
 				result.addError(
-					Messages.format(key, BasicElementLabels.getJavaElementName(types[i].getElementName())), 
+					Messages.format(key, BasicElementLabels.getJavaElementName(types[i].getElementName())),
 					JavaStatusContext.create(overridden[0]));
 			}
 		}
 	}
-	
+
 	private ASTNode[] removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] invocations) {
 		if (invocations.length <= 1)
 			return invocations;
@@ -537,14 +537,14 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		}
 		return (ASTNode[])result.toArray(new ASTNode[result.size()]);
 	}
-	
+
 	private void removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] parents, ASTNode[] invocations, int index) {
 		ASTNode invocation= invocations[index];
 		for (int i= 0; i < parents.length; i++) {
 			ASTNode parent= parents[i];
 			while (parent != null) {
 				if (parent == invocation) {
-					status.addError(RefactoringCoreMessages.InlineMethodRefactoring_nestedInvocation,  
+					status.addError(RefactoringCoreMessages.InlineMethodRefactoring_nestedInvocation,
 						JavaStatusContext.create(unit, parent));
 					invocations[index]= null;
 				}

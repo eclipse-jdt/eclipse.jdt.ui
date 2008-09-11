@@ -40,8 +40,8 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 
 	public ReorgCopyAction(IWorkbenchSite site) {
 		super(site);
-		setText(ReorgMessages.ReorgCopyAction_3); 
-		setDescription(ReorgMessages.ReorgCopyAction_4); 
+		setText(ReorgMessages.ReorgCopyAction_3);
+		setDescription(ReorgMessages.ReorgCopyAction_4);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.COPY_ACTION);
 	}
@@ -76,7 +76,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		action.selectionChanged(selection);
 		return action;
 	}
-	
+
 	public void run(IStructuredSelection selection) {
 		if (ReorgUtils.containsOnlyProjects(selection.toList())){
 			createWorkbenchAction(selection).run();
@@ -86,10 +86,10 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements)) 
+			if (RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements))
 				RefactoringExecutionStarter.startCopyRefactoring(resources, javaElements, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 }

@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public interface IOccurrencesFinder {
-	
+
 	public static final int K_OCCURRENCE= 5;
 
 	public static final int K_EXCEPTION_OCCURRENCE= 6;
@@ -62,12 +62,12 @@ public interface IOccurrencesFinder {
 		public String toString() {
 			return "[" + fOffset + " / " + fLength + "] " + fDescription; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
-		
+
 	}
-	
-	
+
+
 	public String initialize(CompilationUnit root, int offset, int length);
-	
+
 	public String initialize(CompilationUnit root, ASTNode node);
 
 	public String getJobLabel();
@@ -82,7 +82,7 @@ public interface IOccurrencesFinder {
 	 * @return the unformatted label
 	 */
 	public String getUnformattedPluralLabel();
-	
+
 	/**
 	 * Returns the singular label for this finder with 2 placeholders:
 	 * <ul>
@@ -92,7 +92,7 @@ public interface IOccurrencesFinder {
 	 * @return the unformatted label
 	 */
 	public String getUnformattedSingularLabel();
-	
+
 	/**
 	 * Returns the name of the element to look for or <code>null</code> if the finder hasn't
 	 * been initialized yet.
@@ -100,24 +100,24 @@ public interface IOccurrencesFinder {
 	 */
 	public String getElementName();
 
-	
+
 	/**
 	 * Returns the AST root.
-	 * 
+	 *
 	 * @return the AST root
 	 */
 	public CompilationUnit getASTRoot();
 
 	/**
 	 * Returns the occurrences
-	 * 
+	 *
 	 * @return the occurrences
 	 */
 	public OccurrenceLocation[] getOccurrences();
 
 
 	public int getSearchKind();
-			
+
 	/**
 	 * Returns the id of this finder.
 	 * @return returns the id of this finder.

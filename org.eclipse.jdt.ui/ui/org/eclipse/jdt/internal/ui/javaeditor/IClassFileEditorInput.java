@@ -12,8 +12,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.ui.IEditorInput;
+
+import org.eclipse.jdt.core.IClassFile;
 
 
 /**

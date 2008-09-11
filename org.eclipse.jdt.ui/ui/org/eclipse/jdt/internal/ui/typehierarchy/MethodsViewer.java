@@ -52,40 +52,40 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
  * No dependency to the type hierarchy view
  */
 public class MethodsViewer extends ProblemTableViewer {
-	
+
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	private static final String TAG_SORTBYDEFININGTYPE= "sortbydefiningtype";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
-	
+
 	private MethodsLabelProvider fLabelProvider;
-	
+
 	private MemberFilterActionGroup fMemberFilterActionGroup;
-	
+
 	private ShowInheritedMembersAction fShowInheritedMembersAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
-	
+
 	public MethodsViewer(Composite parent, final TypeHierarchyLifeCycle lifeCycle) {
 		super(new Table(parent, SWT.MULTI));
-		
+
 		addFilter(new SyntheticMembersFilter());
-		
+
 		fLabelProvider= new MethodsLabelProvider(lifeCycle, this);
-	
+
 		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
-		
+
 		HierarchyViewerSorter sorter= new HierarchyViewerSorter(lifeCycle);
 		sorter.setSortByDefiningType(false);
 		setComparator(sorter);
-		
+
 		fMemberFilterActionGroup= new MemberFilterActionGroup(this, "HierarchyMethodView", false, MemberFilterActionGroup.ALL_FILTERS & ~MemberFilterActionGroup.FILTER_LOCALTYPES); //$NON-NLS-1$
-		
+
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);
 		fSortByDefiningTypeAction= new SortByDefiningTypeAction(this, false);
-		
+
 		showInheritedMethodsNoRedraw(false);
 		sortByDefiningTypeNoRedraw(false);
-		
+
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}
 
@@ -104,7 +104,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		fSortByDefiningTypeAction.setEnabled(!on);
 
 	}
-	
+
 	/**
 	 * Show inherited methods
 	 * @param on the new state
@@ -144,14 +144,14 @@ public class MethodsViewer extends ProblemTableViewer {
 			getTable().setRedraw(true);
 		}
 	}
-		
+
 	/*
 	 * @see Viewer#inputChanged(Object, Object)
 	 */
 	protected void inputChanged(Object input, Object oldInput) {
 		super.inputChanged(input, oldInput);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if inherited methods are shown.
 	 * @return <code>true</code> if inherited methods are shown.
@@ -159,7 +159,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	public boolean isShowInheritedMethods() {
 		return ((MethodsContentProvider) getContentProvider()).isShowInheritedMethods();
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if defining types are shown.
 	 * @return <code>true</code> if defining types are shown.
@@ -174,7 +174,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	 */
 	public void saveState(IMemento memento) {
 		fMemberFilterActionGroup.saveState(memento);
-		
+
 		memento.putString(TAG_SHOWINHERITED, String.valueOf(isShowInheritedMethods()));
 		memento.putString(TAG_SORTBYDEFININGTYPE, String.valueOf(isShowDefiningTypes()));
 
@@ -192,13 +192,13 @@ public class MethodsViewer extends ProblemTableViewer {
 		getControl().setRedraw(false);
 		refresh();
 		getControl().setRedraw(true);
-		
+
 		boolean showInherited= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
 		showInheritedMethods(showInherited);
-		
+
 		boolean showDefiningTypes= Boolean.valueOf(memento.getString(TAG_SORTBYDEFININGTYPE)).booleanValue();
 		sortByDefiningType(showDefiningTypes);
-		
+
 		ScrollBar bar= getTable().getVerticalBar();
 		if (bar != null) {
 			Integer vScroll= memento.getInteger(TAG_VERTICAL_SCROLL);
@@ -207,7 +207,7 @@ public class MethodsViewer extends ProblemTableViewer {
 			}
 		}
 	}
-	
+
 	/**
 	 * Attaches a contextmenu listener to the table
 	 * @param menuListener the menu listener
@@ -222,8 +222,8 @@ public class MethodsViewer extends ProblemTableViewer {
 		getTable().setMenu(menu);
 		viewSite.registerContextMenu(popupId, menuMgr, this);
 	}
-		
-	
+
+
 	/**
 	 * Fills up the context menu with items for the method viewer
 	 * Should be called by the creator of the context menu
@@ -243,7 +243,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		tbm.add(new Separator());
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 	}
-	
+
 	public void dispose() {
 		if (fMemberFilterActionGroup != null) {
 			fMemberFilterActionGroup.dispose();
@@ -287,12 +287,12 @@ public class MethodsViewer extends ProblemTableViewer {
 		setSelection(newSelection);
 		updateSelection(newSelection);
 	}
-	
+
 	private IMethod findSimilarMethod(IMethod meth, Object[] elements) throws JavaModelException {
 		String name= meth.getElementName();
 		String[] paramTypes= meth.getParameterTypes();
 		boolean isConstructor= meth.isConstructor();
-		
+
 		for (int i= 0; i < elements.length; i++) {
 			Object curr= elements[i];
 			if (curr instanceof IMethod && JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, (IMethod) curr)) {

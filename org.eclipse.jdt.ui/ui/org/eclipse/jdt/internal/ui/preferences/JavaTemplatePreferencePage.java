@@ -46,14 +46,14 @@ import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariablePro
 public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 
 	private TemplateVariableProcessor fTemplateProcessor;
-	
+
 	public JavaTemplatePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setTemplateStore(JavaPlugin.getDefault().getTemplateStore());
 		setContextTypeRegistry(JavaPlugin.getDefault().getTemplateContextRegistry());
 		fTemplateProcessor= new TemplateVariableProcessor();
 	}
-	
+
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
@@ -61,7 +61,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 * @since 3.3
@@ -70,13 +70,13 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 		ScrolledPageContent scrolled= new ScrolledPageContent(ancestor, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
 		scrolled.setExpandVertical(true);
-		
+
 		Control control= super.createContents(scrolled);
 
 		scrolled.setContent(control);
 		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolled.setMinSize(size.x, size.y);
-		
+
 		return scrolled;
 	}
 
@@ -88,17 +88,17 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 		boolean ok= super.performOk();
 
 		JavaPlugin.getDefault().savePluginPreferences();
-		
+
 		return ok;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#getFormatterPreferenceKey()
 	 */
 	protected String getFormatterPreferenceKey() {
 		return PreferenceConstants.TEMPLATES_USE_CODEFORMATTER;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createTemplateEditDialog2(org.eclipse.jface.text.templates.Template, boolean, boolean)
 	 */
@@ -109,7 +109,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 		}
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
@@ -123,41 +123,41 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 		viewer.configure(configuration);
 		viewer.setEditable(false);
 		viewer.setDocument(document);
-	
+
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(viewer, configuration, store);
-		
+
 		Control control= viewer.getControl();
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
 		control.setLayoutData(data);
-		
+
 		return viewer;
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#updateViewerInput()
 	 */
 	protected void updateViewerInput() {
 		IStructuredSelection selection= (IStructuredSelection) getTableViewer().getSelection();
 		SourceViewer viewer= getViewer();
-		
+
 		if (selection.size() == 1 && selection.getFirstElement() instanceof TemplatePersistenceData) {
 			TemplatePersistenceData data= (TemplatePersistenceData) selection.getFirstElement();
 			Template template= data.getTemplate();
 			String contextId= template.getContextTypeId();
 			TemplateContextType type= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextId);
 			fTemplateProcessor.setContextType(type);
-			
+
 			IDocument doc= viewer.getDocument();
-			
+
 			String start= null;
 			if ("javadoc".equals(contextId)) { //$NON-NLS-1$
 				start= "/**" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
 			} else
 				start= ""; //$NON-NLS-1$
-			
+
 			doc.set(start + template.getPattern());
 			int startLen= start.length();
 			viewer.setDocument(doc, startLen, doc.getLength() - startLen);

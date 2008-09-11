@@ -13,9 +13,9 @@ package org.eclipse.jdt.text.tests;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 
 /**
@@ -25,22 +25,22 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
  * - the source folder is called "src"
  * - the output folder is called "bin"
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class JUnitProjectTestSetup extends TestSetup {
-	
+
 	private static IJavaProject fgProject;
-	
+
 	public static IJavaProject getProject() {
 		assertNotNull(fgProject);
 		return fgProject;
 	}
-	
+
 	public JUnitProjectTestSetup(Test test) {
 		super(test);
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.1
@@ -49,7 +49,7 @@ public class JUnitProjectTestSetup extends TestSetup {
 		String projectName= "JUnit_" + System.currentTimeMillis();
 		fgProject= JavaProjectHelper.createJavaProjectWithJUnitSource(projectName, "src", "bin");
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1

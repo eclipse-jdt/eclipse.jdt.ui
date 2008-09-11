@@ -19,21 +19,21 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.PositionInformation;
 
 public class LinkedProposalModel {
-	
+
 	private Map/*<String, PositionGroup>*/ fPositionGroups;
 	private LinkedProposalPositionGroup.PositionInformation fEndPosition;
-	
+
 	public void addPositionGroup(LinkedProposalPositionGroup positionGroup) {
 		if (positionGroup == null) {
 			throw new IllegalArgumentException("positionGroup must not be null"); //$NON-NLS-1$
 		}
-		
+
 		if (fPositionGroups == null) {
 			fPositionGroups= new HashMap();
 		}
 		fPositionGroups.put(positionGroup.getGroupId(), positionGroup);
 	}
-	
+
 	public LinkedProposalPositionGroup getPositionGroup(String groupId, boolean createIfNotExisting) {
 		LinkedProposalPositionGroup group= fPositionGroups != null ? (LinkedProposalPositionGroup) fPositionGroups.get(groupId) : null;
 		if (createIfNotExisting && group == null) {
@@ -42,7 +42,7 @@ public class LinkedProposalModel {
 		}
 		return group;
 	}
-	
+
 	public Iterator getPositionGroupIterator() {
 		if (fPositionGroups == null) {
 			return new Iterator() {
@@ -53,8 +53,8 @@ public class LinkedProposalModel {
 		}
 		return fPositionGroups.values().iterator();
 	}
-	
-	
+
+
 	/**
 	 * Sets the end position of the linked mode to the end of the passed range.
 	 * @param position The position that describes the end position of the linked mode.
@@ -62,11 +62,11 @@ public class LinkedProposalModel {
 	public void setEndPosition(PositionInformation position) {
 		fEndPosition= position;
 	}
-	
+
 	public void setEndPosition(ITrackedNodePosition position) {
 		setEndPosition(LinkedProposalPositionGroup.createPositionInformation(position, false));
 	}
-	
+
 	public PositionInformation getEndPosition() {
 		return fEndPosition;
 	}
@@ -77,7 +77,7 @@ public class LinkedProposalModel {
 
 	public void clear() {
 		fPositionGroups= null;
-		fEndPosition= null;	
+		fEndPosition= null;
 	}
-	
+
 }

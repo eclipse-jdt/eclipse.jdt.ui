@@ -12,11 +12,11 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -33,6 +33,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.LineRange;
 
 import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -65,12 +66,12 @@ public class JavaMoveLinesAction extends TextEditorAction {
 		 * Set to true before modifying the document, to false after.
 		 */
 		boolean fIsChanging= false;
-		
+
 		/** <code>true</code> if a compound move / copy is going on. */
 		private boolean fEditInProgress= false;
 		/** The exit strategy that will detect the ending of a compound edit */
 		private final CompoundEditExitStrategy fExitStrategy;
-		
+
 		public SharedState(CompilationUnitEditor editor) {
 			fEditor= editor;
 			fExitStrategy= new CompoundEditExitStrategy(new String[] {ITextEditorActionDefinitionIds.MOVE_LINES_UP, ITextEditorActionDefinitionIds.MOVE_LINES_DOWN, ITextEditorActionDefinitionIds.COPY_LINES_UP, ITextEditorActionDefinitionIds.COPY_LINES_DOWN});
@@ -80,7 +81,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 				}
 			});
 		}
-		
+
 		/**
 		 * Ends the compound change.
 		 */
@@ -149,7 +150,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 		actions[3]= new JavaMoveLinesAction(bundle, "Editor.CopyLineDown.", false, true, state); //$NON-NLS-1$
 		return actions;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.texteditor.TextEditorAction#setEditor(org.eclipse.ui.texteditor.ITextEditor)
 	 */
@@ -377,14 +378,14 @@ public class JavaMoveLinesAction extends TextEditorAction {
 
 			// modify the document
 			ILineRange selectionBefore= getLineRange(document, movingArea);
-			
+
 			if (fCopy)
 				fSharedState.endCompoundEdit();
 			fSharedState.beginCompoundEdit();
 			fSharedState.fIsChanging= true;
-			
+
 			document.replace(offset, lenght, insertion);
-			
+
 			ILineRange selectionAfter;
 			if (fUpwards && fCopy)
 				selectionAfter= selectionBefore;
@@ -394,13 +395,13 @@ public class JavaMoveLinesAction extends TextEditorAction {
 				selectionAfter= new LineRange(selectionBefore.getStartLine() + selectionBefore.getNumberOfLines(), selectionBefore.getNumberOfLines());
 			else
 				selectionAfter= new LineRange(selectionBefore.getStartLine() + 1, selectionBefore.getNumberOfLines());
-			
+
 			fSharedState.fResult= IndentUtil.indentLines(document, selectionAfter, getProject(), fSharedState.fResult);
-			
+
 			// move the selection along
 			IRegion region= getRegion(document, selectionAfter);
 			selectAndReveal(viewer, region.getOffset(), region.getLength());
-			
+
 		} catch (BadLocationException x) {
 			// won't happen without concurrent modification - bail out
 			return;
@@ -427,7 +428,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 		final int nLines= endLine - startLine + 1;
 		return new LineRange(startLine, nLines);
 	}
-	
+
 	private IRegion getRegion(IDocument document, ILineRange lineRange) throws BadLocationException {
 		final int startLine= lineRange.getStartLine();
 		int offset= document.getLineOffset(startLine);

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -24,12 +25,12 @@ public class LRUWorkingSetsList {
 	private final ArrayList fLRUList;
 	private final int fSize;
 	private final  WorkingSetsComparator fComparator= new WorkingSetsComparator();
-	
+
 	public LRUWorkingSetsList(int size) {
 		fSize= size;
 		fLRUList= new ArrayList(size);
 	}
-	
+
 	public void add(IWorkingSet[] workingSets) {
 		removeDeletedWorkingSets();
 		IWorkingSet[] existingWorkingSets= find(fLRUList, workingSets);
@@ -40,19 +41,19 @@ public class LRUWorkingSetsList {
 		fLRUList.add(0, workingSets);
 
 	}
-	
+
 	public Iterator iterator() {
 		removeDeletedWorkingSets();
-		return fLRUList.iterator();	
+		return fLRUList.iterator();
 	}
 
 	public Iterator sortedIterator() {
 		removeDeletedWorkingSets();
 		ArrayList sortedList= new ArrayList(fLRUList);
 		Collections.sort(sortedList, fComparator);
-		return sortedList.iterator();	
+		return sortedList.iterator();
 	}
-	
+
 	private void removeDeletedWorkingSets() {
 		Iterator iter= new ArrayList(fLRUList).iterator();
 		while (iter.hasNext()) {
@@ -65,7 +66,7 @@ public class LRUWorkingSetsList {
 			}
 		}
 	}
-	
+
 	private IWorkingSet[] find(ArrayList list, IWorkingSet[] workingSets) {
 		Set workingSetList= new HashSet(Arrays.asList(workingSets));
 		Iterator iter= list.iterator();

@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -36,6 +34,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.resource.JFaceResources;
@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
  * A special control to edit and reorder method parameters.
  */
 public class ChangeParametersControl extends Composite {
-	
+
 	public static class Mode {
 		private final String fName;
 		private Mode(String name) {
@@ -95,7 +95,7 @@ public class ChangeParametersControl extends Composite {
 			return this == Mode.CHANGE_METHOD_SIGNATURE;
 		}
 	}
-	
+
 	private static class ParameterInfoContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object inputElement) {
 			return removeMarkedAsDeleted((List) inputElement);
@@ -143,7 +143,7 @@ public class ChangeParametersControl extends Composite {
 				return JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT);
 			else
 				return null;
-		}		
+		}
 	}
 
 	private class ParametersCellModifier implements ICellModifier {
@@ -219,15 +219,15 @@ public class ChangeParametersControl extends Composite {
 	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, Mode mode, StubTypeContext typeContext) {
 		this(parent, style, label, listener, mode, typeContext, new String[0]);
 	}
-	
+
 	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, Mode mode) {
 		this(parent, style, label, listener, mode, null, new String[0]);
 	}
-	
+
 	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, Mode mode, String[] paramNameProposals) {
 		this(parent, style, label, listener, mode, null, paramNameProposals);
 	}
-	
+
 	/**
 	 * @param label the label before the table or <code>null</code>
 	 * @param typeContext the package in which to complete types
@@ -266,14 +266,14 @@ public class ChangeParametersControl extends Composite {
 		if (fParameterInfos.size() > 0)
 			fTableViewer.setSelection(new StructuredSelection(fParameterInfos.get(0)));
 	}
-	
+
 	public void editParameter(ParameterInfo info) {
 		fTableViewer.getControl().setFocus();
 		if (! info.isDeleted()) {
 			fTableViewer.setSelection(new StructuredSelection(info), true);
 			updateButtonsEnabledState();
 			editColumnOrNextPossible(NEWNAME_PROP);
-			return;	
+			return;
 		}
 	}
 
@@ -282,25 +282,25 @@ public class ChangeParametersControl extends Composite {
 	private void createParameterList(Composite parent) {
 		TableLayoutComposite layouter= new TableLayoutComposite(parent, SWT.NONE);
 		addColumnLayoutData(layouter);
-		
+
 		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		TableColumn tc;
 		tc= new TableColumn(table, SWT.NONE, TYPE_PROP);
 		tc.setResizable(true);
-		tc.setText(RefactoringMessages.ChangeParametersControl_table_type); 
-		
+		tc.setText(RefactoringMessages.ChangeParametersControl_table_type);
+
 		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
 		tc.setResizable(true);
-		tc.setText(RefactoringMessages.ChangeParametersControl_table_name); 
+		tc.setText(RefactoringMessages.ChangeParametersControl_table_name);
 
 		if (fMode.canChangeDefault()){
 			tc= new TableColumn(table, SWT.NONE, DEFAULT_PROP);
 			tc.setResizable(true);
-			tc.setText(RefactoringMessages.ChangeParametersControl_table_defaultValue); 
-		}	
-		
+			tc.setText(RefactoringMessages.ChangeParametersControl_table_defaultValue);
+		}
+
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
 		gd.widthHint= 40;
@@ -348,7 +348,7 @@ public class ChangeParametersControl extends Composite {
 			nextColumn= nextColumn(nextColumn);
 		} while (nextColumn != column);
 	}
-	
+
 	private void editColumnOrPrevPossible(int column){
 		ParameterInfo[]	selected= getSelectedElements();
 		if (selected.length != 1)
@@ -361,15 +361,15 @@ public class ChangeParametersControl extends Composite {
 			prevColumn= prevColumn(prevColumn);
 		} while (prevColumn != column);
 	}
-	
+
 	private int nextColumn(int column) {
 		return (column >= getTable().getColumnCount() - 1) ? 0 : column + 1;
 	}
-	
+
 	private int prevColumn(int column) {
 		return (column <= 0) ? getTable().getColumnCount() - 1 : column - 1;
 	}
-	
+
 	private void addColumnLayoutData(TableLayoutComposite layouter) {
 		if (fMode.canChangeDefault()){
 			layouter.addColumnData(new ColumnWeightData(33, true));
@@ -378,7 +378,7 @@ public class ChangeParametersControl extends Composite {
 		} else {
 			layouter.addColumnData(new ColumnWeightData(50, true));
 			layouter.addColumnData(new ColumnWeightData(50, true));
-		}	
+		}
 	}
 
 	private ParameterInfo[] getSelectedElements() {
@@ -404,18 +404,18 @@ public class ChangeParametersControl extends Composite {
 		buttonComposite.setLayout(gl);
 
 		if (fMode.canAddParameters())
-			fAddButton= createAddButton(buttonComposite);	
+			fAddButton= createAddButton(buttonComposite);
 
 		fEditButton= createEditButton(buttonComposite);
-		
+
 		if (fMode.canAddParameters())
-			fRemoveButton= createRemoveButton(buttonComposite);	
-		
+			fRemoveButton= createRemoveButton(buttonComposite);
+
 		if (buttonComposite.getChildren().length != 0)
 			addSpacer(buttonComposite);
 
-		fUpButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_up, true); 
-		fDownButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_down, false); 
+		fUpButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_up, true);
+		fDownButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_down, false);
 
 		updateButtonsEnabledState();
 	}
@@ -433,7 +433,7 @@ public class ChangeParametersControl extends Composite {
 		if (fEditButton != null)
 			fEditButton.setEnabled(getTableSelectionCount() == 1);
 		if (fAddButton != null)
-			fAddButton.setEnabled(true);	
+			fAddButton.setEnabled(true);
 		if (fRemoveButton != null)
 			fRemoveButton.setEnabled(getTableSelectionCount() != 0);
 	}
@@ -449,10 +449,10 @@ public class ChangeParametersControl extends Composite {
 	private Table getTable() {
 		return fTableViewer.getTable();
 	}
-	
+
 	private Button createEditButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.ChangeParametersControl_buttons_edit); 
+		button.setText(RefactoringMessages.ChangeParametersControl_buttons_edit);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -472,10 +472,10 @@ public class ChangeParametersControl extends Composite {
 		});
 		return button;
 	}
-	
+
 	private Button createAddButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.ChangeParametersControl_buttons_add); 
+		button.setText(RefactoringMessages.ChangeParametersControl_buttons_add);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -504,13 +504,13 @@ public class ChangeParametersControl extends Composite {
 				updateButtonsEnabledState();
 				editColumnOrNextPossible(0);
 			}
-		});	
+		});
 		return button;
 	}
 
 	private Button createRemoveButton(Composite buttonComposite) {
 		final Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.ChangeParametersControl_buttons_remove); 
+		button.setText(RefactoringMessages.ChangeParametersControl_buttons_remove);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -521,7 +521,7 @@ public class ChangeParametersControl extends Composite {
 					if (selected[i].isAdded())
 						fParameterInfos.remove(selected[i]);
 					else
-						selected[i].markAsDeleted();	
+						selected[i].markAsDeleted();
 				}
 				restoreSelection(index);
 			}
@@ -537,7 +537,7 @@ public class ChangeParametersControl extends Composite {
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
 			}
-		});	
+		});
 		return button;
 	}
 
@@ -554,7 +554,7 @@ public class ChangeParametersControl extends Composite {
 				ParameterInfo[] selection= getSelectedElements();
 				if (selection.length == 0)
 					return;
-					
+
 				if (up) {
 					moveUp(selection);
 				} else {
@@ -568,18 +568,18 @@ public class ChangeParametersControl extends Composite {
 		});
 		return button;
 	}
-	
+
 	//---- editing -----------------------------------------------------------------------------------------------
 
 	private void addCellEditors() {
 		fTableViewer.setColumnProperties(PROPERTIES);
-		
+
 		final TableTextCellEditor editors[]= new TableTextCellEditor[PROPERTIES.length];
 
 		editors[TYPE_PROP]= new TableTextCellEditor(fTableViewer, TYPE_PROP);
 		editors[NEWNAME_PROP]= new TableTextCellEditor(fTableViewer, NEWNAME_PROP);
 		editors[DEFAULT_PROP]= new TableTextCellEditor(fTableViewer, DEFAULT_PROP);
-		
+
 		if (fMode.canChangeTypes()) {
 			SubjectControlContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getText());
 			editors[TYPE_PROP].setContentAssistant(assistant);
@@ -588,7 +588,7 @@ public class ChangeParametersControl extends Composite {
 			SubjectControlContentAssistant assistant= installParameterNameContentAssist(editors[NEWNAME_PROP].getText());
 			editors[NEWNAME_PROP].setContentAssistant(assistant);
 		}
-		
+
 		for (int i = 0; i < editors.length; i++) {
 			final int editorColumn= i;
 			final TableTextCellEditor editor = editors[i];
@@ -605,7 +605,7 @@ public class ChangeParametersControl extends Composite {
 							editColumnOrPrevPossible(prevColumn(editorColumn));
 							e.detail= SWT.TRAVERSE_NONE;
 							break;
-						
+
 						default :
 							break;
 					}
@@ -613,7 +613,7 @@ public class ChangeParametersControl extends Composite {
 			});
 			TextFieldNavigationHandler.install(editor.getText());
 		}
-		
+
 		editors[NEWNAME_PROP].setActivationListener(new TableTextCellEditor.IActivationListener(){
 			public void activate() {
 				ParameterInfo[] selected= getSelectedElements();
@@ -622,7 +622,7 @@ public class ChangeParametersControl extends Composite {
 				}
 			}
 		});
-		
+
 		fTableViewer.setCellEditors(editors);
 		fTableViewer.setCellModifier(new ParametersCellModifier());
 	}
@@ -697,7 +697,7 @@ public class ChangeParametersControl extends Composite {
 		}
 		return true;
 	}
-	
+
 	private int getNotDeletedInfosCount(){
 		if (fParameterInfos == null) // during initialization
 			return 0;

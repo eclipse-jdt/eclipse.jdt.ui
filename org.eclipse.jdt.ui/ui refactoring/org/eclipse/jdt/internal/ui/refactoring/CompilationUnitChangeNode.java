@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class CompilationUnitChangeNode extends TextEditChangeNode {
 
 	static final ChildNode[] EMPTY_CHILDREN= new ChildNode[0];
-	
+
 	private static class JavaLanguageNode extends LanguageElementNode {
 
 		private IJavaElement fJavaElement;
@@ -57,39 +57,39 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 			fJavaElement= element;
 			Assert.isNotNull(fJavaElement);
 		}
-		
+
 		public JavaLanguageNode(ChildNode parent, IJavaElement element) {
 			super(parent);
 			fJavaElement= element;
 			Assert.isNotNull(fJavaElement);
 		}
-		
+
 		public String getText() {
 			return JavaElementLabels.getElementLabel(fJavaElement, JavaElementLabels.ALL_DEFAULT);
 		}
-		
+
 		public ImageDescriptor getImageDescriptor() {
 			return fgImageProvider.getJavaImageDescriptor(
-				fJavaElement, 
+				fJavaElement,
 				JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
 		}
-		
+
 		public IRegion getTextRange() throws CoreException {
 			ISourceRange range= ((ISourceReference)fJavaElement).getSourceRange();
 			return new Region(range.getOffset(), range.getLength());
-		}	
-	}	
-	
+		}
+	}
+
 	public CompilationUnitChangeNode(TextEditBasedChange change) {
 		super(change);
 	}
-	
+
 	protected ChildNode[] createChildNodes() {
 		TextEditBasedChange change= getTextEditBasedChange();
 		if (change instanceof MultiStateTextFileChange) {
 			return new ChildNode[0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits must be applied in sequence)
 		}
-		
+
 		ICompilationUnit cunit= (ICompilationUnit) change.getAdapter(ICompilationUnit.class);
 		if (cunit != null) {
 			List children= new ArrayList(5);
@@ -114,7 +114,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 			return EMPTY_CHILDREN;
 		}
 	}
-	
+
 	private static class OffsetComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			TextEditBasedChangeGroup c1= (TextEditBasedChangeGroup)o1;
@@ -126,13 +126,13 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 			if (p1 > p2)
 				return 1;
 			// same offset
-			return 0;	
+			return 0;
 		}
 		private int getOffset(TextEditBasedChangeGroup edit) {
 			return edit.getRegion().getOffset();
 		}
 	}
-	
+
 	private TextEditBasedChangeGroup[] getSortedChangeGroups(TextEditBasedChange change) {
 		TextEditBasedChangeGroup[] edits= change.getChangeGroups();
 		List result= new ArrayList(edits.length);
@@ -144,7 +144,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 		Collections.sort(result, comparator);
 		return (TextEditBasedChangeGroup[])result.toArray(new TextEditBasedChangeGroup[result.size()]);
 	}
-	
+
 	private IJavaElement getModifiedJavaElement(TextEditBasedChangeGroup edit, ICompilationUnit cunit) throws JavaModelException {
 		IRegion range= edit.getRegion();
 		if (range.getOffset() == 0 && range.getLength() == 0)
@@ -152,7 +152,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 		IJavaElement result= cunit.getElementAt(range.getOffset());
 		if (result == null)
 			return cunit;
-		
+
 		try {
 			while(true) {
 				ISourceReference ref= (ISourceReference)result;
@@ -168,7 +168,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 		}
 		return result;
 	}
-	
+
 	private JavaLanguageNode getChangeElement(Map map, IJavaElement element, List children, TextEditChangeNode cunitChange) {
 		JavaLanguageNode result= (JavaLanguageNode)map.get(element);
 		if (result != null)
@@ -186,7 +186,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 		}
 		return result;
 	}
-	
+
 	private boolean coveredBy(TextEditBasedChangeGroup group, IRegion sourceRegion) {
 		int sLength= sourceRegion.getLength();
 		if (sLength == 0)

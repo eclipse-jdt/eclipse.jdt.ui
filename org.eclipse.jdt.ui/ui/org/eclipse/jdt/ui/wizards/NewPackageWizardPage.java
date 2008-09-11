@@ -13,6 +13,13 @@ package org.eclipse.jdt.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
@@ -23,13 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -58,49 +58,49 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
- * Wizard page to create a new package. 
- * 
+ * Wizard page to create a new package.
+ *
  * <p>
  * Note: This class is not intended to be subclassed, but clients can instantiate.
  * To implement a different kind of a new package wizard page, extend <code>NewContainerWizardPage</code>.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class NewPackageWizardPage extends NewContainerWizardPage {
-	
+
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
-	
+
 	private static final String PACKAGE= "NewPackageWizardPage.package"; //$NON-NLS-1$
-	
+
 	private StringDialogField fPackageDialogField;
-	
+
 	/*
 	 * Status of last validation of the package field
 	 */
 	private IStatus fPackageStatus;
-	
+
 	private IPackageFragment fCreatedPackageFragment;
-	
+
 	/**
 	 * Creates a new <code>NewPackageWizardPage</code>
 	 */
 	public NewPackageWizardPage() {
 		super(PAGE_NAME);
-		
-		setTitle(NewWizardMessages.NewPackageWizardPage_title); 
-		setDescription(NewWizardMessages.NewPackageWizardPage_description);		 
-		
+
+		setTitle(NewWizardMessages.NewPackageWizardPage_title);
+		setDescription(NewWizardMessages.NewPackageWizardPage_description);
+
 		fCreatedPackageFragment= null;
 
 		PackageFieldAdapter adapter= new PackageFieldAdapter();
-		
+
 		fPackageDialogField= new StringDialogField();
 		fPackageDialogField.setDialogFieldListener(adapter);
-		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label); 
-		
+		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
+
 		fPackageStatus= new StatusInfo();
 	}
 
@@ -108,14 +108,14 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * The wizard owning this page is responsible for calling this method with the
-	 * current selection. The selection is used to initialize the fields of the wizard 
+	 * current selection. The selection is used to initialize the fields of the wizard
 	 * page.
-	 * 
+	 *
 	 * @param selection used to initialize the fields
 	 */
 	public void init(IStructuredSelection selection) {
-		IJavaElement jelem= getInitialJavaElement(selection);	
-		
+		IJavaElement jelem= getInitialJavaElement(selection);
+
 		initContainerPage(jelem);
 		String pName= ""; //$NON-NLS-1$
 		if (jelem != null) {
@@ -124,40 +124,40 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				pName= pf.getElementName();
 		}
 		setPackageText(pName, true);
-		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });		
+		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
 	}
-	
+
 	// -------- UI Creation ---------
 
 	/*
 	 * @see WizardPage#createControl
-	 */	
+	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-			
+
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
 		int nColumns= 3;
-		
+
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;		
+		layout.numColumns= 3;
 		composite.setLayout(layout);
-		
+
 		Label label= new Label(composite, SWT.WRAP);
 		label.setText(NewWizardMessages.NewPackageWizardPage_info);
 		GridData gd= new GridData();
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		gd.horizontalSpan= 3;
 		label.setLayoutData(gd);
-		
+
 		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
-		
+
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE);
 	}
-	
+
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
@@ -167,14 +167,14 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			setFocus();
 		}
 	}
-	
+
 	/**
 	 * Sets the focus to the package name input field.
-	 */		
+	 */
 	protected void setFocus() {
 		fPackageDialogField.setFocus();
 	}
-	
+
 
 	private void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
@@ -182,24 +182,24 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		LayoutUtil.setHorizontalGrabbing(text);
 		DialogField.createEmptySpace(composite);
-		
+
 		TextFieldNavigationHandler.install(text);
 	}
-				
+
 	// -------- PackageFieldAdapter --------
 
 	private class PackageFieldAdapter implements IDialogFieldListener {
-		
+
 		// --------- IDialogFieldListener
-		
+
 		public void dialogFieldChanged(DialogField field) {
 			fPackageStatus= packageChanged();
 			// tell all others
 			handleFieldChanged(PACKAGE);
 		}
 	}
-		
-	// -------- update message ----------------		
+
+	// -------- update message ----------------
 
 	/*
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
@@ -210,11 +210,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			fPackageStatus= packageChanged();
 		}
 		// do status line update
-		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });		
-	}	
-			
+		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
+	}
+
 	// ----------- validation ----------
-	
+
 	private IStatus validatePackageName(String text) {
 		IJavaProject project= getJavaProject();
 		if (project == null || !project.exists()) {
@@ -222,7 +222,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 		return JavaConventionsUtil.validatePackageName(text, project);
 	}
-	
+
 	/*
 	 * Verifies the input for the package field.
 	 */
@@ -232,15 +232,15 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (packName.length() > 0) {
 			IStatus val= validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
-				status.setError(Messages.format(NewWizardMessages.NewPackageWizardPage_error_InvalidPackageName, val.getMessage())); 
+				status.setError(Messages.format(NewWizardMessages.NewPackageWizardPage_error_InvalidPackageName, val.getMessage()));
 				return status;
 			} else if (val.getSeverity() == IStatus.WARNING) {
-				status.setWarning(Messages.format(NewWizardMessages.NewPackageWizardPage_warning_DiscouragedPackageName, val.getMessage())); 
+				status.setWarning(Messages.format(NewWizardMessages.NewPackageWizardPage_warning_DiscouragedPackageName, val.getMessage()));
 			}
 		} else {
-			status.setError(NewWizardMessages.NewPackageWizardPage_error_EnterName); 
+			status.setError(NewWizardMessages.NewPackageWizardPage_error_EnterName);
 			return status;
-		}			
+		}
 
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null && root.getJavaProject().exists()) {
@@ -253,22 +253,22 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					// like the bin folder
 					IPath packagePath= pack.getPath();
 					if (outputPath.isPrefixOf(packagePath)) {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_IsOutputFolder); 
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_IsOutputFolder);
 						return status;
 					}
-				}		
+				}
 				if (pack.exists()) {
 					if (pack.containsJavaResources() || !pack.hasSubpackages()) {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists); 
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
 					} else {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);  
+						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
 					}
 				} else {
 					URI location= pack.getResource().getLocationURI();
 					if (location != null) {
 						IFileStore store= EFS.getStore(location);
 						if (store.fetchInfo().exists()) {
-							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExistsDifferentCase); 
+							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExistsDifferentCase);
 						}
 					}
 				}
@@ -281,7 +281,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Returns the content of the package input field.
-	 * 
+	 *
 	 * @return the content of the package input field
 	 */
 	public String getPackageText() {
@@ -290,17 +290,17 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Sets the content of the package input field to the given value.
-	 * 
+	 *
 	 * @param str the new package input field text
 	 * @param canBeModified if <code>true</code> the package input
 	 * field can be modified; otherwise it is read-only.
-	 */	
+	 */
 	public void setPackageText(String str, boolean canBeModified) {
 		fPackageDialogField.setText(str);
-		
+
 		fPackageDialogField.setEnabled(canBeModified);
 	}
-	
+
 	/**
 	 * Returns the resource handle that corresponds to the element to was created or
 	 * will be created.
@@ -314,15 +314,15 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 		return null;
 	}
-	
-		
+
+
 	// ---- creation ----------------
 
 	/**
 	 * Returns a runnable that creates a package using the current settings.
-	 * 
+	 *
 	 * @return the runnable that creates the new package
-	 */	
+	 */
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -330,25 +330,25 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					createPackage(monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
-				} 
+				}
 			}
 		};
 	}
 
 	/**
 	 * Returns the created package fragment. This method only returns a valid value
-	 * after <code>getRunnable</code> or <code>createPackage</code> have been 
+	 * after <code>getRunnable</code> or <code>createPackage</code> have been
 	 * executed.
-	 * 
+	 *
 	 * @return the created package fragment
-	 */	
+	 */
 	public IPackageFragment getNewPackageFragment() {
 		return fCreatedPackageFragment;
 	}
-	
+
 	/**
 	 * Creates the new package using the entered field values.
-	 * 
+	 *
 	 * @param monitor a progress monitor to report progress. The progress
 	 * monitor must not be <code>null</code>
 	 * @throws CoreException Thrown if creating the package failed.
@@ -363,9 +363,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
-		
+
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
-	}	
+	}
 }

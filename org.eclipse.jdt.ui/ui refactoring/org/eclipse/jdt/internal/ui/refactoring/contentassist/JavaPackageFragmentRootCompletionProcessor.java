@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
@@ -48,7 +47,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  */
 public class JavaPackageFragmentRootCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
-	
+
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private CompletionProposalComparator fComparator;
 
@@ -57,7 +56,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	/**
 	 * Creates a <code>JavaPackageCompletionProcessor</code> to complete existing packages
 	 * in the context of <code>packageFragmentRoot</code>.
-	 *  
+	 *
 	 * @param packageFragmentRoot the context for package completion
 	 */
 	public JavaPackageFragmentRootCompletionProcessor(IPackageFragmentRoot packageFragmentRoot) {
@@ -122,7 +121,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	}
 
 	/*
-	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int) 
+	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		String input= contentAssistSubjectControl.getDocument().get();

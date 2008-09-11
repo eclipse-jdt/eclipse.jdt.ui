@@ -24,13 +24,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 
 public class LocalVariableIndex extends ASTVisitor {
-	
+
 	private int fTopIndex;
-	
+
 	/**
-	 * Computes the maximum number of local variable declarations in the 
+	 * Computes the maximum number of local variable declarations in the
 	 * given body declaration.
-	 *  
+	 *
 	 * @param declaration the body declaration. Must either be a method
 	 *  declaration, or an initializer, or a field declaration.
 	 * @return the maximum number of local variables
@@ -46,7 +46,7 @@ public class LocalVariableIndex extends ASTVisitor {
 				throw new IllegalArgumentException(declaration.toString());
 		}
 	}
-	
+
 	private static int internalPerform(BodyDeclaration methodOrInitializer) {
 		// we have to find the outermost method/initializer/field declaration since a local or anonymous
 		// type can reference final variables from the outer scope.
@@ -58,7 +58,7 @@ public class LocalVariableIndex extends ASTVisitor {
 			}
 			parent= parent.getParent();
 		}
-		
+
 		return doPerform(target);
 	}
 
@@ -72,12 +72,12 @@ public class LocalVariableIndex extends ASTVisitor {
 		handleVariableBinding(node.resolveBinding());
 		return true;
 	}
-	
+
 	public boolean visit(VariableDeclarationFragment node) {
 		handleVariableBinding(node.resolveBinding());
 		return true;
 	}
-	
+
 	private void handleVariableBinding(IVariableBinding binding) {
 		if (binding == null)
 			return;

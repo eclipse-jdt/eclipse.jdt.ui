@@ -36,6 +36,7 @@ import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -67,7 +68,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	/**
 	 * An exit policy that skips Backspace and Delete at the beginning and at the end
 	 * of a linked position, respectively.
-	 * 
+	 *
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=183925 .
 	 */
 	public static class DeleteBlockingExitPolicy implements IExitPolicy {
@@ -245,17 +246,17 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 		}
 		return fLabel;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 */
 	public StyledString getStyledDisplayString() {
 		StyledString str= new StyledString(fLabel);
-		
+
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fLabel, shortCutString });
-			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER); 
+			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER);
 		}
 		return str;
 	}

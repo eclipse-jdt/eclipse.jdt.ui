@@ -26,19 +26,18 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Java-aware refactoring model merger.
- * 
+ *
  * @since 3.2
  */
 public final class JavaModelMerger extends AbstractResourceMappingMerger {
 
 	/**
 	 * Creates a new java model merger.
-	 * 
+	 *
 	 * @param provider
 	 *            the model provider
 	 */
@@ -61,7 +60,7 @@ public final class JavaModelMerger extends AbstractResourceMappingMerger {
 
 	/**
 	 * Returns the dependent projects of the specified project.
-	 * 
+	 *
 	 * @param set
 	 *            the project set
 	 * @param project

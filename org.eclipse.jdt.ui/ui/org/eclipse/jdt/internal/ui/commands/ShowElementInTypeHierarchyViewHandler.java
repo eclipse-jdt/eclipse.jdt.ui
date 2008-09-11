@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 /**
  * A command handler to show a java element in the type hierarchy view.
- * 
+ *
  * @since 3.2
  */
 public class ShowElementInTypeHierarchyViewHandler extends AbstractHandler {

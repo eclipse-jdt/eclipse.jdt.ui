@@ -73,16 +73,16 @@ public class MoveMembersWizard extends RefactoringWizard {
 	public MoveMembersWizard(MoveStaticMembersProcessor processor, Refactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
 		fProcessor= processor;
-		setDefaultPageTitle(RefactoringMessages.MoveMembersWizard_page_title); 
+		setDefaultPageTitle(RefactoringMessages.MoveMembersWizard_page_title);
 	}
 
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
-	 */ 
+	 */
 	protected void addUserInputPages(){
 		addPage(new MoveMembersInputPage(fProcessor));
 	}
-	
+
 	private static class MoveMembersInputPage extends UserInputWizardPage {
 
 		public static final String PAGE_NAME= "MoveMembersInputPage"; //$NON-NLS-1$
@@ -99,23 +99,23 @@ public class MoveMembersWizard extends RefactoringWizard {
 			super(PAGE_NAME);
 			fProcessor= processor;
 		}
-	
+
 		public void setVisible(boolean visible){
 			if (visible){
-				String message= Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey, 
+				String message= Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey,
 					new String[]{new Integer(getMoveProcessor().getMembersToMove().length).toString(),
 								    JavaElementLabels.getElementLabel(getMoveProcessor().getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 				setDescription(message);
-			}	
-			super.setVisible(visible);	
+			}
+			super.setVisible(visible);
 		}
-	
-		public void createControl(Composite parent) {		
+
+		public void createControl(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			GridLayout layout= new GridLayout();
 			layout.numColumns= 2;
 			composite.setLayout(layout);
-		
+
 			addLabel(composite);
 			addDestinationControls(composite);
 			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(), getMoveProcessor().getMembersToMove().length > 1);
@@ -154,17 +154,17 @@ public class MoveMembersWizard extends RefactoringWizard {
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			super.dispose();
 		}
-		
+
 		private void addLabel(Composite parent) {
 			Label label= new Label(parent, SWT.NONE);
 			IMember[] members= getMoveProcessor().getMembersToMove();
 			if (members.length == 1) {
 				label.setText(Messages.format(
-						RefactoringMessages.MoveMembersInputPage_destination_single, 
+						RefactoringMessages.MoveMembersInputPage_destination_single,
 						JavaElementLabels.getElementLabel(members[0], LABEL_FLAGS)));
 			} else {
 				label.setText(Messages.format(
-						RefactoringMessages.MoveMembersInputPage_destination_multi, 
+						RefactoringMessages.MoveMembersInputPage_destination_multi,
 						String.valueOf(members.length)));
 			}
 			GridData gd= new GridData();
@@ -202,7 +202,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 							}
 						} catch(JavaModelException ex) {
 							JavaPlugin.log(ex); //no ui here
-							error(RefactoringMessages.MoveMembersInputPage_invalid_name); 
+							error(RefactoringMessages.MoveMembersInputPage_invalid_name);
 						}
 					}
 				}
@@ -221,9 +221,9 @@ public class MoveMembersWizard extends RefactoringWizard {
 			processor.setPackageFragment(context);
 			ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);
 			TextFieldNavigationHandler.install(fDestinationField);
-			
+
 			Button button= new Button(composite, SWT.PUSH);
-			button.setText(RefactoringMessages.MoveMembersInputPage_browse); 
+			button.setText(RefactoringMessages.MoveMembersInputPage_browse);
 			button.setLayoutData(new GridData());
 			SWTUtil.setButtonDimensionHint(button);
 			button.addSelectionListener(new SelectionAdapter(){
@@ -232,12 +232,12 @@ public class MoveMembersWizard extends RefactoringWizard {
 				}
 			});
 		}
-			
+
 		protected boolean performFinish() {
 			initializeRefactoring();
 			return super.performFinish();
 		}
-	
+
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
 			return super.getNextPage();
@@ -249,33 +249,33 @@ public class MoveMembersWizard extends RefactoringWizard {
 				if (!fgMruDestinations.remove(destination) && fgMruDestinations.size() >= MRU_COUNT)
 					fgMruDestinations.remove(fgMruDestinations.size() - 1);
 				fgMruDestinations.add(0, destination);
-				
+
 				getMoveProcessor().setDestinationTypeFullyQualifiedName(destination);
 			} catch(JavaModelException e) {
-				ExceptionHandler.handle(e, getShell(), RefactoringMessages.MoveMembersInputPage_move_Member, RefactoringMessages.MoveMembersInputPage_exception); 
+				ExceptionHandler.handle(e, getShell(), RefactoringMessages.MoveMembersInputPage_move_Member, RefactoringMessages.MoveMembersInputPage_exception);
 			}
 		}
-	
+
 		private IJavaSearchScope createWorkspaceSourceScope(){
 			IJavaElement[] project= new IJavaElement[] { getMoveProcessor().getDeclaringType().getJavaProject() };
 			return SearchEngine.createJavaSearchScope(project, IJavaSearchScope.REFERENCED_PROJECTS | IJavaSearchScope.SOURCES);
 		}
-	
+
 		private void openTypeSelectionDialog(){
 			int elementKinds= IJavaSearchConstants.TYPE;
 			final IJavaSearchScope scope= createWorkspaceSourceScope();
 			FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false,
 				getWizard().getContainer(), scope, elementKinds);
-			dialog.setTitle(RefactoringMessages.MoveMembersInputPage_choose_Type); 
-			dialog.setMessage(RefactoringMessages.MoveMembersInputPage_dialogMessage); 
+			dialog.setTitle(RefactoringMessages.MoveMembersInputPage_choose_Type);
+			dialog.setMessage(RefactoringMessages.MoveMembersInputPage_dialogMessage);
 			dialog.setValidator(new ISelectionStatusValidator(){
 				public IStatus validate(Object[] selection) {
 					Assert.isTrue(selection.length <= 1);
 					if (selection.length == 0)
-						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null); 
+						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
 					Object element= selection[0];
 					if (! (element instanceof IType))
-						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null); 
+						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
 					IType type= (IType)element;
 					return validateDestinationType(type, type.getElementName());
 				}
@@ -283,8 +283,8 @@ public class MoveMembersWizard extends RefactoringWizard {
 			dialog.setInitialPattern(createInitialFilter());
 			if (dialog.open() == Window.CANCEL)
 				return;
-			IType firstResult= (IType)dialog.getFirstResult();		
-			fDestinationField.setText(firstResult.getFullyQualifiedName('.'));	
+			IType firstResult= (IType)dialog.getFirstResult();
+			fDestinationField.setText(firstResult.getFullyQualifiedName('.'));
 		}
 
 		private String createInitialFilter() {
@@ -293,15 +293,15 @@ public class MoveMembersWizard extends RefactoringWizard {
 			else
 				return getMoveProcessor().getDeclaringType().getElementName();
 		}
-	
+
 		private static IStatus validateDestinationType(IType type, String typeName){
 			if (type == null || ! type.exists())
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, Messages.format(RefactoringMessages.MoveMembersInputPage_not_found, BasicElementLabels.getJavaElementName(typeName)), null); 
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, Messages.format(RefactoringMessages.MoveMembersInputPage_not_found, BasicElementLabels.getJavaElementName(typeName)), null);
 			if (type.isBinary())
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_no_binary, null); 
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_no_binary, null);
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 		}
-	
+
 		private MoveStaticMembersProcessor getMoveProcessor() {
 			return fProcessor;
 		}

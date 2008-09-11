@@ -16,14 +16,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -62,38 +62,38 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
-		
+
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP);
 	}
-	
+
 	public RemoveFromBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
-		
+
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_REMOVE_AS_SOURCE_FOLDER);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_REMOVE_AS_SOURCE_FOLDER);
     }
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.REMOVE_FROM_BP);
-		
+
 		fContext= context;
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_label);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
-		
+
 		if (getSelectedElements().size() != 1)
-			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath; 
-		
+			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath;
+
 		Object elem= getSelectedElements().get(0);
-        
+
         if (elem instanceof IJavaProject) {
             String name= ClasspathModifier.escapeSpecialChars(JavaElementLabels.getElementLabel(((IJavaElement)elem), JavaElementLabels.ALL_DEFAULT));
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, name);
@@ -103,7 +103,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
         } else if (elem instanceof ClassPathContainer) {
         	return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath;
         }
-        
+
         return null;
 	}
 
@@ -128,12 +128,12 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 			final List elementsToRemove= new ArrayList();
 			final List foldersToDelete= new ArrayList();
 			queryToRemoveLinkedFolders(elementsToRemove, foldersToDelete);
-		
+
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, foldersToDelete.size() + 10);
-						
+
 						CPJavaProject cpProject= CPJavaProject.createFromExisting(project);
 						CPListElement[] toRemove= new CPListElement[elementsToRemove.size()];
 						int i= 0;
@@ -148,14 +148,14 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 							}
 	                        i++;
                         }
-						
+
 						BuildpathDelta delta= ClasspathModifier.removeFromBuildpath(toRemove, cpProject);
 						ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 10));
-						
+
 						deleteFolders(foldersToDelete, new SubProgressMonitor(monitor, foldersToDelete.size()));
-						
+
 						informListeners(delta);
-						
+
 						if (delta.getDeletedResources().length == foldersToDelete.size()) {
 							selectAndReveal(new StructuredSelection(project));
 						} else {
@@ -171,7 +171,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 				}
 			};
 			fContext.run(false, false, runnable);
-			
+
 		} catch (CoreException e) {
 			showExceptionDialog(e, NewWizardMessages.RemoveFromBuildpathAction_ErrorTitle);
 		} catch (InvocationTargetException e) {
@@ -186,7 +186,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 
 	private void deleteFolders(List folders, IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, folders.size()); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, folders.size());
 
 			for (Iterator iter= folders.iterator(); iter.hasNext();) {
 				IFolder folder= (IFolder)iter.next();
@@ -196,7 +196,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 			monitor.done();
 		}
 	}
-	
+
 	private void queryToRemoveLinkedFolders(final List elementsToRemove, final List foldersToDelete) throws JavaModelException {
 		final Shell shell= getShell();
 		for (Iterator iter= getSelectedElements().iterator(); iter.hasNext();) {
@@ -207,7 +207,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 					RemoveLinkedFolderDialog dialog= new RemoveLinkedFolderDialog(shell, folder);
 
 					final int result= dialog.open() == Window.OK?dialog.getRemoveStatus():IRemoveLinkedFolderQuery.REMOVE_CANCEL;
-					
+
 					if (result != IRemoveLinkedFolderQuery.REMOVE_CANCEL) {
 						if (result == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH) {
 							elementsToRemove.add(element);

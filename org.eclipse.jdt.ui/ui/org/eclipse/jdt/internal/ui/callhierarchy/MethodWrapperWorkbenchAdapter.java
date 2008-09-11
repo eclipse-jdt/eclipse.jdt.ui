@@ -56,7 +56,7 @@ public class MethodWrapperWorkbenchAdapter implements IWorkbenchAdapter {
 	public Object getParent(Object o) {
 		return fMethodWrapper.getParent();
 	}
-	
+
     /*
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
@@ -74,5 +74,5 @@ public class MethodWrapperWorkbenchAdapter implements IWorkbenchAdapter {
         //Note: A MethodWrapperWorkbenchAdapter is equal to its MethodWrapper and vice versa (bug 101677).
         return fMethodWrapper.hashCode();
     }
-    
+
 }

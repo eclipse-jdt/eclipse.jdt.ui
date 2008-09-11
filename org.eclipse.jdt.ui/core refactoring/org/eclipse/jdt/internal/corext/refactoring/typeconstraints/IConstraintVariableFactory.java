@@ -26,7 +26,7 @@ public interface IConstraintVariableFactory {
 	ParameterTypeVariable makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex);
 	RawBindingVariable makeRawBindingVariable(ITypeBinding binding);
 	ReturnTypeVariable makeReturnTypeVariable(ReturnStatement returnStatement);
-	ReturnTypeVariable makeReturnTypeVariable(IMethodBinding methodBinding);		
+	ReturnTypeVariable makeReturnTypeVariable(IMethodBinding methodBinding);
 	TypeVariable makeTypeVariable(Type type);
-	TypeVariable makeTypeVariable(ITypeBinding binding, String source, CompilationUnitRange range);	
+	TypeVariable makeTypeVariable(ITypeBinding binding, String source, CompilationUnitRange range);
 }

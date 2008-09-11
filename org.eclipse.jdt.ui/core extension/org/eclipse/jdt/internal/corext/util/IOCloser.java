@@ -24,7 +24,7 @@ public class IOCloser {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	public static void rethrows(Reader reader, InputStream stream) throws IOException {
 		if (reader != null) {
 			reader.close();
@@ -34,6 +34,6 @@ public class IOCloser {
 			stream.close();
 			return;
 		}
-	}	
+	}
 }
 

@@ -21,15 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
@@ -38,6 +29,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -117,11 +117,11 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 /**
  * Shows a list of Java types to the user with a text entry field for a string
  * pattern used to filter the list of types.
- * 
+ *
  * @since 3.3
  */
 public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog implements ITypeSelectionComponent {
-	
+
 	/**
 	 * Disabled "Show Container for Duplicates because of
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=184693 .
@@ -143,17 +143,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	private ShowContainerForDuplicatesAction fShowContainerForDuplicatesAction;
 
 	private IJavaSearchScope fSearchScope;
-	
+
 	private boolean fAllowScopeSwitching;
 
 	/**
 	 * Flags defining nature of searched elements; the only valid
 	 * values are:
-	 *  {@link IJavaSearchConstants#TYPE}, 
-	 * 	{@link IJavaSearchConstants#ANNOTATION_TYPE}, 
-	 * 	{@link IJavaSearchConstants#INTERFACE}, 
-	 * 	{@link IJavaSearchConstants#ENUM}, 
-	 * 	{@link IJavaSearchConstants#CLASS_AND_INTERFACE}, 
+	 *  {@link IJavaSearchConstants#TYPE},
+	 * 	{@link IJavaSearchConstants#ANNOTATION_TYPE},
+	 * 	{@link IJavaSearchConstants#INTERFACE},
+	 * 	{@link IJavaSearchConstants#ENUM},
+	 * 	{@link IJavaSearchConstants#CLASS_AND_INTERFACE},
 	 * 	{@link IJavaSearchConstants#CLASS_AND_ENUM}.
 	 */
 	private final int fElementKinds;
@@ -165,16 +165,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	private ISelectionStatusValidator fValidator;
 
 	private final TypeInfoUtil fTypeInfoUtil;
-	
+
 	private static boolean fgFirstTime= true;
 
-	private final TypeItemsComparator fTypeItemsComparator; 
-	
+	private final TypeItemsComparator fTypeItemsComparator;
+
 	private int fTypeFilterVersion= 0;
 
 	/**
 	 * Creates new FilteredTypesSelectionDialog instance
-	 * 
+	 *
 	 * @param parent
 	 *            shell to parent the dialog on
 	 * @param multi
@@ -201,7 +201,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/**
 	 * Creates new FilteredTypesSelectionDialog instance.
-	 * 
+	 *
 	 * @param shell
 	 *            shell to parent the dialog on
 	 * @param multi
@@ -212,7 +212,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 * @param scope
 	 *            scope used when searching for types. If the scope is <code>null</code>,
 	 *            then workspace is scope is used as default, and the user can
-	 *            choose a working set as scope. 
+	 *            choose a working set as scope.
 	 * @param elementKinds
 	 *            flags defining nature of searched elements; the only valid
 	 *            values are: <code>IJavaSearchConstants.TYPE</code>
@@ -229,7 +229,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	public FilteredTypesSelectionDialog(Shell shell, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds, TypeSelectionExtension extension) {
 		super(shell, multi);
-		
+
 		setSelectionHistory(new TypeSelectionHistory());
 
 		if (scope == null) {
@@ -258,13 +258,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 		});
 		setDetailsLabelProvider(new TypeItemDetailsLabelProvider(fTypeInfoUtil));
-		
+
 		fTypeItemsComparator= new TypeItemsComparator();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.SelectionDialog#setTitle(java.lang.String)
 	 */
 	public void setTitle(String title) {
@@ -274,7 +274,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/**
 	 * Adds or replaces subtitle of the dialog
-	 * 
+	 *
 	 * @param text
 	 *            the new subtitle for this dialog
 	 */
@@ -288,7 +288,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#getDialogSettings()
 	 */
 	protected IDialogSettings getDialogSettings() {
@@ -303,7 +303,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#storeDialog(org.eclipse.jface.dialogs.IDialogSettings)
 	 */
 	protected void storeDialog(IDialogSettings settings) {
@@ -330,7 +330,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#restoreDialog(org.eclipse.jface.dialogs.IDialogSettings)
 	 */
 	protected void restoreDialog(IDialogSettings settings) {
@@ -343,7 +343,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		} else {
 			fTypeInfoLabelProvider.setContainerInfo(true);
 		}
-		
+
 		if (fAllowScopeSwitching) {
 			String setting= settings.get(WORKINGS_SET_SETTINGS);
 			if (setting != null) {
@@ -375,7 +375,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#fillViewMenu(org.eclipse.jface.action.IMenuManager)
 	 */
 	protected void fillViewMenu(IMenuManager menuManager) {
@@ -396,20 +396,20 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 						setSearchScope(JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true));
 						setSubtitle(ws.getLabel());
 					}
-	
+
 					applyFilter();
 				}
 			});
 			fFilterActionGroup.fillViewMenu(menuManager);
 		}
-		
+
 		menuManager.add(new Separator());
 		menuManager.add(new TypeFiltersPreferencesAction());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#createExtendedContentArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createExtendedContentArea(Composite parent) {
@@ -424,7 +424,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				addition.setLayoutData(gd);
 
 			}
-			
+
 			fExtension.initialize(this);
 		}
 
@@ -433,7 +433,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.SelectionDialog#setResult(java.util.List)
 	 */
 	protected void setResult(List newResult) {
@@ -472,10 +472,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			TextFieldNavigationHandler.install((Text) patternControl);
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.window.Window#open()
 	 */
 	public int open() {
@@ -499,7 +499,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/**
 	 * Sets a new validator.
-	 * 
+	 *
 	 * @param validator
 	 *            the new validator
 	 */
@@ -509,13 +509,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#createFilter()
 	 */
 	protected ItemsFilter createFilter() {
 		return new TypeItemsFilter(fSearchScope, fElementKinds, fFilterExtension);
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
@@ -526,7 +526,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillContentProvider(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.AbstractContentProvider,
 	 *      org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter,
 	 *      org.eclipse.core.runtime.IProgressMonitor)
@@ -537,14 +537,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		SearchEngine engine= new SearchEngine((WorkingCopyOwner) null);
 		String packPattern= typeSearchFilter.getPackagePattern();
 		progressMonitor.setTaskName(JavaUIMessages.FilteredTypesSelectionDialog_searchJob_taskName);
-		
+
 		/*
 		 * Setting the filter into match everything mode avoids filtering twice
 		 * by the same pattern (the search engine only provides filtered
 		 * matches). For the case when the pattern is a camel case pattern with
 		 * a terminator, the filter is not set to match everything mode because
 		 * jdt.core's SearchPattern does not support that case.
-		 */ 
+		 */
 		String typePattern= typeSearchFilter.getNamePattern();
 		int matchRule= typeSearchFilter.getMatchRule();
 		typeSearchFilter.setMatchEverythingMode(true);
@@ -566,7 +566,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#getItemsComparator()
 	 */
 	protected Comparator getItemsComparator() {
@@ -575,7 +575,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#getElementName(java.lang.Object)
 	 */
 	public String getElementName(Object item) {
@@ -585,7 +585,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#validateItem(java.lang.Object)
 	 */
 	protected IStatus validateItem(Object item) {
@@ -607,14 +607,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	/**
 	 * Sets search scope used when searching for types.
-	 * 
+	 *
 	 * @param scope
 	 *            the new scope
 	 */
 	private void setSearchScope(IJavaSearchScope scope) {
 		fSearchScope= scope;
 	}
-	
+
 	/*
 	 * We only have to ensure history consistency here since the search engine
 	 * takes care of working copies.
@@ -643,27 +643,27 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 		public static boolean needsExecution() {
 			OpenTypeHistory history= OpenTypeHistory.getInstance();
-			return fgFirstTime || history.isEmpty() || history.needConsistencyCheck(); 
+			return fgFirstTime || history.isEmpty() || history.needConsistencyCheck();
 		}
 		private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {
 			try {
 				new SearchEngine().searchAllTypeNames(
 						null,
 						0,
-						// make sure we search a concrete name. This is faster according to Kent  
+						// make sure we search a concrete name. This is faster according to Kent
 						"_______________".toCharArray(), //$NON-NLS-1$
-						SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
+						SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
 						IJavaSearchConstants.ENUM,
-						SearchEngine.createWorkspaceScope(), 
-						new TypeNameRequestor() {}, 
-						IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+						SearchEngine.createWorkspaceScope(),
+						new TypeNameRequestor() {},
+						IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 						monitor);
 			} catch (JavaModelException e) {
 				throw new InvocationTargetException(e);
 			}
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#reloadCache(boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -675,7 +675,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				ConsistencyRunnable runnable= new ConsistencyRunnable();
 				runnable.run(new SubProgressMonitor(monitor, 1));
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
+				ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message);
 				close();
 				return;
 			} catch (InterruptedException e) {
@@ -714,23 +714,23 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
 			fTypeInfoLabelProvider.setContainerInfo(isChecked());
 		}
 	}
-	
+
 	private class TypeFiltersPreferencesAction extends Action {
-		
+
 		public TypeFiltersPreferencesAction() {
 			super(JavaUIMessages.FilteredTypesSelectionDialog_TypeFiltersPreferencesAction_label);
 		}
-		
+
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
@@ -767,7 +767,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 		 */
 		public Image getImage(Object element) {
@@ -784,7 +784,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 		 */
 		public String getText(Object element) {
@@ -805,7 +805,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(org.eclipse.swt.graphics.Image,
 		 *      java.lang.Object)
 		 */
@@ -815,7 +815,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(java.lang.String,
 		 *      java.lang.Object)
 		 */
@@ -836,7 +836,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 */
 		public StyledString getStyledText(Object element) {
 			String text= getText(element);
-			StyledString string= new StyledString(text);			
+			StyledString string= new StyledString(text);
 			int index= text.indexOf(JavaElementLabels.CONCAT_STRING);
 			if (index != -1) {
 				string.setStyle(index, text.length() - index, StyledString.QUALIFIER_STYLER);
@@ -859,7 +859,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 		 */
 		public Image getImage(Object element) {
@@ -872,7 +872,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 		 */
 		public String getText(Object element) {
@@ -1041,7 +1041,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				fAdapter.setMatch(type);
 				return fProviderExtension.getImageDescriptor(fAdapter);
 			}
-			return null; 
+			return null;
 		}
 
 		private String getTypeContainerName(TypeNameMatch info) {
@@ -1076,14 +1076,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	private class TypeItemsFilter extends ItemsFilter {
 
 		private boolean fMatchEverything= false;
-		
+
 		private final int fMyTypeFilterVersion= fTypeFilterVersion;
 
 		private final TypeInfoFilter fTypeInfoFilter;
-		
+
 		/**
 		 * Creates instance of TypeItemsFilter
-		 * 
+		 *
 		 * @param scope
 		 * @param elementKind
 		 * @param extension
@@ -1104,7 +1104,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter)
 		 */
 		public boolean isSubFilter(ItemsFilter filter) {
@@ -1113,7 +1113,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			TypeItemsFilter typeItemsFilter= (TypeItemsFilter) filter;
 			if (fMyTypeFilterVersion != typeItemsFilter.getMyTypeFilterVersion())
 				return false;
-			
+
 			//Caveat: This method is defined the wrong way 'round in FilteredItemsSelectionDialog!
 			//WRONG (has reverse meaning!): return fTypeInfoFilter.isSubFilter(filter.getPattern());
 			return typeItemsFilter.fTypeInfoFilter.isSubFilter(fTypeInfoFilter.getText());
@@ -1143,11 +1143,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public int getMyTypeFilterVersion() {
 			return fMyTypeFilterVersion;
 		}
-		
+
 		public String getNamePattern() {
 			return fTypeInfoFilter.getNamePattern();
 		}
-		
+
 		public String getPackagePattern() {
 			return fTypeInfoFilter.getPackagePattern();
 		}
@@ -1166,7 +1166,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/**
 		 * Set filter to "match everything" mode.
-		 * 
+		 *
 		 * @param matchEverything if <code>true</code>, {@link #matchItem(Object)} always returns true.
 		 * 					If <code>false</code>, the filter is enabled.
 		 */
@@ -1176,7 +1176,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isConsistentItem(java.lang.Object)
 		 */
 		public boolean isConsistentItem(Object item) {
@@ -1185,25 +1185,25 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#matchItem(java.lang.Object)
 		 */
 		public boolean matchItem(Object item) {
-			if (fMatchEverything) 
+			if (fMatchEverything)
 				return true;
-			
+
 			TypeNameMatch type= (TypeNameMatch) item;
 			return fTypeInfoFilter.matchesHistoryElement(type);
 		}
-		
+
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#matchesRawNamePattern(java.lang.Object)
 		 */
 		public boolean matchesRawNamePattern(Object item) {
 			TypeNameMatch type= (TypeNameMatch) item;
-			return matchesRawNamePattern(type); 
+			return matchesRawNamePattern(type);
 		}
 
 		/**
@@ -1223,10 +1223,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		/**
-		 * @param text 
+		 * @param text
 		 * @return never returns
 		 * @throws UnsupportedOperationException always
-		 *         
+		 *
 		 * @deprecated not used
 		 */
 		protected boolean matches(String text) {
@@ -1240,12 +1240,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	private static class TypeSearchPattern extends org.eclipse.ui.dialogs.SearchPattern {
 
-		private String fPattern;	
-		
+		private String fPattern;
+
 		public void setPattern(String stringPattern) {
 			fPattern= stringPattern;
 		}
-		
+
 		public String getPattern() {
 			return fPattern;
 		}
@@ -1276,7 +1276,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
 		 */
 		public void acceptTypeNameMatch(TypeNameMatch match) {
@@ -1351,7 +1351,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
 		public int compare(Object left, Object right) {
@@ -1449,7 +1449,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#accessed(java.lang.Object)
 		 */
 		public synchronized void accessed(Object object) {
@@ -1458,7 +1458,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#remove(java.lang.Object)
 		 */
 		public synchronized boolean remove(Object element) {
@@ -1468,7 +1468,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#load(org.eclipse.ui.IMemento)
 		 */
 		public void load(IMemento memento) {
@@ -1482,7 +1482,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#save(org.eclipse.ui.IMemento)
 		 */
 		public void save(IMemento memento) {
@@ -1508,7 +1508,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#storeItemToMemento(java.lang.Object,
 		 *      org.eclipse.ui.IMemento)
 		 */

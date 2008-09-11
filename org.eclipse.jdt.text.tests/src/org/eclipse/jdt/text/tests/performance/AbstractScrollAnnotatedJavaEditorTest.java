@@ -17,6 +17,7 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -74,6 +75,6 @@ public abstract class AbstractScrollAnnotatedJavaEditorTest extends ScrollEditor
 			if (extension != null)
 				extension.getRewriteTarget().endCompoundChange();
 		}
-		
+
 	}
 }

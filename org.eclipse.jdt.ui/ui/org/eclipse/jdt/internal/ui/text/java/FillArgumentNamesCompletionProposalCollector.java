@@ -105,7 +105,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	 * <code>false</code> if not. Note that even though code (in a library)
 	 * may be referenced that uses generics, it is still possible that the
 	 * current source does not allow generics.
-	 * 
+	 *
 	 * @param project the Java project
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not

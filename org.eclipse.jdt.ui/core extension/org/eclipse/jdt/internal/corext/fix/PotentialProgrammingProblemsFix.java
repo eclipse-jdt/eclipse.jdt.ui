@@ -68,24 +68,24 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOperationsFix {
-	
+
 	/** Name of the serializable class */
 	private static final String SERIALIZABLE_NAME= "java.io.Serializable"; //$NON-NLS-1$
-	
+
 	/** The name of the serial version field */
 	private static final String NAME_FIELD= "serialVersionUID"; //$NON-NLS-1$
-	
+
 	private interface ISerialVersionFixContext {
 		public RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException;
 		public Long getSerialVersionId(ITypeBinding binding);
 	}
-	
+
 	private static class SerialVersionHashContext implements ISerialVersionFixContext {
-		
+
 		private final IJavaProject fProject;
 		private final ICompilationUnit[] fCompilationUnits;
 		private final Hashtable /*<bindingKey, Long>*/ fIdsTable;
-		
+
 		public SerialVersionHashContext(IJavaProject project, ICompilationUnit[] compilationUnits) {
 			fProject= project;
 			fCompilationUnits= compilationUnits;
@@ -95,19 +95,19 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		public RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException {
 			if (monitor == null)
 				monitor= new NullProgressMonitor();
-			
+
 			RefactoringStatus result;
 			try {
 				monitor.beginTask("", 10); //$NON-NLS-1$
-				
+
 				IType[] types= findTypesWithMissingUID(fProject, fCompilationUnits, new SubProgressMonitor(monitor, 1));
 				if (types.length == 0)
 					return new RefactoringStatus();
-				
+
 				fProject.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
 				if (monitor.isCanceled())
 					throw new OperationCanceledException();
-				
+
 				result= new RefactoringStatus();
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setProject(fProject);
@@ -135,35 +135,35 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			}
 			return result;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public Long getSerialVersionId(ITypeBinding binding) {
 			return (Long) fIdsTable.get(binding.getKey());
 		}
-		
+
 		protected void setSerialVersionId(ITypeBinding binding, Long id) {
 			fIdsTable.put(binding.getKey(), id);
 		}
-		
+
 		private IType[] findTypesWithMissingUID(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 			try {
 				monitor.beginTask("", compilationUnits.length); //$NON-NLS-1$
-				
+
 				IType serializable= project.findType(SERIALIZABLE_NAME);
-				
+
 				List types= new ArrayList();
-				
+
 				if (compilationUnits.length > 500) {
 					//500 is a guess. Building the type hierarchy on serializable is very expensive
 					//depending on how many subtypes exit in the project.
-					
+
 					HashSet cus= new HashSet();
 					for (int i= 0; i < compilationUnits.length; i++) {
 						cus.add(compilationUnits[i]);
 					}
-					
+
 					monitor.subTask(Messages.format(FixMessages.Java50Fix_SerialVersion_CalculateHierarchy_description, SERIALIZABLE_NAME));
 					ITypeHierarchy hierarchy1= serializable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));
 					IType[] allSubtypes1= hierarchy1.getAllSubtypes(serializable);
@@ -177,13 +177,13 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
                     	monitor.worked(1);
                     }
 				}
-				
+
 				return (IType[])types.toArray(new IType[types.size()]);
 			} finally {
 				monitor.done();
 			}
 		}
-		
+
 		private void addTypes(IType[] allSubtypes, HashSet cus, List types) throws JavaModelException {
 			for (int i= 0; i < allSubtypes.length; i++) {
 				IType type= allSubtypes[i];
@@ -196,13 +196,13 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 				}
 			}
 		}
-		
+
 		private void collectChildrenWithMissingSerialVersionId(IJavaElement[] children, IType serializable, List result) throws JavaModelException {
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement child= children[i];
 				if (child instanceof IType) {
 					IType type= (IType)child;
-					
+
 					if (type.isClass()) {
     					IField field= type.getField(NAME_FIELD);
     					if (!field.exists()) {
@@ -226,7 +226,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			}
 		}
 	}
-	
+
 	private static class SerialVersionHashBatchOperation extends AbstractSerialVersionOperation {
 
 		private final ISerialVersionFixContext fContext;
@@ -243,11 +243,11 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			ITypeBinding typeBinding= getTypeBinding(declarationNode);
 			if (typeBinding == null)
 				return false;
-			
+
 			Long id= fContext.getSerialVersionId(typeBinding);
 			if (id == null)
 				return false;
-			
+
 			fragment.setInitializer(fragment.getAST().newNumberLiteral(id.toString() + LONG_SUFFIX));
 			return true;
 		}
@@ -256,7 +256,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		 * {@inheritDoc}
 		 */
 		protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {}
-		
+
 	}
 
 	private static ISerialVersionFixContext fCurrentContext;
@@ -264,33 +264,33 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() != IProblem.MissingSerialVersion)
 			return null;
-		
+
 		final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (unit == null)
 			return null;
-		
+
 		final SimpleName simpleName= getSelectedName(compilationUnit, problem);
 		if (simpleName == null)
 			return null;
-		
+
 		ASTNode declaringNode= getDeclarationNode(simpleName);
 		if (declaringNode == null)
 			return null;
-		
+
 		SerialVersionDefaultOperation defop= new SerialVersionDefaultOperation(unit, new ASTNode[] {declaringNode});
 		IProposableFix fix1= new PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_default_description, compilationUnit, new CompilationUnitRewriteOperation[] {defop});
-		
+
 		SerialVersionHashOperation hashop= new SerialVersionHashOperation(unit, new ASTNode[] {declaringNode});
 		IProposableFix fix2= new PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_hash_description, compilationUnit, new CompilationUnitRewriteOperation[] {hashop});
-	
+
 		return new IProposableFix[] {fix1, fix2};
 	}
 
-	public static RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor, 
-			boolean calculatedId, 
-			boolean defaultId, 
+	public static RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor,
+			boolean calculatedId,
+			boolean defaultId,
 			boolean randomId) throws CoreException {
-		
+
 		if (defaultId) {
 			fCurrentContext= new ISerialVersionFixContext() {
 				public Long getSerialVersionId(ITypeBinding binding) {
@@ -320,17 +320,17 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			return new RefactoringStatus();
 		}
     }
-	
+
 	public static RefactoringStatus checkPostConditions(IProgressMonitor monitor) {
 		if (monitor != null)
 			monitor.done();
-		
+
 		fCurrentContext= null;
 	    return new RefactoringStatus();
     }
-		
+
 	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean addSerialVersionIds) {
-		
+
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
@@ -338,14 +338,14 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		}
 		return createCleanUp(compilationUnit, locations, addSerialVersionIds);
 	}
-	
+
 	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addSerialVersionIds) {
 		if (addSerialVersionIds) {
-			
+
 			final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();
 			if (unit == null)
 				return null;
-			
+
 			List declarationNodes= new ArrayList();
 			for (int i= 0; i < problems.length; i++) {
 				if (problems[i].getProblemId() == IProblem.MissingSerialVersion) {
@@ -360,24 +360,24 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			}
 			if (declarationNodes.size() == 0)
 				return null;
-			
+
 			for (Iterator iter= declarationNodes.iterator(); iter.hasNext();) {
 	            ASTNode declarationNode= (ASTNode) iter.next();
 	            ITypeBinding binding= getTypeBinding(declarationNode);
 	            if (fCurrentContext.getSerialVersionId(binding) != null) {
 	            	SerialVersionHashBatchOperation op= new SerialVersionHashBatchOperation(unit, (ASTNode[])declarationNodes.toArray(new ASTNode[declarationNodes.size()]), fCurrentContext);
-	    			return new PotentialProgrammingProblemsFix(FixMessages.PotentialProgrammingProblemsFix_add_id_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});	            	
+	    			return new PotentialProgrammingProblemsFix(FixMessages.PotentialProgrammingProblemsFix_add_id_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	            }
             }
 		}
 		return null;
 	}
-	
+
 	private static SimpleName getSelectedName(CompilationUnit compilationUnit, IProblemLocation problem) {
 		final ASTNode selection= problem.getCoveredNode(compilationUnit);
 		if (selection == null)
 			return null;
-		
+
 		Name name= null;
 		if (selection instanceof SimpleType) {
 			final SimpleType type= (SimpleType) selection;
@@ -394,21 +394,21 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		}
 		if (name == null)
 			return null;
-		
+
 		if (name.isSimpleName()) {
 			return (SimpleName)name;
 		} else {
 			return ((QualifiedName)name).getName();
 		}
 	}
-	
+
 	/**
 	 * Returns the declaration node for the originally selected node.
 	 * @param name the name of the node
 	 *
 	 * @return the declaration node
 	 */
-	private static ASTNode getDeclarationNode(SimpleName name) {		
+	private static ASTNode getDeclarationNode(SimpleName name) {
 		ASTNode parent= name.getParent();
 		if (!(parent instanceof AbstractTypeDeclaration)) {
 
@@ -423,10 +423,10 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		}
 		return parent;
 	}
-	
+
 	/**
 	 * Returns the type binding of the class declaration node.
-	 * 
+	 *
 	 * @param parent the node to get the type for
 	 * @return the type binding
 	 */

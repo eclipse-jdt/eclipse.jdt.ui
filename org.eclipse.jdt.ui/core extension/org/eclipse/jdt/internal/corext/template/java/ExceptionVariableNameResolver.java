@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 /**
  *  Variable resolver for variable <code>exception_variable_name</code>. Resolves to
  *  an unused exception name.
- * 
+ *
  *  @since 3.4
  */
 public class ExceptionVariableNameResolver extends TemplateVariableResolver {

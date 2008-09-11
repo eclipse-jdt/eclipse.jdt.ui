@@ -491,7 +491,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 		if (!isEnabled())
 			return;
-		
+
 		boolean refreshNeeded= false;
 
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
@@ -545,7 +545,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 				continue;
 			}
 		}
-		
+
 		if (refreshNeeded && fReconciler != null)
 			fReconciler.refresh();
 	}
@@ -621,7 +621,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 	/**
 	 * Returns this hightlighter's reconciler.
-	 * 
+	 *
 	 * @return the semantic highlighter reconciler or <code>null</code> if none
 	 * @since 3.3
 	 */

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *          (report 60714: Call Hierarchy: display search scope in view title)
@@ -24,26 +24,26 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 class SearchScopeWorkingSetAction extends SearchScopeAction {
 	private IWorkingSet[] fWorkingSets;
-	
+
 	public SearchScopeWorkingSetAction(SearchScopeActionGroup group, IWorkingSet[] workingSets, String name) {
 		super(group, name);
-		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_workingset_tooltip); 
+		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_workingset_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
-		
+
 		this.fWorkingSets = workingSets;
 	}
-	
+
 	public IJavaSearchScope getSearchScope() {
 		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(fWorkingSets, true);
 	}
-	
+
 	/**
 	 * @return returns the working sets
 	 */
 	public IWorkingSet[] getWorkingSets() {
 		return fWorkingSets;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
 	 */

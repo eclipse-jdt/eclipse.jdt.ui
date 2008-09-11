@@ -25,10 +25,10 @@ public interface IParameterListChangeListener {
 	 * @param parameter the parameter that has been added.
 	 */
 	public void parameterAdded(ParameterInfo parameter);
-	
-	
+
+
 	/**
-	 * Gets fired if the parameter list got modified by reordering or removing 
+	 * Gets fired if the parameter list got modified by reordering or removing
 	 * parameters (note that adding is handled by <code>parameterAdded</code>))
 	 */
 	public void parameterListChanged();

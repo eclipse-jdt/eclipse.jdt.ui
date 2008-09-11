@@ -24,14 +24,14 @@ public final class CorextMessages extends NLS {
 	public static String Resources_outOfSync;
 	public static String Resources_modifiedResources;
 	public static String Resources_fileModified;
-	
+
 	public static String JavaDocLocations_migrate_operation;
 	public static String JavaDocLocations_error_readXML;
 	public static String JavaDocLocations_migratejob_name;
-	
+
 	public static String AllTypesCache_searching;
 	public static String AllTypesCache_checking_type_cache;
-	
+
 	public static String History_error_serialize;
 	public static String History_error_read;
 	public static String TypeInfoHistory_consistency_check;

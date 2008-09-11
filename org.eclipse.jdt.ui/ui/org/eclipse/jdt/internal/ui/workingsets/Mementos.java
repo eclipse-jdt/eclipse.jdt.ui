@@ -20,8 +20,8 @@ import org.eclipse.ui.PlatformUI;
 public class Mementos {
 
     public static final String TAG_FACTORY_ID = "factoryID"; //$NON-NLS-1$
-    public static final String TAG_ITEM = "item"; //$NON-NLS-1$			
-	
+    public static final String TAG_ITEM = "item"; //$NON-NLS-1$
+
     public static void saveItem(IMemento memento, IAdaptable element) {
         IPersistableElement persistable= (IPersistableElement)element.getAdapter(IPersistableElement.class);
         if (persistable != null) {
@@ -30,13 +30,13 @@ public class Mementos {
                 persistable.getFactoryId());
             persistable.saveState(memento);
         }
-    	
+
     }
-    
+
 	public static IAdaptable restoreItem(IMemento memento) {
 		return restoreItem(memento, TAG_FACTORY_ID);
 	}
-	
+
 	public static IAdaptable restoreItem(IMemento memento, String factoryTag) {
 		if (memento == null)
 			return null;

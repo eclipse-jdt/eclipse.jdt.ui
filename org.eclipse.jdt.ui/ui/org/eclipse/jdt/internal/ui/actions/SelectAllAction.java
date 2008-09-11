@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
- 
+
 /**
  * This action selects all entries currently showing in view.
  */
@@ -36,16 +36,16 @@ public class SelectAllAction extends Action {
 
 	/**
 	 * Creates the action for a TreeViewer
-	 * 
+	 *
 	 * @param viewer the tree viewer
 	 */
 	public SelectAllAction(TreeViewer viewer) {
 		this((StructuredViewer) viewer);
 	}
-	
+
 	/**
 	 * Creates the action for a TableViewer
-	 * 
+	 *
 	 * @param viewer the table viewer
 	 */
 	public SelectAllAction(TableViewer viewer) {
@@ -60,7 +60,7 @@ public class SelectAllAction extends Action {
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
 	}
-	
+
 	private void collectExpandedAndVisible(TreeItem[] items, List result) {
 		for (int i= 0; i < items.length; i++) {
 			TreeItem item= items[i];

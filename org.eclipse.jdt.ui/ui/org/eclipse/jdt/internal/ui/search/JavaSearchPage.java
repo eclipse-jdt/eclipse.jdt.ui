@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage {
-	
+
 	private static class SearchPatternData {
 		private final int searchFor;
 		private final int limitTo;
@@ -96,11 +96,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		private final int scope;
 		private final IWorkingSet[] workingSets;
 		private IJavaElement javaElement;
-		
+
 		public SearchPatternData(int searchFor, int limitTo, int matchLocations, boolean isCaseSensitive, String pattern, IJavaElement element, int includeMask) {
 			this(searchFor, limitTo, matchLocations, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null, includeMask);
 		}
-		
+
 		public SearchPatternData(int searchFor, int limitTo, int matchLocations, String pattern, boolean isCaseSensitive, IJavaElement element, int scope, IWorkingSet[] workingSets, int includeMask) {
 			this.searchFor= searchFor;
 			this.limitTo= limitTo;
@@ -110,10 +110,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			this.scope= scope;
 			this.workingSets= workingSets;
 			this.includeMask= includeMask;
-			
+
 			setJavaElement(element);
 		}
-		
+
 		public void setJavaElement(IJavaElement javaElement) {
 			this.javaElement= javaElement;
 		}
@@ -145,15 +145,15 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		public IWorkingSet[] getWorkingSets() {
 			return workingSets;
 		}
-		
+
 		public int getIncludeMask() {
 			return includeMask;
 		}
-		
+
 		public int getMatchLocations() {
 			return matchLocations;
 		}
-		
+
 		public void store(IDialogSettings settings) {
 			settings.put("searchFor", searchFor); //$NON-NLS-1$
 			settings.put("scope", scope); //$NON-NLS-1$
@@ -173,7 +173,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			}
 			settings.put("includeMask", includeMask); //$NON-NLS-1$
 		}
-		
+
 		public static SearchPatternData create(IDialogSettings settings) {
 			String pattern= settings.get("pattern"); //$NON-NLS-1$
 			if (pattern.length() == 0) {
@@ -182,7 +182,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			IJavaElement elem= null;
 			String handleId= settings.get("javaElement"); //$NON-NLS-1$
 			if (handleId != null && handleId.length() > 0) {
-				IJavaElement restored= JavaCore.create(handleId); 
+				IJavaElement restored= JavaCore.create(handleId);
 				if (restored != null && isSearchableType(restored) && restored.exists()) {
 					elem= restored;
 				}
@@ -204,14 +204,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				int searchFor= settings.getInt("searchFor"); //$NON-NLS-1$
 				int scope= settings.getInt("scope"); //$NON-NLS-1$
 				int limitTo= settings.getInt("limitTo"); //$NON-NLS-1$
-				
+
 				int matchLocations= 0;
 				if (settings.get("matchLocations") != null) { //$NON-NLS-1$
 					matchLocations= settings.getInt("matchLocations"); //$NON-NLS-1$
 				}
-				
+
 				boolean isCaseSensitive= settings.getBoolean("isCaseSensitive"); //$NON-NLS-1$
-				
+
 				int includeMask;
 				if (settings.get("includeMask") != null) { //$NON-NLS-1$
 					includeMask= settings.getInt("includeMask"); //$NON-NLS-1$
@@ -226,16 +226,16 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				return null;
 			}
 		}
-		
+
 	}
-	
+
 	// search for
 	private final static int TYPE= IJavaSearchConstants.TYPE;
 	private final static int METHOD= IJavaSearchConstants.METHOD;
 	private final static int PACKAGE= IJavaSearchConstants.PACKAGE;
 	private final static int CONSTRUCTOR= IJavaSearchConstants.CONSTRUCTOR;
 	private final static int FIELD= IJavaSearchConstants.FIELD;
-	
+
 	// limit to
 	private final static int DECLARATIONS= IJavaSearchConstants.DECLARATIONS;
 	private final static int IMPLEMENTORS= IJavaSearchConstants.IMPLEMENTORS;
@@ -244,70 +244,70 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private final static int ALL_OCCURRENCES= IJavaSearchConstants.ALL_OCCURRENCES;
 	private final static int READ_ACCESSES= IJavaSearchConstants.READ_ACCESSES;
 	private final static int WRITE_ACCESSES= IJavaSearchConstants.WRITE_ACCESSES;
-	
+
 	public static final String PARTICIPANT_EXTENSION_POINT= "org.eclipse.jdt.ui.queryParticipants"; //$NON-NLS-1$
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
-	
+
 	private static final int HISTORY_SIZE= 12;
-	
+
 	// Dialog store id constants
 	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
 	private final static String STORE_CASE_SENSITIVE= "CASE_SENSITIVE"; //$NON-NLS-1$
 	private final static String STORE_INCLUDE_MASK= "INCLUDE_MASK"; //$NON-NLS-1$
 	private final static String STORE_HISTORY= "HISTORY"; //$NON-NLS-1$
 	private final static String STORE_HISTORY_SIZE= "HISTORY_SIZE"; //$NON-NLS-1$
-	
+
 	private final List fPreviousSearchPatterns;
-	
+
 	private SearchPatternData fInitialData;
 	private IJavaElement fJavaElement;
 	private boolean fFirstTime= true;
 	private IDialogSettings fDialogSettings;
 	private boolean fIsCaseSensitive;
-	
+
 	private Combo fPattern;
 	private ISearchPageContainer fContainer;
 	private Button fCaseSensitive;
-	
+
 	private Button[] fSearchFor;
 	private Button[] fLimitTo;
 	private Button[] fIncludeMasks;
 	private Group fLimitToGroup;
-	
+
 	private int fMatchLocations;
 	private Link fMatchLocationsLink;
 
 	/**
-	 * 
+	 *
 	 */
 	public JavaSearchPage() {
 		fPreviousSearchPatterns= new ArrayList();
 	}
-	
-	
+
+
 	//---- Action Handling ------------------------------------------------
-	
+
 	public boolean performAction() {
 		return performNewSearch();
 	}
-	
+
 	private boolean performNewSearch() {
 		SearchPatternData data= getPatternData();
 
 		// Setup search scope
 		IJavaSearchScope scope= null;
 		String scopeDescription= ""; //$NON-NLS-1$
-		
+
 		int searchFor= data.getSearchFor();
 		int limitTo= data.getLimitTo();
 		if (limitTo == SPECIFIC_REFERENCES) {
 			limitTo= fMatchLocations;
 		}
-		
+
 		int includeMask= data.getIncludeMask();
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
-		
+
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
 				scopeDescription= factory.getWorkspaceScopeDescription(includeMask);
@@ -329,12 +329,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= factory.getWorkingSetScopeDescription(workingSets, includeMask); 
+				scopeDescription= factory.getWorkingSetScopeDescription(workingSets, includeMask);
 				scope= factory.createJavaSearchScope(workingSets, includeMask);
 				SearchUtil.updateLRUWorkingSets(workingSets);
 			}
 		}
-		
+
 		QuerySpecification querySpec= null;
 		if (data.getJavaElement() != null && getPattern().equals(fInitialData.getPattern())) {
 			if (limitTo == REFERENCES)
@@ -343,13 +343,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		} else {
 			querySpec= new PatternQuerySpecification(data.getPattern(), searchFor, data.isCaseSensitive(), limitTo, scope, scopeDescription);
 			data.setJavaElement(null);
-		} 
-		
+		}
+
 		JavaSearchQuery textSearchJob= new JavaSearchQuery(querySpec);
 		NewSearchUI.runQueryInBackground(textSearchJob);
 		return true;
 	}
-	
+
 	private int getLimitTo() {
 		for (int i= 0; i < fLimitTo.length; i++) {
 			Button button= fLimitTo[i];
@@ -371,7 +371,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fillLimitToGroup(searchFor, limitTo);
 		return limitTo;
 	}
-	
+
 	private int getIncludeMask() {
 		int mask= 0;
 		for (int i= 0; i < fIncludeMasks.length; i++) {
@@ -382,14 +382,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		return mask;
 	}
-	
+
 	private void setIncludeMask(int includeMask) {
 		for (int i= 0; i < fIncludeMasks.length; i++) {
 			Button button= fIncludeMasks[i];
 			button.setSelection((includeMask & getIntData(button)) != 0);
 		}
 	}
-	
+
 	private void setMatchLocations(int matchLocations) {
 		fMatchLocations= matchLocations;
 		updateMatchLocationText();
@@ -403,7 +403,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			patterns[i]= ((SearchPatternData) fPreviousSearchPatterns.get(i)).getPattern();
 		return patterns;
 	}
-	
+
 	private int getSearchFor() {
 		for (int i= 0; i < fSearchFor.length; i++) {
 			Button button= fSearchFor[i];
@@ -414,23 +414,23 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		Assert.isTrue(false, "shouldNeverHappen"); //$NON-NLS-1$
 		return -1;
 	}
-	
+
 	private void setSearchFor(int searchFor) {
 		for (int i= 0; i < fSearchFor.length; i++) {
 			Button button= fSearchFor[i];
 			button.setSelection(searchFor == getIntData(button));
 		}
 	}
-	
+
 	private int getIntData(Button button) {
 		return ((Integer) button.getData()).intValue();
 	}
-	
+
 	private String getPattern() {
 		return fPattern.getText();
 	}
 
-	
+
 	private SearchPatternData findInPrevious(String pattern) {
 		for (Iterator iter= fPreviousSearchPatterns.iterator(); iter.hasNext();) {
 			SearchPatternData element= (SearchPatternData) iter.next();
@@ -440,7 +440,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Return search pattern data and update previous searches.
 	 * An existing entry will be updated.
@@ -463,7 +463,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				getContainer().getSelectedWorkingSets(),
 				getIncludeMask()
 		);
-			
+
 		fPreviousSearchPatterns.add(0, match); // insert on top
 		return match;
 	}
@@ -484,36 +484,36 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		updateOKStatus();
 		super.setVisible(visible);
 	}
-	
+
 	public boolean isValid() {
 		return true;
 	}
 
 	//---- Widget creation ------------------------------------------------
 
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		readConfiguration();
-		
+
 		Composite result= new Composite(parent, SWT.NONE);
-		
+
 		GridLayout layout= new GridLayout(2, false);
 		layout.horizontalSpacing= 10;
 		result.setLayout(layout);
-		
+
 		Control expressionComposite= createExpression(result);
 		expressionComposite.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1));
-		
+
 		Label separator= new Label(result, SWT.NONE);
 		separator.setVisible(false);
 		GridData data= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
 		data.heightHint= convertHeightInCharsToPixels(1) / 3;
 		separator.setLayoutData(data);
-		
+
 		Control searchFor= createSearchFor(result);
 		searchFor.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 
@@ -522,9 +522,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 		Control includeMask= createIncludeMask(result);
 		includeMask.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
-				
+
 		//createParticipants(result);
-		
+
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				if (getSearchFor() == fInitialData.getSearchFor())
@@ -544,10 +544,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		setControl(result);
 
 		Dialog.applyDialogFont(result);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);
 	}
-	
-	
+
+
 	/*private Control createParticipants(Composite result) {
 		if (!SearchParticipantsExtensionPoint.hasAnyParticipants())
 			return new Composite(result, SWT.NULL);
@@ -579,7 +579,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 		// Pattern text + info
 		Label label= new Label(result, SWT.LEFT);
-		label.setText(SearchMessages.SearchPage_expression_label); 
+		label.setText(SearchMessages.SearchPage_expression_label);
 		label.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1));
 
 		// Pattern combo
@@ -603,24 +603,24 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		data.widthHint= convertWidthInCharsToPixels(50);
 		fPattern.setLayoutData(data);
 
-		// Ignore case checkbox		
+		// Ignore case checkbox
 		fCaseSensitive= new Button(result, SWT.CHECK);
-		fCaseSensitive.setText(SearchMessages.SearchPage_expression_caseSensitive); 
+		fCaseSensitive.setText(SearchMessages.SearchPage_expression_caseSensitive);
 		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fIsCaseSensitive= fCaseSensitive.getSelection();
 			}
 		});
 		fCaseSensitive.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, 1, 1));
-		
+
 		return result;
 	}
-	
+
 	final void updateOKStatus() {
 		boolean isValid= isValidSearchPattern();
 		getContainer().setPerformActionEnabled(isValid);
 	}
-	
+
 	private boolean isValidSearchPattern() {
 		if (getPattern().length() == 0) {
 			return false;
@@ -628,10 +628,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (fJavaElement != null) {
 			return true;
 		}
-		return SearchPattern.createPattern(getPattern(), getSearchFor(), getLimitTo(), SearchPattern.R_EXACT_MATCH) != null;		
+		return SearchPattern.createPattern(getPattern(), getSearchFor(), getLimitTo(), SearchPattern.R_EXACT_MATCH) != null;
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -656,7 +656,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		int selectionIndex= fPattern.getSelectionIndex();
 		if (selectionIndex < 0 || selectionIndex >= fPreviousSearchPatterns.size())
 			return;
-		
+
 		SearchPatternData initialData= (SearchPatternData) fPreviousSearchPatterns.get(selectionIndex);
 
 		setSearchFor(initialData.getSearchFor());
@@ -670,19 +670,19 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fCaseSensitive.setEnabled(fJavaElement == null);
 		fCaseSensitive.setSelection(initialData.isCaseSensitive());
 
-		
+
 		if (initialData.getWorkingSets() != null)
 			getContainer().setSelectedWorkingSets(initialData.getWorkingSets());
 		else
 			getContainer().setSelectedScope(initialData.getScope());
-		
+
 		fInitialData= initialData;
 	}
-	
+
 
 	private Control createSearchFor(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.SearchPage_searchFor_label); 
+		result.setText(SearchMessages.SearchPage_searchFor_label);
 		result.setLayout(new GridLayout(2, true));
 
 		fSearchFor= new Button[] {
@@ -692,33 +692,33 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			createButton(result, SWT.RADIO, SearchMessages.SearchPage_searchFor_constructor, CONSTRUCTOR, false),
 			createButton(result, SWT.RADIO, SearchMessages.SearchPage_searchFor_field, FIELD, false)
 		};
-			
+
 		// Fill with dummy radio buttons
 		Label filler= new Label(result, SWT.NONE);
 		filler.setVisible(false);
 		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 
-		return result;		
+		return result;
 	}
-	
+
 	private Control createLimitTo(Composite parent) {
 		fLimitToGroup= new Group(parent, SWT.NONE);
-		fLimitToGroup.setText(SearchMessages.SearchPage_limitTo_label); 
+		fLimitToGroup.setText(SearchMessages.SearchPage_limitTo_label);
 		fLimitToGroup.setLayout(new GridLayout(2, false));
 
 		fillLimitToGroup(TYPE, ALL_OCCURRENCES);
-		
+
 		return fLimitToGroup;
 	}
-		
+
 	private void fillLimitToGroup(int searchFor, int limitTo) {
 		Control[] children= fLimitToGroup.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			children[i].dispose();
 		}
 		fMatchLocationsLink= null;
-		
-		
+
+
 		ArrayList buttons= new ArrayList();
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_allOccurrences, ALL_OCCURRENCES, limitTo == ALL_OCCURRENCES));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_declarations, DECLARATIONS, limitTo == DECLARATIONS));
@@ -726,17 +726,17 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_references, REFERENCES, limitTo == REFERENCES));
 		if (searchFor == TYPE) {
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_implementors, IMPLEMENTORS, limitTo == IMPLEMENTORS));
-			
+
 			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
 		}
-		
+
 		if (searchFor == FIELD) {
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_readReferences, READ_ACCESSES, limitTo == READ_ACCESSES));
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_writeReferences, WRITE_ACCESSES, limitTo == WRITE_ACCESSES));
 		}
-		
+
 		fLimitTo= (Button[]) buttons.toArray(new Button[buttons.size()]);
-		
+
 		SelectionAdapter listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				performLimitToSelectionChanged((Button) e.widget);
@@ -746,7 +746,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			fLimitTo[i].addSelectionListener(listener);
 		}
 		Dialog.applyDialogFont(fLimitToGroup); // re-apply font as we disposed the previous widgets
-		
+
 		fLimitToGroup.layout();
 	}
 
@@ -759,7 +759,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		layout.marginHeight= 0;
 		layout.horizontalSpacing= 0;
 		specificComposite.setLayout(layout);
-		
+
 		Button button= createButton(specificComposite, SWT.RADIO, SearchMessages.JavaSearchPage_match_locations_label, SPECIFIC_REFERENCES, isSelected);
 		fMatchLocationsLink= new Link(specificComposite, SWT.NONE);
 		fMatchLocationsLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -772,21 +772,21 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			}
 		});
 		updateMatchLocationText();
-		
+
 		return button;
 	}
-	
+
 	private void updateMatchLocationText() {
 		if (fMatchLocationsLink != null) {
 			int searchFor= getSearchFor();
 			int totNum= MatchLocations.getTotalNumberOfSettings(searchFor);
 			int currNum= MatchLocations.getNumberOfSelectedSettings(fMatchLocations, searchFor);
-			
+
 			fMatchLocationsLink.setText(Messages.format(SearchMessages.JavaSearchPage_match_location_link_label, new Object[] { new Integer(currNum), new Integer(totNum) }));
 			fMatchLocationsLink.setToolTipText(SearchMessages.JavaSearchPage_match_location_link_label_tooltip);
 		}
 	}
-	
+
 	protected final void performLimitToSelectionChanged(Button button) {
 		if (button.getSelection()) {
 			for (int i= 0; i < fLimitTo.length; i++) {
@@ -798,14 +798,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		updateUseJRE();
 	}
-	
-	
+
+
 	protected final void performConfigureMatchLocation() {
 		for (int i= 0; i < fLimitTo.length; i++) {
 			Button curr= fLimitTo[i];
 			curr.setSelection(getIntData(curr) == SPECIFIC_REFERENCES);
 		}
-		
+
 		MatchLocationSelectionDialog locationSelectionDialog= new MatchLocationSelectionDialog(getShell(), fMatchLocations, getSearchFor());
 		if (locationSelectionDialog.open() == Window.OK) {
 			setMatchLocations(locationSelectionDialog.getCurrentSelection());
@@ -816,7 +816,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private Control createIncludeMask(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
 		result.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		result.setText(SearchMessages.SearchPage_searchIn_label); 
+		result.setText(SearchMessages.SearchPage_searchIn_label);
 		result.setLayout(new GridLayout(4, false));
 		fIncludeMasks= new Button[] {
 			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_sources, JavaSearchScopeFactory.SOURCES, true),
@@ -826,7 +826,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		};
 		return result;
 	}
-	
+
 	private Button createButton(Composite parent, int style, String text, int data, boolean isSelected) {
 		Button button= new Button(parent, style);
 		button.setText(text);
@@ -835,10 +835,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		button.setSelection(isSelected);
 		return button;
 	}
-	
+
 	private void initSelections() {
 		ISelection sel= getContainer().getSelection();
-		
+
 		IWorkbenchPage activePage= JavaPlugin.getActivePage();
 		if (activePage != null) {
 			IWorkbenchPart activePart= activePage.getActivePart();
@@ -849,7 +849,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				}
 			}
 		}
-		
+
 		SearchPatternData initData= null;
 
 		if (sel instanceof IStructuredSelection) {
@@ -873,17 +873,17 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (initData == null) {
 			initData= getDefaultInitValues();
 		}
-		
+
 		fInitialData= initData;
 		fJavaElement= initData.getJavaElement();
 		fCaseSensitive.setSelection(initData.isCaseSensitive());
 		fCaseSensitive.setEnabled(fJavaElement == null);
-		
+
 		setSearchFor(initData.getSearchFor());
 		setLimitTo(initData.getSearchFor(), initData.getLimitTo());
 		setIncludeMask(initData.getIncludeMask());
 		setMatchLocations(initData.getMatchLocations());
-		
+
 		fPattern.setText(initData.getPattern());
 	}
 
@@ -920,7 +920,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		return res;
 	}
-	
+
 	final static boolean isSearchableType(IJavaElement element) {
 		switch (element.getElementType()) {
 			case IJavaElement.PACKAGE_FRAGMENT:
@@ -939,7 +939,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			//JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 			//boolean isInsideJRE= factory.isInsideJRE(element);
 			int includeMask= getLastIncludeMask();
-			
+
 			switch (element.getElementType()) {
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.PACKAGE_DECLARATION:
@@ -975,16 +975,16 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 					int searchFor= method.isConstructor() ? CONSTRUCTOR : METHOD;
 					return new SearchPatternData(searchFor, REFERENCES, 0, true, PatternStrings.getMethodSignature(method), element, includeMask);
 			}
-			
+
 		} catch (JavaModelException e) {
 			if (!e.isDoesNotExist()) {
-				ExceptionHandler.handle(e, SearchMessages.Search_Error_javaElementAccess_title, SearchMessages.Search_Error_javaElementAccess_message); 
+				ExceptionHandler.handle(e, SearchMessages.Search_Error_javaElementAccess_title, SearchMessages.Search_Error_javaElementAccess_message);
 			}
 			// element might not exist
 		}
-		return null;	
+		return null;
 	}
-	
+
 	private SearchPatternData trySimpleTextSelection(ITextSelection selection) {
 		String selectedText= selection.getText();
 		if (selectedText != null && selectedText.length() > 0) {
@@ -998,7 +998,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		return null;
 	}
-	
+
 	private SearchPatternData getDefaultInitValues() {
 		if (!fPreviousSearchPatterns.isEmpty()) {
 			return (SearchPatternData) fPreviousSearchPatterns.get(0);
@@ -1006,7 +1006,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 		return new SearchPatternData(TYPE, REFERENCES, 0, fIsCaseSensitive, "", null, getLastIncludeMask()); //$NON-NLS-1$
 	}
-	
+
 	private int getLastIncludeMask() {
 		try {
 			return getDialogSettings().getInt(STORE_INCLUDE_MASK);
@@ -1021,7 +1021,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	public void setContainer(ISearchPageContainer container) {
 		fContainer= container;
 	}
-	
+
 	/**
 	 * Returns the search page's container.
 	 * @return the search page container
@@ -1029,7 +1029,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private ISearchPageContainer getContainer() {
 		return fContainer;
 	}
-		
+
 	private IEditorPart getActiveEditor() {
 		IWorkbenchPage activePage= JavaPlugin.getActivePage();
 		if (activePage != null) {
@@ -1037,12 +1037,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		return null;
 	}
-	
+
 	//--------------- Configuration handling --------------
-	
+
 	/**
 	 * Returns the page settings for this Java search page.
-	 * 
+	 *
 	 * @return the page settings to be used
 	 */
 	private IDialogSettings getDialogSettings() {
@@ -1051,14 +1051,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		return fDialogSettings;
 	}
-	
+
 	/**
 	 * Initializes itself from the stored page settings.
 	 */
 	private void readConfiguration() {
 		IDialogSettings s= getDialogSettings();
 		fIsCaseSensitive= s.getBoolean(STORE_CASE_SENSITIVE);
-		
+
 		try {
 			int historySize= s.getInt(STORE_HISTORY_SIZE);
 			for (int i= 0; i < historySize; i++) {
@@ -1074,7 +1074,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			// ignore
 		}
 	}
-	
+
 	/**
 	 * Stores the current configuration in the dialog store.
 	 */
@@ -1082,7 +1082,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		IDialogSettings s= getDialogSettings();
 		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
 		s.put(STORE_INCLUDE_MASK, getIncludeMask());
-		
+
 		int historySize= Math.min(fPreviousSearchPatterns.size(), HISTORY_SIZE);
 		s.put(STORE_HISTORY_SIZE, historySize);
 		for (int i= 0; i < historySize; i++) {

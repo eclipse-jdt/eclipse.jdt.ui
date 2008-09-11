@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
@@ -15,13 +15,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -45,24 +45,24 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /*package*/ class HistoryListAction extends Action {
-	
+
 	private class HistoryListDialog extends StatusDialog {
 		private static final int MAX_MAX_ENTRIES= 100;
 		private ListDialogField fHistoryList;
 		private StringDialogField fMaxEntriesField;
 		private int fMaxEntries;
-		
+
 		private Object fResult;
-		
+
 		private HistoryListDialog() {
 			super(fHistory.getShell());
-			setTitle(fHistory.getHistoryListDialogTitle()); 
-			
+			setTitle(fHistory.getHistoryListDialogTitle());
+
 			createHistoryList();
 			createMaxEntriesField();
 			setHelpAvailable(false);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 		 * @since 3.4
@@ -70,7 +70,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		protected boolean isResizable() {
 			return true;
 		}
-		
+
 		private void createHistoryList() {
 			IListAdapter adapter= new IListAdapter() {
 				public void customButtonPressed(ListDialogField field, int index) {
@@ -79,19 +79,19 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 				public void selectionChanged(ListDialogField field) {
 					doSelectionChanged();
 				}
-				
+
 				public void doubleClicked(ListDialogField field) {
 					doDoubleClicked();
-				}				
+				}
 			};
 			String[] buttonLabels= new String[] { JavaUIMessages.HistoryListAction_remove, JavaUIMessages.HistoryListAction_remove_all };
 			LabelProvider labelProvider= new TestRunLabelProvider();
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(fHistory.getHistoryListDialogMessage());
-			
+
 			List historyEntries= fHistory.getHistoryEntries();
 			fHistoryList.setElements(historyEntries);
-			
+
 			Object currentEntry= fHistory.getCurrentEntry();
 			ISelection sel;
 			if (currentEntry != null) {
@@ -129,9 +129,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		 */
 		protected Control createDialogArea(Composite parent) {
 			initializeDialogUnits(parent);
-			
+
 			Composite composite= (Composite) super.createDialogArea(parent);
-			
+
 			Composite inner= new Composite(composite, SWT.NONE);
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 			inner.setFont(composite.getFont());
@@ -139,13 +139,13 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			LayoutUtil.doDefaultLayout(inner, new DialogField[] { fHistoryList, new Separator() }, true);
 			LayoutUtil.setHeightHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));
 			LayoutUtil.setHorizontalGrabbing(fHistoryList.getListControl(null));
-			
+
 			Composite additionalControls= new Composite(inner, SWT.NONE);
 			additionalControls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			LayoutUtil.doDefaultLayout(additionalControls, new DialogField[] { fMaxEntriesField }, false);
 			LayoutUtil.setHorizontalGrabbing(fMaxEntriesField.getTextControl(null));
-			
-			applyDialogFont(composite);		
+
+			applyDialogFont(composite);
 			return composite;
 		}
 
@@ -163,11 +163,11 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 					break;
 			}
 		}
-		
+
 		private void doDoubleClicked() {
 			okPressed();
 		}
-		
+
 		private void doSelectionChanged() {
 			List selected= fHistoryList.getSelectedElements();
 			if (selected.size() >= 1) {
@@ -177,21 +177,21 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			}
 			fHistoryList.enableButton(0, selected.size() != 0);
 		}
-				
+
 		public Object getResult() {
 			return fResult;
 		}
-		
+
 		public List getRemaining() {
 			return fHistoryList.getElements();
 		}
-		
+
 		public int getMaxEntries() {
 			return fMaxEntries;
 		}
 
 	}
-	
+
 	private final class TestRunLabelProvider extends LabelProvider {
 		private final HashMap fImages= new HashMap();
 
@@ -221,15 +221,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			fImages.clear();
 		}
 	}
-	
+
 	private ViewHistory fHistory;
-	
+
 	public HistoryListAction(ViewHistory history) {
 		super(null, IAction.AS_RADIO_BUTTON);
 		fHistory= history;
 		fHistory.configureHistoryListAction(this);
 	}
-		
+
 	/*
 	 * @see IAction#run()
 	 */

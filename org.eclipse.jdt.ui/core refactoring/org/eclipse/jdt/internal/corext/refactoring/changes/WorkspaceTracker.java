@@ -20,14 +20,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 public class WorkspaceTracker {
 
 	public final static WorkspaceTracker INSTANCE= new WorkspaceTracker();
-	
+
 	public interface Listener {
 		public void workspaceChanged();
 	}
-	
+
 	private ListenerList fListeners;
 	private ResourceListener fResourceListener;
-	
+
 	private WorkspaceTracker() {
 		fListeners= new ListenerList();
 	}
@@ -37,14 +37,14 @@ public class WorkspaceTracker {
 			workspaceChanged();
 		}
 	}
-	
+
 	private void workspaceChanged() {
 		Object[] listeners= fListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			((Listener)listeners[i]).workspaceChanged();
 		}
 	}
-	
+
 	public void addListener(Listener l) {
 		fListeners.add(l);
 		if (fResourceListener == null) {
@@ -52,7 +52,7 @@ public class WorkspaceTracker {
 			ResourcesPlugin.getWorkspace().addResourceChangeListener(fResourceListener);
 		}
 	}
-	
+
 	public void removeListener(Listener l) {
 		if (fListeners.size() == 0)
 			return;

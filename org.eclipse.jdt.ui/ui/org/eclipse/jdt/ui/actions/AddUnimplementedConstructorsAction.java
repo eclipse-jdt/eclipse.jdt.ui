@@ -13,11 +13,6 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.IWorkspaceRunnable;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -30,6 +25,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -100,13 +100,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * <p>
  * The action is applicable to structured selections containing elements of type
  * <code>IType</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class AddUnimplementedConstructorsAction extends SelectionDispatchAction {
@@ -197,7 +197,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			fAddConstructorsSettings= dialogSettings.getSection(SETTINGS_SECTION);
 			if (fAddConstructorsSettings == null) {
 				fAddConstructorsSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-				fAddConstructorsSettings.put(OMIT_SUPER, false); 
+				fAddConstructorsSettings.put(OMIT_SUPER, false);
 			}
 
 			fOmitSuper= fAddConstructorsSettings.getBoolean(OMIT_SUPER);
@@ -282,13 +282,13 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		 */
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
-			link.setText(ActionMessages.AddUnimplementedConstructorsAction_template_link_message); 
+			link.setText(ActionMessages.AddUnimplementedConstructorsAction_template_link_message);
 			link.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 				}
 			});
-			link.setToolTipText(ActionMessages.AddUnimplementedConstructorsAction_template_link_tooltip); 
+			link.setToolTipText(ActionMessages.AddUnimplementedConstructorsAction_template_link_tooltip);
 
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
@@ -305,7 +305,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			omitSuperComposite.setFont(composite.getFont());
 
 			Button omitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
-			omitSuperButton.setText(ActionMessages.AddUnimplementedConstructorsDialog_omit_super); 
+			omitSuperButton.setText(ActionMessages.AddUnimplementedConstructorsDialog_omit_super);
 			omitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 			omitSuperButton.addSelectionListener(new SelectionListener() {
@@ -366,21 +366,21 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			int count= countSelectedMethods(selection);
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-			String message= Messages.format(ActionMessages.AddUnimplementedConstructorsAction_methods_selected, new Object[] { String.valueOf(count), String.valueOf(fEntries)}); 
+			String message= Messages.format(ActionMessages.AddUnimplementedConstructorsAction_methods_selected, new Object[] { String.valueOf(count), String.valueOf(fEntries)});
 			return new StatusInfo(IStatus.INFO, message);
 		}
 	}
 
-	private static final String DIALOG_TITLE= ActionMessages.AddUnimplementedConstructorsAction_error_title; 
+	private static final String DIALOG_TITLE= ActionMessages.AddUnimplementedConstructorsAction_error_title;
 
 	private CompilationUnitEditor fEditor;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this
 	 * constructor.
-	 * 
+	 *
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public AddUnimplementedConstructorsAction(CompilationUnitEditor editor) {
@@ -394,14 +394,14 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public AddUnimplementedConstructorsAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.AddUnimplementedConstructorsAction_label); 
-		setDescription(ActionMessages.AddUnimplementedConstructorsAction_description); 
-		setToolTipText(ActionMessages.AddUnimplementedConstructorsAction_tooltip); 
+		setText(ActionMessages.AddUnimplementedConstructorsAction_label);
+		setDescription(ActionMessages.AddUnimplementedConstructorsAction_description);
+		setToolTipText(ActionMessages.AddUnimplementedConstructorsAction_tooltip);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION);
 	}
@@ -450,17 +450,17 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		try {
 			IType type= getSelectedType(selection);
 			if (type == null) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable); 
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable);
 				return;
 			}
 			if (type.isAnnotation()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_annotation_not_applicable); 
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_annotation_not_applicable);
 				return;
 			} else if (type.isInterface()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_interface_not_applicable); 
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_interface_not_applicable);
 				return;
 			} else if (type.isEnum()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_enum_not_applicable); 
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_enum_not_applicable);
 				return;
 			}
 			run(shell, type, false);
@@ -481,7 +481,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			if (type != null)
 				run(shell, type, true);
 			else
-				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable); 
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		} catch (CoreException e) {
@@ -510,14 +510,14 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		}
 
 		AddUnimplementedConstructorsDialog dialog= new AddUnimplementedConstructorsDialog(shell, new BindingLabelProvider(), provider, fEditor, type);
-		dialog.setCommentString(ActionMessages.SourceActionDialog_createConstructorComment); 
-		dialog.setTitle(ActionMessages.AddUnimplementedConstructorsAction_dialog_title); 
+		dialog.setCommentString(ActionMessages.SourceActionDialog_createConstructorComment);
+		dialog.setTitle(ActionMessages.AddUnimplementedConstructorsAction_dialog_title);
 		dialog.setInitialSelections(constructors);
 		dialog.setContainerMode(true);
 		dialog.setComparator(new JavaElementComparator());
 		dialog.setSize(60, 18);
 		dialog.setInput(new Object());
-		dialog.setMessage(ActionMessages.AddUnimplementedConstructorsAction_dialog_label); 
+		dialog.setMessage(ActionMessages.AddUnimplementedConstructorsAction_dialog_label);
 		dialog.setValidator(new AddUnimplementedConstructorsValidator(constructors.length));
 
 		final int dialogResult= dialog.open();
@@ -555,7 +555,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
 				String[] created= operation.getCreatedConstructors();
 				if (created == null || created.length == 0)
-					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_error_nothing_found); 
+					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_error_nothing_found);
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, shell, getDialogTitle(), null);
 			} catch (InterruptedException e) {
@@ -571,7 +571,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 	/**
 	 * Returns a runnable that creates the constructor stubs.
-	 * 
+	 *
 	 * @param astRoot the AST of the compilation unit to work on. The AST must have been created from a {@link ICompilationUnit}, that
 	 * means {@link ASTParser#setSource(ICompilationUnit)} was used.
 	 * @param type the binding of the type to add the new methods to. The type binding must correspond to a type declaration in the AST.
@@ -582,7 +582,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 * @param omitSuper if set, no <code>super()</code> call without arguments will be created.
 	 * @return returns a runnable that creates the constructor stubs.
 	 * @throws IllegalArgumentException a {@link IllegalArgumentException} is thrown if the AST passed has not been created from a {@link ICompilationUnit}.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static IWorkspaceRunnable createRunnable(CompilationUnit astRoot, ITypeBinding type, IMethodBinding[] constructorsToOverride, int insertPos, boolean createComments, int visibility, boolean omitSuper) {

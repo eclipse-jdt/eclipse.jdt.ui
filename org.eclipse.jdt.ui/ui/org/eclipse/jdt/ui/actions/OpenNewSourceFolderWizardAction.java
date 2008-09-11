@@ -27,28 +27,28 @@ import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
  * <p>Action that opens the new source folder wizard. The action initializes the wizard with the
  * selection as configured by {@link #setSelection(IStructuredSelection)} or the selection of
  * the active workbench window.</p>
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *  
- * @since 3.2 
- * 
+ *
+ * @since 3.2
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenNewSourceFolderWizardAction extends AbstractOpenWizardAction {
-	
+
 	/**
 	 * Creates an instance of the <code>OpenNewSourceFolderWizardAction</code>.
 	 */
 	public OpenNewSourceFolderWizardAction() {
-		setText(ActionMessages.OpenNewSourceFolderWizardAction_text); 
-		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
-		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
+		setText(ActionMessages.OpenNewSourceFolderWizardAction_text);
+		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description);
+		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */

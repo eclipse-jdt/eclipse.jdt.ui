@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -34,6 +34,7 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.ui.texteditor.ITextEditorExtension2;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 

@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposalComputer {
@@ -50,11 +50,11 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		final int contextPosition= context.getInvocationOffset();
-		
+
 		IDocument document= context.getDocument();
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 		int bound= Math.max(-1, contextPosition - 200);
-		
+
 		// try the innermost scope of parentheses that looks like a method call
 		int pos= contextPosition - 1;
 		do {
@@ -68,7 +68,7 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 				return paren + 1;
 			pos= paren - 1;
 		} while (true);
-		
+
 		return super.guessContextInformationPosition(context);
 	}
 }

@@ -21,13 +21,13 @@ import org.eclipse.jface.viewers.ILabelProvider;
  * contol.addWidgetListener(new LabelProviderDisposer(myLabelProvider));
  */
 public class LabelProviderDisposer implements DisposeListener {
-	
+
 	private ILabelProvider fLabelProvider;
-		
+
 	public LabelProviderDisposer(ILabelProvider labelProvider) {
 		fLabelProvider= labelProvider;
 	}
-	
+
 	public void widgetDisposed(DisposeEvent e) {
 		fLabelProvider.dispose();
 	}

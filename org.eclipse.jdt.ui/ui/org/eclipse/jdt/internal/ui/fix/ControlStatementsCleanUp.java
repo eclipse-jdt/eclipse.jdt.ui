@@ -23,28 +23,28 @@ import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
 public class ControlStatementsCleanUp extends AbstractCleanUp {
-	
+
 	public ControlStatementsCleanUp(Map options) {
 		super(options);
     }
-	
+
 	public ControlStatementsCleanUp() {
 		super();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, null);
 	}
-	
+
 	private boolean requireAST() {
 		boolean useBlocks= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		
+
 		if (!useBlocks)
 			return false;
-		
+
 		return isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS) ||
 		       isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER) ||
 		       isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
@@ -57,11 +57,11 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
-		
+
 		boolean useBlocks= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		if (!useBlocks)
 			return null;
-		
+
 		return ControlStatementsFix.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS),
 				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER),
@@ -79,21 +79,21 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description);
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description);
-		
+
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS)) {
 			buf.append("if (obj == null) {\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
-			
+
 			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
 			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
 			buf.append("} else {\n"); //$NON-NLS-1$
@@ -103,7 +103,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("if (obj == null)\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
-			
+
 			buf.append("if (ids.length > 0)\n"); //$NON-NLS-1$
 			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
 			buf.append("else\n"); //$NON-NLS-1$
@@ -113,7 +113,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("if (obj == null)\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
-			
+
 			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
 			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
 			buf.append("} else \n"); //$NON-NLS-1$
@@ -123,14 +123,14 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("if (obj == null) {\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
-			
+
 			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
 			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
 			buf.append("} else \n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
 		}
-		
+
 		return buf.toString();
 	}
 

@@ -18,11 +18,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Vector;
 
-import org.eclipse.test.performance.PerformanceMeter;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**
@@ -74,14 +74,14 @@ public class PerfTestSuite extends TestSuite {
 	private boolean isPublicMeasureMethod(Method m) {
 		return isMeasureMethod(m) && Modifier.isPublic(m.getModifiers());
 	 }
-	 
+
 	private boolean isMeasureMethod(Method m) {
 		String name= m.getName();
 		Class[] parameters= m.getParameterTypes();
 		Class returnType= m.getReturnType();
 		return parameters.length == 1 && name.startsWith("measure") && returnType.equals(Void.TYPE) && PerformanceMeter.class.isAssignableFrom(parameters[0]); //$NON-NLS-1$
 	 }
-	 
+
 	public PerfTestSuite(Class theClass) {
 		this(theClass, theClass.getName());
 	}
@@ -92,7 +92,7 @@ public class PerfTestSuite extends TestSuite {
 
 	/**
 	 * ... buried deep in the mountains in a lonely camp of the Swiss army...
-	 * 
+	 *
 	 * @param theClass the class to be scanned for <code>measure</code> methods
 	 * @param name hte name of the test
 	 * @return a new performance test
@@ -130,7 +130,7 @@ public class PerfTestSuite extends TestSuite {
 		return stringWriter.toString();
 
 	}
-	
+
 	public static Test warning(final String message) {
 		return new TestCase("warning") { //$NON-NLS-1$
 			protected void runTest() {

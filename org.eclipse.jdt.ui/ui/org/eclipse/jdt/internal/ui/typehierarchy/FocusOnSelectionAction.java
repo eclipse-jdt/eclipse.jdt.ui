@@ -30,18 +30,18 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  * Refocuses the type hierarchy on the currently selection type.
  */
 public class FocusOnSelectionAction extends Action {
-		
+
 	private ITypeHierarchyViewPart fViewPart;
-	
+
 	public FocusOnSelectionAction(ITypeHierarchyViewPart part) {
-		super(TypeHierarchyMessages.FocusOnSelectionAction_label); 
-		setDescription(TypeHierarchyMessages.FocusOnSelectionAction_description); 
-		setToolTipText(TypeHierarchyMessages.FocusOnSelectionAction_tooltip); 
+		super(TypeHierarchyMessages.FocusOnSelectionAction_label);
+		setDescription(TypeHierarchyMessages.FocusOnSelectionAction_description);
+		setToolTipText(TypeHierarchyMessages.FocusOnSelectionAction_tooltip);
 		fViewPart= part;
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FOCUS_ON_SELECTION_ACTION);
 	}
-	
+
 	private ISelection getSelection() {
 		ISelectionProvider provider= fViewPart.getSite().getSelectionProvider();
 		if (provider != null) {
@@ -49,7 +49,7 @@ public class FocusOnSelectionAction extends Action {
 		}
 		return null;
 	}
-	
+
 
 	/*
 	 * @see Action#run
@@ -59,15 +59,15 @@ public class FocusOnSelectionAction extends Action {
 		if (element instanceof IType) {
 			fViewPart.setInputElement((IType)element);
 		}
-	}	
-	
+	}
+
 	public boolean canActionBeAdded() {
 		Object element= SelectionUtil.getSingleElement(getSelection());
 		if (element instanceof IType) {
 			IType type= (IType)element;
 			setText(Messages.format(
-					TypeHierarchyMessages.FocusOnSelectionAction_label, 
-					JavaElementLabels.getTextLabel(type, 0))); 
+					TypeHierarchyMessages.FocusOnSelectionAction_label,
+					JavaElementLabels.getTextLabel(type, 0)));
 			return true;
 		}
 		return false;

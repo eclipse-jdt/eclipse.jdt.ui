@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -31,7 +31,7 @@ public class RefactoringActions {
 	 * Converts the given selection into a type using the following rules:
 	 * <ul>
 	 *   <li>if the selection is enclosed by a type than that type is returned.</li>
-	 *   <li>if the selection is inside a compilation unit or class file than the 
+	 *   <li>if the selection is inside a compilation unit or class file than the
 	 *       primary type is returned.</li>
 	 *   <li>otherwise <code>null</code> is returned.
 	 * </ul>
@@ -55,11 +55,11 @@ public class RefactoringActions {
 			return result;
 		if (element instanceof ICompilationUnit)
 			return ((ICompilationUnit)element).findPrimaryType();
-		if (element instanceof IClassFile) 
+		if (element instanceof IClassFile)
 			return ((IClassFile)element).getType();
 		return null;
 	}
-	
+
 	/**
 	 * Converts the given selection into a type using the following rules:
 	 * <ul>
@@ -74,7 +74,7 @@ public class RefactoringActions {
 		return convertToEnclosingType(SelectionConverter.resolveEnclosingElement(
 			editor, (ITextSelection)editor.getSelectionProvider().getSelection()));
 	}
-	
+
 	private static IType convertToEnclosingType(IJavaElement element) {
 		if (element == null)
 			return null;

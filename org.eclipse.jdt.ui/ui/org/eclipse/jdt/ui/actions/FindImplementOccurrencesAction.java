@@ -18,6 +18,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.ITypeRoot;
@@ -37,23 +38,23 @@ import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
 
 /**
  * Action to find all implement occurrences of an extended class or an implemented interface.
- * <p> 
+ * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindImplementOccurrencesAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindImplementOccurrencesAction(JavaEditor editor) {
@@ -61,23 +62,23 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(getEditorInput(editor) != null);
 	}
-	
+
 	/**
-	 * Creates a new <code>FindImplementOccurrencesAction</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>FindImplementOccurrencesAction</code>. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FindImplementOccurrencesAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.FindImplementOccurrencesAction_text); 
-		setToolTipText(ActionMessages.FindImplementOccurrencesAction_toolTip); 
+		setText(ActionMessages.FindImplementOccurrencesAction_text);
+		setToolTipText(ActionMessages.FindImplementOccurrencesAction_toolTip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENT_OCCURRENCES);
 	}
-	
+
 	//---- Text Selection ----------------------------------------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -88,17 +89,17 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
 		setEnabled(astRoot != null && new ImplementOccurrencesFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
@@ -124,12 +125,12 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 
 	private static ITypeRoot getEditorInput(JavaEditor editor) {
 		return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
-	} 
-		
+	}
+
 	private static void showMessage(Shell shell, JavaEditor editor, String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
-		if (statusLine != null) 
-			statusLine.setMessage(true, msg, null); 
+		if (statusLine != null)
+			statusLine.setMessage(true, msg, null);
 		shell.getDisplay().beep();
 	}
 }

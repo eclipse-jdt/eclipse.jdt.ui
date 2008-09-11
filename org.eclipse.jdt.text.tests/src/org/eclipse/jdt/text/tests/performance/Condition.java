@@ -14,15 +14,15 @@ package org.eclipse.jdt.text.tests.performance;
 public abstract class Condition {
 
 	public abstract boolean isTrue();
-	
+
 	public boolean isStrict() {
 		return false;
 	}
-	
+
 	public boolean busyWaitFor(long maxTime) {
 		return busyWaitFor(maxTime, isStrict());
 	}
-	
+
 	public boolean busyWaitFor(long maxTime, boolean strict) {
 		long maxEndTime= System.currentTimeMillis() + maxTime;
 		while (System.currentTimeMillis() < maxEndTime)

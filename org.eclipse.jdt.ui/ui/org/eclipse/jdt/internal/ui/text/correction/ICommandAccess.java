@@ -11,8 +11,8 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 /**
- * Correction proposals implement this interface to by invokable by a command. 
- * (e.g. keyboard shortcut) 
+ * Correction proposals implement this interface to by invokable by a command.
+ * (e.g. keyboard shortcut)
  */
 public interface ICommandAccess {
 
@@ -22,5 +22,5 @@ public interface ICommandAccess {
 	 * to be recognixes as correction command.
 	 */
 	String getCommandId();
-	
+
 }

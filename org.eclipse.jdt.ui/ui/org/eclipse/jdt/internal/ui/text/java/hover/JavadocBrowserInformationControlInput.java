@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 /**
  * Browser input for Javadoc hover.
- * 
+ *
  * @since 3.4
  */
 public class JavadocBrowserInformationControlInput extends BrowserInformationControlInput {
@@ -50,10 +50,10 @@ public class JavadocBrowserInformationControlInput extends BrowserInformationCon
 	public int getLeadingImageWidth() {
 		return fLeadingImageWidth;
 	}
-	
+
 	/**
 	 * Returns the Java element.
-	 * 
+	 *
 	 * @return the element or <code>null</code> if none available
 	 */
 	public IJavaElement getElement() {

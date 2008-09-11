@@ -80,16 +80,16 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
  * @deprecated use {@link FilteredTypesSelectionDialog}
  */
 public class TypeSelectionComponent extends Composite implements ITypeSelectionComponent {
-	
+
 	private IDialogSettings fSettings;
 	private boolean fMultipleSelection;
 	private ITitleLabel fTitleLabel;
-	
+
 	private ToolBar fToolBar;
 	private ToolItem fToolItem;
 	private MenuManager fMenuManager;
 	private WorkingSetFilterActionGroup fFilterActionGroup;
-	
+
 	private TypeSelectionExtension fTypeSelectionExtension;
 	private Text fFilter;
 	private String fInitialFilterText;
@@ -97,16 +97,16 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 	private TypeInfoViewer fViewer;
 	private ViewForm fForm;
 	private CLabel fLabel;
-	
+
 	public static final int NONE= 0;
 	public static final int CARET_BEGINNING= 1;
 	public static final int FULL_SELECTION= 2;
-	
+
 	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.TypeSelectionComponent"; //$NON-NLS-1$
 	private static final String SHOW_STATUS_LINE= "show_status_line"; //$NON-NLS-1$
 	private static final String FULLY_QUALIFY_DUPLICATES= "fully_qualify_duplicates"; //$NON-NLS-1$
 	private static final String WORKINGS_SET_SETTINGS= "workingset_settings"; //$NON-NLS-1$
-	
+
 	private class ToggleStatusLineAction extends Action {
 		public ToggleStatusLineAction() {
 			super(JavaUIMessages.TypeSelectionComponent_show_status_line_label, IAction.AS_CHECK_BOX);
@@ -122,7 +122,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			TypeSelectionComponent.this.layout();
 		}
 	}
-	
+
 	private class FullyQualifyDuplicatesAction extends Action {
 		public FullyQualifyDuplicatesAction() {
 			super(JavaUIMessages.TypeSelectionComponent_fully_qualify_duplicates_label, IAction.AS_CHECK_BOX);
@@ -133,21 +133,21 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			fSettings.put(FULLY_QUALIFY_DUPLICATES, checked);
 		}
 	}
-	
+
 	/**
-	 * Special interface to access a title lable in 
+	 * Special interface to access a title lable in
 	 * a generic fashion.
 	 */
 	public interface ITitleLabel {
 		/**
 		 * Sets the title to the given text
-		 * 
+		 *
 		 * @param text the title text
 		 */
 		public void setText(String text);
 	}
-	
-	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, 
+
+	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi,
 			IJavaSearchScope scope, int elementKind, String initialFilter, ITitleLabel titleLabel,
 			TypeSelectionExtension extension) {
 		super(parent, style);
@@ -168,31 +168,31 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		}
 		createContent(message, elementKind);
 	}
-	
+
 	public void triggerSearch() {
 		fViewer.forceSearch();
 	}
-	
+
 	public TypeNameMatch[] getSelection() {
 		return fViewer.getSelection();
 	}
-	
+
 	public IJavaSearchScope getScope() {
 		return fScope;
 	}
-	
+
 	private void createContent(final String message, int elementKind) {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0; layout.marginHeight= 0;
 		setLayout(layout);
 		Font font= getFont();
-		
+
 		Control header= createHeader(this, font, message);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		header.setLayoutData(gd);
-		
+
 		fFilter= new Text(this, SWT.BORDER | SWT.FLAT);
 		fFilter.setFont(font);
 		if (fInitialFilterText != null) {
@@ -217,7 +217,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		});
 		SWTUtil.setAccessibilityText(fFilter, Strings.removeMnemonicIndicator(message));
 		TextFieldNavigationHandler.install(fFilter);
-		
+
 		Label label= new Label(this, SWT.NONE);
 		label.setFont(font);
 		label.setText(JavaUIMessages.TypeSelectionComponent_label);
@@ -233,8 +233,8 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		label.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		fViewer= new TypeInfoViewer(this, fMultipleSelection ? SWT.MULTI : SWT.NONE, label, 
-			fScope, elementKind, fInitialFilterText, 
+		fViewer= new TypeInfoViewer(this, fMultipleSelection ? SWT.MULTI : SWT.NONE, label,
+			fScope, elementKind, fInitialFilterText,
 			fTypeSelectionExtension != null ? fTypeSelectionExtension.getFilterExtension() : null,
 			fTypeSelectionExtension != null ? fTypeSelectionExtension.getImageProvider() : null);
 		gd= new GridData(GridData.FILL_BOTH);
@@ -299,7 +299,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 	public void addSelectionListener(SelectionListener listener) {
 		fViewer.getTable().addSelectionListener(listener);
 	}
-	
+
 	public void populate(int selectionMode) {
 		if (fInitialFilterText != null) {
 			switch(selectionMode) {
@@ -310,15 +310,15 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 					fFilter.setSelection(0, fInitialFilterText.length());
 					break;
 			}
-		} 
+		}
 		fFilter.setFocus();
 		fViewer.startup();
 	}
-	
+
 	private void patternChanged(Text text) {
 		fViewer.setSearchPattern(text.getText());
 	}
-	
+
 	private Control createHeader(Composite parent, Font font, String message) {
 		Composite header= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -339,11 +339,11 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		});
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		
+
 		createViewMenu(header);
 		return header;
 	}
-	
+
 	private void createViewMenu(Composite parent) {
 		fToolBar= new ToolBar(parent, SWT.FLAT);
 		fToolItem= new ToolItem(fToolBar, SWT.PUSH, 0);
@@ -360,14 +360,14 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 				showViewMenu();
 			}
 		});
-		
+
 		fMenuManager= new MenuManager();
 		fillViewMenu(fMenuManager);
 
 		// ICommandService commandService= (ICommandService)PlatformUI.getWorkbench().getAdapter(ICommandService.class);
 		// IHandlerService handlerService= (IHandlerService)PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 	}
-	
+
 	private void showViewMenu() {
 		Menu menu = fMenuManager.createContextMenu(getShell());
 		Rectangle bounds = fToolItem.getBounds();
@@ -376,7 +376,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		menu.setLocation(topLeft.x, topLeft.y);
 		menu.setVisible(true);
 	}
-	
+
 	private void fillViewMenu(IMenuManager viewMenu) {
 		if (!fMultipleSelection) {
 			ToggleStatusLineAction showStatusLineAction= new ToggleStatusLineAction();

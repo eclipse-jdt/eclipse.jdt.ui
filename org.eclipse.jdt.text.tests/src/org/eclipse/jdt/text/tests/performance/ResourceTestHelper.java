@@ -41,9 +41,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 public class ResourceTestHelper {
 
 	public static final int FAIL_IF_EXISTS= 0;
-	
+
 	public static final int OVERWRITE_IF_EXISTS= 1;
-	
+
 	public static final int SKIP_IF_EXISTS= 2;
 
 	private static final int DELETE_MAX_RETRY= 5;
@@ -143,7 +143,7 @@ public class ResourceTestHelper {
 		};
 		getFile(dest).create(stream, true, null);
 	}
-	
+
 
 	public static void replicate(String src, String destPrefix, String destSuffix, int n, String srcName, String destNamePrefix, int ifExists) throws IOException, CoreException {
 		StringBuffer s= read(src);
@@ -211,7 +211,7 @@ public class ResourceTestHelper {
 	public static boolean enableAutoBuilding() {
 		return setAutoBuilding(true);
 	}
-	
+
 	public static boolean setAutoBuilding(boolean value) {
 		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
 		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
@@ -225,7 +225,7 @@ public class ResourceTestHelper {
 		IProject project= workspace.getRoot().getProject(projectName);
 		IProjectDescription description= workspace.newProjectDescription(projectName);
 		description.setLocation(null);
-	
+
 		project.create(description, null);
 		project.open(null);
 		return project;

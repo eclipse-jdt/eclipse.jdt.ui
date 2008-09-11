@@ -20,17 +20,17 @@ import org.eclipse.jdt.ui.ISharedImages;
  * Default implementation of ISharedImages
  */
 public class SharedImages implements ISharedImages {
-	
+
 	public SharedImages() {
 	}
-		
+
 	/* (Non-Javadoc)
 	 * Method declared in ISharedImages
 	 */
 	public Image getImage(String key) {
 		return JavaPluginImages.get(key);
 	}
-	
+
 	/* (Non-Javadoc)
 	 * Method declared in ISharedImages
 	 */

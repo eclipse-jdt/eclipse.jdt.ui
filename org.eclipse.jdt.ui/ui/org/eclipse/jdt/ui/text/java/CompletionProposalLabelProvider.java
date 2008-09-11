@@ -46,11 +46,11 @@ public class CompletionProposalLabelProvider {
 	private static final String QUALIFIER_SEPARATOR= JavaElementLabels.CONCAT_STRING;
 	private static final String RETURN_TYPE_SEPARATOR= JavaElementLabels.DECL_STRING;
 	private static final String VAR_TYPE_SEPARATOR= JavaElementLabels.DECL_STRING;
-	
-	
+
+
 	/**
 	 * The completion context.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private CompletionContext fContext;
@@ -136,7 +136,7 @@ public class CompletionProposalLabelProvider {
 		}
 		return appendParameterSignature(buffer, typeParameters, null);
 	}
-	
+
 	/**
 	 * Converts the display name for an array type into a variable arity display name.
 	 * <p>
@@ -150,7 +150,7 @@ public class CompletionProposalLabelProvider {
 	 * <p>
 	 * If <code>typeName</code> does not include the substring "[]", it is returned unchanged.
 	 * </p>
-	 * 
+	 *
 	 * @param typeName the type name to convert
 	 * @return the converted type name
 	 * @since 3.2
@@ -161,12 +161,12 @@ public class CompletionProposalLabelProvider {
     	final int len= typeName.length;
 		if (len < 2)
     		return typeName;
-    	
+
     	if (typeName[len - 1] != ']')
     		return typeName;
     	if (typeName[len - 2] != '[')
     		return typeName;
-    	
+
 		char[] vararg= new char[len + 1];
 		System.arraycopy(typeName, 0, vararg, 0, len - 2);
 		vararg[len - 2]= '.';
@@ -295,26 +295,26 @@ public class CompletionProposalLabelProvider {
 	 * following display name is returned:
 	 * <code>add(Object) - List</code>.<br>
 	 * </p>
-	 * 
+	 *
 	 * @param methodProposal the method proposal to display
 	 * @return the display label for the given method proposal
 	 * @since 3.2
 	 */
 	StyledString createJavadocMethodProposalLabel(CompletionProposal methodProposal) {
 		StyledString nameBuffer= new StyledString();
-		
+
 		// method name
 		nameBuffer.append(methodProposal.getCompletion());
-		
+
 		// declaring type
 		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
-		
+
 		return nameBuffer;
 	}
-	
+
 	StyledString createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
 		StyledString nameBuffer= new StyledString();
 
@@ -325,7 +325,7 @@ public class CompletionProposalLabelProvider {
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(')');
-		
+
 		nameBuffer.append(RETURN_TYPE_SEPARATOR);
 
 		// return type
@@ -384,17 +384,17 @@ public class CompletionProposalLabelProvider {
 		char[] fullName= Signature.toCharArray(signature);
 		return createTypeProposalLabel(fullName);
 	}
-	
+
 	StyledString createJavadocTypeProposalLabel(CompletionProposal typeProposal) {
 		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
 		return createJavadocTypeProposalLabel(fullName);
 	}
-	
+
 	StyledString createJavadocSimpleProposalLabel(CompletionProposal proposal) {
 		// TODO get rid of this
 		return createSimpleLabel(proposal);
 	}
-	
+
 	StyledString createTypeProposalLabel(char[] fullName) {
 		// only display innermost type name as type name, using any
 		// enclosing types as qualification
@@ -408,12 +408,12 @@ public class CompletionProposalLabelProvider {
 		}
 		return buf;
 	}
-	
+
 	StyledString createJavadocTypeProposalLabel(char[] fullName) {
 		// only display innermost type name as type name, using any
 		// enclosing types as qualification
 		int qIndex= findSimpleNameStart(fullName);
-		
+
 		StyledString buf= new StyledString("{@link "); //$NON-NLS-1$
 		buf.append(new String(fullName, qIndex, fullName.length - qIndex));
 		buf.append('}');
@@ -423,7 +423,7 @@ public class CompletionProposalLabelProvider {
 		}
 		return buf;
 	}
-	
+
 	private int findSimpleNameStart(char[] array) {
 		int lastDot= 0;
 		for (int i= 0, len= array.length; i < len; i++) {
@@ -450,7 +450,7 @@ public class CompletionProposalLabelProvider {
 
 	/**
 	 * Returns whether the given string starts with "this.".
-	 * 
+	 *
 	 * @param string string to test
 	 * @return <code>true</code> if the given string starts with "this."
 	 * @since 3.3
@@ -465,7 +465,7 @@ public class CompletionProposalLabelProvider {
 		char[] name= proposal.getCompletion();
 		if (!isThisPrefix(name))
 			name= proposal.getName();
-		
+
 		StyledString buf= new StyledString();
 		buf.append(name);
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
@@ -517,13 +517,13 @@ public class CompletionProposalLabelProvider {
 	public String createLabel(CompletionProposal proposal) {
 		return createStyledLabel(proposal).getString();
 	}
-	
+
 	/**
 	 * Creates a display label with styles for a given <code>CompletionProposal</code>.
 	 *
 	 * @param proposal the completion proposal to create the display label for
 	 * @return the display label for <code>proposal</code>
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public StyledString createStyledLabel(CompletionProposal proposal) {
@@ -686,7 +686,7 @@ public class CompletionProposalLabelProvider {
 
 		if (kind == CompletionProposal.TYPE_REF && Flags.isAbstract(flags) && !Flags.isInterface(flags))
 			adornments |= JavaElementImageDescriptor.ABSTRACT;
-		
+
 		if (kind == CompletionProposal.FIELD_REF) {
 			if (Flags.isTransient(flags))
 				adornments |= JavaElementImageDescriptor.TRANSIENT;
@@ -699,7 +699,7 @@ public class CompletionProposalLabelProvider {
 
 	/**
 	 * Sets the completion context.
-	 * 
+	 *
 	 * @param context the completion context
 	 * @since 3.2
 	 */

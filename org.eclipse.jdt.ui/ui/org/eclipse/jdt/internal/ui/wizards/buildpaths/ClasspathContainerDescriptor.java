@@ -40,7 +40,7 @@ public class ClasspathContainerDescriptor {
 
 	private static final String ATT_ID = "id"; //$NON-NLS-1$
 	private static final String ATT_NAME = "name"; //$NON-NLS-1$
-	private static final String ATT_PAGE_CLASS = "class"; //$NON-NLS-1$	
+	private static final String ATT_PAGE_CLASS = "class"; //$NON-NLS-1$
 
 	public ClasspathContainerDescriptor(IConfigurationElement configElement) throws CoreException {
 		super();
@@ -71,15 +71,15 @@ public class ClasspathContainerDescriptor {
 		}
 		return fPage;
 	}
-	
+
 	public IClasspathContainerPage getPage() {
 		return fPage;
 	}
-	
+
 	public void setPage(IClasspathContainerPage page) {
 		fPage= page;
 	}
-	
+
 	public void dispose() {
 		if (fPage != null) {
 			fPage.dispose();
@@ -90,10 +90,10 @@ public class ClasspathContainerDescriptor {
 	public String getName() {
 		return fConfigElement.getAttribute(ATT_NAME);
 	}
-	
+
 	public String getPageClass() {
 		return fConfigElement.getAttribute(ATT_PAGE_CLASS);
-	}	
+	}
 
 	public boolean canEdit(IClasspathEntry entry) {
 		String id = fConfigElement.getAttribute(ATT_ID);
@@ -106,12 +106,12 @@ public class ClasspathContainerDescriptor {
 
 	public static ClasspathContainerDescriptor[] getDescriptors() {
 		ArrayList containers= new ArrayList();
-		
+
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		if (extensionPoint != null) {
 			ClasspathContainerDescriptor defaultPage= null;
 			String defaultPageName= ClasspathContainerDefaultPage.class.getName();
-			
+
 			IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
 			for (int i = 0; i < elements.length; i++) {
 				try {

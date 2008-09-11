@@ -14,23 +14,23 @@ package org.eclipse.jdt.ui;
  * Interface used for Java element content providers to indicate that
  * the content provider can return working copy elements for members
  * below compilation units.
- * 
+ *
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
  *
  * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IWorkingCopyProvider {
-	
+
 	/**
-	 * Returns <code>true</code> if the content provider returns working 
+	 * Returns <code>true</code> if the content provider returns working
 	 * copy elements; otherwise <code>false</code> is returned.
-	 * 
+	 *
 	 * @return whether working copy elements are provided.
 	 */
 	public boolean providesWorkingCopies();

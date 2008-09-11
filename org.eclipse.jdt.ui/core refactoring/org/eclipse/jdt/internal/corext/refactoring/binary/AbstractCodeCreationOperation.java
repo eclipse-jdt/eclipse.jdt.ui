@@ -35,12 +35,11 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Partial implementation of a code creation operation.
- * 
+ *
  * @since 3.2
  */
 public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnable {
@@ -53,7 +52,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 
 	/**
 	 * Creates a new abstract code creation operation.
-	 * 
+	 *
 	 * @param uri
 	 *            the URI where to output the code
 	 * @param packages
@@ -68,7 +67,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 
 	/**
 	 * Creates a new compilation unit with the given contents.
-	 * 
+	 *
 	 * @param store
 	 *            the file store
 	 * @param name
@@ -102,7 +101,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 
 	/**
 	 * Creates a package fragment with the given name.
-	 * 
+	 *
 	 * @param store
 	 *            the file store
 	 * @param name
@@ -118,14 +117,14 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 
 	/**
 	 * Returns the operation label.
-	 * 
+	 *
 	 * @return the operation label
 	 */
 	protected abstract String getOperationLabel();
 
 	/**
 	 * Runs the stub generation on the specified class file.
-	 * 
+	 *
 	 * @param file
 	 *            the class file
 	 * @param parent

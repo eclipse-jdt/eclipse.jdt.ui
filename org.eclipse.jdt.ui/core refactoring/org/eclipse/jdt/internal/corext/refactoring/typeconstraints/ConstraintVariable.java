@@ -46,7 +46,7 @@ public abstract class ConstraintVariable {
 	public String toString() {
 		return toResolvedString();
 	}
-		
+
 	/**
 	 * @return the type binding or <code>null</code>
 	 */
@@ -56,15 +56,15 @@ public abstract class ConstraintVariable {
 	}
 
 	/**
-	 * For storing additional information associated with constraint variables. 
+	 * For storing additional information associated with constraint variables.
 	 * Added in anticipation of the generics-related refactorings.
 	 */
 	private Object fData;
-	
+
 	public Object getData(){
 		return fData;
 	}
-	
+
 	public void setData(Object data){
 		fData= data;
 	}

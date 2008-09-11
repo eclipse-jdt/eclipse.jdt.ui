@@ -17,14 +17,15 @@ import junit.framework.TestSuite;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.ui.PartInitException;
 
 public class UndoTextEditorTest extends UndoEditorTest {
-	
+
 	private static final Class THIS= UndoTextEditorTest.class;
-	
+
 	private static final String FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
-	
+
 	private static final String ORIG_FILE= FILE_PREFIX + ".java";
 
 	private static final String FILE= FILE_PREFIX + ".txt";
@@ -36,23 +37,23 @@ public class UndoTextEditorTest extends UndoEditorTest {
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	protected void setUp() throws Exception {
 		ResourceTestHelper.copy(ORIG_FILE, FILE);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 		super.setUp();
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		ResourceTestHelper.delete(FILE);
 	}
-	
+
 	public void testUndoTextEditor2() throws PartInitException {
 		measureUndo(ResourceTestHelper.findFile(FILE));
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.UndoEditorTest#createMeter()
 	 * @since 3.3

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -23,6 +20,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionP
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ParameterEditDialog extends StatusDialog {
-	
+
 	private final ParameterInfo fParameter;
 	private final boolean fEditType;
 	private final boolean fEditDefault;
@@ -55,12 +55,12 @@ public class ParameterEditDialog extends StatusDialog {
 	private Text fType;
 	private Text fName;
 	private Text fDefaultValue;
-	
+
 	/**
-	 * @param parentShell 
-	 * @param parameter 
-	 * @param canEditType 
-	 * @param canEditDefault 
+	 * @param parentShell
+	 * @param parameter
+	 * @param canEditType
+	 * @param canEditDefault
 	 * @param context the <code>IPackageFragment</code> for type ContentAssist.
 	 * Can be <code>null</code> if <code>canEditType</code> is <code>false</code>.
 	 */
@@ -71,10 +71,10 @@ public class ParameterEditDialog extends StatusDialog {
 		fEditDefault= canEditDefault;
 		fContext= context;
 	}
-	
+
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(RefactoringMessages.ParameterEditDialog_title); 
+		newShell.setText(RefactoringMessages.ParameterEditDialog_title);
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -83,20 +83,20 @@ public class ParameterEditDialog extends StatusDialog {
 		layout.numColumns= 2;
 		Label label;
 		GridData gd;
-		
+
 		label= new Label(result, SWT.NONE);
 		String newName = fParameter.getNewName();
 		if (newName.length() == 0)
-			label.setText(RefactoringMessages.ParameterEditDialog_message_new); 
+			label.setText(RefactoringMessages.ParameterEditDialog_message_new);
 		else
-			label.setText(Messages.format(RefactoringMessages.ParameterEditDialog_message, BasicElementLabels.getJavaElementName(newName))); 
+			label.setText(Messages.format(RefactoringMessages.ParameterEditDialog_message, BasicElementLabels.getJavaElementName(newName)));
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);
-		
+
 		if (fEditType) {
 			label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.ParameterEditDialog_type); 
+			label.setText(RefactoringMessages.ParameterEditDialog_type);
 			fType= new Text(result, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			fType.setLayoutData(gd);
@@ -116,7 +116,7 @@ public class ParameterEditDialog extends StatusDialog {
 		label= new Label(result, SWT.NONE);
 		fName= new Text(result, SWT.BORDER);
 		initializeDialogUnits(fName);
-		label.setText(RefactoringMessages.ParameterEditDialog_name); 
+		label.setText(RefactoringMessages.ParameterEditDialog_name);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(45);
 		fName.setLayoutData(gd);
@@ -131,7 +131,7 @@ public class ParameterEditDialog extends StatusDialog {
 
 		if (fEditDefault && fParameter.isAdded()) {
 			label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.ParameterEditDialog_defaultValue); 
+			label.setText(RefactoringMessages.ParameterEditDialog_defaultValue);
 			fDefaultValue= new Text(result, SWT.BORDER);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			fDefaultValue.setLayoutData(gd);
@@ -144,10 +144,10 @@ public class ParameterEditDialog extends StatusDialog {
 				});
 			TextFieldNavigationHandler.install(fDefaultValue);
 		}
-		applyDialogFont(result);		
+		applyDialogFont(result);
 		return result;
 	}
-	
+
 	protected void okPressed() {
 		if (fType != null) {
 			fParameter.setNewTypeName(fType.getText());
@@ -158,7 +158,7 @@ public class ParameterEditDialog extends StatusDialog {
 		}
 		super.okPressed();
 	}
-	
+
 	private void validate(Text first) {
 		IStatus[] result= new IStatus[3];
 		if (first == fType) {
@@ -183,12 +183,12 @@ public class ParameterEditDialog extends StatusDialog {
 		}
 		updateStatus(createOkStatus());
 	}
-	
+
 	private IStatus validateType() {
 		if (fType == null)
 			return null;
 		String type= fType.getText();
-		
+
 		RefactoringStatus status= TypeContextChecker.checkParameterTypeSyntax(type, fContext.getCuHandle().getJavaProject());
 		if (status == null || status.isOK())
 			return createOkStatus();
@@ -197,9 +197,9 @@ public class ParameterEditDialog extends StatusDialog {
 		else
 			return createWarningStatus(status.getEntryWithHighestSeverity().getMessage());
 	}
-	
+
 	private IStatus validateName() {
-		if (fName == null) 
+		if (fName == null)
 			return null;
 		String text= fName.getText();
 		if (text.length() == 0)
@@ -210,10 +210,10 @@ public class ParameterEditDialog extends StatusDialog {
 		if (status.matches(IStatus.ERROR))
 			return status;
 		if (! Checks.startsWithLowerCase(text))
-			return createWarningStatus(RefactoringCoreMessages.ExtractTempRefactoring_convention); 
+			return createWarningStatus(RefactoringCoreMessages.ExtractTempRefactoring_convention);
 		return createOkStatus();
 	}
-	
+
 	private IStatus validateDefaultValue() {
 		if (fDefaultValue == null)
 			return null;
@@ -222,19 +222,19 @@ public class ParameterEditDialog extends StatusDialog {
 			return createErrorStatus(RefactoringMessages.ParameterEditDialog_defaultValue_error);
 		if (ChangeSignatureProcessor.isValidExpression(defaultValue))
 			return createOkStatus();
-		String msg= Messages.format(RefactoringMessages.ParameterEditDialog_defaultValue_invalid, new String[]{defaultValue}); 
+		String msg= Messages.format(RefactoringMessages.ParameterEditDialog_defaultValue_invalid, new String[]{defaultValue});
 		return createErrorStatus(msg);
-		
+
 	}
-	
+
 	private Status createOkStatus() {
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 	}
-	
+
 	private Status createWarningStatus(String message) {
 		return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.WARNING, message, null);
 	}
-	
+
 	private Status createErrorStatus(String message) {
 		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
 	}

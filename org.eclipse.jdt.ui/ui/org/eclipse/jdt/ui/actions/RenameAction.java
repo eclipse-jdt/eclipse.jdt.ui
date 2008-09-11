@@ -31,13 +31,13 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RenameResourceAction;
  * <p>
  * Action is applicable to selections containing elements of type
  * <code>IJavaElement</code> or <code>IResource</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class RenameAction extends SelectionDispatchAction {
@@ -49,30 +49,30 @@ public class RenameAction extends SelectionDispatchAction {
 	 * Creates a new <code>RenameAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public RenameAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.RenameAction_text); 
+		setText(RefactoringMessages.RenameAction_text);
 		fRenameJavaElement= new RenameJavaElementAction(site);
 		fRenameJavaElement.setText(getText());
 		fRenameResource= new RenameResourceAction(site);
 		fRenameResource.setText(getText());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.RENAME_ACTION);
 	}
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public RenameAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fRenameJavaElement= new RenameJavaElementAction(editor);
 	}
-	
+
 	/*
 	 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 	 */
@@ -80,7 +80,7 @@ public class RenameAction extends SelectionDispatchAction {
 		fRenameJavaElement.selectionChanged(event);
 		if (fRenameResource != null)
 			fRenameResource.selectionChanged(event);
-		setEnabled(computeEnabledState());		
+		setEnabled(computeEnabledState());
 	}
 
 	/*
@@ -88,13 +88,13 @@ public class RenameAction extends SelectionDispatchAction {
 	 */
 	public void update(ISelection selection) {
 		fRenameJavaElement.update(selection);
-		
+
 		if (fRenameResource != null)
 			fRenameResource.update(selection);
-	
-		setEnabled(computeEnabledState());		
+
+		setEnabled(computeEnabledState());
 	}
-	
+
 	private boolean computeEnabledState(){
 		if (fRenameResource != null) {
 			return fRenameJavaElement.isEnabled() || fRenameResource.isEnabled();
@@ -102,7 +102,7 @@ public class RenameAction extends SelectionDispatchAction {
 			return fRenameJavaElement.isEnabled();
 		}
 	}
-	
+
 	public void run(IStructuredSelection selection) {
 		if (fRenameJavaElement.isEnabled())
 			fRenameJavaElement.run(selection);
@@ -114,6 +114,6 @@ public class RenameAction extends SelectionDispatchAction {
 		if (fRenameJavaElement.canRunInEditor())
 			fRenameJavaElement.run(selection);
 		else
-			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);  
+			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);
 	}
 }

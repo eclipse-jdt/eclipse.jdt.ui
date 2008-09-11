@@ -20,11 +20,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Configures Java Editor save participant preferences.
- * 
+ *
  * @since 3.3
  */
 public final class SaveParticipantPreferencePage extends AbstractConfigurationBlockPreferenceAndPropertyPage {
-	
+
 	public static final String PROPERTY_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.SaveParticipantPreferencePage"; //$NON-NLS-1$
 	public static final String PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage"; //$NON-NLS-1$
 
@@ -34,28 +34,28 @@ public final class SaveParticipantPreferencePage extends AbstractConfigurationBl
 	protected String getHelpId() {
 		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected IPreferenceAndPropertyConfigurationBlock createConfigurationBlock(IScopeContext context) {
 		return new SaveParticipantConfigurationBlock(context, this);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected String getPreferencePageID() {
 		return PREFERENCE_PAGE_ID;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected String getPropertyPageID() {
 		return PROPERTY_PAGE_ID;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

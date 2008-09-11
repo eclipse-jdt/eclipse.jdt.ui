@@ -21,9 +21,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public abstract class PackageFragmentRootContainer implements IAdaptable {
-	
+
 	private static WorkbenchAdapterImpl fgAdapterInstance= new WorkbenchAdapterImpl();
-	
+
 	private static class WorkbenchAdapterImpl implements IWorkbenchAdapter {
 
 		/* (non-Javadoc)
@@ -62,7 +62,7 @@ public abstract class PackageFragmentRootContainer implements IAdaptable {
 			return null;
 		}
 	}
-	
+
 	private IJavaProject fProject;
 
 	public PackageFragmentRootContainer(IJavaProject project) {
@@ -71,19 +71,19 @@ public abstract class PackageFragmentRootContainer implements IAdaptable {
 	}
 
 	public Object getAdapter(Class adapter) {
-		if (adapter == IWorkbenchAdapter.class) 
+		if (adapter == IWorkbenchAdapter.class)
 			return fgAdapterInstance;
 		return null;
 	}
 
 	public abstract IAdaptable[] getChildren();
-	
+
 	public abstract IPackageFragmentRoot[] getPackageFragmentRoots();
-	
+
 	public abstract String getLabel();
-	
+
 	public abstract ImageDescriptor getImageDescriptor();
-	
+
 	public IJavaProject getJavaProject() {
 		return fProject;
 	}

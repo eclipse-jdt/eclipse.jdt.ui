@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
+ *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix
  *       expressions into a combination of setter and getter calls.
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
@@ -15,9 +15,9 @@ package org.eclipse.jdt.internal.corext.refactoring.sef;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -55,14 +55,14 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 
 /**
- * Analyzer to find all references to the field and to determine how to convert 
+ * Analyzer to find all references to the field and to determine how to convert
  * them into setter or getter calls.
  */
 class AccessAnalyzer extends ASTVisitor {
 
 	private ICompilationUnit fCUnit;
 	private IVariableBinding fFieldBinding;
-	private ITypeBinding fDeclaringClassBinding;	
+	private ITypeBinding fDeclaringClassBinding;
 	private String fGetter;
 	private String fSetter;
 	private ASTRewrite fRewriter;
@@ -72,16 +72,16 @@ class AccessAnalyzer extends ASTVisitor {
 	private boolean fSetterMustReturnValue;
 	private boolean fEncapsulateDeclaringClass;
 	private boolean fIsFieldFinal;
-	
+
 	private boolean fRemoveStaticImport;
 	private boolean fReferencingGetter;
 	private boolean fReferencingSetter;
 
-	private static final String READ_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_read_access; 
-	private static final String WRITE_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_write_access; 
-	private static final String PREFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_prefix_access; 
-	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_postfix_access; 
-		
+	private static final String READ_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_read_access;
+	private static final String WRITE_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_write_access;
+	private static final String PREFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_prefix_access;
+	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_postfix_access;
+
 	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, IVariableBinding field, ITypeBinding declaringClass, ASTRewrite rewriter, ImportRewrite importRewrite) {
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(unit);
@@ -113,16 +113,16 @@ class AccessAnalyzer extends ASTVisitor {
 	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
-	
+
 	public List getGroupDescriptions() {
 		return fGroupDescriptions;
 	}
-	
+
 	public boolean visit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
 		if (!considerBinding(resolveBinding(lhs), lhs))
 			return true;
-			
+
 		checkParent(node);
 		if (!fIsFieldFinal) {
 			// Write access.
@@ -166,37 +166,37 @@ class AccessAnalyzer extends ASTVisitor {
 		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node)) {
 			fReferencingGetter= true;
 			fRewriter.replace(
-				node, 
+				node,
 				fRewriter.createStringPlaceholder(fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
 				createGroupDescription(READ_ACCESS));
 		}
 		return true;
 	}
-	
+
 	public boolean visit(ImportDeclaration node) {
 		if (considerBinding(node.resolveBinding(), node)) {
 			fRemoveStaticImport= true;
 		}
 		return false;
 	}
-	
+
 	public boolean visit(PrefixExpression node) {
 		Expression operand= node.getOperand();
 		if (!considerBinding(resolveBinding(operand), operand))
 			return true;
-		
-		PrefixExpression.Operator operator= node.getOperator();	
+
+		PrefixExpression.Operator operator= node.getOperator();
 		if (operator != PrefixExpression.Operator.INCREMENT && operator != PrefixExpression.Operator.DECREMENT)
 			return true;
-			
+
 		checkParent(node);
-		
-		fRewriter.replace(node, 
-			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
+
+		fRewriter.replace(node,
+			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()),
 			createGroupDescription(PREFIX_ACCESS));
 		return false;
 	}
-	
+
 	public boolean visit(PostfixExpression node) {
 		Expression operand= node.getOperand();
 		if (!considerBinding(resolveBinding(operand), operand))
@@ -204,30 +204,30 @@ class AccessAnalyzer extends ASTVisitor {
 
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof ExpressionStatement)) {
-			fStatus.addError(RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_cannot_convert_postfix_expression,  
+			fStatus.addError(RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_cannot_convert_postfix_expression,
 				JavaStatusContext.create(fCUnit, new SourceRange(node)));
 			return false;
 		}
-		fRewriter.replace(node, 
-			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
+		fRewriter.replace(node,
+			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()),
 			createGroupDescription(POSTFIX_ACCESS));
 		return false;
 	}
-	
+
 	public boolean visit(MethodDeclaration node) {
 		String name= node.getName().getIdentifier();
 		if (name.equals(fGetter) || name.equals(fSetter))
 			return false;
 		return true;
 	}
-	
+
 	public void endVisit(CompilationUnit node) {
 		// If we don't had a static import to the field we don't
-		// have to add any, even if we generated a setter or 
+		// have to add any, even if we generated a setter or
 		// getter access.
 		if (!fRemoveStaticImport)
 			return;
-		
+
 		ITypeBinding type= fFieldBinding.getDeclaringClass();
 		String fieldName= fFieldBinding.getName();
 		String typeName= type.getQualifiedName();
@@ -241,14 +241,14 @@ class AccessAnalyzer extends ASTVisitor {
 			fImportRewriter.addStaticImport(typeName, fSetter, false);
 		}
 	}
-	
+
 	private boolean considerBinding(IBinding binding, ASTNode node) {
 		if (!(binding instanceof IVariableBinding))
 			return false;
 		boolean result= Bindings.equals(fFieldBinding, ((IVariableBinding)binding).getVariableDeclaration());
 		if (!result || fEncapsulateDeclaringClass)
 			return result;
-			
+
 		if (binding instanceof IVariableBinding) {
 			AbstractTypeDeclaration type= (AbstractTypeDeclaration)ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 			if (type != null) {
@@ -258,13 +258,13 @@ class AccessAnalyzer extends ASTVisitor {
 		}
 		return true;
 	}
-	
+
 	private void checkParent(ASTNode node) {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof ExpressionStatement))
 			fSetterMustReturnValue= true;
 	}
-		
+
 	private IBinding resolveBinding(Expression expression) {
 		if (expression instanceof SimpleName)
 			return ((SimpleName)expression).resolveBinding();
@@ -274,7 +274,7 @@ class AccessAnalyzer extends ASTVisitor {
 			return ((FieldAccess)expression).getName().resolveBinding();
 		return null;
 	}
-	
+
 	private Expression getReceiver(Expression expression) {
 		int type= expression.getNodeType();
 		switch(type) {
@@ -287,7 +287,7 @@ class AccessAnalyzer extends ASTVisitor {
 		}
 		return null;
 	}
-		
+
 	private MethodInvocation createInvocation(AST ast, Expression operand, String operator) {
 		Expression receiver= getReceiver(operand);
 		MethodInvocation invocation= ast.newMethodInvocation();
@@ -312,10 +312,10 @@ class AccessAnalyzer extends ASTVisitor {
 
 		fReferencingGetter= true;
 		fReferencingSetter= true;
-		
+
 		return invocation;
 	}
-	
+
 	private TextEditGroup createGroupDescription(String name) {
 		TextEditGroup result= new TextEditGroup(name);
 		fGroupDescriptions.add(result);

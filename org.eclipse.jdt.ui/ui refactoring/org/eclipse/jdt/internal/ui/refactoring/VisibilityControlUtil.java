@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.Modifier;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -24,27 +22,29 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
+import org.eclipse.jdt.core.dom.Modifier;
+
 public class VisibilityControlUtil {
 	private VisibilityControlUtil(){}
-	
+
 	public static Composite createVisibilityControl(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
 		List allowedVisibilities= convertToIntegerList(availableVisibilities);
 		if (allowedVisibilities.size() == 1)
 			return null;
-		
+
 		Group group= new Group(parent, SWT.NONE);
-		group.setText(RefactoringMessages.VisibilityControlUtil_Access_modifier); 
+		group.setText(RefactoringMessages.VisibilityControlUtil_Access_modifier);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
 		layout.makeColumnsEqualWidth= true;
-		layout.numColumns= 4; 
+		layout.numColumns= 4;
 		group.setLayout(layout);
-		
+
 		String[] labels= new String[] {
 			"&public", //$NON-NLS-1$
 			"pro&tected", //$NON-NLS-1$
-			RefactoringMessages.VisibilityControlUtil_defa_ult_4, 
+			RefactoringMessages.VisibilityControlUtil_defa_ult_4,
 			"pri&vate" //$NON-NLS-1$
 		};
 		Integer[] data= new Integer[] {

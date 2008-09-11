@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 
 /**
  * Refactoring contribution for the copy refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class CopyRefactoringContribution extends JavaRefactoringContribution {
@@ -41,13 +41,13 @@ public final class CopyRefactoringContribution extends JavaRefactoringContributi
 		JavaCopyProcessor processor= new JavaCopyProcessor(arguments, status);
 		return new CopyRefactoring(processor);
 	}
-	
+
 	public RefactoringDescriptor createDescriptor() {
 		return new CopyDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new CopyDescriptor(project, description, comment, arguments, flags);
 	}
-	
+
 }

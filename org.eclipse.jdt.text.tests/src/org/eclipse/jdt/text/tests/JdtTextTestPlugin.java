@@ -31,7 +31,7 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 	private static JdtTextTestPlugin plugin;
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
-	
+
 	/**
 	 * The constructor.
 	 */
@@ -46,8 +46,8 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the shared instance.
-	 * 
-	 * @return the default plug-in instance 
+	 *
+	 * @return the default plug-in instance
 	 */
 	public static JdtTextTestPlugin getDefault() {
 		return plugin;
@@ -55,8 +55,8 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the workspace instance.
-	 * 
-	 * @return the workspace 
+	 *
+	 * @return the workspace
 	 */
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
@@ -64,9 +64,9 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the string from the plugin's resource bundle.
-	 * 
-	 * @param key the resource key 
-	 * @return the resource string or the given <code>key</code> if not found 
+	 *
+	 * @param key the resource key
+	 * @return the resource string or the given <code>key</code> if not found
 	 */
 	public static String getResourceString(String key) {
 		ResourceBundle bundle= JdtTextTestPlugin.getDefault().getResourceBundle();
@@ -79,7 +79,7 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the plugin's resource bundle.
-	 * 
+	 *
 	 * @return the resource bundle
 	 */
 	public ResourceBundle getResourceBundle() {

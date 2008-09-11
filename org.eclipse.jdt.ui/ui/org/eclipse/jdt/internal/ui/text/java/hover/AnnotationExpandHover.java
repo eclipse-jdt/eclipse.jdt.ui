@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationExpansionControl.An
  * This class got moved here form Platform Text since it was not used there
  * and caused discouraged access warnings. It will be moved down again once
  * annotation roll-over support is provided by Platform Text.
- * 
+ *
  * @since 3.2
  */
 public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHoverExtension {
@@ -216,7 +216,7 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 	protected boolean isDuplicateMessage(Map messagesAtPosition, Position position, String message) {
 		if (message == null)
 			return false;
-		
+
 		if (messagesAtPosition.containsKey(position)) {
 			Object value= messagesAtPosition.get(position);
 			if (message.equals(value))

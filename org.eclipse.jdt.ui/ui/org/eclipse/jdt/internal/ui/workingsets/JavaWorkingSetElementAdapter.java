@@ -29,7 +29,7 @@ public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 
 	public IAdaptable[] adaptElements(IWorkingSet ws, IAdaptable[] elements) {
 		ArrayList result= new ArrayList(elements.length);
-		
+
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable curr= elements[i];
 			if (curr instanceof IJavaElement) {
@@ -51,7 +51,7 @@ public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 		}
 		return (IAdaptable[]) result.toArray(new IAdaptable[result.size()]);
 	}
-	
+
 	private Object adaptFromResource(IResource resource) {
 		IProject project= resource.getProject();
 		if (project != null && project.isAccessible()) {
@@ -68,7 +68,7 @@ public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 		}
 		return resource;
 	}
-	
+
 
 	public void dispose() {
 	}

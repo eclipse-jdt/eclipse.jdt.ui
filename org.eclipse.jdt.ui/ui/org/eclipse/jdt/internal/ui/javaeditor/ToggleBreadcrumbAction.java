@@ -19,6 +19,7 @@ import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.ResourceAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -38,7 +39,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 
 	/**
 	 * Constructs and updates the action.
-	 * 
+	 *
 	 * @param page the workbench page
 	 */
 	public ToggleBreadcrumbAction(IWorkbenchPage page) {
@@ -91,11 +92,11 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 			fPage= null;
 		}
 	}
-	
+
 	/**
 	 * Returns the preference key for the breadcrumb. The
 	 * value depends on the current perspective.
-	 * 
+	 *
 	 * @return the preference key or <code>null</code> if there's no perspective
 	 */
 	private String getPreferenceKey() {

@@ -12,14 +12,10 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -31,16 +27,20 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
+
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathContainerPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
-
 /**
  * Action to open a dialog to configure classpath containers. Added as a <code>objectContribution</code>
  * to {@link ClassPathContainer}.
- * 
+ *
  * @deprecated DO NOT USE this class will be removed soon, it is replaced by {@link ClasspathContainerPreferencePage}
  */
 public class ConfigureContainerAction implements IObjectActionDelegate {
@@ -64,12 +64,12 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 			openWizard(container.getClasspathEntry(), container.getLabel(), container.getJavaProject());
 		}
 	}
-	
+
 	private void openWizard(IClasspathEntry entry, String label, final IJavaProject project) {
 		Shell shell= fPart.getSite().getShell();
 		try {
 			IClasspathEntry[] entries= project.getRawClasspath();
-			
+
 			IClasspathEntry result= BuildPathDialogAccess.configureContainerEntry(shell, entry, project, entries);
 			if (result == null || result.equals(entry)) {
 				return; // user cancelled or no changes
@@ -79,18 +79,18 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 			if (idx == -1) {
 				return;
 			}
-			
+
 			final IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
 			System.arraycopy(entries, 0, newEntries, 0, entries.length);
 			newEntries[idx]= result;
-			
+
 			IRunnableContext context= fPart.getSite().getWorkbenchWindow();
 			if (context == null) {
 				context= PlatformUI.getWorkbench().getProgressService();
 			}
 			context.run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {			
+					try {
 						project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
@@ -98,18 +98,18 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 				}
 			});
 		} catch (JavaModelException e) {
-			String title= ActionMessages.ConfigureContainerAction_error_title; 
-			String message= ActionMessages.ConfigureContainerAction_error_creationfailed_message; 
+			String title= ActionMessages.ConfigureContainerAction_error_title;
+			String message= ActionMessages.ConfigureContainerAction_error_creationfailed_message;
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InvocationTargetException e) {
-			String title= ActionMessages.ConfigureContainerAction_error_title; 
-			String message= ActionMessages.ConfigureContainerAction_error_applyingfailed_message; 
+			String title= ActionMessages.ConfigureContainerAction_error_title;
+			String message= ActionMessages.ConfigureContainerAction_error_applyingfailed_message;
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InterruptedException e) {
 			// user cancelled
 		}
 	}
-	
+
 	protected static int indexInClasspath(IClasspathEntry[] entries, IClasspathEntry entry) {
 		for (int i= 0; i < entries.length; i++) {
 			if (entries[i] == entry) {

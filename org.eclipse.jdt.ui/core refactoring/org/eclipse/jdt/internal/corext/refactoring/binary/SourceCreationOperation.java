@@ -27,14 +27,14 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  * Operation, which run, creates source code for a list of binary package
  * fragments with attached source.
- * 
+ *
  * @since 3.2
  */
 public class SourceCreationOperation extends AbstractCodeCreationOperation {
 
 	/**
 	 * Creates a new source creation operation.
-	 * 
+	 *
 	 * @param uri
 	 *            the URI where to output the source
 	 * @param packages
@@ -46,7 +46,7 @@ public class SourceCreationOperation extends AbstractCodeCreationOperation {
 
 	/**
 	 * Returns the operation label.
-	 * 
+	 *
 	 * @return the operation label
 	 */
 	protected String getOperationLabel() {
@@ -55,7 +55,7 @@ public class SourceCreationOperation extends AbstractCodeCreationOperation {
 
 	/**
 	 * Runs the stub generation on the specified class file.
-	 * 
+	 *
 	 * @param file
 	 *            the class file
 	 * @param parent

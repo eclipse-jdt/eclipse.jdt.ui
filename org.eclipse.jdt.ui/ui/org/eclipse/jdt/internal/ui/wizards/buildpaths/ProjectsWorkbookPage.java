@@ -49,48 +49,48 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 
 public class ProjectsWorkbookPage extends BuildPathBasePage {
-	
+
 	private final int IDX_ADDPROJECT= 0;
-	
+
 	private final int IDX_EDIT= 2;
 	private final int IDX_REMOVE= 3;
-	
+
 	private final ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
-	
+
 	private final TreeListDialogField fProjectsList;
-	
+
 	private Control fSWTControl;
 
 	private final IWorkbenchPreferenceContainer fPageContainer;
-	
+
 	public ProjectsWorkbookPage(ListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
 		fPageContainer= pageContainer;
 		fSWTControl= null;
-		
+
 		String[] buttonLabels= new String[] {
 			NewWizardMessages.ProjectsWorkbookPage_projects_add_button,
 			null,
 			NewWizardMessages.ProjectsWorkbookPage_projects_edit_button,
 			NewWizardMessages.ProjectsWorkbookPage_projects_remove_button
 		};
-		
+
 		ProjectsAdapter adapter= new ProjectsAdapter();
-		
+
 		fProjectsList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fProjectsList.setDialogFieldListener(adapter);
 		fProjectsList.setLabelText(NewWizardMessages.ProjectsWorkbookPage_projects_label);
-		
+
 		fProjectsList.enableButton(IDX_REMOVE, false);
 		fProjectsList.enableButton(IDX_EDIT, false);
-		
+
 		fProjectsList.setViewerComparator(new CPListElementSorter());
 	}
-	
+
 	public void init(final IJavaProject jproject) {
 		fCurrJProject= jproject;
-		
+
 		if (Display.getCurrent() != null) {
 			updateProjectsList();
 		} else {
@@ -101,13 +101,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			});
 		}
 	}
-		
+
 	private void updateProjectsList() {
 		// add the projects-cpentries that are already on the class path
 		List cpelements= fClassPathList.getElements();
-		
+
 		final List checkedProjects= new ArrayList(cpelements.size());
-		
+
 		for (int i= cpelements.size() - 1 ; i >= 0; i--) {
 			CPListElement cpelem= (CPListElement)cpelements.get(i);
 			if (isEntryKind(cpelem.getEntryKind())) {
@@ -116,28 +116,28 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 		fProjectsList.setElements(checkedProjects);
 	}
-		
+
 	// -------- UI creation ---------
-		
+
 	public Control getControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
-		
+
 		Composite composite= new Composite(parent, SWT.NONE);
-			
+
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fProjectsList }, true, SWT.DEFAULT, SWT.DEFAULT);
 		LayoutUtil.setHorizontalGrabbing(fProjectsList.getTreeControl(null));
-		
+
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fProjectsList.setButtonsMinWidth(buttonBarWidth);
-		
+
 		fSWTControl= composite;
-				
+
 		return composite;
 	}
-		
+
 	private void updateClasspathList() {
 		List projelements= fProjectsList.getElements();
-		
+
 		boolean remove= false;
 		List cpelements= fClassPathList.getElements();
 		// backwards, as entries will be deleted
@@ -157,7 +157,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			fClassPathList.setElements(cpelements);
 		}
 	}
-	
+
 	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
@@ -176,7 +176,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
 	 */
@@ -186,22 +186,22 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 
 	private class ProjectsAdapter implements IDialogFieldListener, ITreeListAdapter {
-		
+
 		private final Object[] EMPTY_ARR= new Object[0];
-		
+
 		// -------- IListAdapter --------
 		public void customButtonPressed(TreeListDialogField field, int index) {
 			projectPageCustomButtonPressed(field, index);
 		}
-		
+
 		public void selectionChanged(TreeListDialogField field) {
 			projectPageSelectionChanged(field);
 		}
-		
+
 		public void doubleClicked(TreeListDialogField field) {
 			projectPageDoubleClicked(field);
 		}
-		
+
 		public void keyPressed(TreeListDialogField field, KeyEvent event) {
 			projectPageKeyPressed(field, event);
 		}
@@ -223,14 +223,14 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		public boolean hasChildren(TreeListDialogField field, Object element) {
 			return getChildren(field, element).length > 0;
 		}
-			
+
 		// ---------- IDialogFieldListener --------
-	
+
 		public void dialogFieldChanged(DialogField field) {
 			projectPageDialogFieldChanged(field);
 		}
 	}
-	
+
 	/**
 	 * @param field the dialog field
 	 * @param index the button index
@@ -259,7 +259,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 					elementsToAdd.add(curr);
 				}
 			}
-						
+
 			fProjectsList.addElements(elementsToAdd);
 			if (index == IDX_ADDPROJECT) {
 				fProjectsList.refresh();
@@ -267,7 +267,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			fProjectsList.postSetSelection(new StructuredSelection(entries));
 		}
 	}
-	
+
 	private void removeEntry() {
 		List selElements= fProjectsList.getSelectedElements();
 		for (int i= selElements.size() - 1; i >= 0 ; i--) {
@@ -294,7 +294,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			fProjectsList.removeElements(selElements);
 		}
 	}
-	
+
 	private boolean canRemove(List selElements) {
 		if (selElements.size() == 0) {
 			return false;
@@ -345,7 +345,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Method editEntry.
 	 */
@@ -359,7 +359,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			editAttributeEntry((CPListElementAttribute) elem);
 		}
 	}
-	
+
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
 		if (key.equals(CPListElement.ACCESSRULES)) {
@@ -371,7 +371,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-	
+
 	private void showAccessRestrictionDialog(CPListElement selElement) {
 		AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, fCurrJProject, fPageContainer != null);
 		int res= dialog.open();
@@ -380,13 +380,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			selElement.setAttribute(CPListElement.COMBINE_ACCESSRULES, new Boolean(dialog.doCombineAccessRules()));
 			fProjectsList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
-			
+
 			if (res == AccessRulesDialog.SWITCH_PAGE) {
 				dialog.performPageSwitch(fPageContainer);
 			}
 		}
 	}
-			
+
 	private Shell getShell() {
 		if (fSWTControl != null) {
 			return fSWTControl.getShell();
@@ -396,11 +396,11 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 
 	private CPListElement[] addProjectDialog() {
-		
+
 		try {
 			Object[] selectArr= getNotYetRequiredProjects();
 			new JavaElementComparator().sort(null, selectArr);
-					
+
 			ListSelectionDialog dialog= new ListSelectionDialog(getShell(), Arrays.asList(selectArr), new ArrayContentProvider(), new JavaUILabelProvider(), NewWizardMessages.ProjectsWorkbookPage_chooseProjects_message);
 			dialog.setTitle(NewWizardMessages.ProjectsWorkbookPage_chooseProjects_title);
 			dialog.setHelpAvailable(false);
@@ -423,7 +423,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		ArrayList selectable= new ArrayList();
 		selectable.addAll(Arrays.asList(fCurrJProject.getJavaModel().getJavaProjects()));
 		selectable.remove(fCurrJProject);
-		
+
 		List elements= fProjectsList.getElements();
 		for (int i= 0; i < elements.size(); i++) {
 			CPListElement curr= (CPListElement)elements.get(i);
@@ -454,7 +454,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-	
+
 	/**
 	 * @param field the dialog field
 	 */
@@ -464,7 +464,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			updateClasspathList();
 		}
 	}
-	
+
 	/**
 	 * @param field the dialog field
 	 */
@@ -472,7 +472,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		List selElements= fProjectsList.getSelectedElements();
 		fProjectsList.enableButton(IDX_EDIT, canEdit(selElements));
 		fProjectsList.enableButton(IDX_REMOVE, canRemove(selElements));
-		
+
 		boolean enabled;
 		try {
 			enabled= getNotYetRequiredProjects().length > 0;

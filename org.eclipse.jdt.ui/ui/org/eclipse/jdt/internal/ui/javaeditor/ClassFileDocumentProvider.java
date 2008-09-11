@@ -18,10 +18,10 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ISynchronizable;
@@ -211,7 +211,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 	/**
 	 * Creates an annotation model derived from the given class file editor input.
-	 * 
+	 *
 	 * @param classFileEditorInput the editor input from which to query the annotations
 	 * @return the created annotation model
 	 * @exception CoreException if the editor input could not be accessed
@@ -240,7 +240,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected IDocument createEmptyDocument() {
 		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null, LocationKind.IFILE);
 		if (document instanceof ISynchronizable)
-			((ISynchronizable)document).setLockObject(new Object());		
+			((ISynchronizable)document).setLockObject(new Object());
 		return document;
 	}
 

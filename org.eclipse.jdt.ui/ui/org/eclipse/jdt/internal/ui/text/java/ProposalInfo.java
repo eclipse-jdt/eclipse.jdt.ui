@@ -31,14 +31,14 @@ public class ProposalInfo {
 	public ProposalInfo(IMember member) {
 		fElement= member;
 	}
-	
+
 	protected ProposalInfo() {
 		fElement= null;
 	}
 
 	/**
 	 * Returns the Java element.
-	 * 
+	 *
 	 * @throws JavaModelException if accessing the java model fails
 	 * @return the Java element
 	 */
@@ -97,5 +97,5 @@ public class ProposalInfo {
 		}
 		return null;
 	}
-	
+
 }

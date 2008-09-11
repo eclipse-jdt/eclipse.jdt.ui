@@ -32,7 +32,7 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 	private Class[] fAcceptedTypes;
 	private boolean fAllowMultipleSelection;
 	private Collection fRejectedElements;
-	
+
 	/**
 	 * @param acceptedTypes The types accepted by the validator
 	 * @param allowMultipleSelection If set to <code>true</code>, the validator
@@ -41,7 +41,7 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 	public TypedElementSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection) {
 		this(acceptedTypes, allowMultipleSelection, null);
 	}
-	
+
 	/**
 	 * @param acceptedTypes The types accepted by the validator
 	 * @param allowMultipleSelection If set to <code>true</code>, the validator
@@ -53,8 +53,8 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 		fAcceptedTypes= acceptedTypes;
 		fAllowMultipleSelection= allowMultipleSelection;
 		fRejectedElements= rejectedElements;
-	}	
-	
+	}
+
 	/*
 	 * @see org.eclipse.ui.dialogs.ISelectionValidator#isValid(java.lang.Object)
 	 */
@@ -63,7 +63,7 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 			return fgOKStatus;
 		}
 		return fgErrorStatus;
-	}	
+	}
 
 	private boolean isOfAcceptedType(Object o) {
 		for (int i= 0; i < fAcceptedTypes.length; i++) {
@@ -73,30 +73,30 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 		}
 		return false;
 	}
-	
+
 	private boolean isRejectedElement(Object elem) {
 		return (fRejectedElements != null) && fRejectedElements.contains(elem);
 	}
-	
+
 	/**
-	 * @param elem the element to test 
+	 * @param elem the element to test
 	 * @return returns if the selected element is valid
 	 */
 	protected boolean isSelectedValid(Object elem) {
 		return true;
 	}
-	
+
 	private boolean isValid(Object[] selection) {
 		if (selection.length == 0) {
 			return false;
 		}
-		
+
 		if (!fAllowMultipleSelection && selection.length != 1) {
 			return false;
 		}
-		
+
 		for (int i= 0; i < selection.length; i++) {
-			Object o= selection[i];	
+			Object o= selection[i];
 			if (!isOfAcceptedType(o) || isRejectedElement(o) || !isSelectedValid(o)) {
 				return false;
 			}

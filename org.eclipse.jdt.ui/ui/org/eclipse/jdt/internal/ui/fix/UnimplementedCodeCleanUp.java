@@ -122,7 +122,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		int id= problem.getProblemId();
 		if (id == IProblem.AbstractMethodMustBeImplemented || id == IProblem.EnumConstantMustImplementAbstractMethod)
 			return isEnabled(CleanUpConstants.ADD_MISSING_METHODES) || isEnabled(MAKE_TYPE_ABSTRACT);
-		
+
 		return false;
 	}
 
@@ -134,7 +134,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 			return 0;
 
 		IProblemLocation[] locations= filter(convertProblems(compilationUnit.getProblems()), new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
-		
+
 		HashSet types= new HashSet();
 		for (int i= 0; i < locations.length; i++) {
 			ASTNode type= UnimplementedCodeFix.getSelectedTypeNode(compilationUnit, locations[i]);

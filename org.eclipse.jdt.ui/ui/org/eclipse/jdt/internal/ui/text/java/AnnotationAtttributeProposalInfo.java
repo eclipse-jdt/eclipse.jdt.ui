@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 /**
  * Proposal info that computes the javadoc lazily when it is queried.
- * 
+ *
  * @since 3.5
  */
 public final class AnnotationAtttributeProposalInfo extends MemberProposalInfo {

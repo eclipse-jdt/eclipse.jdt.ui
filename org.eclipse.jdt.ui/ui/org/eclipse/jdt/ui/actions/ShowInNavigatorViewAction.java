@@ -39,40 +39,40 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Reveals the selected element in the resource navigator view. 
+ * Reveals the selected element in the resource navigator view.
  * <p>
- * Action is applicable to structured selections containing Java element 
+ * Action is applicable to structured selections containing Java element
  * or resources.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
-	
+
 	/**
-	 * Creates a new <code>ShowInNavigatorViewAction</code>. The action requires 
-	 * that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>ShowInNavigatorViewAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public ShowInNavigatorViewAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.ShowInNavigatorView_label); 
+		setText(ActionMessages.ShowInNavigatorView_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_IN_NAVIGATOR_VIEW_ACTION);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ShowInNavigatorViewAction(JavaEditor editor) {
@@ -80,7 +80,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -91,7 +91,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getResource(selection) != null); 
+		setEnabled(getResource(selection) != null);
 	}
 
 	/* (non-Javadoc)
@@ -100,14 +100,14 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		IJavaElement input= SelectionConverter.getInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
-			return;		
-		
-		
+			return;
+
+
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
 			if (elements == null || elements.length == 0)
 				return;
-			
+
 			IJavaElement candidate= elements[0];
 			if (elements.length > 1) {
 				candidate= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.ShowInNavigatorView_dialog_message);
@@ -121,33 +121,33 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 			// cancelled
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
 		run(getResource(selection));
 	}
-	
+
 	/*
 	 * No Javadoc. The method should be internal but can't be changed since
-	 * we shipped it with a public visibility 
+	 * we shipped it with a public visibility
 	 */
 	public void run(IResource resource) {
 		if (resource == null)
 			return;
 		try {
-			IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();	
+			IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();
 			IViewPart view= page.showView(IPageLayout.ID_RES_NAV);
 			if (view instanceof ISetSelectionTarget) {
 				ISelection selection= new StructuredSelection(resource);
 				((ISetSelectionTarget)view).selectReveal(selection);
 			}
 		} catch(PartInitException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.ShowInNavigatorView_error_activation_failed); 
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.ShowInNavigatorView_error_activation_failed);
 		}
 	}
-	
+
 	private IResource getResource(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;
@@ -158,19 +158,19 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 			return getResource((IJavaElement)element);
 		return null;
 	}
-	
+
 	private IResource getResource(IJavaElement element) {
 		if (element == null)
 			return null;
-		
+
 		element= (IJavaElement) element.getOpenable();
 		if (element instanceof ICompilationUnit) {
 			element= ((ICompilationUnit) element).getPrimary();
 		}
 		return element.getResource();
 	}
-	
+
 	private static String getDialogTitle() {
-		return ActionMessages.ShowInNavigatorView_dialog_title; 
-	}	
+		return ActionMessages.ShowInNavigatorView_dialog_title;
+	}
 }

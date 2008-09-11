@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypePro
 
 /**
  * Refactoring contribution for the extract supertype refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractSupertypeRefactoringContribution extends JavaRefactoringContribution {
@@ -45,7 +45,7 @@ public final class ExtractSupertypeRefactoringContribution extends JavaRefactori
 	public RefactoringDescriptor createDescriptor() {
 		return new ExtractSuperclassDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ExtractSuperclassDescriptor(project, description, comment, arguments, flags);
 	}

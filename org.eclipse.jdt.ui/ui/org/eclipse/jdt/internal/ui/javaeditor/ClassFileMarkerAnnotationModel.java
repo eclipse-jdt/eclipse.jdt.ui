@@ -12,6 +12,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
@@ -19,7 +21,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
@@ -104,11 +105,11 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 			int workspaceMarkersLength= workspaceMarkers.length;
 			if (workspaceMarkersLength == 0)
 				return resourceMarkers;
-			
+
 			int resourceMarkersLength= resourceMarkers.length;
 			if (resourceMarkersLength == 0)
 				return workspaceMarkers;
-			
+
 			IMarker[] result= new IMarker[resourceMarkersLength + workspaceMarkersLength];
 			System.arraycopy(resourceMarkers, 0, result, 0, resourceMarkersLength);
 			System.arraycopy(workspaceMarkers, 0, result, resourceMarkersLength, workspaceMarkersLength);

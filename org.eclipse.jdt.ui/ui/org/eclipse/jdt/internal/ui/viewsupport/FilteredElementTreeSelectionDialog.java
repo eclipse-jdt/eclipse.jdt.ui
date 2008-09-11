@@ -13,15 +13,15 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -47,15 +47,15 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDialog {
 
 	private static class MultiplePatternFilter extends PatternFilter {
-		
+
 		private StringMatcher[] fMatchers;
 		private final boolean fIsDeepFiltering;
-		
+
 
 		public MultiplePatternFilter(boolean deepFiltering) {
 			fIsDeepFiltering= deepFiltering;
 		}
-		
+
 		public void setPattern(String patternString) {
 			super.setPattern(patternString);
 			fMatchers= null;
@@ -74,7 +74,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 				}
 			}
 		}
-		
+
 		protected boolean wordMatches(String text) {
 			if (text != null) {
 				if (fMatchers == null || fMatchers.length == 0) {
@@ -88,7 +88,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 			}
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.ui.dialogs.PatternFilter#isElementVisible(org.eclipse.jface.viewers.Viewer, java.lang.Object)
 		 * @since 3.5
@@ -98,7 +98,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 			if (fIsDeepFiltering) {
 				if (!super.isElementVisible(viewer, element))
 					return false;
-				
+
 				// Also apply deep filtering to the other registered filters
 				ViewerFilter[] filters= ((TreeViewer)viewer).getFilters();
 				for (int i= 0; i < filters.length; i++) {
@@ -112,7 +112,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 			return hasChildren || isLeafMatch(viewer, element);
 		}
 	}
-	
+
 	private static class FilteredTreeWithFilter extends FilteredTree {
 		private boolean narrowingDown;
 		private String previousFilterText;
@@ -123,9 +123,9 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 				setFilterText(initialFilter);
 				textChanged();
 			}
-			
+
 		}
-		
+
 		protected void textChanged() {
 			narrowingDown= previousFilterText == null || getFilterString().startsWith(previousFilterText);
 			previousFilterText= getFilterString();
@@ -190,10 +190,10 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 		}
 
 	}
-	
+
 	private String fInitialFilter;
 	private boolean fIsDeepFiltering;
-	
+
 	public FilteredElementTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider) {
 		this(parent, labelProvider, contentProvider, true);
 	}
@@ -203,11 +203,11 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 		fInitialFilter= null;
 		fIsDeepFiltering= isDeepFiltering;
 	}
-	
+
 	/**
 	 * A comma separate list of patterns that are filled in initial filter list.
 	 * Example is: '*.jar, *.zip'
-	 * 
+	 *
 	 * @param initialFilter the initial filter or <code>null</code>.
 	 */
 	public void setInitialFilter(String initialFilter) {
@@ -217,12 +217,12 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 	protected TreeViewer doCreateTreeViewer(Composite parent, int style) {
 		FilteredTree tree= new FilteredTreeWithFilter(parent, style, fInitialFilter, fIsDeepFiltering);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		applyDialogFont(tree);
-		
+
 		TreeViewer viewer= tree.getViewer();
 		SWTUtil.setAccessibilityText(viewer.getControl(), Strings.removeMnemonicIndicator(getMessage()));
 		return viewer;
 	}
-	
+
 }

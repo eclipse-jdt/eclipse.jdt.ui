@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.model;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.core.resources.IFolder;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Label provider for Java models.
- * 
+ *
  * @since 3.2
  */
 public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
@@ -58,7 +58,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 
 	/**
 	 * Creates a new java model label provider.
-	 * 
+	 *
 	 * @param preferences
 	 *            the preferences label
 	 * @param refactorings

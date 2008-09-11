@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class AccessRulesLabelProvider extends LabelProvider implements ITableLabelProvider {
-	
+
 	public AccessRulesLabelProvider() {
 	}
 
@@ -54,7 +54,7 @@ public class AccessRulesLabelProvider extends LabelProvider implements ITableLab
 		}
 		return element.toString();
 	}
-	
+
 	public static Image getResolutionImage(int kind) {
 		switch (kind) {
 			case IAccessRule.K_ACCESSIBLE:
@@ -66,16 +66,16 @@ public class AccessRulesLabelProvider extends LabelProvider implements ITableLab
 		}
 		return null;
 	}
-	
-	
+
+
 	public static String getResolutionLabel(int kind) {
 		switch (kind) {
 			case IAccessRule.K_ACCESSIBLE:
-				return NewWizardMessages.AccessRulesLabelProvider_kind_accessible; 
+				return NewWizardMessages.AccessRulesLabelProvider_kind_accessible;
 			case IAccessRule.K_DISCOURAGED:
-				return NewWizardMessages.AccessRulesLabelProvider_kind_discouraged; 
+				return NewWizardMessages.AccessRulesLabelProvider_kind_discouraged;
 			case IAccessRule.K_NON_ACCESSIBLE:
-				return NewWizardMessages.AccessRulesLabelProvider_kind_non_accessible; 
+				return NewWizardMessages.AccessRulesLabelProvider_kind_non_accessible;
 		}
 		return ""; //$NON-NLS-1$
 	}

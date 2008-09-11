@@ -37,12 +37,12 @@ public class RenameSelectionState {
 	private final Object fElement;
 	private final List fParts;
 	private final List fSelections;
-	
+
 	public RenameSelectionState(Object element) {
 		fElement= element;
 		fParts= new ArrayList();
 		fSelections= new ArrayList();
-		
+
 		IWorkbenchWindow dw = JavaPlugin.getActiveWorkbenchWindow();
 		if (dw ==  null) {
 			fDisplay= null;
@@ -61,7 +61,7 @@ public class RenameSelectionState {
 			consider(refs[i].getPart(false));
 		}
 	}
-	
+
 	private void consider(IWorkbenchPart part) {
 		if (part == null)
 			return;
@@ -85,7 +85,7 @@ public class RenameSelectionState {
 		fParts.add(part);
 		fSelections.add(selection);
 	}
-	
+
 	public void restore(Object newElement) {
 		if (fDisplay == null)
 			return;
@@ -129,7 +129,7 @@ public class RenameSelectionState {
 			}
 		}
 	}
-	
+
 	// Method assumes that segment count of path > 0.
 	private TreePath createTreePath(TreePath old, Object newElement) {
 		int count= old.getSegmentCount();

@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVa
 	public ElementStructureEnvironment(){
 		fElemStructure= new LinkedHashMap();
 	}
-	
+
 	public void setElemStructure(ConstraintVariable2 v, ParametricStructure t) {
 		fElemStructure.put(v, t);
 	}

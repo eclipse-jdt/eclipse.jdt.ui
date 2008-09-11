@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
  * @since 3.1
  */
 public class JavaSpellingEngine extends SpellingEngine {
-	
+
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)

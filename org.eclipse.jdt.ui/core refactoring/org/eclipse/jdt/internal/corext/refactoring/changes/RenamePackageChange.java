@@ -63,7 +63,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		super(resourcePath, oldName, newName, stampToRestore);
 		fCompilationUnitStamps= compilationUnitStamps;
 		fRenameSubpackages= renameSubpackages;
-	
+
 		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
 
@@ -116,7 +116,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 		if (!fRenameSubpackages) {
 			renamePackage(pack, pm, createNewPath(), getNewName());
-			
+
 		} else {
 			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
 			Arrays.sort(allPackages, new Comparator() {

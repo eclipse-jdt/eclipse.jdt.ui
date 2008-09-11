@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameLocalVariablePro
 
 /**
  * Refactoring contribution for the rename local variable refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class RenameLocalVariableRefactoringContribution extends JavaRefactoringContribution {

@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -35,13 +35,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CodeFormatterUtil {
 
 	/**
-	 * Creates a string that represents the given number of indentation units. 
+	 * Creates a string that represents the given number of indentation units.
 	 * The returned string can contain tabs and/or spaces depending on the core formatter preferences.
-	 * 
+	 *
 	 * @param indentationUnits
 	 *        the number of indentation units to generate
 	 * @param project
-	 *        the project from which to get the formatter settings, 
+	 *        the project from which to get the formatter settings,
 	 *        <code>null</code> if the workspace default should be used
 	 * @return the indent string
 	 */
@@ -52,9 +52,9 @@ public class CodeFormatterUtil {
 
 	/**
 	 * Gets the current tab width.
-	 * 
+	 *
 	 * @param project
-	 *        The project where the source is used, used for project specific options or 
+	 *        The project where the source is used, used for project specific options or
 	 *        <code>null</code> if the project is unknown and the workspace default should be used
 	 * @return The tab width
 	 */
@@ -76,9 +76,9 @@ public class CodeFormatterUtil {
 
 	/**
 	 * Returns the current indent width.
-	 * 
+	 *
 	 * @param project
-	 *        the project where the source is used or, 
+	 *        the project where the source is used or,
 	 *        <code>null</code> if the project is unknown and the workspace default should be used
 	 * @return the indent width
 	 * @since 3.1
@@ -95,9 +95,9 @@ public class CodeFormatterUtil {
 
 	/**
 	 * Returns the possibly <code>project</code>-specific core preference defined under <code>key</code>.
-	 * 
+	 *
 	 * @param project
-	 *        the project to get the preference from, 
+	 *        the project to get the preference from,
 	 *        or <code>null</code> to get the global preference
 	 * @param key
 	 *        the key of the preference
@@ -111,11 +111,11 @@ public class CodeFormatterUtil {
 	}
 
 	/**
-	 * Returns the possibly <code>project</code>-specific core preference defined under <code>key</code>, 
+	 * Returns the possibly <code>project</code>-specific core preference defined under <code>key</code>,
 	 * or <code>def</code> if the value is not a integer.
-	 * 
+	 *
 	 * @param project
-	 *        the project to get the preference from, 
+	 *        the project to get the preference from,
 	 *        or <code>null</code> to get the global preference
 	 * @param key
 	 *        the key of the preference
@@ -136,20 +136,20 @@ public class CodeFormatterUtil {
 
 	/**
 	 * Old API. Consider to use format2 (TextEdit)
-	 * 
+	 *
 	 * @param kind
-	 *        Use to specify the kind of the code snippet to format. 
+	 *        Use to specify the kind of the code snippet to format.
 	 *        It can be any of the kind constants defined in {@link CodeFormatter}
 	 * @param source
 	 *        The source to format
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param project
-	 *        The project from which to retrieve the formatter options from 
+	 *        The project from which to retrieve the formatter options from
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
 	 * @return the formatted source string
 	 */
@@ -160,21 +160,21 @@ public class CodeFormatterUtil {
 
 	/**
 	 * Old API. Consider to use format2 (TextEdit)
-	 * 
+	 *
 	 * @param kind
-	 *        Use to specify the kind of the code snippet to format. 
+	 *        Use to specify the kind of the code snippet to format.
 	 *        It can be any of the kind constants defined in {@link CodeFormatter}
 	 * @param source
 	 *        The source to format
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param options
-	 *        The options map to use for formatting with the default code formatter. 
-	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        The options map to use for formatting with the default code formatter.
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>.
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
 	 * @return the formatted source string
 	 */
@@ -195,28 +195,28 @@ public class CodeFormatterUtil {
 	}
 
 	/**
-	 * Creates edits that describe how to format the given string. 
+	 * Creates edits that describe how to format the given string.
 	 * Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * 
+	 *
 	 * @param kind
-	 *        Use to specify the kind of the code snippet to format. 
+	 *        Use to specify the kind of the code snippet to format.
 	 *        It can be any of the kind constants defined in {@link CodeFormatter}
 	 * @param source
 	 *        The source to format
-	 * @param offset 
+	 * @param offset
 	 *        The given offset to start recording the edits (inclusive).
 	 * @param length the given length to stop recording the edits (exclusive).
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param options
-	 *        The options map to use for formatting with the default code formatter. 
-	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        The options map to use for formatting with the default code formatter.
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>.
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
-	 * @return an TextEdit describing the changes required to format source 
+	 * @return an TextEdit describing the changes required to format source
 	 * @throws IllegalArgumentException
 	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */
@@ -228,25 +228,25 @@ public class CodeFormatterUtil {
 	}
 
 	/**
-	 * Creates edits that describe how to format the given string. 
+	 * Creates edits that describe how to format the given string.
 	 * Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * 
+	 *
 	 * @param kind
-	 *        Use to specify the kind of the code snippet to format. 
+	 *        Use to specify the kind of the code snippet to format.
 	 *        It can be any of the kind constants defined in {@link CodeFormatter}
 	 * @param source
 	 *        The source to format
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param options
-	 *        The options map to use for formatting with the default code formatter. 
-	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        The options map to use for formatting with the default code formatter.
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>.
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
-	 * @return an TextEdit describing the changes required to format source 
+	 * @return an TextEdit describing the changes required to format source
 	 * @throws IllegalArgumentException
 	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */
@@ -255,29 +255,29 @@ public class CodeFormatterUtil {
 	}
 
 	/**
-	 * Creates edits that describe how to re-format the given string. 
+	 * Creates edits that describe how to re-format the given string.
 	 * This method should be used for formatting existing code.
 	 * Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * 
+	 *
 	 * @param kind
-	 *        Use to specify the kind of the code snippet to format. 
+	 *        Use to specify the kind of the code snippet to format.
 	 *        It can be any of the kind constants defined in {@link CodeFormatter}
 	 * @param source
 	 *        The source to format
-	 * @param offset 
+	 * @param offset
 	 *        The given offset to start recording the edits (inclusive).
 	 * @param length the given length to stop recording the edits (exclusive).
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param options
-	 *        The options map to use for formatting with the default code formatter. 
-	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        The options map to use for formatting with the default code formatter.
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>.
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
-	 * @return an TextEdit describing the changes required to format source 
+	 * @return an TextEdit describing the changes required to format source
 	 * @throws IllegalArgumentException
 	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */
@@ -289,14 +289,14 @@ public class CodeFormatterUtil {
 	}
 
 	/**
-	 * Creates edits that describe how to re-format the regions in the given string. 
+	 * Creates edits that describe how to re-format the regions in the given string.
 	 * This method should be used for formatting existing code.
 	 * Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * 
+	 *
 	 * <p>No region in <code>regions</code> must overlap with any other region in <code>regions</code>.
 	 * Each region must be within source. There must be at least one region. Regions must be sorted
 	 * by their offsets, smaller offset first.</p>
-	 * 
+	 *
 	 * @param kind
 	 *        Use to specify the kind of the code snippet to format.
 	 *        It can be any of K_EXPRESSION, K_STATEMENTS, K_CLASS_BODY_DECLARATIONS, K_COMPILATION_UNIT, K_UNKNOWN
@@ -305,16 +305,16 @@ public class CodeFormatterUtil {
 	 * @param regions
 	 *        a set of regions in the string to format
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param options
-	 *        The options map to use for formatting with the default code formatter. 
-	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        The options map to use for formatting with the default code formatter.
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>.
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
-	 * @return an TextEdit describing the changes required to format source 
+	 * @return an TextEdit describing the changes required to format source
 	 * @throws IllegalArgumentException if there is no region, a region overlaps with another region, or the regions are not
 	 *         sorted in the ascending order.
 	 * @since 3.4
@@ -324,26 +324,26 @@ public class CodeFormatterUtil {
 	}
 
 	/**
-	 * Creates edits that describe how to re-format the given string. 
+	 * Creates edits that describe how to re-format the given string.
 	 * This method should be used for formatting existing code.
 	 * Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * 
+	 *
 	 * @param kind
-	 *        Use to specify the kind of the code snippet to format. 
+	 *        Use to specify the kind of the code snippet to format.
 	 *        It can be any of the kind constants defined in {@link CodeFormatter}
 	 * @param source
 	 *        The source to format
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param options
-	 *        The options map to use for formatting with the default code formatter. 
-	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        The options map to use for formatting with the default code formatter.
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>.
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
-	 * @return an TextEdit describing the changes required to format source 
+	 * @return an TextEdit describing the changes required to format source
 	 * @throws IllegalArgumentException
 	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */
@@ -356,22 +356,22 @@ public class CodeFormatterUtil {
 	 * The given node is used to infer the kind to use to format the string.
 	 * Consider to use {@link #format2(int, String, int, String, Map)} if the kind is already known.
 	 * Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * 
+	 *
 	 * @param node
 	 *        Use to infer the kind of the code snippet to format.
 	 * @param source
 	 *        The source to format
 	 * @param indentationLevel
-	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        The initial indentation level, used to shift left/right the entire source fragment.
 	 *        An initial indentation level of zero or below has no effect.
 	 * @param lineSeparator
-	 *        The line separator to use in formatted source, 
+	 *        The line separator to use in formatted source,
 	 *        if set to <code>null</code>, then the platform default one will be used.
 	 * @param options
-	 *        The options map to use for formatting with the default code formatter. 
-	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        The options map to use for formatting with the default code formatter.
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>.
 	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
-	 * @return an TextEdit describing the changes required to format source 
+	 * @return an TextEdit describing the changes required to format source
 	 * @throws IllegalArgumentException
 	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */

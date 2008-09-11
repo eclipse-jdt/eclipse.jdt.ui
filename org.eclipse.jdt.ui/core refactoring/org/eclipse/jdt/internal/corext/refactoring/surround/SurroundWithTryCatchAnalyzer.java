@@ -26,7 +26,7 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 	public SurroundWithTryCatchAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection);
 	}
-	
+
 	public ITypeBinding[] getExceptions() {
 		return fExceptions;
 	}

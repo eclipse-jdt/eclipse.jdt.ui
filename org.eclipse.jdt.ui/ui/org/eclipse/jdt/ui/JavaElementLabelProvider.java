@@ -32,21 +32,21 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * <p>Since 3.4, this class also implements {@link org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider} for colored labels.</p>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaElementLabelProvider extends LabelProvider implements IStyledLabelProvider {
-	
+
 	/**
 	 * Flag (bit mask) indicating that methods labels include the method return type (appended).
 	 */
 	public final static int SHOW_RETURN_TYPE=				0x001;
-	
+
 	/**
 	 * Flag (bit mask) indicating that method label include parameter types.
 	 */
 	public final static int SHOW_PARAMETERS=				0x002;
-	
+
 	/**
 	 * Flag (bit mask) indicating that the label of a member should include the container.
 	 * For example, include the name of the type enclosing a field.
@@ -77,7 +77,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 * package fragment root (appended).
 	 */
 	public final static int SHOW_ROOT=					0x040;
-	
+
 	/**
 	 * Flag (bit mask) indicating that the label qualification of a type should
 	 * be shown after the name.
@@ -90,18 +90,18 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 * reserved for overlays.
 	 */
 	public final static int SHOW_SMALL_ICONS= 			0x100;
-	
+
 	/**
 	 * Flag (bit mask) indicating that the package fragment roots from class path variables should
 	 * be rendered with the variable in the name
 	 */
 	public final static int SHOW_VARIABLE= 			0x200;
-	
+
 	/**
 	 * Flag (bit mask) indicating that compilation units, class files, types, declarations and members
 	 * should be rendered qualified.
 	 * Examples: <code>java.lang.String</code>, <code>java.util.Vector.size()</code>
-	 * 
+	 *
 	 * @since 2.0
 	 */
 	public final static int SHOW_QUALIFIED=				0x400;
@@ -110,19 +110,19 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 * Flag (bit mask) indicating that compilation units, class files, types, declarations and members
 	 * should be rendered qualified.The qualification is appended.
 	 * Examples: <code>String - java.lang</code>, <code>size() - java.util.Vector</code>
-	 * 
+	 *
 	 * @since 2.0
 	 */
-	public final static int SHOW_POST_QUALIFIED=	0x800;	
-	
-	
+	public final static int SHOW_POST_QUALIFIED=	0x800;
+
+
 	/**
-	 * Constant (value <code>0</code>) indicating that the label should show 
+	 * Constant (value <code>0</code>) indicating that the label should show
 	 * the basic images only.
 	 */
 	public final static int SHOW_BASICS= 0x000;
-	
-	
+
+
 	/**
 	 * Constant indicating the default label rendering.
 	 * Currently the default is equivalent to
@@ -131,12 +131,12 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	public final static int SHOW_DEFAULT= new Integer(SHOW_PARAMETERS | SHOW_OVERLAY_ICONS).intValue();
 
 	private JavaElementImageProvider fImageLabelProvider;
-	
+
 	private StorageLabelProvider fStorageLabelProvider;
 	private int fFlags;
 	private int fImageFlags;
 	private long fTextFlags;
-	
+
 	/**
 	 * Creates a new label provider with <code>SHOW_DEFAULT</code> flag.
 	 *
@@ -157,13 +157,13 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		fStorageLabelProvider= new StorageLabelProvider();
 		fFlags= flags;
 		updateImageProviderFlags();
-		updateTextProviderFlags();		
+		updateTextProviderFlags();
 	}
-	
+
 	private boolean getFlag( int flag) {
 		return (fFlags & flag) != 0;
 	}
-	
+
 	/**
 	 * Turns on the rendering options specified in the given flags.
 	 *
@@ -174,7 +174,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		updateImageProviderFlags();
 		updateTextProviderFlags();
 	}
-	
+
 	/**
 	 * Turns off the rendering options specified in the given flags.
 	 *
@@ -185,7 +185,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		updateImageProviderFlags();
 		updateTextProviderFlags();
 	}
-	
+
 	private void updateImageProviderFlags() {
 		fImageFlags= 0;
 		if (getFlag(SHOW_OVERLAY_ICONS)) {
@@ -194,8 +194,8 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		if (getFlag(SHOW_SMALL_ICONS)) {
 			fImageFlags |= JavaElementImageProvider.SMALL_ICONS;
 		}
-	}	
-	
+	}
+
 	private void updateTextProviderFlags() {
 		fTextFlags= JavaElementLabels.T_TYPE_PARAMETERS;
 		if (getFlag(SHOW_RETURN_TYPE)) {
@@ -203,7 +203,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		}
 		if (getFlag(SHOW_PARAMETERS)) {
 			fTextFlags |= JavaElementLabels.M_PARAMETER_TYPES;
-		}		
+		}
 		if (getFlag(SHOW_CONTAINER)) {
 			fTextFlags |= JavaElementLabels.P_POST_QUALIFIED | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.TP_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 		}
@@ -217,18 +217,18 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		}
 		if (getFlag(SHOW_ROOT)) {
 			fTextFlags |= JavaElementLabels.APPEND_ROOT_PATH;
-		}			
+		}
 		if (getFlag(SHOW_VARIABLE)) {
 			fTextFlags |= JavaElementLabels.ROOT_VARIABLE;
 		}
 		if (getFlag(SHOW_QUALIFIED)) {
-			fTextFlags |= (JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED 
+			fTextFlags |= (JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED);
 		}
 		if (getFlag(SHOW_POST_QUALIFIED)) {
-			fTextFlags |= (JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED 
+			fTextFlags |= (JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED
 			| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.TP_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED);
-		}		
+		}
 	}
 
 	/* (non-Javadoc)
@@ -240,7 +240,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 			return result;
 		}
 
-		if (element instanceof IStorage) 
+		if (element instanceof IStorage)
 			return fStorageLabelProvider.getImage(element);
 
 		return result;
@@ -252,15 +252,15 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	public String getText(Object element) {
 		return JavaElementLabels.getTextLabel(element, fTextFlags);
 	}
-	
+
 	/**
 	 * Returns the styled text label for the given element
-	 * 
+	 *
 	 * @param element
 	 *            the element to evaluate the styled string for
-	 * 
+	 *
 	 * @return the styled string.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public StyledString getStyledText(Object element) {

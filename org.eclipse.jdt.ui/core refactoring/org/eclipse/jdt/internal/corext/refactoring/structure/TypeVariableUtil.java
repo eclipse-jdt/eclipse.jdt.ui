@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -36,7 +35,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns the composition of two type variable mappings. The type variables signatures can have an arbitrary format.
-	 * 
+	 *
 	 * @param first
 	 *        the first type variable mapping
 	 * @param second
@@ -71,7 +70,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Extracts the type variables from a signature
-	 * 
+	 *
 	 * @param signature
 	 *        the signature to extract the type variables from
 	 * @param variables
@@ -92,7 +91,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns the type variables referenced in the signature of the specified member.
-	 * 
+	 *
 	 * @param declaring
 	 *        The declaring type of the specified member
 	 * @param member
@@ -158,7 +157,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns all type variable names of the indicated member not mapped by the specified type variable mapping.
-	 * 
+	 *
 	 * @param mapping
 	 *        the type variable mapping. The entries of this mapping must be simple type variable names.
 	 * @param declaring
@@ -204,7 +203,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns the type variable signatures of the specified parameterized type signature, or an empty array if none.
-	 * 
+	 *
 	 * @param signature
 	 *        the signature to get its type variable signatures from. The signature must be a parameterized type signature.
 	 * @return a possibly empty array of type variable signatures
@@ -224,7 +223,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns the reversed type variable mapping of the specified mapping.
-	 * 
+	 *
 	 * @param mapping
 	 *        the mapping to inverse
 	 * @return the possibly empty inverse mapping
@@ -243,7 +242,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Creates a type variable mapping from a domain to a range.
-	 * 
+	 *
 	 * @param domain
 	 *        the domain of the mapping
 	 * @param range
@@ -283,7 +282,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Converts the specified type parameters to type variable names.
-	 * 
+	 *
 	 * @param parameters
 	 *        the type parameters to convert.
 	 * @return the converted type variable names
@@ -301,7 +300,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Creates a type variable mapping from a domain to a range.
-	 * 
+	 *
 	 * @param domain
 	 *        the domain of the mapping
 	 * @param range
@@ -328,7 +327,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns a type variable mapping from a subclass to a superclass.
-	 * 
+	 *
 	 * @param type
 	 *        the type representing the subclass class
 	 * @return a type variable mapping. The mapping entries consist of simple type variable names.
@@ -352,7 +351,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns a type variable mapping from a subclass to a superclass.
-	 * 
+	 *
 	 * @param subtype
 	 *        the type representing the subclass
 	 * @param supertype
@@ -382,7 +381,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns a type variable mapping from a superclass to a subclass.
-	 * 
+	 *
 	 * @param supertype
 	 *        the type representing the superclass
 	 * @param subtype
@@ -409,7 +408,7 @@ public final class TypeVariableUtil {
 
 	/**
 	 * Returns a type variable mapping from a superclass to a subclass.
-	 * 
+	 *
 	 * @param supertype
 	 *        the type representing the superclass
 	 * @param subtype

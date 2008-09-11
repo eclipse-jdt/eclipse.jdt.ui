@@ -385,7 +385,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			synchronized (fPositionLock) {
 				List oldPositions= fPositions;
 				int newSize= Math.max(fPositions.size() + addedPositions.length - removedPositions.length, 10);
-				
+
 				/*
 				 * The following loop is a kind of merge sort: it merges two List<Position>, each
 				 * sorted by position.offset, into one new list. The first of the two is the
@@ -398,7 +398,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 				Position addedPosition= null;
 				for (int i= 0, j= 0, n= oldPositions.size(), m= addedPositions.length; i < n || position != null || j < m || addedPosition != null;) {
 					// loop variant: i + j < old(i + j)
-					
+
 					// a) find the next non-deleted Position from the old list
 					while (position == null && i < n) {
 						position= (Position) oldPositions.get(i++);
@@ -407,13 +407,13 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 							position= null;
 						}
 					}
-					
+
 					// b) find the next Position from the added list
 					if (addedPosition == null && j < m) {
 						addedPosition= addedPositions[j++];
 						document.addPosition(positionCategory, addedPosition);
 					}
-					
+
 					// c) merge: add the next of position/addedPosition with the lower offset
 					if (position != null) {
 						if (addedPosition != null)
@@ -479,7 +479,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		int index= computeIndexAtOffset(positions, position.getOffset());
 		int size= positions.size();
 		while (index < size) {
-			if (positions.get(index) == position) 
+			if (positions.get(index) == position)
 				return index;
 			index++;
 		}

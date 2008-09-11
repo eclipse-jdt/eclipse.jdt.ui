@@ -59,18 +59,18 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * Note: This class is for internal use only. Clients should not use this class.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public abstract class FindAction extends SelectionDispatchAction {
 
 	// A dummy which can't be selected in the UI
 	private static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getWorkspace().getRoot());
-		
+
 	private Class[] fValidTypes;
-	private JavaEditor fEditor;	
+	private JavaEditor fEditor;
 
 
 	FindAction(IWorkbenchSite site) {
@@ -84,7 +84,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	/**
 	 * Called once by the constructors to initialize label, tooltip, image and help support of the action.
 	 * To be overridden by implementors of this action.
@@ -97,11 +97,11 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * @return the valid input types of the action
 	 */
 	abstract Class[] getValidTypes();
-	
+
 	private boolean canOperateOn(IStructuredSelection sel) {
 		return sel != null && !sel.isEmpty() && canOperateOn(getJavaElement(sel, true));
 	}
-		
+
 	boolean canOperateOn(IJavaElement element) {
 		if (element == null || fValidTypes == null || fValidTypes.length == 0 || !ActionUtil.isOnBuildPath(element))
 			return false;
@@ -116,7 +116,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 		return false;
 	}
-	
+
 	private boolean hasChildren(IPackageFragment packageFragment) {
 		try {
 			return packageFragment.hasChildren();
@@ -135,7 +135,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 			case IJavaElement.CLASS_FILE:
 				return ((IClassFile)o).getType();
 			default:
-				return o;				
+				return o;
 		}
 	}
 
@@ -143,33 +143,33 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (selection.size() == 1) {
 			Object firstElement= selection.getFirstElement();
 			IJavaElement elem= null;
-			if (firstElement instanceof IJavaElement) 
+			if (firstElement instanceof IJavaElement)
 				elem= (IJavaElement) firstElement;
-			else if (firstElement instanceof IAdaptable) 
+			else if (firstElement instanceof IAdaptable)
 				elem= (IJavaElement) ((IAdaptable) firstElement).getAdapter(IJavaElement.class);
 			if (elem != null) {
 				return getTypeIfPossible(elem, silent);
 			}
-			
+
 		}
 		return null;
 	}
 
 	private void showOperationUnavailableDialog() {
-		MessageDialog.openInformation(getShell(), SearchMessages.JavaElementAction_operationUnavailable_title, getOperationUnavailableMessage()); 
-	}	
+		MessageDialog.openInformation(getShell(), SearchMessages.JavaElementAction_operationUnavailable_title, getOperationUnavailableMessage());
+	}
 
 	String getOperationUnavailableMessage() {
-		return SearchMessages.JavaElementAction_operationUnavailable_generic; 
+		return SearchMessages.JavaElementAction_operationUnavailable_generic;
 	}
 
 	private IJavaElement findType(ICompilationUnit cu, boolean silent) {
 		IType[] types= null;
-		try {					
+		try {
 			types= cu.getAllTypes();
 		} catch (JavaModelException ex) {
 			if (JavaModelUtil.isExceptionToBeLogged(ex))
-				ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message); 
+				ExceptionHandler.log(ex, SearchMessages.JavaElementAction_error_open_message);
 			if (silent)
 				return RETURN_WITHOUT_BEEP;
 			else
@@ -181,22 +181,22 @@ public abstract class FindAction extends SelectionDispatchAction {
 			return RETURN_WITHOUT_BEEP;
 		if (types.length == 0)
 			return null;
-		String title= SearchMessages.JavaElementAction_typeSelectionDialog_title; 
-		String message = SearchMessages.JavaElementAction_typeSelectionDialog_message; 
-		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
+		String title= SearchMessages.JavaElementAction_typeSelectionDialog_title;
+		String message = SearchMessages.JavaElementAction_typeSelectionDialog_message;
+		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(flags));
 		dialog.setTitle(title);
 		dialog.setMessage(message);
 		dialog.setElements(types);
-		
+
 		if (dialog.open() == Window.OK)
 			return (IType)dialog.getFirstResult();
 		else
 			return RETURN_WITHOUT_BEEP;
 	}
 
-	/* 
+	/*
 	 * Method declared on SelectionChangedAction.
 	 */
 	public void run(IStructuredSelection selection) {
@@ -204,23 +204,23 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (element == null || !element.exists()) {
 			showOperationUnavailableDialog();
 			return;
-		} 
+		}
 		else if (element == RETURN_WITHOUT_BEEP)
 			return;
-		
+
 		run(element);
 	}
 
-	/* 
+	/*
 	 * Method declared on SelectionChangedAction.
 	 */
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
 			return;
 		try {
-			String title= SearchMessages.SearchElementSelectionDialog_title; 
-			String message= SearchMessages.SearchElementSelectionDialog_message; 
-			
+			String title= SearchMessages.SearchElementSelectionDialog_title;
+			String message= SearchMessages.SearchElementSelectionDialog_message;
+
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
 			if (elements.length > 0 && canOperateOn(elements[0])) {
 				IJavaElement element= elements[0];
@@ -232,22 +232,22 @@ public abstract class FindAction extends SelectionDispatchAction {
 			else
 				showOperationUnavailableDialog();
 		} catch (InvocationTargetException ex) {
-			String title= SearchMessages.Search_Error_search_title; 
-			String message= SearchMessages.Search_Error_codeResolve; 
+			String title= SearchMessages.Search_Error_search_title;
+			String message= SearchMessages.Search_Error_codeResolve;
 			ExceptionHandler.handle(ex, getShell(), title, message);
 		} catch (InterruptedException e) {
 			// ignore
 		}
 	}
 
-	/* 
+	/*
 	 * Method declared on SelectionChangedAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
 
-	/* 
+	/*
 	 * Method declared on SelectionChangedAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
@@ -258,15 +258,15 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * @param element The java element to be found.
 	 */
 	public void run(IJavaElement element) {
-		
+
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
-		
+
 		// will return true except for debugging purposes.
 		try {
 			performNewSearch(element);
 		} catch (JavaModelException ex) {
-			ExceptionHandler.handle(ex, getShell(), SearchMessages.Search_Error_search_notsuccessful_title, SearchMessages.Search_Error_search_notsuccessful_message); 
+			ExceptionHandler.handle(ex, getShell(), SearchMessages.Search_Error_search_notsuccessful_title, SearchMessages.Search_Error_search_notsuccessful_message);
 		} catch (InterruptedException e) {
 			// cancelled
 		}
@@ -292,16 +292,16 @@ public abstract class FindAction extends SelectionDispatchAction {
 			 */
 			IStatus status= SearchUtil.runQueryInForeground(progressService, query);
 			if (status.matches(IStatus.ERROR | IStatus.INFO | IStatus.WARNING)) {
-				ErrorDialog.openError(getShell(), SearchMessages.Search_Error_search_title, SearchMessages.Search_Error_search_message, status); 
+				ErrorDialog.openError(getShell(), SearchMessages.Search_Error_search_title, SearchMessages.Search_Error_search_message, status);
 			}
 		}
 	}
-	
+
 	/**
 	 * Creates a query for the given element. Subclasses reimplement this method.
-	 * 
+	 *
 	 * @param element the element to create a query for
-	 * 
+	 *
 	 * @return returns the query
 	 * @throws JavaModelException thrown when accessing the element failed
 	 * @throws InterruptedException thrown when the user interrupted the query selection
@@ -318,7 +318,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	IType getType(IJavaElement element) {
 		if (element == null)
 			return null;
-		
+
 		IType type= null;
 		if (element.getElementType() == IJavaElement.TYPE)
 			type= (IType)element;
@@ -329,9 +329,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 		return type;
 	}
-	
+
 	JavaEditor getEditor() {
 		return fEditor;
 	}
-		
+
 }

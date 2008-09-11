@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
@@ -99,15 +102,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
-
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 /**
  * Special flow analyzer to determine the return value of the extracted method
  * and the variables which have to be passed to the method.
- * 
+ *
  * Note: This analyzer doesn't do a full flow analysis. For example it doesn't
  * do dead code analysis or variable initialization analysis. It analyses the
  * the first access to a variable (read or write) and if all execution paths
@@ -130,7 +130,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			fInfos.add(info);
 		}
 		public IRegion[] getRanges() {
-			return (IRegion[]) fRanges.toArray(new IRegion[fRanges.size()]);	
+			return (IRegion[]) fRanges.toArray(new IRegion[fRanges.size()]);
 		}
 		public FlowInfo[] getInfos() {
 			return (FlowInfo[]) fInfos.toArray(new FlowInfo[fInfos.size()]);
@@ -150,61 +150,61 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	protected abstract boolean createReturnFlowInfo(ReturnStatement node);
 
 	protected abstract boolean traverseNode(ASTNode node);
-	
+
 	protected boolean skipNode(ASTNode node) {
 		return !traverseNode(node);
 	}
-	
+
 	protected final boolean visitNode(ASTNode node) {
 		return traverseNode(node);
 	}
-	
+
 	//---- Hooks to create Flow info objects. User may introduce their own infos.
-	
+
 	protected ReturnFlowInfo createReturn(ReturnStatement statement) {
 		return new ReturnFlowInfo(statement);
 	}
-	
+
 	protected ThrowFlowInfo createThrow() {
 		return new ThrowFlowInfo();
 	}
-	
+
 	protected BranchFlowInfo createBranch(SimpleName label) {
 		return new BranchFlowInfo(label, fFlowContext);
 	}
-	
+
 	protected GenericSequentialFlowInfo createSequential() {
 		return new GenericSequentialFlowInfo();
 	}
-	
+
 	protected ConditionalFlowInfo createConditional() {
 		return new ConditionalFlowInfo();
 	}
-	
+
 	protected EnhancedForFlowInfo createEnhancedFor() {
 		return new EnhancedForFlowInfo();
 	}
-	
+
 	protected ForFlowInfo createFor() {
 		return new ForFlowInfo();
 	}
-	
+
 	protected TryFlowInfo createTry() {
 		return new TryFlowInfo();
 	}
-	
+
 	protected WhileFlowInfo createWhile() {
 		return new WhileFlowInfo();
 	}
-	
+
 	protected IfFlowInfo createIf() {
 		return new IfFlowInfo();
 	}
-	
+
 	protected DoWhileFlowInfo createDoWhile() {
 		return new DoWhileFlowInfo();
 	}
-	
+
 	protected SwitchFlowInfo createSwitch() {
 		return new SwitchFlowInfo();
 	}
@@ -212,50 +212,50 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	protected BlockFlowInfo createBlock() {
 		return new BlockFlowInfo();
 	}
-	
+
 	protected MessageSendFlowInfo createMessageSendFlowInfo() {
 		return new MessageSendFlowInfo();
 	}
-	
+
 	protected FlowContext getFlowContext() {
 		return fFlowContext;
 	}
-	
+
 	//---- Helpers to access flow analysis objects ----------------------------------------
-	
+
 	protected FlowInfo getFlowInfo(ASTNode node) {
 		return (FlowInfo)fData.remove(node);
 	}
-	
+
 	protected void setFlowInfo(ASTNode node, FlowInfo info) {
-		fData.put(node, info);	
+		fData.put(node, info);
 	}
-	
+
 	protected FlowInfo assignFlowInfo(ASTNode target, ASTNode source) {
 		FlowInfo result= getFlowInfo(source);
 		setFlowInfo(target, result);
 		return result;
 	}
-	
+
 	protected FlowInfo accessFlowInfo(ASTNode node) {
 		return (FlowInfo)fData.get(node);
 	}
-	
+
 	//---- Helpers to process sequential flow infos -------------------------------------
-	
+
 	protected GenericSequentialFlowInfo processSequential(ASTNode parent, List nodes) {
 		GenericSequentialFlowInfo result= createSequential(parent);
 		process(result, nodes);
 		return result;
 	}
-	
+
 	protected GenericSequentialFlowInfo processSequential(ASTNode parent, ASTNode node1) {
 		GenericSequentialFlowInfo result= createSequential(parent);
 		if (node1 != null)
 			result.merge(getFlowInfo(node1), fFlowContext);
 		return result;
 	}
-	
+
 	protected GenericSequentialFlowInfo processSequential(ASTNode parent, ASTNode node1, ASTNode node2) {
 		GenericSequentialFlowInfo result= createSequential(parent);
 		if (node1 != null)
@@ -264,21 +264,21 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			result.merge(getFlowInfo(node2), fFlowContext);
 		return result;
 	}
-	
+
 	protected GenericSequentialFlowInfo createSequential(ASTNode parent) {
 		GenericSequentialFlowInfo result= createSequential();
 		setFlowInfo(parent, result);
 		return result;
 	}
-	
+
 	protected GenericSequentialFlowInfo createSequential(List nodes) {
 		GenericSequentialFlowInfo result= createSequential();
 		process(result, nodes);
-		return result;		
+		return result;
 	}
-	
+
 	//---- Generic merge methods --------------------------------------------------------
-	
+
 	protected void process(GenericSequentialFlowInfo info, List nodes) {
 		if (nodes == null)
 			return;
@@ -286,26 +286,26 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			info.merge(getFlowInfo((ASTNode)iter.next()), fFlowContext);
 		}
 	}
-	
+
 	protected void process(GenericSequentialFlowInfo info, ASTNode node) {
 		if (node != null)
 			info.merge(getFlowInfo(node), fFlowContext);
 	}
-	
+
 	protected void process(GenericSequentialFlowInfo info, ASTNode node1, ASTNode node2) {
 		if (node1 != null)
 			info.merge(getFlowInfo(node1), fFlowContext);
 		if (node2 != null)
 			info.merge(getFlowInfo(node2), fFlowContext);
 	}
-	
+
 	//---- special visit methods -------------------------------------------------------
-	
+
 	public boolean visit(EmptyStatement node) {
 		// Empty statements aren't of any interest.
 		return false;
 	}
-	
+
 	public boolean visit(TryStatement node) {
 		if (traverseNode(node)) {
 			fFlowContext.pushExcptions(node);
@@ -322,18 +322,18 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		}
 		return false;
 	}
-	
+
 	//---- Helper to process switch statement ----------------------------------------
-	
+
 	protected SwitchData createSwitchData(SwitchStatement node) {
 		SwitchData result= new SwitchData();
 		List statements= node.statements();
 		if (statements.isEmpty())
 			return result;
-			
+
 		int start= -1, end= -1;
 		GenericSequentialFlowInfo info= null;
-		
+
 		for (Iterator iter= statements.iterator(); iter.hasNext(); ) {
 			Statement statement= (Statement)iter.next();
 			if (statement instanceof SwitchCase) {
@@ -359,7 +359,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		result.add(new Region(start, end - start + 1), info);
 		return result;
 	}
-	
+
 	protected void endVisit(SwitchStatement node, SwitchData data) {
 		SwitchFlowInfo switchFlowInfo= createSwitch();
 		setFlowInfo(node, switchFlowInfo);
@@ -367,39 +367,39 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		FlowInfo[] cases= data.getInfos();
 		for (int i= 0; i < cases.length; i++)
 			switchFlowInfo.mergeCase(cases[i], fFlowContext);
-		switchFlowInfo.mergeDefault(data.hasDefaultCase(), fFlowContext);	
+		switchFlowInfo.mergeDefault(data.hasDefaultCase(), fFlowContext);
 		switchFlowInfo.removeLabel(null);
 	}
 
 	//---- concret endVisit methods ---------------------------------------------------
-	
+
 	public void endVisit(AnnotationTypeDeclaration node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.bodyDeclarations());
 		info.setNoReturn();
 	}
-	
+
 	public void endVisit(AnnotationTypeMemberDeclaration node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getType(), node.getDefault());
-		info.setNoReturn();		
+		info.setNoReturn();
 	}
-	
+
 	public void endVisit(AnonymousClassDeclaration node) {
 		if (skipNode(node))
 			return;
 		FlowInfo info= processSequential(node, node.bodyDeclarations());
 		info.setNoReturn();
 	}
-	
+
 	public void endVisit(ArrayAccess node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getArray(), node.getIndex());
 	}
-	
+
 	public void endVisit(ArrayCreation node) {
 		if (skipNode(node))
 			return;
@@ -407,19 +407,19 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		process(info, node.dimensions());
 		process(info, node.getInitializer());
 	}
-	
+
 	public void endVisit(ArrayInitializer node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.expressions());
 	}
-	
+
 	public void endVisit(ArrayType node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getElementType());
 	}
-	
+
 	public void endVisit(AssertStatement node) {
 		if (skipNode(node))
 			return;
@@ -428,7 +428,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
 		info.merge(getFlowInfo(node.getMessage()), null, fFlowContext);
 	}
-	
+
 	public void endVisit(Assignment node) {
 		if (skipNode(node))
 			return;
@@ -449,7 +449,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.merge(rhs, fFlowContext);
 		info.merge(lhs, fFlowContext);
 	}
-	
+
 	public void endVisit(Block node) {
 		if (skipNode(node))
 			return;
@@ -457,33 +457,33 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		setFlowInfo(node, info);
 		process(info, node.statements());
 	}
-	
+
 	public void endVisit(BooleanLiteral node) {
 		// Leaf node.
 	}
-	
+
 	public void endVisit(BreakStatement node) {
 		if (skipNode(node))
 			return;
 		setFlowInfo(node, createBranch(node.getLabel()));
 	}
-	
+
 	public void endVisit(CastExpression node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getType(), node.getExpression());
 	}
-	
+
 	public void endVisit(CatchClause node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getException(), node.getBody());
 	}
-	
+
 	public void endVisit(CharacterLiteral node) {
 		// Leaf node.
 	}
-	
+
 	public void endVisit(ClassInstanceCreation node) {
 		if (skipNode(node))
 			return;
@@ -492,14 +492,14 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		process(info, node.arguments());
 		process(info, node.getAnonymousClassDeclaration());
 	}
-	
+
 	public void endVisit(CompilationUnit node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.imports());
 		process(info, node.types());
 	}
-	
+
 	public void endVisit(ConditionalExpression node) {
 		if (skipNode(node))
 			return;
@@ -507,23 +507,23 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		setFlowInfo(node, info);
 		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
 		info.merge(
-			getFlowInfo(node.getThenExpression()), 
-			getFlowInfo(node.getElseExpression()), 
+			getFlowInfo(node.getThenExpression()),
+			getFlowInfo(node.getElseExpression()),
 			fFlowContext);
 	}
-	
+
 	public void endVisit(ConstructorInvocation node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.arguments());
 	}
-	
+
 	public void endVisit(ContinueStatement node) {
 		if (skipNode(node))
 			return;
 		setFlowInfo(node, createBranch(node.getLabel()));
 	}
-	
+
 	public void endVisit(DoStatement node) {
 		if (skipNode(node))
 			return;
@@ -533,11 +533,11 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
 		info.removeLabel(null);
 	}
-	
+
 	public void endVisit(EmptyStatement node) {
 		// Leaf node.
 	}
-	
+
 	public void endVisit(EnhancedForStatement node) {
 		if (skipNode(node))
 			return;
@@ -548,42 +548,42 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		forInfo.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
 		forInfo.removeLabel(null);
 	}
-	
+
 	public void endVisit(EnumConstantDeclaration node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.arguments());
 		process(info, node.getAnonymousClassDeclaration());
 	}
-	
+
 	public void endVisit(EnumDeclaration node) {
 		if (skipNode(node))
 			return;
-		GenericSequentialFlowInfo info= processSequential(node, node.superInterfaceTypes()); 
+		GenericSequentialFlowInfo info= processSequential(node, node.superInterfaceTypes());
 		process(info, node.enumConstants());
 		process(info, node.bodyDeclarations());
 		info.setNoReturn();
 	}
-	
+
 	public void endVisit(ExpressionStatement node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getExpression());
 	}
-	
+
 	public void endVisit(FieldAccess node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getExpression(), node.getName());
 	}
-	
+
 	public void endVisit(FieldDeclaration node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getType());
 		process(info, node.fragments());
 	}
-	
+
 	public void endVisit(ForStatement node) {
 		if (skipNode(node))
 			return;
@@ -596,7 +596,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		forInfo.mergeIncrement(createSequential(node.updaters()), fFlowContext);
 		forInfo.removeLabel(null);
 	}
-	
+
 	public void endVisit(IfStatement node) {
 		if (skipNode(node))
 			return;
@@ -605,36 +605,36 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
 		info.merge(getFlowInfo(node.getThenStatement()), getFlowInfo(node.getElseStatement()), fFlowContext);
 	}
-	
+
 	public void endVisit(ImportDeclaration node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getName());
 	}
-	
+
 	public void endVisit(InfixExpression node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getLeftOperand(), node.getRightOperand());
 		process(info, node.extendedOperands());
 	}
-	
+
 	public void endVisit(InstanceofExpression node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getLeftOperand(), node.getRightOperand());
 	}
-	
+
 	public void endVisit(Initializer node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getBody());
 	}
-	
+
 	public void endVisit(Javadoc node) {
 		// no influence on flow analysis
 	}
-	
+
 	public void endVisit(LabeledStatement node) {
 		if (skipNode(node))
 			return;
@@ -642,11 +642,11 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		if (info != null)
 			info.removeLabel(node.getLabel());
 	}
-	
+
 	public void endVisit(MarkerAnnotation node) {
 		// nothing to do for marker annotations;
 	}
-	
+
 	public void endVisit(MemberValuePair node) {
 		if (skipNode(node))
 			return;
@@ -661,9 +661,9 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		// first process value and then name.
 		info.merge(value, fFlowContext);
 		info.merge(name, fFlowContext);
-		
+
 	}
-	
+
 	public void endVisit(MethodDeclaration node) {
 		if (skipNode(node))
 			return;
@@ -672,49 +672,49 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		process(info, node.thrownExceptions());
 		process(info, node.getBody());
 	}
-	
+
 	public void endVisit(MethodInvocation node) {
 		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), getMethodBinding(node.getName()));
 	}
-	
+
 	public void endVisit(NormalAnnotation node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getTypeName());
 		process(info, node.values());
 	}
-	
+
 	public void endVisit(NullLiteral node) {
 		// Leaf node.
 	}
-	
+
 	public void endVisit(NumberLiteral node) {
 		// Leaf node.
 	}
-	
+
 	public void endVisit(PackageDeclaration node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getName());
 	}
-	
+
 	public void endVisit(ParameterizedType node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getType());
 		process(info, node.typeArguments());
 	}
-	
+
 	public void endVisit(ParenthesizedExpression node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getExpression());
 	}
-	
+
 	public void endVisit(PostfixExpression node) {
 		endVisitIncDecOperation(node, node.getOperand());
 	}
-	
+
 	public void endVisit(PrefixExpression node) {
 		PrefixExpression.Operator op= node.getOperator();
 		if (PrefixExpression.Operator.INCREMENT.equals(op) || PrefixExpression.Operator.DECREMENT.equals(op)) {
@@ -723,27 +723,27 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			assignFlowInfo(node, node.getOperand());
 		}
 	}
-	
+
 	public void endVisit(PrimitiveType node) {
 		// Leaf node
 	}
-	
+
 	public void endVisit(QualifiedName node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getQualifier(), node.getName());
 	}
-	
+
 	public void endVisit(QualifiedType node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getQualifier(), node.getName());
 	}
-	
+
 	public void endVisit(ReturnStatement node) {
 		if (skipNode(node))
 			return;
-			
+
 		if (createReturnFlowInfo(node)) {
 			ReturnFlowInfo info= createReturn(node);
 			setFlowInfo(node, info);
@@ -752,7 +752,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			assignFlowInfo(node, node.getExpression());
 		}
 	}
-	
+
 	public void endVisit(SimpleName node) {
 		if (skipNode(node) || node.isDeclaration())
 			return;
@@ -772,23 +772,23 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			}
 		}
 	}
-	
+
 	public void endVisit(SimpleType node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getName());
 	}
-	
+
 	public void endVisit(SingleMemberAnnotation node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getValue());
 	}
-	
+
 	public void endVisit(SingleVariableDeclaration node) {
 		if (skipNode(node))
 			return;
-			
+
 		IVariableBinding binding= node.resolveBinding();
 		LocalFlowInfo nameInfo= null;
 		Expression initializer= node.getInitializer();
@@ -798,48 +798,48 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		GenericSequentialFlowInfo info= processSequential(node, node.getType(), initializer);
 		info.merge(nameInfo, fFlowContext);
 	}
-	
+
 	public void endVisit(StringLiteral node) {
 		// Leaf node
 	}
-	
+
 	public void endVisit(SuperConstructorInvocation node) {
 		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), node.resolveConstructorBinding());
 	}
-	
+
 	public void endVisit(SuperFieldAccess node) {
 		if (skipNode(node))
 			return;
 		processSequential(node, node.getQualifier(), node.getName());
 	}
-	
+
 	public void endVisit(SuperMethodInvocation node) {
 		endVisitMethodInvocation(node, node.getQualifier(), node.arguments(), getMethodBinding(node.getName()));
 	}
-	
+
 	public void endVisit(SwitchCase node) {
 		endVisitNode(node);
 	}
-	
+
 	public void endVisit(SwitchStatement node) {
 		if (skipNode(node))
 			return;
 		endVisit(node, createSwitchData(node));
 	}
-	
+
 	public void endVisit(SynchronizedStatement node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getExpression());
 		process(info, node.getBody());
 	}
-	
+
 	public void endVisit(ThisExpression node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getQualifier());
 	}
-	
+
 	public void endVisit(ThrowStatement node) {
 		if (skipNode(node))
 			return;
@@ -849,7 +849,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.merge(getFlowInfo(expression), fFlowContext);
 		info.mergeException(expression.resolveTypeBinding(), fFlowContext);
 	}
-	
+
 	public void endVisit(TryStatement node) {
 		if (skipNode(node))
 			return;
@@ -863,7 +863,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		}
 		info.mergeFinally(getFlowInfo(node.getFinally()), fFlowContext);
 	}
-	
+
 	// TODO account for enums and annotations
 
 	public void endVisit(TypeDeclaration node) {
@@ -874,44 +874,44 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		process(info, node.bodyDeclarations());
 		info.setNoReturn();
 	}
-	
+
 	public void endVisit(TypeDeclarationStatement node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getDeclaration());
 	}
-	
+
 	public void endVisit(TypeLiteral node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getType());
 	}
-	
+
 	public void endVisit(TypeParameter node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getName());
 		process(info, node.typeBounds());
 	}
-	
+
 	public void endVisit(VariableDeclarationExpression node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getType());
 		process(info, node.fragments());
 	}
-	
+
 	public void endVisit(VariableDeclarationStatement node) {
 		if (skipNode(node))
 			return;
 		GenericSequentialFlowInfo info= processSequential(node, node.getType());
 		process(info, node.fragments());
 	}
-	
+
 	public void endVisit(VariableDeclarationFragment node) {
 		if (skipNode(node))
 			return;
-			
+
 		IVariableBinding binding= node.resolveBinding();
 		LocalFlowInfo nameInfo= null;
 		Expression initializer= node.getInitializer();
@@ -921,7 +921,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		GenericSequentialFlowInfo info= processSequential(node, initializer);
 		info.merge(nameInfo, fFlowContext);
 	}
-	
+
 	public void endVisit(WhileStatement node) {
 		if (skipNode(node))
 			return;
@@ -931,13 +931,13 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
 		info.removeLabel(null);
 	}
-	
+
 	public void endVisit(WildcardType node) {
 		if (skipNode(node))
 			return;
 		assignFlowInfo(node, node.getBound());
 	}
-	
+
 	private void endVisitMethodInvocation(ASTNode node, ASTNode receiver, List arguments, IMethodBinding binding) {
 		if (skipNode(node))
 			return;
@@ -950,7 +950,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.mergeReceiver(getFlowInfo(receiver), fFlowContext);
 		info.mergeExceptions(binding, fFlowContext);
 	}
-	
+
 	private void endVisitIncDecOperation(Expression node, Expression operand) {
 		if (skipNode(node))
 			return;
@@ -962,13 +962,13 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			GenericSequentialFlowInfo result= createSequential(node);
 			result.merge(info, fFlowContext);
 			result.merge(
-				new LocalFlowInfo((LocalFlowInfo)info, FlowInfo.WRITE, fFlowContext), 
+				new LocalFlowInfo((LocalFlowInfo)info, FlowInfo.WRITE, fFlowContext),
 				fFlowContext);
 		} else {
 			setFlowInfo(node, info);
 		}
 	}
-	
+
 	private IMethodBinding getMethodBinding(Name name) {
 		if (name == null)
 			return null;
@@ -976,5 +976,5 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		if (binding instanceof IMethodBinding)
 			return (IMethodBinding)binding;
 		return null;
-	}		
+	}
 }

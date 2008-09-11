@@ -14,6 +14,10 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
+
 import org.eclipse.text.tests.Accessor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -26,10 +30,6 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -41,23 +41,23 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 
 public class AbstractSemanticHighlightingTest extends TestCase {
-	
+
 	protected static class SemanticHighlightingTestSetup extends TestSetup {
 
 		private IJavaProject fJavaProject;
 		private final String fTestFilename;
-		
+
 		public SemanticHighlightingTestSetup(Test test, String testFilename) {
 			super(test);
 			fTestFilename= testFilename;
 		}
-		
+
 		protected void setUp() throws Exception {
 			super.setUp();
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
-			
+
 			disableAllSemanticHighlightings();
-			
+
 			fEditor= (JavaEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(fTestFilename), true);
 			fSourceViewer= EditorTestHelper.getSourceViewer(fEditor);
 			assertTrue(EditorTestHelper.joinReconciler(fSourceViewer, 0, 10000, 100));
@@ -71,9 +71,9 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 			EditorTestHelper.closeEditor(fEditor);
 			fEditor= null;
 			fSourceViewer= null;
-			
+
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			
+
 			SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 			for (int i= 0, n= semanticHighlightings.length; i < n; i++) {
 				String enabledPreferenceKey= SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i]);
@@ -83,24 +83,24 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 
 			if (fJavaProject != null)
 				JavaProjectHelper.delete(fJavaProject);
-			
+
 			super.tearDown();
 		}
 	}
-	
+
 	public static final String LINKED_FOLDER= "testResources/semanticHighlightingTest1";
-	
+
 	public static final String PROJECT= "SHTest";
-	
+
 	private static JavaEditor fEditor;
-	
+
 	private static SourceViewer fSourceViewer;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		disableAllSemanticHighlightings();
 	}
-	
+
 	protected void assertEqualPositions(Position[] expected, Position[] actual) {
 		assertEquals(expected.length, actual.length);
 		for (int i= 0, n= expected.length; i < n; i++) {
@@ -152,7 +152,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 	private String getEnabledPreferenceKey(String preferenceKey) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + preferenceKey + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
 	}
-	
+
 	private static void disableAllSemanticHighlightings() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		SemanticHighlighting[] semanticHilightings= SemanticHighlightings.getSemanticHighlightings();

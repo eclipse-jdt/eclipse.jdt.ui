@@ -12,16 +12,16 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.Iterator;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -39,6 +39,7 @@ import org.eclipse.jface.text.link.ProposalPosition;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
@@ -55,10 +56,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * Does the setup of the linked mode from a {@link LinkedProposalModel}
  */
 public class LinkedProposalModelPresenter {
-	
+
 	public LinkedProposalModelPresenter() {
 	}
-	
+
 	public void enterLinkedMode(ITextViewer viewer, IEditorPart editor, LinkedProposalModel linkedProposalModel) throws BadLocationException {
 		IDocument document= viewer.getDocument();
 
@@ -229,7 +230,7 @@ public class LinkedProposalModelPresenter {
 			return false;
 		}
 	}
-	
+
 	private static class LinkedModeExitPolicy implements LinkedModeUI.IExitPolicy {
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 			if (event.character  == '=') {

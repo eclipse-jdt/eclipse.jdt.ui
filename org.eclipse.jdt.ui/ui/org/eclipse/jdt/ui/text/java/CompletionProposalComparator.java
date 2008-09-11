@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
  * <p>
  * Note: this comparator imposes orderings that are inconsistent with equals.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public final class CompletionProposalComparator implements Comparator {

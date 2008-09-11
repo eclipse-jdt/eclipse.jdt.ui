@@ -12,33 +12,33 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jdt.core.ISourceRange;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
+import org.eclipse.jdt.core.ISourceRange;
+
 /**
- * A Java string context can be used to annotate a </code>RefactoringStatusEntry<code> 
+ * A Java string context can be used to annotate a </code>RefactoringStatusEntry<code>
  * with detailed information about an error detected in Java source code represented
  * by a string.
  */
 public class JavaStringStatusContext extends RefactoringStatusContext {
-	
+
 	private String fSource;
 	private ISourceRange fSourceRange;
 
 	/**
 	 * Creates a new <code>JavaStringStatusContext</code>.
-	 * 
+	 *
 	 * @param source the source code containing the error
 	 * @param range a source range inside <code>source</code> or
 	 *  <code>null</code> if no special source range is known.
-	 */	
+	 */
 	public JavaStringStatusContext(String source, ISourceRange range){
 		Assert.isNotNull(source);
 		fSource= source;
 		fSourceRange= range;
 	}
-	
+
 	public String getSource() {
 		return fSource;
 	}
@@ -46,7 +46,7 @@ public class JavaStringStatusContext extends RefactoringStatusContext {
 	public ISourceRange getSourceRange() {
 		return fSourceRange;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see RefactoringStatusContext#getCorrespondingElement()
 	 */

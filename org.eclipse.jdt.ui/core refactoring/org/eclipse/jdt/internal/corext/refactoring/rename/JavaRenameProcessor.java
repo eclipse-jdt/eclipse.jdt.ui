@@ -31,14 +31,14 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public abstract class JavaRenameProcessor extends RenameProcessor implements INameUpdating {
-	
+
 	private String fNewElementName;
 	private RenameModifications fRenameModifications;
-	
+
 	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
 		return getRenameModifications().loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
-	
+
 	public final RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
@@ -54,17 +54,17 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 		renameModifications.buildValidateEdits((ValidateEditChecker)context.getChecker(ValidateEditChecker.class));
 		return result;
 	}
-	
+
 	private RenameModifications getRenameModifications() throws CoreException {
 		if (fRenameModifications == null)
 			fRenameModifications= computeRenameModifications();
 		return fRenameModifications;
 	}
-	
+
 	protected abstract RenameModifications computeRenameModifications() throws CoreException;
-	
+
 	protected abstract RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException;
-	
+
 	protected abstract IFile[] getChangedFiles() throws CoreException;
 
 	protected abstract String[] getAffectedProjectNatures() throws CoreException;
@@ -77,10 +77,10 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	public String getNewElementName() {
 		return fNewElementName;
 	}
-	
+
 	/**
 	 * @return a save mode from {@link RefactoringSaveHelper}
-	 * 
+	 *
 	 * @see RefactoringSaveHelper
 	 */
 	public abstract int getSaveMode();

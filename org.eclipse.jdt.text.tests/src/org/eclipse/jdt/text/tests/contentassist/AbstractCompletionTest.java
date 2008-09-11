@@ -74,7 +74,7 @@ public class AbstractCompletionTest extends TestCase {
 	private String fLocals;
 	private char fTrigger;
 	private boolean fWaitBeforeCompleting;
-	
+
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
 		configureCoreOptions(options);
@@ -92,7 +92,7 @@ public class AbstractCompletionTest extends TestCase {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, "/**\n * Constructor.\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, "/**\n * Method.\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "//TODO\n${body_statement}", null);
-		
+
 		fBeforeImports= "";
 		fAfterImports= "";
 		fMembers= "";
@@ -108,13 +108,13 @@ public class AbstractCompletionTest extends TestCase {
 		options.put(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.DISABLED);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 	}
-	
+
 	protected void setCoreOption(String key, String value) {
 		Hashtable options= JavaCore.getOptions();
 		options.put(key, value);
 		JavaCore.setOptions(options);
 	}
-	
+
 	protected void waitBeforeCompleting(boolean wait) {
 		fWaitBeforeCompleting= wait;
 	}
@@ -142,10 +142,10 @@ public class AbstractCompletionTest extends TestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_AUTOINSERT);
 		fCU= null;
 		fEditor= null;
-		
+
 		JavaProjectHelper.emptyDisplayLoop();
 	}
-	
+
 	protected void addImport(String imp) {
 		imp= normalizeImport(imp);
 		if (fBeforeImports.length() == 0)
@@ -161,7 +161,7 @@ public class AbstractCompletionTest extends TestCase {
 		else
 			fAfterImports += imp + "\n";
 	}
-	
+
 	private String normalizeImport(String imp) {
 		if (!imp.startsWith("import "))
 			imp= "import " + imp;
@@ -169,15 +169,15 @@ public class AbstractCompletionTest extends TestCase {
 			imp+= ";";
 		return imp;
 	}
-	
+
 	protected void addMembers(String member) {
 		fMembers += "\n	" + member + "\n";
 	}
-	
+
 	protected void addLocalVariables(String variable) {
 		fLocals += "\n		" + variable + "\n";
 	}
-	
+
 	protected void setTrigger(char trigger) {
 		fTrigger= trigger;
 	}
@@ -186,7 +186,7 @@ public class AbstractCompletionTest extends TestCase {
 	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
 	 * the first proposal whose display name matches <code>selector</code> and asserts that the
 	 * method's body now has the content of <code>expected</code>.
-	 * 
+	 *
 	 * @param before the contents of the javadoc line before code completion is run
 	 * @param expected the expected contents of the type javadoc line
 	 * @param selector the prefix to match a proposal with
@@ -204,7 +204,7 @@ public class AbstractCompletionTest extends TestCase {
 	/**
 	 * Creates a CU with a method containing <code>before</code>, then runs incremental code assist
 	 * and asserts that the method's body now has the content of <code>expected</code>.
-	 * 
+	 *
 	 * @param expected the expected contents of the type javadoc line
 	 * @param before the contents of the javadoc line before code completion is run
 	 * @throws CoreException if a failure happened during assertion
@@ -214,7 +214,7 @@ public class AbstractCompletionTest extends TestCase {
 		IRegion preSelection= assembleMethodBodyTestCUExtractSelection(contents, before, fBeforeImports);
 		StringBuffer result= new StringBuffer();
 		IRegion expectedSelection= assembleMethodBodyTestCUExtractSelection(result, expected, fAfterImports);
-		
+
 		assertIncrementalCompletion(contents, preSelection, result, expectedSelection);
 	}
 
@@ -222,7 +222,7 @@ public class AbstractCompletionTest extends TestCase {
 	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
 	 * the first proposal whose display name matches <code>selector</code> and asserts that the
 	 * method's body now has the content of <code>expected</code>.
-	 * 
+	 *
 	 * @param before the contents of the javadoc line before code completion is run
 	 * @param expected the expected contents of the type javadoc line
 	 * @param selector the prefix to match a proposal with
@@ -233,7 +233,7 @@ public class AbstractCompletionTest extends TestCase {
 		IRegion preSelection= assembleMethodJavadocTestCUExtractSelection(contents, before);
 		StringBuffer result= new StringBuffer();
 		IRegion expectedSelection= assembleMethodJavadocTestCUExtractSelection(result, expected);
-		
+
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
 
@@ -241,7 +241,7 @@ public class AbstractCompletionTest extends TestCase {
 	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
 	 * the first proposal whose display name matches <code>selector</code> and asserts that the
 	 * method's body now has the content of <code>expected</code>.
-	 * 
+	 *
 	 * @param before the contents of the javadoc line before code completion is run
 	 * @param expected the expected contents of the type javadoc line
 	 * @param selector the prefix to match a proposal with
@@ -252,7 +252,7 @@ public class AbstractCompletionTest extends TestCase {
 		IRegion preSelection= assembleClassBodyTestCUExtractSelection(contents, before, fBeforeImports);
 		StringBuffer result= new StringBuffer();
 		IRegion expectedSelection= assembleClassBodyTestCUExtractSelection(result, expected, fAfterImports);
-		
+
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
 
@@ -260,7 +260,7 @@ public class AbstractCompletionTest extends TestCase {
 	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
 	 * the first proposal whose display name matches <code>selector</code> and asserts that the
 	 * method's body now has the content of <code>expected</code>.
-	 * 
+	 *
 	 * @param expected the expected contents of the type javadoc line
 	 * @param before the contents of the line where before code completion is run
 	 * @param selector the prefix to match a proposal with
@@ -271,14 +271,14 @@ public class AbstractCompletionTest extends TestCase {
 		IRegion preSelection= assembleClassJavadocTestCUExtractSelection(contents, before, fBeforeImports);
 		StringBuffer result= new StringBuffer();
 		IRegion expectedSelection= assembleClassJavadocTestCUExtractSelection(result, expected, fAfterImports);
-		
+
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
 
 	/**
 	 * Creates a CU with a method containing <code>before</code>, then runs code assist and asserts
 	 * that there is no proposal starting with selector.
-	 * 
+	 *
 	 * @param before the contents of the javadoc line before code completion is run
 	 * @param selector the prefix to match a proposal with
 	 * @throws CoreException if a failure happened during assertion
@@ -308,7 +308,7 @@ public class AbstractCompletionTest extends TestCase {
 		assertEquals(expectedSelection.getOffset(), postSelection.getOffset());
 		assertEquals(expectedSelection.getLength(), postSelection.getLength());
 	}
-	
+
 	private void assertIncrementalCompletion(StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
 		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
@@ -321,12 +321,12 @@ public class AbstractCompletionTest extends TestCase {
 		} finally {
 			EditorTestHelper.closeEditor(fEditor);
 		}
-		
+
 		assertEquals(result.toString(), doc.get());
 		assertEquals(expectedSelection.getOffset(), postSelection.getOffset());
 		assertEquals(expectedSelection.getLength(), postSelection.getLength());
 	}
-	
+
 	private void assertNoProposal(String selector, StringBuffer contents, IRegion preSelection) throws CoreException {
 		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
@@ -336,7 +336,7 @@ public class AbstractCompletionTest extends TestCase {
 			EditorTestHelper.closeEditor(fEditor);
 		}
 	}
-	
+
 	private IRegion assembleMethodBodyTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
 		String prefix= "package test1;\n" +
 				imports +
@@ -366,7 +366,7 @@ public class AbstractCompletionTest extends TestCase {
 		buffer.append(prefix + lineBuffer + postfix);
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
 	}
-	
+
 	private IRegion assembleClassBodyTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
 		String prefix= "package test1;\n" +
 		imports +
@@ -395,7 +395,7 @@ public class AbstractCompletionTest extends TestCase {
 		buffer.append(prefix + lineBuffer + postfix);
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
 	}
-	
+
 	private IRegion assembleClassJavadocTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
 		String prefix= "package test1;\n" +
 				imports +
@@ -424,7 +424,7 @@ public class AbstractCompletionTest extends TestCase {
 		buffer.append(prefix + lineBuffer + postfix);
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
 	}
-	
+
 	private IRegion assembleMethodJavadocTestCUExtractSelection(StringBuffer buffer, String javadocLine) {
 		String prefix= "package test1;\n" +
 				"\n" +
@@ -457,10 +457,10 @@ public class AbstractCompletionTest extends TestCase {
 		assertNotNull("no proposal starting with \"" + prefix + "\"", proposal);
 		return proposal;
 	}
-	
+
 	private ICompletionProposal findNamedProposal(String prefix, IRegion selection) {
 		ICompletionProposal[] proposals= collectProposals(selection);
-		
+
 		ICompletionProposal found= null;
 		for (int i= 0; i < proposals.length; i++) {
 			String displayString= proposals[i].getDisplayString();
@@ -501,7 +501,7 @@ public class AbstractCompletionTest extends TestCase {
 	 * Invokes {@link Thread#sleep(long)} if {@link #waitBeforeCompleting(boolean)} was set to
 	 * <code>true</code> or camel case completions are enabled. For some reasons, inner types and
 	 * camel case matches don't show up otherwise.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private void waitBeforeCoreCompletion() {

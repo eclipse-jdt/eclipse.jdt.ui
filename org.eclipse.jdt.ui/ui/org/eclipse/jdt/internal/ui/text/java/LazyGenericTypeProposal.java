@@ -15,14 +15,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -38,6 +38,7 @@ import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
@@ -81,7 +82,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		private final String fContextDisplayString;
 		private final Image fImage;
 		private final int fPosition;
-		
+
 		ContextInformation(LazyGenericTypeProposal proposal) {
 			// don't cache the proposal as content assistant
 			// might hang on to the context info
@@ -90,7 +91,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			fImage= proposal.getImage();
 			fPosition= proposal.getReplacementOffset() + proposal.getReplacementString().indexOf('<') + 1;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getContextDisplayString()
 		 */
@@ -117,7 +118,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 				TypeArgumentProposal[] proposals= proposal.computeTypeArgumentProposals();
 				if (proposals.length == 0)
 					return null;
-				
+
 				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < proposals.length; i++) {
 					buf.append(proposals[i].getDisplayName());
@@ -125,7 +126,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 						buf.append(", "); //$NON-NLS-1$
 				}
 				return buf.toString();
-				
+
 			} catch (JavaModelException e) {
 				return null;
 			}
@@ -137,7 +138,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		public int getContextInformationPosition() {
 			return fPosition;
 		}
-		
+
 		/*
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
@@ -235,7 +236,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		// - proposal type does not inherit from expected type
 		super.apply(document, trigger, offset);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#computeTriggerCharacters()
 	 */
@@ -284,36 +285,36 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	 */
 	private TypeArgumentProposal[] computeTypeArgumentProposals() throws JavaModelException {
 		if (fTypeArgumentProposals == null) {
-			
+
 			IType type= (IType) getJavaElement();
 			if (type == null)
 				return new TypeArgumentProposal[0];
-			
+
 			ITypeParameter[] parameters= type.getTypeParameters();
 			if (parameters.length == 0)
 				return new TypeArgumentProposal[0];
-			
+
 			TypeArgumentProposal[] arguments= new TypeArgumentProposal[parameters.length];
-			
+
 			ITypeBinding expectedTypeBinding= getExpectedType();
 			if (expectedTypeBinding != null && expectedTypeBinding.isParameterizedType()) {
 				// in this case, the type arguments we propose need to be compatible
 				// with the corresponding type parameters to declared type
-				
+
 				IType expectedType= (IType) expectedTypeBinding.getJavaElement();
-				
+
 				IType[] path= computeInheritancePath(type, expectedType);
 				if (path == null)
 					// proposed type does not inherit from expected type
 					// the user might be looking for an inner type of proposed type
 					// to instantiate -> do not add any type arguments
 					return new TypeArgumentProposal[0];
-				
+
 				int[] indices= new int[parameters.length];
 				for (int paramIdx= 0; paramIdx < parameters.length; paramIdx++) {
 					indices[paramIdx]= mapTypeParameterIndex(path, path.length - 1, paramIdx);
 				}
-				
+
 				// for type arguments that are mapped through to the expected type's
 				// parameters, take the arguments of the expected type
 				ITypeBinding[] typeArguments= expectedTypeBinding.getTypeArguments();
@@ -325,7 +326,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 					}
 				}
 			}
-			
+
 			// for type arguments that are not mapped through to the expected type,
 			// take the lower bound of the type parameter
 			for (int i= 0; i < arguments.length; i++) {
@@ -345,7 +346,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	 * <li>the type parameter name for all other (unbounded or more than one bound) type parameters</li>
 	 * </ul>
 	 * Type argument proposals for type parameters are always ambiguous.
-	 * 
+	 *
 	 * @param parameter the type parameter of the inserted type
 	 * @return a type argument proposal for <code>parameter</code>
 	 * @throws JavaModelException
@@ -385,7 +386,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	 * </ul>
 	 * </li>
 	 * </ul>
-	 * 
+	 *
 	 * @param binding the type argument binding in the expected type
 	 * @param parameter the type parameter of the inserted type
 	 * @return a type argument proposal for <code>binding</code>
@@ -402,7 +403,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 				// upper bound - the upper bound is the bound itself
 				return new TypeArgumentProposal(binding.getBound().getName(), true, contextName);
 			}
-			
+
 			// no or upper bound - use the type parameter of the inserted type, as it may be more
 			// restrictive (eg. List<?> list= new SerializableList<Serializable>())
 			return computeTypeProposal(parameter);
@@ -625,7 +626,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		 */
 		if (trigger != '\0' && trigger != '<' && trigger != '(')
 			return false;
-		
+
 		/* No argument list if the completion is empty (already within the argument list). */
 		char[] completion= fProposal.getCompletion();
 		if (completion.length == 0)
@@ -778,13 +779,13 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		}
 		return super.computeContextInformation();
 	}
-	
+
 	protected int computeCursorPosition() {
 		if (fSelectedRegion != null)
 			return fSelectedRegion.getOffset() - getReplacementOffset();
 		return super.computeCursorPosition();
 	}
-	
+
 	private boolean hasParameters() {
 		try {
 			IType type= (IType) getJavaElement();

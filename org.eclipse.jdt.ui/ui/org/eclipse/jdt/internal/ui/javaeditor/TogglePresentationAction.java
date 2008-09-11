@@ -21,6 +21,7 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 

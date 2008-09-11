@@ -19,12 +19,12 @@ import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -66,11 +66,11 @@ public class JarWriter4 extends JarWriter3 {
 
 		addEntry(newEntry, zipFile.getInputStream(zipEntry));
 	}
-	
+
 	public void write(File file, IPath destinationPath) throws CoreException {
 		try {
 			Assert.isLegal(!fJarPackage.areDirectoryEntriesIncluded());//Fat JAR writer does not include directory entries
-			
+
 			addFile(file, destinationPath);
 		} catch (IOException ex) {
 			// Ensure full path is visible
@@ -82,12 +82,12 @@ public class JarWriter4 extends JarWriter3 {
 			else
 				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(path, false));
 			throw JarPackagerUtil.createCoreException(message, ex);
-		}	
+		}
 	}
-	
+
 	private void addFile(File file, IPath path) throws IOException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
-		
+
 		if (fJarPackage.isCompressed())
 			newEntry.setMethod(ZipEntry.DEFLATED);
 			// Entry is filled automatically.

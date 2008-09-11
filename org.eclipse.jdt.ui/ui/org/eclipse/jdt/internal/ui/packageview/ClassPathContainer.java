@@ -24,9 +24,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.model.IWorkbenchAdapter;
-
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -54,22 +53,22 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 
 		private final ClassPathContainer fParent;
 		private final IJavaProject fProject;
-		
+
 		public RequiredProjectWrapper(ClassPathContainer parent, IJavaProject project) {
 			fParent= parent;
 			fProject= project;
 		}
-		
+
 		public IJavaProject getProject() {
-			return fProject; 
+			return fProject;
 		}
-		
+
 		public ClassPathContainer getParentClassPathContainer() {
-			return fParent; 
+			return fParent;
 		}
-		
+
 		public Object getAdapter(Class adapter) {
-			if (adapter == IWorkbenchAdapter.class) 
+			if (adapter == IWorkbenchAdapter.class)
 				return this;
 			return null;
 		}
@@ -106,9 +105,9 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 			ClassPathContainer other = (ClassPathContainer)obj;
 			if (getJavaProject().equals(other.getJavaProject()) &&
 				fClassPathEntry.equals(other.fClassPathEntry)) {
-				return true;	
+				return true;
 			}
-			
+
 		}
 		return false;
 	}
@@ -154,21 +153,21 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 	public String getLabel() {
 		if (fContainer != null)
 			return fContainer.getDescription();
-		
+
 		IPath path= fClassPathEntry.getPath();
 		String containerId= path.segment(0);
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerId);
 		if (initializer != null) {
 			String description= initializer.getDescription(path, getJavaProject());
-			return Messages.format(PackagesMessages.ClassPathContainer_unbound_label, description); 
+			return Messages.format(PackagesMessages.ClassPathContainer_unbound_label, description);
 		}
-		return Messages.format(PackagesMessages.ClassPathContainer_unknown_label, BasicElementLabels.getPathLabel(path, false)); 
+		return Messages.format(PackagesMessages.ClassPathContainer_unknown_label, BasicElementLabels.getPathLabel(path, false));
 	}
-	
+
 	public IClasspathEntry getClasspathEntry() {
 		return fClassPathEntry;
 	}
-	
+
 	static boolean contains(IJavaProject project, IClasspathEntry entry, IPackageFragmentRoot root) {
 		IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(entry);
 		for (int i= 0; i < roots.length; i++) {

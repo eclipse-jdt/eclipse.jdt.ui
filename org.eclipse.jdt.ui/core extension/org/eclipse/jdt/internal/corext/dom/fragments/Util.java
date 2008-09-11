@@ -22,9 +22,9 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 
 /**
  * This class houses a collection of static methods which do not refer to,
- * or otherwise depend on, other classes in this package.  Each 
+ * or otherwise depend on, other classes in this package.  Each
  * package-visible method is called by more than one other class in this
- * package.  Since they do not depend on other classes in this package, 
+ * package.  Since they do not depend on other classes in this package,
  * they could be moved to some less specialized package.
  */
 class Util {
@@ -35,9 +35,9 @@ class Util {
 		//TODO: skip leading comments. Consider that leading line comment must be followed by newline!
 		if(!isJustWhitespace(selection.getOffset(), nodes.getOffset(), buffer))
 			return true;
-		if(!isJustWhitespaceOrComment(nodes.getOffset() + nodes.getLength(), selection.getOffset() + selection.getLength(), buffer))				
+		if(!isJustWhitespaceOrComment(nodes.getOffset() + nodes.getLength(), selection.getOffset() + selection.getLength(), buffer))
 			return true;
-		return false;		
+		return false;
 	}
 	private static boolean isJustWhitespace(int start, int end, IBuffer buffer) {
 		if (start == end)

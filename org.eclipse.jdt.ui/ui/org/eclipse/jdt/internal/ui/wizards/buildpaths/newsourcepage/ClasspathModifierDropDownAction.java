@@ -25,34 +25,34 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 /**
  * Drop down action for toolbars containing <code>BuildpathModifierAction</code>s.
- * The drop down action manages a list of actions that are displayed when invoking 
- * the drop down. If there is at least one valid action, then the drop down action 
- * itself will also be valid and invoking run will delegate the call to the 
+ * The drop down action manages a list of actions that are displayed when invoking
+ * the drop down. If there is at least one valid action, then the drop down action
+ * itself will also be valid and invoking run will delegate the call to the
  * first valid action in the list.
  */
 public class ClasspathModifierDropDownAction extends BuildpathModifierAction implements IMenuCreator {
-    
+
 	/** The menu to be populated with items*/
     private Menu fMenu;
     private List fActions;
     //The action to execute on run iff enabled
 	private BuildpathModifierAction fFirstValidAction;
-    
+
     /**
-     * Create a drop down action using the same descriptors as the provided action, but it's on 
-     * tool tip text. The action will automatically be put in the list of actions that are 
+     * Create a drop down action using the same descriptors as the provided action, but it's on
+     * tool tip text. The action will automatically be put in the list of actions that are
      * managed by this drop down menu.
      */
     public ClasspathModifierDropDownAction() {
         super(null, null, BuildpathModifierAction.DROP_DOWN_ACTION, IAction.AS_DROP_DOWN_MENU);
-        
+
         fActions= new ArrayList();
         fFirstValidAction= null;
-        
+
         setText(""); //$NON-NLS-1$
         setToolTipText(""); //$NON-NLS-1$
     }
-    
+
 	/**
      * {@inheritDoc}
      */
@@ -65,7 +65,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
     		return ""; //$NON-NLS-1$
     	}
     }
-        
+
     /**
      * Runs the first action of the list of managed actions that is valid.
      */
@@ -90,30 +90,30 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
     public Menu getMenu(Menu parent) {
         return fMenu;
     }
-    
+
     /**
      * Add dynamically an action to the drop down menu.
-     * 
+     *
      * @param action the action to be added
      */
     public void addAction(BuildpathModifierAction action) {
         fActions.add(action);
         update();
     }
-    
+
     /**
      * Remove an action from the drop down menu
-     *  
+     *
      * @param action the action to be removed
      */
     public void removeAction(BuildpathModifierAction action) {
         fActions.remove(action);
         update();
     }
-    
+
     /**
      * Populate the menu with the given action item
-     *  
+     *
      * @param parent the menu to add an action for
      * @param action the action to be added
      */
@@ -121,10 +121,10 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
         ActionContributionItem item = new ActionContributionItem(action);
         item.fill(parent, -1);
     }
-    
+
     /**
      * Fill the menu with all actions
-     * 
+     *
      * @param menu the menu to be populated
      */
     private void createEntries(Menu menu) {
@@ -133,7 +133,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
             addActionToMenu(menu, action);
         }
     }
-    
+
     public void dispose() {
         if (fMenu != null) {
             fMenu.dispose();

@@ -58,7 +58,7 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 					return;
 				if (listener.isProblemsThresholdReached())
 					return;
-				
+
 				ITypedRegion partition= partitions[i];
 				if (IPropertiesFilePartitions.COMMENT.equals(partition.getType())) {
 					for (; i < partitions.length - 1; i++) {

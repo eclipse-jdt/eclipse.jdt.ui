@@ -56,7 +56,7 @@ public final class FatJarPackagerMessages extends NLS {
 	public static String FatJarPackageWizardPage_description;
 
 	public static String FatJarPackage_confirmCreate_title;
-	
+
 	public static String FatJarPackageAntScript_confirmCreate_message;
 	public static String FatJarPackageAntScript_error_couldNotGetXmlBuilder;
 	public static String FatJarPackageAntScript_error_couldNotTransformToXML;

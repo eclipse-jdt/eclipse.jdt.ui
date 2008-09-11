@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
 
 /**
  * Combined action and action delegate for the jar import action.
- * 
+ *
  * @since 3.2
  */
 public class JarImportWizardAction extends Action implements IObjectActionDelegate, ISelectionChangedListener {

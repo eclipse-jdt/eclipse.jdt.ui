@@ -90,6 +90,6 @@ public class JavaElementHyperlink implements IHyperlink {
 			return Messages.format(JavaEditorMessages.JavaElementHyperlink_hyperlinkText_qualified, new Object[] { elementLabel });
 		} else {
 			return JavaEditorMessages.JavaElementHyperlink_hyperlinkText;
-		}	
+		}
 	}
 }

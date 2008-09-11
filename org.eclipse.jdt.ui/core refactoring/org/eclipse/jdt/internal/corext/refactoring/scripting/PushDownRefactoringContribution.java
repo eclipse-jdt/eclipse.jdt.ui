@@ -28,11 +28,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
 
 /**
  * Refactoring contribution for the push down refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class PushDownRefactoringContribution extends JavaRefactoringContribution {
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -45,7 +45,7 @@ public final class PushDownRefactoringContribution extends JavaRefactoringContri
 	public RefactoringDescriptor createDescriptor() {
 		return new PushDownDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new PushDownDescriptor(project, description, comment, arguments, flags);
 	}

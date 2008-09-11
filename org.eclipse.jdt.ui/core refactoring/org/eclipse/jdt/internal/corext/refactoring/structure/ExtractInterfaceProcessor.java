@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,9 +28,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -147,7 +147,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Is the specified member extractable from the type?
-	 * 
+	 *
 	 * @param member
 	 *            the member to test
 	 * @return <code>true</code> if the member is extractable,
@@ -193,7 +193,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Creates a new extract interface processor.
-	 * 
+	 *
 	 * @param type
 	 *            the type where to extract the supertype, or <code>null</code>
 	 *            if invoked by scripting
@@ -210,7 +210,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Creates a new extract interface processor from refactoring arguments.
-	 * 
+	 *
 	 * @param arguments
 	 *            the refactoring arguments
 	 * @param status
@@ -278,7 +278,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Checks whether the supertype clashes with existing types.
-	 * 
+	 *
 	 * @return the status of the condition checking
 	 * @throws JavaModelException
 	 *             if an error occurs
@@ -299,7 +299,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Checks whether the type name is valid.
-	 * 
+	 *
 	 * @param name
 	 *            the name to check
 	 * @return the status of the condition checking
@@ -381,7 +381,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Creates the text change manager for this processor.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param status
@@ -441,7 +441,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Creates a target field declaration.
-	 * 
+	 *
 	 * @param sourceRewrite
 	 *            the source compilation unit rewrite
 	 * @param targetRewrite
@@ -524,7 +524,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Creates the method comment for the specified declaration.
-	 * 
+	 *
 	 * @param sourceRewrite
 	 *            the compilation unit rewrite
 	 * @param declaration
@@ -579,7 +579,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * Creates the method annotations and comments of the extracted methods in
 	 * the source type.
-	 * 
+	 *
 	 * @param sourceRewrite
 	 *            the source compilation unit rewrite
 	 * @param replacements
@@ -605,7 +605,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Creates a target method declaration.
-	 * 
+	 *
 	 * @param sourceRewrite
 	 *            the source compilation unit rewrite
 	 * @param targetRewrite
@@ -678,7 +678,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Creates the new signature of the source type.
-	 * 
+	 *
 	 * @param rewrite
 	 *            the source compilation unit rewrite
 	 * @param declaration
@@ -720,7 +720,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Should extracted methods be declared as abstract?
-	 * 
+	 *
 	 * @return <code>true</code> if the should be declared as abstract,
 	 *         <code>false</code> otherwise
 	 */
@@ -737,7 +737,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Returns the list of extractable members from the type.
-	 * 
+	 *
 	 * @return the list of extractable members
 	 * @throws JavaModelException
 	 *             if an error occurs
@@ -756,7 +756,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Returns the extracted fields from the compilation unit.
-	 * 
+	 *
 	 * @param unit
 	 *            the compilation unit
 	 * @return the extracted fields
@@ -778,7 +778,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Returns the extracted methods from the compilation unit.
-	 * 
+	 *
 	 * @param unit
 	 *            the compilation unit
 	 * @return the extracted methods
@@ -814,7 +814,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Should extracted methods be declared as public?
-	 * 
+	 *
 	 * @return <code>true</code> if the should be declared as public,
 	 *         <code>false</code> otherwise
 	 */
@@ -824,7 +824,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Returns the type where to extract an interface.
-	 * 
+	 *
 	 * @return the type where to extract an interface
 	 */
 	public final IType getType() {
@@ -833,7 +833,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Returns the new interface name.
-	 * 
+	 *
 	 * @return the new interface name
 	 */
 	public final String getTypeName() {
@@ -912,7 +912,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Should comments be generated?
-	 * 
+	 *
 	 * @return <code>true</code> if comments should be generated,
 	 *         <code>false</code> otherwise
 	 */
@@ -929,7 +929,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Normalizes the indentation of the specified text.
-	 * 
+	 *
 	 * @param code
 	 *            the text to normalize
 	 * @return the normalized text
@@ -1009,7 +1009,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrences by a
 	 * supertype.
-	 * 
+	 *
 	 * @param manager
 	 *            the text change manager
 	 * @param sourceRewrite
@@ -1121,7 +1121,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Determines whether extracted methods should be declared as abstract.
-	 * 
+	 *
 	 * @param declare
 	 *            <code>true</code> to declare them public, <code>false</code>
 	 *            otherwise
@@ -1132,7 +1132,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Determines whether comments should be generated.
-	 * 
+	 *
 	 * @param comments
 	 *            <code>true</code> to generate comments, <code>false</code>
 	 *            otherwise
@@ -1143,7 +1143,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Sets the members to be extracted.
-	 * 
+	 *
 	 * @param members
 	 *            the members to be extracted
 	 * @throws JavaModelException
@@ -1155,7 +1155,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Determines whether extracted methods should be declared as public.
-	 * 
+	 *
 	 * @param declare
 	 *            <code>true</code> to declare them public, <code>false</code>
 	 *            otherwise
@@ -1166,7 +1166,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Sets the new interface name.
-	 * 
+	 *
 	 * @param name
 	 *            the new interface name
 	 */

@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
-	
+
 	private List fCurrentExceptions;	// Elements in this list are of type TypeBinding
 	private Stack fTryStack;
 
@@ -39,11 +39,11 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	}
 
 	public abstract boolean visit(ThrowStatement node);
-	
+
 	public abstract boolean visit(MethodInvocation node);
-	
+
 	public abstract boolean visit(ClassInstanceCreation node);
-	
+
 	public boolean visit(TypeDeclaration node) {
 		// Don't dive into a local type.
 		if (node.isLocalTypeDeclaration())
@@ -64,19 +64,19 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 			return false;
 		return true;
 	}
-	
+
 	public boolean visit(AnonymousClassDeclaration node) {
 		// Don't dive into a local type.
 		return false;
 	}
-	
+
 	public boolean visit(TryStatement node) {
 		fCurrentExceptions= new ArrayList(1);
 		fTryStack.push(fCurrentExceptions);
-		
+
 		// visit try block
 		node.getBody().accept(this);
-		
+
 		// Remove those exceptions that get catch by following catch blocks
 		List catchClauses= node.catchClauses();
 		if (!catchClauses.isEmpty())
@@ -86,35 +86,35 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		for (Iterator iter= current.iterator(); iter.hasNext();) {
 			addException((ITypeBinding)iter.next());
 		}
-		
+
 		// visit catch and finally
 		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
 			((CatchClause)iter.next()).accept(this);
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
-			
-		// return false. We have visited the body by ourselves.	
+
+		// return false. We have visited the body by ourselves.
 		return false;
 	}
-	
+
 	protected void addExceptions(ITypeBinding[] exceptions) {
 		if(exceptions == null)
 			return;
 		for (int i= 0; i < exceptions.length;i++) {
 			addException(exceptions[i]);
-		}			
+		}
 	}
-	
+
 	protected void addException(ITypeBinding exception) {
 		if (!fCurrentExceptions.contains(exception))
 			fCurrentExceptions.add(exception);
 	}
-	
+
 	protected List getCurrentExceptions() {
 		return fCurrentExceptions;
 	}
-	
+
 	private void handleCatchArguments(List catchClauses) {
 		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
 			CatchClause clause= (CatchClause)iter.next();
@@ -128,13 +128,13 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 			}
 		}
 	}
-	
+
 	private boolean catches(ITypeBinding catchTypeBinding, ITypeBinding throwTypeBinding) {
 		while(throwTypeBinding != null) {
 			if (throwTypeBinding == catchTypeBinding)
 				return true;
-			throwTypeBinding= throwTypeBinding.getSuperclass();	
+			throwTypeBinding= throwTypeBinding.getSuperclass();
 		}
 		return false;
-	}	
+	}
 }

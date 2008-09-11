@@ -28,7 +28,7 @@ public final class JavaRefactoringArguments {
 
 	/**
 	 * Creates a new java refactoring arguments from arguments
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param arguments
@@ -41,7 +41,7 @@ public final class JavaRefactoringArguments {
 
 	/**
 	 * Returns the attribute with the specified name.
-	 * 
+	 *
 	 * @param name
 	 *            the name of the attribute
 	 * @return the attribute value, or <code>null</code>
@@ -49,10 +49,10 @@ public final class JavaRefactoringArguments {
 	public String getAttribute(final String name) {
 		return (String) fAttributes.get(name);
 	}
-	
+
 	/**
 	 * Returns the name of the project.
-	 * 
+	 *
 	 * @return the name of the project, or <code>null</code> for the workspace
 	 */
 	public String getProject() {

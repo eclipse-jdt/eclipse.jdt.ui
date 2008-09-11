@@ -28,7 +28,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 
 	/**
 	 * Creates a new covariant type constraint.
-	 * 
+	 *
 	 * @param descendant the descendant type
 	 * @param ancestor the ancestor type
 	 */
@@ -74,6 +74,6 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#toString()
 	 */
 	public final String toString() {
-		return fDescendant.toString() + " <<= " + fAncestor.toString(); //$NON-NLS-1$ 
+		return fDescendant.toString() + " <<= " + fAncestor.toString(); //$NON-NLS-1$
 	}
 }

@@ -33,7 +33,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 
 	protected JavadocWizardPage(String pageName) {
 		super(pageName);
-		setTitle(JavadocExportMessages.JavadocWizardPage_javadocwizardpage_description); 
+		setTitle(JavadocExportMessages.JavadocWizardPage_javadocwizardpage_description);
 	}
 
 	protected Button createButton(Composite composite, int style, String message, GridData gd) {
@@ -83,7 +83,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 		text.setLayoutData(gd);
 		return text;
 	}
-	
+
 	protected Combo createCombo(Composite composite, int style, String message, GridData gd) {
 		Combo combo= new Combo(composite, style);
 		SWTUtil.setDefaultVisibleItemCount(combo);

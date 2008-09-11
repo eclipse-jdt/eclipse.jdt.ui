@@ -30,28 +30,28 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  * Tab page for the comment formatter settings.
  */
 public class CommentsTabPage extends FormatterTabPage {
-	
+
 	/**
-	 * Constant array for boolean selection 
+	 * Constant array for boolean selection
 	 */
 	private static String[] FALSE_TRUE = {
 		DefaultCodeFormatterConstants.FALSE,
 		DefaultCodeFormatterConstants.TRUE
 	};
-	
+
     /**
-     * Constant array for insert / not_insert. 
+     * Constant array for insert / not_insert.
      */
     private static String[] DO_NOT_INSERT_INSERT = {
         JavaCore.DO_NOT_INSERT,
         JavaCore.INSERT
     };
-	
+
 	private static abstract class Controller implements Observer {
-		
+
 		private final Collection fMasters;
 		private final Collection fSlaves;
-		
+
 		public Controller(Collection masters, Collection slaves) {
 			fMasters= masters;
 			fSlaves= slaves;
@@ -59,10 +59,10 @@ public class CommentsTabPage extends FormatterTabPage {
 				((CheckboxPreference)iter.next()).addObserver(this);
 			}
 		}
-		
+
 		public void update(Observable o, Object arg) {
 			boolean enabled= areSlavesEnabled();
-			
+
 			for (final Iterator iter= fSlaves.iterator(); iter.hasNext();) {
 				final Object obj= iter.next();
 				if (obj instanceof Preference) {
@@ -72,25 +72,25 @@ public class CommentsTabPage extends FormatterTabPage {
 				}
 			}
 		}
-		
+
 		public Collection getMasters() {
 			return fMasters;
 		}
-		
+
 		public Collection getSlaves() {
 			return fSlaves;
 		}
-		
+
 		protected abstract boolean areSlavesEnabled();
 	}
-	
+
 	private final static class OrController extends Controller {
-		
+
 		public OrController(Collection masters, Collection slaves) {
 			super(masters, slaves);
 			update(null, null);
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -102,7 +102,7 @@ public class CommentsTabPage extends FormatterTabPage {
 			return false;
 		}
 	}
-	
+
 	private final String PREVIEW=
 		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possibilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
 		"package mypackage;\n" + //$NON-NLS-1$
@@ -134,7 +134,7 @@ public class CommentsTabPage extends FormatterTabPage {
 		" int foo2();" + //$NON-NLS-1$
 		" /**\n" + //$NON-NLS-1$
 		" * The following is some sample code which illustrates source formatting within javadoc comments:\n" + //$NON-NLS-1$
-		" * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>\n" + //$NON-NLS-1$ 
+		" * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>\n" + //$NON-NLS-1$
 		" * Descriptions of parameters and return values are best appended at end of the javadoc comment.\n" + //$NON-NLS-1$
 		" * @param a The first parameter. For an optimum result, this should be an odd number\n" + //$NON-NLS-1$
 		" * between 0 and 100.\n" + //$NON-NLS-1$
@@ -143,7 +143,7 @@ public class CommentsTabPage extends FormatterTabPage {
 		" */" + //$NON-NLS-1$
 		" int foo(int a, int b);\n" + //$NON-NLS-1$
 		"}"; //$NON-NLS-1$
-	
+
 	private CompilationUnitPreview fPreview;
 
 	public CommentsTabPage(ModifyDialog modifyDialog, Map workingValues) {
@@ -151,38 +151,38 @@ public class CommentsTabPage extends FormatterTabPage {
 	}
 
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-	    
+
 		// global group
-		final Group globalGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group1_title); 
-		final CheckboxPreference javadoc= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.commentsTabPage_enable_javadoc_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT); 
+		final Group globalGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group1_title);
+		final CheckboxPreference javadoc= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.commentsTabPage_enable_javadoc_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
 		final CheckboxPreference blockComment= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_block_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
-		final CheckboxPreference singleLineComments= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_line_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT); 
+		final CheckboxPreference singleLineComments= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_line_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT);
 		final CheckboxPreference header= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 		createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_block_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN);
 		createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_line_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN);
 
 		// javadoc comment formatting settings
-		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group2_title); 
-		final CheckboxPreference html= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML); 
-		final CheckboxPreference code= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE); 
-		final CheckboxPreference blankJavadoc= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_blank_line_before_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
-		final CheckboxPreference indentJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_indent_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS); 
-		final CheckboxPreference indentDesc= createCheckboxPref(settingsGroup, numColumns , FormatterMessages.CommentsTabPage_indent_description_after_param, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, FALSE_TRUE); 
+		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group2_title);
+		final CheckboxPreference html= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML);
+		final CheckboxPreference code= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE);
+		final CheckboxPreference blankJavadoc= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_blank_line_before_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS);
+		final CheckboxPreference indentJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_indent_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS);
+		final CheckboxPreference indentDesc= createCheckboxPref(settingsGroup, numColumns , FormatterMessages.CommentsTabPage_indent_description_after_param, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, FALSE_TRUE);
 		((GridData)indentDesc.getControl().getLayoutData()).horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(4);
-		final CheckboxPreference nlParam= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_new_line_after_param_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
-		final CheckboxPreference blankLinesJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_clear_blank_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT); 
-		
+		final CheckboxPreference nlParam= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_new_line_after_param_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER);
+		final CheckboxPreference blankLinesJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_clear_blank_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT);
+
 		// block comment settings
 		final Group blockSettingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group4_title);
 		final CheckboxPreference blankLinesBlock= createPrefTrueFalse(blockSettingsGroup, numColumns, FormatterMessages.CommentsTabPage_remove_blank_block_comment_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT);
-		
-		final Group widthGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group3_title); 
-		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.CommentsTabPage_line_width, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 0, 9999); 
+
+		final Group widthGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group3_title);
+		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.CommentsTabPage_line_width, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 0, 9999);
 
 		ArrayList javaDocMaster= new ArrayList();
 		javaDocMaster.add(javadoc);
 		javaDocMaster.add(header);
-		
+
 		ArrayList javaDocSlaves= new ArrayList();
 		javaDocSlaves.add(settingsGroup);
 		javaDocSlaves.add(html);
@@ -191,33 +191,33 @@ public class CommentsTabPage extends FormatterTabPage {
 		javaDocSlaves.add(indentJavadoc);
 		javaDocSlaves.add(nlParam);
 		javaDocSlaves.add(blankLinesJavadoc);
-		
+
 		new OrController(javaDocMaster, javaDocSlaves);
-		
+
 		ArrayList indentMasters= new ArrayList();
 		indentMasters.add(javadoc);
 		indentMasters.add(header);
 		indentMasters.add(indentJavadoc);
-		
+
 		ArrayList indentSlaves= new ArrayList();
 		indentSlaves.add(indentDesc);
-		
+
 		new Controller(indentMasters, indentSlaves) {
 			protected boolean areSlavesEnabled() {
 				return (javadoc.getChecked() || header.getChecked()) && indentJavadoc.getChecked();
             }
 		}.update(null, null);
-		
+
 		ArrayList blockMasters= new ArrayList();
 		blockMasters.add(blockComment);
 		blockMasters.add(header);
-		
+
 		ArrayList blockSlaves= new ArrayList();
 		blockSlaves.add(blockSettingsGroup);
 		blockSlaves.add(blankLinesBlock);
-		
+
 		new OrController(blockMasters, blockSlaves);
-		
+
 		ArrayList lineWidthMasters= new ArrayList();
 		lineWidthMasters.add(javadoc);
 		lineWidthMasters.add(blockComment);
@@ -227,14 +227,14 @@ public class CommentsTabPage extends FormatterTabPage {
 		ArrayList lineWidthSlaves= new ArrayList();
 		lineWidthSlaves.add(widthGroup);
 		lineWidthSlaves.add(lineWidth);
-		
+
 		new OrController(lineWidthMasters, lineWidthSlaves);
 	}
-	
+
 	protected void initializePage() {
 		fPreview.setPreviewText(PREVIEW);
 	}
-	
+
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
      */
@@ -250,11 +250,11 @@ public class CommentsTabPage extends FormatterTabPage {
     	super.doUpdatePreview();
         fPreview.update();
     }
-	
+
 	private CheckboxPreference createPrefTrueFalse(Composite composite, int numColumns, String text, String key) {
 		return createCheckboxPref(composite, numColumns, text, key, FALSE_TRUE);
 	}
-    
+
     private CheckboxPreference createPrefInsert(Composite composite, int numColumns, String text, String key) {
         return createCheckboxPref(composite, numColumns, text, key, DO_NOT_INSERT_INSERT);
     }

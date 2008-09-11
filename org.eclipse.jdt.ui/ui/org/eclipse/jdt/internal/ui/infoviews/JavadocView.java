@@ -158,7 +158,7 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * Implementation of a {@link BrowserInput} using
 	 * a {@link IJavaElement} as input.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static final class JavaElementBrowserInput extends BrowserInput {
@@ -185,11 +185,11 @@ public class JavadocView extends AbstractInfoView {
 			return fInput.getElementName();
 		}
 	}
-	
+
 	/**
 	 * Implementation of a {@link BrowserInput} using an
 	 * {@link URL} as input.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static class URLBrowserInput extends BrowserInput {
@@ -216,23 +216,23 @@ public class JavadocView extends AbstractInfoView {
 			return fURL.toExternalForm();
 		}
 	}
-	
+
 	/**
 	 * Action to go forward in the history.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private final class ForthAction extends Action {
-		
+
 		public ForthAction() {
 			setText(InfoViewMessages.JavadocView_action_forward_name);
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_DISABLED));
-			
+
 			update();
 		}
-		
+
 		public void update() {
 			if (fCurrent != null && fCurrent.getNext() != null) {
 				BrowserInput element= fCurrent.getNext();
@@ -250,16 +250,16 @@ public class JavadocView extends AbstractInfoView {
 		public void run() {
 			setInput(fCurrent.getNext());
 		}
-		
+
 	}
 
 	/**
 	 * Action to go backwards in the history.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private final class BackAction extends Action {
-		
+
 		public BackAction() {
 			setText(InfoViewMessages.JavadocView_action_back_name);
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
@@ -287,10 +287,10 @@ public class JavadocView extends AbstractInfoView {
 			setInput(fCurrent.getPrevious());
 		}
 	}
-	
+
 	/**
 	 * Action to toggle linking with selection.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private class LinkAction extends Action {
@@ -318,7 +318,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.0
 	 */
 	private static final String DO_NOT_WARN_PREFERENCE_KEY= "JavadocView.error.doNotWarn"; //$NON-NLS-1$
-	
+
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=73558
 	private static final boolean WARNING_DIALOG_ENABLED= false;
 
@@ -361,7 +361,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private String fOriginalInput;
-	
+
 	/**
 	 * The current input element if any
 	 * @since 3.4
@@ -385,7 +385,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private LinkAction fToggleLinkAction;
-	
+
 	/**
 	 * Action to show content in external browser
 	 * @since 3.4
@@ -541,7 +541,7 @@ public class JavadocView extends AbstractInfoView {
 					event.required= true; // Cancel opening of new windows
 				}
 			});
-			
+
 		} catch (SWTError er) {
 
 			/* The Browser widget throws an SWTError if it fails to
@@ -588,7 +588,7 @@ public class JavadocView extends AbstractInfoView {
 
 	/**
 	 * Registers a listener for the Java editor font.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	private void listenForFontChanges() {
@@ -614,14 +614,14 @@ public class JavadocView extends AbstractInfoView {
 		};
 		JFaceResources.getFontRegistry().addListener(fFontListener);
 	}
-	
+
 	private static void initStyleSheet() {
 		if (fgStyleSheetLoaded)
 			return;
 		fgStyleSheetLoaded= true;
 		fgStyleSheet= loadStyleSheet();
 	}
-	
+
 	private static String loadStyleSheet() {
 		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
 		URL styleSheetURL= bundle.getEntry("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
@@ -659,20 +659,20 @@ public class JavadocView extends AbstractInfoView {
 	protected void createActions() {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider) getSelectionProvider());
-		
+
 		fBackAction= new BackAction();
 		fBackAction.setActionDefinitionId("org.eclipse.ui.navigate.back"); //$NON-NLS-1$
 		fForthAction= new ForthAction();
 		fForthAction.setActionDefinitionId("org.eclipse.ui.navigate.forward"); //$NON-NLS-1$
-		
+
 		fToggleLinkAction= new LinkAction();
 		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
-		
+
 		fInputSelectionProvider= new SimpleSelectionProvider();
 		fOpenExternalBrowserAction= new OpenExternalBrowserAction(getSite().getShell().getDisplay(), fInputSelectionProvider);
 		fOpenExternalBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
 		fInputSelectionProvider.addSelectionChangedListener(fOpenExternalBrowserAction);
-		
+
 		IJavaElement input= getInput();
 		StructuredSelection selection;
 		if (input != null) {
@@ -682,7 +682,7 @@ public class JavadocView extends AbstractInfoView {
 		}
 		fInputSelectionProvider.setSelection(selection);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillActionBars(org.eclipse.ui.IActionBars)
 	 * @since 3.4
@@ -692,7 +692,7 @@ public class JavadocView extends AbstractInfoView {
 
 		actionBars.setGlobalActionHandler(ActionFactory.BACK.getId(), fBackAction);
 		actionBars.setGlobalActionHandler(ActionFactory.FORWARD.getId(), fForthAction);
-	
+
 		fInputSelectionProvider.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalBrowserAction);
@@ -711,12 +711,12 @@ public class JavadocView extends AbstractInfoView {
 		tbm.add(fBackAction);
 		tbm.add(fForthAction);
 		tbm.add(new Separator());
-		
+
 		tbm.add(fToggleLinkAction);
 		super.fillToolBar(tbm);
 		tbm.add(fOpenExternalBrowserAction);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 * @since 3.4
@@ -726,7 +726,7 @@ public class JavadocView extends AbstractInfoView {
 
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fBackAction);
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fForthAction);
-		
+
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenExternalBrowserAction);
 	}
 
@@ -785,7 +785,7 @@ public class JavadocView extends AbstractInfoView {
 			doSetInput(computeInput(input));
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getBackgroundColorKey()
 	 * @since 3.2
@@ -804,7 +804,7 @@ public class JavadocView extends AbstractInfoView {
 			JFaceResources.getFontRegistry().removeListener(fFontListener);
 			fFontListener= null;
 		}
-		
+
 		if (fOpenExternalBrowserAction != null) {
 			fInputSelectionProvider.removeSelectionChangedListener(fOpenExternalBrowserAction);
 			fOpenExternalBrowserAction= null;
@@ -824,7 +824,7 @@ public class JavadocView extends AbstractInfoView {
 	protected Object computeInput(Object input) {
 		if (getControl() == null || ! (input instanceof IJavaElement))
 			return null;
-		
+
 		IWorkbenchPart part= null;
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window != null) {
@@ -833,7 +833,7 @@ public class JavadocView extends AbstractInfoView {
 				part= page.getActivePart();
 			}
 		}
-		
+
 		ISelection selection= null;
 		if (part != null) {
 			IWorkbenchPartSite site= part.getSite();
@@ -872,10 +872,10 @@ public class JavadocView extends AbstractInfoView {
 			default:
 				javadocHtml= getJavadocHtml(new IJavaElement[] { input }, part, selection, monitor);
 		}
-		
+
 		if (javadocHtml == null)
 			return ""; //$NON-NLS-1$
-		
+
 		return javadocHtml;
 	}
 
@@ -886,37 +886,37 @@ public class JavadocView extends AbstractInfoView {
 	protected String computeDescription(IWorkbenchPart part, ISelection selection, IJavaElement inputElement, IProgressMonitor monitor) {
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Set input to the given input.
-	 * 
+	 *
 	 * @param input the input for the view
 	 * @since 3.4
 	 */
 	public void setInput(BrowserInput input) {
 		fCurrent= input;
-		
+
 		Object inputElement= input.getInputElement();
 		if (inputElement instanceof IJavaElement) {
 			setInput((IJavaElement) inputElement);
 		} else if (inputElement instanceof URL) {
 			fBrowser.setUrl(((URL) inputElement).toExternalForm());
-			
+
 			if (fInputSelectionProvider != null)
 				fInputSelectionProvider.setSelection(new StructuredSelection(inputElement));
 		}
-		
+
 		fForthAction.update();
 		fBackAction.update();
 	}
-	
+
 	/*
 	 * @see AbstractInfoView#setInput(Object)
 	 */
 	protected void doSetInput(Object input) {
 		String javadocHtml= (String)input; // FIXME: undocumented hard cast
 		fOriginalInput= javadocHtml;
-		
+
 		if (fInputSelectionProvider != null) {
 			IJavaElement inputElement= getInput();
 			StructuredSelection selection= inputElement == null ? StructuredSelection.EMPTY : new StructuredSelection(inputElement);
@@ -947,7 +947,7 @@ public class JavadocView extends AbstractInfoView {
 			TextPresentation.applyTextPresentation(fPresentation, fText);
 		}
 	}
-	
+
 	/**
 	 * Returns the Javadoc in HTML format.
 	 *
@@ -980,17 +980,17 @@ public class JavadocView extends AbstractInfoView {
 			IJavaElement curr= result[0];
 			if (curr instanceof IMember) {
 				final IMember member= (IMember)curr;
-				
+
 				String constantValue= null;
 				if (member instanceof IField)
 					constantValue= computeFieldConstant(activePart, selection, (IField) member, monitor);
-				
+
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
 				Reader reader;
 				try {
 					String content= JavadocContentAccess2.getHTMLContent(member, true);
 					reader= content == null ? null : new StringReader(content);
-					
+
 					// Provide hint why there's no Javadoc
 					if (reader == null && member.isBinary()) {
 						boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(member) != null;
@@ -998,7 +998,7 @@ public class JavadocView extends AbstractInfoView {
 						boolean hasAttachedSource= root != null && root.getSourceAttachmentPath() != null;
 						IOpenable openable= member.getOpenable();
 						boolean hasSource= openable.getBuffer() != null;
-						
+
 						if (!hasAttachedSource && !hasAttachedJavadoc)
 							reader= new StringReader(InfoViewMessages.JavadocView_noAttachments);
 						else if (!hasAttachedJavadoc && !hasSource)
@@ -1007,11 +1007,11 @@ public class JavadocView extends AbstractInfoView {
 							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedSource);
 						else if (!hasSource)
 							reader= new StringReader(InfoViewMessages.JavadocView_noInformation);
-						
+
 					} else {
 						base= JavaDocLocations.getBaseURL(member);
 					}
-					
+
 				} catch (JavaModelException ex) {
 					reader= new StringReader(InfoViewMessages.JavadocView_error_gettingJavadoc);
 					JavaPlugin.log(ex.getStatus());
@@ -1051,7 +1051,7 @@ public class JavadocView extends AbstractInfoView {
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}
-		
+
 		String imageName= null;
 		if (allowImage) {
 			URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(member);
@@ -1059,7 +1059,7 @@ public class JavadocView extends AbstractInfoView {
 				imageName= imageUrl.toExternalForm();
 			}
 		}
-		
+
 		StringBuffer buf= new StringBuffer();
 		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, 8, 5, label.toString(), 22, 0);
 		return buf.toString();
@@ -1072,20 +1072,20 @@ public class JavadocView extends AbstractInfoView {
 	protected boolean isIgnoringNewInput(IJavaElement je, IWorkbenchPart part, ISelection selection) {
 		if (fCurrent != null && fCurrent.getInputElement() instanceof URL)
 			return false;
-		
+
 		if (super.isIgnoringNewInput(je, part, selection)
 				&& part instanceof ITextEditor
 				&& selection instanceof ITextSelection) {
-			
+
 			ITextEditor editor= (ITextEditor)part;
 			IDocumentProvider docProvider= editor.getDocumentProvider();
 			if (docProvider == null)
 				return false;
-			
+
 			IDocument document= docProvider.getDocument(editor.getEditorInput());
 			if (!(document instanceof IDocumentExtension3))
 				return false;
-			
+
 			try {
 				int offset= ((ITextSelection)selection).getOffset();
 				String partition= ((IDocumentExtension3)document).getContentType(IJavaPartitions.JAVA_PARTITIONING, offset, false);
@@ -1152,15 +1152,15 @@ public class JavadocView extends AbstractInfoView {
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.JAVADOC_VIEW;
 	}
-	
+
 	/**
 	 * Compute the textual representation of a 'static' 'final' field's constant initializer value.
-	 * 
+	 *
 	 * @param activePart the part that triggered the computation, or <code>null</code>
 	 * @param selection the selection that references the field, or <code>null</code>
 	 * @param resolvedField the filed whose constant value will be computed
 	 * @param monitor the progress monitor
-	 * 
+	 *
 	 * @return the textual representation of the constant, or <code>null</code> if the
 	 *   field is not a constant field, the initializer value could not be computed, or
 	 *   the progress monitor was cancelled
@@ -1194,7 +1194,7 @@ public class JavadocView extends AbstractInfoView {
 
 	/**
 	 * Retrieve a constant initializer value of a field by (AST) parsing field's type.
-	 * 
+	 *
 	 * @param constantField the constant field
 	 * @param monitor the progress monitor
 	 * @return the constant value of the field, or <code>null</code> if it could not be computed
@@ -1204,7 +1204,7 @@ public class JavadocView extends AbstractInfoView {
 	private Object computeFieldConstantFromTypeAST(IField constantField, IProgressMonitor monitor) {
 		if (monitor.isCanceled())
 			return null;
-		
+
 		CompilationUnit ast= SharedASTProvider.getAST(constantField.getTypeRoot(), SharedASTProvider.WAIT_NO, monitor);
 		if (ast != null) {
 			try {
@@ -1252,7 +1252,7 @@ public class JavadocView extends AbstractInfoView {
 	private static boolean isStaticFinal(IJavaElement member) {
 		if (member.getElementType() != IJavaElement.FIELD)
 			return false;
-		
+
 		IField field= (IField)member;
 		try {
 			return JdtFlags.isFinal(field) && JdtFlags.isStatic(field);
@@ -1273,17 +1273,17 @@ public class JavadocView extends AbstractInfoView {
 	 * @param field the field that is being referenced (usually not declared in <code>activeType</code>)
 	 * @param selection the region in <code>activeType</code> that contains the field reference
 	 * @param monitor a progress monitor
-	 * 
+	 *
 	 * @return the constant value for the given field or <code>null</code> if none
 	 * @since 3.4
 	 */
 	private static Object getConstantValueFromActiveEditor(ITypeRoot activeType, IField field, ITextSelection selection, IProgressMonitor monitor) {
 		Object constantValue= null;
-		
+
 		CompilationUnit unit= SharedASTProvider.getAST(activeType, SharedASTProvider.WAIT_ACTIVE_ONLY, monitor);
 		if (unit == null)
 			return null;
-		
+
 		ASTNode node= NodeFinder.perform(unit, selection.getOffset(), selection.getLength());
 		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			IBinding binding= ((SimpleName)node).resolveBinding();
@@ -1319,10 +1319,10 @@ public class JavadocView extends AbstractInfoView {
 			}
 			result.append('"');
 			return result.toString();
-			
+
 		} else if (constantValue instanceof Character) {
 			String constantResult= '\'' + constantValue.toString() + '\'';
-			
+
 			char charValue= ((Character) constantValue).charValue();
 			String hexString= Integer.toHexString(charValue);
 			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
@@ -1331,23 +1331,23 @@ public class JavadocView extends AbstractInfoView {
 			}
 			hexResult.append(hexString);
 			return formatWithHexValue(constantResult, hexResult.toString());
-			
+
 		} else if (constantValue instanceof Byte) {
 			int byteValue= ((Byte) constantValue).intValue() & 0xFF;
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(byteValue)); //$NON-NLS-1$
-			
+
 		} else if (constantValue instanceof Short) {
 			int shortValue= ((Short) constantValue).shortValue() & 0xFFFF;
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
-			
+
 		} else if (constantValue instanceof Integer) {
 			int intValue= ((Integer) constantValue).intValue();
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
-			
+
 		} else if (constantValue instanceof Long) {
 			long longValue= ((Long) constantValue).longValue();
 			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
-			
+
 		} else {
 			return constantValue.toString();
 		}
@@ -1359,7 +1359,7 @@ public class JavadocView extends AbstractInfoView {
 	 * <p>
 	 * XXX: Copied from {@link JavadocHover}.
 	 * </p>
-	 * 
+	 *
 	 * @param constantValue the constant value
 	 * @param hexValue the hex value
 	 * @return a formatted string with constant and hex values
@@ -1387,10 +1387,10 @@ public class JavadocView extends AbstractInfoView {
 			buffer.append(' ');
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * see also org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.addLinkListener(BrowserInformationControl)
-	 * 
+	 *
 	 * Add link listener to the given browser
 	 * @param browser the browser to add a listener to
 	 * @since 3.4
@@ -1417,16 +1417,16 @@ public class JavadocView extends AbstractInfoView {
 			public boolean handleExternalLink(final URL url, Display display) {
 				if (fCurrent == null || !url.equals(fCurrent.getInputElement())) {
 					fCurrent= new URLBrowserInput(fCurrent, url);
-					
+
 					if (fBackAction != null) {
 						fBackAction.update();
 						fForthAction.update();
 					}
-					
+
 					if (fInputSelectionProvider != null)
 						fInputSelectionProvider.setSelection(new StructuredSelection(url));
 				}
-				
+
 				return false;
 			}
 
@@ -1452,10 +1452,10 @@ public class JavadocView extends AbstractInfoView {
 				IJavaElement input= getInput();
 				if (input == null)
 					return;
-				
+
 				if (fCurrent == null || !fCurrent.getInputElement().equals(input)) {
 					fCurrent= new JavaElementBrowserInput(null, input);
-					
+
 					if (fBackAction != null) {
 						fBackAction.update();
 						fForthAction.update();

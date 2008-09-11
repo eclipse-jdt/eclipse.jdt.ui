@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -67,7 +67,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 
 	/** Properties file content type */
 	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
-	
+
 	/**
 	 * The text editor.
 	 */
@@ -304,7 +304,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 				return PROPERTIES_CONTENT_TYPE;
 			}
 		};
-		
+
 		MonoReconciler reconciler= new MonoReconciler(strategy, true);
 		reconciler.setDelay(500);
 		return reconciler;

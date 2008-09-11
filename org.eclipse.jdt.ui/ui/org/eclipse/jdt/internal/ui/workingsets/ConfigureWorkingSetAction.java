@@ -26,14 +26,14 @@ public class ConfigureWorkingSetAction extends Action {
 	private WorkingSetModel fWorkingSetModel;
 
 	public ConfigureWorkingSetAction(IWorkbenchPartSite site) {
-		super(WorkingSetMessages.ConfigureWorkingSetAction_label); 
+		super(WorkingSetMessages.ConfigureWorkingSetAction_label);
 		fSite= site;
 	}
-	
+
 	public void setWorkingSetModel(WorkingSetModel model) {
 		fWorkingSetModel= model;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -46,9 +46,9 @@ public class ConfigureWorkingSetAction extends Action {
 			activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
 		}
 		WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(
-			fSite.getShell(), 
+			fSite.getShell(),
 			(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]),
-			activeWorkingSets); 
+			activeWorkingSets);
 		dialog.setSelection(activeWorkingSets);
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			IWorkingSet[] selection= dialog.getSelection();

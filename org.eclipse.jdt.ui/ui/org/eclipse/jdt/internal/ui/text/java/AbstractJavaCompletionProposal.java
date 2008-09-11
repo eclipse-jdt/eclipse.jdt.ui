@@ -92,24 +92,24 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 
 
 /**
- * 
+ *
  * @since 3.2
  */
 public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5, ICompletionProposalExtension6 {
-	
-	
+
+
 	/**
 	 * A class to simplify tracking a reference position in a document.
 	 */
 	static final class ReferenceTracker {
-	
+
 		/** The reference position category name. */
 		private static final String CATEGORY= "reference_position"; //$NON-NLS-1$
 		/** The position updater of the reference position. */
 		private final IPositionUpdater fPositionUpdater= new DefaultPositionUpdater(CATEGORY);
 		/** The reference position. */
 		private final Position fPosition= new Position(0);
-	
+
 		/**
 		 * Called before document changes occur. It must be followed by a call to postReplace().
 		 *
@@ -124,13 +124,13 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				document.addPositionCategory(CATEGORY);
 				document.addPositionUpdater(fPositionUpdater);
 				document.addPosition(CATEGORY, fPosition);
-	
+
 			} catch (BadPositionCategoryException e) {
 				// should not happen
 				JavaPlugin.log(e);
 			}
 		}
-	
+
 		/**
 		 * Called after the document changed occurred. It must be preceded by a call to preReplace().
 		 *
@@ -142,7 +142,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				document.removePosition(CATEGORY, fPosition);
 				document.removePositionUpdater(fPositionUpdater);
 				document.removePositionCategory(CATEGORY);
-	
+
 			} catch (BadPositionCategoryException e) {
 				// should not happen
 				JavaPlugin.log(e);
@@ -152,27 +152,27 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	protected static final class ExitPolicy implements IExitPolicy {
-	
+
 		final char fExitCharacter;
 		private final IDocument fDocument;
-	
+
 		public ExitPolicy(char exitCharacter, IDocument document) {
 			fExitCharacter= exitCharacter;
 			fDocument= document;
 		}
-	
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
 		public ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int length) {
-	
+
 			if (event.character == fExitCharacter) {
 				if (environment.anyPositionContains(offset))
 					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
 				else
 					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, true);
 			}
-	
+
 			switch (event.character) {
 				case ';':
 					return new ExitFlags(ILinkedModeListener.NONE, true);
@@ -191,7 +191,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					return null;
 			}
 		}
-	
+
 	}
 
 	private StyledString fDisplayString;
@@ -206,15 +206,15 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	private String fSortString;
 	private int fRelevance;
 	private boolean fIsInJavadoc;
-	
+
 	private StyleRange fRememberedStyleRange;
 	private boolean fToggleEating;
 	private ITextViewer fTextViewer;
-	
-	
+
+
 	/**
 	 * The control creator.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private IInformationControlCreator fCreator;
@@ -223,7 +223,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.3
 	 */
 	private static String fgCSSStyles;
-	
+
 	/**
 	 * The invocation context of this completion proposal. Can be <code>null</code>.
 	 */
@@ -232,7 +232,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	protected AbstractJavaCompletionProposal() {
 		fInvocationContext= null;
 	}
-	
+
 	protected AbstractJavaCompletionProposal(JavaContentAssistInvocationContext context) {
 		fInvocationContext= context;
 	}
@@ -243,10 +243,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public char[] getTriggerCharacters() {
 		return fTriggerCharacters;
 	}
-	
+
 	/**
 	 * Sets the trigger characters.
-	 * 
+	 *
 	 * @param triggerCharacters The set of characters which can trigger the application of this
 	 *        completion proposal
 	 */
@@ -256,7 +256,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 	/**
 	 * Sets the proposal info.
-	 * 
+	 *
 	 * @param proposalInfo The additional information associated with this proposal or
 	 *        <code>null</code>
 	 */
@@ -266,7 +266,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 	/**
 	 * Returns the additional proposal info, or <code>null</code> if none exists.
-	 * 
+	 *
 	 * @return the additional proposal info, or <code>null</code> if none exists
 	 */
 	protected ProposalInfo getProposalInfo() {
@@ -276,14 +276,14 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	/**
 	 * Sets the cursor position relative to the insertion offset. By default this is the length of
 	 * the completion string (Cursor positioned after the completion)
-	 * 
+	 *
 	 * @param cursorPosition The cursorPosition to set
 	 */
 	public void setCursorPosition(int cursorPosition) {
 		Assert.isTrue(cursorPosition >= 0);
 		fCursorPosition= cursorPosition;
 	}
-	
+
 	protected int getCursorPosition() {
 		return fCursorPosition;
 	}
@@ -295,12 +295,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		// not used any longer
 		apply(document, (char) 0, getReplacementOffset() + getReplacementLength());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
-		
+
 		if (isSupportingRequiredProposals()) {
 			CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 			CompletionProposal[] requiredProposals= coreProposal.getRequiredProposals();
@@ -334,50 +334,50 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				}
 			}
 		}
-		
+
 		try {
 			// patch replacement length
 			int delta= offset - (getReplacementOffset() + getReplacementLength());
 			if (delta > 0)
 				setReplacementLength(getReplacementLength() + delta);
-	
+
 			boolean isSmartTrigger= isSmartTrigger(trigger);
-	
+
 			String replacement;
 			if (isSmartTrigger || trigger == (char) 0) {
 				replacement= getReplacementString();
 			} else {
 				StringBuffer buffer= new StringBuffer(getReplacementString());
-	
+
 				// fix for PR #5533. Assumes that no eating takes place.
 				if ((getCursorPosition() > 0 && getCursorPosition() <= buffer.length() && buffer.charAt(getCursorPosition() - 1) != trigger)) {
 					buffer.insert(getCursorPosition(), trigger);
 					setCursorPosition(getCursorPosition() + 1);
 				}
-	
+
 				replacement= buffer.toString();
 				setReplacementString(replacement);
 			}
-	
+
 			// reference position just at the end of the document change.
 			int referenceOffset= getReplacementOffset() + getReplacementLength();
 			final ReferenceTracker referenceTracker= new ReferenceTracker();
 			referenceTracker.preReplace(document, referenceOffset);
-	
+
 			replace(document, getReplacementOffset(), getReplacementLength(), replacement);
-	
+
 			referenceOffset= referenceTracker.postReplace(document);
 			setReplacementOffset(referenceOffset - (replacement == null ? 0 : replacement.length()));
-	
+
 			// PR 47097
 			if (isSmartTrigger)
 				handleSmartTrigger(document, trigger, referenceOffset);
-	
+
 		} catch (BadLocationException x) {
 			// ignore
 		}
 	}
-	
+
 
 	private boolean isSmartTrigger(char trigger) {
 		return trigger == ';' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON)
@@ -387,26 +387,26 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	private void handleSmartTrigger(IDocument document, char trigger, int referenceOffset) throws BadLocationException {
 		DocumentCommand cmd= new DocumentCommand() {
 		};
-		
+
 		cmd.offset= referenceOffset;
 		cmd.length= 0;
 		cmd.text= Character.toString(trigger);
 		cmd.doit= true;
 		cmd.shiftsCaret= true;
 		cmd.caretOffset= getReplacementOffset() + getCursorPosition();
-		
+
 		SmartSemicolonAutoEditStrategy strategy= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
 		strategy.customizeDocumentCommand(document, cmd);
-		
+
 		replace(document, cmd.offset, cmd.length, cmd.text);
 		setCursorPosition(cmd.caretOffset - getReplacementOffset() + cmd.text.length());
 	}
-	
+
 	protected final void replace(IDocument document, int offset, int length, String string) throws BadLocationException {
 		if (!document.get(offset, length).equals(string))
 			document.replace(offset, length, string);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension1#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
@@ -415,7 +415,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		IDocument document= viewer.getDocument();
 		if (fTextViewer == null)
 			fTextViewer= viewer;
-		
+
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
 		// don't apply the proposal if for some reason we're not valid any longer
 		if (!isInJavadoc() && !validate(document, offset, null)) {
@@ -450,16 +450,16 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	/**
 	 * Returns <code>true</code> if the proposal is within javadoc, <code>false</code>
 	 * otherwise.
-	 * 
+	 *
 	 * @return <code>true</code> if the proposal is within javadoc, <code>false</code> otherwise
 	 */
 	protected boolean isInJavadoc(){
 		return fIsInJavadoc;
 	}
-	
+
 	/**
 	 * Sets the javadoc attribute.
-	 * 
+	 *
 	 * @param isInJavadoc <code>true</code> if the proposal is within javadoc
 	 */
 	protected void setInJavadoc(boolean isInJavadoc) {
@@ -504,7 +504,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		Object info= getAdditionalProposalInfo(new NullProgressMonitor());
 		return info == null ? null : info.toString();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -514,9 +514,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			if (info != null && info.length() > 0) {
 				StringBuffer buffer= new StringBuffer();
 				HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
-				
+
 				buffer.append(info);
-				
+
 				IJavaElement element= null;
 				try {
 					element= getProposalInfo().getJavaElement();
@@ -530,19 +530,19 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
-				
+
 				HTMLPrinter.addPageEpilog(buffer);
 				info= buffer.toString();
-				
+
 				return new JavadocBrowserInformationControlInput(null, element, info, 0);
 			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the style information for displaying HTML (Javadoc) content.
-	 * 
+	 *
 	 * @return the CSS styles
 	 * @since 3.3
 	 */
@@ -648,7 +648,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		if (!isCamelCaseMatching())
 			return getReplacementString();
-		
+
 		String prefix= getPrefix(document, completionOffset);
 		return getCamelCaseCompound(prefix, getReplacementString());
 	}
@@ -682,7 +682,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 		if (offset < getReplacementOffset())
 			return false;
-		
+
 		boolean validated= isValidPrefix(getPrefix(document, offset));
 
 		if (validated && event != null) {
@@ -706,7 +706,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * {@link #getDisplayString() display string} using the {@link #isPrefix(String, String) }
 	 * method.
 	 * </p>
-	 * 
+	 *
 	 * @param prefix the current prefix in the document
 	 * @return <code>true</code> if <code>prefix</code> is a valid prefix of this proposal
 	 */
@@ -715,7 +715,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
 		 * why we do not use the replacement string.
 		 * String word= fReplacementString;
-		 * 
+		 *
 		 * Besides that bug we also use the display string
 		 * for performance reasons, as computing the
 		 * replacement string can be expensive.
@@ -743,7 +743,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * Returns the text in <code>document</code> from {@link #getReplacementOffset()} to
 	 * <code>offset</code>. Returns the empty string if <code>offset</code> is before the
 	 * replacement offset or if an exception occurs when accessing the document.
-	 * 
+	 *
 	 * @param document the document
 	 * @param offset the offset
 	 * @return the prefix
@@ -758,10 +758,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Case insensitive comparison of <code>prefix</code> with the start of <code>string</code>.
-	 * 
+	 *
 	 * @param prefix the prefix
 	 * @param string  the string to look for the prefix
 	 * @return <code>true</code> if the string begins with the given prefix and
@@ -785,7 +785,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * <li>getCamelCompound("NuPoE", "NullPointerException") -> "NuPoException"</li>
 	 * <li>getCamelCompound("hasCod", "hashCode") -> "hasCode"</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param prefix the prefix to match against
 	 * @param string the string to match
 	 * @return a compound of prefix and any postfix taken from <code>string</code>
@@ -814,7 +814,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 	/**
 	 * Returns true if camel case matching is enabled.
-	 * 
+	 *
 	 * @return <code>true</code> if camel case matching is enabled
 	 * @since 3.2
 	 */
@@ -822,7 +822,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		String value= JavaCore.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH);
 		return JavaCore.ENABLED.equals(value);
 	}
-	
+
 	private static boolean insertCompletion() {
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
 		return preference.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
@@ -938,7 +938,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (shell == null || !BrowserInformationControl.isAvailable(shell))
 			return null;
-		
+
 		if (fCreator == null) {
 			/*
 			 * FIXME: Take control creators (and link handling) out of JavadocHover,
@@ -970,7 +970,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * Sets up a simple linked mode at {@link #getCursorPosition()} and an exit policy that will
 	 * exit the mode when <code>closingCharacter</code> is typed and an exit position at
 	 * <code>getCursorPosition() + 1</code>.
-	 * 
+	 *
 	 * @param document the document
 	 * @param closingCharacter the exit character
 	 */
@@ -981,11 +981,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			try {
 				LinkedPositionGroup group= new LinkedPositionGroup();
 				group.addPosition(new LinkedPosition(document, offset, 0, LinkedPositionGroup.NO_STOP));
-				
+
 				LinkedModeModel model= new LinkedModeModel();
 				model.addGroup(group);
 				model.forceInstall();
-				
+
 				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 				ui.setSimpleMode(true);
 				ui.setExitPolicy(new ExitPolicy(closingCharacter, document));
@@ -997,7 +997,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			}
 		}
 	}
-	
+
 	protected boolean autocloseBrackets() {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS);
@@ -1006,7 +1006,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	protected void setDisplayString(String string) {
 		fDisplayString= new StyledString(string);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 * @since 3.4
@@ -1014,21 +1014,21 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public StyledString getStyledDisplayString() {
 		return fDisplayString;
 	}
-		
+
 	public void setStyledDisplayString(StyledString text) {
 		fDisplayString= text;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		return getDisplayString();
 	}
-	
+
 	/**
 	 * Returns the java element proposed by the receiver, possibly <code>null</code>.
-	 * 
+	 *
 	 * @return the java element proposed by the receiver, possibly <code>null</code>
 	 */
 	public IJavaElement getJavaElement() {
@@ -1040,10 +1040,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			}
 		return null;
 	}
-	
+
 	/**
 	 * Tells whether required proposals are supported by this proposal.
-	 * 
+	 *
 	 * @return <code>true</code> if required proposals are supported by this proposal
 	 * @see CompletionProposal#getRequiredProposals()
 	 * @since 3.3
@@ -1051,13 +1051,13 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	protected boolean isSupportingRequiredProposals() {
 		if (fInvocationContext == null)
 			return false;
-		
+
 		ProposalInfo proposalInfo= getProposalInfo();
 		if (!(proposalInfo instanceof MemberProposalInfo))
 			return false;
-		
+
 		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
 		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF || proposal.getKind() == CompletionProposal.TYPE_REF);
 	}
-	
+
 }

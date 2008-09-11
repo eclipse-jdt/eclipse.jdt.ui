@@ -20,6 +20,6 @@ public class EmptyTestCase extends TestCase {
 	public static Test suite() {
 		return new TestSuite(EmptyTestCase.class);
 	}
-	
+
 	public void test() {}
 }

@@ -14,11 +14,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -41,7 +42,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 			fParent= parent;
 			fStart= start;
 			fLength= length;
-			if (fParent != null)	
+			if (fParent != null)
 				fParent.addChild(this);
 		}
 		public void setCursor(int offset) {
@@ -99,7 +100,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 			if (fParent != null)
 				return fParent.internalIsInUse(name);
 			return false;
-			
+
 		}
 		private boolean isInUseDown(String name) {
 			if (fNames != null && fNames.contains(name))
@@ -114,7 +115,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 			return false;
 		}
 	}
-	
+
 	private IBinding fIgnoreBinding;
 	private Selection fIgnoreRange;
 	private Scope fScope;
@@ -137,24 +138,24 @@ public class CodeScopeBuilder extends ASTVisitor {
 		fScopes= new ArrayList();
 		fIgnoreBinding= ignore;
 	}
-	
+
 	private CodeScopeBuilder(ASTNode node, Selection ignore) {
 		fScope= new Scope(null, node.getStartPosition(), node.getLength());
 		fScopes= new ArrayList();
 		fIgnoreRange= ignore;
 	}
-	
+
 	public boolean visit(CatchClause node) {
 		// open a new scope for the exception declaration.
 		fScopes.add(fScope);
 		fScope= new Scope(fScope, node.getStartPosition(), node.getLength());
 		return true;
 	}
-	
+
 	public void endVisit(CatchClause node) {
 		fScope= (Scope)fScopes.remove(fScopes.size() - 1);
 	}
-	
+
 	public boolean visit(SimpleName node) {
 		if (fIgnoreBinding != null && Bindings.equals(fIgnoreBinding, node.resolveBinding()))
 			return false;
@@ -163,13 +164,13 @@ public class CodeScopeBuilder extends ASTVisitor {
 		fScope.addName(node.getIdentifier());
 		return false;
 	}
-	
+
 	public boolean visit(QualifiedName node) {
 		// only consider the left most identifier.
 		node.getQualifier().accept(this);
 		return false;
 	}
-	
+
 	public boolean visit(MethodInvocation node) {
 		Expression receiver= node.getExpression();
 		if (receiver == null) {
@@ -182,7 +183,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 		accept(node.arguments());
 		return false;
 	}
-	
+
 	public boolean visit(TypeDeclarationStatement node) {
 		if (node.getAST().apiLevel() == AST.JLS2) {
 			fScope.addName(node.getTypeDeclaration().getName().getIdentifier());
@@ -191,27 +192,27 @@ public class CodeScopeBuilder extends ASTVisitor {
 		}
 		return false;
 	}
-	
+
 	public boolean visit(Block node) {
 		fScopes.add(fScope);
 		fScope= new Scope(fScope, node.getStartPosition(), node.getLength());
 		return true;
 	}
-	
+
 	public void endVisit(Block node) {
 		fScope= (Scope)fScopes.remove(fScopes.size() - 1);
 	}
-	
+
 	public boolean visit(ForStatement node) {
 		fScopes.add(fScope);
 		fScope= new Scope(fScope, node.getStartPosition(), node.getLength());
 		return true;
 	}
-	
+
 	public void endVisit(ForStatement node) {
 		fScope= (Scope)fScopes.remove(fScopes.size() - 1);
 	}
-	
+
 	private void accept(List list) {
 		int size;
 		if (list == null || (size= list.size()) == 0)

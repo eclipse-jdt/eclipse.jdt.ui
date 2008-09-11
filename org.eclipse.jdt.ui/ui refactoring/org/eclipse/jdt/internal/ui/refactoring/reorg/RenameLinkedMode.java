@@ -14,12 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.VerifyEvent;
@@ -31,6 +25,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -91,7 +91,7 @@ public class RenameLinkedMode {
 			if (fInfoPopup.ownsFocusShell()) {
 				return true;
 			}
-			
+
 			Shell editorShell= fEditor.getSite().getShell();
 			Shell activeShell= editorShell.getDisplay().getActiveShell();
 			if (editorShell == activeShell)
@@ -103,7 +103,7 @@ public class RenameLinkedMode {
 			return false; //leave on external modification outside positions
 		}
 	}
-	
+
 	private class EditorSynchronizer implements ILinkedModeListener {
 		public void left(LinkedModeModel model, int flags) {
 			linkedModeLeft();
@@ -118,7 +118,7 @@ public class RenameLinkedMode {
 		public void suspend(LinkedModeModel model) {
 		}
 	}
-	
+
 	private class ExitPolicy extends DeleteBlockingExitPolicy {
 		public ExitPolicy(IDocument document) {
 			super(document);
@@ -130,15 +130,15 @@ public class RenameLinkedMode {
 			return super.doExit(model, event, offset, length);
 		}
 	}
-	
-	
+
+
 	private static RenameLinkedMode fgActiveLinkedMode;
-	
+
 	private final CompilationUnitEditor fEditor;
 	private final IJavaElement fJavaElement;
 
 	private RenameInformationPopup fInfoPopup;
-	
+
 	private boolean fOriginalSaved;
 	private Point fOriginalSelection;
 	private String fOriginalName;
@@ -157,7 +157,7 @@ public class RenameLinkedMode {
 		fJavaElement= element;
 		fFocusEditingSupport= new FocusEditingSupport();
 	}
-	
+
 	public static RenameLinkedMode getActiveLinkedMode() {
 		if (fgActiveLinkedMode != null) {
 			ISourceViewer viewer= fgActiveLinkedMode.fEditor.getViewer();
@@ -172,35 +172,35 @@ public class RenameLinkedMode {
 		}
 		return null;
 	}
-	
+
 	public void start() {
 		if (getActiveLinkedMode() != null) {
 			// for safety; should already be handled in RenameJavaElementAction
 			fgActiveLinkedMode.startFullDialog();
 			return;
 		}
-		
+
 		fOriginalSaved= ! fEditor.isDirty();
-		
+
 		ISourceViewer viewer= fEditor.getViewer();
 		IDocument document= viewer.getDocument();
 		fOriginalSelection= viewer.getSelectedRange();
 		int offset= fOriginalSelection.x;
-		
+
 		try {
 			CompilationUnit root= SharedASTProvider.getAST(getCompilationUnit(), SharedASTProvider.WAIT_YES, null);
-			
+
 			fLinkedPositionGroup= new LinkedPositionGroup();
 			ASTNode selectedNode= NodeFinder.perform(root, fOriginalSelection.x, fOriginalSelection.y);
 			if (! (selectedNode instanceof SimpleName)) {
 				return; // TODO: show dialog
 			}
 			SimpleName nameNode= (SimpleName) selectedNode;
-			
+
 			fOriginalName= nameNode.getIdentifier();
 			final int pos= nameNode.getStartPosition();
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
-			
+
 			//TODO: copied from LinkedNamesAssistProposal#apply(..):
 			// sort for iteration order, starting with the node @ offset
 			Arrays.sort(sameNodes, new Comparator() {
@@ -229,66 +229,66 @@ public class RenameLinkedMode {
 					fNamePosition= linkedPosition;
 				fLinkedPositionGroup.addPosition(linkedPosition);
 			}
-				
+
 			fLinkedModeModel= new LinkedModeModel();
 			fLinkedModeModel.addGroup(fLinkedPositionGroup);
 			fLinkedModeModel.forceInstall();
 			fLinkedModeModel.addLinkingListener(new EditorHighlightingSynchronizer(fEditor));
 			fLinkedModeModel.addLinkingListener(new EditorSynchronizer());
-            
+
 			LinkedModeUI ui= new EditorLinkedModeUI(fLinkedModeModel, viewer);
 			ui.setExitPosition(viewer, offset, 0, Integer.MAX_VALUE);
 			ui.setExitPolicy(new ExitPolicy(document));
 			ui.enter();
-			
+
 			viewer.setSelectedRange(fOriginalSelection.x, fOriginalSelection.y); // by default, full word is selected; restore original selection
-			
+
 			if (viewer instanceof IEditingSupportRegistry) {
 				IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
 				registry.register(fFocusEditingSupport);
 			}
-			
+
 			openSecondaryPopup();
 //			startAnimation();
 			fgActiveLinkedMode= this;
-			
+
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 //	private void startAnimation() {
 //		//TODO:
-//		// - switch off if animations disabled 
+//		// - switch off if animations disabled
 //		// - show rectangle around target for 500ms after animation
 //		Shell shell= fEditor.getSite().getShell();
 //		StyledText textWidget= fEditor.getViewer().getTextWidget();
-//		
+//
 //		// from popup:
 //		Rectangle startRect= fPopup.getBounds();
-//		
+//
 //		// from editor:
 ////		Point startLoc= textWidget.getParent().toDisplay(textWidget.getLocation());
 ////		Point startSize= textWidget.getSize();
 ////		Rectangle startRect= new Rectangle(startLoc.x, startLoc.y, startSize.x, startSize.y);
-//		
+//
 //		// from hell:
 ////		Rectangle startRect= shell.getClientArea();
-//		
+//
 //		Point caretLocation= textWidget.getLocationAtOffset(textWidget.getCaretOffset());
 //		Point displayLocation= textWidget.toDisplay(caretLocation);
 //		Rectangle targetRect= new Rectangle(displayLocation.x, displayLocation.y, 0, 0);
-//		
+//
 //		RectangleAnimation anim= new RectangleAnimation(shell, startRect, targetRect);
 //		anim.schedule();
 //	}
 
 	void doRename(boolean showPreview) {
 		cancel();
-		
+
 		Image image= null;
 		Label label= null;
-		
+
 		fShowPreview|= showPreview;
 		try {
 			ISourceViewer viewer= fEditor.getViewer();
@@ -298,11 +298,11 @@ public class RenameLinkedMode {
 				if (viewerControl instanceof Composite) {
 					Composite composite= (Composite) viewerControl;
 					Display display= composite.getDisplay();
-					
+
 					// Flush pending redraw requests:
 					while (! display.isDisposed() && display.readAndDispatch()) {
 					}
-					
+
 					// Copy editor area:
 					GC gc= new GC(composite);
 					Point size;
@@ -314,7 +314,7 @@ public class RenameLinkedMode {
 						gc.dispose();
 						gc= null;
 					}
-					
+
 					// Persist editor area while executing refactoring:
 					label= new Label(composite, SWT.NONE);
 					label.setImage(image);
@@ -322,14 +322,14 @@ public class RenameLinkedMode {
 					label.moveAbove(null);
 				}
 			}
-			
+
 			String newName= fNamePosition.getContent();
 			if (fOriginalName.equals(newName))
 				return;
 			RenameSupport renameSupport= undoAndCreateRenameSupport(newName);
 			if (renameSupport == null)
 				return;
-			
+
 			Shell shell= fEditor.getSite().getShell();
 			boolean executed;
 			if (fShowPreview) { // could have been updated by undoAndCreateRenameSupport(..)
@@ -364,7 +364,7 @@ public class RenameLinkedMode {
 		}
 		linkedModeLeft();
 	}
-	
+
 	private void restoreFullSelection() {
 		if (fOriginalSelection.y != 0) {
 			int originalOffset= fOriginalSelection.x;
@@ -378,13 +378,13 @@ public class RenameLinkedMode {
 			}
 		}
 	}
-	
+
 	private RenameSupport undoAndCreateRenameSupport(String newName) throws CoreException {
 		// Assumption: the linked mode model should be shut down by now.
-		
+
 		ISourceViewer viewer= fEditor.getViewer();
 		final IDocument document= viewer.getDocument();
-		
+
 		try {
 			if (! fOriginalName.equals(newName)) {
 				fEditor.getSite().getWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
@@ -421,9 +421,9 @@ public class RenameLinkedMode {
 		} finally {
 			JavaModelUtil.reconcile(getCompilationUnit());
 		}
-		
+
 		viewer.setSelectedRange(fOriginalSelection.x, fOriginalSelection.y);
-		
+
 		RenameJavaElementDescriptor descriptor= createRenameDescriptor(fJavaElement, newName);
 		RenameSupport renameSupport= RenameSupport.create(descriptor);
 		return renameSupport;
@@ -432,10 +432,10 @@ public class RenameLinkedMode {
 	private ICompilationUnit getCompilationUnit() {
 		return (ICompilationUnit) EditorUtility.getEditorInputJavaElement(fEditor, false);
 	}
-	
+
 	public void startFullDialog() {
 		cancel();
-		
+
 		try {
 			String newName= fNamePosition.getContent();
 			RenameSupport renameSupport= undoAndCreateRenameSupport(newName);
@@ -447,11 +447,11 @@ public class RenameLinkedMode {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	/**
 	 * @param javaElement
 	 * @param newName
-	 * @return a rename descriptor with current settings as used in the refactoring dialogs 
+	 * @return a rename descriptor with current settings as used in the refactoring dialogs
 	 * @throws JavaModelException
 	 */
 	private RenameJavaElementDescriptor createRenameDescriptor(IJavaElement javaElement, String newName) throws JavaModelException {
@@ -497,19 +497,19 @@ public class RenameLinkedMode {
 			default:
 				return null;
 		}
-		
+
 		RenameJavaElementDescriptor descriptor= (RenameJavaElementDescriptor) RefactoringCore.getRefactoringContribution(contributionId).createDescriptor();
 		descriptor.setJavaElement(javaElement);
 		descriptor.setNewName(newName);
 		if (elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 			descriptor.setUpdateReferences(true);
-		
+
 		IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();
 		IDialogSettings refactoringSettings= javaSettings.getSection(RefactoringWizardPage.REFACTORING_SETTINGS); //TODO: undocumented API
 		if (refactoringSettings == null) {
-			refactoringSettings= javaSettings.addNewSection(RefactoringWizardPage.REFACTORING_SETTINGS); 
+			refactoringSettings= javaSettings.addNewSection(RefactoringWizardPage.REFACTORING_SETTINGS);
 		}
-		
+
 		switch (elementType) {
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
@@ -564,7 +564,7 @@ public class RenameLinkedMode {
 		if (fInfoPopup != null) {
 			fInfoPopup.close();
 		}
-		
+
 		ISourceViewer viewer= fEditor.getViewer();
 		if (viewer instanceof IEditingSupportRegistry) {
 			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
@@ -599,7 +599,7 @@ public class RenameLinkedMode {
 			String newName= fNamePosition.getContent();
 			if (fOriginalName.equals(newName))
 				return false;
-			/* 
+			/*
 			 * TODO: use JavaRenameProcessor#checkNewElementName(String)
 			 * but make sure implementations don't access outdated Java Model
 			 * (cache all necessary information before starting linked mode).
@@ -608,7 +608,7 @@ public class RenameLinkedMode {
 		} catch (BadLocationException e) {
 			return false;
 		}
-		
+
 	}
 
 	public boolean isOriginalName() {

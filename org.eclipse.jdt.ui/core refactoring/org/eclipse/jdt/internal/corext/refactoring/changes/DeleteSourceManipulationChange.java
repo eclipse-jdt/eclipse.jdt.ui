@@ -41,11 +41,11 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
 	private final String fHandle;
-	
-	public DeleteSourceManipulationChange(ISourceManipulation sm, boolean isExecuteChange) { 
+
+	public DeleteSourceManipulationChange(ISourceManipulation sm, boolean isExecuteChange) {
 		Assert.isNotNull(sm);
 		fHandle= getJavaElement(sm).getHandleIdentifier();
-		
+
 		if (isExecuteChange) {
 			if (sm instanceof ICompilationUnit) {
 				// don't check anything in this case. We have a warning dialog
@@ -64,7 +64,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 */
 	public String getName() {
 		IJavaElement javaElement= getJavaElement(getSourceManipulation());
-		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT)); 
+		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT));
 	}
 
 	/*
@@ -73,7 +73,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	public Object getModifiedElement() {
 		return JavaCore.create(fHandle);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
 	 */
@@ -84,7 +84,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		}
 		return null;
 	}
-	
+
 	/*
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
@@ -97,13 +97,13 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ICompilationUnit unit= (ICompilationUnit)element;
 			saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
-			
+
 			IResource resource= unit.getResource();
 			ResourceDescription resourceDescription = ResourceDescription.fromResource(resource);
 			element.delete(false, new SubProgressMonitor(pm, 1));
 			resourceDescription.recordStateFromHistory(resource, new SubProgressMonitor(pm, 1));
 			return new UndoDeleteResourceChange(resourceDescription);
-			
+
 		} else if (element instanceof IPackageFragment) {
 			ICompilationUnit[] units= ((IPackageFragment)element).getCompilationUnits();
 			pm.beginTask("", units.length + 1); //$NON-NLS-1$
@@ -113,13 +113,13 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			}
 			element.delete(false, new SubProgressMonitor(pm, 1));
 			return new NullChange(); // caveat: real undo implemented by UndoablePackageDeleteChange
-			
+
 		} else {
 			element.delete(false, pm);
 			return null; //should not happen
 		}
 	}
-		
+
 	private ISourceManipulation getSourceManipulation() {
 		return (ISourceManipulation) getModifiedElement();
 	}
@@ -128,7 +128,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		//all known ISourceManipulations are IJavaElements
 		return (IJavaElement)sm;
 	}
-	
+
 	private static void saveCUnitIfNeeded(ICompilationUnit unit, IProgressMonitor pm) throws CoreException {
 		saveFileIfNeeded((IFile)unit.getResource(), pm);
 	}

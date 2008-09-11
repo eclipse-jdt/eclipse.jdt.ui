@@ -43,15 +43,15 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 	private final INewNameQuery fNewNameQuery;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
 	private final IContainer fDestination;
-	
-	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IContainer destination, INewNameQuery newNameQuery, 
+
+	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IContainer destination, INewNameQuery newNameQuery,
 			IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		Assert.isTrue(! root.isExternal());
 		fRootHandle= root.getHandleIdentifier();
 		fNewNameQuery= newNameQuery;
 		fUpdateClasspathQuery= updateClasspathQuery;
 		fDestination= destination;
-		
+
 		// we already ask for confirmation of move read only
 		// resources. Furthermore we don't do a validate
 		// edit since move source folders doesn't change
@@ -59,7 +59,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 		setValidationMethod(VALIDATE_DEFAULT);
 	}
 
-	
+
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 2);
 		try {
@@ -90,11 +90,11 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 		}
 		return null;
 	}
-	
+
 	protected IPackageFragmentRoot getRoot(){
 		return (IPackageFragmentRoot)JavaCore.create(fRootHandle);
 	}
-	
+
 	protected IPath getDestinationProjectPath(){
 		return fDestination.getFullPath().removeFirstSegments(ResourcesPlugin.getWorkspace().getRoot().getFullPath().segmentCount());
 	}
@@ -102,7 +102,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 	protected IContainer getDestination() {
 		return fDestination;
 	}
-	
+
 	private String getNewResourceName() throws OperationCanceledException {
 		if (fNewNameQuery == null)
 			return getRoot().getElementName();
@@ -111,7 +111,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 			return getRoot().getElementName();
 		return name;
 	}
-	
+
 	protected int getUpdateModelFlags(boolean isCopy) throws JavaModelException{
 		final int destination= IPackageFragmentRoot.DESTINATION_PROJECT_CLASSPATH;
 		final int replace= IPackageFragmentRoot.REPLACE;
@@ -124,7 +124,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 			originating= IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
 			otherProjects= IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;
 		}
-		
+
 		IJavaElement javaElement= JavaCore.create(getDestination());
 		if (javaElement == null || !javaElement.exists())
 			return replace | originating;
@@ -136,17 +136,17 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 		if (referencingProjects.length <= 1)
 			return replace | originating | destination;
 
-		boolean updateOtherProjectsToo= fUpdateClasspathQuery.confirmManipulation(getRoot(), referencingProjects);	
+		boolean updateOtherProjectsToo= fUpdateClasspathQuery.confirmManipulation(getRoot(), referencingProjects);
 		if (updateOtherProjectsToo)
 			return replace | originating | destination | otherProjects;
 		else
 			return replace | originating | destination;
 	}
-	
+
 	protected int getResourceUpdateFlags(){
 		return IResource.KEEP_HISTORY | IResource.SHALLOW;
 	}
-	
+
 	private void markAsExecuted(IPackageFragmentRoot root, ResourceMapping mapping) {
 		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
 		if (log != null) {

@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
-import com.ibm.icu.text.Collator;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,6 +21,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -63,18 +63,18 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 /**
   */
 public class ClassPathDetector implements IResourceProxyVisitor {
-		
+
 	private HashMap fSourceFolders;
 	private List fClassFiles;
 	private HashSet fJARFiles;
-		
+
 	private IProject fProject;
-		
+
 	private IPath fResultOutputFolder;
 	private IClasspathEntry[] fResultClasspath;
-	
+
 	private IProgressMonitor fMonitor;
-	
+
 	private static class CPSorter implements Comparator {
 		private Collator fCollator= Collator.getInstance();
 		public int compare(Object o1, Object o2) {
@@ -83,25 +83,25 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			return fCollator.compare(e1.getPath().toString(), e2.getPath().toString());
 		}
 	}
-	
-	
+
+
 	public ClassPathDetector(IProject project, IProgressMonitor monitor) throws CoreException {
 		fSourceFolders= new HashMap();
 		fJARFiles= new HashSet(10);
 		fClassFiles= new ArrayList(100);
 		fProject= project;
-			
+
 		fResultClasspath= null;
 		fResultOutputFolder= null;
-		
+
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
-			
+
 		detectClasspath(monitor);
 	}
-	
-	
+
+
 	private boolean isNested(IPath path, Iterator iter) {
 		while (iter.hasNext()) {
 			IPath other= (IPath) iter.next();
@@ -111,20 +111,20 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Method detectClasspath.
 	 * @param monitor The progress monitor (not null)
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	private void detectClasspath(IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(NewWizardMessages.ClassPathDetector_operation_description, 4); 
-			
+			monitor.beginTask(NewWizardMessages.ClassPathDetector_operation_description, 4);
+
 			fMonitor= monitor;
 			fProject.accept(this, IResource.NONE);
 			monitor.worked(1);
-			
+
 			ArrayList cpEntries= new ArrayList();
 
 			detectSourceFolders(cpEntries);
@@ -132,8 +132,8 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 				throw new OperationCanceledException();
 			}
 			monitor.worked(1);
-			
-			
+
+
 			IPath outputLocation= detectOutputFolder();
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -165,7 +165,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			monitor.done();
 		}
 	}
-	
+
 	private IPath findInSourceFolders(IPath path) {
 		Iterator iter= fSourceFolders.keySet().iterator();
 		while (iter.hasNext()) {
@@ -177,10 +177,10 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		}
 		return null;
 	}
-	
+
 	private IPath detectOutputFolder() throws CoreException {
 		HashSet classFolders= new HashSet();
-		
+
 		for (Iterator iter= fClassFiles.iterator(); iter.hasNext();) {
 			IFile file= (IFile) iter.next();
 			IClassFileReader reader= null;
@@ -208,7 +208,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 				int idx= CharOperation.lastIndexOf('/', className) + 1;
 				IPath relPath= new Path(new String(className, 0, idx));
 				IPath cuPath= relPath.append(new String(sourceAttribute.getSourceFileName()));
-				
+
 				IPath resPath= null;
 				if (idx == 0) {
 					resPath= packPath;
@@ -223,11 +223,11 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 					if (path != null) {
 						return resPath;
 					} else {
-						classFolders.add(resPath);	
+						classFolders.add(resPath);
 					}
 				}
-			}			
-		}		
+			}
+		}
 		IPath projPath= fProject.getFullPath();
 		if (fSourceFolders.size() == 1 && classFolders.isEmpty() && fSourceFolders.get(projPath) != null) {
 			return projPath;
@@ -237,7 +237,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 				path= new Path(path.toString() + '1');
 			}
 			return path;
-		} 			
+		}
 	}
 
 
@@ -253,7 +253,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 				continue;
 			}
 			IClasspathEntry entry= JavaCore.newLibraryEntry(path, null, null);
-			res.add(entry);	
+			res.add(entry);
 		}
 		Collections.sort(res, new CPSorter());
 		cpEntries.addAll(res);
@@ -296,8 +296,8 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 					IPath folderPath= getFolderPath(packPath, relPath);
 					if (folderPath != null) {
 						addToMap(fSourceFolders, folderPath, relPath.append(cuName));
-					}					
-				}				
+					}
+				}
 			} catch (JavaModelException e) {
 				// ignore
 			} catch (InvalidInputException e) {
@@ -312,7 +312,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			}
 		}
 	}
-	
+
 	private IPath getPackagePath(String source) throws InvalidInputException {
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 		scanner.setSource(source.toCharArray());
@@ -331,17 +331,17 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			}
 			tok= scanner.getNextToken();
 		} while (tok == ITerminalSymbols.TokenNameDOT);
-		
+
 		return res;
 	}
-	
-	
+
+
 	private void addToMap(HashMap map, IPath folderPath, IPath relPath) {
 		List list= (List) map.get(folderPath);
 		if (list == null) {
 			list= new ArrayList(50);
 			map.put(folderPath, list);
-		}		
+		}
 		list.add(relPath);
 	}
 
@@ -357,12 +357,12 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	}
 
 	private boolean hasExtension(String name, String ext) {
-		return name.endsWith(ext) && (ext.length() != name.length()); 
+		return name.endsWith(ext) && (ext.length() != name.length());
 	}
-	
+
 	private boolean isValidCUName(String name) {
 		return !JavaConventionsUtil.validateCompilationUnitName(name, JavaCore.create(fProject)).matches(IStatus.ERROR);
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core.resources.IResourceProxy)
@@ -371,7 +371,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		if (fMonitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		
+
 		if (proxy.getType() == IResource.FILE) {
 			String name= proxy.getName();
 			if (isValidCUName(name)) {
@@ -390,7 +390,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	public IPath getOutputLocation() {
 		return fResultOutputFolder;
 	}
-		
+
 	public IClasspathEntry[] getClasspath() {
 		if (fResultClasspath == null)
 			return new IClasspathEntry[0];

@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
 /**
  * Computer that computes the template proposals for the SWT context type.
- *  
+ *
  * @since 3.4
  */
 public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompletionProposalComputer {
@@ -46,7 +46,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	 */
 	private static final String SWT_TYPE_NAME= "org.eclipse.swt.SWT"; //$NON-NLS-1$
 
-	
+
 	/**
 	 * Listener that resets the cached java project if its build path changes.
 	 */
@@ -70,7 +70,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 				}
 			}
 		}
-		
+
 		/**
 		 * Does the delta indicate a classpath change?
 		 * @param delta the delta to inspect
@@ -80,7 +80,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 			int flags= delta.getFlags();
 			if (isClasspathChangeFlag(flags))
 				return true;
-			
+
 			if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
 				IJavaElementDelta[] children= delta.getAffectedChildren();
 				for (int i= 0; i < children.length; i++) {
@@ -88,7 +88,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 						return true;
 				}
 			}
-			
+
 			return false;
 		}
 
@@ -100,16 +100,16 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 		private boolean isClasspathChangeFlag(int flags) {
 			if ((flags & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0)
 				return true;
-			
+
 			if ((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0)
 				return true;
-			
+
 			if ((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0)
 				return true;
-			
+
 			if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0)
 				return true;
-			
+
 			return false;
 		}
 	}
@@ -121,7 +121,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	private final TemplateEngine fSWTTemplateEngine;
 	private final TemplateEngine fSWTMembersTemplateEngine;
 	private final TemplateEngine fSWTStatementsTemplateEngine;
-	
+
 	/**
 	 * The Java project of the compilation unit for which a template
 	 * engine has been computed last time if any
@@ -132,16 +132,16 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	 * if <code>fJavaProject</code> is <code>false</code>.
 	 */
 	private boolean fIsSWTOnClasspath;
-	
+
 	public SWTTemplateCompletionProposalComputer() {
 		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
 		fSWTTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_ALL);
 		fSWTMembersTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_MEMBERS);
 		fSWTStatementsTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_STATEMENTS);
-		
+
 		JavaCore.addElementChangedListener(new BuildPathChangeListener());
 	}
-	
+
 	private static TemplateEngine createTemplateEngine(ContextTypeRegistry templateContextRegistry, String contextTypeId) {
 		TemplateContextType contextType= templateContextRegistry.getContextType(contextTypeId);
 		Assert.isNotNull(contextType);
@@ -173,13 +173,13 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 			}
 			return fSWTTemplateEngine;
 		}
-		
+
 		return null;
 	}
 
 	/**
 	 * Tells whether SWT is on the given project's class path.
-	 * 
+	 *
 	 * @param javaProject
 	 * @return <code>true</code> if the given project's class path
 	 */
@@ -198,16 +198,16 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 
 	/**
 	 * Returns the cached Java project.
-	 * 
+	 *
 	 * @return the cached Java project or <code>null</code> if none
 	 */
 	private synchronized IJavaProject getCachedJavaProject() {
 		return fCachedJavaProject;
 	}
-	
+
 	/**
 	 * Set the cached Java project.
-	 * 
+	 *
 	 * @param project or <code>null</code> to reset the cache
 	 */
 	private synchronized void setCachedJavaProject(IJavaProject project) {

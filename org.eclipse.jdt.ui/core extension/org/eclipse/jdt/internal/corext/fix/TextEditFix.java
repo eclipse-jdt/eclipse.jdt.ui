@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;

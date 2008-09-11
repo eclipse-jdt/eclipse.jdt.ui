@@ -16,18 +16,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,6 +27,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -93,10 +93,10 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	// widgets
 	private Button	fExportClassFilesCheckbox;
 	private Button	fExportOutputFoldersCheckbox;
-	private Button	fExportJavaFilesCheckbox;	
+	private Button	fExportJavaFilesCheckbox;
 	private Button	fExportRefactoringsCheckbox;
 	private Link fRefactoringLink;
-	
+
 	private Button		fCompressCheckbox;
 	private Button		fOverwriteCheckbox;
 	private Button		fIncludeDirectoryEntriesCheckbox;
@@ -104,11 +104,11 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	// dialog store id constants
 	private static final String PAGE_NAME= "JarPackageWizardPage"; //$NON-NLS-1$
-	
+
 	private static final String STORE_EXPORT_CLASS_FILES= PAGE_NAME + ".EXPORT_CLASS_FILES"; //$NON-NLS-1$
 	private static final String STORE_EXPORT_OUTPUT_FOLDERS= PAGE_NAME + ".EXPORT_OUTPUT_FOLDER"; //$NON-NLS-1$
 	private static final String STORE_EXPORT_JAVA_FILES= PAGE_NAME + ".EXPORT_JAVA_FILES"; //$NON-NLS-1$
-	
+
 	private static final String STORE_REFACTORINGS= PAGE_NAME + ".REFACTORINGS"; //$NON-NLS-1$
 	private static final String STORE_COMPRESS= PAGE_NAME + ".COMPRESS"; //$NON-NLS-1$
 	private final static String STORE_OVERWRITE= PAGE_NAME + ".OVERWRITE"; //$NON-NLS-1$
@@ -117,7 +117,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	// other constants
 	private static final int SIZING_SELECTION_WIDGET_WIDTH= 480;
 	private static final int SIZING_SELECTION_WIDGET_HEIGHT= 150;
-	
+
 	/**
 	 *	Create an instance of this class
 	 *
@@ -126,8 +126,8 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 */
 	public JarPackageWizardPage(JarPackageData jarPackage, IStructuredSelection selection) {
 		super(PAGE_NAME, selection, jarPackage);
-		setTitle(JarPackagerMessages.JarPackageWizardPage_title); 
-		setDescription(JarPackagerMessages.JarPackageWizardPage_description); 
+		setTitle(JarPackagerMessages.JarPackageWizardPage_title);
+		setDescription(JarPackagerMessages.JarPackageWizardPage_description);
 		fJarPackage= jarPackage;
 		fInitialSelection= selection;
 	}
@@ -136,15 +136,15 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 * Method declared on IDialogPage.
 	 */
 	public void createControl(final Composite parent) {
-		
+
 		initializeDialogUnits(parent);
-		
+
 		Composite composite= new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(
 			new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
-		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_whatToExport_label); 
+		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_whatToExport_label);
 		createInputGroup(composite);
 
 		createExportTypeGroup(composite);
@@ -152,10 +152,10 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		new Label(composite, SWT.NONE); // vertical spacer
 
 
-		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_whereToExport_label); 
+		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_whereToExport_label);
 		createDestinationGroup(composite);
 
-		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_options_label); 
+		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_options_label);
 		createOptionsGroup(composite);
 
 		restoreResourceSpecificationWidgetValues(); // superclass API defines this hook
@@ -171,7 +171,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		update();
 		fRefactoringLink.setEnabled(fExportRefactoringsCheckbox.getSelection());
 		giveFocusToDestination();
-		
+
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARPACKAGER_WIZARD_PAGE);
 	}
@@ -201,7 +201,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	/**
-	 * Returns an iterator over this page's collection of currently-specified 
+	 * Returns an iterator over this page's collection of currently-specified
 	 * elements to be exported. This is the primary element selection facility
 	 * accessor for subclasses.
 	 *
@@ -214,7 +214,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 * Persists resource specification control setting that are to be restored
 	 * in the next instance of this page. Subclasses wishing to persist
-	 * settings for their controls should extend the hook method 
+	 * settings for their controls should extend the hook method
 	 * <code>internalSaveWidgetValues</code>.
 	 */
 	public final void saveWidgetValues() {
@@ -255,7 +255,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fExportJavaFilesCheckbox.setSelection(fJarPackage.areJavaFilesExported());
 
 		super.restoreWidgetValues();
-		
+
 		// options
 		if (fExportRefactoringsCheckbox != null)
 			fExportRefactoringsCheckbox.setSelection(fJarPackage.isRefactoringAware());
@@ -269,7 +269,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 */
 	protected void initializeJarPackage() {
 		super.initializeJarPackage();
-		
+
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
 			// source
@@ -292,7 +292,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	protected void updateModel() {
 		if (getControl() == null)
 			return;
-		
+
 		// source
 		if (fExportClassFilesCheckbox.getSelection() && !fJarPackage.areClassFilesExported())
 			fExportOutputFoldersCheckbox.setSelection(false);
@@ -383,22 +383,22 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));
 		fInputGroup.getTree().addListener(SWT.MouseUp, this);
 		fInputGroup.getTable().addListener(SWT.MouseUp, this);
-		
+
 		SWTUtil.setAccessibilityText(fInputGroup.getTree(), JarPackagerMessages.JarPackageWizardPage_tree_accessibility_message);
 		SWTUtil.setAccessibilityText(fInputGroup.getTable(), JarPackagerMessages.JarPackageWizardPage_table_accessibility_message);
-		
+
 		ICheckStateListener listener = new ICheckStateListener() {
             public void checkStateChanged(CheckStateChangedEvent event) {
                 update();
             }
         };
-        
+
         fInputGroup.addCheckStateListener(listener);
 	}
 
 	/**
 	 * Creates the export type controls.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
 	 */
@@ -516,7 +516,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			setErrorMessage(null);
 		return complete;
 	}
-	
+
 	protected void updatePageCompletion() {
 		boolean pageComplete= isPageComplete();
 		setPageComplete(pageComplete);
@@ -533,7 +533,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		} else if (JarPackagerMessages.JarPackageWizardPage_no_refactorings_selected.equals(currentMessage))
 			setMessage(null);
 	}
-	
+
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
@@ -546,10 +546,10 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 */
 	protected boolean validateSourceGroup() {
 		if (!(fExportClassFilesCheckbox.getSelection() || fExportOutputFoldersCheckbox.getSelection() || fExportJavaFilesCheckbox.getSelection())) {
-			setErrorMessage(JarPackagerMessages.JarPackageWizardPage_error_noExportTypeChecked); 
+			setErrorMessage(JarPackagerMessages.JarPackageWizardPage_error_noExportTypeChecked);
 			return false;
 		}
-		
+
 		if (getSelectedResources().size() == 0) {
 			if (getErrorMessage() != null)
 				setErrorMessage(null);
@@ -557,11 +557,11 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		}
 		if (fExportClassFilesCheckbox.getSelection() || fExportOutputFoldersCheckbox.getSelection())
 			return true;
-			
+
 		// Source file only export - check if there are source files
 		Iterator iter= getSelectedResourcesIterator();
 		while (iter.hasNext()) {
-			Object element= iter.next(); 
+			Object element= iter.next();
 			if (element instanceof IClassFile) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot)((IClassFile)element).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				if (root == null)
@@ -600,7 +600,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			return null;
 	}
 
-	/* 
+	/*
 	 * Overrides method from WizardExportResourcePage
 	 */
 	protected void setupBasedOnInitialSelections() {
@@ -613,7 +613,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 			if (selectedElement instanceof IJavaElement && !((IJavaElement)selectedElement).exists())
 				continue;
-			
+
 			if (selectedElement instanceof ICompilationUnit || selectedElement instanceof IClassFile || selectedElement instanceof IFile)
 				fInputGroup.initialCheckListItem(selectedElement);
 			else {
@@ -622,7 +622,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 					IJavaElement je= JavaCore.create((IResource)selectedElement);
 					if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)selectedElement))
 						selectedElement= je;
-				}	
+				}
 				try {
 					fInputGroup.initialCheckTreeItem(selectedElement);
 				} finally {
@@ -630,7 +630,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 				}
 			}
 		}
-		
+
 		TreeItem[] items= fInputGroup.getTree().getItems();
 		int i= 0;
 		while (i < items.length && !items[i].getChecked())
@@ -642,7 +642,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		}
 	}
 
-	/* 
+	/*
 	 * Method declared on IWizardPage.
 	 */
 	public void setPreviousPage(IWizardPage page) {

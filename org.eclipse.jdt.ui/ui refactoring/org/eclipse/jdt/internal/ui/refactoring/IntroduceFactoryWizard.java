@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
 /**
  * @author rfuhrer@watson.ibm.com
@@ -23,7 +24,7 @@ public class IntroduceFactoryWizard extends RefactoringWizard {
 	 * @param pageTitle the page title
 	 */
 	public IntroduceFactoryWizard(IntroduceFactoryRefactoring ref, String pageTitle) {
-		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
 		setDefaultPageTitle(pageTitle);
 	}
 
@@ -31,7 +32,7 @@ public class IntroduceFactoryWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */
 	protected void addUserInputPages() {
-		String message= RefactoringMessages.IntroduceFactoryInputPage_name_factory; 
+		String message= RefactoringMessages.IntroduceFactoryInputPage_name_factory;
 
 		IntroduceFactoryInputPage	page= new IntroduceFactoryInputPage(message);
 

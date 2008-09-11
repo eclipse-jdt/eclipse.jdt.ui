@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;

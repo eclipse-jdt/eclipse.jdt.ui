@@ -14,9 +14,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -40,43 +40,43 @@ public class VariableDeclarationRewrite {
 		ModifierRewrite listRewrite= ModifierRewrite.create(rewrite, declarationNode);
 		listRewrite.setModifiers(includedModifiers, excludedModifiers, group);
 	}
-	
+
 	public static void rewriteModifiers(final VariableDeclarationExpression declarationNode, final int includedModifiers, final int excludedModifiers, final ASTRewrite rewrite, final TextEditGroup group) {
 		ModifierRewrite listRewrite= ModifierRewrite.create(rewrite, declarationNode);
-		listRewrite.setModifiers(includedModifiers, excludedModifiers, group);	
+		listRewrite.setModifiers(includedModifiers, excludedModifiers, group);
 	}
-	
+
 	public static void rewriteModifiers(final FieldDeclaration declarationNode, final VariableDeclarationFragment[] toChange, final int includedModifiers, final int excludedModifiers, final ASTRewrite rewrite, final TextEditGroup group) {
 		final List fragmentsToChange= Arrays.asList(toChange);
 		AST ast= declarationNode.getAST();
-		
+
 		List fragments= declarationNode.fragments();
 		Iterator iter= fragments.iterator();
-		
+
 		ListRewrite blockRewrite;
 		if (declarationNode.getParent() instanceof AbstractTypeDeclaration) {
 			blockRewrite= rewrite.getListRewrite(declarationNode.getParent(), ((AbstractTypeDeclaration)declarationNode.getParent()).getBodyDeclarationsProperty());
 		} else {
 			blockRewrite= rewrite.getListRewrite(declarationNode.getParent(), AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 		}
-		
+
 		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
 		ASTNode lastStatement= declarationNode;
-		
+
 		if (fragmentsToChange.contains(lastFragment)) {
 			ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, declarationNode);
 			modifierRewrite.setModifiers(includedModifiers, excludedModifiers, group);
 		}
-		
+
 		ListRewrite fragmentsRewrite= null;
 		while (iter.hasNext()) {
 			VariableDeclarationFragment currentFragment= (VariableDeclarationFragment)iter.next();
-			
+
 			if (fragmentsToChange.contains(lastFragment) != fragmentsToChange.contains(currentFragment)) {
-		
+
 					FieldDeclaration newStatement= ast.newFieldDeclaration((VariableDeclarationFragment)rewrite.createMoveTarget(currentFragment));
 					newStatement.setType((Type)rewrite.createCopyTarget(declarationNode.getType()));
-					
+
 					ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, newStatement);
 					if (fragmentsToChange.contains(currentFragment)) {
 						modifierRewrite.copyAllAnnotations(declarationNode, group);
@@ -85,9 +85,9 @@ public class VariableDeclarationRewrite {
 						modifierRewrite.copyAllModifiers(declarationNode, group);
 					}
 					blockRewrite.insertAfter(newStatement, lastStatement, group);
-					
+
 					fragmentsRewrite= rewrite.getListRewrite(newStatement, FieldDeclaration.FRAGMENTS_PROPERTY);
-					lastStatement= newStatement;								
+					lastStatement= newStatement;
 			} else if (fragmentsRewrite != null) {
 				ASTNode fragment0= rewrite.createMoveTarget(currentFragment);
 				fragmentsRewrite.insertLast(fragment0, group);
@@ -95,14 +95,14 @@ public class VariableDeclarationRewrite {
 			lastFragment= currentFragment;
 		}
 	}
-	
+
 	public static void rewriteModifiers(final VariableDeclarationStatement declarationNode, final VariableDeclarationFragment[] toChange, final int includedModifiers, final int excludedModifiers, ASTRewrite rewrite, final TextEditGroup group) {
 		final List fragmentsToChange= Arrays.asList(toChange);
 		AST ast= declarationNode.getAST();
-		
+
 		List fragments= declarationNode.fragments();
 		Iterator iter= fragments.iterator();
-		
+
 		ListRewrite blockRewrite= null;
 		ASTNode parentStatement= declarationNode.getParent();
 		if (parentStatement instanceof SwitchStatement) {
@@ -113,24 +113,24 @@ public class VariableDeclarationRewrite {
 			// should not happen. VariableDeclaration's can not be in a control statement body
 			Assert.isTrue(false);
 		}
-		
+
 		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
 		ASTNode lastStatement= declarationNode;
-		
+
 		if (fragmentsToChange.contains(lastFragment)) {
 			ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, declarationNode);
 			modifierRewrite.setModifiers(includedModifiers, excludedModifiers, group);
 		}
-		
+
 		ListRewrite fragmentsRewrite= null;
 		while (iter.hasNext()) {
 			VariableDeclarationFragment currentFragment= (VariableDeclarationFragment)iter.next();
-			
+
 			if (fragmentsToChange.contains(lastFragment) != fragmentsToChange.contains(currentFragment)) {
-		
+
 					VariableDeclarationStatement newStatement= ast.newVariableDeclarationStatement((VariableDeclarationFragment)rewrite.createMoveTarget(currentFragment));
 					newStatement.setType((Type)rewrite.createCopyTarget(declarationNode.getType()));
-					
+
 					ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, newStatement);
 					if (fragmentsToChange.contains(currentFragment)) {
 						modifierRewrite.copyAllAnnotations(declarationNode, group);
@@ -139,9 +139,9 @@ public class VariableDeclarationRewrite {
 						modifierRewrite.copyAllModifiers(declarationNode, group);
 					}
 					blockRewrite.insertAfter(newStatement, lastStatement, group);
-					
+
 					fragmentsRewrite= rewrite.getListRewrite(newStatement, VariableDeclarationStatement.FRAGMENTS_PROPERTY);
-					lastStatement= newStatement;								
+					lastStatement= newStatement;
 			} else if (fragmentsRewrite != null) {
 				ASTNode fragment0= rewrite.createMoveTarget(currentFragment);
 				fragmentsRewrite.insertLast(fragment0, group);

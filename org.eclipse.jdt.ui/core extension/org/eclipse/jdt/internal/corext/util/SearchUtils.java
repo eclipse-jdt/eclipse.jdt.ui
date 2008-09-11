@@ -31,7 +31,7 @@ public class SearchUtils {
 		else
 			return null;
 	}
-	
+
 	/**
 	 * @param match
 	 * @return the enclosing {@link ICompilationUnit} of the given match, or null iff none
@@ -45,17 +45,17 @@ public class SearchUtils {
 			if (cu != null)
 				return cu;
 		}
-		
+
 		IJavaElement jElement= JavaCore.create(match.getResource());
 		if (jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT)
 			return (ICompilationUnit) jElement;
 		return null;
 	}
-	
+
 	public static SearchParticipant[] getDefaultSearchParticipants() {
 		return new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 	}
-	
+
     /**
      * Constant for use as matchRule in {@link SearchPattern#createPattern(IJavaElement, int, int)}
      * to get search behavior as of 3.1M3 (all generic instantiations are found).
@@ -66,7 +66,7 @@ public class SearchUtils {
      * Returns whether the given pattern is a camel case pattern or not.
      * <em>Note: this method does not consider the
      * {@link SearchPattern#R_CAMELCASE_SAME_PART_COUNT_MATCH} variant.<em>
-     * 
+     *
      * @param pattern the pattern to inspect
      * @return whether it is a camel case pattern or not
      */

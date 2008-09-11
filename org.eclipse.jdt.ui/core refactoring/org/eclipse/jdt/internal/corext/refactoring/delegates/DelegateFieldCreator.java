@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersPr
  * field <strong>with only one fragment</strong>. See
  * {@link MoveStaticMembersProcessor#getASTMembers(org.eclipse.ltk.core.refactoring.RefactoringStatus)}
  * for more information.
- * 
+ *
  * @since 3.2
  */
 public class DelegateFieldCreator extends DelegateCreator {
@@ -40,14 +40,14 @@ public class DelegateFieldCreator extends DelegateCreator {
 	private VariableDeclarationFragment fOldFieldFragment;
 
 	protected void initialize() {
-		
+
 		Assert.isTrue(getDeclaration() instanceof FieldDeclaration);
 		Assert.isTrue(((FieldDeclaration) getDeclaration()).fragments().size() == 1);
-		
+
 		fOldFieldFragment= (VariableDeclarationFragment) ((FieldDeclaration) getDeclaration()).fragments().get(0);
 		if (getNewElementName() == null)
 			setNewElementName(fOldFieldFragment.getName().getIdentifier());
-		
+
 		setInsertBefore(false); // delegate must be inserted after the original field that is referenced in the initializer
 	}
 
@@ -65,11 +65,11 @@ public class DelegateFieldCreator extends DelegateCreator {
 			ref.setQualifier(createDestinationTypeName());
 		return ref;
 	}
-	
+
 	protected ASTNode getBodyHead(BodyDeclaration result) {
 		return fOldFieldFragment;
 	}
-	
+
 	protected ChildPropertyDescriptor getJavaDocProperty() {
 		return FieldDeclaration.JAVADOC_PROPERTY;
 	}

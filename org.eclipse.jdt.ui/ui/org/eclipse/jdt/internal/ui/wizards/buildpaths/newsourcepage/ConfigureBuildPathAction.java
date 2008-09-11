@@ -45,25 +45,25 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 
 	public ConfigureBuildPathAction(IWorkbenchSite site) {
 		super(site, null, BuildpathModifierAction.CONFIGURE_BUILD_PATH);
-		
+
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDetailedDescription() {
 	    return null;
 	}
-	
+
 	public void run() {
 		IProject project= null;
 		Object firstElement= getSelectedElements().get(0);
 		HashMap data= new HashMap();
-		
+
 		if (firstElement instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) firstElement;
 			IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -89,9 +89,9 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 	protected boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() != 1)
 			return false;
-	
+
 		Object firstElement= elements.getFirstElement();
-		
+
 		if (firstElement instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) firstElement;
 			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
@@ -101,7 +101,7 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 			IJavaProject project= element.getJavaProject();
 			if (project == null)
 				return false;
-			
+
 			return project.getProject() != null;
 		} else if (firstElement instanceof PackageFragmentRootContainer) {
 			return true;
@@ -109,11 +109,11 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 			IResource res= (IResource) ((IAdaptable) firstElement).getAdapter(IResource.class);
 			if (res == null)
 				return false;
-			
+
 			IProject project = res.getProject();
 			if (project == null || !project.isOpen())
 				return false;
-			
+
 			try {
 				return project.hasNature(JavaCore.NATURE_ID);
 			} catch (CoreException e) {

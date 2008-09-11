@@ -23,11 +23,11 @@ public class SaveParticipantDescriptor {
 	private final IPostSaveListener fPostSaveListener;
 	/** The preference configuration block, if any */
 	private ISaveParticipantPreferenceConfiguration fPreferenceConfiguration;
-	
+
 	/**
 	 * Creates a new descriptor which connects a {@link IPostSaveListener}
 	 * with an {@link ISaveParticipantPreferenceConfiguration}.
-	 * 
+	 *
 	 * @param listener the listener
 	 */
 	SaveParticipantDescriptor(IPostSaveListener listener) {
@@ -39,7 +39,7 @@ public class SaveParticipantDescriptor {
 	/**
 	 * Returns the post save listener of the described
 	 * save participant
-	 * 
+	 *
 	 * @return the listener
 	 */
 	public IPostSaveListener getPostSaveListener()  {
@@ -49,7 +49,7 @@ public class SaveParticipantDescriptor {
 	/**
 	 * Creates a new preference configuration of the described
 	 * save participant.
-	 * 
+	 *
 	 * @return the preference configuration
 	 */
 	public ISaveParticipantPreferenceConfiguration createPreferenceConfiguration() {
@@ -61,20 +61,20 @@ public class SaveParticipantDescriptor {
 
 			protected String getPostSaveListenerName() {
 	            return fPostSaveListener.getName();
-            }			
+            }
 		};
 	}
-	
+
 	/**
 	 * Returns the preference configuration of the described
 	 * save participant.
-	 * 
+	 *
 	 * @return the preference configuration
 	 */
 	public ISaveParticipantPreferenceConfiguration getPreferenceConfiguration() {
 		if (fPreferenceConfiguration == null)
 			fPreferenceConfiguration= createPreferenceConfiguration();
-		
+
 	    return fPreferenceConfiguration;
     }
 

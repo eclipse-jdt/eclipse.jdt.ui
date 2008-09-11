@@ -13,9 +13,9 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -62,13 +62,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * The action is applicable to structured selections containing a single
  * <code>ICompilationUnit</code> or top level <code>IType</code> in a
  * compilation unit.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class SortMembersAction extends SelectionDispatchAction {
@@ -80,22 +80,22 @@ public class SortMembersAction extends SelectionDispatchAction {
 	 * Creates a new <code>SortMembersAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public SortMembersAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.SortMembersAction_label); 
-		setDescription(ActionMessages.SortMembersAction_description); 
-		setToolTipText(ActionMessages.SortMembersAction_tooltip); 
-		
+		setText(ActionMessages.SortMembersAction_label);
+		setDescription(ActionMessages.SortMembersAction_description);
+		setToolTipText(ActionMessages.SortMembersAction_tooltip);
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_MEMBERS_ACTION);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public SortMembersAction(CompilationUnitEditor editor) {
@@ -103,13 +103,13 @@ public class SortMembersAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(checkEnabledEditor());
 	}
-	
+
 	private boolean checkEnabledEditor() {
 		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
-	}	
-	
+	}
+
 	//---- Structured Viewer -----------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -117,8 +117,8 @@ public class SortMembersAction extends SelectionDispatchAction {
 		boolean enabled= false;
 		enabled= getSelectedCompilationUnit(selection) != null;
 		setEnabled(enabled);
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -136,26 +136,26 @@ public class SortMembersAction extends SelectionDispatchAction {
 			if (!ActionUtil.isEditable(getShell(), cu)) {
 				return;
 			}
-			
+
 			SortMembersMessageDialog dialog= new SortMembersMessageDialog(getShell());
 			if (dialog.open() != Window.OK) {
 				return;
 			}
-			
+
 			if (!ElementValidator.check(cu, getShell(), getDialogTitle(), false)) {
 				return;
 			}
-			
+
 			// open an editor and work on a working copy
 			IEditorPart editor= JavaUI.openInEditor(cu);
 			if (editor != null) {
 				run(shell, cu, editor, dialog.isNotSortingFieldsEnabled());
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
-		}			
+			ExceptionHandler.handle(e, shell, getDialogTitle(), null);
+		}
 	}
-	
+
 	private boolean hasMembersToSort(IJavaElement[] members) throws JavaModelException {
 		if (members.length > 1) {
 			return true;
@@ -170,13 +170,13 @@ public class SortMembersAction extends SelectionDispatchAction {
 	}
 
 	//---- Java Editor --------------------------------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void selectionChanged(ITextSelection selection) {
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -196,12 +196,12 @@ public class SortMembersAction extends SelectionDispatchAction {
 			}
 			run(shell, (ICompilationUnit) input, fEditor, dialog.isNotSortingFieldsEnabled());
 		} else {
-			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.SortMembersAction_not_applicable); 
+			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.SortMembersAction_not_applicable);
 		}
 	}
 
 	//---- Helpers -------------------------------------------------------------------
-	
+
 	private boolean containsRelevantMarkers(IEditorPart editor) {
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
 		Iterator iterator= model.getAnnotationIterator();
@@ -212,22 +212,22 @@ public class SortMembersAction extends SelectionDispatchAction {
 				if (!annot.isMarkedDeleted() && annot.isPersistent() && !annot.isProblem())
 					return true;
 			}
-		}		
+		}
 		return false;
 	}
-	
+
 	private void run(Shell shell, ICompilationUnit cu, IEditorPart editor, boolean isNotSortFields) {
 		if (containsRelevantMarkers(editor)) {
-			int returnCode= OptionalMessageDialog.open(ID_OPTIONAL_DIALOG, 
-					getShell(), 
+			int returnCode= OptionalMessageDialog.open(ID_OPTIONAL_DIALOG,
+					getShell(),
 					getDialogTitle(),
 					null,
-					ActionMessages.SortMembersAction_containsmarkers,  
-					MessageDialog.WARNING, 		
-					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
+					ActionMessages.SortMembersAction_containsmarkers,
+					MessageDialog.WARNING,
+					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL},
 					0);
-			if (returnCode != OptionalMessageDialog.NOT_SHOWN && 
-					returnCode != Window.OK ) return;	
+			if (returnCode != OptionalMessageDialog.NOT_SHOWN &&
+					returnCode != Window.OK ) return;
 		}
 
 		SortMembersOperation op= new SortMembersOperation(cu, null, isNotSortFields);
@@ -237,13 +237,13 @@ public class SortMembersAction extends SelectionDispatchAction {
 				new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
 				op.getScheduleRule());
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
+			ExceptionHandler.handle(e, shell, getDialogTitle(), null);
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		}
 	}
 
-		
+
 	private ICompilationUnit getSelectedCompilationUnit(IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			Object element= selection.getFirstElement();
@@ -258,8 +258,8 @@ public class SortMembersAction extends SelectionDispatchAction {
 		}
 		return null;
 	}
-	
+
 	private String getDialogTitle() {
-		return ActionMessages.SortMembersAction_dialog_title; 
-	}	
+		return ActionMessages.SortMembersAction_dialog_title;
+	}
 }

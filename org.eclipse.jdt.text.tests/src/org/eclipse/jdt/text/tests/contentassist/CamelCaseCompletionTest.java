@@ -18,7 +18,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.JavaCore;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class CamelCaseCompletionTest extends AbstractCompletionTest {
@@ -35,7 +35,7 @@ public class CamelCaseCompletionTest extends AbstractCompletionTest {
 	public static Test suite() {
 		return new CompletionTestSetup(allTests());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */
@@ -48,15 +48,15 @@ public class CamelCaseCompletionTest extends AbstractCompletionTest {
 		addMembers("void methodCallWithParams(int par) {}");
 		assertMethodBodyProposal("this.mCW|", "methodCallWith", "this.methodCallWithParams(|)");
 	}
-	
+
 	public void testMethodWithTrailing() throws Exception {
 		addMembers("void methodCallWithParams(int par) {}");
 		assertMethodBodyProposal("this.mCWith|", "methodCallWith", "this.methodCallWithParams(|)");
 	}
-	
+
 	public void testField() throws Exception {
 		addMembers("int multiCamelCaseField;");
 		assertMethodBodyProposal("this.mCC|", "multiCamel", "this.multiCamelCaseField|");
 	}
-	
+
 }

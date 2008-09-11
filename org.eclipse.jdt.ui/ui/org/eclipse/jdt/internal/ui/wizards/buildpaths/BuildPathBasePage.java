@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -31,13 +31,13 @@ import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class BuildPathBasePage {
-	
+
 	private final ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
-	
+
 	public BuildPathBasePage() {
 		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
 	}
-		
+
 	protected boolean editCustomAttribute(Shell shell, CPListElementAttribute elem) {
 		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
 		if (config != null) {
@@ -49,7 +49,7 @@ public abstract class BuildPathBasePage {
 		}
 		return false;
 	}
-	
+
 	protected boolean removeCustomAttribute(CPListElementAttribute elem) {
 		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
 		if (config != null) {
@@ -61,7 +61,7 @@ public abstract class BuildPathBasePage {
 		}
 		return false;
 	}
-	
+
 	protected boolean canEditCustomAttribute(CPListElementAttribute elem) {
 		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
 		if (config != null) {
@@ -69,7 +69,7 @@ public abstract class BuildPathBasePage {
 		}
 		return false;
 	}
-	
+
 	protected boolean canRemoveCustomAttribute(CPListElementAttribute elem) {
 		ClasspathAttributeConfiguration config= fAttributeDescriptors.get(elem.getKey());
 		if (config != null) {
@@ -77,23 +77,23 @@ public abstract class BuildPathBasePage {
 		}
 		return false;
 	}
-	
-	
+
+
 	public abstract List getSelection();
 	public abstract void setSelection(List selection, boolean expand);
-	
-	
+
+
 	/**
 	 * Adds an element to the page
-	 * 
+	 *
 	 * @param element the element to add
 	 */
 	public void addElement(CPListElement element) {
 		// default implementation does nothing
 	}
-	
+
 	public abstract boolean isEntryKind(int kind);
-			
+
 	protected void filterAndSetSelection(List list) {
 		ArrayList res= new ArrayList(list.size());
 		for (int i= list.size()-1; i >= 0; i--) {
@@ -107,13 +107,13 @@ public abstract class BuildPathBasePage {
 		}
 		setSelection(res, false);
 	}
-	
+
 	public static void fixNestingConflicts(CPListElement[] newEntries, CPListElement[] existing, Set modifiedSourceEntries) {
 		for (int i= 0; i < newEntries.length; i++) {
 			addExclusionPatterns(newEntries[i], existing, modifiedSourceEntries);
 		}
 	}
-	
+
 	private static void addExclusionPatterns(CPListElement newEntry, CPListElement[] existing, Set modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
 		for (int i= 0; i < existing.length; i++) {
@@ -134,7 +134,7 @@ public abstract class BuildPathBasePage {
 			}
 		}
 	}
-	
+
 	private static boolean addToExclusions(IPath entryPath, CPListElement curr) {
 		IPath[] exclusionFilters= (IPath[]) curr.getAttribute(CPListElement.EXCLUSION);
 		if (!JavaModelUtil.isExcludedPath(entryPath, exclusionFilters)) {
@@ -147,7 +147,7 @@ public abstract class BuildPathBasePage {
 		}
 		return false;
 	}
-	
+
 	protected boolean containsOnlyTopLevelEntries(List selElements) {
 		if (selElements.size() == 0) {
 			return true;
@@ -168,7 +168,7 @@ public abstract class BuildPathBasePage {
 	public abstract void init(IJavaProject javaProject);
 
 	public abstract Control getControl(Composite parent);
-	
+
 	public abstract void setFocus();
-	
+
 }

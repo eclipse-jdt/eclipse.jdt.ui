@@ -13,10 +13,11 @@ package org.eclipse.jdt.internal.corext.refactoring.nls.changes;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
@@ -24,18 +25,18 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
 public class CreateTextFileChange extends CreateFileChange {
-	
+
 	private final String fTextType;
-	
+
 	public CreateTextFileChange(IPath path, String source, String encoding, String textType) {
 		super(path, source, encoding);
 		fTextType= textType;
 	}
-	
+
 	public String getTextType() {
 		return fTextType;
 	}
-	
+
 	public String getCurrentContent() throws JavaModelException {
 		IFile file= getOldFile(new NullProgressMonitor());
 		if (! file.exists())
@@ -56,7 +57,7 @@ public class CreateTextFileChange extends CreateFileChange {
 			}
 		}
 	}
-	
+
 	public String getPreview() {
 		return getSource();
 	}

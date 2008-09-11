@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
 /**
  * A manifest provider creates manifest files for a fat jar.
- * 
+ *
  * @since 3.4
  */
 public class FatJarManifestProvider implements IManifestProvider {
@@ -132,7 +132,7 @@ public class FatJarManifestProvider implements IManifestProvider {
 
 	/**
 	 * Hook for subclasses to add additional manifest entries.
-	 * 
+	 *
 	 * @param	manifest	the manifest to which the entries should be added
 	 * @param	jarPackage	the JAR package specification
 	 */

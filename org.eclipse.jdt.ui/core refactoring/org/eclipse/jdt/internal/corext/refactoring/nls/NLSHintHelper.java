@@ -21,13 +21,13 @@ import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -75,7 +75,7 @@ public class NLSHintHelper {
 
 	/**
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
-	 * 
+	 *
 	 * @param astRoot the ast root
 	 * @param nlsElement the nls element
 	 * @return the accessor class reference or <code>null</code> if this element is not a nls'ed entry
@@ -84,10 +84,10 @@ public class NLSHintHelper {
 		IRegion region= nlsElement.getPosition();
 		return getAccessorClassReference(astRoot, region);
 	}
-	
+
 	/**
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
-	 * 
+	 *
 	 * @param astRoot the ast root
 	 * @param region the text region
 	 * @return the accessor class reference or <code>null</code> if this element is not a nls'ed entry
@@ -98,12 +98,12 @@ public class NLSHintHelper {
 			return null; // not found
 
 		ASTNode parent= nlsStringLiteral.getParent();
-		
+
 		ITypeBinding accessorBinding= null;
-		
+
 		if (nlsStringLiteral instanceof SimpleName) {
 			SimpleName name= (SimpleName)nlsStringLiteral;
-			
+
 			IBinding binding= name.resolveBinding();
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding variableBinding= (IVariableBinding)binding;
@@ -111,66 +111,66 @@ public class NLSHintHelper {
 					accessorBinding= variableBinding.getDeclaringClass();
 			}
 		}
-		
+
 		if (accessorBinding == null) {
-		
+
 			if (parent instanceof MethodInvocation) {
 				MethodInvocation methodInvocation= (MethodInvocation) parent;
 				List args= methodInvocation.arguments();
 				if (args.indexOf(nlsStringLiteral) != 0) {
 					return null; // must be first argument in lookup method
 				}
-				
+
 				Expression firstArgument= (Expression)args.get(0);
 				ITypeBinding argumentBinding= firstArgument.resolveTypeBinding();
 				if (argumentBinding == null || !argumentBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
 					return null;
 				}
-				
+
 				ITypeBinding typeBinding= methodInvocation.resolveTypeBinding();
 				if (typeBinding == null || !typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
 					return null;
 				}
-				
+
 				IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
 				if (methodBinding == null || !Modifier.isStatic(methodBinding.getModifiers())) {
 					return null; // only static methods qualify
 				}
-		
+
 				accessorBinding= methodBinding.getDeclaringClass();
 			} else if (parent instanceof VariableDeclarationFragment) {
 				VariableDeclarationFragment decl= (VariableDeclarationFragment)parent;
 				if (decl.getInitializer() != null)
 					return null;
-				
+
 				IBinding binding= decl.resolveBinding();
 				if (!(binding instanceof IVariableBinding))
 					return null;
-				
+
 				IVariableBinding variableBinding= (IVariableBinding)binding;
 				if (!Modifier.isStatic(variableBinding.getModifiers()))
 					return null;
-				
+
 				accessorBinding= variableBinding.getDeclaringClass();
 			}
 		}
-		
+
 		if (accessorBinding == null)
 			return null;
-		
+
 		String resourceBundleName;
 		try {
 			resourceBundleName= getResourceBundleName(accessorBinding);
 		} catch (JavaModelException e) {
 			return null;
 		}
-		
+
 		if (resourceBundleName != null)
 			return new AccessorClassReference(accessorBinding, resourceBundleName, new Region(parent.getStartPosition(), parent.getLength()));
 
 		return null;
 	}
-	
+
 	public static IPackageFragment getPackageOfAccessorClass(IJavaProject javaProject, ITypeBinding accessorBinding) throws JavaModelException {
 		if (accessorBinding != null) {
 			ICompilationUnit unit= Bindings.findCompilationUnit(accessorBinding, javaProject);
@@ -184,26 +184,26 @@ public class NLSHintHelper {
 	public static String getResourceBundleName(ITypeBinding accessorClassBinding) throws JavaModelException {
 		IJavaElement je= accessorClassBinding.getJavaElement();
 		if (!(je instanceof IType))
-			return null;	
+			return null;
 		ITypeRoot typeRoot= ((IType) je).getTypeRoot();
 		CompilationUnit astRoot= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_YES, null);
-	
+
 		return getResourceBundleName(astRoot);
 	}
-	
+
 	public static String getResourceBundleName(ITypeRoot input) throws JavaModelException {
 		return getResourceBundleName(SharedASTProvider.getAST(input, SharedASTProvider.WAIT_YES, null));
 	}
-		
+
 	public static String getResourceBundleName(CompilationUnit astRoot) throws JavaModelException {
 
 		if (astRoot == null)
 			return null;
-		
+
 		final Map resultCollector= new HashMap(5);
 		final Object RESULT_KEY= new Object();
 		final Object FIELD_KEY= new Object();
-		
+
 		astRoot.accept(new ASTVisitor() {
 
 			public boolean visit(MethodInvocation node) {
@@ -223,7 +223,7 @@ public class NLSHintHelper {
 
 				if (argument instanceof Name) {
 					Object fieldNameBinding= ((Name)argument).resolveBinding();
-					if (fieldNameBinding != null) 
+					if (fieldNameBinding != null)
 						resultCollector.put(FIELD_KEY, fieldNameBinding);
 				}
 
@@ -239,7 +239,7 @@ public class NLSHintHelper {
 						resultCollector.put(fieldNameBinding, bundleName);
 					return false;
 				}
-				return true;	
+				return true;
 			}
 
 			public boolean visit(Assignment node) {
@@ -270,15 +270,15 @@ public class NLSHintHelper {
 							return typeBinding.getQualifiedName();
 					}
 				}
-				return null;	
+				return null;
 			}
 
 		});
 
-		
+
 		Object fieldName;
 		String result;
-		
+
 		// First try hard-coded bundle name String field names from NLS tooling:
 		Iterator iter= resultCollector.keySet().iterator();
 		while (iter.hasNext()) {
@@ -327,22 +327,22 @@ public class NLSHintHelper {
 		}
 		return null;
 	}
-	
+
 	public static IStorage getResourceBundle(ICompilationUnit compilationUnit) throws JavaModelException {
 		IJavaProject project= compilationUnit.getJavaProject();
 		if (project == null)
 			return null;
-		
+
 		String name= getResourceBundleName(compilationUnit);
 		if (name == null)
 			return null;
-		
-		String packName= Signature.getQualifier(name); 
+
+		String packName= Signature.getQualifier(name);
 		String resourceName= Signature.getSimpleName(name) + NLSRefactoring.PROPERTY_FILE_EXT;
-		
+
 		return getResourceBundle(project, packName, resourceName);
 	}
-	
+
 	public static IStorage getResourceBundle(IJavaProject javaProject, String packageName, String resourceName) throws JavaModelException {
 		IPackageFragmentRoot[] allRoots= javaProject.getAllPackageFragmentRoots();
 		for (int i= 0; i < allRoots.length; i++) {
@@ -355,7 +355,7 @@ public class NLSHintHelper {
 		}
 		return null;
 	}
-	
+
 	public static IStorage getResourceBundle(IPackageFragmentRoot root, String packageName, String resourceName) throws JavaModelException {
 		IPackageFragment packageFragment= root.getPackageFragment(packageName);
 		if (packageFragment.exists()) {
@@ -377,23 +377,23 @@ public class NLSHintHelper {
 		String resourceBundle= accessorClassReference.getResourceBundleName();
 		if (resourceBundle == null)
 			return null;
-		
+
 		String resourceName= Signature.getSimpleName(resourceBundle) + NLSRefactoring.PROPERTY_FILE_EXT;
 		String packName= Signature.getQualifier(resourceBundle);
 		ITypeBinding accessorClass= accessorClassReference.getBinding();
-		
+
 		if (accessorClass.isFromSource())
 			return getResourceBundle(javaProject, packName, resourceName);
 		else if (accessorClass.getJavaElement() != null)
 			return getResourceBundle((IPackageFragmentRoot)accessorClass.getJavaElement().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT), packName, resourceName);
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Reads the properties from the given storage and
 	 * returns it.
-	 * 
+	 *
 	 * @param javaProject the Java project
 	 * @param accessorClassReference the accessor class reference
 	 * @return the properties or <code>null</code> if it was not successfully read
@@ -407,11 +407,11 @@ public class NLSHintHelper {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Reads the properties from the given storage and
 	 * returns it.
-	 * 
+	 *
 	 * @param storage the storage
 	 * @return the properties or <code>null</code> if it was not successfully read
 	 */
@@ -421,7 +421,7 @@ public class NLSHintHelper {
 
 		Properties props= new Properties();
 		InputStream is= null;
-		
+
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
 			if (manager != null) {
@@ -431,13 +431,13 @@ public class NLSHintHelper {
 					is= new ByteArrayInputStream(document.get().getBytes());
 				}
 			}
-			
+
 			// Fallback: read from storage
 			if (is == null)
 				is= storage.getContents();
-			
+
 			props.load(is);
-			
+
 		} catch (IOException e) {
 			// sorry no properties
 			return null;

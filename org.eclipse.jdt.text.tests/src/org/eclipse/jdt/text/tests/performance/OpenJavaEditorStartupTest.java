@@ -14,13 +14,14 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**
  * Startup performance with an open Java editor.
- * 
+ *
  * @since 3.1
  */
 public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
@@ -28,7 +29,7 @@ public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
 	public static class Setup extends TestSetup {
 
 		private boolean fTearDown;
-		
+
 		private boolean fSetUp;
 
 		public Setup(Test test) {
@@ -57,7 +58,7 @@ public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
 	private static final String SHORT_NAME= "Eclipse SDK startup with Java editor open in Java perspective";
 
 	private static final String FILE= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new Setup(new TestSuite(THIS)));
 	}
@@ -65,7 +66,7 @@ public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
 	public static Test suiteForMeasurement() {
 		return new Setup(new TestSuite(THIS), false, true);
 	}
-	
+
 	public void testJavaEditorStartup() {
 		PerformanceMeter perfMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
 		measureStartup(perfMeter);

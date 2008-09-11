@@ -24,36 +24,36 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * Depending in the action state a different label provider is installed in the viewer
  */
 public class ShowInheritedMembersAction extends Action {
-	
+
 	private MethodsViewer fMethodsViewer;
-	
-	/** 
+
+	/**
 	 * Creates the action.
 	 * @param viewer the viewer
 	 * @param initValue the initial state
 	 */
 	public ShowInheritedMembersAction(MethodsViewer viewer, boolean initValue) {
-		super(TypeHierarchyMessages.ShowInheritedMembersAction_label); 
-		setDescription(TypeHierarchyMessages.ShowInheritedMembersAction_description); 
-		setToolTipText(TypeHierarchyMessages.ShowInheritedMembersAction_tooltip); 
-		
+		super(TypeHierarchyMessages.ShowInheritedMembersAction_label);
+		setDescription(TypeHierarchyMessages.ShowInheritedMembersAction_description);
+		setToolTipText(TypeHierarchyMessages.ShowInheritedMembersAction_tooltip);
+
 		JavaPluginImages.setLocalImageDescriptors(this, "inher_co.gif"); //$NON-NLS-1$
 
 		fMethodsViewer= viewer;
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_INHERITED_ACTION);
- 
+
 		setChecked(initValue);
 	}
-	
+
 	/*
 	 * @see Action#actionPerformed
-	 */	
+	 */
 	public void run() {
 		BusyIndicator.showWhile(fMethodsViewer.getControl().getDisplay(), new Runnable() {
 			public void run() {
 				fMethodsViewer.showInheritedMethods(isChecked());
 			}
-		});		
-	}	
+		});
+	}
 }

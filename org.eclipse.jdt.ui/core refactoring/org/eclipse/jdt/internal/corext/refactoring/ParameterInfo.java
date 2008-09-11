@@ -17,10 +17,10 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 
 
 public class ParameterInfo {
-	
+
 	public static final int INDEX_FOR_ADDED= -1;
 	public static final String ELLIPSIS= "..."; //$NON-NLS-1$
-	
+
 	private IVariableBinding fOldBinding;
 	private ITypeBinding fOldTypeBinding;
 	private final String fOldName;
@@ -35,7 +35,7 @@ public class ParameterInfo {
 	private boolean fCreateField=true;
 	private boolean fInlined;
 	private boolean fResolve= true;
-	
+
 	public ParameterInfo(String type, String name, int index) {
 		this(null, null, type, name, index);
 	}
@@ -43,7 +43,7 @@ public class ParameterInfo {
 	public ParameterInfo(IVariableBinding binding, String type, String name, int index) {
 		this(binding, null, type, name, index);
 	}
-	
+
 	private ParameterInfo(IVariableBinding binding, ITypeBinding typeBinding, String type, String name, int index) {
 		fOldBinding= binding;
 		fOldTypeBinding= typeBinding;
@@ -57,7 +57,7 @@ public class ParameterInfo {
 		fIsDeleted= false;
 	}
 
-	
+
 	/**
 	 * Creates a new ParameterInfo. Parameter is marked as added and not resolvable
 	 * @param type the fullyqualified type
@@ -71,7 +71,7 @@ public class ParameterInfo {
 		info.setResolve(false);
 		return info;
 	}
-	
+
 	private void setResolve(boolean resolve) {
 		fResolve= resolve;
 	}
@@ -83,7 +83,7 @@ public class ParameterInfo {
 		info.setDefaultValue(defaultValue);
 		return info;
 	}
-	
+
 	public static ParameterInfo createInfoForAddedParameter(ITypeBinding typeBinding, String type, String name, String defaultValue) {
 		ParameterInfo info= new ParameterInfo(null, typeBinding, "", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
 		info.setNewTypeName(type);
@@ -91,36 +91,36 @@ public class ParameterInfo {
 		info.setDefaultValue(defaultValue);
 		return info;
 	}
-	
+
 	public int getOldIndex() {
 		return fOldIndex;
 	}
-	
+
 	public boolean isDeleted(){
 		return fIsDeleted;
 	}
-	
+
 	public void markAsDeleted(){
 		Assert.isTrue(! isAdded());//added param infos should be simply removed from the list
 		fIsDeleted= true;
 	}
-	
+
 	public boolean isAdded(){
 		return fOldIndex == INDEX_FOR_ADDED;
 	}
-	
+
 	public boolean isTypeNameChanged() {
 		return !fOldTypeName.equals(fNewTypeName);
 	}
-	
+
 	public boolean isRenamed() {
 		return !fOldName.equals(fNewName);
 	}
-	
+
 	public boolean isVarargChanged() {
 		return isOldVarargs() != isNewVarargs();
 	}
-	
+
 	public IVariableBinding getOldBinding() {
 		return fOldBinding;
 	}
@@ -128,11 +128,11 @@ public class ParameterInfo {
 	public String getOldTypeName() {
 		return fOldTypeName;
 	}
-	
+
 	public String getNewTypeName() {
 		return fNewTypeName;
 	}
-	
+
 	public void setNewTypeName(String type){
 		Assert.isNotNull(type);
 		fNewTypeName= type;
@@ -141,7 +141,7 @@ public class ParameterInfo {
 	public ITypeBinding getNewTypeBinding() {
 		return fNewTypeBinding;
 	}
-	
+
 	public void setNewTypeBinding(ITypeBinding typeBinding){
 		fNewTypeBinding= typeBinding;
 	}
@@ -149,11 +149,11 @@ public class ParameterInfo {
 	public boolean isOldVarargs() {
 		return isVarargs(fOldTypeName);
 	}
-	
+
 	public boolean isNewVarargs() {
 		return isVarargs(fNewTypeName);
 	}
-	
+
 	public String getOldName() {
 		return fOldName;
 	}
@@ -161,7 +161,7 @@ public class ParameterInfo {
 	public String getNewName() {
 		return fNewName;
 	}
-	
+
 	public void setNewName(String newName) {
 		Assert.isNotNull(newName);
 		fNewName= newName;
@@ -170,7 +170,7 @@ public class ParameterInfo {
 	public String getDefaultValue(){
 		return fDefaultValue;
 	}
-	
+
 	public void setDefaultValue(String value){
 		Assert.isNotNull(value);
 		fDefaultValue= value;
@@ -181,14 +181,14 @@ public class ParameterInfo {
 		+ fNewTypeName + " " + fNewName + ": " + fDefaultValue  //$NON-NLS-1$//$NON-NLS-2$
 		+ (fIsDeleted ? " (deleted)" : " (stays)");  //$NON-NLS-1$//$NON-NLS-2$
 	}
-	
+
 	public static String stripEllipsis(String typeName) {
 		if (isVarargs(typeName))
 			return typeName.substring(0, typeName.length() - 3);
 		else
 			return typeName;
 	}
-	
+
 	public static boolean isVarargs(String typeName) {
 		return typeName.endsWith("..."); //$NON-NLS-1$
 	}
@@ -216,7 +216,7 @@ public class ParameterInfo {
 	public void setInlined(boolean inlined) {
 		fInlined=inlined;
 	}
-	
+
 	public boolean isInlined() {
 		return fInlined;
 	}

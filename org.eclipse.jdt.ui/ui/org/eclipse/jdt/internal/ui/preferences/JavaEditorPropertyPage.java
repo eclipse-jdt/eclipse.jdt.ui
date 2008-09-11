@@ -26,14 +26,14 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 
 public class JavaEditorPropertyPage extends PropertyPage {
-	
+
 	public JavaEditorPropertyPage() {}
-	
+
 	protected Control createContents(Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		composite.setLayout(new GridLayout());
-		
+
 		Link link= new Link(composite, SWT.WRAP);
 		GridData data= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		data.widthHint= 300;
@@ -49,5 +49,5 @@ public class JavaEditorPropertyPage extends PropertyPage {
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
-	
+
 }

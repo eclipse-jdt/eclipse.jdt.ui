@@ -20,12 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-import org.eclipse.text.edits.TextEditProcessor;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,6 +29,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.text.edits.TextEditProcessor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -171,7 +171,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Creates a new anonymous class reference finder.
-		 * 
+		 *
 		 * @param declaration
 		 *            the method declaration to search for references
 		 */
@@ -234,7 +234,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Returns the result set.
-		 * 
+		 *
 		 * @return the result set
 		 */
 		public final Set getResult() {
@@ -243,7 +243,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Returns the status of the find operation.
-		 * 
+		 *
 		 * @return the status of the operation
 		 */
 		public final RefactoringStatus getStatus() {
@@ -297,7 +297,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Creates a new enclosing instance reference finder.
-		 * 
+		 *
 		 * @param binding
 		 *            the declaring type
 		 */
@@ -359,7 +359,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Creates a new generic reference finder.
-		 * 
+		 *
 		 * @param declaration
 		 *            the method declaration
 		 */
@@ -400,7 +400,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Returns a argument node for the specified variable binding.
-		 * 
+		 *
 		 * @param binding
 		 *            the binding to create a argument node for
 		 * @param last
@@ -414,7 +414,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Returns a target node for the current target.
-		 * 
+		 *
 		 * @return the corresponding node
 		 * @throws JavaModelException
 		 *             if an error occurs
@@ -450,7 +450,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Creates a new method body rewriter.
-		 * 
+		 *
 		 * @param targetRewrite
 		 *            the target compilation unit rewrite to use
 		 * @param rewrite
@@ -468,7 +468,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fStaticImports.clear();
 			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet(), fStaticImports, false);
 		}
-		
+
 		private boolean isParameterName(String name) {
 			List parameters= fDeclaration.parameters();
 			for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {
@@ -478,9 +478,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				}
 			}
 			return false;
-			
+
 		}
-		
+
 		public final void endVisit(final AnonymousClassDeclaration node) {
 			Assert.isNotNull(node);
 			if (fAnonymousClass > 0)
@@ -516,7 +516,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			}
 			return rewrite.createMoveTarget(oldNameNode);
 		}
-		
+
 		public final boolean visit(final FieldAccess node) {
 			Assert.isNotNull(node);
 			final Expression expression= node.getExpression();
@@ -671,7 +671,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Returns the field binding associated with this expression.
-		 * 
+		 *
 		 * @param expression
 		 *            the expression to get the field binding for
 		 * @return the field binding, if the expression denotes a field access
@@ -695,7 +695,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/**
 		 * Is the specified name a qualified entity, e.g. preceded by 'this',
 		 * 'super' or part of a method invocation?
-		 * 
+		 *
 		 * @param name
 		 *            the name to check
 		 * @return <code>true</code> if this entity is qualified,
@@ -724,7 +724,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Creates a new read only field finder.
-		 * 
+		 *
 		 * @param binding
 		 *            The declaring class of the method declaring to find fields
 		 *            for
@@ -745,7 +745,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/**
 		 * Returns all fields of the declaring class plus the ones references in
 		 * the visited method declaration.
-		 * 
+		 *
 		 * @return all fields of the declaring class plus the references ones
 		 */
 		public final IVariableBinding[] getDeclaredFields() {
@@ -757,7 +757,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/**
 		 * Returns all fields of the declaring class which are not written by
 		 * the visited method declaration.
-		 * 
+		 *
 		 * @return all fields which are not written
 		 */
 		public final IVariableBinding[] getReadOnlyFields() {
@@ -836,7 +836,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Creates a new recursive call finder.
-		 * 
+		 *
 		 * @param declaration
 		 *            the method declaration
 		 */
@@ -942,7 +942,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		/**
 		 * Creates a new visibility adjusting argument factory.
-		 * 
+		 *
 		 * @param ast
 		 *            the ast to use for new nodes
 		 * @param rewrites
@@ -1012,7 +1012,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Returns the bindings of the method arguments of the specified
 	 * declaration.
-	 * 
+	 *
 	 * @param declaration
 	 *            the method declaration
 	 * @return the array of method argument variable bindings
@@ -1037,7 +1037,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Returns the bindings of the method argument types of the specified
 	 * declaration.
-	 * 
+	 *
 	 * @param declaration
 	 *            the method declaration
 	 * @return the array of method argument variable bindings
@@ -1061,7 +1061,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Is the specified name a field access?
-	 * 
+	 *
 	 * @param name
 	 *            the name to check
 	 * @return <code>true</code> if this name is a field access,
@@ -1139,7 +1139,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates a new move instance method processor.
-	 * 
+	 *
 	 * @param method
 	 *            the method to move, or <code>null</code> if invoked by
 	 *            scripting
@@ -1169,7 +1169,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Checks whether a method with the proposed name already exists in the
 	 * target type.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param status
@@ -1202,7 +1202,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Checks whether the new target name conflicts with an already existing
 	 * method parameter.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param status
@@ -1261,7 +1261,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod)));
 								checkConflictingTarget(new SubProgressMonitor(monitor, 1), status);
 								checkConflictingMethod(new SubProgressMonitor(monitor, 1), status);
-								
+
 								Checks.addModifiedFilesToChecker(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), context);
 
 								monitor.worked(1);
@@ -1281,7 +1281,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Checks whether the target is a type variable or a generic type.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param status
@@ -1304,7 +1304,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Checks whether the method has references to type variables or generic
 	 * types.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param declaration
@@ -1356,7 +1356,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Checks whether the instance method body is compatible with this
 	 * refactoring.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param declaration
@@ -1402,7 +1402,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Checks whether the instance method declaration is compatible with this
 	 * refactoring.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param status
@@ -1443,7 +1443,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Checks whether the method has possible targets to be moved to
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to display progress
 	 * @param declaration
@@ -1467,7 +1467,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Searches for references to the original method.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to use
 	 * @param status
@@ -1484,13 +1484,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			SearchPattern pattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(fMethod, true, false);
-			
+
 			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fMethod.getElementName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs);
 			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(monitor, 1), status);
 			binaryRefs.addErrorIfNecessary(status);
-			
+
 			return result;
 		} finally {
 			monitor.done();
@@ -1499,7 +1499,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Computes the files that are being modified by this refactoring.
-	 * 
+	 *
 	 * @param source
 	 *            the source compilation unit
 	 * @param target
@@ -1516,7 +1516,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the reserved identifiers in the method to move.
-	 * 
+	 *
 	 * @return the reserved identifiers
 	 * @throws JavaModelException
 	 *             if the method declaration could not be found
@@ -1545,7 +1545,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Computes the target categories for the method to move.
-	 * 
+	 *
 	 * @param declaration
 	 *            the method declaration
 	 * @return the possible targets as variable bindings of read-only fields and
@@ -1594,7 +1594,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates a visibility-adjusted target expression taking advantage of
 	 * existing accessor methods.
-	 * 
+	 *
 	 * @param enclosingElement
 	 *            the java element which encloses the current method access.
 	 * @param expression
@@ -1643,7 +1643,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates a generic argument list of the refactored moved method
-	 * 
+	 *
 	 * @param declaration
 	 *            the method declaration of the method to move
 	 * @param arguments
@@ -1737,7 +1737,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates the text change manager for this processor.
-	 * 
+	 *
 	 * @param status
 	 *            the refactoring status
 	 * @param monitor
@@ -1819,7 +1819,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary change to inline a method invocation represented by
 	 * a search match.
-	 * 
+	 *
 	 * @param rewriter
 	 *            the current compilation unit rewrite
 	 * @param declaration
@@ -1915,7 +1915,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates the target field expression for the inline method invocation.
-	 * 
+	 *
 	 * @param rewriter
 	 *            the current compilation unit rewrite
 	 * @param enclosingElement
@@ -1952,7 +1952,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates the method arguments for the target method declaration.
-	 * 
+	 *
 	 * @param rewrites
 	 *            the compilation unit rewrites
 	 * @param rewrite
@@ -2041,7 +2041,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates the method body for the target method declaration.
-	 * 
+	 *
 	 * @param rewriter
 	 *            the target compilation unit rewrite
 	 * @param rewrite
@@ -2056,7 +2056,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates the method comment for the target method declaration.
-	 * 
+	 *
 	 * @param rewrite
 	 *            the source ast rewrite
 	 * @param declaration
@@ -2137,7 +2137,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates the method content of the moved method.
-	 * 
+	 *
 	 * @param document
 	 *            the document representing the source compilation unit
 	 * @param declaration
@@ -2170,7 +2170,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary changes to create the delegate method with the
 	 * original method body.
-	 * 
+	 *
 	 * @param document
 	 *            the buffer containing the source of the source compilation
 	 *            unit
@@ -2231,7 +2231,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary changes to replace the body of the method
 	 * declaration with an expression to invoke the delegate.
-	 * 
+	 *
 	 * @param declaration
 	 *            the method declaration to replace its body
 	 * @param rewrites
@@ -2266,7 +2266,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary changes to inline the method invocations to the
 	 * original method.
-	 * 
+	 *
 	 * @param rewrites
 	 *            the map of compilation units to compilation unit rewrites
 	 * @param declaration
@@ -2364,7 +2364,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary imports for the copied method in the target
 	 * compilation unit.
-	 * 
+	 *
 	 * @param rewrite
 	 *            the target compilation unit rewrite
 	 * @param declaration
@@ -2393,7 +2393,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary change to updated a comment reference represented
 	 * by a search match.
-	 * 
+	 *
 	 * @param rewrite
 	 *            the current compilation unit rewrite
 	 * @param declaration
@@ -2423,7 +2423,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary changes to update tag references to the original
 	 * method.
-	 * 
+	 *
 	 * @param rewrites
 	 *            the map of compilation units to compilation unit rewrites
 	 * @param declaration
@@ -2478,7 +2478,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates a comment method reference to the moved method
-	 * 
+	 *
 	 * @param declaration
 	 *            the method declaration of the original method
 	 * @param ast
@@ -2547,7 +2547,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the necessary changes to remove method type parameters if they
 	 * match with enclosing type parameters.
-	 * 
+	 *
 	 * @param rewrite
 	 *            the ast rewrite to use
 	 * @param declaration
@@ -2585,7 +2585,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Creates the expression to access the new target.
-	 * 
+	 *
 	 * @param declaration
 	 *            the method declaration where to access the target
 	 * @return the corresponding expression
@@ -2620,7 +2620,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the candidate targets for the method to move.
-	 * 
+	 *
 	 * @return the candidate targets as variable bindings of fields and
 	 *         parameters
 	 */
@@ -2631,7 +2631,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns a compilation unit rewrite for the specified compilation unit.
-	 * 
+	 *
 	 * @param rewrites
 	 *            the compilation unit rewrite map
 	 * @param unit
@@ -2689,7 +2689,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the method to be moved.
-	 * 
+	 *
 	 * @return the method to be moved
 	 */
 	public final IMethod getMethod() {
@@ -2698,7 +2698,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the new method name.
-	 * 
+	 *
 	 * @return the name of the new method
 	 */
 	public final String getMethodName() {
@@ -2707,7 +2707,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the possible targets for the method to move.
-	 * 
+	 *
 	 * @return the possible targets as variable bindings of read-only fields and
 	 *         parameters
 	 */
@@ -2725,7 +2725,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the index of the chosen target.
-	 * 
+	 *
 	 * @return the target index
 	 */
 	protected final int getTargetIndex() {
@@ -2742,7 +2742,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the new target name.
-	 * 
+	 *
 	 * @return the name of the new target
 	 */
 	public final String getTargetName() {
@@ -2751,7 +2751,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns the type of the new target.
-	 * 
+	 *
 	 * @return the type of the new target
 	 * @throws JavaModelException
 	 *             if the type does not exist
@@ -2770,7 +2770,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Initializes the refactoring with the given input.
-	 * 
+	 *
 	 * @param method
 	 *            the method to move
 	 */
@@ -2865,7 +2865,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Is the specified name a target access?
-	 * 
+	 *
 	 * @param name
 	 *            the name to check
 	 * @return <code>true</code> if this name is a target access,
@@ -2899,7 +2899,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Does the moved method need a target node?
-	 * 
+	 *
 	 * @return <code>true</code> if it needs a target node, <code>false</code>
 	 *         otherwise
 	 */
@@ -2925,7 +2925,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Determines whether the delegator has to be inlined.
-	 * 
+	 *
 	 * @param inline
 	 *            <code>true</code> to inline the delegator,
 	 *            <code>false</code> otherwise
@@ -2936,7 +2936,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Sets the new method name.
-	 * 
+	 *
 	 * @param name
 	 *            the name to set
 	 * @return the status of the operation
@@ -2954,7 +2954,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * Determines whether the delegator has to be removed after inlining. Note
 	 * that the option to inline the delegator has to be enabled if this method
 	 * is called with the argument <code>true</code>.
-	 * 
+	 *
 	 * @param remove
 	 *            <code>true</code> if it should be removed,
 	 *            <code>false</code> otherwise
@@ -2966,7 +2966,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Sets the new target.
-	 * 
+	 *
 	 * @param target
 	 *            the target to set
 	 */
@@ -2990,7 +2990,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Sets the new target name.
-	 * 
+	 *
 	 * @param name
 	 *            the name to set
 	 * @return the status of the operation
@@ -3007,7 +3007,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Determines whether getter methods should be used to resolve visibility
 	 * issues.
-	 * 
+	 *
 	 * @param use
 	 *            <code>true</code> if getter methods should be used,
 	 *            <code>false</code> otherwise
@@ -3019,7 +3019,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Determines whether setter methods should be used to resolve visibility
 	 * issues.
-	 * 
+	 *
 	 * @param use
 	 *            <code>true</code> if setter methods should be used,
 	 *            <code>false</code> otherwise
@@ -3030,7 +3030,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Should getter methods be used to resolve visibility issues?
-	 * 
+	 *
 	 * @return <code>true</code> if getter methods should be used,
 	 *         <code>false</code> otherwise
 	 */
@@ -3040,7 +3040,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Should setter methods be used to resolve visibility issues?
-	 * 
+	 *
 	 * @return <code>true</code> if setter methods should be used,
 	 *         <code>false</code> otherwise
 	 */
@@ -3050,7 +3050,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	/**
 	 * Returns a best guess for the name of the new target.
-	 * 
+	 *
 	 * @return a best guess for the name
 	 */
 	protected String suggestTargetName() {

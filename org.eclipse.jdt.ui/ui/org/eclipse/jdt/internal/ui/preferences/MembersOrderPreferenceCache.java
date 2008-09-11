@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 /**
   */
 public class MembersOrderPreferenceCache implements IPropertyChangeListener {
-	
+
 	public static final int TYPE_INDEX= 0;
 	public static final int CONSTRUCTORS_INDEX= 1;
 	public static final int METHOD_INDEX= 2;
@@ -34,38 +34,38 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	public static final int STATIC_METHODS_INDEX= 7;
 	public static final int ENUM_CONSTANTS_INDEX= 8;
 	public static final int N_CATEGORIES= ENUM_CONSTANTS_INDEX + 1;
-	
+
 	private static final int PUBLIC_INDEX= 0;
 	private static final int PRIVATE_INDEX= 1;
 	private static final int PROTECTED_INDEX= 2;
 	private static final int DEFAULT_INDEX= 3;
-	private static final int N_VISIBILITIES= DEFAULT_INDEX + 1;	
-	
+	private static final int N_VISIBILITIES= DEFAULT_INDEX + 1;
+
 	private int[] fCategoryOffsets= null;
-	
+
 	private boolean fSortByVisibility;
 	private int[] fVisibilityOffsets= null;
-	
+
 	private IPreferenceStore fPreferenceStore;
-	
+
 	public MembersOrderPreferenceCache() {
 		fPreferenceStore= null;
 		fCategoryOffsets= null;
 		fSortByVisibility= false;
 		fVisibilityOffsets= null;
 	}
-	
+
 	public void install(IPreferenceStore store) {
 		fPreferenceStore= store;
 		store.addPropertyChangeListener(this);
-		fSortByVisibility= store.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);	
+		fSortByVisibility= store.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
 	}
-	
+
 	public void dispose() {
 		fPreferenceStore.removePropertyChangeListener(this);
 		fPreferenceStore= null;
 	}
-	
+
 	public static boolean isMemberOrderProperty(String property) {
 		return PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(property)
 			|| PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER.equals(property)
@@ -74,7 +74,7 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
-		
+
 		if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(property)) {
 			fCategoryOffsets= null;
 		} else if (PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER.equals(property)) {
@@ -90,7 +90,7 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		}
 		return fCategoryOffsets[kind];
 	}
-	
+
 	private int[] getCategoryOffsets() {
 		int[] offsets= new int[N_CATEGORIES];
 		IPreferenceStore store= fPreferenceStore;
@@ -98,16 +98,16 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		boolean success= fillCategoryOffsetsFromPreferenceString(store.getString(key), offsets);
 		if (!success) {
 			store.setToDefault(key);
-			fillCategoryOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
+			fillCategoryOffsetsFromPreferenceString(store.getDefaultString(key), offsets);
 		}
 		return offsets;
 	}
-	
+
 	private boolean fillCategoryOffsetsFromPreferenceString(String str, int[] offsets) {
 		StringTokenizer tokenizer= new StringTokenizer(str, ","); //$NON-NLS-1$
 		int i= 0;
 		offsets[ENUM_CONSTANTS_INDEX]= i++; // enum constants always on top
-		
+
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken().trim();
 			if ("T".equals(token)) { //$NON-NLS-1$
@@ -130,11 +130,11 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		}
 		return i == N_CATEGORIES;
 	}
-	
+
 	public boolean isSortByVisibility() {
 		return fSortByVisibility;
 	}
-				
+
 	public int getVisibilityIndex(int modifierFlags) {
 		if (fVisibilityOffsets == null) {
 			fVisibilityOffsets= getVisibilityOffsets();
@@ -147,10 +147,10 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		} else if (Flags.isPrivate(modifierFlags)) {
 			kind= PRIVATE_INDEX;
 		}
-		
+
 		return fVisibilityOffsets[kind];
 	}
-	
+
 	private int[] getVisibilityOffsets() {
 		int[] offsets= new int[N_VISIBILITIES];
 		IPreferenceStore store= fPreferenceStore;
@@ -158,11 +158,11 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		boolean success= fillVisibilityOffsetsFromPreferenceString(store.getString(key), offsets);
 		if (!success) {
 			store.setToDefault(key);
-			fillVisibilityOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
+			fillVisibilityOffsetsFromPreferenceString(store.getDefaultString(key), offsets);
 		}
 		return offsets;
-	}	
-		
+	}
+
 	private boolean fillVisibilityOffsetsFromPreferenceString(String str, int[] offsets) {
 		StringTokenizer tokenizer= new StringTokenizer(str, ","); //$NON-NLS-1$
 		int i= 0;
@@ -180,6 +180,6 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		}
 		return i == N_VISIBILITIES;
 	}
-	
+
 
 }

@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 import org.eclipse.osgi.util.NLS;
 
 public class CleanUpMessages extends NLS {
-	
+
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages"; //$NON-NLS-1$
-	
+
 	public static String CleanUpConfigurationBlock_SelectedCleanUps_label;
 	public static String CleanUpConfigurationBlock_ShowCleanUpWizard_checkBoxLabel;
 
@@ -28,7 +28,7 @@ public class CleanUpMessages extends NLS {
 	public static String CleanUpModifyDialog_TabPageName_UnnecessaryCode;
 
 	public static String CleanUpModifyDialog_XofYSelected_Label;
-	
+
 	public static String CleanUpProfileManager_ProfileName_EclipseBuildIn;
 
 	public static String CodeFormatingTabPage_CheckboxName_FormatSourceCode;

@@ -15,25 +15,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Point;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.swt.graphics.Point;
-
-
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
-import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -80,12 +79,12 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
-			
+
 			ICompilationUnit cu= javaContext.getCompilationUnit();
 			int offset= javaContext.getInvocationOffset();
-			
+
 			ArrayList result= new ArrayList();
-			
+
 			IJavadocCompletionProcessor[] processors= getContributedProcessors();
 			String error= null;
 			for (int i= 0; i < processors.length; i++) {
@@ -111,7 +110,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavadocContentAssistInvocationContext) {
 			JavadocContentAssistInvocationContext javaContext= (JavadocContentAssistInvocationContext) context;
-			
+
 			ICompilationUnit cu= javaContext.getCompilationUnit();
 			int offset= javaContext.getInvocationOffset();
 			int length= javaContext.getSelectionLength();
@@ -120,9 +119,9 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 				offset= selection.x;
 				length= selection.y;
 			}
-			
+
 			ArrayList result= new ArrayList();
-			
+
 			IJavadocCompletionProcessor[] processors= getContributedProcessors();
 			for (int i= 0; i < processors.length; i++) {
 				IJavadocCompletionProcessor curr= processors[i];

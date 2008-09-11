@@ -20,7 +20,7 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 /**
  *  Variable resolver for variable <code>importStatic</code>. Resolves to
  *  static import statements.
- * 
+ *
  *  @since 3.4
  */
 public class StaticImportResolver extends TemplateVariableResolver {

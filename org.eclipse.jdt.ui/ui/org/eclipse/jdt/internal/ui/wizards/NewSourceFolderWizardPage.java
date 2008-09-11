@@ -16,6 +16,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
@@ -33,10 +37,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -50,7 +50,6 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -85,64 +84,64 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 
 public class NewSourceFolderWizardPage extends NewElementWizardPage {
-		
+
 	private static final String PAGE_NAME= "NewSourceFolderWizardPage"; //$NON-NLS-1$
 
 	private StringButtonDialogField fProjectField;
 	private StatusInfo fProjectStatus;
-	
+
 	private StringButtonDialogField fRootDialogField;
 	private StatusInfo fRootStatus;
-	
+
 	private SelectionButtonDialogField fExcludeInOthersFields;
-	
+
 	private IWorkspaceRoot fWorkspaceRoot;
-	
+
 	private IJavaProject fCurrJProject;
 	private IClasspathEntry[] fEntries;
 	private IPath fOutputLocation;
-	
+
 	private IClasspathEntry[] fNewEntries;
-	private IPath fNewOutputLocation;	
-	
+	private IPath fNewOutputLocation;
+
 	private boolean fIsProjectAsSourceFolder;
-	
+
 	private IPackageFragmentRoot fCreatedRoot;
-	
+
 	public NewSourceFolderWizardPage() {
 		super(PAGE_NAME);
-		
-		setTitle(NewWizardMessages.NewSourceFolderWizardPage_title); 
-		setDescription(NewWizardMessages.NewSourceFolderWizardPage_description);		 
-		
+
+		setTitle(NewWizardMessages.NewSourceFolderWizardPage_title);
+		setDescription(NewWizardMessages.NewSourceFolderWizardPage_description);
+
 		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
-		
+
 		RootFieldAdapter adapter= new RootFieldAdapter();
-		
+
 		fProjectField= new StringButtonDialogField(adapter);
 		fProjectField.setDialogFieldListener(adapter);
-		fProjectField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_project_label); 
-		fProjectField.setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_project_button);	 
-		
+		fProjectField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_project_label);
+		fProjectField.setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_project_button);
+
 		fRootDialogField= new StringButtonDialogField(adapter);
 		fRootDialogField.setDialogFieldListener(adapter);
-		fRootDialogField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_root_label); 
-		fRootDialogField.setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_root_button); 
-		
+		fRootDialogField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_root_label);
+		fRootDialogField.setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_root_button);
+
 		fExcludeInOthersFields= new SelectionButtonDialogField(SWT.CHECK);
 		fExcludeInOthersFields.setDialogFieldListener(adapter);
-		fExcludeInOthersFields.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_exclude_label); 
-		
+		fExcludeInOthersFields.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_exclude_label);
+
 		fExcludeInOthersFields.setEnabled(JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS)));
-		
+
 		fRootStatus= new StatusInfo();
 		fProjectStatus= new StatusInfo();
 	}
-			
+
 	// -------- Initialization ---------
-		
+
 	public void init(IStructuredSelection selection) {
-		String projPath= getProjectPath(selection);		
+		String projPath= getProjectPath(selection);
 		if (projPath != null) {
 			fProjectField.setText(projPath);
 		}
@@ -156,18 +155,18 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		} else if (selection.size() == 1) {
 			selectedElement= selection.getFirstElement();
 		}
-		
+
 		if (selectedElement instanceof IResource) {
 			IProject proj= ((IResource)selectedElement).getProject();
 			if (proj != null) {
 				return proj.getFullPath().makeRelative().toString();
-			}	
+			}
 		} else if (selectedElement instanceof IJavaElement) {
 			IJavaProject jproject= ((IJavaElement)selectedElement).getJavaProject();
 			if (jproject != null) {
 				return jproject.getProject().getFullPath().makeRelative().toString();
 			}
-		}	
+		}
 
 		return null;
 	}
@@ -179,27 +178,27 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		
+
 		Composite composite= new Composite(parent, SWT.NONE);
-			
+
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		composite.setLayout(layout);
-				
-		fProjectField.doFillIntoGrid(composite, 3);	
+
+		fProjectField.doFillIntoGrid(composite, 3);
 		fRootDialogField.doFillIntoGrid(composite, 3);
 		fExcludeInOthersFields.doFillIntoGrid(composite, 3);
-		
+
 		int maxFieldWidth= convertWidthInCharsToPixels(40);
 		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);
-		LayoutUtil.setHorizontalGrabbing(fProjectField.getTextControl(null));	
-		LayoutUtil.setWidthHint(fRootDialogField.getTextControl(null), maxFieldWidth);	
-			
+		LayoutUtil.setHorizontalGrabbing(fProjectField.getTextControl(null));
+		LayoutUtil.setWidthHint(fRootDialogField.getTextControl(null), maxFieldWidth);
+
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
@@ -208,8 +207,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		if (visible) {
 			fRootDialogField.setFocus();
 		}
-	}	
-		
+	}
+
 	// -------- ContainerFieldAdapter --------
 
 	private class RootFieldAdapter implements IStringButtonAdapter, IDialogFieldListener {
@@ -218,7 +217,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		public void changeControlPressed(DialogField field) {
 			packRootChangeControlPressed(field);
 		}
-		
+
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
 			packRootDialogFieldChanged(field);
@@ -227,8 +226,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	protected void packRootChangeControlPressed(DialogField field) {
 		if (field == fRootDialogField) {
 			IPath initialPath= new Path(fRootDialogField.getText());
-			String title= NewWizardMessages.NewSourceFolderWizardPage_ChooseExistingRootDialog_title; 
-			String message= NewWizardMessages.NewSourceFolderWizardPage_ChooseExistingRootDialog_description; 
+			String title= NewWizardMessages.NewSourceFolderWizardPage_ChooseExistingRootDialog_title;
+			String message= NewWizardMessages.NewSourceFolderWizardPage_ChooseExistingRootDialog_description;
 			IFolder folder= chooseFolder(title, message, initialPath);
 			if (folder != null) {
 				IPath path= folder.getFullPath().removeFirstSegments(1);
@@ -240,9 +239,9 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				IPath path= jproject.getProject().getFullPath().makeRelative();
 				fProjectField.setText(path.toString());
 			}
-		} 
-	}	
-	
+		}
+	}
+
 	protected void packRootDialogFieldChanged(DialogField field) {
 		if (field == fRootDialogField) {
 			updateRootStatus();
@@ -254,30 +253,30 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		}
 		updateStatus(new IStatus[] { fProjectStatus, fRootStatus });
 	}
-	
-	
+
+
 	private void updateProjectStatus() {
 		fCurrJProject= null;
 		fIsProjectAsSourceFolder= false;
-		
+
 		String str= fProjectField.getText();
 		if (str.length() == 0) {
-			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_EnterProjectName); 
+			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_EnterProjectName);
 			return;
 		}
 		IPath path= new Path(str);
 		if (path.segmentCount() != 1) {
-			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_InvalidProjectPath); 
+			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_InvalidProjectPath);
 			return;
 		}
 		IProject project= fWorkspaceRoot.getProject(path.toString());
 		if (!project.exists()) {
-			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_ProjectNotExists); 
+			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_ProjectNotExists);
 			return;
 		}
 		if (!project.isOpen()) {
-			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_ProjectNotOpen); 
-			return;	
+			fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_ProjectNotOpen);
+			return;
 		}
 		try {
 			if (project.hasNature(JavaCore.NATURE_ID)) {
@@ -290,8 +289,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			fCurrJProject= null;
-		}	
-		fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_NotAJavaProject); 
+		}
+		fProjectStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_NotAJavaProject);
 	}
 
 	private void updateRootStatus() {
@@ -301,21 +300,21 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			return;
 		}
 		fRootStatus.setOK();
-		
+
 		IPath projPath= fCurrJProject.getProject().getFullPath();
 		String str= fRootDialogField.getText();
 		if (str.length() == 0) {
-			fRootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, BasicElementLabels.getPathLabel(fCurrJProject.getPath(), false))); 
+			fRootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, BasicElementLabels.getPathLabel(fCurrJProject.getPath(), false)));
 		} else {
 			IPath path= projPath.append(str);
 			IStatus validate= fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER);
 			if (validate.matches(IStatus.ERROR)) {
-				fRootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_InvalidRootName, validate.getMessage())); 
+				fRootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_InvalidRootName, validate.getMessage()));
 			} else {
 				IResource res= fWorkspaceRoot.findMember(path);
 				if (res != null) {
 					if (res.getType() != IResource.FOLDER) {
-						fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_NotAFolder); 
+						fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_NotAFolder);
 						return;
 					}
 				} else {
@@ -324,7 +323,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						try {
 							IFileStore store= EFS.getStore(projLocation).getChild(str);
 							if (store.fetchInfo().exists()) {
-								fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
+								fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase);
 								return;
 							}
 						} catch (CoreException e) {
@@ -336,24 +335,24 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				}
 				ArrayList newEntries= new ArrayList(fEntries.length + 1);
 				int projectEntryIndex= -1;
-				
+
 				for (int i= 0; i < fEntries.length; i++) {
 					IClasspathEntry curr= fEntries[i];
 					if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 						if (path.equals(curr.getPath())) {
-							fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting); 
+							fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting);
 							return;
 						}
 						if (projPath.equals(curr.getPath())) {
 							projectEntryIndex= i;
-						}	
+						}
 					}
 					newEntries.add(curr);
 				}
-				
+
 				IClasspathEntry newEntry= JavaCore.newSourceEntry(path);
-				
-				Set modified= new HashSet();				
+
+				Set modified= new HashSet();
 				if (fExcludeInOthersFields.isSelected()) {
 					addExclusionPatterns(newEntry, newEntries, modified);
 					IClasspathEntry entry= JavaCore.newSourceEntry(path);
@@ -367,7 +366,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						insertAtEndOfCategory(entry, newEntries);
 					}
 				}
-					
+
 				fNewEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 				fNewOutputLocation= fOutputLocation;
 
@@ -378,9 +377,9 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						IStatus status2= JavaConventions.validateClasspath(fCurrJProject, fNewEntries, fNewOutputLocation);
 						if (status2.isOK()) {
 							if (fIsProjectAsSourceFolder) {
-								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false))); 
+								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false)));
 							} else {
-								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false))); 
+								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false)));
 							}
 							return;
 						}
@@ -388,17 +387,17 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 					fRootStatus.setError(status.getMessage());
 					return;
 				} else if (fIsProjectAsSourceFolder) {
-					fRootStatus.setInfo(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSF); 
+					fRootStatus.setInfo(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSF);
 					return;
 				}
 				if (!modified.isEmpty()) {
-					fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions, String.valueOf(modified.size()))); 
+					fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions, String.valueOf(modified.size())));
 					return;
 				}
 			}
 		}
 	}
-	
+
 	private void insertAtEndOfCategory(IClasspathEntry entry, List entries) {
 		int length= entries.size();
 		IClasspathEntry[] elements= (IClasspathEntry[])entries.toArray(new IClasspathEntry[length]);
@@ -414,7 +413,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			entries.add(i, entry);
 			return;
 		}
-		
+
 		switch (entry.getEntryKind()) {
 		case IClasspathEntry.CPE_SOURCE:
 			entries.add(0, entry);
@@ -428,7 +427,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			break;
 		}
 	}
-	
+
 	private void addExclusionPatterns(IClasspathEntry newEntry, List existing, Set modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
 		for (int i= 0; i < existing.size(); i++) {
@@ -441,30 +440,30 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 					IPath[] newExclusionFilters= new IPath[exclusionFilters.length + 1];
 					System.arraycopy(exclusionFilters, 0, newExclusionFilters, 0, exclusionFilters.length);
 					newExclusionFilters[exclusionFilters.length]= pathToExclude;
-					
+
 					IClasspathEntry updated= JavaCore.newSourceEntry(currPath, newExclusionFilters, curr.getOutputLocation());
 					existing.set(i, updated);
 					modifiedEntries.add(updated);
 				}
 			}
 		}
-	}	
-	
+	}
+
 	// ---- creation ----------------
-	
+
 	public IPackageFragmentRoot getNewPackageFragmentRoot() {
 		return fCreatedRoot;
 	}
-	
+
 	public IResource getCorrespondingResource() {
 		return fCurrJProject.getProject().getFolder(fRootDialogField.getText());
 	}
-	
+
 	public void createPackageFragmentRoot(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		monitor.beginTask(NewWizardMessages.NewSourceFolderWizardPage_operation, 3); 
+		monitor.beginTask(NewWizardMessages.NewSourceFolderWizardPage_operation, 3);
 		try {
 			IPath projPath= fCurrJProject.getProject().getFullPath();
 			if (fOutputLocation.equals(projPath) && !fNewOutputLocation.equals(projPath)) {
@@ -473,33 +472,33 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						BuildPathsBlock.removeOldClassfiles(fCurrJProject.getProject());
 					}
 				}
-			}		
-			
+			}
+
 			String relPath= fRootDialogField.getText();
-				
+
 			IFolder folder= fCurrJProject.getProject().getFolder(relPath);
 			if (!folder.exists()) {
-				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));			
+				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
 			}
 			if (monitor.isCanceled()) {
 				throw new InterruptedException();
 			}
-			
+
 			fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, new SubProgressMonitor(monitor, 2));
-	
+
 			fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
 		} finally {
 			monitor.done();
 		}
 	}
-		
+
 	// ------------- choose dialogs
-	
-	private IFolder chooseFolder(String title, String message, IPath initialPath) {	
+
+	private IFolder chooseFolder(String title, String message, IPath initialPath) {
 		Class[] acceptedClasses= new Class[] { IFolder.class };
 		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, null);	
-		
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, null);
+
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
@@ -519,10 +518,10 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 		if (dialog.open() == Window.OK) {
 			return (IFolder) dialog.getFirstResult();
-		}			
-		return null;		
+		}
+		return null;
 	}
-	
+
 	private IJavaProject chooseProject() {
 		IJavaProject[] projects;
 		try {
@@ -531,18 +530,18 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			JavaPlugin.log(e);
 			projects= new IJavaProject[0];
 		}
-		
+
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
-		dialog.setTitle(NewWizardMessages.NewSourceFolderWizardPage_ChooseProjectDialog_title); 
-		dialog.setMessage(NewWizardMessages.NewSourceFolderWizardPage_ChooseProjectDialog_description); 
+		dialog.setTitle(NewWizardMessages.NewSourceFolderWizardPage_ChooseProjectDialog_title);
+		dialog.setMessage(NewWizardMessages.NewSourceFolderWizardPage_ChooseProjectDialog_description);
 		dialog.setElements(projects);
 		dialog.setInitialSelections(new Object[] { fCurrJProject });
 		dialog.setHelpAvailable(false);
-		if (dialog.open() == Window.OK) {			
+		if (dialog.open() == Window.OK) {
 			return (IJavaProject) dialog.getFirstResult();
-		}			
-		return null;		
+		}
+		return null;
 	}
-				
+
 }

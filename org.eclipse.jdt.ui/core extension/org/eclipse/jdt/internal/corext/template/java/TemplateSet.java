@@ -30,6 +30,16 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,19 +49,10 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 /**
  * <code>TemplateSet</code> manages a collection of templates and makes them
  * persistent.
- * 
+ *
  * @deprecated use TemplateStore instead
  * @since 3.0
  */
@@ -63,19 +64,19 @@ public class TemplateSet {
 
 	private List fTemplates= new ArrayList();
 	private String fTemplateTag;
-	
+
 	private static final int TEMPLATE_PARSE_EXCEPTION= 10002;
 	private static final int TEMPLATE_IO_EXCEPTION= 10005;
 	private ContextTypeRegistry fRegistry;
-	
+
 	public TemplateSet(String templateTag, ContextTypeRegistry registry) {
 		fTemplateTag= templateTag;
 		fRegistry= registry;
 	}
-	
+
 	/**
 	 * Convenience method for reading templates from a file.
-	 * 
+	 *
 	 * @param file
 	 * @param allowDuplicates
 	 * @see #addFromStream(InputStream, boolean)
@@ -98,32 +99,32 @@ public class TemplateSet {
 			} catch (IOException e) {
 				// just exit
 			}
-		}		
+		}
 	}
-	
+
 	public String getTemplateTag() {
 		return fTemplateTag;
 	}
-	
+
 
 	/**
 	 * Reads templates from a XML stream and adds them to the templates
-	 * 
+	 *
 	 * @param stream
 	 * @param allowDuplicates
 	 * @throws CoreException
-	 */	
+	 */
 	public void addFromStream(InputStream stream, boolean allowDuplicates) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			DocumentBuilder parser= factory.newDocumentBuilder();		
+			DocumentBuilder parser= factory.newDocumentBuilder();
 			Document document= parser.parse(new InputSource(stream));
-			
+
 			NodeList elements= document.getElementsByTagName(getTemplateTag());
-			
+
 			int count= elements.getLength();
 			for (int i= 0; i != count; i++) {
-				Node node= elements.item(i);					
+				Node node= elements.item(i);
 				NamedNodeMap attributes= node.getAttributes();
 
 				if (attributes == null)
@@ -133,11 +134,11 @@ public class TemplateSet {
 				String description= getAttributeValue(attributes, DESCRIPTION_ATTRIBUTE);
 				if (name == null || description == null)
 					continue;
-				
+
 				String context= getAttributeValue(attributes, CONTEXT_ATTRIBUTE);
 
 				if (context == null)
-					throw new SAXException(JavaTemplateMessages.TemplateSet_error_missing_attribute); 
+					throw new SAXException(JavaTemplateMessages.TemplateSet_error_missing_attribute);
 
 				StringBuffer buffer= new StringBuffer();
 				NodeList children= node.getChildNodes();
@@ -149,7 +150,7 @@ public class TemplateSet {
 				String pattern= buffer.toString().trim();
 
 				Template template= new Template(name, description, context, pattern,  true);
-				
+
 				String message= validateTemplate(template);
 				if (message == null) {
 					if (!allowDuplicates) {
@@ -158,7 +159,7 @@ public class TemplateSet {
 							remove(templates[k]);
 						}
 					}
-					add(template);					
+					add(template);
 				} else {
 					throwReadException(null);
 				}
@@ -171,7 +172,7 @@ public class TemplateSet {
 			throwReadException(e);
 		}
 	}
-	
+
 	protected String validateTemplate(Template template) {
 		TemplateContextType type= fRegistry.getContextType(template.getContextTypeId());
 		if (type == null) {
@@ -184,7 +185,7 @@ public class TemplateSet {
 			return e.getMessage();
 		}
 	}
-	
+
 	private String getAttributeValue(NamedNodeMap attributes, String name) {
 		Node node= attributes.getNamedItem(name);
 
@@ -195,7 +196,7 @@ public class TemplateSet {
 
 	/**
 	 * Convenience method for saving to a file.
-	 * 
+	 *
 	 * @param file the file
 	 * @throws CoreException in case the save operation fails
 	 * @see #saveToStream(OutputStream)
@@ -219,47 +220,47 @@ public class TemplateSet {
 			}
 		}
 	}
-		
+
 	/**
 	 * Saves the template set as XML.
-	 * 
+	 *
 	 * @param stream the stream
 	 * @throws CoreException in case the save operation fails
 	 */
 	public void saveToStream(OutputStream stream) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder= factory.newDocumentBuilder();		
+			DocumentBuilder builder= factory.newDocumentBuilder();
 			Document document= builder.newDocument();
 
 			Node root= document.createElement("templates"); //$NON-NLS-1$
 			document.appendChild(root);
-			
+
 			for (int i= 0; i != fTemplates.size(); i++) {
 				Template template= (Template) fTemplates.get(i);
-				
+
 				Node node= document.createElement(getTemplateTag());
 				root.appendChild(node);
-				
+
 				NamedNodeMap attributes= node.getAttributes();
-				
+
 				Attr name= document.createAttribute(NAME_ATTRIBUTE);
 				name.setValue(template.getName());
 				attributes.setNamedItem(name);
-	
+
 				Attr description= document.createAttribute(DESCRIPTION_ATTRIBUTE);
 				description.setValue(template.getDescription());
 				attributes.setNamedItem(description);
-	
+
 				Attr context= document.createAttribute(CONTEXT_ATTRIBUTE);
 				context.setValue(template.getContextTypeId());
-				attributes.setNamedItem(context);			
+				attributes.setNamedItem(context);
 
 				Text pattern= document.createTextNode(template.getPattern());
-				node.appendChild(pattern);			
-			}		
-			
-			
+				node.appendChild(pattern);
+			}
+
+
 			Transformer transformer=TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
@@ -272,7 +273,7 @@ public class TemplateSet {
 			throwWriteException(e);
 		} catch (TransformerException e) {
 			throwWriteException(e);
-		}		
+		}
 	}
 
 	private static void throwReadException(Throwable t) throws CoreException {
@@ -285,7 +286,7 @@ public class TemplateSet {
 //		throw new JavaUIException(status);
 		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", code, JavaTemplateMessages.TemplateSet_error_read, t));  //$NON-NLS-1$
 	}
-	
+
 	private static void throwWriteException(Throwable t) throws CoreException {
 //		IStatus status= JavaUIStatus.createError(IJavaStatusConstants.TEMPLATE_IO_EXCEPTION,
 //			TemplateMessages.getString("TemplateSet.error.write"), t); //$NON-NLS-1$
@@ -295,13 +296,13 @@ public class TemplateSet {
 
 	/**
 	 * Adds a template to the set.
-	 * 
+	 *
 	 * @param template the template to add to the set
 	 */
 	public void add(Template template) {
 		if (exists(template))
 			return; // ignore duplicate
-		
+
 		fTemplates.add(template);
 	}
 
@@ -312,38 +313,38 @@ public class TemplateSet {
 			if (template.equals(anotherTemplate))
 				return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Removes a template to the set.
-	 * 
+	 *
 	 * @param template the template to remove from the set
-	 */	
+	 */
 	public void remove(Template template) {
 		fTemplates.remove(template);
 	}
 
 	/**
 	 * Empties the set.
-	 */		
+	 */
 	public void clear() {
 		fTemplates.clear();
 	}
-	
+
 	/**
 	 * Returns all templates.
-	 * 
+	 *
 	 * @return all templates
 	 */
 	public Template[] getTemplates() {
 		return (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
 	}
-	
+
 	/**
 	 * Returns all templates with a given name.
-	 * 
+	 *
 	 * @param name the template name
 	 * @return the templates with the given name
 	 */
@@ -357,10 +358,10 @@ public class TemplateSet {
 		}
 		return (Template[]) res.toArray(new Template[res.size()]);
 	}
-	
+
 	/**
 	 * Returns the first templates with the given name.
-	 * 
+	 *
 	 * @param name the template name
 	 * @return the first template with the given name
 	 */
@@ -372,7 +373,7 @@ public class TemplateSet {
 			}
 		}
 		return null;
-	}	
-	
+	}
+
 }
 

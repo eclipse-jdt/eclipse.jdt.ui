@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.text.edits.MalformedTreeException;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
 
 import org.eclipse.jface.viewers.StyledString;
 
@@ -73,11 +73,11 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		fMethodName= methodName;
 
 		fJavaProject= jproject;
-		
+
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(completionProposal);
 		buffer.append(" {};"); //$NON-NLS-1$
-		
+
 		setReplacementString(buffer.toString());
 	}
 
@@ -87,23 +87,23 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return fMethodName;
 	}
-	
+
 	private CompilationUnit getRecoveredAST(IDocument document, int offset, Document recoveredDocument) {
 		CompilationUnit ast= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (ast != null) {
 			recoveredDocument.set(document.get());
 			return ast;
 		}
-		
+
 		char[] content= document.get().toCharArray();
-		
+
 		// clear prefix to avoid compile errors
 		int index= offset - 1;
 		while (index >= 0 && Character.isJavaIdentifierPart(content[index])) {
 			content[index]= ' ';
 			index--;
 		}
-		
+
 		recoveredDocument.set(new String(content));
 
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
@@ -114,7 +114,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		parser.setProject(fCompilationUnit.getJavaProject());
 		return (CompilationUnit) parser.createAST(new NullProgressMonitor());
 	}
-	
+
 	/*
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportRewrite)
 	 */
@@ -159,10 +159,10 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 				ITrackedNodePosition position= rewrite.track(stub);
 				try {
 					rewrite.rewriteAST(recoveredDocument, fJavaProject.getOptions(true)).apply(recoveredDocument);
-					
+
 					String generatedCode= recoveredDocument.get(position.getStartPosition(), position.getLength());
 					int generatedIndent= IndentManipulation.measureIndentUnits(getIndentAt(recoveredDocument, position.getStartPosition(), settings), settings.tabWidth, settings.indentWidth);
-					
+
 					String indent= getIndentAt(document, getReplacementOffset(), settings);
 					setReplacementString(IndentManipulation.changeIndent(generatedCode, generatedIndent, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(document)));
 
@@ -175,7 +175,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		}
 		return true;
 	}
-	
+
 	private static String getIndentAt(IDocument document, int offset, CodeGenerationSettings settings) {
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);

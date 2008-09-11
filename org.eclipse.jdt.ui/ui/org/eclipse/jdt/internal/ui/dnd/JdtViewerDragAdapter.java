@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.dnd.DragSourceEvent;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.util.DelegatingDragAdapter;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -27,12 +27,12 @@ public class JdtViewerDragAdapter extends DelegatingDragAdapter {
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
 	}
-	
+
 	public void dragStart(DragSourceEvent event) {
 		IStructuredSelection selection= (IStructuredSelection)fViewer.getSelection();
 		if (selection.isEmpty()) {
 			event.doit= false;
-			return; 
+			return;
 		}
 		super.dragStart(event);
 	}

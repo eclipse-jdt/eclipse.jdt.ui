@@ -21,19 +21,19 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
  * This is an action template for actions that toggle whether
  * it links its selection to the active editor.
- * 
+ *
  * @since 3.0
  */
 public abstract class AbstractToggleLinkingAction extends Action {
-	
+
 	/**
 	 * Constructs a new action.
 	 */
 	public AbstractToggleLinkingAction() {
-		super(ActionMessages.ToggleLinkingAction_label); 
-		setDescription(ActionMessages.ToggleLinkingAction_description); 
-		setToolTipText(ActionMessages.ToggleLinkingAction_tooltip); 
-		JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$		
+		super(ActionMessages.ToggleLinkingAction_label);
+		setDescription(ActionMessages.ToggleLinkingAction_description);
+		setToolTipText(ActionMessages.ToggleLinkingAction_tooltip);
+		JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LINK_EDITOR_ACTION);
 		setChecked(false);
 	}

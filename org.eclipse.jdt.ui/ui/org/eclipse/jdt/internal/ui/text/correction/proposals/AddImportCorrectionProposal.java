@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.IDocument;
 

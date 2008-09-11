@@ -32,19 +32,19 @@ public class MultiFormatAction extends CleanUpAction {
 		super(site);
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CleanUpAction#createCleanUps(org.eclipse.jdt.core.ICompilationUnit[])
 	 */
 	protected ICleanUp[] createCleanUps(ICompilationUnit[] units) {
 		Map settings= new Hashtable();
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
-		
-		return new ICleanUp[] { 
-				new CodeFormatCleanUp(settings) 
+
+		return new ICleanUp[] {
+				new CodeFormatCleanUp(settings)
 		};
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CleanUpAction#getActionName()
 	 */
 	protected String getActionName() {

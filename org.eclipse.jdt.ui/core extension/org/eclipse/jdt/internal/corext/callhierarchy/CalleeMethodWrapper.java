@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
@@ -65,7 +65,7 @@ class CalleeMethodWrapper extends MethodWrapper {
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getTaskName()
      */
     protected String getTaskName() {
-        return CallHierarchyMessages.CalleeMethodWrapper_taskname; 
+        return CallHierarchyMessages.CalleeMethodWrapper_taskname;
     }
 
 	/*
@@ -74,7 +74,7 @@ class CalleeMethodWrapper extends MethodWrapper {
     protected MethodWrapper createMethodWrapper(MethodCall methodCall) {
         return new CalleeMethodWrapper(this, methodCall);
     }
-    
+
     /*
      * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#canHaveChildren()
      */
@@ -96,7 +96,7 @@ class CalleeMethodWrapper extends MethodWrapper {
 
 			if (cu != null) {
 				CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor(member, cu, progressMonitor);
-		
+
 				cu.accept(visitor);
 				return visitor.getCallees();
 			}

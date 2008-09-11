@@ -14,18 +14,18 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 
 class ReturnFlowInfo extends FlowInfo {
-	
+
 	public ReturnFlowInfo(ReturnStatement node) {
 		super(getReturnFlag(node));
 	}
-	
+
 	public void merge(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
-			
+
 		assignAccessMode(info);
 	}
-	
+
 	private static int getReturnFlag(ReturnStatement node) {
 		Expression expression= node.getExpression();
 		if (expression == null || expression.resolveTypeBinding() == node.getAST().resolveWellKnownType("void")) //$NON-NLS-1$

@@ -32,7 +32,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 
 	/**
 	 * Creates a new persistent spell dictionary.
-	 * 
+	 *
 	 * @param url the URL of the word list for this dictionary
 	 */
 	public PersistentSpellDictionary(final URL url) {
@@ -65,14 +65,14 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 				byteArray= new byte[size];
 				byteBuffer.get(byteArray);
 			}
-			
+
 			fileStream= new FileOutputStream(fLocation.getPath(), true);
-			
+
 			// Encoding UTF-16 charset writes a BOM. In which case we need to cut it away if the file isn't empty
 			int bomCutSize= 0;
 			if (!isEmpty() && "UTF-16".equals(charset.name())) //$NON-NLS-1$
 				bomCutSize= 2;
-			
+
 			fileStream.write(byteArray, bomCutSize, size - bomCutSize);
 		} catch (IOException exception) {
 			JavaPlugin.log(exception);

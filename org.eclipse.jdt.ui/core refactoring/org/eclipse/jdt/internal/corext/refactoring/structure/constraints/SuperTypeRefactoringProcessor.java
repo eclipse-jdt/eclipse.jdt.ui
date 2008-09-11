@@ -20,15 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -113,7 +113,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Partial implementation of a refactoring processor solving supertype
  * constraint models.
- * 
+ *
  * @since 3.1
  */
 public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor {
@@ -133,7 +133,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Returns a new ast node corresponding to the given type.
-	 * 
+	 *
 	 * @param rewrite
 	 *            the compilation unit rewrite to use
 	 * @param type
@@ -177,7 +177,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Creates a new supertype refactoring processor.
-	 * 
+	 *
 	 * @param settings
 	 *            the code generation settings, or <code>null</code>
 	 */
@@ -187,7 +187,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Adds the refactoring settings to the specified comment.
-	 * 
+	 *
 	 * @param comment
 	 *            the java refactoring descriptor comment
 	 * @param addUseSupertype
@@ -206,7 +206,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Creates the super type constraint solver to solve the model.
-	 * 
+	 *
 	 * @param model
 	 *            the model to create a solver for
 	 * @return The created super type constraint solver
@@ -215,7 +215,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Creates the declarations of the new supertype members.
-	 * 
+	 *
 	 * @param sourceRewrite
 	 *            the source compilation unit rewrite
 	 * @param targetRewrite
@@ -232,7 +232,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Creates the declaration of the new supertype, excluding any comments or
 	 * package declaration.
-	 * 
+	 *
 	 * @param sourceRewrite
 	 *            the source compilation unit rewrite
 	 * @param subType
@@ -303,7 +303,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Creates the necessary imports for the extracted supertype.
-	 * 
+	 *
 	 * @param unit
 	 *            the working copy of the new supertype
 	 * @param monitor
@@ -354,7 +354,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Creates the type parameters of the new supertype.
-	 * 
+	 *
 	 * @param targetRewrite
 	 *            the target compilation unit rewrite
 	 * @param subType
@@ -381,7 +381,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Creates the source for the new compilation unit containing the supertype.
-	 * 
+	 *
 	 * @param copy
 	 *            the working copy of the new supertype
 	 * @param subType
@@ -457,7 +457,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Creates the type template based on the code generation settings.
-	 * 
+	 *
 	 * @param unit
 	 *            the working copy for the new supertype
 	 * @param imports
@@ -500,7 +500,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Returns the field which corresponds to the specified variable declaration
 	 * fragment
-	 * 
+	 *
 	 * @param fragment
 	 *            the variable declaration fragment
 	 * @return the corresponding field
@@ -524,7 +524,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Computes the compilation units of fields referencing the specified type
 	 * occurrences.
-	 * 
+	 *
 	 * @param units
 	 *            the compilation unit map (element type:
 	 *            <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
@@ -560,7 +560,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Computes the compilation units of methods referencing the specified type
 	 * occurrences.
-	 * 
+	 *
 	 * @param units
 	 *            the compilation unit map (element type:
 	 *            <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
@@ -594,7 +594,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Computes the compilation units referencing the subtype to replace.
-	 * 
+	 *
 	 * @param type
 	 *            the subtype
 	 * @param monitor
@@ -625,7 +625,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Returns the fields which reference the specified ast node.
-	 * 
+	 *
 	 * @param node
 	 *            the ast node
 	 * @param project
@@ -655,7 +655,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Returns the method which references the specified ast node.
-	 * 
+	 *
 	 * @param node
 	 *            the ast node
 	 * @return the referencing method
@@ -691,7 +691,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Returns whether type occurrences in instanceof's should be rewritten.
-	 * 
+	 *
 	 * @return <code>true</code> if they are rewritten, <code>false</code>
 	 *         otherwise
 	 */
@@ -701,7 +701,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Should occurrences of the subtype be replaced by the supertype?
-	 * 
+	 *
 	 * @return <code>true</code> if the subtype should be replaced,
 	 *         <code>false</code> otherwise
 	 */
@@ -711,7 +711,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Performs the first pass of processing the affected compilation units.
-	 * 
+	 *
 	 * @param creator
 	 *            the constraints creator to use
 	 * @param units
@@ -752,7 +752,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Performs the second pass of processing the affected compilation units.
-	 * 
+	 *
 	 * @param creator
 	 *            the constraints creator to use
 	 * @param unit
@@ -790,7 +790,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Resets the working copies.
-	 * 
+	 *
 	 * @param unit
 	 *            the compilation unit to discard
 	 */
@@ -817,7 +817,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrence by a
 	 * supertype.
-	 * 
+	 *
 	 * @param range
 	 *            the compilation unit range
 	 * @param estimate
@@ -929,7 +929,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrence by a
 	 * supertype.
-	 * 
+	 *
 	 * @param estimate
 	 *            the type estimate
 	 * @param rewrite
@@ -947,7 +947,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrence by a
 	 * supertype.
-	 * 
+	 *
 	 * @param manager
 	 *            the text change manager to use
 	 * @param requestor
@@ -972,7 +972,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Creates the necessary text edits to replace the subtype occurrences by a
 	 * supertype.
-	 * 
+	 *
 	 * @param manager
 	 *            the text change manager to use
 	 * @param sourceRewrite
@@ -1072,7 +1072,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Determines whether type occurrences in instanceof's should be rewritten.
-	 * 
+	 *
 	 * @param rewrite
 	 *            <code>true</code> to rewrite them, <code>false</code>
 	 *            otherwise
@@ -1084,7 +1084,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	/**
 	 * Determines whether occurrences of the subtype should be replaced by the
 	 * supertype.
-	 * 
+	 *
 	 * @param replace
 	 *            <code>true</code> to replace occurrences where possible,
 	 *            <code>false</code> otherwise
@@ -1095,7 +1095,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Solves the supertype constraints to replace subtype by a supertype.
-	 * 
+	 *
 	 * @param subUnit
 	 *            the compilation unit of the subtype, or <code>null</code>
 	 * @param subNode

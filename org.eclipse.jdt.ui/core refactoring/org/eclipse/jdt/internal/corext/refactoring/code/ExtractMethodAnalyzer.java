@@ -93,44 +93,44 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 	private int fReturnKind;
 	private Type fReturnType;
 	private ITypeBinding fReturnTypeBinding;
-	
+
 	private FlowInfo fInputFlowInfo;
 	private FlowContext fInputFlowContext;
-	
+
 	private IVariableBinding[] fArguments;
 	private IVariableBinding[] fMethodLocals;
 	private ITypeBinding[] fTypeVariables;
-	
+
 	private IVariableBinding fReturnValue;
 	private IVariableBinding[] fCallerLocals;
 	private IVariableBinding fReturnLocal;
-	
+
 	private ITypeBinding[] fAllExceptions;
 	private ITypeBinding fExpressionBinding;
 
 	private boolean fForceStatic;
 	private boolean fIsLastStatementSelected;
-	
+
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection, false);
 	}
-	
+
 	public BodyDeclaration getEnclosingBodyDeclaration() {
 		return fEnclosingBodyDeclaration;
 	}
-	
+
 	public int getReturnKind() {
 		return fReturnKind;
 	}
-	
+
 	public boolean extractsExpression() {
 		return fReturnKind == EXPRESSION;
 	}
-	
+
 	public Type getReturnType() {
 		return fReturnType;
 	}
-	
+
 	public ITypeBinding getReturnTypeBinding() {
 		return fReturnTypeBinding;
 	}
@@ -143,47 +143,47 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				return false;
 		}
 	}
-	
+
 	public IVariableBinding[] getArguments() {
 		return fArguments;
 	}
-	
+
 	public IVariableBinding[] getMethodLocals() {
 		return fMethodLocals;
 	}
-	
+
 	public IVariableBinding getReturnValue() {
 		return fReturnValue;
 	}
-	
+
 	public IVariableBinding[] getCallerLocals() {
 		return fCallerLocals;
 	}
-	
+
 	public IVariableBinding getReturnLocal() {
 		return fReturnLocal;
 	}
-	
+
 	public ITypeBinding getExpressionBinding() {
 		return fExpressionBinding;
 	}
-	
+
 	public boolean getForceStatic() {
 		return fForceStatic;
 	}
-	
+
 	public ITypeBinding[] getTypeVariables() {
 		return fTypeVariables;
 	}
-	
+
 	//---- Activation checking ---------------------------------------------------------------------------
-	
+
 	public RefactoringStatus checkInitialConditions(ImportRewrite rewriter) {
 		RefactoringStatus result= getStatus();
 		checkExpression(result);
 		if (result.hasFatalError())
 			return result;
-			
+
 		fReturnKind= UNDEFINED;
 		fMaxVariableId= LocalVariableIndex.perform(fEnclosingBodyDeclaration);
 		if (analyzeSelection(result).hasFatalError())
@@ -198,28 +198,28 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 			fReturnKind= EXPRESSION;
 			returns++;
 		}
-			
+
 		if (returns > 1) {
-			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_ambiguous_return_value, JavaStatusContext.create(fCUnit, getSelection())); 
+			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_ambiguous_return_value, JavaStatusContext.create(fCUnit, getSelection()));
 			fReturnKind= MULTIPLE;
 			return result;
 		}
 		initReturnType(rewriter);
 		return result;
 	}
-	
+
 	private void checkExpression(RefactoringStatus status) {
 		ASTNode[] nodes= getSelectedNodes();
 		if (nodes != null && nodes.length == 1) {
 			ASTNode node= nodes[0];
 			if (node instanceof Type) {
-				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference, JavaStatusContext.create(fCUnit, node)); 
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference, JavaStatusContext.create(fCUnit, node));
 			} else if (node.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
-				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_switch_case, JavaStatusContext.create(fCUnit, node)); 
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_switch_case, JavaStatusContext.create(fCUnit, node));
 			}
 		}
 	}
-	
+
 	private void initReturnType(ImportRewrite rewriter) {
 		AST ast= fEnclosingBodyDeclaration.getAST();
 		fReturnType= null;
@@ -241,7 +241,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				}
 				if (fExpressionBinding != null) {
 					if (fExpressionBinding.isNullType()) {
-						getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_null_type, JavaStatusContext.create(fCUnit, expression)); 
+						getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_null_type, JavaStatusContext.create(fCUnit, expression));
 					} else {
 						ITypeBinding normalizedBinding= Bindings.normalizeForDeclarationUse(fExpressionBinding, ast);
 						if (normalizedBinding != null) {
@@ -252,9 +252,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				} else {
 					fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 					fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
-					getStatus().addError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_determine_return_type, JavaStatusContext.create(fCUnit, expression)); 
+					getStatus().addError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_determine_return_type, JavaStatusContext.create(fCUnit, expression));
 				}
-				break;	
+				break;
 			case RETURN_STATEMENT_VALUE:
 				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 					fReturnType= ((MethodDeclaration) fEnclosingBodyDeclaration).getReturnType2();
@@ -269,7 +269,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 			fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 			fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
 	}
-	
+
 	//	 !!! -- +/- same as in ExtractTempRefactoring
 	public boolean isLiteralNodeSelected() {
 		ASTNode[] nodes= getSelectedNodes();
@@ -282,21 +282,21 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 			case ASTNode.NULL_LITERAL :
 			case ASTNode.NUMBER_LITERAL :
 				return true;
-			
+
 			default :
 				return false;
 		}
 	}
 
 	//---- Input checking -----------------------------------------------------------------------------------
-		
+
 	public void checkInput(RefactoringStatus status, String methodName) {
 		ITypeBinding[] arguments= getArgumentTypes();
 		ITypeBinding type= ASTNodes.getEnclosingType(fEnclosingBodyDeclaration);
 		status.merge(Checks.checkMethodInType(type, methodName, arguments));
 		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments));
 	}
-	
+
 	private ITypeBinding[] getArgumentTypes() {
 		ITypeBinding[] result= new ITypeBinding[fArguments.length];
 		for (int i= 0; i < fArguments.length; i++) {
@@ -304,17 +304,17 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		}
 		return result;
 	}
-	
+
 	private RefactoringStatus analyzeSelection(RefactoringStatus status) {
 		fInputFlowContext= new FlowContext(0, fMaxVariableId + 1);
 		fInputFlowContext.setConsiderAccessMode(true);
 		fInputFlowContext.setComputeMode(FlowContext.ARGUMENTS);
-		
+
 		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(fInputFlowContext);
 		fInputFlowInfo= flowAnalyzer.perform(getSelectedNodes());
-		
+
 		if (fInputFlowInfo.branches()) {
-			status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch, JavaStatusContext.create(fCUnit, getSelection())); 
+			status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch, JavaStatusContext.create(fCUnit, getSelection()));
 			fReturnKind= ERROR;
 			return status;
 		}
@@ -325,9 +325,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		} else if (fInputFlowInfo.isNoReturn() || fInputFlowInfo.isThrow() || fInputFlowInfo.isUndefined()) {
 			fReturnKind= NO;
 		}
-		
+
 		if (fReturnKind == UNDEFINED) {
-			status.addError(RefactoringCoreMessages.FlowAnalyzer_execution_flow, JavaStatusContext.create(fCUnit, getSelection())); 
+			status.addError(RefactoringCoreMessages.FlowAnalyzer_execution_flow, JavaStatusContext.create(fCUnit, getSelection()));
 			fReturnKind= NO;
 		}
 		computeInput();
@@ -335,12 +335,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		computeOutput(status);
 		if (status.hasFatalError())
 			return status;
-		
+
 		adjustArgumentsAndMethodLocals();
 		compressArrays();
 		return status;
 	}
-	
+
 	private boolean isVoidMethod() {
 		// if we have an initializer
 		if (fEnclosingMethodBinding == null)
@@ -350,7 +350,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 			return true;
 		return false;
 	}
-	
+
 	public boolean isLastStatementSelected() {
 		return fIsLastStatementSelected;
 	}
@@ -379,7 +379,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		fMethodLocals= removeSelectedDeclarations(fInputFlowInfo.get(fInputFlowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL));
 		fTypeVariables= computeTypeVariables(fInputFlowInfo.getTypeVariables());
 	}
-	
+
 	private IVariableBinding[] removeSelectedDeclarations(IVariableBinding[] bindings) {
 		List result= new ArrayList(bindings.length);
 		Selection selection= getSelection();
@@ -390,7 +390,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		}
 		return (IVariableBinding[])result.toArray(new IVariableBinding[result.size()]);
 	}
-	
+
 	private ITypeBinding[] computeTypeVariables(ITypeBinding[] bindings) {
 		Selection selection= getSelection();
 		Set result= new HashSet();
@@ -414,7 +414,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		}
 		return (ITypeBinding[])result.toArray(new ITypeBinding[result.size()]);
 	}
-	
+
 	private void computeOutput(RefactoringStatus status) {
 		// First find all writes inside the selection.
 		FlowContext flowContext= new FlowContext(0, fMaxVariableId + 1);
@@ -422,11 +422,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		flowContext.setComputeMode(FlowContext.RETURN_VALUES);
 		FlowInfo returnInfo= new InOutFlowAnalyzer(flowContext).perform(getSelectedNodes());
 		IVariableBinding[] returnValues= returnInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
-		
+
 		// Compute a selection that exactly covers the selected nodes
 		IRegion region= getSelectedNodeRange();
 		Selection selection= Selection.createFromStartLength(region.getOffset(), region.getLength());
-		
+
 		int counter= 0;
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
 		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, selection, true).perform(fEnclosingBodyDeclaration);
@@ -449,7 +449,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				break;
 			default:
 				fReturnValue= null;
-				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_assignments_to_local, JavaStatusContext.create(fCUnit, getSelection())); 
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_assignments_to_local, JavaStatusContext.create(fCUnit, getSelection()));
 				return;
 		}
 		List callerLocals= new ArrayList(5);
@@ -464,7 +464,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		if (fReturnValue != null && getSelection().covers(ASTNodes.findDeclaration(fReturnValue, fEnclosingBodyDeclaration)))
 			fReturnLocal= fReturnValue;
 	}
-	
+
 	private void adjustArgumentsAndMethodLocals() {
 		for (int i= 0; i < fArguments.length; i++) {
 			IVariableBinding argument= fArguments[i];
@@ -478,44 +478,44 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				if (fArguments[i] != null) {
 					for (int l= 0; l < fMethodLocals.length; l++) {
 						if (fMethodLocals[l] == argument)
-							fMethodLocals[l]= null;						
+							fMethodLocals[l]= null;
 					}
 				}
 			}
 		}
 	}
-	
+
 	private void compressArrays() {
 		fArguments= compressArray(fArguments);
 		fCallerLocals= compressArray(fCallerLocals);
 		fMethodLocals= compressArray(fMethodLocals);
 	}
-	
+
 	private IVariableBinding[] compressArray(IVariableBinding[] array) {
 		if (array == null)
 			return null;
 		int size= 0;
 		for (int i= 0; i < array.length; i++) {
 			if (array[i] != null)
-				size++;	
+				size++;
 		}
 		if (size == array.length)
 			return array;
 		IVariableBinding[] result= new IVariableBinding[size];
 		for (int i= 0, r= 0; i < array.length; i++) {
 			if (array[i] != null)
-				result[r++]= array[i];		
+				result[r++]= array[i];
 		}
 		return result;
 	}
-	
+
 	//---- Change creation ----------------------------------------------------------------------------------
-	
+
 	public void aboutToCreateChange() {
 	}
 
 	//---- Exceptions -----------------------------------------------------------------------------------------
-	
+
 	public ITypeBinding[] getExceptions(boolean includeRuntimeExceptions) {
 		if (includeRuntimeExceptions)
 			return fAllExceptions;
@@ -528,23 +528,23 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		}
 		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
 	}
-	
+
 	private void computeExceptions() {
 		fAllExceptions= ExceptionAnalyzer.perform(getSelectedNodes());
 	}
-	
+
 	//---- Special visitor methods ---------------------------------------------------------------------------
 
 	protected void handleNextSelectedNode(ASTNode node) {
 		super.handleNextSelectedNode(node);
 		checkParent(node);
 	}
-	
+
 	protected boolean handleSelectionEndsIn(ASTNode node) {
-		invalidSelection(RefactoringCoreMessages.StatementAnalyzer_doesNotCover, JavaStatusContext.create(fCUnit, node)); 
+		invalidSelection(RefactoringCoreMessages.StatementAnalyzer_doesNotCover, JavaStatusContext.create(fCUnit, node));
 		return super.handleSelectionEndsIn(node);
 	}
-		
+
 	private void checkParent(ASTNode node) {
 		ASTNode firstParent= getFirstSelectedNode().getParent();
 		do {
@@ -552,9 +552,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 			if (node == firstParent)
 				return;
 		} while (node != null);
-		invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_parent_mismatch); 
+		invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_parent_mismatch);
 	}
-	
+
 	public void endVisit(CompilationUnit node) {
 		RefactoringStatus status= getStatus();
 		superCall: {
@@ -567,20 +567,20 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 					Message[] messages= ASTNodes.getMessages(methodDecl, ASTNodes.NODE_ONLY);
 					if (messages.length > 0) {
 						status.addFatalError(Messages.format(
-							RefactoringCoreMessages.ExtractMethodAnalyzer_compile_errors, 
+							RefactoringCoreMessages.ExtractMethodAnalyzer_compile_errors,
 							BasicElementLabels.getJavaElementName(methodDecl.getName().getIdentifier())), JavaStatusContext.create(fCUnit, methodDecl));
 						break superCall;
 					}
 				}
-				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body); 
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body);
 				break superCall;
 			}
 			fEnclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
-			if (fEnclosingBodyDeclaration == null || 
-					(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION && 
+			if (fEnclosingBodyDeclaration == null ||
+					(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION &&
 					 fEnclosingBodyDeclaration.getNodeType() != ASTNode.FIELD_DECLARATION &&
 					 fEnclosingBodyDeclaration.getNodeType() != ASTNode.INITIALIZER)) {
-				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body); 
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body);
 				break superCall;
 			} else if (ASTNodes.getEnclosingType(fEnclosingBodyDeclaration) == null) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_compile_errors_no_parent_binding);
@@ -589,7 +589,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				fEnclosingMethodBinding= ((MethodDeclaration)fEnclosingBodyDeclaration).resolveBinding();
 			}
 			if (!isSingleExpressionOrStatementSet()) {
-				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_single_expression_or_set); 
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_single_expression_or_set);
 				break superCall;
 			}
 			if (isExpressionSelected()) {
@@ -597,26 +597,26 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				if (expression instanceof Name) {
 					Name name= (Name)expression;
 					if (name.resolveBinding() instanceof ITypeBinding) {
-						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference); 
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference);
 						break superCall;
 					}
 					if (name.resolveBinding() instanceof IMethodBinding) {
-						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_method_name_reference); 
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_method_name_reference);
 						break superCall;
 					}
 					if (name.resolveBinding() instanceof IVariableBinding) {
 						StructuralPropertyDescriptor locationInParent= name.getLocationInParent();
 						if (locationInParent == QualifiedName.NAME_PROPERTY || (locationInParent == FieldAccess.NAME_PROPERTY && !(((FieldAccess) name.getParent()).getExpression() instanceof ThisExpression)))  {
-							status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name); 
+							status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name);
 							break superCall;
 						}
 					}
 					if (name.isSimpleName() && ((SimpleName)name).isDeclaration()) {
-						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_name_in_declaration); 
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_name_in_declaration);
 						break superCall;
 					}
 				}
-				fForceStatic= 
+				fForceStatic=
 					ASTNodes.getParent(expression, ASTNode.SUPER_CONSTRUCTOR_INVOCATION) != null ||
 					ASTNodes.getParent(expression, ASTNode.CONSTRUCTOR_INVOCATION) != null;
 			}
@@ -625,21 +625,21 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		}
 		super.endVisit(node);
 	}
-	
+
 	public boolean visit(AnonymousClassDeclaration node) {
 		boolean result= super.visit(node);
 		if (isFirstSelectedNode(node)) {
-			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_anonymous_type, JavaStatusContext.create(fCUnit, node)); 
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_anonymous_type, JavaStatusContext.create(fCUnit, node));
 			return false;
 		}
 		return result;
 	}
-	
+
 	public boolean visit(Assignment node) {
 		boolean result= super.visit(node);
 		if (getSelection().getVisitSelectionMode(node.getLeftHandSide()) == Selection.SELECTED) {
 			invalidSelection(
-				RefactoringCoreMessages.ExtractMethodAnalyzer_leftHandSideOfAssignment,  
+				RefactoringCoreMessages.ExtractMethodAnalyzer_leftHandSideOfAssignment,
 				JavaStatusContext.create(fCUnit, node));
 			return false;
 		}
@@ -648,17 +648,17 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 	public boolean visit(DoStatement node) {
 		boolean result= super.visit(node);
-		
+
 		try {
 			int actionStart= getTokenScanner().getTokenEndOffset(ITerminalSymbols.TokenNamedo, node.getStartPosition());
 			if (getSelection().getOffset() == actionStart) {
-				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_after_do_keyword, JavaStatusContext.create(fCUnit, getSelection())); 
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_after_do_keyword, JavaStatusContext.create(fCUnit, getSelection()));
 				return false;
 			}
 		} catch (CoreException e) {
 			// ignore
 		}
-		
+
 		return result;
 	}
 
@@ -674,63 +674,63 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 			return false;
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(ConstructorInvocation node) {
 		return visitConstructorInvocation(node, super.visit(node));
 	}
-	
+
 	public boolean visit(SuperConstructorInvocation node) {
 		return visitConstructorInvocation(node, super.visit(node));
 	}
-	
+
 	private boolean visitConstructorInvocation(ASTNode node, boolean superResult) {
 		if (getSelection().getVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_super_or_this, JavaStatusContext.create(fCUnit, node)); 
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_super_or_this, JavaStatusContext.create(fCUnit, node));
 			return false;
 		}
 		return superResult;
 	}
-	
+
 	public boolean visit(VariableDeclarationFragment node) {
 		boolean result= super.visit(node);
 		if (isFirstSelectedNode(node)) {
-			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_variable_declaration_fragment, JavaStatusContext.create(fCUnit, node)); 
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_variable_declaration_fragment, JavaStatusContext.create(fCUnit, node));
 			return false;
 		}
 		return result;
 	}
-	
+
 	public void endVisit(ForStatement node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (node.initializers().contains(getFirstSelectedNode())) {
-				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_for_initializer, JavaStatusContext.create(fCUnit, getSelection())); 
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_for_initializer, JavaStatusContext.create(fCUnit, getSelection()));
 			} else if (node.updaters().contains(getLastSelectedNode())) {
-				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_for_updater, JavaStatusContext.create(fCUnit, getSelection())); 
+				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_for_updater, JavaStatusContext.create(fCUnit, getSelection()));
 			}
 		}
 		super.endVisit(node);
-	}		
-	
+	}
+
 	public void endVisit(VariableDeclarationExpression node) {
 		checkTypeInDeclaration(node.getType());
-		super.endVisit(node);		
+		super.endVisit(node);
 	}
-			
+
 	public void endVisit(VariableDeclarationStatement node) {
 		checkTypeInDeclaration(node.getType());
-		super.endVisit(node);		
+		super.endVisit(node);
 	}
-			
+
 	private boolean isFirstSelectedNode(ASTNode node) {
 		return getSelection().getVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node;
 	}
-	
+
 	private void checkTypeInDeclaration(Type node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
-			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_variable_declaration, JavaStatusContext.create(fCUnit, getSelection())); 
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_variable_declaration, JavaStatusContext.create(fCUnit, getSelection()));
 		}
 	}
-	
+
 	private boolean isSingleExpressionOrStatementSet() {
 		ASTNode first= getFirstSelectedNode();
 		if (first == null)

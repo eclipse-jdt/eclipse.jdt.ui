@@ -28,14 +28,14 @@ import org.eclipse.jdt.core.Signature;
 /**
  * Helper class to transplant a IJavaElement handle from a certain state of the
  * Java Model into another.
- * 
+ *
  * The changes to the workspace include one type rename, a number of field
  * renames, and a number of method renames including signature changes.
- * 
+ *
  * The returned handle exists in the target model state.
- * 
+ *
  * @since 3.2
- * 
+ *
  */
 public class RefactoringHandleTransplanter {
 
@@ -60,7 +60,7 @@ public class RefactoringHandleTransplanter {
 	/**
 	 * Converts the handle. Handle need not exist, but must be a source
 	 * reference.
-	 * 
+	 *
 	 * @param handle
 	 * @return the new handle
 	 */
@@ -86,7 +86,7 @@ public class RefactoringHandleTransplanter {
 		if (parent instanceof IMember)
 			addElements((IMember) parent, chain);
 	}
-	
+
 	private IMember[] convertElements(IMember[] oldElements) {
 
 		final IMember[] newElements= new IMember[oldElements.length];

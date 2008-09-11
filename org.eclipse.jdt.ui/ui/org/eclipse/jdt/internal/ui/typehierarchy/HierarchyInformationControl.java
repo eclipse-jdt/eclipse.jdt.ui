@@ -57,21 +57,21 @@ import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 /**
  * Show hierarchy in light-weight control.
- * 
+ *
  * @since 3.0
  */
 public class HierarchyInformationControl extends AbstractInformationControl {
-	
+
 	private TypeHierarchyLifeCycle fLifeCycle;
 	private HierarchyLabelProvider fLabelProvider;
 	private KeyAdapter fKeyAdapter;
-	
+
 	private Object[] fOtherExpandedElements;
 	private TypeHierarchyContentProvider fOtherContentProvider;
-	
+
 	private IMethod fFocus; // method to filter for or null if type hierarchy
 	private boolean fDoFilter;
-	
+
 	private MethodOverrideTester fMethodOverrideTester;
 
 	public HierarchyInformationControl(Shell parent, int shellStyle, int treeStyle) {
@@ -80,7 +80,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		fDoFilter= true;
 		fMethodOverrideTester= null;
 	}
-	
+
 	private KeyAdapter getKeyAdapter() {
 		if (fKeyAdapter == null) {
 			fKeyAdapter= new KeyAdapter() {
@@ -90,7 +90,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					KeySequence[] sequences= getInvokingCommandKeySequences();
 					if (sequences == null)
 						return;
-					
+
 					for (int i= 0; i < sequences.length; i++) {
 						if (sequences[i].equals(keySequence)) {
 							e.doit= false;
@@ -99,9 +99,9 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 						}
 					}
 				}
-			};			
+			};
 		}
-		return fKeyAdapter;		
+		return fKeyAdapter;
 	}
 
 	/**
@@ -116,9 +116,9 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		Text text= super.createFilterText(parent);
 		text.addKeyListener(getKeyAdapter());
 		return text;
-	}	
-		
-	
+	}
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl#createTreeViewer(org.eclipse.swt.widgets.Composite, int)
 	 */
@@ -133,8 +133,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return element instanceof IType;
 			}
-		});		
-		
+		});
+
 		fLifeCycle= new TypeHierarchyLifeCycle(false);
 
 		treeViewer.setComparator(new HierarchyViewerSorter(fLifeCycle));
@@ -145,17 +145,17 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return hasFocusMethod((IType) element);
 			}
-		});	
+		});
 
 		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED);
 		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
 		treeViewer.setLabelProvider(new ColoringLabelProvider(fLabelProvider));
-		
-		treeViewer.getTree().addKeyListener(getKeyAdapter());	
-		
+
+		treeViewer.getTree().addKeyListener(getKeyAdapter());
+
 		return treeViewer;
 	}
-	
+
 	protected boolean hasFocusMethod(IType type) {
 		if (fFocus == null) {
 			return true;
@@ -163,7 +163,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (type.equals(fFocus.getDeclaringType())) {
 			return true;
 		}
-		
+
 		try {
 			IMethod method= findMethod(fFocus, type);
 			if (method != null) {
@@ -177,17 +177,17 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			// ignore
 			JavaPlugin.log(e);
 		}
-		return false;			
-		
+		return false;
+
 	}
-	
+
 	private IMethod findMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
 		IType filterType= filterMethod.getDeclaringType();
 		ITypeHierarchy hierarchy= fLifeCycle.getHierarchy();
-		
+
 		boolean filterOverrides= JavaModelUtil.isSuperType(hierarchy, typeToFindIn, filterType);
 		IType focusType= filterOverrides ? filterType : typeToFindIn;
-		
+
 		if (fMethodOverrideTester == null || !fMethodOverrideTester.getFocusType().equals(focusType)) {
 			fMethodOverrideTester= new MethodOverrideTester(focusType, hierarchy);
 		}
@@ -214,7 +214,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			if (elem.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 				elem= elem.getParent();
 			}
-			
+
 			switch (elem.getElementType()) {
 				case IJavaElement.JAVA_PROJECT :
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
@@ -231,7 +231,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 				case IJavaElement.METHOD :
 					IMethod method= (IMethod) elem;
 					if (!method.isConstructor()) {
-						locked= method;				
+						locked= method;
 					}
 					input= method.getDeclaringType();
 					break;
@@ -257,7 +257,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		super.setTitleText(getHeaderLabel(locked == null ? input : locked));
 		try {
 			fLifeCycle.ensureRefreshedTypeHierarchy(input, JavaPlugin.getActiveWorkbenchWindow());
@@ -268,16 +268,16 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			return;
 		}
 		IMember[] memberFilter= locked != null ? new IMember[] { locked } : null;
-		
+
 		TraditionalHierarchyContentProvider contentProvider= new TraditionalHierarchyContentProvider(fLifeCycle);
 		contentProvider.setMemberFilter(memberFilter);
-		getTreeViewer().setContentProvider(contentProvider);		
-		
+		getTreeViewer().setContentProvider(contentProvider);
+
 		fOtherContentProvider= new SuperTypeHierarchyContentProvider(fLifeCycle);
 		fOtherContentProvider.setMemberFilter(memberFilter);
-		
+
 		fFocus= locked;
-		
+
 		Object[] topLevelObjects= contentProvider.getElements(fLifeCycle);
 		if (topLevelObjects.length > 0 && contentProvider.getChildren(topLevelObjects[0]).length > 40) {
 			fDoFilter= false;
@@ -293,7 +293,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 		inputChanged(fLifeCycle, selection);
 	}
-	
+
 	protected void stringMatcherUpdated() {
 		if (fDoFilter) {
 			super.stringMatcherUpdated(); // refresh the view
@@ -301,12 +301,12 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			selectFirstMatch();
 		}
 	}
-	
+
 	protected void toggleHierarchy() {
 		TreeViewer treeViewer= getTreeViewer();
-		
+
 		treeViewer.getTree().setRedraw(false);
-		
+
 		Object[] expandedElements= treeViewer.getExpandedElements();
 		TypeHierarchyContentProvider contentProvider= (TypeHierarchyContentProvider) treeViewer.getContentProvider();
 		treeViewer.setContentProvider(fOtherContentProvider);
@@ -317,41 +317,41 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		} else {
 			treeViewer.expandAll();
 		}
-		
+
 		treeViewer.getTree().setRedraw(true);
-		
+
 		fOtherContentProvider= contentProvider;
 		fOtherExpandedElements= expandedElements;
-		
+
 		updateStatusFieldText();
 	}
-	
-	
+
+
 	private String getHeaderLabel(IJavaElement input) {
 		if (input instanceof IMethod) {
 			String[] args= { JavaElementLabels.getElementLabel(input.getParent(), JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(input, JavaElementLabels.ALL_DEFAULT) };
-			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_methodhierarchy_label, args); 
+			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_methodhierarchy_label, args);
 		} else if (input != null) {
 			String arg= JavaElementLabels.getElementLabel(input, JavaElementLabels.DEFAULT_QUALIFIED);
-			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_hierarchy_label, arg);	 
+			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_hierarchy_label, arg);
 		} else {
 			return ""; //$NON-NLS-1$
 		}
 	}
-	
+
 	protected String getStatusFieldText() {
 		KeySequence[] sequences= getInvokingCommandKeySequences();
 		String keyName= ""; //$NON-NLS-1$
 		if (sequences != null && sequences.length > 0)
 			keyName= sequences[0].format();
-		
+
 		if (fOtherContentProvider instanceof TraditionalHierarchyContentProvider) {
-			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_toggle_traditionalhierarchy_label, keyName); 
+			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_toggle_traditionalhierarchy_label, keyName);
 		} else {
-			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_toggle_superhierarchy_label, keyName); 
+			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_toggle_superhierarchy_label, keyName);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getId()
 	 */

@@ -54,7 +54,7 @@ public class MultiFixMessages extends NLS {
 	public static String SortMembersCleanUp_RemoveMarkersWarning0;
 	public static String StringMultiFix_AddMissingNonNls_description;
 	public static String StringMultiFix_RemoveUnnecessaryNonNls_description;
-	
+
 	public static String UnusedCodeMultiFix_RemoveUnusedVariable_description;
 	public static String UnusedCodeMultiFix_RemoveUnusedField_description;
 	public static String UnusedCodeMultiFix_RemoveUnusedType_description;
@@ -62,7 +62,7 @@ public class MultiFixMessages extends NLS {
 	public static String UnusedCodeMultiFix_RemoveUnusedMethod_description;
 	public static String UnusedCodeMultiFix_RemoveUnusedImport_description;
 	public static String UnusedCodeCleanUp_RemoveUnusedCasts_description;
-	
+
 	public static String CodeStyleMultiFix_ChangeNonStaticAccess_description;
 	public static String CodeStyleMultiFix_AddThisQualifier_description;
 	public static String CodeStyleMultiFix_QualifyAccessToStaticField;
@@ -73,18 +73,18 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleCleanUp_QualifyStaticMethod_description;
 	public static String CodeStyleCleanUp_removeFieldThis_description;
 	public static String CodeStyleCleanUp_removeMethodThis_description;
-	
+
 	public static String Java50MultiFix_AddMissingDeprecated_description;
 	public static String Java50MultiFix_AddMissingOverride_description;
 	public static String Java50CleanUp_ConvertToEnhancedForLoop_description;
 	public static String Java50CleanUp_AddTypeParameters_description;
 
 	public static String SerialVersionCleanUp_Generated_description;
-	
+
 	public static String CleanUpRefactoringWizard_WindowTitle;
 	public static String CleanUpRefactoringWizard_PageTitle;
 	public static String CleanUpRefactoringWizard_formatterException_errorMessage;
-	
+
 	public static String ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description;
 	public static String ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description;
 
@@ -93,19 +93,19 @@ public class MultiFixMessages extends NLS {
 
 	public static String ExpressionsCleanUp_addParanoiac_description;
 	public static String ExpressionsCleanUp_removeUnnecessary_description;
-	
+
 	public static String VariableDeclarationCleanUp_AddFinalField_description;
 	public static String VariableDeclarationCleanUp_AddFinalParameters_description;
 	public static String VariableDeclarationCleanUp_AddFinalLocals_description;
-	
+
 	public static String CodeFormatCleanUp_description;
 	public static String CodeFormatFix_description;
-	
+
 	public static String CommentFormatCleanUp_javadocComments;
 	public static String CommentFormatCleanUp_multiLineComments;
 	public static String CommentFormatCleanUp_singleLineComments;
 	public static String CommentFormatFix_description;
-	
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, MultiFixMessages.class);

@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -27,6 +23,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -91,7 +91,7 @@ public class ChangeExceptionsControl extends Composite {
 
 	private static class ExceptionInfoLabelProvider extends LabelProvider implements ITableLabelProvider {
 		private Image fInterfaceImage;
-			
+
 		public ExceptionInfoLabelProvider() {
 			super();
 			fInterfaceImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS);
@@ -174,7 +174,7 @@ public class ChangeExceptionsControl extends Composite {
 		gl.marginWidth= 0;
 		buttonComposite.setLayout(gl);
 
-		createAddButton(buttonComposite);	
+		createAddButton(buttonComposite);
 		fRemoveButton= createRemoveButton(buttonComposite);
 		updateButtonsEnabledState();
 	}
@@ -195,10 +195,10 @@ public class ChangeExceptionsControl extends Composite {
 	private Table getTable() {
 		return fTableViewer.getTable();
 	}
-	
+
 	private Button createAddButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.ChangeExceptionsControl_buttons_add); 
+		button.setText(RefactoringMessages.ChangeExceptionsControl_buttons_add);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.setEnabled(true);
@@ -206,7 +206,7 @@ public class ChangeExceptionsControl extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				doAddException();
 			}
-		});	
+		});
 		return button;
 	}
 
@@ -214,7 +214,7 @@ public class ChangeExceptionsControl extends Composite {
 		IType newException= chooseException();
 		if (newException == null)
 			return;
-		
+
 		ExceptionInfo info= findExceptionInfo(newException);
 		if (info != null) {
 			if (info.isDeleted()) {
@@ -226,7 +226,7 @@ public class ChangeExceptionsControl extends Composite {
 			fTableViewer.setSelection(new StructuredSelection(info), true);
 			return;
 		}
-		
+
 		info= ExceptionInfo.createInfoForAddedException(newException);
 		fExceptionInfos.add(info);
 		fListener.exceptionListChanged();
@@ -237,15 +237,15 @@ public class ChangeExceptionsControl extends Composite {
 		updateButtonsEnabledState();
 
 	}
-	
+
 	private IType chooseException() {
 		IJavaElement[] elements= new IJavaElement[] { fProject.getJavaProject() };
 		final IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		
+
 		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false,
 				PlatformUI.getWorkbench().getProgressService(), scope, IJavaSearchConstants.CLASS);
-		dialog.setTitle(RefactoringMessages.ChangeExceptionsControl_choose_title); 
-		dialog.setMessage(RefactoringMessages.ChangeExceptionsControl_choose_message); 
+		dialog.setTitle(RefactoringMessages.ChangeExceptionsControl_choose_title);
+		dialog.setMessage(RefactoringMessages.ChangeExceptionsControl_choose_message);
 		dialog.setInitialPattern("*Exception*"); //$NON-NLS-1$
 		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
@@ -259,13 +259,13 @@ public class ChangeExceptionsControl extends Composite {
 				}
 			}
 		});
-		
+
 		if (dialog.open() == Window.OK) {
 			return (IType) dialog.getFirstResult();
 		}
 		return null;
 	}
-	
+
 	private IStatus checkException(final IType type) throws JavaModelException {
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new NullProgressMonitor());
 		IType curr= type;
@@ -276,9 +276,9 @@ public class ChangeExceptionsControl extends Composite {
 			curr= hierarchy.getSuperclass(curr);
 		}
 		return JavaUIStatus.createError(IStatus.ERROR,
-				RefactoringMessages.ChangeExceptionsControl_not_exception, null); 
+				RefactoringMessages.ChangeExceptionsControl_not_exception, null);
 	}
-	
+
 	private ExceptionInfo findExceptionInfo(IType exception) {
 		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
@@ -290,7 +290,7 @@ public class ChangeExceptionsControl extends Composite {
 
 	private Button createRemoveButton(Composite buttonComposite) {
 		final Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText(RefactoringMessages.ChangeExceptionsControl_buttons_remove); 
+		button.setText(RefactoringMessages.ChangeExceptionsControl_buttons_remove);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -301,7 +301,7 @@ public class ChangeExceptionsControl extends Composite {
 					if (selected[i].isAdded())
 						fExceptionInfos.remove(selected[i]);
 					else
-						selected[i].markAsDeleted();	
+						selected[i].markAsDeleted();
 				}
 				restoreSelection(index);
 			}
@@ -317,7 +317,7 @@ public class ChangeExceptionsControl extends Composite {
 				fListener.exceptionListChanged();
 				updateButtonsEnabledState();
 			}
-		});	
+		});
 		return button;
 	}
 

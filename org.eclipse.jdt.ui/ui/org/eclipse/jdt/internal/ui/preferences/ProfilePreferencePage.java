@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.preference.IPreferencePageContainer;
 
@@ -41,11 +41,11 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
     	if (container instanceof IWorkbenchPreferenceContainer) {
     		workingCopyManager= ((IWorkbenchPreferenceContainer) container).getWorkingCopyManager();
     	} else {
-    		workingCopyManager= new WorkingCopyManager(); // non shared 
+    		workingCopyManager= new WorkingCopyManager(); // non shared
     	}
     	PreferencesAccess access= PreferencesAccess.getWorkingCopyPreferences(workingCopyManager);
     	fConfigurationBlock= createConfigurationBlock(access);
-    	
+
     	super.createControl(parent);
     }
 
@@ -81,14 +81,14 @@ public abstract class ProfilePreferencePage extends PropertyAndPreferencePage {
 	public boolean performOk() {
     	if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
     		return false;
-    	}	
+    	}
     	return super.performOk();
     }
 
 	public void performApply() {
     	if (fConfigurationBlock != null) {
     		fConfigurationBlock.performApply();
-    	}	
+    	}
     	super.performApply();
     }
 

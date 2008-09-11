@@ -23,14 +23,14 @@ import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 
 public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
-	
+
 	private final String fOldName;
 	private final String fOldQualifiedName;
-	
+
 	public TypeOccurrenceCollector(IType type) {
 		this(type, null);
 	}
-	
+
 	public TypeOccurrenceCollector(IType type, ReferencesInBinaryContext binaryRefs) {
 		super(binaryRefs);
 		fOldName= type.getElementName();
@@ -40,17 +40,17 @@ public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
 	public void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
 		collectMatch(acceptSearchMatch2(unit, match));
 	}
-	
+
 	public SearchMatch acceptSearchMatch2(ICompilationUnit unit, SearchMatch match) throws CoreException {
 		int start= match.getOffset();
 		int length= match.getLength();
-		
+
 		//unqualified:
 		String matchText= unit.getBuffer().getText(start, length);
 		if (fOldName.equals(matchText)) {
 			return match;
 		}
-		
+
 		//(partially) qualified:
 		if (fOldQualifiedName.endsWith(matchText)) {
 			//e.g. rename B and p.A.B ends with match A.B
@@ -59,7 +59,7 @@ public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
 			match.setLength(simpleNameLenght);
 			return match;
 		}
-		
+
 		//Not a standard reference -- use scanner to find last identifier token:
 		IScanner scanner= getScanner(unit);
 		scanner.setSource(matchText.toCharArray());
@@ -76,7 +76,7 @@ public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
 			}
 		} catch (InvalidInputException e){
 			//ignore
-		}	
+		}
 		if (simpleNameStart != -1) {
 			match.setOffset(start + simpleNameStart);
 			match.setLength(simpleNameEnd + 1 - simpleNameStart);

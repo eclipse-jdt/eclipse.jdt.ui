@@ -26,15 +26,15 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 
 public class CodeFormatCleanUp extends AbstractCleanUp {
-	
+
 	public CodeFormatCleanUp() {
 		super();
 	}
-	
+
 	public CodeFormatCleanUp(Map options) {
 		super(options);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -42,7 +42,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		boolean requiresChangedRegions= isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE) && isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		return new SaveActionRequirements(false, false, null, requiresChangedRegions);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -50,23 +50,23 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		ICompilationUnit compilationUnit= context.getCompilationUnit();
 		if (compilationUnit == null)
 			return null;
-		
+
 		IRegion[] regions;
 		if (context instanceof MultiLineCleanUpContext) {
 			regions= ((MultiLineCleanUpContext)context).getRegions();
 		} else {
 			regions= null;
 		}
-		
+
 		boolean removeWhitespaces= isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		return CodeFormatFix.createCleanUp(compilationUnit, 
-				regions, 
-				isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE), 
-				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL), 
-				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY), 
+		return CodeFormatFix.createCleanUp(compilationUnit,
+				regions,
+				isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE),
+				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL),
+				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY),
 				isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -74,7 +74,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		ArrayList result= new ArrayList();
 		if (isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
 			result.add(MultiFixMessages.CodeFormatCleanUp_description);
-		
+
 		if (isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES)) {
 			if (isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL)) {
 				result.add(MultiFixMessages.CodeFormatCleanUp_RemoveTrailingAll_description);
@@ -82,13 +82,13 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 				result.add(MultiFixMessages.CodeFormatCleanUp_RemoveTrailingNoEmpty_description);
 			}
 		}
-		
+
 		if (isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION))
 			result.add(MultiFixMessages.CodeFormatCleanUp_correctIndentation_description);
-		
+
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -113,7 +113,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		buf.append("        void stop() {\n"); //$NON-NLS-1$
 		buf.append("    }\n"); //$NON-NLS-1$
 		buf.append("}\n"); //$NON-NLS-1$
-		
+
 		return buf.toString();
 	}
 }

@@ -20,9 +20,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 
 public abstract class EditorTracker implements IWindowListener, IPageListener, IPartListener {
-	
+
 	//--- Window listener
-	
+
 	public void windowActivated(IWorkbenchWindow window) {
 	}
 	public void windowDeactivated(IWorkbenchWindow window) {
@@ -33,9 +33,9 @@ public abstract class EditorTracker implements IWindowListener, IPageListener, I
 	public void windowOpened(IWorkbenchWindow window) {
 		window.addPageListener(this);
 	}
-	
+
 	//---- IPageListener
-	
+
 	public void pageActivated(IWorkbenchPage page) {
 	}
 	public void pageClosed(IWorkbenchPage page) {
@@ -44,9 +44,9 @@ public abstract class EditorTracker implements IWindowListener, IPageListener, I
 	public void pageOpened(IWorkbenchPage page) {
 		page.addPartListener(this);
 	}
-	
+
 	//---- Part Listener
-	
+
 	public void partActivated(IWorkbenchPart part) {
 	}
 	public void partBroughtToTop(IWorkbenchPart part) {
@@ -63,9 +63,9 @@ public abstract class EditorTracker implements IWindowListener, IPageListener, I
 			editorOpened((IEditorPart)part);
 		}
 	}
-	
+
 	public abstract void editorOpened(IEditorPart part);
-	
+
 	public abstract void editorClosed(IEditorPart part);
-	
+
 }

@@ -15,13 +15,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -142,7 +142,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * in order not to eagerly load refactoring classes during action
  * initialization.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public final class RefactoringExecutionStarter {
@@ -219,25 +219,25 @@ public final class RefactoringExecutionStarter {
 		final ChangeTypeRefactoring refactoring= new ChangeTypeRefactoring(unit, offset, length);
 		new RefactoringStarter().activate(new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
-	
+
 	public static void startCleanupRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps, Shell shell, boolean showWizard, String actionName) throws InvocationTargetException {
 		final CleanUpRefactoring refactoring= new CleanUpRefactoring(actionName);
 		for (int i= 0; i < cus.length; i++) {
 			refactoring.addCompilationUnit(cus[i]);
 		}
-		
+
 		if (!showWizard) {
 			for (int i= 0; i < cleanUps.length; i++) {
 				refactoring.addCleanUp(cleanUps[i]);
 			}
-			
+
 			IRunnableContext context;
 			if (refactoring.getCleanUpTargetsSize() > 1) {
 				context= new ProgressMonitorDialog(shell);
 			} else {
 				context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			}
-			
+
 			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, shell, context);
 			try {
 				helper.perform(true, true, true);
@@ -246,7 +246,7 @@ public final class RefactoringExecutionStarter {
 		} else {
 			CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE);
 			RefactoringStarter starter= new RefactoringStarter();
-			starter.activate(refactoringWizard, shell, actionName, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);			
+			starter.activate(refactoringWizard, shell, actionName, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 		}
 	}
 
@@ -472,7 +472,7 @@ public final class RefactoringExecutionStarter {
 	private RefactoringExecutionStarter() {
 		// Not for instantiation
 	}
-	
+
 	public static void startIntroduceParameterObject(ICompilationUnit unit, int offset, Shell shell) throws CoreException {
 		IJavaElement javaElement= unit.getElementAt(offset);
 		if (javaElement instanceof IMethod) {
@@ -491,7 +491,7 @@ public final class RefactoringExecutionStarter {
 		ipod.setMethod(method);
 
 		IntroduceParameterObjectProcessor processor= new IntroduceParameterObjectProcessor(ipod);
-		
+
 		final RefactoringStatus status= processor.checkInitialConditions(new NullProgressMonitor());
 		if (status.hasFatalError()) {
 			final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
@@ -518,7 +518,7 @@ public final class RefactoringExecutionStarter {
 			new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 		}
 	}
-	
+
 	public static void startExtractClassRefactoring(IType type, Shell shell) {
 		ExtractClassDescriptor descriptor= new ExtractClassDescriptor();
 		descriptor.setType(type);
@@ -526,5 +526,5 @@ public final class RefactoringExecutionStarter {
 		ExtractClassWizard wizard= new ExtractClassWizard(descriptor, refactoring);
 		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
-	
+
 }

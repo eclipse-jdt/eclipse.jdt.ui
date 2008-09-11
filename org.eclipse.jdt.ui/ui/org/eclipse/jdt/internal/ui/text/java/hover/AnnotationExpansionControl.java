@@ -220,7 +220,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		}
 	}
 
-	
+
 	/**
 	 * Listener on mouse events on the items.
 	 */
@@ -249,7 +249,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * Using mouseDown as mouseUp isn't fired on some Platforms, for
 		 * details see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=165533
-		 * 
+		 *
 		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */
 		public void mouseDown(MouseEvent e) {
@@ -315,7 +315,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		}
 	}
 
-	
+
 	/**
 	 * @since 3.0
 	 */
@@ -351,7 +351,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 		/**
 		 * Gets the shell region for the given number of items.
-		 * 
+		 *
 		 * @param itemCount the item count
 		 * @return the shell region
 		 */
@@ -361,8 +361,8 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		}
 
 	}
-	
-	
+
+
 	/**
 	 * Listener on paint events on the items. Paints the annotation image on the given <code>GC</code>.
 	 */
@@ -558,7 +558,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/**
      * Internal hook method called when the input is
 	 * initially set or subsequently changed.
-	 * 
+	 *
 	 * @param newInput the new input
 	 * @param newSelection  the new selection
 	 */

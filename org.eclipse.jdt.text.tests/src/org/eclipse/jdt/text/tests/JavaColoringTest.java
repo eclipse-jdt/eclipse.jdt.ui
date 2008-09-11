@@ -40,79 +40,79 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 public class JavaColoringTest extends TestCase {
-	
+
 	protected TestTextViewer fTextViewer;
 	protected IDocument fDocument;
 	protected JavaTextTools fTextTools;
-	
+
 	public JavaColoringTest(String name) {
 		super(name);
 	}
-	
+
 	protected void setUp() {
-		
+
 		IPreferenceStore store= new PreferenceStore();
 		fTextTools= new JavaTextTools(store);
-		
+
 		fTextViewer= new TestTextViewer();
-		
+
 		fDocument= new Document();
 		IDocumentPartitioner partitioner= fTextTools.createDocumentPartitioner();
 		partitioner.connect(fDocument);
 		fDocument.setDocumentPartitioner(partitioner);
-		
+
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore combinedStore= new ChainedPreferenceStore(new IPreferenceStore[] { store, generalTextStore });
 
 		SourceViewerConfiguration conf= new JavaSourceViewerConfiguration(fTextTools.getColorManager(), combinedStore, null, null);
 		IPresentationReconciler reconciler= conf.getPresentationReconciler(fTextViewer);
 		reconciler.install(fTextViewer);
-		
+
 		System.out.print("------ next ---------\n");
-		
+
 	}
 
 	public static Test suite() {
 		return new TestSuite(JavaColoringTest.class);
 	}
-	
+
 	protected void tearDown () {
-		
+
 		fTextTools.dispose();
 		fTextTools= null;
 
 		fTextViewer= null;
 		fDocument= null;
 	}
-		
+
 	String print(TextPresentation presentation) {
-		
+
 		StringBuffer buf= new StringBuffer();
-		
+
 		if (presentation != null) {
-			
+
 			buf.append("Default style range: ");
 			StyleRange range= presentation.getDefaultStyleRange();
 			if (range != null)
 				buf.append(range.toString());
 			buf.append('\n');
-			
+
 			Iterator e= presentation.getAllStyleRangeIterator();
 			while (e.hasNext()) {
 				buf.append(e.next().toString());
 				buf.append('\n');
 			}
 		}
-		
+
 		return buf.toString();
 	}
-	
+
 	public void testSimple() {
 		fDocument.set("xx //");
 		fTextViewer.setDocument(fDocument);
 		System.out.print(print(fTextViewer.getTextPresentation()));
 	}
-	
+
 	public void testTypingWithPartitionChange() {
 		try {
 			fTextViewer.setDocument(fDocument);
@@ -124,7 +124,7 @@ public class JavaColoringTest extends TestCase {
 			assertTrue(false);
 		}
 	}
-	
+
 	public void testTogglingPartitions() {
 		try {
 			fTextViewer.setDocument(fDocument);

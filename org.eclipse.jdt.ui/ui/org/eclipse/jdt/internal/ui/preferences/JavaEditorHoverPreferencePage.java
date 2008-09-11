@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * <p>
  * Note: Must be public since it is referenced from plugin.xml
  * </p>
- * 
+ *
  * @since 3.0
  */
 public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPreferencePage {
@@ -40,18 +40,18 @@ public class JavaEditorHoverPreferencePage extends AbstractConfigurationBlockPre
 	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
 	 */
 	protected void setDescription() {
-		String description= PreferencesMessages.JavaEditorPreferencePage_hoverTab_title; 
+		String description= PreferencesMessages.JavaEditorPreferencePage_hoverTab_title;
 		setDescription(description);
 	}
-	
+
 	/*
 	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
 	 */
 	protected void setPreferenceStore() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
-	
-	
+
+
 	protected Label createDescriptionLabel(Composite parent) {
 		return null; // no description for new look.
 	}

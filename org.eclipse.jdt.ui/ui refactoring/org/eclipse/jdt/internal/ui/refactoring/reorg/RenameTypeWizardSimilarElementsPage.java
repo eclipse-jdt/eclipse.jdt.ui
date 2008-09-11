@@ -18,9 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
@@ -38,6 +35,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -106,12 +106,12 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
- * 
+ *
  * Wizard page for displaying a tree of similarly named elements renamed along with a
  * type.
- * 
+ *
  * @since 3.2
- * 
+ *
  */
 class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
@@ -142,14 +142,14 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 		 */
 		protected Control createDialogArea(Composite parent) {
 			final Composite composite= (Composite) super.createDialogArea(parent);
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fNameField }, true, SWT.DEFAULT, SWT.DEFAULT);
 			fNameField.postSetFocusOnDialogField(parent.getDisplay());
-			
+
 			LayoutUtil.setWidthHint(fNameField.getLabelControl(null), convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH));
 			Text text= fNameField.getTextControl(null);
 			LayoutUtil.setHorizontalGrabbing(text);
@@ -161,7 +161,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
@@ -193,7 +193,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 						return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardSimilarElementsPage_method_exists);
 				}
 			}
-			
+
 			// cannot check local variables; no .getLocalVariable(String) in IMember
 
 			return StatusInfo.OK_STATUS;
@@ -351,17 +351,17 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 		public String getText(Object element) {
 			if (isSimilarElement(element)) {
-				return Messages.format(RefactoringMessages.RenameTypeWizardSimilarElementsPage_rename_to, new String[] { super.getText(element), (String)fElementToNewName.get(element) } ); 
+				return Messages.format(RefactoringMessages.RenameTypeWizardSimilarElementsPage_rename_to, new String[] { super.getText(element), (String)fElementToNewName.get(element) } );
 			}
 			return super.getText(element);
 		}
-		
+
 		private boolean isSimilarElement(Object element) {
 			return fElementToNewName.containsKey(element);
 		}
-		
+
 	}
-	
+
 	private static class SimilarElementComparator extends JavaElementComparator {
 
 		/*
@@ -587,7 +587,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		}
 		fTreeViewer.getTree().setFocus();
 	}
-	
+
 	private Object getFirstSimilarElement(TreeItem item) {
 		Object data= item.getData();
 		if (isSimilarElement(data)) {
@@ -618,7 +618,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			restoreSelectionAndNames(getRenameTypeProcessor().getSimilarElementsToSelection());
 		} finally {
 			getShell().setRedraw(true);
-		}		
+		}
 		fWasInitialized= true;
 	}
 
@@ -706,7 +706,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 	private boolean isSimilarElement(Object element) {
 		if (!fWasInitialized)
 			return false;
-		
+
 		return fSimilarElementsToNewName.containsKey(element);
 	}
 
@@ -746,7 +746,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			fSourceViewer.getDocument().set(EMPTY);
 			return;
 		}
-		
+
 		String contents= element.getSource();
 		try {
 			fSourceViewer.setRedraw(false);
@@ -757,7 +757,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			}
 		} finally {
 			fSourceViewer.setRedraw(true);
-		}		
+		}
 	}
 
 	private ISourceRange getNameRange(IJavaElement element) throws JavaModelException {

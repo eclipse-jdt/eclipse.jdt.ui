@@ -13,21 +13,21 @@ package org.eclipse.jdt.internal.corext.util;
 import org.w3c.dom.Element;
 
 public class QualifiedTypeNameHistory extends History {
-	
+
 	private static final String NODE_ROOT= "qualifiedTypeNameHistroy"; //$NON-NLS-1$
 	private static final String NODE_TYPE_INFO= "fullyQualifiedTypeName"; //$NON-NLS-1$
 	private static final String NODE_NAME= "name"; //$NON-NLS-1$
-	
+
 	private static QualifiedTypeNameHistory fgInstance;
-	
-	
+
+
 	public static QualifiedTypeNameHistory getDefault() {
 		if (fgInstance == null)
 			fgInstance= new QualifiedTypeNameHistory("QualifiedTypeNameHistory.xml"); //$NON-NLS-1$
-		
+
 		return fgInstance;
 	}
-	
+
 	public QualifiedTypeNameHistory(String fileName) {
 		super(fileName, NODE_ROOT, NODE_TYPE_INFO);
 		load();
@@ -53,7 +53,7 @@ public class QualifiedTypeNameHistory extends History {
 	protected Object getKey(Object object) {
 		return object;
 	}
-	
+
 	public static int getBoost(String fullyQualifiedTypeName, int min, int max) {
 		float position= getDefault().getNormalizedPosition(fullyQualifiedTypeName);
 		int dist= max - min;

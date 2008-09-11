@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -23,19 +23,19 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
  * Opens the user interface for a given refactoring.
  */
 public class UserInterfaceStarter {
-	
+
 	private RefactoringWizard fWizard;
-	
+
 	/**
 	 * Initializes this user interface starter with the given
 	 * wizard.
-	 * 
+	 *
 	 * @param wizard the refactoring wizard to use
 	 */
 	public void initialize(RefactoringWizard wizard) {
-		fWizard= wizard;		
+		fWizard= wizard;
 	}
-	
+
 	/**
 	 * Actually activates the user interface. This default implementation
 	 * assumes that the configuration element passed to <code>initialize
@@ -43,14 +43,14 @@ public class UserInterfaceStarter {
 	 * used for the given refactoring.
 	 * <p>
 	 * Subclasses may override to open a different user interface
-	 * 
+	 *
 	 * @param refactoring the refactoring for which the user interface
 	 *  should be opened
 	 * @param parent the parent shell to be used
 	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
 	 * @return <code>true</code> iff the refactoring was executed,
 	 *  <code>false</code> otherwise
-	 * 
+	 *
 	 * @exception CoreException if the user interface can't be activated
 	 */
 	public boolean activate(Refactoring refactoring, Shell parent, int saveMode) throws CoreException {

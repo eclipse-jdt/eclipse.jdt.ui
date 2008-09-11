@@ -28,13 +28,13 @@ public class BreakIteratorTest extends TestCase {
 
 	public void assertNextPositions(CharSequence ci, int[] positions) {
 		fBreakIterator.setText(ci.toString());
-		
+
 		// test next()
 		for (int i = 0; i < positions.length; i++) {
 			int pos= fBreakIterator.next();
 			assertEquals(positions[i], pos);
 		}
-		
+
 		// test following()
 		int idx= 0;
 		for (int i = 0; i < positions.length; i++) {
@@ -45,12 +45,12 @@ public class BreakIteratorTest extends TestCase {
 				idx++;
 			}
 		}
-		
+
 	}
 
 	/**
 	 * Check if we are in a multi-byte delimiter.
-	 * 
+	 *
 	 * @param seq the sequence
 	 * @param idx the index
 	 * @return <code>true</code> if position is illegal
@@ -71,12 +71,12 @@ public class BreakIteratorTest extends TestCase {
 	public void assertPreviousPositions(CharSequence ci, int[] positions) {
 		fBreakIterator.setText(ci.toString());
 		fBreakIterator.last();
-		
+
 		for (int i = positions.length - 1; i >= 0; i--) {
 			int pos= fBreakIterator.previous();
 			assertEquals(positions[i], pos);
 		}
-	
+
 		// test preceding()
 		int idx= ci.length();
 		for (int i = positions.length - 1; i >= 0; i--) {

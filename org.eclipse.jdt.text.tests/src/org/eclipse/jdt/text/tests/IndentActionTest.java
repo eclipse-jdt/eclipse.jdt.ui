@@ -17,6 +17,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -27,15 +31,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
-
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class IndentActionTest extends TestCase {
@@ -50,14 +50,14 @@ public class IndentActionTest extends TestCase {
 	protected static class IndentTestSetup extends TestSetup {
 
 		private IJavaProject fJavaProject;
-		
+
 		public IndentTestSetup(Test test) {
 			super(test);
 		}
-		
+
 		protected void setUp() throws Exception {
 			super.setUp();
-			
+
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, "testResources/indentation");
 			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.FALSE);
@@ -68,7 +68,7 @@ public class IndentActionTest extends TestCase {
 		protected void tearDown () throws Exception {
 			if (fJavaProject != null)
 				JavaProjectHelper.delete(fJavaProject);
-			
+
 			super.tearDown();
 		}
 
@@ -77,7 +77,7 @@ public class IndentActionTest extends TestCase {
 			return JavaCore.create(project);
 		}
 	}
-	
+
 	private static final Class THIS= IndentActionTest.class;
 	public static Test suite() {
 		return new IndentTestSetup(new TestSuite(THIS));
@@ -96,7 +96,7 @@ public class IndentActionTest extends TestCase {
 		fSourceViewer= EditorTestHelper.getSourceViewer(fEditor);
 		fDocument= fSourceViewer.getDocument();
 	}
-	
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
@@ -105,13 +105,13 @@ public class IndentActionTest extends TestCase {
 		fEditor= null;
 		fSourceViewer= null;
 	}
-	
+
 	private void assertIndentResult() throws Exception {
 		String afterFile= createFileName("Modified");
 		String expected= ResourceTestHelper.read(afterFile).toString();
-		
+
 		new IndentAction(new EmptyBundle(), "prefix", fEditor, false).run();
-		
+
 		assertEquals(expected, fDocument.get());
 	}
 
@@ -120,16 +120,16 @@ public class IndentActionTest extends TestCase {
 		name= name.substring(4, 5).toLowerCase() + name.substring(5);
 		return "/" + PROJECT + "/src/" + name + "/" + qualifier + ".java";
 	}
-	
+
 	private void selectAll() {
 		fSourceViewer.setSelectedRange(0, fDocument.getLength());
 	}
-	
+
 	public void testUnchanged() throws Exception {
 		selectAll();
 		assertIndentResult();
 	}
-	
+
 	public void testBug122261() throws Exception {
 		selectAll();
 		assertIndentResult();

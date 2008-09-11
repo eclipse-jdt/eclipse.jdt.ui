@@ -23,10 +23,10 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class CommentAnalyzer {
-	
+
 	private CommentAnalyzer() {
 	}
-	
+
 	public static RefactoringStatus perform(Selection selection, IScanner scanner, int start, int length) {
 		RefactoringStatus result= new RefactoringStatus();
 		if (length <= 0)
@@ -34,12 +34,12 @@ public class CommentAnalyzer {
 		new CommentAnalyzer().check(result, selection, scanner, start, start + length - 1);
 		return result;
 	}
-	
+
 	private void check(RefactoringStatus result, Selection selection, IScanner scanner, int start, int end) {
 		char[] characters= scanner.getSource();
 		selection= adjustSelection(characters, selection, end);
 		scanner.resetTo(start, end);
-		
+
 		int token= 0;
 		try {
 			loop: while (token != ITerminalSymbols.TokenNameEOF) {
@@ -49,21 +49,21 @@ public class CommentAnalyzer {
 					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
 					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 						if (checkStart(scanner, selection.getOffset())) {
-							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_starts_inside_comment); 
+							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_starts_inside_comment);
 							break loop;
 						}
 						if (checkEnd(scanner, selection.getInclusiveEnd())) {
-							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_ends_inside_comment); 
+							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_ends_inside_comment);
 							break loop;
 						}
 						break;
 				}
-			} 
+			}
 		} catch (InvalidInputException e) {
-			result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_internal_error); 
+			result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_internal_error);
 		}
 	}
-	
+
 	private boolean checkStart(IScanner scanner, int position) {
 		return scanner.getCurrentTokenStartPosition() < position && position <= scanner.getCurrentTokenEndPosition();
 	}
@@ -71,7 +71,7 @@ public class CommentAnalyzer {
 	private boolean checkEnd(IScanner scanner, int position) {
 		return scanner.getCurrentTokenStartPosition() <= position && position < scanner.getCurrentTokenEndPosition();
 	}
-	
+
 	private Selection adjustSelection(char[] characters, Selection selection, int end) {
 		int newEnd= selection.getInclusiveEnd();
 		for(int i= selection.getExclusiveEnd(); i <= end; i++) {
@@ -82,7 +82,7 @@ public class CommentAnalyzer {
 		}
 		return Selection.createFromStartEnd(selection.getOffset(), newEnd);
 	}
-	
+
 	/**
 	 * Removes comments and whitespace
 	 * @param reference the type reference

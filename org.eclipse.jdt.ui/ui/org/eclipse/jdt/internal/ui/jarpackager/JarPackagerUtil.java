@@ -24,6 +24,9 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
@@ -36,9 +39,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -75,14 +75,14 @@ public final class JarPackagerUtil {
 	public static boolean askToCreateDirectory(final Shell parent, File directory) {
 		if (parent == null)
 			return false;
-		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmCreate_title, Messages.format(JarPackagerMessages.JarPackage_confirmCreate_message, BasicElementLabels.getPathLabel(directory))); 
+		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmCreate_title, Messages.format(JarPackagerMessages.JarPackage_confirmCreate_message, BasicElementLabels.getPathLabel(directory)));
 	}
 
 	/**
 	 * Returns the name of the refactorings zip entry.
-	 * 
+	 *
 	 * @return the name of the refactorings zip entry
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static String getRefactoringsEntry() {
@@ -91,11 +91,11 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Returns the name of the deprecations zip entry for the specified file.
-	 * 
+	 *
 	 * @param name
 	 *            the name of the file
 	 * @return the name of the deprecations zip entry
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static String getDeprecationEntry(final String name) {
@@ -104,9 +104,9 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Returns the name of the meta entry.
-	 * 
+	 *
 	 * @return the name of the meta entry
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static String getMetaEntry() {
@@ -116,7 +116,7 @@ public final class JarPackagerUtil {
 	/**
 	 * Computes and returns the elements as resources.
 	 * The underlying resource is used for Java elements.
-	 * 
+	 *
 	 * @param elements elements for which to retrieve the resources from
 	 * @return a List with the selected resources
 	 */
@@ -138,13 +138,13 @@ public final class JarPackagerUtil {
 	public static boolean askForOverwritePermission(final Shell parent, IPath filePath, boolean isOSPath) {
 		if (parent == null)
 			return false;
-		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmReplace_title, Messages.format(JarPackagerMessages.JarPackage_confirmReplace_message, BasicElementLabels.getPathLabel(filePath, isOSPath))); 
+		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmReplace_title, Messages.format(JarPackagerMessages.JarPackage_confirmReplace_message, BasicElementLabels.getPathLabel(filePath, isOSPath)));
 	}
 
 	/**
 	 * Gets the name of the manifest's main class
-	 * 
-	 * @param jarPackage 
+	 *
+	 * @param jarPackage
 	 * @return a string with the name
 	 */
 	static String getMainClassName(JarPackageData jarPackage) {
@@ -165,13 +165,13 @@ public final class JarPackagerUtil {
 				returnValue[0]= MessageDialog.openQuestion(parent, title, message);
 			}
 		};
-		display.syncExec(runnable);	
+		display.syncExec(runnable);
 		return returnValue[0];
 	}
-	
+
 	/**
 	 * Creates a <code>CoreException</code> with the given parameters.
-	 * 
+	 *
 	 * @param	message	a string with the message
 	 * @param	ex		the exception to be wrapped or <code>null</code> if none
 	 * @return a CoreException
@@ -184,15 +184,15 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Tells whether the specified manifest main class is valid.
-	 * 
-	 * @param data 
-	 * @param context 
+	 *
+	 * @param data
+	 * @param context
 	 * @return <code>true</code> if a main class is specified and valid
 	 */
 	public static boolean isMainClassValid(JarPackageData data, IRunnableContext context) {
 		if (data == null)
 			return false;
-		
+
 		IType mainClass= data.getManifestMainClass();
 		if (mainClass == null)
 			// no main class specified
@@ -211,14 +211,14 @@ public final class JarPackagerUtil {
 		}
 		return false;
 	}
-	
+
 	static boolean contains(List resources, IFile file) {
 		if (resources == null || file == null)
 			return false;
-			
+
 		if (resources.contains(file))
 			return true;
-		
+
 		Iterator iter= resources.iterator();
 		while (iter.hasNext()) {
 			IResource resource= (IResource)iter.next();
@@ -239,14 +239,14 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Calculates the crc and size of the resource and updates the entry.
-	 * 
+	 *
 	 * @param entry
 	 *            the jar entry to update
 	 * @param stream
 	 *            the input stream
 	 * @param buffer
 	 *            a shared buffer to store temporary data
-	 * 
+	 *
 	 * @throws IOException
 	 *             if an input/output error occurs
 	 */
@@ -271,16 +271,16 @@ public final class JarPackagerUtil {
 		entry.setSize(size);
 		entry.setCrc(crc.getValue());
 	}
-	
+
 	/**
 	 * The archive file at the given location
-	 * 
+	 *
 	 * @param location
 	 *        the location of the archive file
 	 * @return the archive or null if it could not be retrieved
 	 * @throws CoreException
 	 *         if the archive could not be read
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public static ZipFile getArchiveFile(IPath location) throws CoreException {

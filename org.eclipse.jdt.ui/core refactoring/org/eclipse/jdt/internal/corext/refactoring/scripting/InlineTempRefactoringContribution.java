@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 /**
  * Refactoring contribution for the inline temp refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class InlineTempRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class InlineTempRefactoringContribution extends JavaRefactoringCont
 	public RefactoringDescriptor createDescriptor() {
 		return new InlineLocalVariableDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new InlineLocalVariableDescriptor(project, description, comment, arguments, flags);
 	}

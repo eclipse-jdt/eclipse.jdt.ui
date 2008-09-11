@@ -41,11 +41,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class RefactoringAnalyzeUtil {
-	
+
 	private RefactoringAnalyzeUtil() {
 		//no instances
 	}
-	
+
 	public static IRegion[] getNewRanges(TextEdit[] edits, TextChange change){
 		IRegion[] result= new IRegion[edits.length];
 		for (int i= 0; i < edits.length; i++) {
@@ -58,11 +58,11 @@ public class RefactoringAnalyzeUtil {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
 			RefactoringStatusContext context= new JavaStringStatusContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));
-			result.addError(Messages.format(RefactoringCoreMessages.RefactoringAnalyzeUtil_name_collision, BasicElementLabels.getJavaElementName(problemNodes[i].getIdentifier())), context); 
+			result.addError(Messages.format(RefactoringCoreMessages.RefactoringAnalyzeUtil_name_collision, BasicElementLabels.getJavaElementName(problemNodes[i].getIdentifier())), context);
 		}
 		return result;
 	}
-	
+
 
 	public static MethodDeclaration getMethodDeclaration(TextEdit edit, TextChange change, CompilationUnit cuNode){
 		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
@@ -73,9 +73,9 @@ public class RefactoringAnalyzeUtil {
 		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
 		return ((Block)ASTNodes.getParent(decl, Block.class));
 	}
-	
+
 	public static IProblem[] getIntroducedCompileProblems(CompilationUnit newCUNode, CompilationUnit oldCuNode) {
-		Set subResult= new HashSet();				
+		Set subResult= new HashSet();
 		Set oldProblems= getOldProblems(oldCuNode);
 		IProblem[] newProblems= ASTNodes.getProblems(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS);
 		for (int i= 0; i < newProblems.length; i++) {
@@ -85,11 +85,11 @@ public class RefactoringAnalyzeUtil {
 		}
 		return (IProblem[]) subResult.toArray(new IProblem[subResult.size()]);
 	}
-	
+
 	public static IRegion getNewTextRange(TextEdit edit, TextChange change){
 		return change.getPreviewEdit(edit).getRegion();
 	}
-	
+
 	private static IProblem findCorrespondingProblem(Set oldProblems, IProblem iProblem) {
 		for (Iterator iter= oldProblems.iterator(); iter.hasNext();) {
 			IProblem oldProblem= (IProblem) iter.next();
@@ -98,11 +98,11 @@ public class RefactoringAnalyzeUtil {
 		}
 		return null;
 	}
-	
+
 	private static boolean isCorresponding(IProblem oldProblem, IProblem iProblem) {
-		if (oldProblem.getID() != iProblem.getID())		
+		if (oldProblem.getID() != iProblem.getID())
 			return false;
-		if (! oldProblem.getMessage().equals(iProblem.getMessage()))	
+		if (! oldProblem.getMessage().equals(iProblem.getMessage()))
 			return false;
 		return true;
 	}
@@ -112,7 +112,7 @@ public class RefactoringAnalyzeUtil {
 			return (SimpleName)node;
 		if (node instanceof VariableDeclaration)
 			return ((VariableDeclaration)node).getName();
-		return null;	
+		return null;
 	}
 
 	private static SimpleName findSimpleNameNode(IRegion range, CompilationUnit cuNode) {

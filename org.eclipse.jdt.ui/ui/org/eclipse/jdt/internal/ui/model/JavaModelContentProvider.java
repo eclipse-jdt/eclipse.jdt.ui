@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 /**
  * Content provider for Java models.
- * 
+ *
  * @since 3.2
  */
 public final class JavaModelContentProvider extends StandardJavaElementContentProvider {

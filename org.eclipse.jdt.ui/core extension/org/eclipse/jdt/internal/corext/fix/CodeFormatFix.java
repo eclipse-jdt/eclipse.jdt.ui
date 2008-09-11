@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -46,28 +46,28 @@ import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class CodeFormatFix implements IFix {
-	
+
 	public static IFix createCleanUp(ICompilationUnit cu, IRegion[] regions, boolean format, boolean removeTrailingWhitespacesAll, boolean removeTrailingWhitespacesIgnorEmpty, boolean correctIndentation) throws CoreException {
 		if (!format && !removeTrailingWhitespacesAll && !removeTrailingWhitespacesIgnorEmpty && !correctIndentation)
 			return null;
-		
+
 		ArrayList groups= new ArrayList();
-		
-		MultiTextEdit formatEdit= new MultiTextEdit();		
+
+		MultiTextEdit formatEdit= new MultiTextEdit();
 		if (format) {
 			Map formatterSettings= new HashMap(cu.getJavaProject().getOptions(true));
-			
+
 			String content= cu.getBuffer().getContents();
 			Document document= new Document(content);
 			String lineDelemiter= TextUtilities.getDefaultLineDelimiter(document);
-						
+
 			TextEdit edit;
 			if (regions == null) {
 				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, 0, lineDelemiter, formatterSettings);
 			} else {
 				if (regions.length == 0)
 					return null;
-  
+
 				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, regions, 0, lineDelemiter, formatterSettings);
 			}
 			if (edit != null && (!(edit instanceof MultiTextEdit) || edit.hasChildren())) {
@@ -91,23 +91,23 @@ public class CodeFormatFix implements IFix {
 					removeTrailingWhitespacesAll= false;
 					removeTrailingWhitespacesIgnorEmpty= true;
 				}
-				
+
 				Document document= new Document(cu.getBuffer().getContents());
 				if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty) {
 					String label= MultiFixMessages.CodeFormatFix_RemoveTrailingWhitespace_changeDescription;
 					CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-					
+
 					int lineCount= document.getNumberOfLines();
 					for (int i= 0; i < lineCount; i++) {
-						
+
 						IRegion region= document.getLineInformation(i);
 						if (region.getLength() == 0)
 							continue;
-						
+
 						int lineStart= region.getOffset();
 						int lineExclusiveEnd= lineStart + region.getLength();
 						int j= getIndexOfRightMostNoneWhitspaceCharacter(lineStart, lineExclusiveEnd - 1, document);
-						
+
 						if (removeTrailingWhitespacesAll) {
 							j++;
 							if (j < lineExclusiveEnd) {
@@ -133,20 +133,20 @@ public class CodeFormatFix implements IFix {
 							}
 						}
 					}
-					
+
 					if (otherEdit.hasChildren()) {
 						groups.add(group);
 					}
-				} 
-					
+				}
+
 				if (correctIndentation) {
 					JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 					TextEdit edit= IndentAction.indent(document, cu.getJavaProject());
 					if (edit != null) {
-						
+
 						String label= MultiFixMessages.CodeFormatFix_correctIndentation_changeGroupLabel;
 						CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-						
+
 						if (edit instanceof MultiTextEdit) {
 							TextEdit[] children= ((MultiTextEdit)edit).getChildren();
 							for (int i= 0; i < children.length; i++) {
@@ -163,20 +163,20 @@ public class CodeFormatFix implements IFix {
 								group.addTextEdit(edit);
 							}
 						}
-						
+
 						groups.add(group);
 					}
 				}
-				
+
 			} catch (BadLocationException x) {
 				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", x)); //$NON-NLS-1$
 			}
 		}
-		
+
 		TextEdit resultEdit= TextEditUtil.merge(formatEdit, otherEdit);
 		if (!resultEdit.hasChildren())
 			return null;
-		
+
 		CompilationUnitChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
 		change.setEdit(resultEdit);
 
@@ -189,11 +189,11 @@ public class CodeFormatFix implements IFix {
 	}
 
 	/**
-	 * Returns the index in document of a none whitespace character 
-	 * between start (inclusive) and end (inclusive) such that if 
+	 * Returns the index in document of a none whitespace character
+	 * between start (inclusive) and end (inclusive) such that if
 	 * more then one such character the index returned is the largest
-	 * possible (closest to end). Returns start - 1 if no such character. 
-	 * 
+	 * possible (closest to end). Returns start - 1 if no such character.
+	 *
 	 * @param start
 	 * @param end
 	 * @param document
@@ -204,12 +204,12 @@ public class CodeFormatFix implements IFix {
 		int position= end;
 		while (position >= start && Character.isWhitespace(document.getChar(position)))
 			position--;
-		
+
 		return position;
 	}
 
 	private final CompilationUnitChange fChange;
-	
+
 	public CodeFormatFix(CompilationUnitChange change) {
 		fChange= change;
 	}

@@ -12,6 +12,7 @@ package org.eclipse.jdt.text.tests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellingTestSuite;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
@@ -19,7 +20,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 
 /**
  * JDT Text Test Suite.
- * 
+ *
  * @since 3.0
  */
 public class JdtTextTestSuite {
@@ -58,7 +59,7 @@ public class JdtTextTestSuite {
 		suite.addTest(IndentActionTest.suite());
 		suite.addTest(TemplatesTestSuite.suite());
 		//$JUnit-END$
-		
+
 		return suite;
 	}
 }

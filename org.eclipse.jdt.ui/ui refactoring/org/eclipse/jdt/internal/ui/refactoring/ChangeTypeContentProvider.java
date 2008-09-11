@@ -17,18 +17,17 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 
-//import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 
 class ChangeTypeContentProvider implements ITreeContentProvider {
-	
+
 	private ChangeTypeRefactoring fGeneralizeType;
-	
+
 	ChangeTypeContentProvider(ChangeTypeRefactoring gt){
 		fGeneralizeType= gt;
 	}
@@ -36,28 +35,28 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 	public Object[] getChildren(Object element) {
 		if (element instanceof RootType){
 			return ((RootType)element).getChildren();
-		}	
+		}
 		Object[] superTypes = getDirectSuperTypes((ITypeBinding)element).toArray();
 		Arrays.sort(superTypes, new Comparator(){
 			public int compare(Object o1, Object o2) {
 				String name1 = ((ITypeBinding)o1).getQualifiedName();
 				String name2 = ((ITypeBinding)o2).getQualifiedName();
 				return name1.compareTo(name2);
-			}	
+			}
 		});
 		return superTypes;
 	}
-	
+
 	/**
 	 * Returns the direct superclass and direct superinterfaces. Class Object is
 	 * included in the result if the root of the hierarchy is a top-level
-	 * interface. 
+	 * interface.
 	 */
 	public Set/*<ITypeBinding>*/ getDirectSuperTypes(ITypeBinding type){
 		Set/*<ITypeBinding>*/ result= new HashSet();
 		if (type.getSuperclass() != null){
 			result.add(type.getSuperclass());
-		}	
+		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i=0; i < interfaces.length; i++){
 			result.add(interfaces[i]);
@@ -66,7 +65,7 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 			result.add(fGeneralizeType.getObject());
 		}
 		return result;
-	}	
+	}
 
 	public Object[] getElements(Object element) {
 		Assert.isTrue(element instanceof RootType);
@@ -86,7 +85,7 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
-	
+
 	/**
 	 * Artificial "root node" of the tree view. This is needed to handle situations where the replacement
 	 * types do not have a single common supertype. Also, the tree view does not show the root node by

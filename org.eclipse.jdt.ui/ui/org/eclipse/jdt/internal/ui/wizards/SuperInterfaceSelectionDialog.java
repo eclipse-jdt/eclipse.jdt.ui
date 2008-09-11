@@ -13,12 +13,12 @@ package org.eclipse.jdt.internal.ui.wizards;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -59,7 +59,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 
 	/**
 	 * Creates new instance of SuperInterfaceSelectionDialog
-	 * 
+	 *
 	 * @param parent
 	 *            shell to parent the dialog on
 	 * @param context
@@ -79,7 +79,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		setStatusLineAboveButtons(true);
 	}
 
-	/* (non-Javadoc) 
+	/* (non-Javadoc)
 	 * @see org.eclipse.ui.dialogs.SelectionDialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -202,7 +202,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		}
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
@@ -210,7 +210,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.SUPER_INTERFACE_SELECTION_DIALOG);
 	}
-	
+
 	public static String getNameWithTypeParameters(IType type) {
 		String superName= type.getFullyQualifiedName('.');
 		if (!JavaModelUtil.is50OrHigher(type.getJavaProject())) {
@@ -234,7 +234,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 			// ignore
 		}
 		return superName;
-		
+
 	}
-	
+
 }

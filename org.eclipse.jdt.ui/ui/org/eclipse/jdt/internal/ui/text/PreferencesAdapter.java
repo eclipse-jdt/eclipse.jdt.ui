@@ -11,11 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.text;
 
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Preferences;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -113,7 +113,7 @@ public class PreferencesAdapter implements IPreferenceStore {
 						listener.propertyChange(event);
 					}
 				};
-				
+
 				if (Display.getCurrent() != null)
 					runnable.run();
 				else {

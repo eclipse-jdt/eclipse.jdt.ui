@@ -33,10 +33,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 /**
- * Label provider for the hierarchy method viewers. 
+ * Label provider for the hierarchy method viewers.
  */
 public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
-	
+
 	private boolean fShowDefiningType;
 	private TypeHierarchyLifeCycle fHierarchy;
 	private MethodsViewer fMethodsViewer;
@@ -56,19 +56,19 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		};
 		JFaceResources.getColorRegistry().addListener(fColorRegistryListener);
 	}
-	
+
 	public void setShowDefiningType(boolean showDefiningType) {
 		fShowDefiningType= showDefiningType;
 	}
-	
+
 	public boolean isShowDefiningType() {
 		return fShowDefiningType;
-	}	
-			
+	}
+
 
 	private IType getDefiningType(Object element) throws JavaModelException {
 		int kind= ((IJavaElement) element).getElementType();
-	
+
 		if (kind != IJavaElement.METHOD && kind != IJavaElement.FIELD && kind != IJavaElement.INITIALIZER) {
 			return null;
 		}
@@ -91,7 +91,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getText
-	 */ 	
+	 */
 	public String getText(Object element) {
 		String text= super.getText(element);
 		String qualifier= getQualifier(element);
@@ -100,7 +100,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return text;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
@@ -113,9 +113,9 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 			return styledString;
 		}
 		return text;
-		
+
 	}
-	
+
 	private String getQualifier(Object element) {
 		if (fShowDefiningType) {
 			try {
@@ -128,8 +128,8 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return null;
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
@@ -137,18 +137,18 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		if (fMethodsViewer.isShowInheritedMethods() && element instanceof IMethod) {
 			IMethod curr= (IMethod) element;
 			IMember declaringType= curr.getDeclaringType();
-			
+
 			if (!declaringType.equals(fMethodsViewer.getInput())) {
 				return JFaceResources.getColorRegistry().get(ColoredViewersManager.INHERITED_COLOR_NAME);
 			}
 		}
 		return null;
 	}
-	
+
 	public void dispose() {
 		JFaceResources.getColorRegistry().removeListener(fColorRegistryListener);
 		fColorRegistryListener= null;
 		super.dispose();
 	}
-	
+
 }

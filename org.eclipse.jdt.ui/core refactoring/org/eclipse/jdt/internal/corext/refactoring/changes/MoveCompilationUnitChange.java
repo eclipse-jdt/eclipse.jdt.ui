@@ -35,28 +35,28 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 	private boolean fUndoable;
 	private long fStampToRestore;
 	private final IPackageFragment[] fDeletePackages;
-	
+
 	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage){
 		super(cu, newPackage);
 		fStampToRestore= IResource.NULL_STAMP;
 		fDeletePackages= null;
-		
+
 		setValidationMethod(SAVE_IF_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
-	
+
 	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage, long stampToRestore, IPackageFragment[] deletePackages) {
 		super(oldPackage.getHandleIdentifier(), newPackage.getHandleIdentifier(), oldPackage.getCompilationUnit(cuName).getHandleIdentifier());
 		fStampToRestore= stampToRestore;
 		fDeletePackages= deletePackages;
-		
+
 		setValidationMethod(SAVE_IF_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
-	
+
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.MoveCompilationUnitChange_name, 
-		new String[]{BasicElementLabels.getFileName(getCu()), getPackageName(getDestinationPackage())}); 
+		return Messages.format(RefactoringCoreMessages.MoveCompilationUnitChange_name,
+		new String[]{BasicElementLabels.getFileName(getCu()), getPackageName(getDestinationPackage())});
 	}
-	
+
 	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		String name;
 		String newName= getNewName();
@@ -64,17 +64,17 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 			name= getCu().getElementName();
 		else
 			name= newName;
-		
+
 		// get current modification stamp
 		long currentStamp= IResource.NULL_STAMP;
 		IResource resource= getCu().getResource();
 		if (resource != null) {
 			currentStamp= resource.getModificationStamp();
 		}
-		
+
 		IPackageFragment destination= getDestinationPackage();
 		fUndoable= !destination.exists() || !destination.getCompilationUnit(name).exists();
-		
+
 		IPackageFragment[] createdPackages= null;
 		if (!destination.exists()) {
 			IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) destination.getParent();
@@ -90,13 +90,13 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 				movedResource.revertModificationStamp(fStampToRestore);
 			}
 		}
-		
+
 		if (fDeletePackages != null) {
 			for (int i= fDeletePackages.length - 1; i >= 0; i--) {
 				fDeletePackages[i].delete(true, pm);
 			}
 		}
-		
+
 		if (fUndoable) {
 			return new MoveCompilationUnitChange(destination, getCu().getElementName(), getOldPackage(), currentStamp, createdPackages);
 		} else {

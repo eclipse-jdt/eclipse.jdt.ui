@@ -10,16 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.part.ResourceTransfer;
-
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
@@ -33,28 +32,28 @@ public class JdtViewerDragSupport {
 
 	public JdtViewerDragSupport(StructuredViewer viewer) {
 		fViewer= viewer;
-		
+
 		fDragAdapter= new JdtViewerDragAdapter(fViewer);
 		fDragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(fViewer));
 		fDragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		fDragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(fViewer));
 		fDragAdapter.addDragSourceListener(new FileTransferDragAdapter(fViewer));
-		
+
 		fStarted= false;
 	}
 
 	public void start() {
 		Assert.isLegal(!fStarted);
-		
+
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		
+
 		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(), 
+			LocalSelectionTransfer.getInstance(),
 			ResourceTransfer.getInstance(),
 			FileTransfer.getInstance()};
 
 		fViewer.addDragSupport(ops, transfers, fDragAdapter);
-		
+
 		fStarted= true;
 	}
 

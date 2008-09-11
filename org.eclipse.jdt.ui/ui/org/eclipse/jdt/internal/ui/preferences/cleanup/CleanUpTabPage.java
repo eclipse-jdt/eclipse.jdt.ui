@@ -30,21 +30,21 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	private boolean fIsSaveAction;
 	int fCount;
 	int fSelectedCount;
-	
+
 	public CleanUpTabPage() {
 		super();
 		fCount= 0;
 		fSelectedCount= 0;
 		fIsSaveAction= false;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setOptionsKind(int kind) {
 		fIsSaveAction= kind == ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -52,14 +52,14 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		super.setWorkingValues(workingValues);
 		fValues= workingValues;
 	}
-	
+
 	/**
 	 * @return is this tab page shown in the save action dialog
 	 */
 	public boolean isSaveAction() {
 		return fIsSaveAction;
 	}
-	
+
 	public int getCleanUpCount() {
 		return fCount;
 	}
@@ -67,9 +67,9 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	public int getSelectedCleanUpCount() {
 		return fSelectedCount;
 	}
-	
+
 	protected abstract ICleanUp[] createPreviewCleanUps(Map values);
-	
+
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fCleanUpPreview= new CleanUpPreview(parent, createPreviewCleanUps(fValues));
     	return fCleanUpPreview;
@@ -79,11 +79,11 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		fCleanUpPreview.setWorkingValues(fValues);
 		fCleanUpPreview.update();
 	}
-	
+
 	protected void initializePage() {
 		fCleanUpPreview.update();
 	}
-	
+
 	protected void registerPreference(final CheckboxPreference preference) {
 		fCount++;
 		preference.addObserver(new Observer() {
@@ -99,16 +99,16 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 			fSelectedCount++;
 		}
 	}
-	
+
 	protected void registerSlavePreference(final CheckboxPreference master, final RadioPreference[] slaves) {
 		internalRegisterSlavePreference(master, slaves);
 		registerPreference(master);
 	}
-	
+
 	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves) {
 		internalRegisterSlavePreference(master, slaves);
 		fCount+= slaves.length;
-		
+
 		master.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
 				if (master.getChecked()) {
@@ -116,7 +116,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 						if (slaves[i].getChecked()) {
 							fSelectedCount++;
 						}
-					}	
+					}
 				} else {
 					for (int i= 0; i < slaves.length; i++) {
 						if (slaves[i].getChecked()) {
@@ -126,7 +126,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				}
 			}
 		});
-		
+
 		for (int i= 0; i < slaves.length; i++) {
 			final CheckboxPreference slave= slaves[i];
 			slave.addObserver(new Observer() {
@@ -139,7 +139,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				}
 			});
 		}
-		
+
 		if (master.getChecked()) {
 			for (int i= 0; i < slaves.length; i++) {
 				if (slaves[i].getChecked()) {
@@ -148,7 +148,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 			}
 		}
 	}
-	
+
 	private void internalRegisterSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
     	master.addObserver( new Observer() {
     		public void update(Observable o, Object arg) {
@@ -157,7 +157,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				}
     		}
     	});
-    	
+
     	for (int i= 0; i < slaves.length; i++) {
 			slaves[i].setEnabled(master.getChecked());
 		}

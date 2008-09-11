@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class IntroduceParameterObjectAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
 
 	/**
@@ -49,8 +49,8 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>IntroduceIndirectionAction</code>. 
-	 * 
+	 * Creates a new <code>IntroduceIndirectionAction</code>.
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public IntroduceParameterObjectAction(IWorkbenchSite site) {
@@ -121,10 +121,10 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 			IJavaElement[] elements= selection.resolveElementAtOffset();
 			if (elements.length != 1)
 				return;
-			
+
 			if (!(elements[0] instanceof IMethod))
 				return;
-			
+
 			run((IMethod) elements[0]);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.IntroduceParameterObjectAction_exceptiondialog_title,	ActionMessages.IntroduceParameterObjectAction_unexpected_exception);
@@ -142,11 +142,11 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	private static IMethod getSingleSelectedMethod(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;
-		
+
 		Object element= selection.getFirstElement();
 		if (!(element instanceof IMethod))
 			return null;
-		
+
 		return (IMethod)element;
 	}
 
@@ -158,14 +158,14 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 		if (elements.length > 1)
 			return null;
-		
+
 		if (elements.length == 1 && elements[0] instanceof IMethod) {
 			return (IMethod) elements[0];
-		} else {			
+		} else {
 			IJavaElement elementAt= SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
 			if (!(elementAt instanceof IMethod))
 				return null;
-				
+
 			return (IMethod) elementAt;
 		}
 	}

@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
  * The format is defined by the client who implements the
  * reader/writer pair.
  * </p>
- * 
+ *
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @see org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader
  * @since 2.0
@@ -32,19 +32,19 @@ public interface IJarDescriptionWriter {
 	 * <p>
      * It is the client's responsibility to close this writer.
 	 * </p>
-	 * 
+	 *
 	 * @param jarPackage the jar package data to write
-	 * 
+	 *
 	 * @throws CoreException	if writing fails, e.g. I/O error during write operation
 	 */
 	void write(JarPackageData jarPackage) throws CoreException;
-	
+
 	/**
      * Closes this writer.
 	 * <p>
      * It is the client's responsibility to close this writer.
 	 * </p>
-     * 
+     *
 	 * @throws CoreException	if closing fails, e.g. I/O error during close operation
      */
     public void close() throws CoreException;

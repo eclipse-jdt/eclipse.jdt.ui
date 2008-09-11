@@ -35,15 +35,15 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * Action group that adds the actions opening a new editor to the 
+ * Action group that adds the actions opening a new editor to the
  * context menu and the action bar's navigate menu.
  *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenEditorActionGroup extends ActionGroup {
@@ -57,7 +57,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
 	 * that the selection provided by the part's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 */
 	public OpenEditorActionGroup(IViewPart part) {
@@ -66,13 +66,13 @@ public class OpenEditorActionGroup extends ActionGroup {
 
 	/**
 	 * Creates a new <code>OpenEditorActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public OpenEditorActionGroup(IWorkbenchPartSite site, ISelectionProvider specialSelectionProvider) {
@@ -84,11 +84,11 @@ public class OpenEditorActionGroup extends ActionGroup {
 		if (specialSelectionProvider != null)
 			fOpen.setSpecialSelectionProvider(specialSelectionProvider);
 	}
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OpenEditorActionGroup(JavaEditor editor) {
@@ -102,8 +102,8 @@ public class OpenEditorActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * Returns the open action managed by this action group. 
-	 * 
+	 * Returns the open action managed by this action group.
+	 *
 	 * @return the open action. Returns <code>null</code> if the group
 	 * 	doesn't provide any open action
 	 */
@@ -126,7 +126,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -145,16 +145,16 @@ public class OpenEditorActionGroup extends ActionGroup {
 		fSelectionProvider.removeSelectionChangedListener(fOpen);
 		super.dispose();
 	}
-	
+
 	private void setGlobalActionHandlers(IActionBars actionBars) {
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpen);
 	}
-	
+
 	private void appendToGroup(IMenuManager menu, IAction action) {
 		if (action.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 	}
-	
+
 	private void addOpenWithMenu(IMenuManager menu) {
 		ISelection selection= getContext().getSelection();
 		if (selection.isEmpty() || !(selection instanceof IStructuredSelection))
@@ -170,10 +170,10 @@ public class OpenEditorActionGroup extends ActionGroup {
 		IAdaptable element= (IAdaptable)o;
 		Object resource= element.getAdapter(IResource.class);
 		if (!(resource instanceof IFile))
-			return; 
+			return;
 
 		// Create a menu.
-		IMenuManager submenu= new MenuManager(ActionMessages.OpenWithMenu_label); 
+		IMenuManager submenu= new MenuManager(ActionMessages.OpenWithMenu_label);
 		submenu.add(new OpenWithMenu(fSite.getPage(), (IFile) resource));
 
 		// Add the submenu.

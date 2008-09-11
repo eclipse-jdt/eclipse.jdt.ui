@@ -25,7 +25,7 @@ public final class JavaUIMessages extends NLS {
 	public static String JavaPlugin_additionalInfo_affordance;
 	public static String JavaPlugin_internal_error;
 	public static String JavaPlugin_initializing_ui;
-	
+
 	public static String JavaElementProperties_name;
 
 	public static String OpenTypeAction_createProjectFirst;
@@ -36,13 +36,13 @@ public final class JavaUIMessages extends NLS {
 	public static String OpenTypeAction_label;
 	public static String OpenTypeAction_dialogTitle;
 	public static String OpenTypeAction_dialogMessage;
-	
+
 	public static String JavaUI_defaultDialogMessage;
-	
+
 	public static String MultiElementListSelectionDialog_pageInfoMessage;
 	public static String PackageSelectionDialog_progress_findEmpty;
 	public static String PackageSelectionDialog_progress_search;
-	
+
 	public static String TypeSelectionDialog_errorMessage;
 	public static String TypeSelectionDialog_dialogMessage;
 	public static String TypeSelectionDialog_errorTitle;
@@ -56,36 +56,36 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeSelectionDialog_error_type_doesnot_exist;
 
 	public static String ExceptionDialog_seeErrorLogMessage;
-	
+
 	public static String MainTypeSelectionDialog_errorTitle;
 	public static String MultiMainTypeSelectionDialog_errorTitle;
-	
+
 	public static String PackageSelectionDialog_error_title;
 	public static String PackageSelectionDialog_error3Message;
 	public static String PackageSelectionDialog_nopackages_title;
 	public static String PackageSelectionDialog_nopackages_message;
 	public static String ProblemMarkerManager_problem_marker_update_job_description;
-	
+
 	public static String BuildPathDialog_title;
-	
+
 	public static String OverrideMethodDialog_groupMethodsByTypes;
 	public static String OverrideMethodDialog_dialog_title;
 	public static String OverrideMethodDialog_dialog_description;
 	public static String OverrideMethodDialog_selectioninfo_more;
 	public static String OverrideMethodDialog_link_tooltip;
 	public static String OverrideMethodDialog_link_message;
-	
+
 	public static String GenerateHashCodeEqualsDialog_dialog_title;
 	public static String GenerateHashCodeEqualsDialog_dialog_description;
 	public static String GenerateHashCodeEqualsDialog_selectioninfo_more;
 	public static String GenerateHashCodeEqualsDialog_no_entries;
 	public static String GenerateHashCodeEqualsDialog_select_at_least_one_field;
 	public static String GenerateHashCodeEqualsDialog_select_fields_to_include;
-		
 
-		
+
+
 	public static String JavaImageLabelprovider_assert_wrongImage;
-	
+
 	public static String JavaElementLabels_default_package;
 	public static String JavaElementLabels_anonym_type;
 	public static String JavaElementLabels_anonym;
@@ -96,24 +96,24 @@ public final class JavaUIMessages extends NLS {
 	public static String JavaElementLabels_comma_string;
 	public static String JavaElementLabels_declseparator_string;
 	public static String JavaElementLabels_category_separator_string;
-	
+
 	public static String StatusBarUpdater_num_elements_selected;
-	
+
 	public static String OpenTypeHierarchyUtil_error_open_view;
 	public static String OpenTypeHierarchyUtil_error_open_perspective;
 	public static String OpenTypeHierarchyUtil_error_open_editor;
 	public static String OpenTypeHierarchyUtil_selectionDialog_title;
 	public static String OpenTypeHierarchyUtil_selectionDialog_message;
-	
+
 	public static String TypeInfoLabelProvider_default_package;
-	
+
 	public static String JavaUIHelp_link_label;
 	public static String JavaUIHelpContext_javaHelpCategory_label;
-	
+
 	public static String ResourceTransferDragAdapter_cannot_delete_resource;
 	public static String ResourceTransferDragAdapter_moving_resource;
 	public static String ResourceTransferDragAdapter_cannot_delete_files;
-	
+
 	public static String Spelling_error_label;
 	public static String Spelling_correct_label;
 	public static String Spelling_add_info;
@@ -128,27 +128,27 @@ public final class JavaUIMessages extends NLS {
 	public static String Spelling_case_label;
 	public static String Spelling_error_case_label;
 	public static String AbstractSpellingDictionary_encodingError;
-	
+
 	public static String JavaAnnotationHover_multipleMarkersAtThisLine;
 	public static String JavaEditor_codeassist_noCompletions;
-	
+
 	public static String HTMLTextPresenter_ellipsis;
 	public static String HTML2TextReader_listItemPrefix;
-	
+
 	public static String OptionalMessageDialog_dontShowAgain;
 	public static String ElementValidator_cannotPerform;
 	public static String SelectionListenerWithASTManager_job_title;
-	
+
 	public static String JavaOutlineControl_statusFieldText_hideInheritedMembers;
 	public static String JavaOutlineControl_statusFieldText_showInheritedMembers;
-	
+
 	public static String RenameSupport_not_available;
 	public static String RenameSupport_dialog_title;
-	
+
 	public static String CoreUtility_job_title;
 	public static String CoreUtility_buildall_taskname;
 	public static String CoreUtility_buildproject_taskname;
-	
+
 	public static String FilteredTypesSelectionDialog_default_package;
 	public static String FilteredTypesSelectionDialog_dialogMessage;
 	public static String FilteredTypesSelectionDialog_error_type_doesnot_exist;
@@ -156,14 +156,14 @@ public final class JavaUIMessages extends NLS {
 	public static String FilteredTypesSelectionDialog_searchJob_taskName;
 	public static String FilteredTypeSelectionDialog_showContainerForDuplicatesAction;
 	public static String FilteredTypeSelectionDialog_titleFormat;
-	
+
 	public static String TypeSelectionDialog2_title_format;
-	
+
 	public static String TypeSelectionComponent_label;
 	public static String TypeSelectionComponent_menu;
 	public static String TypeSelectionComponent_show_status_line_label;
 	public static String TypeSelectionComponent_fully_qualify_duplicates_label;
-	
+
 	public static String TypeInfoViewer_job_label;
 	public static String TypeInfoViewer_job_error;
 	public static String TypeInfoViewer_job_cancel;
@@ -176,11 +176,11 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeInfoViewer_remove_from_history;
 	public static String TypeInfoViewer_separator_message;
 	public static String TypeInfoViewer_library_name_format;
-	
+
 	public static String InitializeAfterLoadJob_starter_job_name;
-	
+
 	public static String SortMembersMessageDialog_configure_preferences_tool_tip;
-	
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
 	}

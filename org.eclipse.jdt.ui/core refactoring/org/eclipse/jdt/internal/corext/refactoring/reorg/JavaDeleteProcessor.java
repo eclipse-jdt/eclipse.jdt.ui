@@ -26,10 +26,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.LocationKind;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -37,6 +33,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -100,7 +100,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 	private Change fDeleteChange;
 	private boolean fDeleteSubPackages;
-	
+
 	public JavaDeleteProcessor(Object[] elements) {
 		fElements= elements;
 		if (fElements != null) {
@@ -121,7 +121,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.DELETE_PROCESSOR;
 	}
-	
+
 	public boolean isApplicable() throws CoreException {
 		if (fElements.length == 0)
 			return false;
@@ -137,7 +137,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		}
 		return true;
 	}
-	
+
 	public boolean needsProgressMonitor() {
 		if (fResources != null && fResources.length > 0)
 			return true;
@@ -149,21 +149,21 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			}
 		}
 		return false;
-		
+
 	}
 
 	public String getProcessorName() {
-		return RefactoringCoreMessages.DeleteRefactoring_7; 
+		return RefactoringCoreMessages.DeleteRefactoring_7;
 	}
-	
+
 	public Object[] getElements() {
 		return fElements;
 	}
-	
+
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
 		return fDeleteModifications.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
-	
+
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fJavaElements);
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fResources);
@@ -173,22 +173,22 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
-	/* 
+	/*
 	 * This has to be customizable because when drag and drop is performed on a field,
 	 * you don't want to suggest deleting getter/setter if only the field was moved.
 	 */
 	public void setSuggestGetterSetterDeletion(boolean suggest){
 		fSuggestGetterSetterDeletion= suggest;
 	}
-	
+
 	public void setDeleteSubPackages(boolean selection) {
 		fDeleteSubPackages= selection;
 	}
-	
+
 	public boolean getDeleteSubPackages() {
 		return fDeleteSubPackages;
 	}
-	
+
 	public boolean hasSubPackagesToDelete() {
 		try {
 			for (int i= 0; i < fJavaElements.length; i++) {
@@ -210,7 +210,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		Assert.isNotNull(queries);
 		fDeleteQueries= queries;
 	}
-	
+
 	public IJavaElement[] getJavaElementsToDelete(){
 		return fJavaElements;
 	}
@@ -218,11 +218,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public boolean wasCanceled() {
 		return fWasCanceled;
 	}
-	
+
 	public IResource[] getResourcesToDelete(){
 		return fResources;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -246,7 +246,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.DeleteRefactoring_1, 1); 
+		pm.beginTask(RefactoringCoreMessages.DeleteRefactoring_1, 1);
 		try{
 			fWasCanceled= false;
 			RefactoringStatus result= new RefactoringStatus();
@@ -259,10 +259,10 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			fDeleteModifications.delete(fResources);
 			fDeleteModifications.delete(fJavaElements);
 			List/*<IResource>*/ packageDeletes= fDeleteModifications.postProcess();
-			
+
 			TextChangeManager manager= new TextChangeManager();
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName(), packageDeletes);
-			
+
 			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 			fDeleteModifications.buildDelta(deltaFactory);
@@ -278,14 +278,14 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			pm.done();
 		}
 	}
-	
+
 	private void checkDirtyCompilationUnits(RefactoringStatus result) throws CoreException {
 		if (fJavaElements == null || fJavaElements.length == 0)
 			return;
 		for (int je= 0; je < fJavaElements.length; je++) {
 			IJavaElement element= fJavaElements[je];
 			if (element instanceof ICompilationUnit) {
-				checkDirtyCompilationUnit(result, (ICompilationUnit)element);	
+				checkDirtyCompilationUnit(result, (ICompilationUnit)element);
 			} else if (element instanceof IPackageFragment) {
 				ICompilationUnit[] units= ((IPackageFragment)element).getCompilationUnits();
 				for (int u = 0; u < units.length; u++) {
@@ -294,7 +294,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			}
 		}
 	}
-	
+
 	private void checkDirtyCompilationUnit(RefactoringStatus result, ICompilationUnit cunit) {
 		IResource resource= cunit.getResource();
 		if (resource == null || resource.getType() != IResource.FILE)
@@ -315,7 +315,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			}, IResource.DEPTH_INFINITE, false);
 		}
 	}
-	
+
 	private void checkDirtyFile(RefactoringStatus result, IFile file) {
 		if (file == null || !file.exists())
 			return;
@@ -323,11 +323,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		if (buffer != null && buffer.isDirty()) {
 			if (buffer.isStateValidated() && buffer.isSynchronized()) {
 				result.addWarning(Messages.format(
-					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, 
+					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes,
 					BasicElementLabels.getPathLabel(file.getFullPath(), false)));
 			} else {
 				result.addFatalError(Messages.format(
-					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, 
+					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes,
 					BasicElementLabels.getPathLabel(file.getFullPath(), false)));
 			}
 		}
@@ -336,7 +336,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	/*
 	 * The set of elements that will eventually be deleted may be very different from the set
 	 * originally selected - there may be fewer, more or different elements.
-	 * This method is used to calculate the set of elements that will be deleted - if necessary, 
+	 * This method is used to calculate the set of elements that will be deleted - if necessary,
 	 * it asks the user.
 	 */
 	private void recalculateElementsToDelete() throws CoreException {
@@ -344,8 +344,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		fAccessorsDeleted= false;
 		if (fDeleteSubPackages) /* add subpackages first, to allow removing elements with parents in selection etc. */
 			addSubPackages();
-		
-		removeElementsWithParentsInSelection(); /*ask before adding empty cus - you don't want to ask if you, for example delete 
+
+		removeElementsWithParentsInSelection(); /*ask before adding empty cus - you don't want to ask if you, for example delete
 												 *the package, in which the cus live*/
 		removeUnconfirmedFoldersThatContainSourceFolders(); /* a selected folder may be a parent of a source folder
 															 * we must inform the user about it and ask if ok to delete the folder*/
@@ -354,17 +354,17 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		removeJavaElementsChildrenOfJavaElements();/*because adding cus may create elements (types in cus)
 												    *whose parents are in selection*/
 		confirmDeletingReadOnly();   /*after empty cus - you want to ask for all cus that are to be deleted*/
-	
+
 		if (fSuggestGetterSetterDeletion)
 			addGettersSetters();/*at the end - this cannot invalidate anything*/
-		
+
 		addDeletableParentPackagesOnPackageDeletion(); /* do not change the sequence in fJavaElements after this method */
 	}
 
 	/**
 	 * Adds all subpackages of the selected packages to the list of items to be
 	 * deleted.
-	 * 
+	 *
 	 * @throws JavaModelException
 	 */
 	private void addSubPackages() throws JavaModelException {
@@ -383,7 +383,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 	/**
 	 * Add deletable parent packages to the list of items to delete.
-	 * 
+	 *
 	 * @throws CoreException
 	 */
 	private void addDeletableParentPackagesOnPackageDeletion() throws CoreException {
@@ -415,12 +415,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 		for (Iterator outerIter= initialPackagesToDelete.iterator(); outerIter.hasNext();) {
 			final IPackageFragment currentPackageFragment= (IPackageFragment) outerIter.next();
-			
+
 			// The package will at least be cleared
 			allFragmentsToDelete.add(currentPackageFragment);
 
 			if (canRemoveCompletely(currentPackageFragment, initialPackagesToDelete)) {
-				
+
 				final IPackageFragment parent= JavaElementUtil.getParentSubpackage(currentPackageFragment);
 				if (parent != null && !initialPackagesToDelete.contains(parent)) {
 
@@ -461,11 +461,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	/**
-	 * @param pack 
-	 * @param packagesToDelete 
+	 * @param pack
+	 * @param packagesToDelete
 	 * @return true if this initially selected package is really deletable
-	 * (if it has non-selected subpackages, it may only be cleared). 
-	 * @throws JavaModelException 
+	 * (if it has non-selected subpackages, it may only be cleared).
+	 * @throws JavaModelException
 	 */
 	private boolean canRemoveCompletely(IPackageFragment pack, List packagesToDelete) throws JavaModelException {
 		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);
@@ -480,11 +480,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	 * Adds deletable parent packages of the fragment "frag" to the list
 	 * "deletableParentPackages"; also adds the resources of those packages to the
 	 * set "resourcesToDelete".
-	 * @param frag 
-	 * @param initialPackagesToDelete 
-	 * @param resourcesToDelete 
-	 * @param deletableParentPackages 
-	 * @throws CoreException 
+	 * @param frag
+	 * @param initialPackagesToDelete
+	 * @param resourcesToDelete
+	 * @param deletableParentPackages
+	 * @throws CoreException
 	 */
 	private void addDeletableParentPackages(IPackageFragment frag, List initialPackagesToDelete, Set resourcesToDelete, List deletableParentPackages)
 			throws CoreException {
@@ -494,7 +494,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (!query.confirm(Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_delete_linked_folder_question, BasicElementLabels.getResourceName(frag.getResource()))))
 					return;
 		}
-		
+
 		final IResource[] children= ((IContainer) frag.getResource()).members();
 		for (int i= 0; i < children.length; i++) {
 			// Child must be a package fragment already in the list,
@@ -513,7 +513,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	// ask for confirmation of deletion of all package fragment roots that are
 	// on classpaths of other projects
 	private void removeUnconfirmedReferencedArchives() throws JavaModelException {
-		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_2; 
+		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_2;
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_REFERENCED_ARCHIVES);
 		removeUnconfirmedReferencedPackageFragmentRoots(query);
 		removeUnconfirmedReferencedArchiveFiles(query);
@@ -525,7 +525,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			IResource resource= fResources[i];
 			if (! (resource instanceof IFile))
 				continue;
-		
+
 			IJavaProject project= JavaCore.create(resource.getProject());
 			if (project == null || ! project.exists())
 				continue;
@@ -557,12 +557,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private static boolean skipDeletingReferencedRoot(IConfirmQuery query, IPackageFragmentRoot root, List referencingProjects) throws OperationCanceledException {
 		if (referencingProjects.isEmpty() || root == null || ! root.exists() ||! root.isArchive())
 			return false;
-		String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_3, JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT)); 
+		String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_3, JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT));
 		return ! query.confirm(question, referencingProjects.toArray());
 	}
 
 	private void removeUnconfirmedFoldersThatContainSourceFolders() throws CoreException {
-		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_4; 
+		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_4;
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
 		List foldersToSkip= new ArrayList(0);
 		for (int i= 0; i < fResources.length; i++) {
@@ -570,7 +570,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (resource instanceof IFolder){
 				IFolder folder= (IFolder)resource;
 				if (containsSourceFolder(folder)){
-					String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_5, BasicElementLabels.getResourceName(folder)); 
+					String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_5, BasicElementLabels.getResourceName(folder));
 					if (! query.confirm(question))
 						foldersToSkip.add(folder);
 				}
@@ -585,9 +585,9 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (! (subFolders[i] instanceof IFolder))
 				continue;
 			IJavaElement element= JavaCore.create(folder);
-			if (element instanceof IPackageFragmentRoot)	
+			if (element instanceof IPackageFragmentRoot)
 				return true;
-			if (element instanceof IPackageFragment)	
+			if (element instanceof IPackageFragment)
 				continue;
 			if (containsSourceFolder((IFolder)subFolders[i]))
 				return true;
@@ -607,7 +607,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		parentUtil.removeElementsWithAncestorsOnList(true);
 		fJavaElements= parentUtil.getJavaElements();
 	}
-	
+
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.JavaDeleteProcessor_creating_change, 1);
@@ -657,13 +657,13 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private void addToSetToDelete(IJavaElement[] newElements){
-		fJavaElements= ReorgUtils.union(fJavaElements, newElements);		
+		fJavaElements= ReorgUtils.union(fJavaElements, newElements);
 	}
-	
+
 	private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
 		fResources= ReorgUtils.setMinus(fResources, resourcesToNotDelete);
 	}
-	
+
 	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
 		fJavaElements= ReorgUtils.setMinus(fJavaElements, elementsToNotDelete);
 	}
@@ -686,12 +686,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 	private List getGettersSettersToDelete(Map getterSetterMapping) {
 		List gettersSettersToAdd= new ArrayList(getterSetterMapping.size());
-		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_8; 
+		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_8;
 		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_GETTER_SETTER);
 		for (Iterator iter= getterSetterMapping.keySet().iterator(); iter.hasNext();) {
 			IField field= (IField) iter.next();
 			Assert.isTrue(hasGetter(getterSetterMapping, field) || hasSetter(getterSetterMapping, field));
-			String deleteGetterSetter= Messages.format(RefactoringCoreMessages.DeleteRefactoring_9, JavaElementUtil.createFieldSignature(field)); 
+			String deleteGetterSetter= Messages.format(RefactoringCoreMessages.DeleteRefactoring_9, JavaElementUtil.createFieldSignature(field));
 			if (getterSetterQuery.confirm(deleteGetterSetter)){
 				if (hasGetter(getterSetterMapping, field))
 					gettersSettersToAdd.add(getGetter(getterSetterMapping, field));
@@ -733,15 +733,15 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			IMethod[] getterSetter= getGetterSetter(field);
 			if (getterSetter != null)
 				result.put(field, getterSetter);
-		}		
+		}
 		return result;
 	}
 	private static boolean hasSetter(Map getterSetterMapping, IField field){
-		return getterSetterMapping.containsKey(field) && 
+		return getterSetterMapping.containsKey(field) &&
 			   getSetter(getterSetterMapping, field) != null;
 	}
 	private static boolean hasGetter(Map getterSetterMapping, IField field){
-		return getterSetterMapping.containsKey(field) && 
+		return getterSetterMapping.containsKey(field) &&
 			   getGetter(getterSetterMapping, field) != null;
 	}
 	private static void removeGetterFromMapping(Map getterSetterMapping, IField field){
@@ -792,7 +792,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private Set getCusToEmpty() throws JavaModelException {
 		Set result= new HashSet();
 		for (int i= 0; i < fJavaElements.length; i++) {
-			IJavaElement element= fJavaElements[i];	
+			IJavaElement element= fJavaElements[i];
 			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
 			if (cu != null && ! result.contains(cu) && willHaveAllTopLevelTypesDeleted(cu))
 				result.add(cu);

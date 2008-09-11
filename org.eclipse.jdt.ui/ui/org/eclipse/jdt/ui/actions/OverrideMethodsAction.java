@@ -13,11 +13,11 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -66,19 +66,19 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * The action is applicable to structured selections containing elements of type
  * {@link org.eclipse.jdt.core.IType}.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OverrideMethodsAction extends SelectionDispatchAction {
 
 	/** The dialog title */
-	private static final String DIALOG_TITLE= ActionMessages.OverrideMethodsAction_error_title; 
+	private static final String DIALOG_TITLE= ActionMessages.OverrideMethodsAction_error_title;
 
 	/** The compilation unit editor */
 	private CompilationUnitEditor fEditor;
@@ -87,7 +87,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	 * Note: This constructor is for internal use only. Clients should not call this
 	 * constructor.
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OverrideMethodsAction(final CompilationUnitEditor editor) {
@@ -101,14 +101,14 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	 * <p>
 	 * The action requires that the selection provided by the site's selection provider is
 	 * of type {@link org.eclipse.jface.viewers.IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the workbench site providing context information for this action
 	 */
 	public OverrideMethodsAction(final IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.OverrideMethodsAction_label); 
-		setDescription(ActionMessages.OverrideMethodsAction_description); 
-		setToolTipText(ActionMessages.OverrideMethodsAction_tooltip); 
+		setText(ActionMessages.OverrideMethodsAction_label);
+		setDescription(ActionMessages.OverrideMethodsAction_description);
+		setToolTipText(ActionMessages.OverrideMethodsAction_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION);
 	}
 
@@ -162,7 +162,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			}
 			run(getShell(), type);
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_actionfailed); 
+			ExceptionHandler.handle(exception, getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_actionfailed);
 		}
 	}
 
@@ -189,12 +189,12 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				}
 				run(getShell(), type);
 			} else {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_not_applicable); 
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_not_applicable);
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_actionfailed); 
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_actionfailed);
 		}
 	}
 
@@ -209,13 +209,13 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			notifyResult(false);
 			return;
 		}
-			
+
 		final Object[] selected= dialog.getResult();
 		if (selected == null) {
 			notifyResult(false);
 			return;
 		}
-		
+
 		ArrayList methods= new ArrayList();
 		for (int i= 0; i < selected.length; i++) {
 			Object elem= selected[i];
@@ -225,7 +225,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		}
 		IMethodBinding[] methodToOverride= (IMethodBinding[]) methods.toArray(new IMethodBinding[methods.size()]);
 
-		
+
 		final IEditorPart editor= JavaUI.openInEditor(type.getCompilationUnit());
 		final IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 		if (target != null)
@@ -234,7 +234,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			CompilationUnit astRoot= dialog.getCompilationUnit();
 			final ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
 			int insertPos= dialog.getInsertOffset();
-			
+
 			AddUnimplementedMethodsOperation operation= (AddUnimplementedMethodsOperation) createRunnable(astRoot, typeBinding, methodToOverride, insertPos, dialog.getGenerateComment());
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 			if (context == null)
@@ -242,7 +242,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
 			final String[] created= operation.getCreatedMethods();
 			if (created == null || created.length == 0)
-				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found); 
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found);
 		} catch (InvocationTargetException exception) {
 			ExceptionHandler.handle(exception, shell, getDialogTitle(), null);
 		} catch (InterruptedException exception) {
@@ -256,7 +256,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 
 	/**
 	 * Returns a runnable that creates the method stubs for overridden methods.
-	 * 
+	 *
 	 * @param astRoot the AST of the compilation unit to work on. The AST must have been created from a {@link ICompilationUnit}, that
 	 * means {@link ASTParser#setSource(ICompilationUnit)} was used.
 	 * @param type the binding of the type to add the new methods to. The type binding must correspond to a type declaration in the AST.
@@ -265,7 +265,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	 * @param createComments if set, comments will be added to the new methods.
 	 * @return returns a runnable that creates the methods stubs.
 	 * @throws IllegalArgumentException a {@link IllegalArgumentException} is thrown if the AST passed has not been created from a {@link ICompilationUnit}.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static IWorkspaceRunnable createRunnable(CompilationUnit astRoot, ITypeBinding type, IMethodBinding[] methodToOverride, int insertPos, boolean createComments) {

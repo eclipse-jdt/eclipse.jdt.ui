@@ -18,18 +18,19 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.SpecificContentAssistExecutor;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public final class JavaContentAssistHandler extends AbstractHandler {
 	private final SpecificContentAssistExecutor fExecutor= new SpecificContentAssistExecutor(CompletionProposalComputerRegistry.getDefault());
-	
+
 	public JavaContentAssistHandler() {
 	}
 
@@ -40,11 +41,11 @@ public final class JavaContentAssistHandler extends AbstractHandler {
 		ITextEditor editor= getActiveEditor();
 		if (editor == null)
 			return null;
-		
+
 		String categoryId= event.getParameter("org.eclipse.jdt.ui.specific_content_assist.category_id"); //$NON-NLS-1$
 		if (categoryId == null)
 			return null;
-		
+
 		fExecutor.invokeContentAssist(editor, categoryId);
 
 		return null;

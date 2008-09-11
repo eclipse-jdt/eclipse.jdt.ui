@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
 /**
  * Refactoring contribution for the extract temp refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractTempRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class ExtractTempRefactoringContribution extends JavaRefactoringCon
 	public RefactoringDescriptor createDescriptor() {
 		return new ExtractLocalDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ExtractLocalDescriptor(project, description, comment, arguments, flags);
 	}

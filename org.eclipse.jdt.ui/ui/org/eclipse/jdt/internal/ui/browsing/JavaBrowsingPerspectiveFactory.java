@@ -15,14 +15,14 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
+import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.progress.IProgressConstants;
+
 import org.eclipse.ui.texteditor.templates.TemplatesView;
 
-import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.search.ui.NewSearchUI;
-
-import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jdt.core.IJavaElement;
 

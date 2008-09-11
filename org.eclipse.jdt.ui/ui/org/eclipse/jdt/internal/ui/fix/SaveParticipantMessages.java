@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class SaveParticipantMessages extends NLS {
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.fix.SaveParticipantMessages"; //$NON-NLS-1$
-	
+
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_CodeOrganizing_TabPage;
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_CodeStyle_TabPage;
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_MemberAccesses_TabPage;
@@ -24,24 +24,24 @@ public class SaveParticipantMessages extends NLS {
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_UnnecessaryCode_TabPage;
 
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_XofYSelected_Label;
-	
+
 	public static String CleanUpSaveParticipantPreferenceConfiguration_AdditionalActions_Checkbox;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_CleanUpActionsTopNodeName_Checkbox;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_CleanUpSaveParticipantConfiguration_Title;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_Configure_Button;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_ConfigureFormatter_Link;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_ConfigureImports_Link;
-	
+
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePAge_FormatAllLines_Radio;
 
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatOnlyChangedRegions_Radio;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatSource_Checkbox;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_OrganizeImports_Checkbox;
-	
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, SaveParticipantMessages.class);
 	}
-	
+
 	private SaveParticipantMessages() {}
 }

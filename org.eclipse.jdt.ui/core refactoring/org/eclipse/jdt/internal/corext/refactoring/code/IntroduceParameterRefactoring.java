@@ -99,7 +99,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	private ICompilationUnit fSourceCU;
 	private int fSelectionStart;
 	private int fSelectionLength;
-	
+
 	private IMethod fMethod;
 	private Refactoring fChangeSignatureRefactoring;
 	private ChangeSignatureProcessor fChangeSignatureProcessor;
@@ -109,7 +109,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 	private Expression fSelectedExpression;
 	private String[] fExcludedParameterNames;
-	
+
 	/**
 	 * Creates a new introduce parameter refactoring.
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
@@ -123,13 +123,13 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 	}
-	
+
     public IntroduceParameterRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this(null, 0, 0);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
     }
-	
+
 	// ------------------- IDelegateUpdating ----------------------
 
 	public boolean canEnableDelegateUpdating() {
@@ -157,22 +157,22 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	// ------------------- /IDelegateUpdating ---------------------
 
 	public String getName() {
-		return RefactoringCoreMessages.IntroduceParameterRefactoring_name; 
+		return RefactoringCoreMessages.IntroduceParameterRefactoring_name;
 	}
 
 	//--- checkActivation
-		
+
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 7); //$NON-NLS-1$
-			
-			if (! fSourceCU.isStructureKnown())		
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_syntax_error); 
-			
+
+			if (! fSourceCU.isStructureKnown())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_syntax_error);
+
 			IJavaElement enclosingElement= SelectionConverter.resolveEnclosingElement(fSourceCU, new TextSelection(fSelectionStart, fSelectionLength));
 			if (! (enclosingElement instanceof IMethod))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
-			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
+
 			fMethod= (IMethod) enclosingElement;
 			pm.worked(1);
 
@@ -222,30 +222,30 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			CompilationUnitRewrite cuRewrite= fChangeSignatureProcessor.getBaseCuRewrite();
 			if (! cuRewrite.getCu().equals(fSourceCU))
 				cuRewrite= new CompilationUnitRewrite(fSourceCU); // TODO: should try to avoid throwing away this AST
-			
+
 			initializeSelectedExpression(cuRewrite);
 			pm.worked(1);
-		
+
 			result.merge(checkSelection(cuRewrite, new SubProgressMonitor(pm, 3)));
 			if (result.hasFatalError())
 				return result;
 
 			initializeExcludedParameterNames(cuRewrite);
-			
+
 			addParameterInfo(cuRewrite);
-			
+
 			fChangeSignatureProcessor.setBodyUpdater(new BodyUpdater() {
 				public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite rewrite, RefactoringStatus updaterResult) {
 					replaceSelectedExpression(rewrite);
 				}
 			});
-			
+
 			return result;
 		} finally {
 			pm.done();
 			if (fChangeSignatureRefactoring != null)
 				fChangeSignatureRefactoring.setValidationContext(null);
-		}	
+		}
 	}
 
 	private void addParameterInfo(CompilationUnitRewrite cuRewrite) throws JavaModelException {
@@ -268,143 +268,143 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		if (! fSourceCU.equals(cuRewrite.getCu()))
 			return;
 		// TODO: do for all methodDeclarations and replace matching fragments?
-		
+
 		// cannot use fSelectedExpression here, since it could be from another AST (if method was replaced by overridden):
 		Expression expression= (Expression) NodeFinder.perform(cuRewrite.getRoot(), fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
-		
+
 		ASTNode newExpression= cuRewrite.getRoot().getAST().newSimpleName(fParameter.getNewName());
-		String description= RefactoringCoreMessages.IntroduceParameterRefactoring_replace; 
+		String description= RefactoringCoreMessages.IntroduceParameterRefactoring_replace;
 		cuRewrite.getASTRewrite().replace(expression, newExpression, cuRewrite.createGroupDescription(description));
 	}
 
 	private void initializeSelectedExpression(CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		IASTFragment fragment= ASTFragmentFactory.createFragmentForSourceRange(
 				new SourceRange(fSelectionStart, fSelectionLength), cuRewrite.getRoot(), cuRewrite.getCu());
-		
+
 		if (! (fragment instanceof IExpressionFragment))
 			return;
-		
+
 		//TODO: doesn't handle selection of partial Expressions
 		Expression expression= ((IExpressionFragment) fragment).getAssociatedExpression();
 		if (fragment.getStartPosition() != expression.getStartPosition()
 				|| fragment.getLength() != expression.getLength())
 			return;
-		
+
 		if (Checks.isInsideJavadoc(expression))
 			return;
 		//TODO: exclude invalid selections
 		if (Checks.isEnumCase(expression.getParent()))
 			return;
-		
+
 		fSelectedExpression= expression;
 	}
-	
+
 	private RefactoringStatus checkSelection(CompilationUnitRewrite cuRewrite, IProgressMonitor pm) {
 		try {
 			if (fSelectedExpression == null){
 				String message= RefactoringCoreMessages.IntroduceParameterRefactoring_select;
 				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, cuRewrite.getRoot(), message);
-			}	
-			
+			}
+
 			MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
 			if (methodDeclaration == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
 			if (methodDeclaration.resolveBinding() == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_no_binding); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_no_binding);
 			//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
-			
+
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkExpression());
 			if (result.hasFatalError())
 				return result;
-			
+
 			result.merge(checkExpressionBinding());
 			if (result.hasFatalError())
-				return result;				
-			
+				return result;
+
 //			if (isUsedInForInitializerOrUpdater(getSelectedExpression().getAssociatedExpression()))
 //				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.for_initializer_updater")); //$NON-NLS-1$
-//			pm.worked(1);				
+//			pm.worked(1);
 //
 //			if (isReferringToLocalVariableFromFor(getSelectedExpression().getAssociatedExpression()))
 //				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.refers_to_for_variable")); //$NON-NLS-1$
 //			pm.worked(1);
-			
+
 			return result;
 		} finally {
 			if (pm != null)
 				pm.done();
-		}		
+		}
 	}
 
 	private RefactoringStatus checkExpression() {
 		//TODO: adjust error messages (or generalize for all refactorings on expression-selections?)
 		Expression selectedExpression= fSelectedExpression;
-		
+
 		if (selectedExpression instanceof Name && selectedExpression.getParent() instanceof ClassInstanceCreation)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_name_in_new); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_name_in_new);
 			//TODO: let's just take the CIC automatically (no ambiguity -> no problem -> no dialog ;-)
-		
+
 		if (selectedExpression instanceof NullLiteral) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_null_literals); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_null_literals);
 		} else if (selectedExpression instanceof ArrayInitializer) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_array_initializer); 
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_array_initializer);
 		} else if (selectedExpression instanceof Assignment) {
 			if (selectedExpression.getParent() instanceof Expression)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment);
 			else
 				return null;
 
 		} else if (selectedExpression instanceof SimpleName){
 			if ((((SimpleName)selectedExpression)).isDeclaration())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations);
 			if (selectedExpression.getParent() instanceof QualifiedName && selectedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY
 					|| selectedExpression.getParent() instanceof FieldAccess && selectedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_select_expression);
-		} 
-		
+		}
+
 		return null;
 	}
 
 	private RefactoringStatus checkExpressionBinding() {
 		return checkExpressionFragmentIsRValue();
 	}
-	
+
 	// !! +/- same as in ExtractConstantRefactoring & ExtractTempRefactoring
 	private RefactoringStatus checkExpressionFragmentIsRValue() {
 		switch(Checks.checkExpressionIsRValue(fSelectedExpression)) {
 			case Checks.NOT_RVALUE_MISC:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.IntroduceParameterRefactoring_select, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); 
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.IntroduceParameterRefactoring_select, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null);
 			case Checks.NOT_RVALUE_VOID:
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.IntroduceParameterRefactoring_no_void, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null); 
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.IntroduceParameterRefactoring_no_void, null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID, null);
 			case Checks.IS_RVALUE:
 				return new RefactoringStatus();
 			default:
 				Assert.isTrue(false); return null;
-		}		
-	}	
+		}
+	}
 
 	public List getParameterInfos() {
 		return fChangeSignatureProcessor.getParameterInfos();
 	}
-	
+
 	public ParameterInfo getAddedParameterInfo() {
 		return fParameter;
 	}
-	
+
 	public String getMethodSignaturePreview() throws JavaModelException {
 		return fChangeSignatureProcessor.getNewMethodSignature();
 	}
-	
+
 //--- Input setting/validation
 
 	public void setParameterName(String name) {
 		Assert.isNotNull(name);
 		fParameter.setNewName(name);
 	}
-	
-	/** 
-	 * must only be called <i>after</i> checkActivation() 
+
+	/**
+	 * must only be called <i>after</i> checkActivation()
 	 * @return guessed parameter name
 	 */
 	public String guessedParameterName() {
@@ -414,9 +414,9 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		else
 			return proposals[0];
 	}
-	
+
 // --- TODO: copied from ExtractTempRefactoring - should extract ------------------------------
-	
+
 	/**
 	 * Must only be called <i>after</i> checkActivation().
 	 * The first proposal should be used as "best guess" (if it exists).
@@ -430,7 +430,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		proposals.addAll(guessTempNamesFromExpression(fSelectedExpression, fExcludedParameterNames));
 		return (String[]) proposals.toArray(new String[proposals.size()]);
 	}
-	
+
 	private List/*<String>*/ guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
 		String methodName= selectedMethodInvocation.getName().getIdentifier();
 		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
@@ -450,7 +450,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		String[] proposals= StubUtility.getLocalNameSuggestions(fSourceCU.getJavaProject(), methodName, 0, excludedVariableNames);
 		return Arrays.asList(proposals);
 	}
-	
+
 	private List/*<String>*/ guessTempNamesFromExpression(Expression selectedExpression, String[] excluded) {
 		ITypeBinding expressionBinding= Bindings.normalizeForDeclarationUse(
 			selectedExpression.resolveTypeBinding(),
@@ -458,7 +458,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		String typeName= getQualifiedName(expressionBinding);
 		if (typeName.length() == 0)
 			typeName= expressionBinding.getName();
-		if (typeName.length() == 0)			
+		if (typeName.length() == 0)
 			return Collections.EMPTY_LIST;
 		int typeParamStart= typeName.indexOf("<"); //$NON-NLS-1$
 		if (typeParamStart != -1)
@@ -466,9 +466,9 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		String[] proposals= StubUtility.getLocalNameSuggestions(fSourceCU.getJavaProject(), typeName, expressionBinding.getDimensions(), excluded);
 		return Arrays.asList(proposals);
 	}
-	
+
 // ----------------------------------------------------------------------
-	
+
 	private static String getQualifiedName(ITypeBinding typeBinding) {
 		if (typeBinding.isAnonymous())
 			return getQualifiedName(typeBinding.getSuperclass());
@@ -486,13 +486,13 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			fExcludedParameterNames[i]= bindings[i].getName();
 		}
 	}
-	
+
 	public RefactoringStatus validateInput() {
 		return fChangeSignatureProcessor.checkSignature();
 	}
-	
+
 //--- checkInput
-	
+
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		fChangeSignatureRefactoring.setValidationContext(getValidationContext());
 		try {
@@ -501,7 +501,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			fChangeSignatureRefactoring.setValidationContext(null);
 		}
 	}
-	
+
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		fChangeSignatureRefactoring.setValidationContext(getValidationContext());
 		try {
@@ -512,13 +512,13 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			pm.done();
 		}
 	}
-	
+
 	private IntroduceParameterDescriptor getRefactoringDescriptor() {
 		ChangeMethodSignatureDescriptor extended= (ChangeMethodSignatureDescriptor) fChangeSignatureProcessor.createDescriptor();
 		RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
-		
+
 		Map argumentsMap= contribution.retrieveArgumentMap(extended);
-		
+
 		final Map arguments= new HashMap();
 		arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
@@ -537,7 +537,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, BasicElementLabels.getJavaCodeString(ASTNodes.asString(fSelectedExpression))));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, BasicElementLabels.getJavaElementName(getAddedParameterInfo().getNewName())));
 		return new IntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());
-	}	
+	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 		fArguments= arguments;

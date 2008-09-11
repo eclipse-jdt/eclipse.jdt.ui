@@ -26,13 +26,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * <p>
  * The action is applicable to selections and Search view entries
  * representing a Java element.
- * 
+ *
  * <p>
  * Note: This class is for internal use only. Clients should not use this class.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -44,7 +44,7 @@ public class WorkingSetFindAction extends FindAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param site the site
 	 * @param action the action
-	 * @param workingSetName the working set name 
+	 * @param workingSetName the working set name
 	 */
 	public WorkingSetFindAction(IWorkbenchSite site, FindAction action, String workingSetName) {
 		super(site);
@@ -55,8 +55,8 @@ public class WorkingSetFindAction extends FindAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor (internal type)
 	 * @param action the action
-	 * @param workingSetName the working set name 
-	 * 
+	 * @param workingSetName the working set name
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public WorkingSetFindAction(JavaEditor editor, FindAction action, String workingSetName) {
@@ -67,11 +67,11 @@ public class WorkingSetFindAction extends FindAction {
 	Class[] getValidTypes() {
 		return null; // ignore, we override canOperateOn
 	}
-	
+
 	void init() {
 		// ignore: do our own init in 'init(FindAction, String)'
 	}
-	
+
 	private void init(FindAction action, String workingSetName) {
 		Assert.isNotNull(action);
 		fAction= action;
@@ -80,7 +80,7 @@ public class WorkingSetFindAction extends FindAction {
 		setToolTipText(action.getToolTipText());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
-	
+
 	public void run(IJavaElement element) {
 		fAction.run(element);
 	}

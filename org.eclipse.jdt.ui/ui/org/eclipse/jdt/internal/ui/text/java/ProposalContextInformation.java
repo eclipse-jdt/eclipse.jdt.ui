@@ -38,7 +38,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 
 	/**
 	 * Creates a new context information.
-	 * 
+	 *
 	 * @param proposal the JDT Core completion proposal
 	 */
 	public ProposalContextInformation(CompletionProposal proposal) {
@@ -99,10 +99,10 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	public int getContextInformationPosition() {
 		return fPosition;
 	}
-	
+
 	/**
 	 * Sets the context information position.
-	 * 
+	 *
 	 * @param position the new position, or -1 for unknown.
 	 * @since 3.1
 	 */

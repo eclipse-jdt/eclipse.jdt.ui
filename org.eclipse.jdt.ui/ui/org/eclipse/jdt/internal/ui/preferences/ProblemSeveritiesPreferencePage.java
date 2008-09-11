@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -37,18 +37,18 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 	public static final String DATA_SELECT_OPTION_QUALIFIER= "select_option_qualifier"; //$NON-NLS-1$
 
 	/**
-	 * Key for a Boolean value defining if 'use project specific settings' should be enabled or not. 
+	 * Key for a Boolean value defining if 'use project specific settings' should be enabled or not.
 	 */
 	public static final String USE_PROJECT_SPECIFIC_OPTIONS= "use_project_specific_key"; //$NON-NLS-1$
-	
+
 	private ProblemSeveritiesConfigurationBlock fConfigurationBlock;
 
 	public ProblemSeveritiesPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		//setDescription(PreferencesMessages.getString("ProblemSeveritiesPreferencePage.description")); //$NON-NLS-1$
-		
+
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.ProblemSeveritiesPreferencePage_title);		 
+		setTitle(PreferencesMessages.ProblemSeveritiesPreferencePage_title);
 	}
 
 	/*
@@ -57,7 +57,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new ProblemSeveritiesConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
-		
+
 		super.createControl(parent);
 		if (isProjectPreferencePage()) {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROBLEM_SEVERITIES_PROPERTY_PAGE);
@@ -69,25 +69,25 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
 	}
-	
+
 	protected boolean hasProjectSpecificOptions(IProject project) {
 		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
 	 */
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -97,7 +97,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		}
 		super.dispose();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
 	 */
@@ -107,7 +107,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -124,10 +124,10 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
-		}	
+		}
 		return super.performOk();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */
@@ -136,7 +136,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.performApply();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
@@ -148,7 +148,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 			if (useProjectOptions != null) {
 				enableProjectSpecificSettings(useProjectOptions.booleanValue());
 			}
-			
+
 			Object key= map.get(DATA_SELECT_OPTION_KEY);
 			Object qualifier= map.get(DATA_SELECT_OPTION_QUALIFIER);
 			if (key instanceof String && qualifier instanceof String) {
@@ -156,7 +156,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 			}
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
 	 */
@@ -164,5 +164,5 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		super.setElement(element);
 		setDescription(null); // no description for property page
 	}
-	
+
 }

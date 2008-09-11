@@ -23,7 +23,7 @@ public class PerformanceTestSuite5 extends TestSuite {
 		// exclude PerformanceTestSetup because this suite measures startup performance
 		return new PerformanceTestSuite5();
 	}
-	
+
 	public PerformanceTestSuite5() {
 		addTest(OpenTextEditorStartupTest.suiteForMeasurement());
 	}

@@ -27,7 +27,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 
     private NewEnumWizardPage fPage;
     private boolean fOpenEditorOnFinish;
-	
+
 	public NewEnumCreationWizard() {
 		this(null, true);
 	}
@@ -36,14 +36,14 @@ public class NewEnumCreationWizard extends NewElementWizard {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWENUM);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewEnumCreationWizard_title);
-		
+
 		fPage= page;
 		fOpenEditorOnFinish= openEditorOnFinish;
 	}
 
 	/*
 	 * @see Wizard#addPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
 		if (fPage == null) {
@@ -52,7 +52,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 		}
 		addPage(fPage);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#canRunForked()
 	 */
@@ -66,7 +66,7 @@ public class NewEnumCreationWizard extends NewElementWizard {
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 	    fPage.createType(monitor); // use the full progress monitor
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
@@ -80,15 +80,15 @@ public class NewEnumCreationWizard extends NewElementWizard {
 				if (fOpenEditorOnFinish) {
 					openResource((IFile) resource);
 				}
-			}	
+			}
 		}
 		return res;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
 	 */
 	public IJavaElement getCreatedElement() {
 		return fPage.getCreatedType();
-	}	
+	}
 }

@@ -15,17 +15,17 @@ class WhileFlowInfo extends FlowInfo {
 	public void mergeCondition(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
-			
+
 		mergeAccessModeSequential(info, context);
 	}
-	
+
 	public void mergeAction(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
 
 		info.mergeEmptyCondition(context);
-		
-		mergeSequential(info, context);		
+
+		mergeSequential(info, context);
 	}
 }
 

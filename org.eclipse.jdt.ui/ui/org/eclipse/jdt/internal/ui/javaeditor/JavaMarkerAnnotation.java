@@ -35,7 +35,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/**
 	 * Tells whether the given marker can be treated as a Java annotation
 	 * which will later be update by JDT Core problems.
-	 * 
+	 *
 	 * @param marker the marker
 	 * @return <code>true</code> if the marker can be treated as a Java annotation
 	 * @since 3.3.2
@@ -52,7 +52,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 
 		return MarkerUtilities.isMarkerType(marker, IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 	}
-	
+
 	private IJavaAnnotation fOverlay;
 
 
@@ -173,7 +173,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		IMarker marker= getMarker();
 		if (marker == null  || !marker.exists())
 			return null;
-		
+
 		return  MarkerUtilities.getMarkerType(getMarker());
 	}
 }

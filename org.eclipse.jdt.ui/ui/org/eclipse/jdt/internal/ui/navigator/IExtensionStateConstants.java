@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.ui.navigator;
 
 
 public interface IExtensionStateConstants {
- 
-	String ROOT_MODE= "rootMode"; //$NON-NLS-1$ 
+
+	String ROOT_MODE= "rootMode"; //$NON-NLS-1$
 
 	interface Values {
 
 		String IS_LAYOUT_FLAT= "isLayoutFlat"; //$NON-NLS-1$
- 
+
 
 	}
 

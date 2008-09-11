@@ -41,13 +41,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Action to convert a nested class to a top level class.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ConvertNestedToTopAction extends SelectionDispatchAction {
@@ -58,7 +58,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ConvertNestedToTopAction(JavaEditor editor) {
@@ -72,13 +72,13 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 * that the selection provided by the site's selection provider is of type
 	 * <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site
 	 *            the site providing context information for this action
 	 */
 	public ConvertNestedToTopAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.ConvertNestedToTopAction_Convert); 
+		setText(RefactoringMessages.ConvertNestedToTopAction_Convert);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_INNER_TO_TOP_ACTION);
 	}
 
@@ -112,9 +112,9 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 				RefactoringExecutionStarter.startMoveInnerRefactoring(singleSelectedType, getShell());
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, 
-				RefactoringMessages.OpenRefactoringWizardAction_refactoring, 
-				RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e,
+				RefactoringMessages.OpenRefactoringWizardAction_refactoring,
+				RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 
@@ -138,11 +138,11 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection the Java text selection (internal type)
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -152,7 +152,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	/*
 	 * @see SelectionDispatchAction#run(ITextSelection)
 	 */
@@ -164,12 +164,12 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 					return;
 				RefactoringExecutionStarter.startMoveInnerRefactoring(type, getShell());
 			} else {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.ConvertNestedToTopAction_To_activate); 
+				MessageDialog.openInformation(getShell(), RefactoringMessages.OpenRefactoringWizardAction_unavailable, RefactoringMessages.ConvertNestedToTopAction_To_activate);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, 
+			ExceptionHandler.handle(e,
 				RefactoringMessages.OpenRefactoringWizardAction_refactoring,
-				RefactoringMessages.OpenRefactoringWizardAction_exception); 
+				RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 }

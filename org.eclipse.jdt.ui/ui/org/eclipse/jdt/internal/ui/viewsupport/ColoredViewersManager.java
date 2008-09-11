@@ -26,24 +26,24 @@ import org.eclipse.ui.PlatformUI;
 
 
 public class ColoredViewersManager implements IPropertyChangeListener {
-	
+
 	public static final String INHERITED_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.inherited"; //$NON-NLS-1$
-	
+
 	public static final String HIGHLIGHT_BG_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.match_highlight"; //$NON-NLS-1$
 	public static final String HIGHLIGHT_WRITE_BG_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.writeaccess_highlight"; //$NON-NLS-1$
-	
+
 	private static ColoredViewersManager fgInstance= new ColoredViewersManager();
-	
+
 	private Set fManagedLabelProviders;
-		
+
 	public ColoredViewersManager() {
 		fManagedLabelProviders= new HashSet();
 	}
-	
+
 	public void installColoredLabels(ColoringLabelProvider labelProvider) {
 		if (fManagedLabelProviders.contains(labelProvider))
 			return;
-		
+
 		if (fManagedLabelProviders.isEmpty()) {
 			// first lp installed
 			PlatformUI.getPreferenceStore().addPropertyChangeListener(this);
@@ -51,18 +51,18 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 		}
 		fManagedLabelProviders.add(labelProvider);
 	}
-	
+
 	public void uninstallColoredLabels(ColoringLabelProvider labelProvider) {
 		if (!fManagedLabelProviders.remove(labelProvider))
 			return; // not installed
-		
+
 		if (fManagedLabelProviders.isEmpty()) {
 			PlatformUI.getPreferenceStore().removePropertyChangeListener(this);
 			JFaceResources.getColorRegistry().removeListener(this);
 			// last viewer uninstalled
 		}
 	}
-				
+
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(JFacePreferences.QUALIFIER_COLOR) || property.equals(JFacePreferences.COUNTER_COLOR) || property.equals(JFacePreferences.DECORATIONS_COLOR)
@@ -74,24 +74,24 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 			});
 		}
 	}
-	
+
 	protected final void refreshAllViewers() {
 		for (Iterator iterator= fManagedLabelProviders.iterator(); iterator.hasNext();) {
 			ColoringLabelProvider lp= (ColoringLabelProvider) iterator.next();
 			lp.refresh();
 		}
 	}
-		
+
 	public static boolean showColoredLabels() {
 		return PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.USE_COLORED_LABELS);
 	}
-	
+
 	public static void install(ColoringLabelProvider labelProvider) {
 		fgInstance.installColoredLabels(labelProvider);
 	}
-	
+
 	public static void uninstall(ColoringLabelProvider labelProvider) {
 		fgInstance.uninstallColoredLabels(labelProvider);
-	}	
-	
+	}
+
 }

@@ -16,7 +16,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 /**
  * Defines the constants used in the <code>org.eclipse.ui.themes</code>
  * extension contributed by this plug-in.
- * 
+ *
  * @since 3.3
  */
 public interface IJavaThemeConstants {
@@ -138,5 +138,5 @@ public interface IJavaThemeConstants {
 	 * Theme constant for the color used to render comments in a properties file.
 	 */
 	String PROPERTIES_FILE_COLORING_COMMENT= ID_PREFIX + PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT;
-	
+
 }

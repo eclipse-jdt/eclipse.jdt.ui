@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -28,6 +28,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -67,7 +68,7 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 		viewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
 		viewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 	}
-	
+
 	protected SourceViewer createSourceViewer(Composite parent) {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		return new JavaSourceViewer(parent, null, null, false, SWT.LEFT_TO_RIGHT | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION, store);
@@ -116,18 +117,18 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 			setInput(newJavaDocument(sc.getSource()), createRegion(sc.getSourceRange()));
 		}
 	}
-	
+
 	private IDocument newJavaDocument(String source) {
 		IDocument result= new Document(source);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		textTools.setupJavaDocumentPartitioner(result);
 		return result;
 	}
-	
+
 	private static IRegion createRegion(ISourceRange range) {
 		return new Region(range.getOffset(), range.getLength());
 	}
-	
+
 	private IDocument getDocument(IDocumentProvider provider, IEditorInput input) {
 		if (input == null)
 			return null;
@@ -140,5 +141,5 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 			provider.disconnect(input);
 		}
 		return result;
-	}	
+	}
 }

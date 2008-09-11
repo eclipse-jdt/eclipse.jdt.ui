@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
+import com.ibm.icu.text.Collator;
+
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.StyledString;
 
@@ -116,7 +116,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);
-			
+
 			String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 
 			String contextId;
@@ -130,7 +130,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			// test if selection is either a full line or spans over multiple lines
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
-			
+
 			if (contextId.equals(JavaContextType.ID_ALL)) {
 				IRegion endLineRegion= document.getLineInformation(endLine);
 				//if end position is at start of line, set it back to the previous line's end
@@ -192,7 +192,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 		AssistContext invocationContext= new AssistContext(cu, start, end - start);
 		Statement[] selectedStatements= SurroundWith.getSelectedStatements(invocationContext);
-		
+
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
 			Template currentTemplate= templates[i];

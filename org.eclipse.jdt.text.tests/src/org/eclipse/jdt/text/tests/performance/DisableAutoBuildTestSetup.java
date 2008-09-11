@@ -15,8 +15,8 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 /**
- * Disables automatic builds. 
- * 
+ * Disables automatic builds.
+ *
  * @since 3.1
  */
 public class DisableAutoBuildTestSetup extends TestSetup {
@@ -31,7 +31,7 @@ public class DisableAutoBuildTestSetup extends TestSetup {
 		super.setUp();
 		fWasAutobuilding= ResourceTestHelper.disableAutoBuilding();
 	}
-	
+
 	protected void tearDown() throws Exception {
 		if (fWasAutobuilding) {
 			ResourceTestHelper.fullBuild();

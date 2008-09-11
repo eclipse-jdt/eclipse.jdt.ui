@@ -60,8 +60,8 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	 */
 	protected ClasspathContainerSelectionPage(ClasspathContainerDescriptor[] containerPages) {
 		super("ClasspathContainerWizardPage"); //$NON-NLS-1$
-		setTitle(NewWizardMessages.ClasspathContainerSelectionPage_title); 
-		setDescription(NewWizardMessages.ClasspathContainerSelectionPage_description); 
+		setTitle(NewWizardMessages.ClasspathContainerSelectionPage_title);
+		setDescription(NewWizardMessages.ClasspathContainerSelectionPage_description);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 
 		fContainers= containerPages;
@@ -93,8 +93,8 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 			public void doubleClick(DoubleClickEvent event) {
 				doDoubleClick();
 			}
-		});		
-		
+		});
+
 		int selectionIndex= fDialogSettings.getInt(DIALOGSTORE_CONTAINER_IDX);
 		if (selectionIndex >= fContainers.length) {
 			selectionIndex= 0;
@@ -103,7 +103,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		validatePage();
 		setControl(fListViewer.getList());
 		Dialog.applyDialogFont(fListViewer.getList());
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.BP_SELECT_CLASSPATH_CONTAINER);
 	}
 
@@ -122,16 +122,16 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		}
 		return null;
 	}
-	
+
 	public ClasspathContainerDescriptor[] getContainers() {
 		return fContainers;
 	}
-	
+
 	protected void doDoubleClick() {
 		if (canFlipToNextPage()) {
 			getContainer().showPage(getNextPage());
 		}
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see IWizardPage#canFlipToNextPage()

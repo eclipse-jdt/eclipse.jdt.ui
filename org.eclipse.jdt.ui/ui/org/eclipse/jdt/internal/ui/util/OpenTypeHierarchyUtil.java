@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 public class OpenTypeHierarchyUtil {
-	
+
 	private OpenTypeHierarchyUtil() {
 	}
 
@@ -49,36 +49,36 @@ public class OpenTypeHierarchyUtil {
 			return open(candidates, window);
 		}
 		return null;
-	}	
-	
+	}
+
 	public static TypeHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {
 		Assert.isTrue(candidates != null && candidates.length != 0);
-			
+
 		IJavaElement input= null;
 		if (candidates.length > 1) {
-			String title= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_title;  
-			String message= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_message; 
-			input= SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);			
+			String title= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_title;
+			String message= JavaUIMessages.OpenTypeHierarchyUtil_selectionDialog_message;
+			input= SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);
 		} else {
 			input= candidates[0];
 		}
 		if (input == null)
 			return null;
-			
+
 		try {
 			if (PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.OPEN_TYPE_HIERARCHY))) {
 				return openInPerspective(window, input);
 			} else {
 				return openInViewPart(window, input);
 			}
-				
+
 		} catch (WorkbenchException e) {
 			ExceptionHandler.handle(e, window.getShell(),
-				JavaUIMessages.OpenTypeHierarchyUtil_error_open_perspective, 
+				JavaUIMessages.OpenTypeHierarchyUtil_error_open_perspective,
 				e.getMessage());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, window.getShell(),
-				JavaUIMessages.OpenTypeHierarchyUtil_error_open_editor, 
+				JavaUIMessages.OpenTypeHierarchyUtil_error_open_editor,
 				e.getMessage());
 		}
 		return null;
@@ -95,18 +95,18 @@ public class OpenTypeHierarchyUtil {
 			result.setInputElement(input);
 			return result;
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, window.getShell(), 
-				JavaUIMessages.OpenTypeHierarchyUtil_error_open_view, e.getMessage()); 
+			ExceptionHandler.handle(e, window.getShell(),
+				JavaUIMessages.OpenTypeHierarchyUtil_error_open_view, e.getMessage());
 		}
-		return null;		
+		return null;
 	}
-	
+
 	private static TypeHierarchyViewPart openInPerspective(IWorkbenchWindow window, IJavaElement input) throws WorkbenchException, JavaModelException {
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		// The problem is that the input element can be a working copy. So we first convert it to the original element if
 		// it exists.
 		IJavaElement perspectiveInput= input;
-		
+
 		if (input instanceof IMember) {
 			if (input.getElementType() != IJavaElement.TYPE) {
 				perspectiveInput= ((IMember)input).getDeclaringType();
@@ -115,11 +115,11 @@ public class OpenTypeHierarchyUtil {
 			}
 		}
 		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, perspectiveInput);
-		
+
 		TypeHierarchyViewPart part= (TypeHierarchyViewPart) page.findView(JavaUI.ID_TYPE_HIERARCHY);
 		if (part != null) {
 			part.clearNeededRefresh(); // avoid refresh of old hierarchy on 'becomes visible'
-		}		
+		}
 		part= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
 		part.setInputElement(input);
 		if (input instanceof IMember) {
@@ -135,7 +135,7 @@ public class OpenTypeHierarchyUtil {
 	 * Converts the input to a possible input candidates
 	 * @param input input
 	 * @return the possible candidates
-	 */	
+	 */
 	public static IJavaElement[] getCandidates(Object input) {
 		if (!(input instanceof IJavaElement)) {
 			return null;
@@ -156,7 +156,7 @@ public class OpenTypeHierarchyUtil {
 					break;
 				case IJavaElement.PACKAGE_DECLARATION:
 					return new IJavaElement[] { elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT) };
-				case IJavaElement.IMPORT_DECLARATION:	
+				case IJavaElement.IMPORT_DECLARATION:
 					IImportDeclaration decl= (IImportDeclaration) elem;
 					if (decl.isOnDemand()) {
 						elem= JavaModelUtil.findTypeContainer(elem.getJavaProject(), Signature.getQualifier(elem.getElementName()));
@@ -166,9 +166,9 @@ public class OpenTypeHierarchyUtil {
 					if (elem == null)
 						return null;
 					return new IJavaElement[] {elem};
-					
+
 				case IJavaElement.CLASS_FILE:
-					return new IJavaElement[] { ((IClassFile)input).getType() };				
+					return new IJavaElement[] { ((IClassFile)input).getType() };
 				case IJavaElement.COMPILATION_UNIT: {
 					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
@@ -178,12 +178,12 @@ public class OpenTypeHierarchyUtil {
 						}
 					}
 					break;
-				}					
+				}
 				default:
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return null;	
+		return null;
 	}
 }

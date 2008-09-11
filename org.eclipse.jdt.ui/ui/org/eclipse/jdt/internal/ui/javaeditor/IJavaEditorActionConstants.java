@@ -37,7 +37,7 @@ public interface IJavaEditorActionConstants {
 	 * ID of the action to toggle the style of the presentation.
 	 */
 	public static final String TOGGLE_PRESENTATION= "togglePresentation"; //$NON-NLS-1$
-	
+
 	/**
 	 * ID of the action to copy the qualified name.
 	 * @since 3.3

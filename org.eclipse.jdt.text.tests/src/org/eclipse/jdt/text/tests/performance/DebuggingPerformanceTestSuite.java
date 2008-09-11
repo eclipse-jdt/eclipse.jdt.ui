@@ -23,7 +23,7 @@ public class DebuggingPerformanceTestSuite extends TestSuite {
 	public static Test suite() {
 		return new PerformanceTestSetup(new DebuggingPerformanceTestSuite());
 	}
-	
+
 	public DebuggingPerformanceTestSuite() {
 		addTest(TextTypingInvocationCountTest.suite());
 		addTest(JavaTypingInvocationCountTest.suite());

@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*
  * Created on Apr 13, 2004
- * 
+ *
  * TODO To change the template for this generated file go to Window -
  * Preferences - Java - Code Generation - Code and Comments
  */
@@ -47,7 +47,7 @@ public class SearchParticipantsExtensionPoint {
 			SearchParticipantDescriptor descriptor= new SearchParticipantDescriptor(allParticipants[i]);
 			IStatus status= descriptor.checkSyntax();
 			if (status.isOK()) {
-				fActiveParticipants.add(descriptor); 
+				fActiveParticipants.add(descriptor);
 			} else {
 				JavaPlugin.log(status);
 			}
@@ -92,7 +92,7 @@ public class SearchParticipantsExtensionPoint {
 			fgInstance= new SearchParticipantsExtensionPoint();
 		return fgInstance;
 	}
-	
+
 	public static void debugSetInstance(SearchParticipantsExtensionPoint instance) {
 		fgInstance= instance;
 	}

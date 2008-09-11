@@ -36,19 +36,19 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public final class DestinationContentProvider extends StandardJavaElementContentProvider {
-	
+
 	private IReorgDestinationValidator fValidator;
-	
+
 	public DestinationContentProvider(IReorgDestinationValidator validator) {
 		super(true);
 		fValidator= validator;
 	}
-	
+
 	public boolean hasChildren(Object element) {
 		IReorgDestination destination= ReorgDestinationFactory.createDestination(element);
 		if (!fValidator.canChildrenBeDestinations(destination))
 				return false;
-		
+
 		if (element instanceof IJavaElement){
 			IJavaElement javaElement= (IJavaElement) element;
 			if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
@@ -57,10 +57,10 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 					return false;
 			}
 		}
-		
+
 		return super.hasChildren(element);
 	}
-	
+
 	public Object[] getChildren(Object element) {
 		try {
 			if (element instanceof IJavaModel) {
@@ -88,7 +88,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 		}
 		return super.getChildren(parentElement);
 	}
-	
+
 	// Copied from supertype
 	private Object[] getResources(IContainer container) {
 		try {
@@ -108,7 +108,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 				if (isFolderOnClasspath) {
 					if (javaProject.findPackageFragmentRoot(member.getFullPath()) == null) {
 						nonJavaResources.add(member);
-					} 
+					}
 				} else if (!javaProject.isOnClasspath(member)) {
 					nonJavaResources.add(member);
 				}
@@ -118,7 +118,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 			return NO_CHILDREN;
 		}
 	}
-	
+
 	private static Object[] getOpenNonJavaProjects(IJavaModel model) throws JavaModelException {
 		Object[] nonJavaProjects= model.getNonJavaResources();
 		ArrayList result= new ArrayList(nonJavaProjects.length);

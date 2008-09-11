@@ -16,11 +16,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 /**
  * Computes Java completion proposals and context infos.
- * 
+ *
  * @since 3.2
  */
 public class JavaCompletionProposalComputer implements IJavaCompletionProposalComputer {
@@ -99,9 +99,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 				return fContextInformation.equals(object);
 		}
 	}
-	
+
 	private String fErrorMessage;
-	
+
 	public JavaCompletionProposalComputer() {
 	}
 
@@ -126,11 +126,11 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 					result.add(wrapper);
 			}
 		}
-		
+
 		if (result.size() == 0)
 			return anonymousResult;
 		return result;
-		
+
 	}
 
 	/*
@@ -139,7 +139,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
-			
+
 			int contextInformationPosition= guessContextInformationPosition(javaContext);
 			List result= addContextInformations(javaContext, contextInformationPosition);
 			return result;
@@ -162,31 +162,31 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		ICompilationUnit unit= context.getCompilationUnit();
 		if (unit == null)
 			return Collections.EMPTY_LIST;
-		
+
 		ITextViewer viewer= context.getViewer();
-		
+
 		CompletionProposalCollector collector= createCollector(context);
 		collector.setInvocationContext(context);
-		
+
 		// Allow completions for unresolved types - since 3.3
 		collector.setAllowsRequiredProposals(CompletionProposal.FIELD_REF, CompletionProposal.TYPE_REF, true);
 		collector.setAllowsRequiredProposals(CompletionProposal.FIELD_REF, CompletionProposal.TYPE_IMPORT, true);
 		collector.setAllowsRequiredProposals(CompletionProposal.FIELD_REF, CompletionProposal.FIELD_IMPORT, true);
-		
+
 		collector.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.TYPE_REF, true);
 		collector.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.TYPE_IMPORT, true);
 		collector.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.METHOD_IMPORT, true);
 
 		collector.setAllowsRequiredProposals(CompletionProposal.TYPE_REF, CompletionProposal.TYPE_REF, true);
-		
-		// Set the favorite list to propose static members - since 3.3 
+
+		// Set the favorite list to propose static members - since 3.3
 		collector.setFavoriteReferences(getFavoriteStaticMembers());
 
 		try {
 			Point selection= viewer.getSelectedRange();
 			if (selection.y > 0)
 				collector.setReplacementLength(selection.y);
-			
+
 				unit.codeComplete(offset, collector);
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
@@ -206,7 +206,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 				}
 			}
 		}
-		
+
 		List proposals= new ArrayList(Arrays.asList(javaProposals));
 		if (proposals.size() == 0) {
 			String error= collector.getErrorMessage();
@@ -218,7 +218,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 	/**
 	 * Returns the array with favorite static members.
-	 * 
+	 *
 	 * @return the <code>String</code> array with with favorite static members
 	 * @see CompletionRequestor#setFavoriteReferences(String[])
 	 * @since 3.3
@@ -232,9 +232,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 	/**
 	 * Creates the collector used to get proposals from core.
-	 * 
+	 *
 	 * @param context the context
-	 * @return the collector 
+	 * @return the collector
 	 */
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))

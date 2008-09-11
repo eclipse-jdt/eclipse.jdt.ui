@@ -33,30 +33,30 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
-	
+
 	public static final String DUMMY_CLASS_NAME= "$$__$$"; //$NON-NLS-1$
-	
+
 	/**
 	 * The CU name to be used if no parent ICompilationUnit is available.
 	 * The main type of this class will be filtered out from the proposals list.
 	 */
 	public static final String DUMMY_CU_NAME= DUMMY_CLASS_NAME + JavaModelUtil.DEFAULT_CU_SUFFIX;
-	
+
 	/**
 	 * Creates a <code>JavaTypeCompletionProcessor</code>.
 	 * The completion context must be set via {@link #setPackageFragment(IPackageFragment)}.
-	 * 
+	 *
 	 * @param enableBaseTypes complete java base types iff <code>true</code>
 	 * @param enableVoid complete <code>void</code> base type iff <code>true</code>
 	 */
 	public JavaTypeCompletionProcessor(boolean enableBaseTypes, boolean enableVoid) {
 		this(enableBaseTypes, enableVoid, false);
 	}
-	
+
 	/**
 	 * Creates a <code>JavaTypeCompletionProcessor</code>.
 	 * The completion context must be set via {@link #setPackageFragment(IPackageFragment)}.
-	 * 
+	 *
 	 * @param enableBaseTypes complete java base types iff <code>true</code>
 	 * @param enableVoid complete <code>void</code> base type iff <code>true</code>
 	 * @param fullyQualify always complete to fully qualifies type iff <code>true</code>
@@ -64,7 +64,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	public JavaTypeCompletionProcessor(boolean enableBaseTypes, boolean enableVoid, boolean fullyQualify) {
 		super(new TypeCompletionRequestor(enableBaseTypes, enableVoid, fullyQualify));
 	}
-	
+
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		// disable auto activation in dialog fields, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=89476
 		return null;
@@ -84,7 +84,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 			setCompletionContext(packageFragment.getCompilationUnit(DUMMY_CU_NAME), before, after);
 		}
 	}
-	
+
 	public void setExtendsCompletionContext(IJavaElement javaElement) {
 		if (javaElement instanceof IPackageFragment) {
 			IPackageFragment packageFragment= (IPackageFragment) javaElement;
@@ -113,16 +113,16 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 //		ICompilationUnit cu= packageFragment.getCompilationUnit(DUMMY_CU_NAME);
 //		setCompletionContext(cu, "public class " + DUMMY_CLASS_NAME + " implements ", " {}"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 //	}
-	
+
 	protected static class TypeCompletionRequestor extends CUPositionCompletionRequestor {
 		private static final String VOID= "void"; //$NON-NLS-1$
 		private static final List BASE_TYPES= Arrays.asList(
 			new String[] {"boolean", "byte", "char", "double", "float", "int", "long", "short"});  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
-		
+
 		private boolean fEnableBaseTypes;
 		private boolean fEnableVoid;
 		private final boolean fFullyQualify;
-		
+
 		public TypeCompletionRequestor(boolean enableBaseTypes, boolean enableVoid, boolean fullyQualify) {
 			fFullyQualify= fullyQualify;
 			fEnableBaseTypes= enableBaseTypes;
@@ -139,7 +139,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 			setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
 			setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
 		}
-		
+
 		public void accept(CompletionProposal proposal) {
 			switch (proposal.getKind()) {
 				case CompletionProposal.PACKAGE_REF :
@@ -154,7 +154,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 							proposal.getRelevance(),
 							JavaPluginImages.DESC_OBJS_PACKAGE);
 					return;
-					
+
 				case CompletionProposal.TYPE_REF :
 					char[] signature= proposal.getSignature();
 					char[] fullName= Signature.toCharArray(signature);
@@ -170,10 +170,10 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 						buf.append(typeQualifier);
 					}
 					String name= buf.toString();
-					
+
 					// Only fully qualify if it's a top level type:
 					boolean fullyQualify= fFullyQualify && CharOperation.equals(proposal.getDeclarationSignature(), typeQualifier);
-					
+
 					ImageDescriptor typeImageDescriptor;
 					switch (Signature.getTypeSignatureKind(signature)) {
 						case Signature.TYPE_VARIABLE_SIGNATURE :
@@ -185,7 +185,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 						default :
 							typeImageDescriptor= null;
 					}
-					
+
 					addAdjustedTypeCompletion(
 							name,
 							new String(proposal.getCompletion()),
@@ -195,7 +195,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 							typeImageDescriptor,
 							fullyQualify ? new String(fullName) : null);
 					return;
-					
+
 				case CompletionProposal.KEYWORD:
 					if (! fEnableBaseTypes)
 						return;
@@ -213,7 +213,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 				default :
 					return;
 			}
-			
+
 		}
 	}
 }

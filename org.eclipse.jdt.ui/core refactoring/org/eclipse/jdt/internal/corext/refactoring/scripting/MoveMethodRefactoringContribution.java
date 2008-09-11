@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodP
 
 /**
  * Refactoring contribution for the move method refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class MoveMethodRefactoringContribution extends JavaRefactoringContribution {
@@ -45,7 +45,7 @@ public final class MoveMethodRefactoringContribution extends JavaRefactoringCont
 	public RefactoringDescriptor createDescriptor() {
 		return new MoveMethodDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new MoveMethodDescriptor(project, description, comment, arguments, flags);
 	}

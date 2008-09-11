@@ -23,10 +23,10 @@ public class JavaSearchPageScoreComputer implements ISearchPageScoreComputer {
 		if (!JavaSearchPage.EXTENSION_POINT_ID.equals(id))
 			// Can't decide
 			return ISearchPageScoreComputer.UNKNOWN;
-		
+
 		if (element instanceof IJavaElement || element instanceof IClassFileEditorInput || element instanceof LogicalPackage)
 			return 90;
-		
+
 		return ISearchPageScoreComputer.LOWEST;
 	}
 }

@@ -113,27 +113,27 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
- * 
+ *
  * This refactoring creates a wrapper around a certain method and redirects callers of the original
  * method to the newly created method (called "intermediary method").
- *  
+ *
  * If invoked on a method call, the user may select whether to only update the selected call or
- * all other calls as well. If invoked on a method declaration, the user may select whether to 
+ * all other calls as well. If invoked on a method declaration, the user may select whether to
  * update calls at all. An intermediary method will be created in both cases.
- *  
+ *
  * Creating indirections is possible for both source and binary methods. Select an invocation of the method or
  * the declaring method itself, for example in the outline view.
- *  
+ *
  * Note that in case of methods inside generic types, the parameters of the declaring type of the selected method
  * will be added to the method definition, rendering it generic as well.
- *  
+ *
  * If any of the calls cannot see the intermediary method due to visibility problems with enclosing types
  * of the intermediary method, visibility will be adjusted. If the intermediary method is not able to
  * see the target method, this refactoring will try to adjust the visibility of the target method and
  * enclosing types as well. However, the latter is only possible if the target method is from source.
- * 
+ *
  * @since 3.2
- * 
+ *
  */
 public class IntroduceIndirectionRefactoring extends Refactoring {
 
@@ -208,9 +208,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * manages all changes.
 	 */
 	private TextChangeManager fTextChangeManager;
-	
+
 	// Visibility
-	
+
 	/**
 	 * The visibility adjustor
 	 */
@@ -254,7 +254,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
     }
-	
+
 	private void initialize(int offset, int length) {
 		fSelectionStart= offset;
 		fSelectionLength= length;
@@ -329,7 +329,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		try {
 			if (fullyQualifiedTypeName.length() == 0)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_class_not_selected_error);
-			
+
 			// find type (now including secondaries)
 			target= getProject().findType(fullyQualifiedTypeName, new NullProgressMonitor());
 			if (target == null || !target.exists())
@@ -368,8 +368,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_activation, 1);
 			fRewrites= new HashMap();
 
-			// This refactoring has been invoked on 
-			// (1) a TextSelection inside an ICompilationUnit or inside an IClassFile (definitely with source), or 
+			// This refactoring has been invoked on
+			// (1) a TextSelection inside an ICompilationUnit or inside an IClassFile (definitely with source), or
 			// (2) an IMethod inside a ICompilationUnit or inside an IClassFile (with or without source)
 
 			if (fTargetMethod == null) {
@@ -483,7 +483,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		result.merge(Checks.checkMethodName(fIntermediaryMethodName, fIntermediaryClass));
 		if (result.hasFatalError())
 			return result;
-		
+
 		if (fIntermediaryClass == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_run_without_intermediary_type);
 
@@ -493,7 +493,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		fAdjustor= new MemberVisibilityAdjustor(fIntermediaryClass, fIntermediaryClass);
 		fIntermediaryAdjustments= new HashMap();
-		
+
 		// check static method in non-static nested type
 		if (fIntermediaryClassBinding.isNested() && !Modifier.isStatic(fIntermediaryClassBinding.getModifiers()))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_in_nested_nonstatic, JavaStatusContext.create(fIntermediaryClass));
@@ -566,7 +566,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		// the target method may not be in the target type; and in this case, the type
 		// of the target method does not need a visibility adjustment.
 
-		// This method is called after all other changes have been 
+		// This method is called after all other changes have been
 		// created. Changes induced by this method will be attached to those changes.
 
 		result.merge(adjustVisibility((IType) fIntermediaryFirstParameterType.getJavaElement(), fIntermediaryClass, monitor));
@@ -590,7 +590,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					result.merge(adjustVisibility(method, neededVisibility, monitor));
 					if (monitor.isCanceled())
 						throw new OperationCanceledException();
-					
+
 					if (result.hasError())
 						return result; // binary
 				}
@@ -599,7 +599,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		return result;
 	}
-	
+
 	private RefactoringStatus updateIntermediaryVisibility(NoOverrideProgressMonitor monitor) throws JavaModelException {
 		return rewriteVisibility(fIntermediaryAdjustments, fRewrites, monitor);
 	}
@@ -699,7 +699,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			return status;
 
 		// find lowest common supertype with the method
-		// search in bottom-up order 
+		// search in bottom-up order
 		ITypeBinding[] currentAndSupers= getTypeAndAllSuperTypes(current);
 		ITypeBinding[] highestAndSupers= getTypeAndAllSuperTypes(highest);
 
@@ -765,7 +765,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * Checks whether the target method can be created. Note that this
 	 * can only be done after fDelegateParameterType has been initialized.
 	 * @return resulting status
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	private RefactoringStatus checkCanCreateIntermediaryMethod() throws JavaModelException {
 		// check if method already exists:
@@ -998,25 +998,25 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Attempts to qualify a "this" expression for a method invocation with an appropriate qualifier. 
+	 * Attempts to qualify a "this" expression for a method invocation with an appropriate qualifier.
 	 * The invoked method is analyzed according to the following specs:
-	 * 
+	 *
 	 * 'this' must be qualified iff method is declared in an enclosing type or a supertype of an enclosing type
-	 * 
+	 *
 	 * 1) The method is declared somewhere outside of the cu of the invocation
 	 *      1a) inside a supertype of the current type
 	 *      1b) inside a supertype of an enclosing type
 	 * 2) The method is declared inside of the cu of the invocation
-	 * 		2a) inside the type of the invocation 
+	 * 		2a) inside the type of the invocation
 	 * 		2b) outside the type of the invocation
-	 * 
-	 * In case of 1a) and 2b), qualify with the enclosing type. 
-	 * @param expr 
-	 * @param originalInvocation 
-	 * @param enclosing 
-	 * @param unitRewriter 
+	 *
+	 * In case of 1a) and 2b), qualify with the enclosing type.
+	 * @param expr
+	 * @param originalInvocation
+	 * @param enclosing
+	 * @param unitRewriter
 	 * @return resulting status
-	 * 
+	 *
 	 */
 	private RefactoringStatus qualifyThisExpression(ThisExpression expr, MethodInvocation originalInvocation, IMember enclosing, CompilationUnitRewrite unitRewriter) {
 
@@ -1252,19 +1252,19 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	private RefactoringStatus adjustVisibility(IMember whoToAdjust, IMember fromWhereToLook, IProgressMonitor monitor) throws CoreException {
 		return adjustVisibility(whoToAdjust, getNeededVisibility(whoToAdjust, fromWhereToLook), true, monitor);
 	}
-	
+
 	private RefactoringStatus adjustVisibility(IMember whoToAdjust, ModifierKeyword neededVisibility, IProgressMonitor monitor) throws CoreException {
 		return adjustVisibility(whoToAdjust, neededVisibility, false, monitor);
 	}
-	
+
 	private RefactoringStatus adjustVisibility(IMember whoToAdjust, ModifierKeyword neededVisibility, boolean alsoIncreaseEnclosing, IProgressMonitor monitor) throws CoreException {
-		
+
 		Map adjustments;
 		if (isRewriteKept(whoToAdjust.getCompilationUnit()))
 			adjustments= fIntermediaryAdjustments;
 		else
 			adjustments= new HashMap();
-		
+
 		int existingAdjustments= adjustments.size();
 		addAdjustment(whoToAdjust, neededVisibility, adjustments);
 
@@ -1280,7 +1280,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					.getElementLabel(whoToAdjust, JavaElementLabels.ALL_DEFAULT) }), JavaStatusContext.create(whoToAdjust));
 
 		RefactoringStatus status= new RefactoringStatus();
-		
+
 		// Don't create a rewrite if it is not necessary
 		if (!hasNewAdjustments)
 			return status;

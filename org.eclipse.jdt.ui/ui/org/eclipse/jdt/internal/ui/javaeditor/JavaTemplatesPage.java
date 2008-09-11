@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariablePro
 
 /**
  * The templates page for the Java editor.
- * 
+ *
  * @since 3.4
  */
 public class JavaTemplatesPage extends AbstractTemplatesPage {
@@ -73,13 +73,13 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	private static final TemplateStore TEMPLATE_STORE= JavaPlugin.getDefault().getTemplateStore();
 	private static final IPreferenceStore PREFERENCE_STORE= JavaPlugin.getDefault().getPreferenceStore();
 	private static final ContextTypeRegistry TEMPLATE_CONTEXT_REGISTRY= JavaPlugin.getDefault().getTemplateContextRegistry();
-	
+
 	private TemplateVariableProcessor fTemplateProcessor;
 	private JavaEditor fJavaEditor;
 
 	/**
 	 * Create a new AbstractTemplatesPage for the JavaEditor
-	 * 
+	 *
 	 * @param javaEditor
 	 */
 	public JavaTemplatesPage(JavaEditor javaEditor) {
@@ -94,7 +94,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	protected void insertTemplate(Template template, IDocument document) {
 		if (!fJavaEditor.validateEditorInputState())
 			return;
-		
+
 		ISourceViewer contextViewer= fJavaEditor.getViewer();
 		ITextSelection textSelection= (ITextSelection) contextViewer.getSelectionProvider().getSelection();
 		if (!isValidTemplate(document, template, textSelection.getOffset(), textSelection.getLength()))
@@ -129,7 +129,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		Region region= new Region(textSelection.getOffset() + 1, 0);
 		contextViewer.getSelectionProvider().setSelection(new TextSelection(textSelection.getOffset(), 1));
 		ICompilationUnit compilationUnit= (ICompilationUnit) EditorUtility.getEditorInputJavaElement(fJavaEditor, true);
-	
+
 		TemplateContextType type= getContextTypeRegistry().getContextType(template.getContextTypeId());
 		DocumentTemplateContext context= ((CompilationUnitContextType) type).createContext(document, position, compilationUnit);
 		context.setVariable("selection", savedText); //$NON-NLS-1$
@@ -195,15 +195,15 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		viewer.configure(configuration);
 		viewer.setEditable(false);
 		viewer.setDocument(document);
-	
+
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(viewer, configuration, store);
-	
+
 		Control control= viewer.getControl();
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
 		control.setLayoutData(data);
-	
+
 		viewer.setEditable(false);
 		return viewer;
 	}
@@ -239,15 +239,15 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		String contextId= template.getContextTypeId();
 		TemplateContextType type= getContextTypeRegistry().getContextType(contextId);
 		fTemplateProcessor.setContextType(type);
-	
+
 		IDocument doc= getPatternViewer().getDocument();
-	
+
 		String start= null;
 		if ("javadoc".equals(contextId)) { //$NON-NLS-1$
 			start= "/**" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
 		} else
 			start= ""; //$NON-NLS-1$
-	
+
 		doc.set(start + template.getPattern());
 		int startLen= start.length();
 		getPatternViewer().setDocument(doc, startLen, doc.getLength() - startLen);
@@ -259,7 +259,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	protected String getPreferencePageId() {
 		return PREFERENCE_PAGE_ID;
 	}
-	
+
 	/**
 	 * Undomanager - end compound change
 	 * @param viewer
@@ -281,7 +281,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/**
 	 * Check whether the template is allowed eventhough the context can't evaluate it. This is needed because
 	 * the Dropping of a template is more lenient than ctl-space invoked code assist.
-	 * 
+	 *
 	 * @param context
 	 * @param template
 	 * @return true if the template is allowed
@@ -301,7 +301,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Checks whether the character is a valid character in Java template names
-	 * 
+	 *
 	 * @param ch
 	 * @return true or false
 	 */
@@ -311,7 +311,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Get context
-	 * 
+	 *
 	 * @param document
 	 * @param template
 	 * @param offset
@@ -335,7 +335,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	 * <p>
 	 * FIXME: should trigger code assist to get the context.
 	 * </p>
-	 * 
+	 *
 	 * @param document
 	 * @param offset
 	 * @return an array of valid context id
@@ -354,7 +354,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Get the java identifier terminated at the given offset
-	 * 
+	 *
 	 * @param document
 	 * @param template
 	 * @param offset

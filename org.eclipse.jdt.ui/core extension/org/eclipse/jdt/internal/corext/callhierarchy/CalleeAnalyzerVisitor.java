@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
@@ -119,7 +119,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     	if (!isFurtherTraversalNecessary(node)) {
     		return false;
     	}
-    	
+
     	if (isNodeWithinMethod(node)) {
     		List bodyDeclarations= node.bodyDeclarations();
     		for (Iterator iter= bodyDeclarations.iterator(); iter.hasNext(); ) {
@@ -133,10 +133,10 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
 			}
     		return false;
     	}
-    	
+
     	return true;
     }
-    
+
     /**
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
      */
@@ -182,7 +182,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
         if (isNodeWithinMethod(node)) {
             addMethodCall(node.resolveConstructorBinding(), node);
         }
-        
+
         return true;
     }
 
@@ -204,14 +204,14 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
         if (isNodeWithinMethod(node)) {
             addMethodCall(node.resolveMethodBinding(), node);
         }
-        
+
         return true;
     }
-    
+
     /**
      * When an anonymous class declaration is reached, the traversal should not go further since it's not
      * supposed to consider calls inside the anonymous inner class as calls from the outer method.
-     * 
+     *
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
      */
     public boolean visit(AnonymousClassDeclaration node) {
@@ -251,7 +251,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
                     if (calledMethodBinding.isConstructor() && calledMethodBinding.getParameterTypes().length == 0) {
                         referencedMember= calledType;
                     }
-                } else { 
+                } else {
                     if (calledType.isInterface()) {
                         calledMethod = findImplementingMethods(calledMethod);
                     }
@@ -268,7 +268,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
             JavaPlugin.log(jme);
         }
     }
-    
+
     private static IMethod findIncludingSupertypes(IMethodBinding method, IType type, IProgressMonitor pm) throws JavaModelException {
 		IMethod inThisType= Bindings.findMethod(method, type);
 		if (inThisType != null)
@@ -319,7 +319,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
         }
         return false;
     }
-    
+
     private boolean isFurtherTraversalNecessary(ASTNode node) {
         return isNodeWithinMethod(node) || isNodeEnclosingMethod(node);
     }
@@ -334,7 +334,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
             return (IMethod) implementingMethods.iterator().next();
         }
     }
-    
+
     private void progressMonitorWorked(int work) {
         if (fProgressMonitor != null) {
             fProgressMonitor.worked(work);

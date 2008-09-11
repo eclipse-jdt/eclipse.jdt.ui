@@ -14,9 +14,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public abstract class AbstractTypeVariable extends TType {
-	
+
 	protected TType[] fBounds;
-	
+
 	protected AbstractTypeVariable(TypeEnvironment environment) {
 		super(environment);
 	}
@@ -36,27 +36,27 @@ public abstract class AbstractTypeVariable extends TType {
 			}
 		}
 	}
-	
+
 	public TType getErasure() {
 		if (fBounds.length == 0)
 			return getEnvironment().getJavaLangObject();
 		return fBounds[0].getErasure();
 	}
-	
+
 	/* package */ final boolean isUnbounded() {
 		if (fBounds.length == 0)
 			return true;
 		return fBounds[0].isJavaLangObject();
 	}
-	
+
 	public final TType[] getBounds() {
 		return (TType[]) fBounds.clone();
 	}
-	
+
 	public final TType[] getSubTypes() {
 		return EMPTY_TYPE_ARRAY;
 	}
-	
+
 	protected final boolean checkAssignmentBound(TType rhs) {
 		if (fBounds.length == 0)
 			return true;
@@ -66,7 +66,7 @@ public abstract class AbstractTypeVariable extends TType {
 		}
 		return false;
 	}
-	
+
 	protected final boolean canAssignOneBoundTo(TType lhs) {
 		if (fBounds.length == 0)
 			return lhs.isJavaLangObject();
@@ -76,5 +76,5 @@ public abstract class AbstractTypeVariable extends TType {
 		}
 		return false;
 	}
-	
+
 }

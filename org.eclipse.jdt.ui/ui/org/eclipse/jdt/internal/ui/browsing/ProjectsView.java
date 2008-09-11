@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.Iterator;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.commands.ActionHandler;
@@ -207,7 +207,7 @@ public class ProjectsView extends JavaBrowsingPart {
 		super.activateHandlers(handlerService);
 		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 	}
-	
+
 	protected void fillToolBar(IToolBarManager tbm) {
 		super.fillToolBar(tbm);
 		tbm.add(fCollapseAllAction);

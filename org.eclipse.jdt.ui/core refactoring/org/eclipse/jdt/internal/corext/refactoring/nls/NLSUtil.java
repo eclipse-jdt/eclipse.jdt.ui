@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import com.ibm.icu.text.Collator;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,11 +19,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.TextEdit;
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Region;
 
@@ -76,13 +76,13 @@ public class NLSUtil {
 	}
 
 	/**
-	 * Creates and returns an NLS tag edit for a string that is at the specified position in 
+	 * Creates and returns an NLS tag edit for a string that is at the specified position in
 	 * a compilation unit.
 	 * @param cu the compilation unit
-	 * @param position position of the string 
-	 * @return the edit, or <code>null</code> if the string is already NLSed 
+	 * @param position position of the string
+	 * @return the edit, or <code>null</code> if the string is already NLSed
 	 * or the edit could not be created for some other reason.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public static TextEdit createNLSEdit(ICompilationUnit cu, int position) throws CoreException {
 		NLSLine nlsLine= scanCurrentLine(cu, position);
@@ -97,15 +97,15 @@ public class NLSUtil {
 		String editText= ' ' + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based
 		return new InsertEdit(editOffset, editText);
 	}
-	
+
 	/**
-	 * Creates and returns NLS tag edits for strings that are at the specified positions in 
+	 * Creates and returns NLS tag edits for strings that are at the specified positions in
 	 * a compilation unit.
 	 * @param cu the compilation unit
 	 * @param positions positions of the strings
-	 * @return the edit, or <code>null</code> if all strings are already NLSed 
+	 * @return the edit, or <code>null</code> if all strings are already NLSed
 	 * or the edits could not be created for some other reason.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public static TextEdit[] createNLSEdits(ICompilationUnit cu, int[] positions) throws CoreException {
 		List result= new ArrayList();
@@ -142,7 +142,7 @@ public class NLSUtil {
 		}
 		if (result.isEmpty())
 			return null;
-		
+
 		return (TextEdit[])result.toArray(new TextEdit[result.size()]);
 	}
 
@@ -224,7 +224,7 @@ public class NLSUtil {
 	/**
 	 * Determine a good insertion position for <code>key</code> into the list of given
 	 * <code>keys</code>.
-	 * 
+	 *
 	 * @param key the key to insert
 	 * @param keys a list of {@link String}s
 	 * @return the position in <code>keys</code> after which key must be inserted, returns -1 for before
@@ -232,12 +232,12 @@ public class NLSUtil {
 	 */
 	public static int getInsertionPosition(String key, List keys) {
 		int result= 0;
-		
+
 		int invertDistance= Integer.MIN_VALUE;
 		int i= 0;
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 			String string= (String) iterator.next();
-	
+
 			int currentInvertDistance= invertDistance(key, string);
 			if (currentInvertDistance > invertDistance) {
 				invertDistance= currentInvertDistance;
@@ -251,10 +251,10 @@ public class NLSUtil {
 					result= i;
 				}
 			}
-			
+
 			i++;
 		}
-		
+
 		return result;
 	}
 
@@ -280,7 +280,7 @@ public class NLSUtil {
 				return prefixMatchCount << 16;
 			}
 		}
-		
+
 		if (insertKeyLength > existingKeyLength && isSeparator(insertKey.charAt(existingKeyLength))) {
 			//existing: prefix
 			//new:      prefix_xyz

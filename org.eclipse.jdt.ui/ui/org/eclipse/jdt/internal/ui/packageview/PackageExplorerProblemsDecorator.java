@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IWorkingSet;
 
-import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
-
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+
+import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
 
 
 public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblemsDecorator {
@@ -24,15 +24,15 @@ public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblem
 	public PackageExplorerProblemsDecorator() {
 		super();
 	}
-	
+
 	public PackageExplorerProblemsDecorator(boolean isFlatLayout) {
 		super(isFlatLayout);
 	}
-	
+
 	protected int computeAdornmentFlags(Object obj) {
 		if (!(obj instanceof IWorkingSet))
 			return super.computeAdornmentFlags(obj);
-		
+
 		IWorkingSet workingSet= (IWorkingSet)obj;
 		IAdaptable[] elements= workingSet.getElements();
 		int result= 0;

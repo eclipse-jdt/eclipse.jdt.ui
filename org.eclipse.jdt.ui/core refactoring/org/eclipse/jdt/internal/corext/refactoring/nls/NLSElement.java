@@ -84,7 +84,7 @@ public class NLSElement {
 	}
 
 	/**
-	 * Returns <code>true</code> if the NLS element has an asscociated $NON-NLS-*$ tag. 
+	 * Returns <code>true</code> if the NLS element has an asscociated $NON-NLS-*$ tag.
 	 * Otherwise <code>false</code> is returned.
 	 */
 	public boolean hasTag() {
@@ -109,28 +109,28 @@ public class NLSElement {
 	}
 
 	//--------------- Eclipse NLS mechanism support ---------------
-	
+
 	/**
 	 * Returns whether the standard resource bundle mechanism or
 	 * the Eclipse NLSing mechanism is used.
-	 * 
+	 *
 	 * @return		<code>true</code> if the standard resource bundle mechanism
 	 * 				is used and <code>false</code> NLSing is done the Eclipse way
-	 * @since 3.1 
+	 * @since 3.1
 	 */
 	public boolean isEclipseNLS() {
 		return fIsEclipseNLS;
 	}
-	
+
 	/**
 	 * Sets the accessor class reference for this element.
 	 * <p>
 	 * Note: this call is only valid when the element is
 	 * using the Eclipse NLS mechanism.
 	 * </p>
-	 * 
+	 *
 	 * @param accessorClassRef the accessor class reference
-	 * @since 3.1 
+	 * @since 3.1
 	 */
 	public void setAccessorClassReference(AccessorClassReference accessorClassRef) {
 		Assert.isTrue(fIsEclipseNLS);
@@ -143,9 +143,9 @@ public class NLSElement {
 	 * Note: this call is only valid when the element is
 	 * using the Eclipse NLS mechanism.
 	 * </p>
-	 * 
+	 *
 	 * @return the accessor class reference
-	 * @since 3.1 
+	 * @since 3.1
 	 */
 	public AccessorClassReference getAccessorClassReference() {
 		Assert.isTrue(fIsEclipseNLS);

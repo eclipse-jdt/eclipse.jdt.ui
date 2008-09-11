@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
+
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
@@ -30,39 +31,39 @@ public class RenameKeysDialog extends StatusDialog {
 	private StringDialogField fNameField;
 	private List fSelectedSubstitutions;
 	private int fCommonPrefixLength;
-	
+
 	/**
 	 * @param parent
 	 */
 	public RenameKeysDialog(Shell parent, List selectedSubstitutions) {
 		super(parent);
-		setTitle(NLSUIMessages.RenameKeysDialog_title); 
+		setTitle(NLSUIMessages.RenameKeysDialog_title);
 
 		fSelectedSubstitutions= selectedSubstitutions;
 		String prefix= getInitialPrefix(selectedSubstitutions);
 		fCommonPrefixLength= prefix.length();
-		
+
 		fNameField= new StringDialogField();
 		fNameField.setText(prefix);
-		
+
 		if (prefix.length() == 0) {
-			fNameField.setLabelText(NLSUIMessages.RenameKeysDialog_description_noprefix); 
+			fNameField.setLabelText(NLSUIMessages.RenameKeysDialog_description_noprefix);
 		} else {
-			fNameField.setLabelText(NLSUIMessages.RenameKeysDialog_description_withprefix + prefix + ':'); 
+			fNameField.setLabelText(NLSUIMessages.RenameKeysDialog_description_withprefix + prefix + ':');
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-		
+
 		fNameField.doFillIntoGrid(composite, 2);
 		LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(null));
 		return composite;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
@@ -75,7 +76,7 @@ public class RenameKeysDialog extends StatusDialog {
 		}
 		super.okPressed();
 	}
-		
+
 	private String getInitialPrefix(List selectedSubstitutions) {
 		String prefix= null;
 		for (int i= 0; i < selectedSubstitutions.size(); i++) {
@@ -103,6 +104,6 @@ public class RenameKeysDialog extends StatusDialog {
 		}
 		return shorter;
 	}
-	
+
 
 }

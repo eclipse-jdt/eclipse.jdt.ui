@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
 /**
  * Computer computing template proposals for Java and Javadoc context type.
- * 
+ *
  * @since 3.2
  */
 public class TemplateCompletionProposalComputer extends AbstractTemplateCompletionProposalComputer {
@@ -39,7 +39,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 	private final TemplateEngine fJavaTemplateEngine;
 	private final TemplateEngine fJavaStatementsTemplateEngine;
 	private final TemplateEngine fJavaMembersTemplateEngine;
-	
+
 	private final TemplateEngine fJavadocTemplateEngine;
 
 	public TemplateCompletionProposalComputer() {
@@ -49,7 +49,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 		fJavaStatementsTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_STATEMENTS);
 		fJavadocTemplateEngine= createTemplateEngine(templateContextRegistry, JavaDocContextType.ID);
 	}
-	
+
 	private static TemplateEngine createTemplateEngine(ContextTypeRegistry templateContextRegistry, String contextTypeId) {
 		TemplateContextType contextType= templateContextRegistry.getContextType(contextTypeId);
 		Assert.isNotNull(contextType);

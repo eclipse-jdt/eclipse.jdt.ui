@@ -29,7 +29,7 @@ public class HTMLAnnotationHover extends DefaultAnnotationHover {
 
 	/**
 	 * Creates a new HTML annotation hover.
-	 * 
+	 *
 	 * @param showLineNumber <code>true</code> if the line number should be shown when no annotation is found
 	 * @since 3.4
 	 */

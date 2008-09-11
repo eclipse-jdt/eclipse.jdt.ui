@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.navigator;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * It provides labels for the packages in hierarchical layout and in all other
  * cases delegates it to its super class.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyledLabelProvider {
@@ -99,7 +99,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		return new PackageExplorerLabelProvider(fContentProvider);
 	}
 
-	public void dispose() { 
+	public void dispose() {
 		delegeteLabelProvider.dispose();
 		fStateModel.removePropertyChangeListener(fLayoutPropertyListener);
 	}
@@ -151,7 +151,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 	public String getText(Object element) {
 		return delegeteLabelProvider.getText(element);
 	}
-	
+
 	public StyledString getStyledText(Object element) {
 		return delegeteLabelProvider.getStyledText(element);
 	}
@@ -183,13 +183,13 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		else
 			return BasicElementLabels.getResourceName(element.getName());
 	}
-	
-	public void restoreState(IMemento memento) { 
-		
+
+	public void restoreState(IMemento memento) {
+
 	}
-	
-	public void saveState(IMemento memento) { 
-		
+
+	public void saveState(IMemento memento) {
+
 	}
- 
+
 }

@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
  * <li>collapsing of comments and members</li>
  * <li>expanding and collapsing of certain java elements</li>
  * </ul>
- * 
+ *
  * @since 3.2
  */
 public interface IJavaFoldingStructureProviderExtension {
@@ -35,7 +35,7 @@ public interface IJavaFoldingStructureProviderExtension {
 
 	/**
 	 * Collapses the given elements.
-	 * 
+	 *
 	 * @param elements the java elements to collapse (the array and its elements must not be
 	 *        modified)
 	 */
@@ -43,7 +43,7 @@ public interface IJavaFoldingStructureProviderExtension {
 
 	/**
 	 * Expands the given elements.
-	 * 
+	 *
 	 * @param elements the java elements to expand (the array and its elements must not be modified)
 	 */
 	void expandElements(IJavaElement[] elements);

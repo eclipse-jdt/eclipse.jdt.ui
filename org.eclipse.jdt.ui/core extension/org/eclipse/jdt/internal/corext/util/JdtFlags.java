@@ -36,25 +36,25 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 public class JdtFlags {
 	private JdtFlags(){
 	}
-	
+
 	public static final String VISIBILITY_STRING_PRIVATE= 	"private";		//$NON-NLS-1$
 	public static final String VISIBILITY_STRING_PACKAGE= 	"";				//$NON-NLS-1$
 	public static final String VISIBILITY_STRING_PROTECTED= 	"protected";	//$NON-NLS-1$
 	public static final String VISIBILITY_STRING_PUBLIC= 	"public";		//$NON-NLS-1$
-	
+
 
 	public static final int VISIBILITY_CODE_INVALID= 	-1;
 
 	public static boolean isAbstract(IMember member) throws JavaModelException{
 		if (isInterfaceOrAnnotationMethod(member))
 			return true;
-		return Flags.isAbstract(member.getFlags());	
+		return Flags.isAbstract(member.getFlags());
 	}
-	
+
 	public static boolean isAbstract(IMethodBinding member) {
 		if (isInterfaceOrAnnotationMember(member))
 			return true;
-		return Modifier.isAbstract(member.getModifiers());	
+		return Modifier.isAbstract(member.getModifiers());
 	}
 
 	public static boolean isDeprecated(IMember member) throws JavaModelException{
@@ -64,7 +64,7 @@ public class JdtFlags {
 	public static boolean isFinal(IMember member) throws JavaModelException{
 		if (isInterfaceOrAnnotationField(member))
 			return true;
-		if (isAnonymousType(member))	
+		if (isAnonymousType(member))
 			return true;
 		if (isEnumConstant(member))
 			return true;
@@ -82,11 +82,11 @@ public class JdtFlags {
 	public static boolean isPackageVisible(BodyDeclaration bodyDeclaration) {
 		return (! isPrivate(bodyDeclaration) && ! isProtected(bodyDeclaration) && ! isPublic(bodyDeclaration));
 	}
-	
+
 	public static boolean isPackageVisible(IBinding binding) {
 		return (! isPrivate(binding) && ! isProtected(binding) && ! isPublic(binding));
 	}
-	
+
 	public static boolean isPrivate(IMember member) throws JavaModelException{
 		return Flags.isPrivate(member.getFlags());
 	}
@@ -94,7 +94,7 @@ public class JdtFlags {
 	public static boolean isPrivate(BodyDeclaration bodyDeclaration) {
 		return Modifier.isPrivate(bodyDeclaration.getModifiers());
 	}
-	
+
 	public static boolean isPrivate(IBinding binding) {
 		return Modifier.isPrivate(binding.getModifiers());
 	}
@@ -106,7 +106,7 @@ public class JdtFlags {
 	public static boolean isProtected(BodyDeclaration bodyDeclaration) {
 		return Modifier.isProtected(bodyDeclaration.getModifiers());
 	}
-	
+
 	public static boolean isProtected(IBinding binding) {
 		return Modifier.isProtected(binding.getModifiers());
 	}
@@ -118,13 +118,13 @@ public class JdtFlags {
 			return true;
 		return Flags.isPublic(member.getFlags());
 	}
-	
+
 	public static boolean isPublic(IBinding binding) {
 		if (isInterfaceOrAnnotationMember(binding))
 			return true;
 		return Modifier.isPublic(binding.getModifiers());
 	}
-	
+
 
 	public static boolean isPublic(BodyDeclaration bodyDeclaration) {
 		if (isInterfaceOrAnnotationMember(bodyDeclaration))
@@ -183,7 +183,7 @@ public class JdtFlags {
 	public static boolean isVolatile(IMember member) throws JavaModelException{
 		return Flags.isVolatile(member.getFlags());
 	}
-	
+
 	private static boolean isInterfaceOrAnnotationMethod(IMember member) throws JavaModelException {
 		return member.getElementType() == IJavaElement.METHOD && isInterfaceOrAnnotationMember(member);
 	}
@@ -195,7 +195,7 @@ public class JdtFlags {
 	private static boolean isInterfaceOrAnnotationMember(IMember member) throws JavaModelException {
 		return member.getDeclaringType() != null && JavaModelUtil.isInterfaceOrAnnotation(member.getDeclaringType());
 	}
-	
+
 	private static boolean isInterfaceOrAnnotationMember(IBinding binding) {
 		ITypeBinding declaringType= null;
 		if (binding instanceof IVariableBinding) {
@@ -207,7 +207,7 @@ public class JdtFlags {
 		}
 		return declaringType != null && (declaringType.isInterface() || declaringType.isAnnotation());
 	}
-	
+
 	private static boolean isInterfaceOrAnnotationMember(BodyDeclaration bodyDeclaration) {
 		boolean isInterface= (bodyDeclaration.getParent() instanceof TypeDeclaration) &&
 				((TypeDeclaration)bodyDeclaration.getParent()).isInterface();
@@ -216,17 +216,17 @@ public class JdtFlags {
 	}
 
 	private static boolean isNestedInterfaceOrAnnotation(IMember member) throws JavaModelException{
-		return member.getElementType() == IJavaElement.TYPE && 
+		return member.getElementType() == IJavaElement.TYPE &&
 				member.getDeclaringType() != null &&
 				JavaModelUtil.isInterfaceOrAnnotation((IType)member);
 	}
-	
+
 	private static boolean isEnumConstant(IMember member) throws JavaModelException {
 		return member.getElementType() == IJavaElement.FIELD && isEnum(member);
 	}
 
 	private static boolean isAnonymousType(IMember member) throws JavaModelException {
-		return member.getElementType() == IJavaElement.TYPE && 
+		return member.getElementType() == IJavaElement.TYPE &&
 				((IType)member).isAnonymous();
 	}
 
@@ -242,7 +242,7 @@ public class JdtFlags {
 		Assert.isTrue(false);
 		return VISIBILITY_CODE_INVALID;
 	}
-	
+
 	public static int getVisibilityCode(BodyDeclaration bodyDeclaration) {
 		if (isPublic(bodyDeclaration))
 			return Modifier.PUBLIC;
@@ -255,7 +255,7 @@ public class JdtFlags {
 		Assert.isTrue(false);
 		return VISIBILITY_CODE_INVALID;
 	}
-	
+
 	public static int getVisibilityCode(IBinding binding) {
 		if (isPublic(binding))
 			return Modifier.PUBLIC;
@@ -268,8 +268,8 @@ public class JdtFlags {
 		Assert.isTrue(false);
 		return VISIBILITY_CODE_INVALID;
 	}
-	
-	
+
+
 	public static String getVisibilityString(int visibilityCode){
 		if (Modifier.isPublic(visibilityCode))
 			return VISIBILITY_STRING_PUBLIC;
@@ -297,16 +297,16 @@ public class JdtFlags {
 		Assert.isTrue(	visibility == Modifier.PUBLIC ||
 		            	visibility == Modifier.PROTECTED ||
 		            	visibility == Modifier.NONE ||
-		            	visibility == Modifier.PRIVATE);  
+		            	visibility == Modifier.PRIVATE);
 	}
-	
+
 	/**
 	 * Compares two visibilities.
-	 * 
+	 *
 	 * @param newVisibility the 'new' visibility
 	 * @param oldVisibility the 'old' visibility
 	 * @return <code>true</code> iff the 'new' visibility is strictly higher than the old visibility
-	 * 
+	 *
 	 * @see Modifier#PUBLIC
 	 * @see Modifier#PROTECTED
 	 * @see Modifier#NONE
@@ -329,19 +329,19 @@ public class JdtFlags {
 
 			case Modifier.PUBLIC :
 				return false;
-			default: 
+			default:
 				Assert.isTrue(false);
-				return false;	
+				return false;
 		}
 	}
-	
+
 	public static int getLowerVisibility(int visibility1, int visibility2) {
 		if (isHigherVisibility(visibility1, visibility2))
 			return visibility2;
 		else
 			return visibility1;
 	}
-	
+
 	public static int clearAccessModifiers(int flags) {
 		return clearFlag(Modifier.PROTECTED | Modifier.PUBLIC | Modifier.PRIVATE, flags);
 	}

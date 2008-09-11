@@ -390,10 +390,10 @@ public final class ReorgPolicyFactory {
 			// TODO fix the query problem
 			return new CopyPackageFragmentRootChange(root, destinationProject, nameQuery, null);
 		}
-		
+
 		private Change createChange(IPackageFragmentRoot root, IContainer destination, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IResource res= root.getResource();
-			
+
 			String newName= nameProposer.createNewName(res, destination);
 			INewNameQuery nameQuery;
 			if (newName == null) {
@@ -401,7 +401,7 @@ public final class ReorgPolicyFactory {
 			} else {
 				nameQuery= copyQueries.createNewResourceNameQuery(res, newName);
 			}
-			
+
 			return new CopyResourceChange(res, destination, nameQuery);
 		}
 
@@ -514,7 +514,7 @@ public final class ReorgPolicyFactory {
 				}
 			}
 		}
-		
+
 		private Change createChange(IPackageFragment pack, IContainer container, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			String newName= nameProposer.createNewName(pack.getResource(), container);
 			if (newName == null) {
@@ -675,10 +675,10 @@ public final class ReorgPolicyFactory {
 			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_copy_imports;
 			} else {
-				return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_plural;				
-			} 
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_plural;
+			}
 		}
-		
+
 		protected String getDescriptionSingular() {
 			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_copy_type;
@@ -694,7 +694,7 @@ public final class ReorgPolicyFactory {
 				return RefactoringCoreMessages.ReorgPolicyFactory_copy_import_section;
 			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_copy_import;
-			} else {				
+			} else {
 				return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_singular;
 			}
 		}
@@ -1095,7 +1095,7 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_phantom);
 			if (!resource.isAccessible())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_inaccessible);
-			
+
 			if (resource.getType() == IResource.ROOT)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_not_this_resource);
 
@@ -1160,7 +1160,7 @@ public final class ReorgPolicyFactory {
 		public boolean canUpdateQualifiedNames() {
 			if (!canEnableQualifiedNameUpdating())
 				return false;
-			
+
 			IPackageFragment pack= getDestinationAsPackageFragment();
 			if (pack == null)
 				return false;
@@ -1182,12 +1182,12 @@ public final class ReorgPolicyFactory {
 			IPackageFragment pack= getDestinationAsPackageFragment();
 			if (pack == null || pack.isDefaultPackage())
 				return false;
-			
+
 			IJavaElement destination= getJavaElementDestination();
 			if (destination instanceof IPackageFragmentRoot && getCus().length > 0) {
 				return false;
 			}
-			
+
 			Object commonParent= getCommonParent();
 			if (JavaElementUtil.isDefaultPackage(commonParent))
 				return false;
@@ -1212,7 +1212,7 @@ public final class ReorgPolicyFactory {
 				pm.done();
 			}
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1488,7 +1488,7 @@ public final class ReorgPolicyFactory {
 		public boolean hasAllInputSet() {
 			if (getResourceDestination() == null && getJavaElementDestination() == null)
 				return false;
-			
+
 			return !canUpdateReferences() && !canUpdateQualifiedNames();
 		}
 
@@ -1633,7 +1633,7 @@ public final class ReorgPolicyFactory {
 			// /XXX fix the query
 			return new MovePackageFragmentRootChange(root, destination.getProject(), null);
 		}
-		
+
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length); //$NON-NLS-1$
@@ -1735,7 +1735,7 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);
 			return superStatus;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1750,54 +1750,54 @@ public final class ReorgPolicyFactory {
 
 			return superStatus;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canEnableQualifiedNameUpdating() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean getUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setUpdateQualifiedNames(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setFilePatterns(String patterns) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getFilePatterns() {
 			return null;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canEnableUpdateReferences() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1817,7 +1817,7 @@ public final class ReorgPolicyFactory {
 		 */
 		public void setUpdateReferences(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1871,7 +1871,7 @@ public final class ReorgPolicyFactory {
 		private Change createChange(IPackageFragment pack, IContainer destination) {
 			return new MoveResourceChange(pack.getResource(), destination);
 		}
-		
+
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length); //$NON-NLS-1$
@@ -1971,7 +1971,7 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_package2parent);
 			return superStatus;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1986,54 +1986,54 @@ public final class ReorgPolicyFactory {
 
 			return superStatus;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canEnableQualifiedNameUpdating() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean getUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setUpdateQualifiedNames(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setFilePatterns(String patterns) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getFilePatterns() {
 			return null;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canEnableUpdateReferences() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -2053,7 +2053,7 @@ public final class ReorgPolicyFactory {
 		 */
 		public void setUpdateReferences(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -2150,7 +2150,7 @@ public final class ReorgPolicyFactory {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_containers;
 			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_declarations;
-			} else {				
+			} else {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_plural;
 			}
 		}
@@ -2170,7 +2170,7 @@ public final class ReorgPolicyFactory {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_section;
 			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_declaration;
-			} else {				
+			} else {
 				return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_singular;
 			}
 		}
@@ -2213,37 +2213,37 @@ public final class ReorgPolicyFactory {
 			RefactoringStatus superStatus= super.verifyDestination(destination, location);
 			if (superStatus.hasFatalError())
 				return superStatus;
-			
-			if (location == IReorgDestination.LOCATION_ON) { 
+
+			if (location == IReorgDestination.LOCATION_ON) {
 				Object commonParent= new ParentChecker(new IResource[0], getJavaElements()).getCommonParent();
 				if (destination.equals(commonParent) || Arrays.asList(getJavaElements()).contains(destination))
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);
-				
+
 				return superStatus;
 			} else {
 				if (contains(elements, destination))
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-				
+
 				IJavaElement parent= destination.getParent();
 				if (!(parent instanceof IType))
 					return superStatus;
-				
+
 				if (!allInSameParent(elements, parent))
 					return superStatus;
-				
+
 				ArrayList sortedChildren= getSortedChildren((IType) parent);
-				
+
 				int destinationIndex= sortedChildren.indexOf(destination);
-				
+
 				for (int i= 0; i < elements.length; i++) {
 					int elementIndex= sortedChildren.indexOf(elements[i]);
 					if (location == IReorgDestination.LOCATION_AFTER && elementIndex == destinationIndex + 1)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-					
+
 					if (location == IReorgDestination.LOCATION_BEFORE && elementIndex == destinationIndex - 1)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 				}
-				
+
 				return superStatus;
 			}
 		}
@@ -2257,15 +2257,15 @@ public final class ReorgPolicyFactory {
 						return 0;
 					if (!(e2 instanceof ISourceReference))
 						return 0;
-					
+
 					try {
 						ISourceRange sr1= ((ISourceReference)e1).getSourceRange();
 						ISourceRange sr2= ((ISourceReference)e2).getSourceRange();
 						if (sr1 == null || sr2 == null)
 							return 0;
-						
+
 						return sr1.getOffset() - sr2.getOffset();
-						
+
 					} catch (JavaModelException e) {
 						return 0;
 					}
@@ -2273,13 +2273,13 @@ public final class ReorgPolicyFactory {
 			});
 			return sortedChildren;
 		}
-		
+
 		private boolean contains(IJavaElement[] elements, IJavaElement element) {
 			for (int i= 0; i < elements.length; i++) {
 				if (element.equals(elements[i]))
 					return true;
 			}
-			
+
 			return false;
 		}
 
@@ -2288,7 +2288,7 @@ public final class ReorgPolicyFactory {
 				if (!elements[i].getParent().equals(parent))
 					return false;
 			}
-			
+
 			return true;
 		}
 
@@ -2298,47 +2298,47 @@ public final class ReorgPolicyFactory {
 		public boolean canEnableQualifiedNameUpdating() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean getUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setUpdateQualifiedNames(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setFilePatterns(String patterns) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getFilePatterns() {
 			return null;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canEnableUpdateReferences() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -2358,7 +2358,7 @@ public final class ReorgPolicyFactory {
 		 */
 		public void setUpdateReferences(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -2366,39 +2366,39 @@ public final class ReorgPolicyFactory {
 			return getJavaElementDestination() != null || getResourceDestination() != null;
 		}
 	}
-	
+
 	private static final class MoveMembersPolicy extends MoveSubCuElementsPolicy {
-		
+
 		MoveMembersPolicy(IMember[] members) {
 			super(members);
 		}
 
 		private static final String POLICY_MOVE_MEMBERS= "org.eclipse.jdt.ui.moveMembers"; //$NON-NLS-1$
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getPolicyId() {
 			return POLICY_MOVE_MEMBERS;
 		}
-		
+
 	}
-	
+
 	private static final class MoveImportDeclarationsPolicy extends MoveSubCuElementsPolicy {
-		
+
 		MoveImportDeclarationsPolicy(IImportDeclaration[] importDeclarations) {
 			super(importDeclarations);
 		}
 
 		private static final String POLICY_MOVE_IMPORT_DECLARATIONS= "org.eclipse.jdt.ui.moveImportDeclarations"; //$NON-NLS-1$
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getPolicyId() {
 			return POLICY_MOVE_IMPORT_DECLARATIONS;
 		}
-		
+
 	}
 
 	private static final class NewNameProposer {
@@ -2618,54 +2618,54 @@ public final class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canEnableQualifiedNameUpdating() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean getUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canUpdateQualifiedNames() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setUpdateQualifiedNames(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setFilePatterns(String patterns) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getFilePatterns() {
 			return null;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canEnableUpdateReferences() {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -2685,7 +2685,7 @@ public final class ReorgPolicyFactory {
 		 */
 		public void setUpdateReferences(boolean update) {
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -2867,10 +2867,10 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_phantom);
 			if (!resource.isAccessible())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_inaccessible);
-			
+
 			if (!(resource instanceof IContainer))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_not_this_resource);
-			
+
 			if (resource.getType() == IResource.ROOT)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_not_this_resource);
 
@@ -2882,7 +2882,7 @@ public final class ReorgPolicyFactory {
 
 			return new RefactoringStatus();
 		}
-		
+
 		private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
 				IResource fragmentRootResource= fPackageFragmentRoots[i].getResource();
@@ -2891,7 +2891,7 @@ public final class ReorgPolicyFactory {
 			}
 			return false;
 		}
-		
+
 		protected boolean containsLinkedResources() {
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
 				if (fPackageFragmentRoots[i].getResource().isLinked())
@@ -3085,10 +3085,10 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_phantom);
 			if (!resource.isAccessible())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_inaccessible);
-			
+
 			if (!(resource instanceof IContainer))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_not_this_resource);
-			
+
 			if (resource.getType() == IResource.ROOT)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_not_this_resource);
 
@@ -3100,7 +3100,7 @@ public final class ReorgPolicyFactory {
 
 			return new RefactoringStatus();
 		}
-		
+
 		private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
 			for (int i= 0; i < fPackageFragments.length; i++) {
 				IFolder folder= (IFolder) fPackageFragments[i].getResource();
@@ -3109,7 +3109,7 @@ public final class ReorgPolicyFactory {
 			}
 			return false;
 		}
-		
+
 		protected boolean containsLinkedResources() {
 			for (int i= 0; i < fPackageFragments.length; i++) {
 				if (fPackageFragments[i].getResource().isLinked())
@@ -3128,7 +3128,7 @@ public final class ReorgPolicyFactory {
 		protected boolean fCheckDestination= true;
 
 		private IReorgDestination fDestination;
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -3138,32 +3138,32 @@ public final class ReorgPolicyFactory {
 			} else if (destination instanceof ResourceDestination) {
 				return canChildrenBeDestinations(((ResourceDestination)destination).getResource());
 			}
-			
+
 			return false;
 		}
-		
+
 		/**
 		 * Is it possible, that resource contains valid destinations
 		 * as children?
-		 * 
+		 *
 		 * @param resource the resource to verify
 		 * @return true if resource can have valid destinations
 		 */
 		public boolean canChildrenBeDestinations(IResource resource) {
 			return true;
 		}
-		
+
 		/**
 		 * Is it possible, that resource contains valid destinations
 		 * as children?
-		 * 
+		 *
 		 * @param javaElement the java element to verify
 		 * @return true if resource can have valid destinations
 		 */
 		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
 			return true;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -3173,29 +3173,29 @@ public final class ReorgPolicyFactory {
 			} else if (destination instanceof ResourceDestination) {
 				return canElementBeDestination(((ResourceDestination)destination).getResource());
 			}
-			
+
 			return false;
 		}
-		
+
 		/**
 		 * Is it possible, that sources can be reorged to this kind of resource?
-		 * 
+		 *
 		 * This is less strict then {@link #verifyDestination(IResource)} where
 		 * the resource itself is verified to be a valid destination.
-		 * 
+		 *
 		 * @param resource the resource to move to
 		 * @return true if possible
 		 */
 		public boolean canElementBeDestination(IResource resource) {
 			return true;
 		}
-		
+
 		/**
 		 * Is it possible, that sources can be reorged to this kind of javaElement?
-		 * 
+		 *
 		 * This is less strict then {@link #verifyDestination(IJavaElement)} where
 		 * the java element itself is verified to be a valid destination.
-		 * 
+		 *
 		 * @param javaElement the java element to move to
 		 * @return true if possible
 		 */
@@ -3219,7 +3219,7 @@ public final class ReorgPolicyFactory {
 			}
 			return true;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -3263,20 +3263,20 @@ public final class ReorgPolicyFactory {
 		public final IJavaElement getJavaElementDestination() {
 			if (!(fDestination instanceof JavaElementDestination))
 				return null;
-			
+
 			JavaElementDestination javaElementDestination= (JavaElementDestination) fDestination;
 			return javaElementDestination.getJavaElement();
 		}
-		
+
 		public final int getLocation() {
 			return fDestination.getLocation();
 		}
 
 		/**
 		 * Returns the modifications
-		 * 
+		 *
 		 * @return the modifications
-		 * 
+		 *
 		 * @throws CoreException
 		 */
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -3304,7 +3304,7 @@ public final class ReorgPolicyFactory {
 		public final IResource getResourceDestination() {
 			if (!(fDestination instanceof ResourceDestination))
 				return null;
-			
+
 			ResourceDestination resourceDestination= (ResourceDestination) fDestination;
 			return resourceDestination.getResource();
 		}
@@ -3373,14 +3373,14 @@ public final class ReorgPolicyFactory {
 				return new RefactoringParticipant[0];
 			}
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public final void setDestination(IReorgDestination destination) {
 			fDestination= destination;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -3390,13 +3390,13 @@ public final class ReorgPolicyFactory {
 			} else if (destination instanceof ResourceDestination) {
 				return verifyDestination(((ResourceDestination)destination).getResource());
 			}
-			
+
 			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_invalidDestinationKind);
 		}
-		
+
 		/**
 		 * Can destination be a target for the given source elements?
-		 * 
+		 *
 		 * @param destination the destination to verify
 		 * @return OK status if valid destination
 		 * @throws JavaModelException
@@ -3404,10 +3404,10 @@ public final class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_no_java_element);
 		}
-		
+
 		/**
 		 * Can destination be a target for the given source elements?
-		 * 
+		 *
 		 * @param destination the destination to verify
 		 * @return OK status if valid destination
 		 * @throws JavaModelException
@@ -3423,7 +3423,7 @@ public final class ReorgPolicyFactory {
 			CompilationUnitChange change= rewrite.createChange();
 			if (change != null)
 				change.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
-			
+
 			return change;
 		}
 
@@ -3433,19 +3433,19 @@ public final class ReorgPolicyFactory {
 		protected static final ICompilationUnit getEnclosingCompilationUnit(IJavaElement element) {
 			if (element instanceof ICompilationUnit)
 				return (ICompilationUnit) element;
-			
+
 			return (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 		}
 
 		private static IType getEnclosingType(IJavaElement element) {
 			if (element instanceof IType)
 				return (IType) element;
-			
+
 			return (IType) element.getAncestor(IJavaElement.TYPE);
 		}
 
 		private static String getUnindentedSource(ISourceReference sourceReference) throws JavaModelException {
-			
+
 			String[] lines= Strings.convertIntoLines(sourceReference.getSource());
 			final IJavaProject project= ((IJavaElement) sourceReference).getJavaProject();
 			Strings.trimIndentation(lines, project, false);
@@ -3457,14 +3457,14 @@ public final class ReorgPolicyFactory {
 		SubCuElementReorgPolicy(IJavaElement[] javaElements) {
 			fJavaElements= javaElements;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean canChildrenBeDestinations(IResource resource) {
 			return false;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -3475,7 +3475,7 @@ public final class ReorgPolicyFactory {
 		public boolean canEnable() throws JavaModelException {
 			if (!super.canEnable())
 				return false;
-			
+
 			for (int i= 0; i < fJavaElements.length; i++) {
 				if (fJavaElements[i] instanceof IMember) {
 					IMember member= (IMember) fJavaElements[i];
@@ -3484,10 +3484,10 @@ public final class ReorgPolicyFactory {
 						return false;
 				}
 			}
-			
+
 			return true;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -3497,14 +3497,14 @@ public final class ReorgPolicyFactory {
 
 		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			ListRewrite listRewrite= rewrite.getListRewrite(destinationCuNode, CompilationUnit.IMPORTS_PROPERTY);
-			
+
 			IJavaElement[] importDeclarations= container.getChildren();
 			for (int i= 0; i < importDeclarations.length; i++) {
 				IImportDeclaration declaration= (IImportDeclaration) importDeclarations[i];
-			
+
 				ImportDeclaration sourceNode= ASTNodeSearchUtil.getImportDeclarationNode(declaration, sourceCuNode);
 				ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(rewrite.getAST(), sourceNode);
-				
+
 				if (getLocation() == IReorgDestination.LOCATION_BEFORE) {
 					listRewrite.insertFirst(copiedNode, null);
 				} else {
@@ -3517,7 +3517,7 @@ public final class ReorgPolicyFactory {
 			ImportDeclaration sourceNode= ASTNodeSearchUtil.getImportDeclarationNode(declaration, sourceCuNode);
 			ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(targetRewrite.getAST(), sourceNode);
 			ListRewrite listRewrite= targetRewrite.getListRewrite(destinationCuNode, CompilationUnit.IMPORTS_PROPERTY);
-			
+
 			if (getJavaElementDestination() instanceof IImportDeclaration) {
 				ImportDeclaration destinationNode= ASTNodeSearchUtil.getImportDeclarationNode((IImportDeclaration) getJavaElementDestination(), destinationCuNode);
 				insertRelative(copiedNode, destinationNode, listRewrite);
@@ -3535,13 +3535,13 @@ public final class ReorgPolicyFactory {
 		private void copyMemberToDestination(IMember member, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode, BodyDeclaration newMember) throws JavaModelException {
 			IJavaElement javaElementDestination= getJavaElementDestination();
 			ASTNode nodeDestination= getDestinationNode(javaElementDestination, targetCuNode);
-			ASTNode destinationContainer; 
+			ASTNode destinationContainer;
 			if (getLocation() == IReorgDestination.LOCATION_ON && javaElementDestination instanceof IType) {
 				destinationContainer= nodeDestination;
 			} else {
-				destinationContainer= nodeDestination.getParent();				
+				destinationContainer= nodeDestination.getParent();
 			}
-				
+
 			ListRewrite listRewrite;
 			if (destinationContainer instanceof AbstractTypeDeclaration) {
 				if (newMember instanceof EnumConstantDeclaration && destinationContainer instanceof EnumDeclaration) {
@@ -3554,7 +3554,7 @@ public final class ReorgPolicyFactory {
 			} else if (destinationContainer instanceof Block) {
 				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, Block.STATEMENTS_PROPERTY);
 			} else if (destinationContainer instanceof SwitchStatement) {
-				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, SwitchStatement.STATEMENTS_PROPERTY);				
+				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, SwitchStatement.STATEMENTS_PROPERTY);
 			} else if (destinationContainer instanceof AnonymousClassDeclaration) {
 				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 			} else {
@@ -3563,11 +3563,11 @@ public final class ReorgPolicyFactory {
 			}
 
 			if (getLocation() == IReorgDestination.LOCATION_ON) {
-				listRewrite.insertAt(newMember, ASTNodes.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);						
-			} else {						
+				listRewrite.insertAt(newMember, ASTNodes.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);
+			} else {
 				insertRelative(newMember, nodeDestination, listRewrite);
 			}
-			
+
 			if (!(member instanceof IInitializer)) {
 				BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(member, sourceCuNode);
 				if (decl != null)
@@ -3576,7 +3576,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		/*
-		 * Get the 'destination' in 'target' as ASTNode or 'null' 
+		 * Get the 'destination' in 'target' as ASTNode or 'null'
 		 */
 		private ASTNode getDestinationNode(IJavaElement destination, CompilationUnit target) throws JavaModelException {
 			switch (destination.getElementType()) {
@@ -3601,7 +3601,7 @@ public final class ReorgPolicyFactory {
 		private void insertRelative(ASTNode newNode, ASTNode relativeNode, ListRewrite listRewrite) {
 			final List list= listRewrite.getOriginalList();
 			final int index= list.indexOf(relativeNode);
-			
+
 			if (getLocation() == IReorgDestination.LOCATION_BEFORE) {
 				listRewrite.insertBefore(newNode, (ASTNode) list.get(index), null);
 			} else if (index + 1 < list.size()) {
@@ -3784,7 +3784,7 @@ public final class ReorgPolicyFactory {
 
 		/**
 		 * Verifies the destination.
-		 * 
+		 *
 		 * @param destination the destination
 		 * @param location the location
 		 * @return returns the status
@@ -3807,14 +3807,14 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot_modify);
 
 			switch (destination.getElementType()) {
-				case IJavaElement.COMPILATION_UNIT: 
+				case IJavaElement.COMPILATION_UNIT:
 					if (location != IReorgDestination.LOCATION_ON)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-					
+
 					int[] types0= new int[] {IJavaElement.TYPE, IJavaElement.PACKAGE_DECLARATION, IJavaElement.IMPORT_CONTAINER, IJavaElement.IMPORT_DECLARATION};
 					if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types0))
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-					
+
 					break;
 				case IJavaElement.PACKAGE_DECLARATION: //drop nothing
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_package_decl);
@@ -3826,15 +3826,15 @@ public final class ReorgPolicyFactory {
 						if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_CONTAINER))
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					}
-					
+
 					break;
 				case IJavaElement.IMPORT_DECLARATION: //drop import declarations before/after
 					if (location == IReorgDestination.LOCATION_ON)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-					
+
 					if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-					
+
 					break;
 				case IJavaElement.FIELD:// fall thru
 				case IJavaElement.INITIALIZER:// fall thru
@@ -3843,7 +3843,7 @@ public final class ReorgPolicyFactory {
 						//can paste on itself (drop on itself is disabled in the SelectionTransferDropAdapter)
 						if (getJavaElements().length != 1)
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-						
+
 						if (!destination.equals(getJavaElements()[0]))
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					} else {
@@ -3851,35 +3851,35 @@ public final class ReorgPolicyFactory {
 						if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types))
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					}
-					
+
 					break;
 				case IJavaElement.TYPE:
 					if (location == IReorgDestination.LOCATION_ON) {//can drop type members
 						int[] types1= new int[] {IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD, IJavaElement.TYPE};
 						if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types1))
-							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);	
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					} else {//can drop type before/after
 						if (destination.getParent() instanceof IMethod)
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-						
+
 						int[] types= new int[] {IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD, IJavaElement.TYPE};
 						if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types))
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					}
-					
+
 					break;
 			}
 
 			return new RefactoringStatus();
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException {
 			if (!(destination instanceof JavaElementDestination))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_invalidDestinationKind);
-			
+
 			JavaElementDestination javaElementDestination= (JavaElementDestination) destination;
 			return verifyDestination(javaElementDestination.getJavaElement(), javaElementDestination.getLocation());
 		}
@@ -3983,25 +3983,25 @@ public final class ReorgPolicyFactory {
 
 		if (resources.length == 0 && javaElements.length == 0)
 			return NO;
-		
+
 		if (containsNull(resources))
 			return NO;
-		
+
 		if (containsNull(javaElements))
 			return NO;
-		
+
 		if (ReorgUtils.isArchiveOrExternalMember(javaElements) && ReorgUtils.getElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT).size() != javaElements.length)
 			return NO;
-		
+
 		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT))
 			return NO;
-		
+
 		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_MODEL))
 			return NO;
-		
+
 		if (ReorgUtils.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT))
 			return NO;
-		
+
 		if (!new ParentChecker(resources, javaElements).haveCommonParent())
 			return NO;
 
@@ -4037,15 +4037,15 @@ public final class ReorgPolicyFactory {
 		if (hasOnlyMembers(javaElements)) {
 			if (hasAnonymousClassDeclarations(javaElements))
 				return NO;
-			
+
 			if (copy) {
-				return new CopySubCuElementsPolicy(javaElements);	
+				return new CopySubCuElementsPolicy(javaElements);
 			} else {
 				List members= Arrays.asList(javaElements);
 				return new MoveMembersPolicy((IMember[]) members.toArray(new IMember[members.size()]));
 			}
 		}
-		
+
 		if (hasOnlyImportDeclarations(javaElements)) {
 			if (copy) {
 				return new CopySubCuElementsPolicy(javaElements);
@@ -4054,21 +4054,21 @@ public final class ReorgPolicyFactory {
 				return new MoveImportDeclarationsPolicy((IImportDeclaration[]) declarations.toArray(new IImportDeclaration[declarations.size()]));
 			}
 		}
-		
+
 		if (copy && hasElementsSmallerThanCuOrClassFile(javaElements)) {
 			if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.PACKAGE_DECLARATION))
 				return NO;
-			
+
 			if (hasAnonymousClassDeclarations(javaElements))
 				return NO;
-			
+
 			Assert.isTrue(resources.length == 0);
 			return new CopySubCuElementsPolicy(javaElements);
 		}
-		
+
 		return NO;
 	}
-	
+
 	private static boolean hasAnonymousClassDeclarations(IJavaElement[] javaElements) throws JavaModelException {
 		for (int i= 0; i < javaElements.length; i++) {
 			if (javaElements[i] instanceof IType) {

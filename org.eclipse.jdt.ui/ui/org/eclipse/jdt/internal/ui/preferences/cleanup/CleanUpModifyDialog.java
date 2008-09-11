@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class CleanUpModifyDialog extends ModifyDialog {
-	
+
 	/**
 	 * Constant array for boolean selection
 	 */
@@ -45,7 +45,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 		CleanUpOptions.FALSE,
 		CleanUpOptions.TRUE
 	};
-	
+
 	private Label fCountLabel;
 	private ICleanUpTabPage[] fPages;
 
@@ -58,34 +58,34 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	 */
 	protected void addPages(final Map values) {
 		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors();
-		
+
 		fPages= new ICleanUpTabPage[descriptors.length];
-		
+
 		for (int i= 0; i < descriptors.length; i++) {
 			String name= descriptors[i].getName();
 			ICleanUpTabPage page= descriptors[i].createTabPage();
-			
+
 			page.setOptionsKind(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
 			page.setModifyListener(this);
 			page.setWorkingValues(values);
-			
+
 			addTabPage(name, page);
-			
+
 			fPages[i]= page;
 		}
 	}
-	
+
 	protected Control createDialogArea(Composite parent) {
 		Composite control= (Composite)super.createDialogArea(parent);
-		
+
 		fCountLabel= new Label(control, SWT.NONE);
 		fCountLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		fCountLabel.setFont(parent.getFont());
 		updateCountLabel();
-		
+
 		return control;
 	}
-	
+
 	public void updateStatus(IStatus status) {
 		int count= 0;
 		for (int i= 0; i < fPages.length; i++) {
@@ -97,19 +97,19 @@ public class CleanUpModifyDialog extends ModifyDialog {
 			super.updateStatus(status);
 		}
 	}
-	
+
 	public void valuesModified() {
 		super.valuesModified();
 		updateCountLabel();
 	}
-	
+
 	private void updateCountLabel() {
 		int size= 0, count= 0;
 		for (int i= 0; i < fPages.length; i++) {
 			size+= fPages[i].getCleanUpCount();
 			count+= fPages[i].getSelectedCleanUpCount();
 		}
-		
+
 		fCountLabel.setText(Messages.format(CleanUpMessages.CleanUpModifyDialog_XofYSelected_Label, new Object[] {new Integer(count), new Integer(size)}));
 	}
 

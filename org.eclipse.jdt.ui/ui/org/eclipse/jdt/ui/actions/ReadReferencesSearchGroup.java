@@ -27,6 +27,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -38,35 +39,35 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 /**
  * Action group that adds the search for read references actions to a
  * context menu and the global menu bar.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ReadReferencesSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.group_readReferences; 
+	private static final String MENU_TEXT= SearchMessages.group_readReferences;
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
 	private IActionBars fActionBars;
-	
+
 	private String fGroupId;
 
 	private FindReadReferencesAction fFindReadReferencesAction;
 	private FindReadReferencesInProjectAction fFindReadReferencesInProjectAction;
 	private FindReadReferencesInHierarchyAction fFindReadReferencesInHierarchyAction;
 	private FindReadReferencesInWorkingSetAction fFindReadReferencesInWorkingSetAction;
-	
+
 	/**
 	 * Creates a new <code>ReadReferencesSearchGroup</code>. The group requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the view part that owns this action group
 	 */
 	public ReadReferencesSearchGroup(IWorkbenchSite site) {
@@ -75,13 +76,13 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Creates a new <code>ReadReferencesSearchGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public ReadReferencesSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
@@ -112,7 +113,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ReadReferencesSearchGroup(JavaEditor editor) {
@@ -149,7 +150,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 			manager.add(action);
 		}
 	}
-	
+
 	private void addWorkingSetAction(IWorkingSet[] workingSets, IMenuManager manager) {
 		FindAction action;
 		if (fEditor != null)
@@ -159,8 +160,8 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		action.update(getContext().getSelection());
 		addAction(action, manager);
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
@@ -169,9 +170,9 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		addAction(fFindReadReferencesAction, javaSearchMM);
 		addAction(fFindReadReferencesInProjectAction, javaSearchMM);
 		addAction(fFindReadReferencesInHierarchyAction, javaSearchMM);
-		
+
 		javaSearchMM.add(new Separator());
-		
+
 		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			addWorkingSetAction((IWorkingSet[]) iter.next(), javaSearchMM);
@@ -181,8 +182,8 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		if (!javaSearchMM.isEmpty())
 			manager.appendToGroup(fGroupId, javaSearchMM);
 	}
-	
-	/* 
+
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -192,7 +193,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 		updateGlobalActionHandlers();
 	}
 
-	/* 
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void dispose() {

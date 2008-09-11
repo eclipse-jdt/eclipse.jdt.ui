@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
- *       o Allow 'this' constructor to be inlined  
+ *       o Allow 'this' constructor to be inlined
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
@@ -49,13 +49,13 @@ public class Invocations {
 				throw new IllegalArgumentException(invocation.toString());
 		}
 	}
-	
+
 	public static boolean isInvocation(ASTNode node) {
 		int type= node.getNodeType();
-		return type == ASTNode.METHOD_INVOCATION || type == ASTNode.SUPER_METHOD_INVOCATION || 
+		return type == ASTNode.METHOD_INVOCATION || type == ASTNode.SUPER_METHOD_INVOCATION ||
 			type == ASTNode.CONSTRUCTOR_INVOCATION;
 	}
-	
+
 	public static IMethodBinding resolveBinding(ASTNode invocation) {
 		switch(invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:

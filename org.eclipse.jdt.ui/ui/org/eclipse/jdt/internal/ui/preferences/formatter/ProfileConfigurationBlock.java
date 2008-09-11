@@ -78,7 +78,7 @@ public abstract class ProfileConfigurationBlock {
     			case ProfileManager.SETTINGS_CHANGED_EVENT:
     				try {
     					fProfileStore.writeProfiles(fProfileManager.getSortedProfiles(), fInstanceScope); // update profile store
-    					fProfileManager.commitChanges(fCurrContext); 
+    					fProfileManager.commitChanges(fCurrContext);
     				} catch (CoreException x) {
     					JavaPlugin.log(x);
     				}
@@ -150,7 +150,7 @@ public abstract class ProfileConfigurationBlock {
 
 		public void update(Observable o, Object arg) {
 			Profile selected= ((ProfileManager)o).getSelected();
-			final boolean notBuiltIn= !selected.isBuiltInProfile(); 
+			final boolean notBuiltIn= !selected.isBuiltInProfile();
 			fDeleteButton.setEnabled(notBuiltIn);
 		}
 
@@ -158,7 +158,7 @@ public abstract class ProfileConfigurationBlock {
 			final Button button= (Button)e.widget;
 			if (button == fEditButton)
 				modifyButtonPressed();
-			else if (button == fDeleteButton) 
+			else if (button == fDeleteButton)
 				deleteButtonPressed();
 			else if (button == fNewButton)
 				newButtonPressed();
@@ -176,18 +176,18 @@ public abstract class ProfileConfigurationBlock {
 
 		private void deleteButtonPressed() {
 			if (MessageDialog.openQuestion(
-					fComposite.getShell(), 
-					FormatterMessages.CodingStyleConfigurationBlock_delete_confirmation_title, 
-					Messages.format(FormatterMessages.CodingStyleConfigurationBlock_delete_confirmation_question, fProfileManager.getSelected().getName()))) { 
+					fComposite.getShell(),
+					FormatterMessages.CodingStyleConfigurationBlock_delete_confirmation_title,
+					Messages.format(FormatterMessages.CodingStyleConfigurationBlock_delete_confirmation_question, fProfileManager.getSelected().getName()))) {
 				fProfileManager.deleteSelected();
 			}
 		}
 
 		private void newButtonPressed() {
 			final CreateProfileDialog p= new CreateProfileDialog(fComposite.getShell(), fProfileManager, fProfileVersioner);
-			if (p.open() != Window.OK) 
+			if (p.open() != Window.OK)
 				return;
-			if (!p.openEditDialog()) 
+			if (!p.openEditDialog())
 				return;
 			final StatusDialog modifyDialog= createModifyDialog(fComposite.getShell(), p.getCreatedProfile(), fProfileManager, fProfileStore, true);
 			modifyDialog.open();
@@ -195,14 +195,14 @@ public abstract class ProfileConfigurationBlock {
 
 		private void loadButtonPressed() {
 			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.OPEN);
-			dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_load_profile_dialog_title); 
+			dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_load_profile_dialog_title);
 			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(fLastSaveLoadPathKey + ".loadpath"); //$NON-NLS-1$
 			if (lastPath != null) {
 				dialog.setFilterPath(lastPath);
 			}
 			final String path= dialog.open();
-			if (path == null) 
+			if (path == null)
 				return;
 			JavaPlugin.getDefault().getDialogSettings().put(fLastSaveLoadPathKey + ".loadpath", dialog.getFilterPath()); //$NON-NLS-1$
 
@@ -211,31 +211,31 @@ public abstract class ProfileConfigurationBlock {
 			try {
 				profiles= fProfileStore.readProfilesFromFile(file);
 			} catch (CoreException e) {
-				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title; 
-				final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_message; 
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title;
+				final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_message;
 				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 			if (profiles == null || profiles.isEmpty())
 				return;
 
 			final CustomProfile profile= (CustomProfile)profiles.iterator().next();
-			
+
 			if (!fProfileVersioner.getProfileKind().equals(profile.getKind())) {
-				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title; 
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title;
 				final String message= Messages.format(FormatterMessages.ProfileConfigurationBlock_load_profile_wrong_profile_message, new String[] {fProfileVersioner.getProfileKind(), profile.getKind()});
 				MessageDialog.openError(fComposite.getShell(), title, message);
 				return;
 			}
 
 			if (profile.getVersion() > fProfileVersioner.getCurrentVersion()) {
-				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_title; 
-				final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_message; 
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_title;
+				final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_message;
 				MessageDialog.openWarning(fComposite.getShell(), title, message);
 			}
 
 			if (fProfileManager.containsName(profile.getName())) {
 				final AlreadyExistsDialog aeDialog= new AlreadyExistsDialog(fComposite.getShell(), profile, fProfileManager);
-				if (aeDialog.open() != Window.OK) 
+				if (aeDialog.open() != Window.OK)
 					return;
 			}
 			fProfileVersioner.update(profile);
@@ -252,7 +252,7 @@ public abstract class ProfileConfigurationBlock {
 	private Button fDeleteButton;
 	private Button fNewButton;
 	private Button fLoadButton;
-	
+
 	private PixelConverter fPixConv;
 	/**
 	 * The ProfileManager, the model of this page.
@@ -295,14 +295,14 @@ public abstract class ProfileConfigurationBlock {
         		JavaPlugin.log(e);
         	}
         }
-        
-        if (profiles == null) 
+
+        if (profiles == null)
             profiles= new ArrayList();
 
 		fProfileManager= createProfileManager(profiles, fCurrContext, access, fProfileVersioner);
 
 		new StoreUpdater();
-		
+
 		fPreferenceListenerEnabled= true;
 		fPreferenceListener= new IPreferenceChangeListener() {
 			public void preferenceChange(PreferenceChangeEvent event) {
@@ -316,15 +316,15 @@ public abstract class ProfileConfigurationBlock {
 	}
 
 	protected void preferenceChanged(PreferenceChangeEvent event) {
-		
+
 	}
 
 	protected abstract IProfileVersioner createProfileVersioner();
-	
+
 	protected abstract ProfileStore createProfileStore(IProfileVersioner versioner);
-	
+
 	protected abstract ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner);
-	
+
 	protected abstract ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile);
 
 	protected abstract void configurePreview(Composite composite, int numColumns, ProfileManager profileManager);
@@ -357,10 +357,10 @@ public abstract class ProfileConfigurationBlock {
 		GridData data= new GridData(SWT.FILL, SWT.FILL, true, false);
 		data.horizontalSpan= numColumns;
 		profileLabel.setLayoutData(data);
-		
+
 		fProfileCombo= createProfileCombo(fComposite, 3, fPixConv.convertWidthInCharsToPixels(20));
-		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);  
-		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING); 
+		fEditButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
+		fDeleteButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_remove_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
 
 		fNewButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
 		fLoadButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END);
@@ -395,7 +395,7 @@ public abstract class ProfileConfigurationBlock {
 		label.setFont(composite.getFont());
 		label.setText(text);
 		label.setLayoutData(gd);
-		return label;		
+		return label;
 	}
 
 	private Composite createComposite(Composite parent, int numColumns) {

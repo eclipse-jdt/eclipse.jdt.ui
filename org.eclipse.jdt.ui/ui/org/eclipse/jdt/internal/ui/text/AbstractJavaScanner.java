@@ -23,12 +23,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.BufferedRuleBasedScanner;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
@@ -157,7 +158,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 			fPropertyNamesStrikethrough[i]= getStrikethroughKey(fPropertyNamesColor[i]);
 			fPropertyNamesUnderline[i]= getUnderlineKey(fPropertyNamesColor[i]);
 		}
-		
+
 		fNeedsLazyColorLoading= Display.getCurrent() == null;
 		for (int i= 0; i < length; i++) {
 			if (fNeedsLazyColorLoading)
@@ -168,7 +169,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 
 		initializeRules();
 	}
-	
+
 	protected String getBoldKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	}
@@ -176,15 +177,15 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	protected String getItalicKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_ITALIC_SUFFIX;
 	}
-	
+
 	protected String getStrikethroughKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
 	}
-	
+
 	protected String getUnderlineKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 	}
-	
+
 	public IToken nextToken() {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();

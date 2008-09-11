@@ -44,7 +44,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 
 	private WorkingSetModel fWorkingSetModel;
 	private IPropertyChangeListener fListener;
-	
+
 	public WorkingSetAwareContentProvider(boolean provideMembers, WorkingSetModel model) {
 		super(provideMembers);
 		fWorkingSetModel= model;
@@ -55,7 +55,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 				};
 		fWorkingSetModel.addPropertyChangeListener(fListener);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -72,7 +72,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 			return true;
 		return super.hasChildren(element);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -118,7 +118,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		}
 		return result.toArray();
 	}
-	
+
 	private void processResource(IResource resource, Collection result) {
 		IJavaElement elem= JavaCore.create(resource);
 		if (elem != null && elem.exists()) {
@@ -127,14 +127,14 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 			result.add(resource);
 		}
 	}
-	
+
 	private IProject getProject(IJavaElement element) {
 		IJavaProject project= element.getJavaProject();
 		if (project == null)
 			return null;
 		return project.getProject();
 	}
- 
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -150,7 +150,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		}
 		return (TreePath[])result.toArray(new TreePath[result.size()]);
 	}
-	
+
 	private List getModelPath(Object element) {
 		List result= new ArrayList();
 		result.add(element);
@@ -164,7 +164,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		Collections.reverse(result);
 		return result;
 	}
-	
+
 	private List/*<TreePath>*/ getTreePaths(List modelParents, int index) {
 		List result= new ArrayList();
 		Object input= getViewerInput();
@@ -181,7 +181,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		}
 		return result;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -192,7 +192,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		Object first= parents[0];
 		return first;
 	}
-	
+
 	protected void augmentElementToRefresh(List toRefresh, int relation, Object affectedElement) {
 		// we are refreshing the JavaModel and are in working set mode.
 		if (JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(affectedElement)) {
@@ -215,7 +215,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		}
 		toRefresh.addAll(toAdd);
 	}
-	
+
 	private void workingSetModelChanged(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		Object newValue= event.getNewValue();
@@ -231,7 +231,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		postRefresh(toRefresh, true, runnables);
 		executeRunnables(runnables);
 	}
-	
+
 	private boolean isChildOf(Object element, List potentialParents) {
 		// Calling super get parent to bypass working set mapping
 		Object parent= super.getParent(element);
@@ -244,7 +244,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 					return true;
 				parent= super.getParent(parent);
 			}
-			
+
 		}
 		return false;
 	}

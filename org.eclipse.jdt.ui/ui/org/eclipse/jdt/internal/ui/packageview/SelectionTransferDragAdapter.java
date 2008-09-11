@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
 
 public class SelectionTransferDragAdapter extends BasicSelectionTransferDragAdapter {
-		
+
 	public SelectionTransferDragAdapter(ISelectionProvider provider) {
 		super(provider);
 	}

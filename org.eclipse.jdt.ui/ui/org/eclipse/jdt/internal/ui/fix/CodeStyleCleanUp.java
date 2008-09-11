@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * Creates fixes which can resolve code style issues 
+ * Creates fixes which can resolve code style issues
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFix
  */
 public class CodeStyleCleanUp extends AbstractMultiFix {
@@ -37,20 +37,20 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	public CodeStyleCleanUp() {
 		this(null);
 	}
-	
+
 	public CodeStyleCleanUp(Map options) {
 		super(options);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpOptions getDefaultOptions(int kind) {
-		//Hint: We cheat a little here. 
+		//Hint: We cheat a little here.
 		//This allows us to have all jdt/ui clean up settings in one place, the CleanUpConstants
 		return CleanUpConstants.getDefaultOptions(kind);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -62,7 +62,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 		boolean nonStaticFields= isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		boolean nonStaticMethods= isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		boolean qualifyStatic= isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
-		
+
 		return nonStaticFields && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS) ||
 		       qualifyStatic && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS) ||
 		       qualifyStatic && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD) ||
@@ -79,11 +79,11 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		
+
 		boolean nonStaticFields= isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		boolean nonStaticMethods= isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		boolean qualifyStatic= isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
-		
+
 		return CodeStyleFix.createCleanUp(compilationUnit,
 				nonStaticFields && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS),
 				qualifyStatic && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS),
@@ -95,15 +95,15 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 				nonStaticMethods && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY)
 				);
 	}
-	
-	
+
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return CodeStyleFix.createCleanUp(compilationUnit, problems,
-				isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS), 
-				isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS), 
+				isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS),
+				isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS),
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS));
 	}
 
@@ -131,7 +131,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 			result.add(MultiFixMessages.CodeStyleCleanUp_removeMethodThis_description);
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD))
 			result.add(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
-		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD)) 
+		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD))
 			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyStaticMethod_description);
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
@@ -139,10 +139,10 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf.append("private int value;\n"); //$NON-NLS-1$
 		buf.append("public int get() {\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS)) {
@@ -200,7 +200,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 			buf.append("    (new E()).NUMBER--;\n"); //$NON-NLS-1$
 		}
 		buf.append("}\n"); //$NON-NLS-1$
-		
+
 		return buf.toString();
 	}
 

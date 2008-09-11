@@ -35,11 +35,11 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Label provider to render bindings in viewers.
- * 
+ *
  * @since 3.1
  */
 public class BindingLabelProvider extends LabelProvider {
-	
+
 
 	private static int getAdornmentFlags(IBinding binding) {
 		int adornments= 0;
@@ -192,13 +192,13 @@ public class BindingLabelProvider extends LabelProvider {
 
 		return JavaPluginImages.DESC_MISC_DEFAULT;
 	}
-	
+
 	private static void appendDimensions(int dim, StringBuffer buffer) {
 		for (int i=0 ; i < dim; i++) {
 			buffer.append('[').append(']');
 		}
 	}
-	
+
 
 	private static void getMethodLabel(IMethodBinding binding, long flags, StringBuffer buffer) {
 		// return type
@@ -231,8 +231,8 @@ public class BindingLabelProvider extends LabelProvider {
 				}
 			}
 		}
-		
-		
+
+
 		// parameters
 		buffer.append('(');
 		if ((flags & JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES) != 0) {
@@ -258,7 +258,7 @@ public class BindingLabelProvider extends LabelProvider {
 			}
 		}
 		buffer.append(')');
-		
+
 		if ((flags & JavaElementLabels.M_EXCEPTIONS) != 0) {
 			ITypeBinding[] exceptions= binding.getExceptionTypes();
 			if (exceptions.length > 0) {
@@ -314,7 +314,7 @@ public class BindingLabelProvider extends LabelProvider {
 		// primitive type, wildcard
 		return null;
 	}
-		
+
 
 	private static void getTypeLabel(ITypeBinding binding, long flags, StringBuffer buffer) {
 		if ((flags & JavaElementLabels.T_FULLY_QUALIFIED) != 0) {
@@ -336,7 +336,7 @@ public class BindingLabelProvider extends LabelProvider {
 				buffer.append('.');
 			}
 		}
-		
+
 		if (binding.isCapture()) {
 			getTypeLabel(binding.getWildcard(), flags & JavaElementLabels.T_TYPE_PARAMETERS, buffer);
 		} else if (binding.isWildcardType()) {
@@ -379,7 +379,7 @@ public class BindingLabelProvider extends LabelProvider {
 			} else {
 				buffer.append(name);
 			}
-			
+
 			if ((flags & JavaElementLabels.T_TYPE_PARAMETERS) != 0) {
 				if (binding.isGenericType()) {
 					getTypeParametersLabel(binding.getTypeParameters(), buffer);
@@ -408,7 +408,7 @@ public class BindingLabelProvider extends LabelProvider {
 			}
 		}
 	}
-	
+
 	private static void getTypeArgumentsLabel(ITypeBinding[] typeArgs, long flags, StringBuffer buf) {
 		if (typeArgs.length > 0) {
 			buf.append('<');
@@ -421,7 +421,7 @@ public class BindingLabelProvider extends LabelProvider {
 			buf.append('>');
 		}
 	}
-	
+
 
 	private static void getTypeParametersLabel(ITypeBinding[] typeParameters, StringBuffer buffer) {
 		if (typeParameters.length > 0) {
@@ -457,7 +457,7 @@ public class BindingLabelProvider extends LabelProvider {
 		}
 		return Strings.markLTR(buffer.toString());
 	}
-	
+
 	/**
 	 * Returns the image descriptor for a binding with the flags as defined by {@link JavaElementImageProvider}.
 	 * @param binding The binding to get the image for.
@@ -473,17 +473,17 @@ public class BindingLabelProvider extends LabelProvider {
 		}
 		return null;
 	}
-	
+
 
 	public static final long DEFAULT_TEXTFLAGS= JavaElementLabels.ALL_DEFAULT;
 	public static final int DEFAULT_IMAGEFLAGS= JavaElementImageProvider.OVERLAY_ICONS;
-	
+
 
 	final private long fTextFlags;
 	final private int fImageFlags;
 
 	private ImageDescriptorRegistry fRegistry;
-	
+
 	/**
 	 * Creates a new binding label provider with default text and image flags
 	 */

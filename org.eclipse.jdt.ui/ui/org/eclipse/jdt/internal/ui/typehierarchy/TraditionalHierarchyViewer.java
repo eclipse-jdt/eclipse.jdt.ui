@@ -27,11 +27,11 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  * on construction (shared type hierarchy)
  */
 public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
-	
+
 	public TraditionalHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle) {
 		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), lifeCycle);
 	}
-	
+
 	/*
 	 * @see TypeHierarchyViewer#getTitle
 	 */
@@ -49,7 +49,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
-		
+
 		if (expand) {
 			TraditionalHierarchyContentProvider contentProvider= (TraditionalHierarchyContentProvider) getContentProvider();
 			int expandLevel= contentProvider.getExpandLevel();
@@ -65,12 +65,12 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	 * Content provider for the 'traditional' type hierarchy.
 	 */
 	public static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider {
-		
-			
+
+
 		public TraditionalHierarchyContentProvider(TypeHierarchyLifeCycle provider) {
 			super(provider);
 		}
-		
+
 		public int getExpandLevel() {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
@@ -83,7 +83,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			}
 			return 2;
 		}
-		
+
 		private int getDepth(ITypeHierarchy hierarchy, IType input) {
 			int count= 0;
 			IType superType= hierarchy.getSuperclass(input);
@@ -93,7 +93,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			}
 			return count;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyContentProvider#getRootTypes(java.util.List)
 		 */
@@ -128,7 +128,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				}
 			}
 		}
-				
+
 		/*
 		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
 		 */
@@ -171,6 +171,6 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			}
 			return null;
 		}
-			
+
 	}
 }

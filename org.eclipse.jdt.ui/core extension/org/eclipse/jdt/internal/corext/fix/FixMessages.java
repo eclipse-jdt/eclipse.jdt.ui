@@ -22,7 +22,7 @@ public final class FixMessages extends NLS {
 	public static String CleanUpPostSaveListener_name;
 	public static String CleanUpPostSaveListener_SaveAction_ChangeName;
 	public static String CleanUpPostSaveListener_unknown_profile_error_message;
-	
+
 	public static String CleanUpRefactoring_checkingPostConditions_message;
 	public static String CleanUpRefactoring_clean_up_multi_chang_name;
 	public static String CleanUpRefactoring_could_not_retrive_profile;
@@ -33,7 +33,7 @@ public final class FixMessages extends NLS {
 	public static String CompilationUnitRewriteOperationsFix_nullChangeError;
 	public static String CodeStyleFix_change_name;
 	public static String ControlStatementsFix_change_name;
-	
+
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpression_Warning;
 	public static String ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning;
 	public static String ConvertIterableLoopOperation_semanticChangeWarning;
@@ -43,7 +43,7 @@ public final class FixMessages extends NLS {
 	public static String Java50Fix_add_annotations_change_name;
 	public static String Java50Fix_add_type_parameters_change_name;
 	public static String PotentialProgrammingProblemsFix_add_id_change_name;
-	
+
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_binding;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_exception;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown;
@@ -51,7 +51,7 @@ public final class FixMessages extends NLS {
 	public static String SortMembersFix_Fix_description;
 	public static String UnusedCodeFix_change_name;
 	public static String UnusedCodeFix_RemoveFieldOrLocal_AlteredAssignments_preview;
-	
+
 	public static String UnusedCodeFix_RemoveFieldOrLocal_description;
 	public static String UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview;
 	public static String UnusedCodeFix_RemoveFieldOrLocalWithInitializer_description;
@@ -65,7 +65,7 @@ public final class FixMessages extends NLS {
 	public static String UnusedCodeFix_RemoveUnusedPrivateMethod_description;
 	public static String UnusedCodeFix_RemoveUnusedField_description;
 	public static String UnusedCodeFix_RemoveUnusedVariabl_description;
-	
+
 	public static String Java50Fix_AddMissingAnnotation_description;
 	public static String Java50Fix_AddDeprecated_description;
 	public static String Java50Fix_AddOverride_description;
@@ -76,11 +76,11 @@ public final class FixMessages extends NLS {
 	public static String Java50Fix_SerialVersion_hash_description;
 	public static String Java50Fix_InitializeSerialVersionId_subtask_description;
 	public static String Java50Fix_SerialVersion_CalculateHierarchy_description;
-	
+
 	public static String StringFix_AddRemoveNonNls_description;
 	public static String StringFix_AddNonNls_description;
 	public static String StringFix_RemoveNonNls_description;
-	
+
 	public static String CodeStyleFix_ChangeAccessToStatic_description;
 	public static String CodeStyleFix_AddThisQualifier_description;
 	public static String CodeStyleFix_QualifyWithThis_description;
@@ -93,9 +93,9 @@ public final class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeAccessUsingDeclaring_description;
 	public static String CodeStyleFix_QualifyMethodWithDeclClass_description;
 	public static String CodeStyleFix_QualifyFieldWithDeclClass_description;
-	
+
 	public static String SerialVersion_group_description;
-	
+
 	public static String ControlStatementsFix_removeIfBlock_proposalDescription;
 	public static String ControlStatementsFix_removeElseBlock_proposalDescription;
 	public static String ControlStatementsFix_removeIfElseBlock_proposalDescription;
@@ -104,7 +104,7 @@ public final class FixMessages extends NLS {
 	public static String ExpressionsFix_addParanoiacParenthesis_description;
 	public static String ExpressionsFix_removeUnnecessaryParenthesis_description;
 	public static String VariableDeclarationFix_add_final_change_name;
-	
+
 	public static String VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 	public static String VariableDeclarationFix_ChangeMidifiersToFinalWherPossible_description;
 

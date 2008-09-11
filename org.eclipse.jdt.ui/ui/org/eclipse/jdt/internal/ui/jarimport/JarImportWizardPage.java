@@ -19,13 +19,6 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.filesystem.URIUtil;
-
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -37,6 +30,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.filesystem.URIUtil;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
  * Jar import wizard page.
- * 
+ *
  * @since 3.2
  */
 public final class JarImportWizardPage extends WizardPage {
@@ -104,7 +104,7 @@ public final class JarImportWizardPage extends WizardPage {
 
 	/**
 	 * Creates a new jar import wizard page.
-	 * 
+	 *
 	 * @param wizard
 	 *            the jar import wizard
 	 * @param importWizard
@@ -147,7 +147,7 @@ public final class JarImportWizardPage extends WizardPage {
 
 	/**
 	 * Creates a new grid data.
-	 * 
+	 *
 	 * @param flag
 	 *            the flags to use
 	 * @param hspan
@@ -165,7 +165,7 @@ public final class JarImportWizardPage extends WizardPage {
 
 	/**
 	 * Creates the input group.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
 	 */
@@ -238,7 +238,7 @@ public final class JarImportWizardPage extends WizardPage {
 
 	/**
 	 * Creates the location group.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
 	 */
@@ -281,7 +281,7 @@ public final class JarImportWizardPage extends WizardPage {
 
 	/**
 	 * Creates the rename group.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
 	 */

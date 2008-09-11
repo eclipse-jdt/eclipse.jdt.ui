@@ -13,14 +13,14 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.operation.IRunnableContext;
 
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -41,7 +41,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
 	private int fStyle;
-		
+
 	/**
 	 * Constructor.
 	 */
@@ -55,7 +55,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(scope);
-		
+
 		fRunnableContext= context;
 		fScope= scope;
 		fStyle= style;
@@ -73,20 +73,20 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
 			//XX: to do
-			ExceptionHandler.handle(e, JavaUIMessages.MultiMainTypeSelectionDialog_errorTitle, e.getMessage()); 
+			ExceptionHandler.handle(e, JavaUIMessages.MultiMainTypeSelectionDialog_errorTitle, e.getMessage());
 			return CANCEL;
 		}
-		
+
 		setElements(types);
 		return super.open();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.MULTI_MAIN_TYPE_SELECTION_DIALOG);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.MULTI_MAIN_TYPE_SELECTION_DIALOG);
 	}
 
 

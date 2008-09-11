@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import org.eclipse.core.runtime.Assert;
-
-import org.eclipse.core.resources.IFolder;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -23,6 +19,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 
 /**
  * Dialog to prompt whether a linked folder should be deleted.
- * 
+ *
  */
 class RemoveLinkedFolderDialog extends MessageDialog {
 
@@ -50,7 +50,7 @@ class RemoveLinkedFolderDialog extends MessageDialog {
 
 	/**
 	 * Creates a new remove linked folder dialog.
-	 * 
+	 *
 	 * @param shell the parent shell to use
 	 * @param folder the linked folder to remove
 	 */
@@ -93,7 +93,7 @@ class RemoveLinkedFolderDialog extends MessageDialog {
 
 	/**
 	 * Returns the remove status.
-	 * 
+	 *
 	 * @return the remove status, one of IRemoveLinkedFolderQuery#REMOVE_XXX
 	 */
 	public final int getRemoveStatus() {

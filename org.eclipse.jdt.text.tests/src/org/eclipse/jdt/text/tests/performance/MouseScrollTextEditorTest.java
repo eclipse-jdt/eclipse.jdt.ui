@@ -17,17 +17,17 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 
 public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
-	
+
 	private static final Class THIS= MouseScrollTextEditorTest.class;
-	
+
 	private static final String THUMB_SCROLLING_FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
-	
+
 	private static final String THUMB_SCROLLING_ORIG_FILE= THUMB_SCROLLING_FILE_PREFIX + ".java";
 
 	private static final String THUMB_SCROLLING_FILE= THUMB_SCROLLING_FILE_PREFIX + ".txt";
 
 	private static final String AUTO_SCROLLING_FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
-	
+
 	private static final String AUTO_SCROLLING_ORIG_FILE= AUTO_SCROLLING_FILE_PREFIX + ".java";
 
 	private static final String AUTO_SCROLLING_FILE= AUTO_SCROLLING_FILE_PREFIX + ".txt";
@@ -39,13 +39,13 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	public void testThumbScrollTextEditor1() throws CoreException {
 		try {
 			ResourceTestHelper.copy(THUMB_SCROLLING_ORIG_FILE, THUMB_SCROLLING_FILE);
@@ -54,7 +54,7 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 			ResourceTestHelper.delete(THUMB_SCROLLING_FILE);
 		}
 	}
-	
+
 	public void testAutoScrollTextEditor1() throws CoreException {
 		try {
 			ResourceTestHelper.copy(AUTO_SCROLLING_ORIG_FILE, AUTO_SCROLLING_FILE);

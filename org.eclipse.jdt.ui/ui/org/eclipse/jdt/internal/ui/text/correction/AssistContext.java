@@ -40,7 +40,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 		fCompilationUnit= cu;
 		fASTRoot= null;
 	}
-	
+
 	/*
 	 * Constructor for CorrectionContext.
 	 */

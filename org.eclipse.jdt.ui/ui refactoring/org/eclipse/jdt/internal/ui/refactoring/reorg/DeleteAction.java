@@ -36,8 +36,8 @@ public class DeleteAction extends SelectionDispatchAction {
 
 	public DeleteAction(IWorkbenchSite site) {
 		super(site);
-		setText(ReorgMessages.DeleteAction_3); 
-		setDescription(ReorgMessages.DeleteAction_4); 
+		setText(ReorgMessages.DeleteAction_3);
+		setDescription(ReorgMessages.DeleteAction_4);
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
@@ -74,7 +74,7 @@ public class DeleteAction extends SelectionDispatchAction {
 		try {
 			RefactoringExecutionStarter.startDeleteRefactoring(selection.toArray(), getShell());
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 }

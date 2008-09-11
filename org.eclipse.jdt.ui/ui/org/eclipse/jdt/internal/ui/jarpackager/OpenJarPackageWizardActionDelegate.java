@@ -12,12 +12,14 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.IOException;
 
+import org.xml.sax.SAXException;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -26,8 +28,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-
-import org.xml.sax.SAXException;
 
 /**
  * This action delegate opens the JAR Package Wizard and initializes
@@ -45,37 +45,37 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 		JarPackageData jarPackage= null;
 		String errorDetail= null;
 		try {
-			jarPackage= readJarPackage(getDescriptionFile(getSelection()));			
+			jarPackage= readJarPackage(getDescriptionFile(getSelection()));
 		} catch (IOException ex) {
 			errorDetail= ex.getLocalizedMessage();
-			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail); 
+			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail);
 			return;
 		} catch (CoreException ex) {
 			errorDetail= ex.getLocalizedMessage();
-			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail); 
+			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail);
 			return;
 		} catch (SAXException ex) {
-			errorDetail= JarPackagerMessages.OpenJarPackageWizardDelegate_badXmlFormat + ex.getLocalizedMessage(); 
-			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail); 
+			errorDetail= JarPackagerMessages.OpenJarPackageWizardDelegate_badXmlFormat + ex.getLocalizedMessage();
+			MessageDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_title, JarPackagerMessages.OpenJarPackageWizardDelegate_error_openJarPackager_message + errorDetail);
 			return;
 		}
 
 		if (fReader != null && !fReader.getStatus().isOK())
-			ErrorDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_jarDescriptionReaderWarnings_title, null, fReader.getStatus()); 
+			ErrorDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_jarDescriptionReaderWarnings_title, null, fReader.getStatus());
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);
 		dialog.create();
 		dialog.open();
 	}
-	
+
 	/**
 	 * Reads the JAR package spec from file.
-	 * @param description 
+	 * @param description
 	 * @return the JAR package spec
-	 * @throws CoreException 
-	 * @throws IOException 
-	 * @throws SAXException 
+	 * @throws CoreException
+	 * @throws IOException
+	 * @throws SAXException
 	 */
 	private JarPackageData readJarPackage(IFile description) throws CoreException, IOException, SAXException {
 		Assert.isLegal(description.isAccessible());

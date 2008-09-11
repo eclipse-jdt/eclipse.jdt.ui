@@ -25,25 +25,25 @@ import org.eclipse.ui.actions.ActionGroup;
  * Action group that adds the open and show actions to a context menu and
  * the action bar's navigate menu. This action group reuses the <code>
  * OpenEditorActionGroup</code> and <code>OpenViewActionGroup</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class NavigateActionGroup extends ActionGroup {
 
 	private OpenEditorActionGroup fOpenEditorActionGroup;
 	private OpenViewActionGroup fOpenViewActionGroup;
-	
+
 	/**
 	 * Creates a new <code>NavigateActionGroup</code>. The group requires
 	 * that the selection provided by the part's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 */
 	public NavigateActionGroup(IViewPart  part) {
@@ -53,13 +53,13 @@ public class NavigateActionGroup extends ActionGroup {
 
 	/**
 	 * Creates a new <code>NavigateActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public NavigateActionGroup(IWorkbenchPartSite site, ISelectionProvider specialSelectionProvider) {
@@ -68,15 +68,15 @@ public class NavigateActionGroup extends ActionGroup {
 	}
 
 	/**
-	 * Returns the open action managed by this action group. 
-	 * 
+	 * Returns the open action managed by this action group.
+	 *
 	 * @return the open action. Returns <code>null</code> if the group
 	 * 	doesn't provide any open action
 	 */
 	public IAction getOpenAction() {
 		return fOpenEditorActionGroup.getOpenAction();
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -100,7 +100,7 @@ public class NavigateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		
+
 		fOpenEditorActionGroup.fillContextMenu(menu);
 		fOpenViewActionGroup.fillContextMenu(menu);
 	}

@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
  * A comparator for Java tokens.
  */
 public class JavaTokenComparator implements ITokenComparator {
-	
+
 	/**
 	 * Factory to create text token comparators.
 	 * This is a workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=183224 .
@@ -39,9 +39,9 @@ public class JavaTokenComparator implements ITokenComparator {
 		 */
 		public ITokenComparator createTokenComparator(String text);
 	}
-		
+
 	private static final boolean DEBUG= false;
-	
+
 	private final String fText;
 	private final ITokenComparatorFactory fTextTokenComparatorFactory;
 	private int fCount;
@@ -50,31 +50,31 @@ public class JavaTokenComparator implements ITokenComparator {
 
 	/**
 	 * Creates a token comparator for the given string.
-	 * 
+	 *
 	 * @param text the text to be tokenized
 	 */
 	public JavaTokenComparator(String text) {
 		this(text, null);
 	}
-	
+
 	/**
 	 * Creates a token comparator for the given string.
-	 * 
+	 *
 	 * @param text the text to be tokenized
 	 * @param textTokenComparatorFactory a factory to create text token comparators
 	 */
 	public JavaTokenComparator(String text, ITokenComparatorFactory textTokenComparatorFactory) {
-		
+
 		fTextTokenComparatorFactory= textTokenComparatorFactory;
 		Assert.isLegal(text != null);
-		
+
 		fText= text;
-		
+
 		int length= fText.length();
 		fStarts= new int[length];
 		fLengths= new int[length];
 		fCount= 0;
-		
+
 		IScanner scanner= ToolFactory.createScanner(true, true, false, false); // returns comments & whitespace
 		scanner.setSource(fText.toCharArray());
 		int endPos= 0;
@@ -105,7 +105,7 @@ public class JavaTokenComparator implements ITokenComparator {
 
 	/**
 	 * Records the given token range.
-	 * 
+	 *
 	 * @param start of the token
 	 * @param length length of the token
 	 * @since 3.3
@@ -121,7 +121,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	private void parseText(int start, String text) {
 		if (DEBUG)
 			System.out.println("parsingText>" + text + "<(" + start + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		
+
 		ITokenComparator subTokenizer= fTextTokenComparatorFactory == null
 				? new JavaTokenComparator(text)
 				: fTextTokenComparatorFactory.createTokenComparator(text);
@@ -139,7 +139,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	/**
 	 * Returns the length of the token that
 	 * initiates the given comment type.
-	 * 
+	 *
 	 * @param tokenType
 	 * @return the length of the token that start a comment
 	 * @since 3.3
@@ -182,7 +182,7 @@ public class JavaTokenComparator implements ITokenComparator {
 			return fLengths[index];
 		return 0;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if a token given by the first index
 	 * matches a token specified by the other <code>IRangeComparator</code> and index.

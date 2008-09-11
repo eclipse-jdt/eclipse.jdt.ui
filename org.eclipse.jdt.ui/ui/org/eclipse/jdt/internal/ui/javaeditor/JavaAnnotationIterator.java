@@ -45,7 +45,7 @@ public class JavaAnnotationIterator implements Iterator {
 	private void skip() {
 		while (fIterator.hasNext()) {
 			Annotation next= (Annotation) fIterator.next();
-			
+
 			if (next.isMarkedDeleted())
 				continue;
 

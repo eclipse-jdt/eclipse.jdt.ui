@@ -44,7 +44,7 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 
 	public IAdaptable[] getChildren() {
 		return getPackageFragmentRoots();
-	}	
+	}
 
 
 	public ImageDescriptor getImageDescriptor() {

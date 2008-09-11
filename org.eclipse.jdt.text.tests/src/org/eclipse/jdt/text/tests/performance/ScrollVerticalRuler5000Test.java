@@ -18,32 +18,32 @@ import junit.framework.TestSuite;
  * @since 3.4
  */
 public class ScrollVerticalRuler5000Test extends ScrollVerticalRulerTest {
-	
+
 	private static final Class THIS= ScrollVerticalRuler5000Test.class;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.text.tests.performance.ScrollVerticalRulerTest#getNumberOfAnnotations()
 	 */
 	protected int getNumberOfAnnotations() {
 		return 5000;
 	}
-	
+
 	/**
 	 * Measure the time spent while scrolling page wise in the text editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testScrollTextEditorPageWise() throws Exception {
 		measure(PAGE_WISE);
 	}
-	
+
 	/**
 	 * Measure the time spent while scrolling line wise in the text editor.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 //	This test is too slow

@@ -32,14 +32,14 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollecto
 
 /**
  * Utility methods to manage static and non-static imports of a compilation unit.
- * 
+ *
  * @since 3.1
  */
 public final class ImportRewriteUtil {
-	
+
 	/**
 	 * Adds the necessary imports for an AST node to the specified compilation unit.
-	 * 
+	 *
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
 	 * @param node the AST node specifying the element for which imports should be added
 	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
@@ -52,7 +52,7 @@ public final class ImportRewriteUtil {
 
 	/**
 	 * Adds the necessary imports for an AST node to the specified compilation unit.
-	 * 
+	 *
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
 	 * @param node the AST node specifying the element for which imports should be added
 	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
@@ -67,7 +67,7 @@ public final class ImportRewriteUtil {
 		Assert.isNotNull(staticImports);
 		final Set types= new HashSet();
 		final Set members= new HashSet();
-		
+
 		ImportReferencesCollector.collect(node, rewrite.getCu().getJavaProject(), null, declarations, types, members);
 
 		final ImportRewrite rewriter= rewrite.getImportRewrite();
@@ -108,7 +108,7 @@ public final class ImportRewriteUtil {
 
 	/**
 	 * Collects the necessary imports for an element represented by the specified AST node.
-	 * 
+	 *
 	 * @param project the java project containing the element
 	 * @param node the AST node specifying the element for which imports should be collected
 	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
@@ -121,7 +121,7 @@ public final class ImportRewriteUtil {
 
 	/**
 	 * Collects the necessary imports for an element represented by the specified AST node.
-	 * 
+	 *
 	 * @param project the java project containing the element
 	 * @param node the AST node specifying the element for which imports should be collected
 	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
@@ -136,9 +136,9 @@ public final class ImportRewriteUtil {
 		Assert.isNotNull(staticBindings);
 		final Set types= new HashSet();
 		final Set members= new HashSet();
-		
+
 		ImportReferencesCollector.collect(node, project, null, declarations, types, members);
-		
+
 		Name name= null;
 		IBinding binding= null;
 		for (final Iterator iterator= types.iterator(); iterator.hasNext();) {

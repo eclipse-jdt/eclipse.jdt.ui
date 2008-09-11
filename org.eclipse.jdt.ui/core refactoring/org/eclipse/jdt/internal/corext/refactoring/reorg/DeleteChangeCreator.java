@@ -15,17 +15,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -62,7 +62,7 @@ class DeleteChangeCreator {
 	private DeleteChangeCreator() {
 		//private
 	}
-	
+
 	/**
 	 * @param manager the text change manager
 	 * @param resources the resources to delete
@@ -73,7 +73,7 @@ class DeleteChangeCreator {
 	 *        <code>javaElements</code>, or <code>null</code> iff
 	 *        <code>javaElements</code> does not contain package fragments
 	 * @return the created change
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	static Change createDeleteChange(TextChangeManager manager, IResource[] resources,
 			IJavaElement[] javaElements, String changeName, List/*<IResource>*/ packageDeletes) throws CoreException {
@@ -83,14 +83,14 @@ class DeleteChangeCreator {
 		 * one folder in packageDeletes. The way to handle this is to make the undo
 		 * change of individual package delete changes an empty change, and
 		 * add take care of the undo in UndoablePackageDeleteChange.
-		 */ 
+		 */
 		DynamicValidationStateChange result;
 		if (packageDeletes.size() > 0) {
 			result= new UndoablePackageDeleteChange(changeName, packageDeletes);
 		} else {
 			result= new DynamicValidationStateChange(changeName);
 		}
-		
+
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (! ReorgUtils.isInsideCompilationUnit(element))
@@ -100,7 +100,7 @@ class DeleteChangeCreator {
 		for (int i= 0; i < resources.length; i++) {
 			result.add(createDeleteChange(resources[i]));
 		}
-		
+
 		Map grouped= ReorgUtils.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
 		if (grouped.size() != 0 ){
 			Assert.isNotNull(manager);
@@ -112,7 +112,7 @@ class DeleteChangeCreator {
 
 		return result;
 	}
-	
+
 	private static Change createDeleteChange(IResource resource) {
 		Assert.isTrue(! (resource instanceof IWorkspaceRoot));//cannot be done
 		Assert.isTrue(! (resource instanceof IProject)); //project deletion is handled by the workbench
@@ -139,7 +139,7 @@ class DeleteChangeCreator {
 				TextFileChange tfc= (TextFileChange) textChange;
 				tfc.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
 			}
-			String message= RefactoringCoreMessages.DeleteChangeCreator_1; 
+			String message= RefactoringCoreMessages.DeleteChangeCreator_1;
 			TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
 			return textChange;
 		} finally {
@@ -160,7 +160,7 @@ class DeleteChangeCreator {
 
 	private static Change createDeleteChange(IJavaElement javaElement) throws JavaModelException {
 		Assert.isTrue(! ReorgUtils.isInsideCompilationUnit(javaElement));
-		
+
 		switch(javaElement.getElementType()){
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				return createPackageFragmentRootDeleteChange((IPackageFragmentRoot)javaElement);
@@ -205,34 +205,34 @@ class DeleteChangeCreator {
 			IResource resource;
 			if (element instanceof ICompilationUnit)
 				resource= ReorgUtils.getResource((ICompilationUnit)element);
-			else 
+			else
 				resource= ((IPackageFragment)element).getResource();
 			if (resource != null && resource.isLinked())
 				return createDeleteChange(resource);
 		}
 		return new DeleteSourceManipulationChange(element, true);
 	}
-	
+
 	private static Change createPackageFragmentRootDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
 		IResource resource= root.getResource();
 		if (resource != null && resource.isLinked()){
 			//XXX using this code is a workaround for jcore bug 31998
 			//jcore cannot handle linked stuff
 			//normally, we should always create DeletePackageFragmentRootChange
-			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.DeleteRefactoring_delete_package_fragment_root); 
-	
+			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.DeleteRefactoring_delete_package_fragment_root);
+
 			ClasspathChange change= ClasspathChange.removeEntryChange(root.getJavaProject(), root.getRawClasspathEntry());
 			if (change != null) {
 				composite.add(change);
 			}
 			Assert.isTrue(! Checks.isClasspathDelete(root));//checked in preconditions
 			composite.add(createDeleteChange(resource));
-	
+
 			return composite;
 		} else {
 			Assert.isTrue(! root.isExternal());
 			// TODO remove the query argument
-			return new DeletePackageFragmentRootChange(root, true, null); 
+			return new DeletePackageFragmentRootChange(root, true, null);
 		}
 	}
 }

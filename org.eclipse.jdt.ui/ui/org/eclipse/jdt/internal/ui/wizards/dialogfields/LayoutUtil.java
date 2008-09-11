@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 public class LayoutUtil {
-	
+
 	/**
 	 * Calculates the number of columns needed by field editors
 	 */
@@ -28,11 +28,11 @@ public class LayoutUtil {
 		}
 		return nCulumns;
 	}
-	
+
 	/**
 	 * Creates a composite and fills in the given editors.
 	 * @param labelOnTop Defines if the label of all fields should be on top of the fields
-	 */	
+	 */
 	public static void doDefaultLayout(Composite parent, DialogField[] editors, boolean labelOnTop) {
 		doDefaultLayout(parent, editors, labelOnTop, 0, 0);
 	}
@@ -42,7 +42,7 @@ public class LayoutUtil {
 	 * @param labelOnTop Defines if the label of all fields should be on top of the fields
 	 * @param marginWidth The margin width to be used by the composite
 	 * @param marginHeight The margin height to be used by the composite
-	 */	
+	 */
 	public static void doDefaultLayout(Composite parent, DialogField[] editors, boolean labelOnTop, int marginWidth, int marginHeight) {
 		int nCulumns= getNumberOfColumns(editors);
 		Control[][] controls= new Control[editors.length][];
@@ -65,16 +65,16 @@ public class LayoutUtil {
 		if (marginHeight != SWT.DEFAULT) {
 			layout.marginHeight= marginHeight;
 		}
-		layout.numColumns= nCulumns;		
+		layout.numColumns= nCulumns;
 		parent.setLayout(layout);
 	}
-	
+
 	private static void modifyLabelSpans(Control[][] controls, int nCulumns) {
 		for (int i= 0; i < controls.length; i++) {
 			setHorizontalSpan(controls[i][0], nCulumns);
 		}
 	}
-	
+
 	/**
 	 * Sets the span of a control. Assumes that GridData is used.
 	 */
@@ -87,7 +87,7 @@ public class LayoutUtil {
 			gd.horizontalSpan= span;
 			control.setLayoutData(gd);
 		}
-	}	
+	}
 
 	/**
 	 * Sets the width hint of a control. Assumes that GridData is used.
@@ -98,7 +98,7 @@ public class LayoutUtil {
 			((GridData)ld).widthHint= widthHint;
 		}
 	}
-	
+
 	/**
 	 * Sets the heightHint hint of a control. Assumes that GridData is used.
 	 */
@@ -107,8 +107,8 @@ public class LayoutUtil {
 		if (ld instanceof GridData) {
 			((GridData)ld).heightHint= heightHint;
 		}
-	}	
-	
+	}
+
 	/**
 	 * Sets the horizontal indent of a control. Assumes that GridData is used.
 	 */
@@ -118,7 +118,7 @@ public class LayoutUtil {
 			((GridData)ld).horizontalIndent= horizontalIndent;
 		}
 	}
-	
+
 	/**
 	 * Sets the horizontal grabbing of a control to true. Assumes that GridData is used.
 	 */
@@ -127,6 +127,6 @@ public class LayoutUtil {
 		if (ld instanceof GridData) {
 			((GridData)ld).grabExcessHorizontalSpace= true;
 		}
-	}		
+	}
 
 }

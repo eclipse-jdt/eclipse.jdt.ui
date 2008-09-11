@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.swt.custom.BusyIndicator;
+
+import org.eclipse.jface.action.Action;
 
 
 public class SortAction extends Action {
 	private int fSortOrder;
 	private JavaSearchResultPage fPage;
-	
+
 	public SortAction(String label, JavaSearchResultPage page, int sortOrder) {
 		super(label);
 		fPage= page;

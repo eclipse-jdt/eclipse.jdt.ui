@@ -251,7 +251,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * the selection provider is a post selection provider, post selection changed
 		 * events are the preferred choice, otherwise normal selection changed events
 		 * are requested.
-		 * 
+		 *
 		 * @param selectionProvider the selection provider
 		 */
 		public void install(ISelectionProvider selectionProvider) {
@@ -785,7 +785,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				if (next != BreakIterator.DONE)
 					widget= modelOffset2WidgetOffset(viewer, next);
 			}
-			
+
 			IDocument document= viewer.getDocument();
 			LinkedModeModel model= LinkedModeModel.getModel(document, position);
 			if (model != null) {
@@ -803,7 +803,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					}
 				}
 			}
-			
+
 			return next;
 		}
 
@@ -979,7 +979,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				if (previous != BreakIterator.DONE)
 					widget= modelOffset2WidgetOffset(viewer, previous);
 			}
-			
+
 			IDocument document= viewer.getDocument();
 			LinkedModeModel model= LinkedModeModel.getModel(document, position);
 			if (model != null) {
@@ -997,7 +997,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					}
 				}
 			}
-			
+
 			return previous;
 		}
 
@@ -1131,7 +1131,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	protected class FormatElementAction extends Action implements IUpdate {
-		
+
 		/*
 		 * @since 3.2
 		 */
@@ -1342,8 +1342,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void partHidden(IWorkbenchPartReference partRef) {}
 		public void partInputChanged(IWorkbenchPartReference partRef) {}
 	}
-	
-	
+
+
 	/**
 	 * Editor specific selection provider which wraps the source viewer's selection provider.
 	 * @since 3.4
@@ -1389,10 +1389,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (selection instanceof ITextSelection) {
 				if (fInvalidSelection != null) {
 					fInvalidSelection= null;
-					
+
 					ITextSelection newSelection= (ITextSelection) selection;
 					ITextSelection oldSelection= (ITextSelection) getSelection();
-					
+
 					if (newSelection.getOffset() == oldSelection.getOffset() && newSelection.getLength() == oldSelection.getLength()) {
 						markValid();
 					} else {
@@ -1449,7 +1449,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			for (int i= 0; i < listeners.length; i++)
 				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
 		}
-		
+
 		/**
 		 * Marks this selection provider as being valid.
 		 */
@@ -1468,7 +1468,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 	}
 
-	
+
 
 	/** Preference key for matching brackets */
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
@@ -1582,14 +1582,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean fMarkMethodExitPoints;
-	
+
 	/**
 	 * Tells whether to mark targets of <code>break</code> and <code>continue</code> statements in this editor.
 	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
 	 * @since 3.2
 	 */
 	private boolean fMarkBreakContinueTargets;
-	
+
 	/**
 	 * Tells whether to mark implementors in this editor.
 	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
@@ -1649,36 +1649,36 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.1
 	 */
 	private ToggleFoldingRunner fFoldingRunner;
-	
+
 	/**
 	 * Tells whether the selection changed event is caused
 	 * by a call to {@link #gotoAnnotation(boolean)}.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private boolean fSelectionChangedViaGotoAnnotation;
 	/**
 	 * The cached selected range.
-	 * 
+	 *
 	 * @see ITextViewer#getSelectedRange()
 	 * @since 3.3
 	 */
 	private Point fCachedSelectedRange;
-	
+
 	/**
 	 * The editor breadcrumb.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private IBreadcrumb fBreadcrumb;
-	
+
 	/**
 	 * The composite containing the breadcrumb.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private Composite fBreadcrumbComposite;
-	
+
 	/**
 	 * This editor's selection provider.
 	 * @since 3.4
@@ -1704,7 +1704,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	abstract protected IJavaElement getCorrespondingElement(IJavaElement element);
 
-	
+
 	/**
 	 * Sets the input of the editor's outline page.
 	 *
@@ -1714,13 +1714,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
 		if (page == null)
 			return;
-		
+
 		IJavaElement je= getInputJavaElement();
 		if (je != null && je.exists())
 			page.setInput(je);
 		else
 			page.setInput(null);
-		
+
 	}
 
 	/*
@@ -1738,7 +1738,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Returns a new Java source viewer configuration.
-	 * 
+	 *
 	 * @return a new <code>JavaSourceViewerConfiguration</code>
 	 * @since 3.3
 	 */
@@ -1778,12 +1778,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fillLayout.marginWidth= 0;
 		fillLayout.spacing= 0;
 		editorComposite.setLayout(fillLayout);
-		
+
 		IPreferenceStore store= getPreferenceStore();
 		ISourceViewer viewer= createJavaSourceViewer(editorComposite, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
-		
+
 		JavaUIHelp.setHelp(this, viewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
-		
+
 		JavaSourceViewer javaSourceViewer= null;
 		if (viewer instanceof JavaSourceViewer)
 			javaSourceViewer= (JavaSourceViewer)viewer;
@@ -1794,7 +1794,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		if (javaSourceViewer != null && isFoldingEnabled() && (store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
 			javaSourceViewer.prepareDelayedProjection();
-		
+
 		ProjectionViewer projectionViewer= (ProjectionViewer)viewer;
 		fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
@@ -1831,7 +1831,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected IBreadcrumb createBreadcrumb() {
 		return new JavaEditorBreadcrumb(this);
 	}
-	
+
 	/**
 	 * @return the breadcrumb used by this viewer if any.
 	 * @since 3.4
@@ -1843,7 +1843,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/**
 	 * Returns the preference key for the breadcrumb. The
 	 * value depends on the current perspective.
-	 * 
+	 *
 	 * @return the preference key or <code>null</code> if there's no perspective
 	 * @since 3.4
 	 */
@@ -1858,18 +1858,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * Returns true if the breadcrumb is active. If true
 	 * then the breadcrumb has the focus if this part
 	 * is the active part.
-	 * 
+	 *
 	 * @return true if the breadcrumb is active.
 	 * @since 3.4
 	 */
 	public boolean isBreadcrumbActive() {
 		return fBreadcrumb != null && fBreadcrumb.isActive();
 	}
-	
+
 	/**
 	 * Makes the breadcrumb visible. Creates its content
 	 * if this is the first time it is made visible.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private void showBreadcrumb() {
@@ -1879,17 +1879,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (fBreadcrumbComposite.getChildren().length == 0) {
 			fBreadcrumb.createContent(fBreadcrumbComposite);
 		}
-		
+
 		((GridData) fBreadcrumbComposite.getLayoutData()).exclude= false;
 		fBreadcrumbComposite.setVisible(true);
-		
+
 		ISourceReference selection= computeHighlightRangeSourceReference();
 		if (selection == null)
 			selection= getInputJavaElement();
 		setBreadcrumbInput(selection);
 		fBreadcrumbComposite.getParent().layout(true, true);
 	}
-	
+
 	/**
 	 * Hides the breadcrumb
 	 *
@@ -2000,7 +2000,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
-		
+
 		//Breadcrumb
 		IAction action= getAction(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
@@ -2010,7 +2010,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 		action= getAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
-		
+
 		// Copy qualified name
 		action= getAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
 		if (menu.find(ITextEditorActionConstants.COPY) != null)
@@ -2099,7 +2099,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			IJavaElement inputJE= getInputJavaElement();
 			if (inputJE instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit) inputJE))
 				return null;
-			
+
 			return new IShowInSource() {
 				public ShowInContext getShowInContext() {
 					return new ShowInContext(null, null) {
@@ -2110,10 +2110,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						public Object getInput() {
 							if (isBreadcrumbActive())
 								return null;
-							
+
 							return getEditorInput();
 						}
-						
+
 						/*
 						 * @see org.eclipse.ui.part.ShowInContext#getSelection()
 						 * @since 3.3
@@ -2121,7 +2121,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						public ISelection getSelection() {
 							if (isBreadcrumbActive())
 								return getBreadcrumb().getSelectionProvider().getSelection();
-							
+
 							try {
 								IJavaElement je= SelectionConverter.getElementAtOffset(JavaEditor.this);
 								if (je != null)
@@ -2256,12 +2256,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						int start= content.indexOf("import") + 6; //$NON-NLS-1$
 						while (start < content.length() && content.charAt(start) == ' ')
 							start++;
-						
+
 						int end= content.indexOf(';');
 						do {
 							end--;
 						} while (end >= 0 && content.charAt(end) == ' ');
-						
+
 						offset= range.getOffset() + start;
 						length= end - start + 1;
 					} else {
@@ -2305,7 +2305,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			markInNavigationHistory();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setFocus()
 	 */
@@ -2314,7 +2314,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fBreadcrumb.activate();
 			return;
 		}
-		
+
 		super.setFocus();
 	}
 
@@ -2356,25 +2356,25 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			JavaPlugin.getActivePage().bringToTop(this);
 
 		setSelection(reference, !isActivePart());
-		
+
 		ISelectionProvider selectionProvider= getSelectionProvider();
 		if (selectionProvider == null )
 			return;
-		
+
 		ISelection textSelection= selectionProvider.getSelection();
 		if (!(textSelection instanceof ITextSelection))
 			return;
-		
+
 		ITypeRoot inputJavaElement= getInputJavaElement();
 		if (inputJavaElement == null)
 			return;
-		
+
 		CompilationUnit ast= SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , getProgressMonitor());
 		if (ast != null) {
 			fForcedMarkOccurrencesSelection= textSelection;
 			updateOccurrenceAnnotations((ITextSelection)textSelection, ast);
 		}
-		
+
 	}
 
 	/*
@@ -2500,11 +2500,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		JavaSourceViewer javaSourceViewer= null;
 		if (sourceViewer instanceof JavaSourceViewer)
 			javaSourceViewer= (JavaSourceViewer)sourceViewer;
-		
+
 		IPreferenceStore store= getPreferenceStore();
 		if (javaSourceViewer != null && isFoldingEnabled() &&(store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
 			javaSourceViewer.prepareDelayedProjection();
-		
+
 		super.doSetInput(input);
 
 		if (javaSourceViewer != null && javaSourceViewer.getReconciler() == null) {
@@ -2605,19 +2605,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fActionGroups.dispose();
 			fActionGroups= null;
 		}
-		
+
 		if (fBreadcrumb != null) {
 			fBreadcrumb.dispose();
 			fBreadcrumb= null;
 		}
-		
+
 		super.dispose();
 		fSelectionProvider= null;
 	}
-	
+
 	protected void createActions() {
 		installEncodingSupport();
-		
+
 		super.createActions();
 
 		ActionGroup oeg, ovg, jsg;
@@ -2633,7 +2633,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		Action action= new GotoMatchingBracketAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
-		
+
 		action= new ShowInBreadcrumbAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
 		setAction(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, action);
@@ -2692,11 +2692,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// add annotation actions for roll-over expand hover
 		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
 		setAction("AnnotationAction", action); //$NON-NLS-1$
-		
+
 		action= new ShowInPackageViewAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
 		setAction("ShowInPackageView", action); //$NON-NLS-1$
-		
+
 
 		// replace cut/copy paste actions with a version that implement 'add imports on paste'
 
@@ -2708,7 +2708,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
-		
+
 		action= new CopyQualifiedNameAction(this);
 		action.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 		action.setImageDescriptor(null);
@@ -2722,7 +2722,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * as we don't want to make this risky method API at this point, since Java editor breadcrumb
 	 * might become a Platform UI feature during 3.5 and hence we can then delete this workaround.
 	 * </p>
-	 * 
+	 *
 	 * @param state <code>true</code> if activated
 	 * @since 3.4
 	 */
@@ -2760,7 +2760,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
 	}
-	
+
 
 	public void updatedTitleImage(Image image) {
 		setTitleImage(image);
@@ -2923,7 +2923,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
-		
+
 		if (AbstractDecoratedTextEditorPreferenceConstants.SHOW_RANGE_INDICATOR.equals(property)) {
 			// superclass already installed the range indicator
 			Object newValue= event.getNewValue();
@@ -3037,7 +3037,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fBreadcrumb= createBreadcrumb();
 		if (fIsBreadcrumbVisible)
 			showBreadcrumb();
-		
+
 		PlatformUI.getWorkbench().addWindowListener(fActivationListener);
 	}
 
@@ -3154,13 +3154,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 				if (isCanceled(progressMonitor))
 					return Status.CANCEL_STATUS;
-				
+
 				OccurrenceLocation location= fLocations[i];
 				Position position= new Position(location.getOffset(), location.getLength());
 
 				String description= location.getDescription();
 				String annotationType= (location.getFlags() == IOccurrencesFinder.F_WRITE_OCCURRENCE) ? "org.eclipse.jdt.ui.occurrences.write" : "org.eclipse.jdt.ui.occurrences"; //$NON-NLS-1$ //$NON-NLS-2$
-				
+
 				annotationMap.put(new Annotation(annotationType, false, description), position);
 			}
 
@@ -3223,7 +3223,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		OccurrenceLocation[] locations= null;
-		
+
 		ASTNode selectedNode= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
 		if (fMarkExceptions) {
 			ExceptionOccurrencesFinder finder= new ExceptionOccurrencesFinder();
@@ -3245,7 +3245,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				locations= finder.getOccurrences();
 			}
 		}
-		
+
 		if (locations == null && fMarkImplementors) {
 			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
 			if (finder.initialize(astRoot, selectedNode) == null) {
@@ -3405,7 +3405,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
-		
+
 		if (provideAST) {
 			CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
 			fOverrideIndicatorManager.reconciled(ast, true, getProgressMonitor());
@@ -3516,7 +3516,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Tells whether the given annotation stands for a problem marker.
-	 * 
+	 *
 	 * @param annotation the annotation
 	 * @return <code>true</code> if it is a problem marker
 	 * @since 3.4
@@ -3619,7 +3619,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		return new Region(selection.x, selection.y);
 	}
-	
+
 	public ISelectionProvider getSelectionProvider() {
 		return fSelectionProvider;
 	}
@@ -3764,7 +3764,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
 		if (model == null)
 			return null;
-		
+
 		Iterator parent;
 		if (model instanceof IAnnotationModelExtension2)
 			parent= ((IAnnotationModelExtension2)model).getAnnotationIterator(offset, length, true, true);
@@ -3789,7 +3789,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fSelectionChangedViaGotoAnnotation= true;
 		return super.gotoAnnotation(forward);
 	}
-	
+
 	/**
 	 * Computes and returns the source reference that includes the caret and
 	 * serves as provider for the outline page selection and the editor range
@@ -3926,7 +3926,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 
 		}));
-		
+
 		return column;
 	}
 
@@ -4011,7 +4011,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		System.arraycopy(inheritedPages, 0, result, length, inheritedPages.length);
 		return result;
 	}
-	
+
 	/*
 	 * @see AbstractTextEditor#getUndoRedoOperationApprover(IUndoContext)
 	 * @since 3.1
@@ -4025,7 +4025,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/**
 	 * Resets the foldings structure according to the folding
 	 * preferences.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public void resetProjection() {
@@ -4033,11 +4033,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionModelUpdater.initialize();
 		}
 	}
-	
+
 	/**
 	 * Collapses all foldable members if supported by the folding
 	 * structure provider.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public void collapseMembers() {
@@ -4046,11 +4046,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			extension.collapseMembers();
 		}
 	}
-	
+
 	/**
 	 * Collapses all foldable comments if supported by the folding
 	 * structure provider.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public void collapseComments() {

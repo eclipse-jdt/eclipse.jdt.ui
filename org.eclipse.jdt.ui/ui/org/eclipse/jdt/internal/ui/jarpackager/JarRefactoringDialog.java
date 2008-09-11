@@ -13,12 +13,6 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -27,6 +21,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 /**
  * Dialog to configure the refactorings to export.
- * 
+ *
  * @since 3.2
  */
 public final class JarRefactoringDialog extends TrayDialog {
@@ -72,7 +72,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 
 	/**
 	 * Creates a new jar refactoring dialog.
-	 * 
+	 *
 	 * @param shell
 	 *            the parent shell
 	 * @param settings
@@ -182,7 +182,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 
 	/**
 	 * Create the export option group.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent composite
 	 */
@@ -199,7 +199,7 @@ public final class JarRefactoringDialog extends TrayDialog {
 
 	/**
 	 * Creates a new label.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent control
 	 * @param text

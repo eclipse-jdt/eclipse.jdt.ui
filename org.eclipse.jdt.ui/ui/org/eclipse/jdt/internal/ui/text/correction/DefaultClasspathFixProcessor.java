@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
@@ -52,9 +52,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * Default contribution to org.eclipse.jdt.ui.classpathFixProcessors
  */
 public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
-	
+
 	private static class DefaultClasspathFixProposal extends ClasspathFixProposal {
-		
+
 		private String fName;
 		private Change fChange;
 		private String fDescription;
@@ -93,16 +93,16 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		collectProposals(project, missingType, res);
 		return (ClasspathFixProposal[]) res.toArray(new ClasspathFixProposal[res.size()]);
 	}
-	
+
 	private void collectProposals(IJavaProject project, String name, Collection proposals) throws CoreException {
 		int idx= name.lastIndexOf('.');
 		char[] packageName= idx != -1 ? name.substring(0, idx).toCharArray() : null; // no package provided
 		char[] typeName= name.substring(idx + 1).toCharArray();
-		
+
 		if (typeName.length == 1 && typeName[0] == '*') {
 			typeName= null;
 		}
-		
+
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		ArrayList res= new ArrayList();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(res);
@@ -177,7 +177,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 			}
 		}
 	}
-	
+
 	private boolean isNonProjectSpecificContainer(IPath containerPath) {
 		if (containerPath.segmentCount() > 0) {
 			String id= containerPath.segment(0);
@@ -187,7 +187,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		}
 		return false;
 	}
-	
+
 
 	private static String getAddClasspathLabel(IClasspathEntry entry, IPackageFragmentRoot root, IJavaProject project) {
 		switch (entry.getEntryKind()) {

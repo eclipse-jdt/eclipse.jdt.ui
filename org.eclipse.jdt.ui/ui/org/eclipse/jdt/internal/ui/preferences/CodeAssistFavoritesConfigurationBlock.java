@@ -13,9 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -26,6 +23,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -70,21 +70,21 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 /**
  * Configures the Content Assist > Static Members preference page.
- * 
+ *
  * @since 3.3
  */
 class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
-	
-	
+
+
 	private static class FavoriteStaticMemberInputDialog extends StatusDialog {
-		
+
 		private class StringButtonAdapter implements IDialogFieldListener, IStringButtonAdapter {
 			/*
 			 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 			 */
 			public void dialogFieldChanged(DialogField field) {
 				doValidation();
-			}			
+			}
 
 			/*
 			 * @see IStringButtonAdapter#changeControlPressed(DialogField)
@@ -93,22 +93,22 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 				doBrowseTypes();
 			}
 		}
-		
+
 		private StringButtonDialogField fNameDialogField;
 		private List fExistingEntries;
 		private final boolean fIsEditingMember;
-			
+
 		public FavoriteStaticMemberInputDialog(Shell parent, List existingEntries, boolean isEditingMember) {
 			super(parent);
 			fIsEditingMember= isEditingMember;
 			fExistingEntries= existingEntries;
-			
+
 			String label, title;
 			if (isEditingMember) {
-				title= PreferencesMessages.FavoriteStaticMemberInputDialog_member_title; 
-				label= PreferencesMessages.FavoriteStaticMemberInputDialog_member_labelText; 
+				title= PreferencesMessages.FavoriteStaticMemberInputDialog_member_title;
+				label= PreferencesMessages.FavoriteStaticMemberInputDialog_member_labelText;
 			} else {
-				title= PreferencesMessages.FavoriteStaticMemberInputDialog_type_title; 
+				title= PreferencesMessages.FavoriteStaticMemberInputDialog_type_title;
 				label= PreferencesMessages.FavoriteStaticMemberInputDialog_type_labelText;
 			}
 			setTitle(title);
@@ -116,8 +116,8 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			StringButtonAdapter adapter= new StringButtonAdapter();
 
 			fNameDialogField= new StringButtonDialogField(adapter);
-			fNameDialogField.setLabelText(label); 
-			fNameDialogField.setButtonLabel(PreferencesMessages.FavoriteStaticMemberInputDialog_browse_button); 
+			fNameDialogField.setLabelText(label);
+			fNameDialogField.setButtonLabel(PreferencesMessages.FavoriteStaticMemberInputDialog_browse_button);
 			fNameDialogField.setDialogFieldListener(adapter);
 			fNameDialogField.setText(""); //$NON-NLS-1$
 		}
@@ -129,7 +129,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		protected boolean isResizable() {
 			return true;
 		}
-			
+
 		public void setInitialSelection(String editedEntry) {
 			Assert.isNotNull(editedEntry);
 			if (editedEntry.length() == 0)
@@ -137,57 +137,57 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			else
 				fNameDialogField.setText(editedEntry);
 		}
-		
+
 		public String getResult() {
 			String val= fNameDialogField.getText();
 			if (!fIsEditingMember)
 				val= val + WILDCARD;
 			return val;
 		}
-			
+
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			initializeDialogUnits(parent);
-			
+
 			GridLayout layout= (GridLayout) composite.getLayout();
 			layout.numColumns= 2;
-			
+
 			fNameDialogField.doFillIntoGrid(composite, 3);
-			
+
 			fNameDialogField.getChangeControl(null).setVisible(!fIsEditingMember);
-			
+
 			LayoutUtil.setHorizontalSpan(fNameDialogField.getLabelControl(null), 2);
-			
+
 			int fieldWidthHint= convertWidthInCharsToPixels(60);
 			Text text= fNameDialogField.getTextControl(null);
 			LayoutUtil.setWidthHint(text, fieldWidthHint);
 			LayoutUtil.setHorizontalGrabbing(text);
 			LayoutUtil.setHorizontalSpan(text, fIsEditingMember ? 2 : 1);
 			TextFieldNavigationHandler.install(text);
-			
+
 			DialogField.createEmptySpace(composite, 1);
-			
+
 			fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
-			
-			
-			applyDialogFont(composite);		
+
+
+			applyDialogFont(composite);
 			return composite;
 		}
-		
-		private void doBrowseTypes() {		
+
+		private void doBrowseTypes() {
 			IRunnableContext context= new BusyIndicatorRunnableContext();
 			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 			int style= IJavaElementSearchConstants.CONSIDER_ALL_TYPES;
 			try {
 				SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), context, scope, style, false, fNameDialogField.getText());
-				dialog.setTitle(PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_title); 
-				dialog.setMessage(PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_description); 
+				dialog.setTitle(PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_title);
+				dialog.setMessage(PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_description);
 				if (dialog.open() == Window.OK) {
 					IType res= (IType) dialog.getResult()[0];
 					fNameDialogField.setText(res.getFullyQualifiedName('.'));
 				}
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, getShell(), PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_title, PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_error_message);  
+				ExceptionHandler.handle(e, getShell(), PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_title, PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_error_message);
 			}
 		}
 
@@ -199,19 +199,19 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			} else {
 				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 				if (val.matches(IStatus.ERROR)) {
-					if (fIsEditingMember) 
+					if (fIsEditingMember)
 						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_invalidMemberName);
 					else
 						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_invalidTypeName);
 				} else {
 					if (doesExist(newText)) {
-						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_entryExists); 
+						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_entryExists);
 					}
 				}
 			}
 			updateStatus(status);
 		}
-		
+
 		private boolean doesExist(String name) {
 			for (int i= 0; i < fExistingEntries.size(); i++) {
 				String entry= (String) fExistingEntries.get(i);
@@ -221,7 +221,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			}
 			return false;
 		}
-		
+
 
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
@@ -233,9 +233,9 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 
 	}
 
-	
+
 	private static class ListLabelProvider extends LabelProvider {
-		
+
 		public final Image MEMBER_ICON;
 		private final Image CLASS_ICON;
 
@@ -243,7 +243,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			MEMBER_ICON= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, 0, JavaElementImageProvider.SMALL_SIZE);
 			CLASS_ICON= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.SMALL_SIZE);
 		}
-		
+
 		public Image getImage(Object element) {
 			return ((String)element).endsWith(WILDCARD) ? CLASS_ICON : MEMBER_ICON;
 		}
@@ -252,8 +252,8 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			return BasicElementLabels.getJavaElementName((String) element);
 		}
 	}
-	
-	
+
+
 	private class ListAdapter implements IListAdapter, IDialogFieldListener {
 
 		private boolean canEdit(ListDialogField field) {
@@ -272,17 +272,17 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
         public void dialogFieldChanged(DialogField field) {
         	doDialogFieldChanged(field);
         }
-        
+
         public void doubleClicked(ListDialogField field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
         }
 	}
-	
-	
+
+
 	private static final Key PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS= getJDTUIKey(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
-	
+
 	private static final String WILDCARD= ".*"; //$NON-NLS-1$
 
 	private static final int IDX_NEW_TYPE= 0;
@@ -291,14 +291,14 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	private static final int IDX_REMOVE= 3;
 
 	private ListDialogField fList;
-	
+
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
 				PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS
-		};	
+		};
 	}
-	
+
 
 	public CodeAssistFavoritesConfigurationBlock(IStatusChangeListener statusListener, IWorkbenchPreferenceContainer workbenchcontainer) {
 		super(statusListener, null, getAllKeys(), workbenchcontainer);
@@ -308,32 +308,32 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
 		scrolled.setExpandVertical(true);
-		
+
 		Composite control= new Composite(scrolled, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		control.setLayout(layout);
-		
+
 		createFavoriteList(control);
-		
+
 		initialize();
-		
+
 		scrolled.setContent(control);
 		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolled.setMinSize(size.x, size.y);
 
 		Dialog.applyDialogFont(scrolled);
-		
+
 		return scrolled;
 	}
-	
+
 	private void createFavoriteList(Composite parent) {
-		String[] buttonLabels= new String[] { 
-				PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_newType_button, 
-				PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_newMember_button, 
-				PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_edit_button, 
+		String[] buttonLabels= new String[] {
+				PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_newType_button,
+				PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_newMember_button,
+				PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_edit_button,
 				PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_remove_button
 		};
 
@@ -341,24 +341,24 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 
 		fList= new ListDialogField(adapter, buttonLabels, new ListLabelProvider());
 		fList.setDialogFieldListener(adapter);
-		fList.setLabelText(PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_description); 
+		fList.setLabelText(PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_description);
 		fList.setRemoveButtonIndex(IDX_REMOVE);
 		fList.enableButton(IDX_EDIT, false);
 		fList.setViewerComparator(new ViewerComparator());
-		
+
 		PixelConverter pixelConverter= new PixelConverter(parent);
-		
+
 		fList.doFillIntoGrid(parent, 3);
 		LayoutUtil.setHorizontalSpan(fList.getLabelControl(null), 2);
 		LayoutUtil.setWidthHint(fList.getLabelControl(null), pixelConverter.convertWidthInCharsToPixels(60));
 		LayoutUtil.setHorizontalGrabbing(fList.getListControl(null));
-		
+
 		Control listControl= fList.getListControl(null);
 		GridData gd= (GridData)listControl.getLayoutData();
 		gd.verticalAlignment= GridData.BEGINNING;
 		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(7);
 	}
-	
+
 	public void initialize() {
 		initializeFields();
 	}
@@ -366,16 +366,16 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	private void initializeFields() {
 		fList.setElements(Arrays.asList(getFavoriteStaticMembersPreference()));
  	}
-	
+
     public void performDefaults() {
 		super.performDefaults();
 		initializeFields();
 	}
-	
+
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null;
 	}
-	
+
 	protected void validateSettings(Key key, String oldValue, String newValue) {
 		// no validation
 	}
@@ -410,9 +410,9 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 				return curr;
 			}
 		}
-		return null;		
+		return null;
 	}
-	
+
 	private void doButtonPressed(int index) {
 		if (index == IDX_NEW_TYPE || index == IDX_NEW_MEMBER) { // add new
 			List existing= fList.getElements();
@@ -426,7 +426,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 				return;
 
 			String editedEntry= (String)selected.get(0);
-			
+
 			List existing= fList.getElements();
 			existing.remove(editedEntry);
 			boolean isType= editedEntry.endsWith(WILDCARD);
@@ -435,13 +435,13 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 				dialog.setInitialSelection(editedEntry.substring(0, editedEntry.length() - 2));
 			else
 				dialog.setInitialSelection(editedEntry);
-			
+
 			if (dialog.open() == Window.OK) {
 				fList.replaceElement(editedEntry, dialog.getResult());
 			}
 		}
 	}
-	
+
 	protected final void doDialogFieldChanged(DialogField field) {
 		// set values in working copy
 		if (field == fList)
@@ -458,7 +458,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	private static String[] deserializeFavorites(String str) {
 		return str.split(";"); //$NON-NLS-1$
 	}
-	
+
 	private static String serializeFavorites(List favorites) {
 		int size= favorites.size();
 		StringBuffer buf= new StringBuffer();

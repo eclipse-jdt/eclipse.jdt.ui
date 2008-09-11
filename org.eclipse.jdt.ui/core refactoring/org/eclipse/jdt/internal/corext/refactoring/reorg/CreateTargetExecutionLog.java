@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Objects of this class can be used as a log to trace the creation of new
  * destinations during refactorings like move.
- * 
+ *
  * @since 3.3
  */
 public final class CreateTargetExecutionLog {
@@ -25,7 +25,7 @@ public final class CreateTargetExecutionLog {
 
 	/**
 	 * Returns the element which got created for the given selection.
-	 * 
+	 *
 	 * @param selection
 	 *            the selection
 	 * @return the created element, or <code>null</code>
@@ -36,7 +36,7 @@ public final class CreateTargetExecutionLog {
 
 	/**
 	 * Returns all created elements.
-	 * 
+	 *
 	 * @return all created elements
 	 */
 	public Object[] getCreatedElements() {
@@ -45,7 +45,7 @@ public final class CreateTargetExecutionLog {
 
 	/**
 	 * Returns all selected elements.
-	 * 
+	 *
 	 * @return all selected elements
 	 */
 	public Object[] getSelectedElements() {
@@ -54,7 +54,7 @@ public final class CreateTargetExecutionLog {
 
 	/**
 	 * Logs that the given element got created by the refactoring.
-	 * 
+	 *
 	 * @param selection
 	 *            the selected object
 	 * @param element

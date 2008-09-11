@@ -65,7 +65,7 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.ui.progress.IDeferredWorkbenchAdapter#fetchDeferredChildren(java.lang.Object,
      *      org.eclipse.jface.progress.IElementCollector,
      *      org.eclipse.core.runtime.IProgressMonitor)
@@ -87,7 +87,7 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.ui.progress.IDeferredWorkbenchAdapter#isContainer()
      */
     public boolean isContainer() {
@@ -96,7 +96,7 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.ui.progress.IDeferredWorkbenchAdapter#getRule()
      */
     public ISchedulingRule getRule(Object o) {
@@ -105,7 +105,7 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
      */
     public Object[] getChildren(Object o) {

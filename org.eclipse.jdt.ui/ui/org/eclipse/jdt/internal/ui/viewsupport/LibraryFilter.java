@@ -23,7 +23,7 @@ public class LibraryFilter extends ViewerFilter {
 	/**
 	 * Returns the result of this filter, when applied to the
 	 * given inputs.
-	 * 
+	 *
 	 * @param viewer the viewer
 	 * @param parent the parent element
 	 * @param element the element to test

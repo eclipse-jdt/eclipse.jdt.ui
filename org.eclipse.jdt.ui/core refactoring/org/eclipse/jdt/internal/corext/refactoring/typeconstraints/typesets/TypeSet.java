@@ -16,15 +16,15 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 
 public abstract class TypeSet implements ITypeSet {
-	
+
 	public TType chooseSingleType() {
 		return null;
 	}
-	
+
 	public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	protected TType getJavaLangObject() {
 		return fTypeSetEnvironment.getJavaLangObject();
 	}
@@ -44,8 +44,8 @@ public abstract class TypeSet implements ITypeSet {
 	 */
 	protected final int fID;
 	private final TypeSetEnvironment fTypeSetEnvironment;
-	
-	protected TypeSet(TypeSetEnvironment typeSetEnvironment) { 
+
+	protected TypeSet(TypeSetEnvironment typeSetEnvironment) {
 		fTypeSetEnvironment= typeSetEnvironment;
 		fID= sID++;
 	}
@@ -138,7 +138,7 @@ public abstract class TypeSet implements ITypeSet {
 //
 //			return new ArrayTypeSet(possiblyArraySubTypeSetFor(at.getArrayElementType()));
 //		} else
-			
+
 		return getTypeSetEnvironment().createSubTypesOfSingleton(t);
 	}
 

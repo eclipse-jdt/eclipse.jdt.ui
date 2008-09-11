@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Refactoring wizard for the extract supertype refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractSupertypeWizard extends RefactoringWizard {
@@ -31,10 +31,10 @@ public final class ExtractSupertypeWizard extends RefactoringWizard {
 
 	/**
 	 * Creates a new extract supertype wizard.
-	 * 
+	 *
 	 * @param processor
-	 *            the processor 
-	 * 
+	 *            the processor
+	 *
 	 * @param refactoring
 	 *            the refactoring
 	 */

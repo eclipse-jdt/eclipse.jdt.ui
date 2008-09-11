@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -23,6 +21,8 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -45,7 +45,7 @@ public class TableLayoutComposite extends Composite {
 	 * <p>
 	 * XXX: Should either switch to use {@link org.eclipse.jface.layout.TableColumnLayout} or get API from JFace or SWT, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=218483
 	 * </p>
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	private static int COLUMN_TRIM;
@@ -58,12 +58,12 @@ public class TableLayoutComposite extends Composite {
 		else
 			COLUMN_TRIM= 3;
 	}
-	
+
 	private List columns= new ArrayList();
 
 	/**
 	 * Creates a new <code>TableLayoutComposite</code>.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @param style the SWT style
 	 */
@@ -85,7 +85,7 @@ public class TableLayoutComposite extends Composite {
             }
         });
 	}
-	
+
 	/**
 	 * Adds a new column of data to this table layout.
 	 *
@@ -94,12 +94,12 @@ public class TableLayoutComposite extends Composite {
 	public void addColumnData(ColumnLayoutData data) {
 		columns.add(data);
 	}
-	
+
 	//---- Helpers -------------------------------------------------------------------------------------
-	
+
 	private Point computeTableSize(Table table) {
 		Point result= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		
+
 		int width= 0;
 		int size= columns.size();
 		for (int i= 0; i < size; ++i) {
@@ -121,7 +121,7 @@ public class TableLayoutComposite extends Composite {
 			result.x= width;
 		return result;
 	}
-	
+
 	private void layoutTable(Table table, int width, Rectangle area, boolean increase) {
 		// XXX: Layout is being called with an invalid value the first time
 		// it is being called on Linux. This method resets the
@@ -192,7 +192,7 @@ public class TableLayoutComposite extends Composite {
 				}
 			}
 		}
-		
+
 		if (increase) {
 			table.setSize(area.width, area.height);
 		}

@@ -12,5 +12,5 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 public class NullContext implements IContext {
-	
+
 }

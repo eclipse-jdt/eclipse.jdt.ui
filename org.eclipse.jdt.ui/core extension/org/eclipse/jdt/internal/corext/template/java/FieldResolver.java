@@ -15,18 +15,18 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.V
 /**
  * Resolves a template variable to a field that is assignment-compatible
  * with the variable instance' class parameter.
- * 
+ *
  * @since 3.3
  */
 public class FieldResolver extends AbstractVariableResolver {
-	
+
 	/**
 	 * Default constructor for instantiation by the extension point.
 	 */
 	public FieldResolver() {
 		this("java.lang.Object"); //$NON-NLS-1$
 	}
-	
+
 	FieldResolver(String defaultType) {
 		super(defaultType);
 	}
@@ -37,5 +37,5 @@ public class FieldResolver extends AbstractVariableResolver {
 	protected Variable[] getVisibleVariables(String type, JavaContext context) {
 		return context.getFields(type);
 	}
-	
+
 }

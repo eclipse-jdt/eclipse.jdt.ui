@@ -32,6 +32,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -61,47 +62,47 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * The action is applicable to selections containing elements of
  * type <code>ICompilationUnit</code>, <code>IMember</code>
  * or <code>IFile</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
- * </p> 
- * 
+ * </p>
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Creates a new <code>OpenAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public OpenAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.OpenAction_label); 
-		setToolTipText(ActionMessages.OpenAction_tooltip); 
-		setDescription(ActionMessages.OpenAction_description); 
+		setText(ActionMessages.OpenAction_label);
+		setToolTipText(ActionMessages.OpenAction_tooltip);
+		setDescription(ActionMessages.OpenAction_description);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_ACTION);
 	}
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OpenAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-		setText(ActionMessages.OpenAction_declaration_label); 
+		setText(ActionMessages.OpenAction_declaration_label);
 		setEnabled(EditorUtility.getEditorInputJavaElement(fEditor, false) != null);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -114,7 +115,7 @@ public class OpenAction extends SelectionDispatchAction {
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
-	
+
 	private boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
@@ -130,7 +131,7 @@ public class OpenAction extends SelectionDispatchAction {
 		}
 		return true;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -143,11 +144,11 @@ public class OpenAction extends SelectionDispatchAction {
 			if (elements == null || elements.length == 0) {
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
-					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null); 
+					statusLine.setMessage(true, ActionMessages.OpenAction_error_messageBadSelection, null);
 				getShell().getDisplay().beep();
 				return;
 			}
-			
+
 			IJavaElement element= elements[0];
 			if (elements.length > 1) {
 				element= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
@@ -157,7 +158,7 @@ public class OpenAction extends SelectionDispatchAction {
 
 			run(new Object[] {element} );
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message); 
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message);
 		} catch (InterruptedException e) {
 			// ignore
 		}
@@ -165,7 +166,7 @@ public class OpenAction extends SelectionDispatchAction {
 
 	/**
 	 * Selects the openable elements out of the given ones.
-	 * 
+	 *
 	 * @param elements the elements to filter
 	 * @return the openable elements
 	 * @since 3.4
@@ -197,7 +198,7 @@ public class OpenAction extends SelectionDispatchAction {
 		}
 		return ActionUtil.isProcessable(fEditor);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -206,20 +207,20 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 		run(selection.toArray());
 	}
-	
+
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @param elements the elements to process
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void run(Object[] elements) {
 		if (elements == null)
 			return;
-		
+
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, ActionMessages.OpenAction_multistatus_message, null);
-		
+
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			try {
@@ -242,21 +243,21 @@ public class OpenAction extends SelectionDispatchAction {
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message, children.length == 1 ? children[0] : status);
 		}
 	}
-	
+
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @param object the element to open
 	 * @return the real element to open
 	 * @throws JavaModelException if an error occurs while accessing the Java model
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public Object getElementToOpen(Object object) throws JavaModelException {
 		return object;
-	}	
-	
+	}
+
 	private String getDialogTitle() {
-		return ActionMessages.OpenAction_error_title; 
+		return ActionMessages.OpenAction_error_title;
 	}
 }

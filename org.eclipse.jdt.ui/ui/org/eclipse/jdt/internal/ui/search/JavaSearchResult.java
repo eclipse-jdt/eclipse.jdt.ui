@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaSearchResult extends AbstractJavaSearchResult {
-		
+
 	private final JavaSearchQuery fQuery;
 	private final Map fElementsToParticipants;
 
@@ -57,7 +57,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 	public String getTooltip() {
 		return getLabel();
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#setMatchFilters(org.eclipse.search.ui.text.MatchFilter[])
 	 */
@@ -65,7 +65,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 		super.setActiveMatchFilters(filters);
 		JavaMatchFilter.setLastUsedFilters(filters);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#getAllMatchFilters()
 	 */
@@ -79,7 +79,7 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 	public ISearchQuery getQuery() {
 		return fQuery;
 	}
-	
+
 	synchronized IMatchPresentation getSearchParticpant(Object element) {
 		return (IMatchPresentation) fElementsToParticipants.get(element);
 	}
@@ -95,14 +95,14 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 		addMatch(match);
 		return true;
 	}
-	
+
 	public void removeAll() {
 		synchronized(this) {
 			fElementsToParticipants.clear();
 		}
 		super.removeAll();
 	}
-	
+
 	public void removeMatch(Match match) {
 		synchronized(this) {
 			if (getMatchCount(match.getElement()) == 1)

@@ -22,9 +22,9 @@ import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class TypeInfoFilter {
-	
+
 	private static class PatternMatcher {
-		
+
 		private String fPattern;
 		private int fMatchKind;
 		private StringMatcher fStringMatcher;
@@ -32,12 +32,12 @@ public class TypeInfoFilter {
 		private static final char END_SYMBOL= '<';
 		private static final char ANY_STRING= '*';
 		private static final char BLANK= ' ';
-		
+
 		public PatternMatcher(String pattern) {
 			this(pattern, SearchPattern.R_EXACT_MATCH | SearchPattern.R_PREFIX_MATCH |
 				SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CAMELCASE_MATCH | SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH);
 		}
-		
+
 		private PatternMatcher(String pattern, int allowedModes) {
 			initializePatternAndMatchKind(pattern);
 			fMatchKind= fMatchKind & allowedModes;
@@ -45,15 +45,15 @@ public class TypeInfoFilter {
 				fStringMatcher= new StringMatcher(fPattern, true, false);
 			}
 		}
-		
+
 		public String getPattern() {
 			return fPattern;
 		}
-		
+
 		public int getMatchKind() {
 			return fMatchKind;
 		}
-		
+
 		public boolean matches(String text) {
 			switch (fMatchKind) {
 				case SearchPattern.R_PATTERN_MATCH:
@@ -72,7 +72,7 @@ public class TypeInfoFilter {
 					return Strings.startsWithIgnoreCase(text, fPattern);
 			}
 		}
-		
+
 		private void initializePatternAndMatchKind(String pattern) {
 			int length= pattern.length();
 			if (length == 0) {
@@ -81,7 +81,7 @@ public class TypeInfoFilter {
 				return;
 			}
 			char last= pattern.charAt(length - 1);
-			
+
 			if (pattern.indexOf('*') != -1 || pattern.indexOf('?') != -1) {
 				fMatchKind= SearchPattern.R_PATTERN_MATCH;
 				switch (last) {
@@ -97,7 +97,7 @@ public class TypeInfoFilter {
 				}
 				return;
 			}
-			
+
 			if (last == END_SYMBOL || last == BLANK) {
 				fPattern= pattern.substring(0, length - 1);
 				if (SearchPattern.validateMatchRule(fPattern,SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH)
@@ -108,18 +108,18 @@ public class TypeInfoFilter {
 				}
 				return;
 			}
-			
+
 			if (SearchUtils.isCamelCasePattern(pattern)) {
 				fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
 				fPattern= pattern;
 				return;
 			}
-			
+
 			fMatchKind= SearchPattern.R_PREFIX_MATCH;
 			fPattern= pattern;
-		}		
+		}
 	}
-	
+
 	private final String fText;
 	private final IJavaSearchScope fSearchScope;
 	private final boolean fIsWorkspaceScope;
@@ -129,16 +129,16 @@ public class TypeInfoFilter {
 
 	private final PatternMatcher fPackageMatcher;
 	private final PatternMatcher fNameMatcher;
-	
+
 	private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
-	
+
 	public TypeInfoFilter(String text, IJavaSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
 		fText= text;
 		fSearchScope= scope;
 		fIsWorkspaceScope= fSearchScope.equals(SearchEngine.createWorkspaceScope());
 		fElementKind= elementKind;
 		fFilterExtension= extension;
-		
+
 		int index= text.lastIndexOf("."); //$NON-NLS-1$
 		if (index == -1) {
 			fNameMatcher= new PatternMatcher(text);
@@ -151,7 +151,7 @@ public class TypeInfoFilter {
 			fNameMatcher= new PatternMatcher(name);
 		}
 	}
-	
+
 	/*
 	 * Transforms o.e.j  to o*.e*.j*
 	 */
@@ -192,7 +192,7 @@ public class TypeInfoFilter {
 	 * {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter}.
 	 * </i>
 	 * </p>
-	 * 
+	 *
 	 * @param text another filter text
 	 * @return <code>true</code> if <code>this</code> filter is a subFilter of <code>text</code>
 	 * e.g. "List" is a subFilter of "L". In this case, the filters matches a proper subset of
@@ -201,7 +201,7 @@ public class TypeInfoFilter {
 	public boolean isSubFilter(String text) {
 		if (! fText.startsWith(text))
 			return false;
-		
+
 		return fText.indexOf('.', text.length()) == -1;
 	}
 
@@ -223,19 +223,19 @@ public class TypeInfoFilter {
 	public int getSearchFlags() {
 		return fNameMatcher.getMatchKind();
 	}
-	
+
 	public int getElementKind() {
 		return fElementKind;
 	}
-	
+
 	public IJavaSearchScope getSearchScope() {
 		return fSearchScope;
 	}
-	
+
 	public int getPackageFlags() {
 		if (fPackageMatcher == null)
 			return SearchPattern.R_EXACT_MATCH;
-		
+
 		return fPackageMatcher.getMatchKind();
 	}
 
@@ -248,7 +248,7 @@ public class TypeInfoFilter {
 			return false;
 		return matchesName(type);
 	}
-	
+
 	public boolean matchesHistoryElement(TypeNameMatch type) {
 		if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type) && matchesFilterExtension(type)))
 			return false;
@@ -261,7 +261,7 @@ public class TypeInfoFilter {
 		fAdapter.setMatch(type);
 		return fFilterExtension.select(fAdapter);
 	}
-	
+
 	private boolean matchesName(TypeNameMatch type) {
 		if (fText.length() == 0) {
 			return true; //empty pattern matches all names
@@ -280,7 +280,7 @@ public class TypeInfoFilter {
 			return true;
 		return fSearchScope.encloses(type.getType());
 	}
-	
+
 	private boolean matchesModifiers(TypeNameMatch type) {
 		if (fElementKind == IJavaSearchConstants.TYPE)
 			return true;

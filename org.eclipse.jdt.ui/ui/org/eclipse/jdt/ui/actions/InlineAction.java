@@ -41,9 +41,9 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.InlineMethodAction;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class InlineAction extends SelectionDispatchAction {
@@ -62,7 +62,7 @@ public class InlineAction extends SelectionDispatchAction {
 	 */
 	public InlineAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.InlineAction_Inline); 
+		setText(RefactoringMessages.InlineAction_Inline);
 		fInlineTemp		= new InlineTempAction(site);
 		fInlineConstant	= new InlineConstantAction(site);
 		fInlineMethod	= new InlineMethodAction(site);
@@ -72,13 +72,13 @@ public class InlineAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public InlineAction(JavaEditor editor) {
 		//don't want to call 'this' here - it'd create useless action objects
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.InlineAction_Inline); 
+		setText(RefactoringMessages.InlineAction_Inline);
 		fEditor= editor;
 		fInlineTemp		= new InlineTempAction(editor);
 		fInlineConstant	= new InlineConstantAction(editor);
@@ -109,7 +109,7 @@ public class InlineAction extends SelectionDispatchAction {
 			return;
 
 		CompilationUnit node= RefactoringASTParser.parseWithASTProvider(typeRoot, true, null);
-		
+
 		if (typeRoot instanceof ICompilationUnit) {
 			ICompilationUnit cu= (ICompilationUnit) typeRoot;
 			if (fInlineTemp.isEnabled() && fInlineTemp.tryInlineTemp(cu, node, selection, getShell()))
@@ -122,9 +122,9 @@ public class InlineAction extends SelectionDispatchAction {
 		if (fInlineMethod.isEnabled() && fInlineMethod.tryInlineMethod(typeRoot, node, selection, getShell()))
 			return;
 
-		MessageDialog.openInformation(getShell(), RefactoringMessages.InlineAction_dialog_title, RefactoringMessages.InlineAction_select); 
+		MessageDialog.openInformation(getShell(), RefactoringMessages.InlineAction_dialog_title, RefactoringMessages.InlineAction_select);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
@@ -133,7 +133,7 @@ public class InlineAction extends SelectionDispatchAction {
 			fInlineConstant.run(selection);
 		else if (fInlineMethod.isEnabled())
 			fInlineMethod.run(selection);
-		else	
+		else
 			//inline temp will never be enabled on IStructuredSelection
 			//don't bother running it
 			Assert.isTrue(! fInlineTemp.isEnabled());

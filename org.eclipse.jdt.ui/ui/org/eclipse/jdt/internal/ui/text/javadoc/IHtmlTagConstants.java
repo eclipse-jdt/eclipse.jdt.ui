@@ -34,7 +34,7 @@ public interface IHtmlTagConstants {
 	 * @since 3.3
 	 */
 	public static final char HTML_ENTITY_END= ';';
-	
+
 	/** Html entity codes */
 	public static final String[] HTML_ENTITY_CODES= new String[] { "&lt;", "&gt;", "&nbsp;", "&amp;", "&circ;", "&tilde;", "&quot;" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 

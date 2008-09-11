@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
@@ -33,6 +31,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -104,7 +104,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.4
 	 */
 	private final int fOrientation;
-	
+
 	private Color fBackgroundColor;
 	private boolean fIsSystemBackgroundColor= true;
 
@@ -123,7 +123,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	public SourceViewerInformationControl(Shell parent, boolean isResizable, int orientation, String statusFieldText) {
 		Assert.isLegal(orientation == SWT.RIGHT_TO_LEFT || orientation == SWT.LEFT_TO_RIGHT || orientation == SWT.NONE);
 		fOrientation= orientation;
-		
+
 		GridLayout layout;
 		GridData gd;
 
@@ -132,9 +132,9 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
 		Display display= fShell.getDisplay();
-		
+
 		initializeColors();
-		
+
 		Composite composite= fShell;
 		layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
@@ -167,7 +167,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		fText.setLayoutData(gd);
 		fText.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		fText.setBackground(fBackgroundColor);
-		
+
 		initializeFont();
 
 		fText.addKeyListener(new KeyListener() {
@@ -217,7 +217,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			fIsSystemBackgroundColor= true;
 		}
 	}
-	
+
 	private RGB getHoverBackgroundColorRGB() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)
@@ -227,7 +227,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 	/**
 	 * Initialize the font to the Java editor font.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private void initializeFont() {
@@ -415,7 +415,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 	/**
 	 * Adds the internal trimmings to the given trim of the shell.
-	 * 
+	 *
 	 * @param trim the shell's trim, will be updated
 	 * @since 3.4
 	 */
@@ -425,7 +425,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		trim.y+= textTrim.y;
 		trim.width+= textTrim.width;
 		trim.height+= textTrim.height;
-		
+
 		if (fStatusField != null) {
 			trim.height+= fSeparator.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 			trim.height+= fStatusField.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
@@ -491,7 +491,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	public boolean isVisible() {
 		return fShell != null && !fShell.isDisposed() && fShell.isVisible();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension5#computeSizeConstraints(int, int)
 	 */

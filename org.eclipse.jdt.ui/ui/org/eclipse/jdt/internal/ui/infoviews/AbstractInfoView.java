@@ -81,7 +81,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		| JavaElementLabels.USE_RESOLVED;
 	private final long LOCAL_VARIABLE_TITLE_FLAGS= TITLE_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 	private final long TYPE_PARAMETER_TITLE_FLAGS= TITLE_FLAGS | JavaElementLabels.TP_POST_QUALIFIED;
-	
+
 	/** JavaElementLabels flags used for the tool tip text */
 	private static final long TOOLTIP_LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
 			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS |
@@ -129,26 +129,26 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	private GotoInputAction fGotoInputAction;
 	/** Counts the number of background computation requests. */
 	private volatile int fComputeCount;
-	
+
 	/**
 	 * Progress monitor used to cancel pending computations.
 	 * @since 3.4
 	 */
 	private IProgressMonitor fComputeProgressMonitor;
-	
+
 	/**
 	 * Background color.
 	 * @since 3.2
 	 */
 	private Color fBackgroundColor;
 	private RGB fBackgroundColorRGB;
-	
+
 	/**
 	 * True if linking with selection is enabled, false otherwise.
 	 * @since 3.4
 	 */
 	private boolean fLinking= true;
-	
+
 	/**
 	 * The last selected element if linking was disabled.
 	 * @since 3.4
@@ -169,10 +169,10 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @return	the input or <code>null</code> if the input was not computed successfully
 	 */
 	abstract protected Object computeInput(Object element);
-	
+
 	/**
 	 * Computes the input for this view based on the given elements
-	 * 
+	 *
 	 * @param part the part that triggered the current element update, or <code>null</code>
 	 * @param selection the new selection, or <code>null</code>
 	 * @param element the new java element that will be displayed
@@ -349,10 +349,10 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			return;
 
 		setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		
+
 		ColorRegistry registry= JFaceResources.getColorRegistry();
 		registry.addListener(this);
-		
+
 		fBackgroundColorRGB= registry.getRGB(getBackgroundColorKey());
 		Color bgColor;
 		if (fBackgroundColorRGB == null) {
@@ -362,18 +362,18 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			bgColor= new Color(display, fBackgroundColorRGB);
 			fBackgroundColor= bgColor;
 		}
-		
+
 		setBackground(bgColor);
 	}
-	
+
 	/**
 	 * The preference key for the background color.
-	 * 
+	 *
 	 * @return the background color key
 	 * @since 3.2
 	 */
 	abstract protected String getBackgroundColorKey();
-	
+
 	public void propertyChange(PropertyChangeEvent event) {
 		if (getBackgroundColorKey().equals(event.getProperty()))
 			inititalizeColors();
@@ -392,25 +392,25 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	protected void stopListeningForSelectionChanges() {
 		getSite().getPage().removePostSelectionListener(this);
 	}
-	
+
 	/**
 	 * Sets whether this info view reacts to selection
 	 * changes in the workbench.
-	 * 
+	 *
 	 * @param enabled if true then the input is set on selection changes
 	 */
 	protected void setLinkingEnabled(boolean enabled) {
 		fLinking= enabled;
-		
+
 		if (fLinking && fLastSelection != null) {
 			setInput(fLastSelection);
 		}
 	}
-	
+
 	/**
 	 * Returns whether this info view reacts to selection
 	 * changes in the workbench.
-	 * 
+	 *
 	 * @return true if linking with selection is enabled
 	 */
 	protected boolean isLinkingEnabled() {
@@ -542,7 +542,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			fBackgroundColor.dispose();
 			fBackgroundColor= null;
 		}
-		
+
 		internalDispose();
 
 	}
@@ -582,7 +582,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		Assert.isLegal(part != null || element != null);
 
 		final int currentCount= ++fComputeCount;
-		
+
 		final ISelection selection;
 		if (element != null)
 			selection= null;
@@ -620,7 +620,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				final Object input= computeInput(part, selection, je, computeProgressMonitor);
 				if (input == null)
 					return;
-				
+
 				final String description= computeDescription(part, selection, je, computeProgressMonitor);
 
 				Shell shell= getSite().getShell();
@@ -642,7 +642,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 						fCurrentViewInput= je;
 						doSetInput(input, description);
-						
+
 						fComputeProgressMonitor= null;
 					}
 				});
@@ -656,7 +656,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 	/**
 	 * Computes the contents description that will be displayed for the current element.
-	 * 
+	 *
 	 * @param part the part that triggered the current element update, or <code>null</code>
 	 * @param selection the new selection, or <code>null</code>
 	 * @param inputElement the new java element that will be displayed
@@ -682,7 +682,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		fGotoInputAction.setEnabled(true);
 
 		IJavaElement inputElement= getInput();
-		
+
 		setContentDescription(description);
 		setTitleToolTip(JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS));
 	}

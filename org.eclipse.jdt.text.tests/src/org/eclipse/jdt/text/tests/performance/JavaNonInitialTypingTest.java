@@ -21,13 +21,13 @@ import junit.framework.TestSuite;
 public class JavaNonInitialTypingTest extends NonInitialTypingTest {
 
 	private static final String SHORT_NAME_TYPING= "Java editor typing speed";
-	
+
 	private static final Class THIS= JavaNonInitialTypingTest.class;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	protected String getScenarioId() {
 		if ("testTypeAMethod".equals(getName()))
 			return "org.eclipse.jdt.text.tests.performance.NonInitialTypingTest#testTypeAMethod()";

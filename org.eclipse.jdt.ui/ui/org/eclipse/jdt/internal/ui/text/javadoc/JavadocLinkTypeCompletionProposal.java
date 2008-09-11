@@ -16,14 +16,13 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.CompletionProposal;
 
-
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 
 /**
  * Types directly completed to &#x7b;&#x40;link Type&#x7d;. See {@link CompletionProposal#JAVADOC_TYPE_REF}.
- * 
+ *
  * @since 3.2
  */
 public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeCompletionProposal {
@@ -32,7 +31,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 		super(proposal, context);
 		Assert.isTrue(isInJavadoc());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#computeReplacementString()
 	 */
@@ -46,7 +45,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 		else
 			return "{@link " + typeReplacement; //$NON-NLS-1$
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
@@ -60,7 +59,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 		boolean continueWithMember= trigger == '#';
 		if (continueWithMember)
 			setCursorPosition(getCursorPosition() - 1); // before the closing curly brace
-		
+
 		super.apply(document, trigger, offset);
 
 		if (continueWithMember)

@@ -34,26 +34,26 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
- 
+
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
-	
+
 	private HierarchyLabelProvider fLabelProvider;
 
-			
+
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle) {
 		super(new Tree(parent, SWT.SINGLE));
 
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
-	
+
 		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true));
 		setUseHashlookup(true);
-			
+
 		setContentProvider(contentProvider);
 		setComparator(new HierarchyViewerSorter(lifeCycle));
-		
+
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}
-	
+
 	public void setQualifiedTypeName(boolean on) {
 		if (on) {
 			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() | JavaElementLabels.T_POST_QUALIFIED);
@@ -65,7 +65,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 
 	/**
 	 * Attaches a context menu listener to the tree.
-	 * 
+	 *
 	 * @param menuListener the menu listener
 	 * @param popupId the popup id
 	 * @param viewSite the view site
@@ -117,7 +117,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 			contentProvider.setWorkingSetFilter(filter);
 		}
 	}
-	
+
 	/**
 	 * Returns true if the hierarchy contains elements. Returns one of them
 	 * With member filtering it is possible that no elements are visible
@@ -133,7 +133,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns true if the hierarchy contains elements. Returns one of them
 	 * With member filtering it is possible that no elements are visible
@@ -149,7 +149,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		}
 		return null;
 	}
-			
+
 	/**
 	 * Returns true if the hierarchy contains element the element.
 	 * @param element the element
@@ -158,19 +158,19 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	public boolean isElementShown(Object element) {
 		return findItem(element) != null;
 	}
-	
+
 	/**
 	 * Updates the content of this viewer: refresh and expanding the tree in the way wanted.
 	 * @param doExpand if set, update should expand
 	 */
 	public abstract void updateContent(boolean doExpand);
-	
+
 	/**
 	 * Returns the title for the current view
 	 * @return the title
 	 */
 	public abstract String getTitle();
-	
+
 	/*
 	 * @see StructuredViewer#setContentProvider
 	 * Content provider must be of type TypeHierarchyContentProvider
@@ -183,5 +183,5 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	protected TypeHierarchyContentProvider getHierarchyContentProvider() {
 		return (TypeHierarchyContentProvider)getContentProvider();
 	}
-	
+
 }

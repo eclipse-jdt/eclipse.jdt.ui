@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersPr
 
 /**
  * Refactoring contribution for the move static members refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class MoveStaticMembersRefactoringContribution extends JavaRefactoringContribution {
@@ -46,7 +46,7 @@ public final class MoveStaticMembersRefactoringContribution extends JavaRefactor
 	public RefactoringDescriptor createDescriptor() {
 		return new MoveStaticMembersDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new MoveStaticMembersDescriptor(project, description, comment, arguments, flags);
 	}

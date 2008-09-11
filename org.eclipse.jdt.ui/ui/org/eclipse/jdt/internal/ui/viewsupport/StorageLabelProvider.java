@@ -15,11 +15,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -51,7 +51,7 @@ public class StorageLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getImage
 	 */
 	public Image getImage(Object element) {
-		if (element instanceof IStorage) 
+		if (element instanceof IStorage)
 			return getImageForJarEntry((IStorage)element);
 
 		return super.getImage(element);
@@ -68,7 +68,7 @@ public class StorageLabelProvider extends LabelProvider {
 	}
 
 	/* (non-Javadoc)
-	 * 
+	 *
 	 * @see IBaseLabelProvider#dispose
 	 */
 	public void dispose() {
@@ -82,16 +82,16 @@ public class StorageLabelProvider extends LabelProvider {
 		}
 		fDefaultImage= null;
 	}
-	
+
 	/*
 	 * Gets and caches an image for a JarEntryFile.
 	 * The image for a JarEntryFile is retrieved from the EditorRegistry.
-	 */ 
+	 */
 	private Image getImageForJarEntry(IStorage element) {
 		if (element instanceof IJarEntryResource && !((IJarEntryResource) element).isFile()) {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 		}
-		
+
 		if (fJarImageMap == null)
 			return getDefaultImage();
 
@@ -101,7 +101,7 @@ public class StorageLabelProvider extends LabelProvider {
 		// Try to find icon for full name
 		String name= element.getName();
 		Image image= (Image)fJarImageMap.get(name);
-		if (image != null) 
+		if (image != null)
 			return image;
 		IFileEditorMapping[] mappings= getEditorRegistry().getFileEditorMappings();
 		int i= 0;
@@ -120,11 +120,11 @@ public class StorageLabelProvider extends LabelProvider {
 			if (key == null)
 				return getDefaultImage();
 			image= (Image)fJarImageMap.get(key);
-			if (image != null) 
+			if (image != null)
 				return image;
 		}
 
-		// Get the image from the editor registry	
+		// Get the image from the editor registry
 		ImageDescriptor desc= getEditorRegistry().getImageDescriptor(name);
 		image= desc.createImage();
 
@@ -132,7 +132,7 @@ public class StorageLabelProvider extends LabelProvider {
 
 		return image;
 	}
-	
+
 	private Image getDefaultImage() {
 		if (fDefaultImage == null)
 			fDefaultImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);

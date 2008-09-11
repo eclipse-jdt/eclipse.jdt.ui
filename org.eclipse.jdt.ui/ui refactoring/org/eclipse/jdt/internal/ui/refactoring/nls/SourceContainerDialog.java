@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
@@ -60,7 +60,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * A TypedViewerFilter that accepts only PackageFragments and JavaProjects.
 	 * PackageFragments are only accepted if they are of the kind K_SOURCE.
@@ -88,8 +88,8 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 		super(shell,new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT),new StandardJavaElementContentProvider());
 		setValidator(new PackageAndProjectSelectionValidator());
 		setComparator(new JavaElementComparator());
-		setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title); 
-		setMessage(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_description); 
+		setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title);
+		setMessage(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_description);
 		addFilter(new JavaTypedViewerFilter());
 	}
 

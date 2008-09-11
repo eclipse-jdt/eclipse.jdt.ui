@@ -28,14 +28,14 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Introduces a new method parameter from a selected expression.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.0
  * @noextend This class is not intended to be subclassed by clients.
- */ 
+ */
 public class IntroduceParameterAction extends SelectionDispatchAction {
 
 	private final JavaEditor fEditor;
@@ -43,7 +43,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public IntroduceParameterAction(JavaEditor editor) {
@@ -56,24 +56,24 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		setEnabled(RefactoringAvailabilityTester.isIntroduceParameterAvailable(selection));
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;

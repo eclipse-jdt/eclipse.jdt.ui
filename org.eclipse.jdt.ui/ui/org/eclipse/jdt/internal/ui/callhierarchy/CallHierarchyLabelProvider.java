@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -34,7 +34,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
     private static final int IMAGEFLAGS= DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS;
 
     private ILabelDecorator fDecorator;
-    
+
     CallHierarchyLabelProvider() {
         super(TEXTFLAGS, IMAGEFLAGS);
         fDecorator= new CallHierarchyLabelDecorator();
@@ -55,7 +55,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         } else {
             result= super.getImage(element);
         }
-        
+
         return result;
     }
 
@@ -68,7 +68,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         }
         return getSpecialLabel(element);
     }
-    
+
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
      */
@@ -81,29 +81,29 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         }
         return new StyledString(getSpecialLabel(element));
     }
-    
+
     private String getSpecialLabel(Object element) {
     	if (element instanceof MethodWrapper) {
-    		return CallHierarchyMessages.CallHierarchyLabelProvider_root; 
+    		return CallHierarchyMessages.CallHierarchyLabelProvider_root;
     	} else if (element == TreeTermination.SEARCH_CANCELED) {
-            return CallHierarchyMessages.CallHierarchyLabelProvider_searchCanceled; 
+            return CallHierarchyMessages.CallHierarchyLabelProvider_searchCanceled;
         } else if (isPendingUpdate(element)) {
-            return CallHierarchyMessages.CallHierarchyLabelProvider_updatePending; 
+            return CallHierarchyMessages.CallHierarchyLabelProvider_updatePending;
         }
-        return CallHierarchyMessages.CallHierarchyLabelProvider_noMethodSelected; 
+        return CallHierarchyMessages.CallHierarchyLabelProvider_noMethodSelected;
     }
-    
+
     private boolean isPendingUpdate(Object element) {
         return element instanceof IWorkbenchAdapter;
     }
-    
+
     private String getElementLabel(MethodWrapper methodWrapper) {
         String label = super.getText(methodWrapper.getMember());
 
         Collection callLocations = methodWrapper.getMethodCall().getCallLocations();
 
         if ((callLocations != null) && (callLocations.size() > 1)) {
-            return Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_matches, new String[]{label, String.valueOf(callLocations.size())}); 
+            return Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_matches, new String[]{label, String.valueOf(callLocations.size())});
         }
 
         return label;

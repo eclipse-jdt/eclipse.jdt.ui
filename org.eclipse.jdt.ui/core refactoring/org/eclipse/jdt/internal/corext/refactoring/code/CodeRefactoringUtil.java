@@ -46,15 +46,15 @@ public class CodeRefactoringUtil {
 		cuNode.accept(analyzer);
 		ASTNode coveringNode= analyzer.getLastCoveringNode();
 		if (! (coveringNode instanceof Block) || ! (coveringNode.getParent() instanceof MethodDeclaration))
-			return RefactoringStatus.createFatalErrorStatus(invalidSelectionMessage); 
+			return RefactoringStatus.createFatalErrorStatus(invalidSelectionMessage);
 		if (ASTNodes.getMessages(coveringNode, ASTNodes.NODE_ONLY).length == 0)
-			return RefactoringStatus.createFatalErrorStatus(invalidSelectionMessage); 
+			return RefactoringStatus.createFatalErrorStatus(invalidSelectionMessage);
 
 		MethodDeclaration methodDecl= (MethodDeclaration)coveringNode.getParent();
-		String message= Messages.format(RefactoringCoreMessages.CodeRefactoringUtil_error_message, BasicElementLabels.getJavaElementName(methodDecl.getName().getIdentifier())); 
-		return RefactoringStatus.createFatalErrorStatus(message);	
+		String message= Messages.format(RefactoringCoreMessages.CodeRefactoringUtil_error_message, BasicElementLabels.getJavaElementName(methodDecl.getName().getIdentifier()));
+		return RefactoringStatus.createFatalErrorStatus(message);
 	}
-	
+
 	public static int getIndentationLevel(ASTNode node, ICompilationUnit unit) throws CoreException {
 		IPath fullPath= unit.getCorrespondingResource().getFullPath();
 		try{
@@ -70,7 +70,7 @@ public class CodeRefactoringUtil {
 		} finally {
 			FileBuffers.getTextFileBufferManager().disconnect(fullPath, LocationKind.IFILE, new NullProgressMonitor());
 		}
-	}	
+	}
 
     private CodeRefactoringUtil() {}
 }

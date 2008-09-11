@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
  * The interface is used in type binding visiting algorithms.
- * 
+ *
  * @see Bindings#visitHierarchy(ITypeBinding, TypeBindingVisitor)
  */
 public interface TypeBindingVisitor {

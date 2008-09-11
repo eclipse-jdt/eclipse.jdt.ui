@@ -57,11 +57,11 @@ class OverwriteHelper {
 		Assert.isNotNull(cus);
 		fCus= cus;
 	}
-	
+
 	public void setPackageFragmentRoots(IPackageFragmentRoot[] roots) {
 		Assert.isNotNull(roots);
 		fRoots= roots;
-	}	
+	}
 
 	public void setPackages(IPackageFragment[] fragments) {
 		Assert.isNotNull(fragments);
@@ -94,15 +94,15 @@ class OverwriteHelper {
 		fDestination= destination;
 		confirmOverwritting(reorgQueries);
 	}
-	
+
 	private void confirmOverwritting(IReorgQueries reorgQueries) {
-		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.OverwriteHelper_0, true, IReorgQueries.CONFIRM_OVERWRITING); 
-		IConfirmQuery skipQuery= reorgQueries.createSkipQuery(RefactoringCoreMessages.OverwriteHelper_2, IReorgQueries.CONFIRM_SKIPPING); 
+		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.OverwriteHelper_0, true, IReorgQueries.CONFIRM_OVERWRITING);
+		IConfirmQuery skipQuery= reorgQueries.createSkipQuery(RefactoringCoreMessages.OverwriteHelper_2, IReorgQueries.CONFIRM_SKIPPING);
 		confirmFileOverwritting(overwriteQuery, skipQuery);
 		confirmFolderOverwritting(skipQuery);
-		confirmCuOverwritting(overwriteQuery);	
-		confirmPackageFragmentRootOverwritting(skipQuery, overwriteQuery);	
-		confirmPackageOverwritting(overwriteQuery);	
+		confirmCuOverwritting(overwriteQuery);
+		confirmPackageFragmentRootOverwritting(skipQuery, overwriteQuery);
+		confirmPackageOverwritting(overwriteQuery);
 	}
 
 	private void confirmPackageFragmentRootOverwritting(IConfirmQuery skipQuery, IConfirmQuery overwriteQuery) {
@@ -139,7 +139,7 @@ class OverwriteHelper {
 		for (int i= 0; i < fFolders.length; i++) {
 			IFolder folder= fFolders[i];
 			if (willOverwrite(folder) && ! skip(BasicElementLabels.getResourceName(folder), overwriteQuery))
-				foldersToNotOverwrite.add(folder);				
+				foldersToNotOverwrite.add(folder);
 		}
 		IFolder[] folders= (IFolder[]) foldersToNotOverwrite.toArray(new IFolder[foldersToNotOverwrite.size()]);
 		fFolders= ArrayTypeConverter.toFolderArray(ReorgUtils.setMinus(fFolders, folders));
@@ -185,27 +185,27 @@ class OverwriteHelper {
 	}
 
 	/*
-	 * Will resource override a member of destination? 
+	 * Will resource override a member of destination?
 	 */
 	private boolean willOverwrite(IResource resource) {
 		if (resource == null)
 			return false;
-		
+
 		IResource destinationResource= ResourceUtil.getResource(fDestination);
 		if (destinationResource.equals(resource.getParent()))
 			return false;
-		
+
 		if (destinationResource instanceof IContainer) {
 			IContainer container= (IContainer)destinationResource;
 			IResource member=  container.findMember(resource.getName());
 			if (member == null || !member.exists())
 				return false;
-			
+
 			return true;
 		}
 		return false;
 	}
-	
+
 	private boolean canOverwrite(IPackageFragmentRoot root) {
 		if (fDestination instanceof IJavaProject) {
 			IJavaProject destination= (IJavaProject)fDestination;
@@ -238,11 +238,11 @@ class OverwriteHelper {
 	}
 
 	private static boolean overwrite(String name, IConfirmQuery overwriteQuery){
-		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_1, BasicElementLabels.getJavaElementName(name)); 
+		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_1, BasicElementLabels.getJavaElementName(name));
 		return overwriteQuery.confirm(question);
 	}
 	private static boolean skip(String name, IConfirmQuery overwriteQuery){
-		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_3, BasicElementLabels.getJavaElementName(name)); 
+		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_3, BasicElementLabels.getJavaElementName(name));
 		return overwriteQuery.confirm(question);
-	}	
+	}
 }

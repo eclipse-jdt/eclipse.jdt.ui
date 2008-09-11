@@ -12,14 +12,16 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
+import org.w3c.dom.Element;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.operation.IRunnableContext;
 
@@ -33,10 +35,8 @@ import org.eclipse.jdt.ui.wizards.JavadocExportWizardPage.IJavadocExportWizardPa
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-import org.w3c.dom.Element;
-
 public class ContributedJavadocWizardPage extends NewElementWizardPage implements IJavadocExportWizardPageContainer {
-	
+
 	private static class ErrorJavadocExportWizardPage extends JavadocExportWizardPage {
 
 		public Control createContents(Composite parent) {
@@ -51,8 +51,8 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	private static final String ATT_ID = "id"; //$NON-NLS-1$
 	private static final String ATT_DESCRIPTION = "description"; //$NON-NLS-1$
 	private static final String ATT_PAGE_CLASS = "class"; //$NON-NLS-1$
-	
-	
+
+
 	private IConfigurationElement fConfigElement;
 	private JavadocExportWizardPage fPage;
 	private final JavadocOptionsManager fStore;
@@ -62,11 +62,11 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		fConfigElement = configElement;
 		fStore= store;
 		fPage= null;
-		
-		setTitle(JavadocExportMessages.JavadocWizardPage_javadocwizardpage_description); 
+
+		setTitle(JavadocExportMessages.JavadocWizardPage_javadocwizardpage_description);
 		setDescription(fConfigElement.getAttribute(ATT_DESCRIPTION));
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -74,7 +74,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		Control createContents= getPage().createContents(parent);
 		setControl(createContents);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewElementWizardPage#setVisible(boolean)
 	 */
@@ -82,7 +82,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		getPage().setVisible(visible);
 		super.setVisible(visible);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.JavadocExportWizardPage.IJavadocExportWizardPageContainer#getRunnableContext()
 	 */
@@ -96,14 +96,14 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	public void statusUpdated() {
 		updateStatus(getPage().getStatus());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#performHelp()
 	 */
 	public void performHelp() {
 		getPage().performHelp();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -114,7 +114,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		}
 		super.dispose();
 	}
-	
+
 	public String[] getConfiguredJavadocOptions() {
 		ArrayList vmArgs= new ArrayList();
 		ArrayList toolArgs= new ArrayList();
@@ -128,7 +128,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		fStore.getArgumentArray(vmArgs, toolArgs);
 		return (String[]) vmArgs.toArray(new String[vmArgs.size()]);
 	}
-	
+
 	public IJavaElement[] getSelectedJavaElements() {
 		IJavaElement[] sourceElements= fStore.getSourceElements();
 		if (sourceElements != null) {
@@ -136,7 +136,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		}
 		return new IJavaElement[0];
 	}
-	
+
 	public void updateArguments(ArrayList vmOptions, ArrayList toolOptions) {
 		getPage().updateArguments(vmOptions, toolOptions);
 	}
@@ -162,17 +162,17 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		}
 		return fPage;
 	}
-	
+
 	public static ContributedJavadocWizardPage[] getContributedPages(JavadocOptionsManager store) {
 		ArrayList pages= new ArrayList();
-		
-		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION); 
+
+		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement curr= elements[i];
 			String id= curr.getAttribute(ATT_ID);
 			String description= curr.getAttribute(ATT_DESCRIPTION);
 			String pageClassName= curr.getAttribute(ATT_PAGE_CLASS);
-			
+
 			if (id == null || description == null || pageClassName == null) {
 				JavaPlugin.logErrorMessage("Invalid extension " + curr.toString()); //$NON-NLS-1$
 				continue;

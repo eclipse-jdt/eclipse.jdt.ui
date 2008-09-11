@@ -13,13 +13,13 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class LinkedProposalPositionGroup {
-	
+
 	/**
 	 * {@link LinkedProposalPositionGroup.PositionInformation} describes a position
 	 * insinde a position group. The information provided must be accurate
@@ -51,9 +51,9 @@ public class LinkedProposalPositionGroup {
 		public abstract int getLength();
 		public abstract int getSequenceRank();
 	}
-	
+
 	public static class Proposal {
-		
+
 		private String fDisplayString;
 		private Image fImage;
 		private int fRelevance;
@@ -63,41 +63,41 @@ public class LinkedProposalPositionGroup {
 			fImage= image;
 			fRelevance= relevance;
 		}
-		
+
 		public String getDisplayString() {
 			return fDisplayString;
 		}
-		
+
 		public Image getImage() {
 			return fImage;
 		}
-		
+
 		public int getRelevance() {
 			return fRelevance;
 		}
-				
+
 		public void setImage(Image image) {
 			fImage= image;
 		}
-		
+
 		public String getAdditionalProposalInfo() {
 			return null;
 		}
-				
+
 		public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
 			return new ReplaceEdit(position.getOffset(), position.getLength(), fDisplayString);
 		}
-	}	
-	
+	}
+
 	public static PositionInformation createPositionInformation(ITrackedNodePosition pos, boolean isFirst) {
 		return new TrackedNodePosition(pos, isFirst);
 	}
-	
+
 	private static class TrackedNodePosition extends PositionInformation {
-		
+
 		private final ITrackedNodePosition fPos;
 		private final boolean fIsFirst;
-		
+
 		public TrackedNodePosition(ITrackedNodePosition pos, boolean isFirst) {
 			fPos= pos;
 			fIsFirst= isFirst;
@@ -106,16 +106,16 @@ public class LinkedProposalPositionGroup {
 		public int getOffset() {
 			return fPos.getStartPosition();
 		}
-		
+
 		public int getLength() {
 			return fPos.getLength();
 		}
-		
+
 		public int getSequenceRank() {
 			return fIsFirst ? 0 : 1;
 		}
 	}
-	
+
 	private static final class JavaLinkedModeProposal extends Proposal {
 		private final ITypeBinding fTypeProposal;
 		private final ICompilationUnit fCompilationUnit;
@@ -136,47 +136,47 @@ public class LinkedProposalPositionGroup {
 		public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
 			ImportRewrite impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
 			String replaceString= impRewrite.addImport(fTypeProposal);
-				
+
 			MultiTextEdit composedEdit= new MultiTextEdit();
 			composedEdit.addChild(new ReplaceEdit(position.getOffset(), position.getLength(), replaceString));
 			composedEdit.addChild(impRewrite.rewriteImports(null));
 			return composedEdit;
 		}
 	}
-		
+
 
 	private final String fGroupId;
 	private final List/*<Position>*/ fPositions;
 	private final List/*<Proposal>*/ fProposals;
-	
+
 
 	public LinkedProposalPositionGroup(String groupID) {
 		fGroupId= groupID;
 		fPositions= new ArrayList();
 		fProposals= new ArrayList();
 	}
-	
+
 	public void addPosition(PositionInformation position) {
 		fPositions.add(position);
 	}
-	
+
 	public void addProposal(Proposal proposal) {
 		fProposals.add(proposal);
 	}
-	
-	
+
+
 	public void addPosition(ITrackedNodePosition position, boolean isFirst) {
 		addPosition(createPositionInformation(position, isFirst));
 	}
-	
+
 	public void addProposal(String displayString, Image image, int relevance) {
 		addProposal(new Proposal(displayString, image, relevance));
 	}
-	
+
 	public void addProposal(ITypeBinding type, ICompilationUnit cu, int relevance) {
 		addProposal(new JavaLinkedModeProposal(cu, type, relevance));
 	}
-	
+
 	public String getGroupId() {
 		return fGroupId;
 	}
@@ -188,5 +188,5 @@ public class LinkedProposalPositionGroup {
 	public Proposal[] getProposals() {
 		return (Proposal[])fProposals.toArray(new Proposal[fProposals.size()]);
 	}
-	
+
 }

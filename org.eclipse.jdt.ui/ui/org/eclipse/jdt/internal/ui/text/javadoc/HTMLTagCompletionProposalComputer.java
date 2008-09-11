@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.StyledString;
 
@@ -119,7 +119,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 		}
 		return pos;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.2
@@ -127,7 +127,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!(context instanceof JavadocContentAssistInvocationContext))
 			return Collections.EMPTY_LIST;
-		
+
 		JavadocContentAssistInvocationContext docContext= (JavadocContentAssistInvocationContext) context;
 		int flags= docContext.getFlags();
 		fCurrentPos= docContext.getInvocationOffset();
@@ -164,7 +164,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 			int word1Begin= findCharBeforeWord(fDocument, lineBeginPos, fCurrentPos);
 			if (word1Begin == fCurrentPos)
 				return;
-			
+
 			char firstChar= fDocument.getChar(word1Begin);
 			if (firstChar == '<') {
 				String prefix= fDocument.get(word1Begin, fCurrentPos - word1Begin);
@@ -224,7 +224,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 		proposal.setTriggerCharacters( new char[] { '>' });
 		return proposal;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeContextInformation(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.2

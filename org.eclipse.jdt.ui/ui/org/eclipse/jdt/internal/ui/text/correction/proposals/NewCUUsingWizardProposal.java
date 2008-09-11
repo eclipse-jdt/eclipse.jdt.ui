@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -259,7 +259,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		}
 
 	}
-	
+
 	private NewTypeWizardPage getPage(NewElementWizard wizard) {
 		IWizardPage[] pages= wizard.getPages();
 		Assert.isTrue(pages.length > 0 && pages[0] instanceof NewTypeWizardPage);

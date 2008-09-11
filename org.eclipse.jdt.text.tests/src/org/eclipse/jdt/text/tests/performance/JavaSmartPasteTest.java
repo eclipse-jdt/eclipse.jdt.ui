@@ -13,6 +13,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -35,13 +36,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * results vary too much.
  */
 public class JavaSmartPasteTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= JavaSmartPasteTest.class;
-	
+
 	private static final String SRC_FILE= "org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
-	
+
 	private static final String DEST_FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
-	
+
 	private static final int SRC_START_LINE= 168;
 
 	private static final int SRC_END_LINE= 343;
@@ -55,7 +56,7 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 	private AbstractTextEditor fEditor;
 
 	private static final String SHORT_NAME= "Smart paste in Java editor";
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -69,7 +70,7 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 		store.setValue(PreferenceConstants.EDITOR_SMART_PASTE, true);
 		store.setValue(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, true);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

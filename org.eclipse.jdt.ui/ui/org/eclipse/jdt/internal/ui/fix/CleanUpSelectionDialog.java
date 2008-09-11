@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -30,6 +27,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -41,25 +41,25 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 
 public abstract class CleanUpSelectionDialog extends StatusDialog implements IModifyDialogTabPage.IModificationListener {
-	
+
 	protected final class NamedCleanUpTabPage {
-		
+
 		private final String fName;
 		private final ICleanUpTabPage fPage;
-		
+
 		public NamedCleanUpTabPage(String name, ICleanUpTabPage page) {
 			fName= name;
 			fPage= page;
 		}
-		
+
 		public ICleanUpTabPage getPage() {
 			return fPage;
 		}
-		
+
 		public String getName() {
 			return fName;
 		}
-		
+
 	}
 
 	private static final String DS_KEY_PREFERRED_WIDTH= ".preferred_width"; //$NON-NLS-1$
@@ -140,9 +140,9 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		NamedCleanUpTabPage[] pages= createTabPages(fWorkingValues);
-		
+
 		fPages= new ICleanUpTabPage[pages.length];
-		
+
 		for (int i= 0; i < pages.length; i++) {
 			fPages[i]= pages[i].getPage();
 			addTabPage(pages[i].getName(), fPages[i]);

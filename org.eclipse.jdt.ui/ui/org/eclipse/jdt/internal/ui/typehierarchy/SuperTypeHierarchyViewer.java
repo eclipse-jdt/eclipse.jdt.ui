@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  * on construction (shared type hierarchy)
  */
 public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
-	
+
 	public SuperTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle) {
 		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), lifeCycle);
 	}
@@ -50,7 +50,7 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 		}
 		getTree().setRedraw(true);
 	}
-	
+
 	/*
 	 * Content provider for the supertype hierarchy
 	 */
@@ -58,7 +58,7 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 		public SuperTypeHierarchyContentProvider(TypeHierarchyLifeCycle lifeCycle) {
 			super(lifeCycle);
 		}
-		
+
 		protected final void getTypesInHierarchy(IType type, List res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
@@ -68,12 +68,12 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 				}
 			}
 		}
-		
+
 		protected IType getParentType(IType type) {
 			// cant handle
 			return null;
 		}
-		
+
 	}
 
 }

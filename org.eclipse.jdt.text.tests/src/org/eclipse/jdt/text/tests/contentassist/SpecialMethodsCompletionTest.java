@@ -16,7 +16,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
@@ -33,14 +33,14 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 	public static Test suite() {
 		return new CompletionTestSetup(allTests());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */
@@ -58,14 +58,14 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 				"        return super.toString();\n" +
 				"    }|");
 	}
-	
+
 	public void testMethodCreation() throws Exception {
-		assertTypeBodyProposal("foobar|", "foobar(", "/**\n" + 
-				"     * Method.\n" + 
-				"     */\n" + 
-				"    private void foobar() {\n" + 
-				"        //TODO\n" + 
-				"\n" + 
+		assertTypeBodyProposal("foobar|", "foobar(", "/**\n" +
+				"     * Method.\n" +
+				"     */\n" +
+				"    private void foobar() {\n" +
+				"        //TODO\n" +
+				"\n" +
 				"    }|");
 	}
 }

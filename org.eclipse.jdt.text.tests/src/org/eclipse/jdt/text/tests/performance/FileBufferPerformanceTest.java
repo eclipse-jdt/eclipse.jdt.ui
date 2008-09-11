@@ -33,11 +33,11 @@ import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 /**
  * Performance tests for file buffers.
- * 
+ *
  * @since 3.3
  */
 public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
-	
+
 	private static final int LONG_REPEAT_COUNT= 1000000;
 	private static final int UNCONNECTED_REPEAT_COUNT= 100000;
 	private static final int ALL_REPEAT_COUNT= 5000;
@@ -48,7 +48,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	private File fTempFile;
 	private IPath fTempFilePath;
 	private IPath fNonExistingPath;
-	
+
 
 	public static Test suite() {
 		return new PerfTestSuite(FileBufferPerformanceTest.class);
@@ -57,8 +57,8 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 	public static Test setUpTest(Test test) {
 		return new PerformanceTestSetup(test);
 	}
-	
-	
+
+
 	protected void setUp() throws Exception {
 		fProject= ResourceHelper.createProject("project");
 		fManager= FileBuffers.getTextFileBufferManager();
@@ -70,7 +70,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		fTempFilePath= new Path(fTempFile.getAbsolutePath());
 		assertTrue(buffer == null);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		ResourceHelper.deleteProject("project");
 		fTempFile.delete();
@@ -81,19 +81,19 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		IFile file= ResourceHelper.createFile(folder, "WorkspaceFile", "content");
 		return file.getFullPath();
 	}
-	
+
 	public void measureConnectOld(PerformanceMeter meter) throws CoreException {
 		meter.start();
 		for (int i= 0; i < LONG_REPEAT_COUNT; i++)
 			fManager.connect(fPath, LocationKind.IFILE, null);
 		meter.stop();
-		
+
 		for (int i= 0; i < LONG_REPEAT_COUNT; i++)
 			fManager.disconnect(fPath, LocationKind.IFILE, null);
-		
+
 		assertNull(fManager.getTextFileBuffer(fPath, LocationKind.IFILE));
 	}
-	
+
 	public void measureGetOld(PerformanceMeter meter) throws CoreException {
 		fManager.connect(fPath, LocationKind.IFILE, null);
 		meter.start();
@@ -101,10 +101,10 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 			fManager.getTextFileBuffer(fPath, LocationKind.IFILE);
 		meter.stop();
 		fManager.disconnect(fPath, LocationKind.IFILE, null);
-		
+
 		assertNull(fManager.getTextFileBuffer(fPath, LocationKind.IFILE));
 	}
-	
+
 	public void measureGetOldNonExist(PerformanceMeter meter) throws CoreException {
 		fManager.connect(fNonExistingPath, LocationKind.NORMALIZE, null);
 		meter.start();
@@ -112,10 +112,10 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 			fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE);
 		meter.stop();
 		fManager.disconnect(fNonExistingPath, LocationKind.NORMALIZE, null);
-		
+
 		assertNull(fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE));
 	}
-	
+
 	public void measureGetOldExternal(PerformanceMeter meter) throws Exception {
 		fManager.connect(fTempFilePath, LocationKind.LOCATION, null);
 		meter.start();
@@ -125,7 +125,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		fManager.disconnect(fTempFilePath, LocationKind.LOCATION, null);
 		assertNull(fManager.getTextFileBuffer(fTempFilePath, LocationKind.LOCATION));
 	}
-	
+
 	public void measureAllOld(PerformanceMeter meter) throws CoreException {
 		meter.start();
 		for (int i= 0; i < ALL_REPEAT_COUNT; i++) {
@@ -134,25 +134,25 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 			fManager.disconnect(fPath, LocationKind.IFILE, null);
 		}
 		meter.stop();
-		
+
 		assertNull(fManager.getTextFileBuffer(fPath, LocationKind.IFILE));
 	}
-	
+
 	public void measureGetUnconnectedOld(PerformanceMeter meter) {
 		meter.start();
 		for (int i= 0; i < UNCONNECTED_REPEAT_COUNT; i++)
 			fManager.getTextFileBuffer(fPath, LocationKind.IFILE);
 		meter.stop();
-		
+
 		assertNull(fManager.getTextFileBuffer(fPath, LocationKind.IFILE));
 	}
-	
+
 	public void measureGetUnconnectedOldNonExist(PerformanceMeter meter) {
 		meter.start();
 		for (int i= 0; i < UNCONNECTED_REPEAT_COUNT; i++)
 			fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE);
 		meter.stop();
-		
+
 		assertNull(fManager.getTextFileBuffer(fNonExistingPath, LocationKind.NORMALIZE));
 	}
 

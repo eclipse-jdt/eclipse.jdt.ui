@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
-import com.ibm.icu.text.BreakIterator;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -19,13 +17,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
+import com.ibm.icu.text.BreakIterator;
 
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IContext2;
 import org.eclipse.help.IHelpResource;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.internal.text.html.HTML2TextReader;
 
@@ -47,8 +47,8 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 
 public class JavadocHelpContext implements IContext2 {
-	
-	
+
+
 	public static void displayHelp(String contextId, Object[] selected) throws CoreException {
 		IContext context= HelpSystem.getContext(contextId);
 		if (context != null) {
@@ -58,8 +58,8 @@ public class JavadocHelpContext implements IContext2 {
 			PlatformUI.getWorkbench().getHelpSystem().displayHelp(context);
 		}
 	}
-	
-	
+
+
 	private static class JavaUIHelpResource implements IHelpResource {
 
 		private IJavaElement fElement;
@@ -79,13 +79,13 @@ public class JavadocHelpContext implements IContext2 {
 			return Messages.format(JavaUIMessages.JavaUIHelp_link_label, label);
 		}
 	}
-	
+
 
 	private IHelpResource[] fHelpResources;
 	private String fText;
 	private String fTitle;
-	
-	
+
+
 	// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=85721
 	private static final boolean BUG_85721_FIXED= false;
 
@@ -103,14 +103,14 @@ public class JavadocHelpContext implements IContext2 {
 				// if element isn't on the build path skip it
 				if (!ActionUtil.isOnBuildPath(element))
 					continue;
-				
+
 				// Create Javadoc summary
 				if (BUG_85721_FIXED) {
 					if (javadocSummary == null) {
 						javadocSummary= retrieveText(element);
 						if (javadocSummary != null) {
 							String elementLabel= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT);
-							
+
 							// FIXME: needs to be NLSed once the code becomes active
 							javadocSummary= "<b>Javadoc for " + elementLabel + ":</b><br>" + javadocSummary;   //$NON-NLS-1$//$NON-NLS-2$
 						}
@@ -118,7 +118,7 @@ public class JavadocHelpContext implements IContext2 {
 						javadocSummary= ""; // no Javadoc summary for multiple selection //$NON-NLS-1$
 					}
 				}
-				
+
 				URL url= JavaUI.getJavadocLocation(element, true);
 				if (url == null || doesNotExist(url)) {
 					IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
@@ -148,12 +148,12 @@ public class JavadocHelpContext implements IContext2 {
 				}
 			}
 		}
-		
+
 		fHelpResources= (IHelpResource[]) helpResources.toArray(new IHelpResource[helpResources.size()]);
 
 		if (context != null)
 			fText= context.getText();
-		
+
 		if (BUG_85721_FIXED) {
 			if (javadocSummary != null && javadocSummary.length() > 0) {
 				if (fText != null)
@@ -162,12 +162,12 @@ public class JavadocHelpContext implements IContext2 {
 					fText= javadocSummary;
 			}
 		}
-		
+
 		if (fText == null)
 			fText= "";  //$NON-NLS-1$
-		
+
 	}
-	
+
 	private String getURLString(URL url) {
 		String location= url.toExternalForm();
 		if (url.getRef() != null) {
@@ -204,7 +204,7 @@ public class JavadocHelpContext implements IContext2 {
 
 	/**
 	 * Gets the reader content as a String.
-	 * 
+	 *
 	 * @param reader the reader
 	 * @return the string
 	 */
@@ -239,7 +239,7 @@ public class JavadocHelpContext implements IContext2 {
 
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.help.IContext2#getTitle()
 	 * @since 3.1

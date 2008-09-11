@@ -21,10 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditCopier;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,6 +29,10 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditCopier;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -107,7 +107,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Refactoring processor for the extract supertype refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor {
@@ -146,7 +146,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates a new extract supertype refactoring processor.
-	 * 
+	 *
 	 * @param members
 	 *            the members to extract, or <code>null</code> if invoked by
 	 *            scripting
@@ -165,7 +165,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates a new extract supertype refactoring processor from refactoring arguments.
-	 * 
+	 *
 	 * @param arguments
 	 *            the refactoring arguments
 	 * @param status
@@ -190,7 +190,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	protected final RefactoringStatus checkDeclaringSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
 		return new RefactoringStatus();
 	}
-	
+
 	protected CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(unit);
@@ -205,7 +205,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Checks whether the compilation unit to be extracted is valid.
-	 * 
+	 *
 	 * @return a status describing the outcome of the
 	 */
 	public RefactoringStatus checkExtractedCompilationUnit() {
@@ -242,7 +242,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Computes the destination type based on the new name.
-	 * 
+	 *
 	 * @param name the new name
 	 * @return the destination type
 	 */
@@ -332,7 +332,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates the new extracted supertype.
-	 * 
+	 *
 	 * @param superType
 	 *            the super type, or <code>null</code> if no super type (ie.
 	 *            <code>java.lang.Object</code>) is available
@@ -369,7 +369,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates a working copy for the modified subtype.
-	 * 
+	 *
 	 * @param unit
 	 *            the compilation unit
 	 * @param root
@@ -418,7 +418,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates the necessary constructors for the extracted supertype.
-	 * 
+	 *
 	 * @param targetRewrite
 	 *            the target compilation unit rewrite
 	 * @param superType
@@ -465,7 +465,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates the source for the new compilation unit containing the supertype.
-	 * 
+	 *
 	 * @param extractedWorkingCopy
 	 *            the working copy of the new extracted supertype
 	 * @param superType
@@ -550,7 +550,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * Creates the declaration of the new supertype, excluding any comments or
 	 * package declaration.
-	 * 
+	 *
 	 * @param extractedWorkingCopy
 	 *            the working copy of the new extracted supertype
 	 * @param superType
@@ -631,7 +631,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates the type parameters of the new supertype.
-	 * 
+	 *
 	 * @param targetRewrite
 	 *            the target compilation unit rewrite
 	 * @param subType
@@ -658,7 +658,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates a new type signature of a subtype.
-	 * 
+	 *
 	 * @param subRewrite
 	 *            the compilation unit rewrite of a subtype
 	 * @param declaration
@@ -714,7 +714,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Creates the type signature of the extracted supertype.
-	 * 
+	 *
 	 * @param targetRewrite
 	 *            the target compilation unit rewrite
 	 * @param superType
@@ -910,7 +910,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Returns the extracted type.
-	 * 
+	 *
 	 * @return the extracted type, or <code>null</code>
 	 */
 	public IType getExtractedType() {
@@ -919,7 +919,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Returns the type name.
-	 * 
+	 *
 	 * @return the type name
 	 */
 	public String getTypeName() {
@@ -929,7 +929,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * Returns the types to extract. The declaring type may or may not be
 	 * contained in the result.
-	 * 
+	 *
 	 * @return the types to extract
 	 */
 	public IType[] getTypesToExtract() {
@@ -1160,7 +1160,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/**
 	 * Sets the type name.
-	 * 
+	 *
 	 * @param name
 	 *            the type name
 	 */
@@ -1173,7 +1173,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * Sets the types to extract. Must be a subset of
 	 * <code>getPossibleCandidates()</code>. If the declaring type is not
 	 * contained, it will automatically be added.
-	 * 
+	 *
 	 * @param types
 	 *            the types to extract
 	 */

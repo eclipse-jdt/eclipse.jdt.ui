@@ -29,9 +29,9 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  * Adapter factory to support basic UI operations for for editor inputs.
  */
 public class EditorInputAdapterFactory implements IAdapterFactory {
-	
+
 	private static Class[] PROPERTIES= new Class[] {IJavaElement.class};
-	
+
 	private Object fSearchPageScoreComputer;
 
 	public Class[] getAdapterList() {
@@ -43,9 +43,9 @@ public class EditorInputAdapterFactory implements IAdapterFactory {
 		updateLazyLoadedAdapters();
 		if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key))
 			return fSearchPageScoreComputer;
-		
+
 		if (IJavaElement.class.equals(key) && element instanceof IEditorInput) {
-			IJavaElement je= JavaUI.getWorkingCopyManager().getWorkingCopy((IEditorInput)element); 
+			IJavaElement je= JavaUI.getWorkingCopyManager().getWorkingCopy((IEditorInput)element);
 			if (je != null)
 				return je;
 			if (element instanceof IStorageEditorInput) {
@@ -63,7 +63,7 @@ public class EditorInputAdapterFactory implements IAdapterFactory {
 		if (fSearchPageScoreComputer == null && SearchUtil.isSearchPlugInActivated())
 			createSearchPageScoreComputer();
 	}
-	
+
 	private void createSearchPageScoreComputer() {
 		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
 		PROPERTIES= new Class[] {ISearchPageScoreComputer.class, IJavaElement.class};

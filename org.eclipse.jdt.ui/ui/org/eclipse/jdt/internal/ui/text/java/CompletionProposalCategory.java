@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -35,11 +37,9 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.osgi.framework.Bundle;
-
 /**
  * Describes a category extension to the "javaCompletionProposalComputer" extension point.
- * 
+ *
  * @since 3.2
  */
 public final class CompletionProposalCategory {
@@ -51,12 +51,12 @@ public final class CompletionProposalCategory {
 	private final IConfigurationElement fElement;
 	/** The image descriptor for this category, or <code>null</code> if none specified. */
 	private final ImageDescriptor fImage;
-	
+
 	private boolean fIsSeparateCommand= true;
 	private boolean fIsEnabled= true;
 	private boolean fIsIncluded= true;
 	private final CompletionProposalComputerRegistry fRegistry;
-	
+
 	private int fSortOrder= 0x10000;
 	private String fLastError= null;
 
@@ -71,7 +71,7 @@ public final class CompletionProposalCategory {
 			fName= fId;
 		else
 			fName= name;
-		
+
 		String icon= element.getAttribute(ICON);
 		ImageDescriptor img= null;
 		if (icon != null) {
@@ -102,7 +102,7 @@ public final class CompletionProposalCategory {
 
 	/**
 	 * Checks that the given attribute value is not <code>null</code>.
-	 * 
+	 *
 	 * @param value the element to be checked
 	 * @param attribute the attribute
 	 * @throws CoreException if <code>value</code> is <code>null</code>
@@ -127,58 +127,58 @@ public final class CompletionProposalCategory {
 
 	/**
 	 * Returns the name of the described extension.
-	 * 
+	 *
 	 * @return Returns the name
 	 */
 	public String getName() {
 		return fName;
 	}
-	
+
 	/**
 	 * Returns the name of the described extension
 	 * without mnemonic hint in order to be displayed
 	 * in a message.
-	 * 
+	 *
 	 * @return Returns the name
 	 */
 	public String getDisplayName() {
 		return LegacyActionTools.removeMnemonics(fName);
 	}
-	
+
 	/**
 	 * Returns the image descriptor of the described category.
-	 * 
+	 *
 	 * @return the image descriptor of the described category
 	 */
 	public ImageDescriptor getImageDescriptor() {
 		return fImage;
 	}
-	
+
 	/**
 	 * Sets the separate command state of the category.
-	 * 
+	 *
 	 * @param enabled the new enabled state.
 	 */
 	public void setSeparateCommand(boolean enabled) {
 		fIsSeparateCommand= enabled;
 	}
-	
+
 	/**
 	 * Returns the enablement state of the category.
-	 * 
+	 *
 	 * @return the enablement state of the category
 	 */
 	public boolean isSeparateCommand() {
 		return fIsSeparateCommand;
 	}
-	
+
 	/**
 	 * @param included the included
 	 */
 	public void setIncluded(boolean included) {
 		fIsIncluded= included;
 	}
-	
+
 	/**
 	 * @return included
 	 */
@@ -197,7 +197,7 @@ public final class CompletionProposalCategory {
 	/**
 	 * Returns <code>true</code> if the category contains any computers, <code>false</code>
 	 * otherwise.
-	 * 
+	 *
 	 * @return <code>true</code> if the category contains any computers, <code>false</code>
 	 *         otherwise
 	 */
@@ -210,11 +210,11 @@ public final class CompletionProposalCategory {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the category contains any computers in the given partition, <code>false</code>
 	 * otherwise.
-	 * 
+	 *
 	 * @param partition the partition
 	 * @return <code>true</code> if the category contains any computers, <code>false</code>
 	 *         otherwise
@@ -228,14 +228,14 @@ public final class CompletionProposalCategory {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @return sortOrder
 	 */
 	public int getSortOrder() {
 		return fSortOrder;
 	}
-	
+
 	/**
 	 * @param sortOrder the sortOrder
 	 */
@@ -247,7 +247,7 @@ public final class CompletionProposalCategory {
 	 * Safely computes completion proposals of all computers of this category through their
 	 * extension. If an extension is disabled, throws an exception or otherwise does not adhere to
 	 * the contract described in {@link IJavaCompletionProposalComputer}, it is disabled.
-	 * 
+	 *
 	 * @param context the invocation context passed on to the extension
 	 * @param partition the partition type where to invocation occurred
 	 * @param monitor the progress monitor passed on to the extension
@@ -272,7 +272,7 @@ public final class CompletionProposalCategory {
 	 * Safely computes context information objects of all computers of this category through their
 	 * extension. If an extension is disabled, throws an exception or otherwise does not adhere to
 	 * the contract described in {@link IJavaCompletionProposalComputer}, it is disabled.
-	 * 
+	 *
 	 * @param context the invocation context passed on to the extension
 	 * @param partition the partition type where to invocation occurred
 	 * @param monitor the progress monitor passed on to the extension
@@ -295,7 +295,7 @@ public final class CompletionProposalCategory {
 
 	/**
 	 * Returns the error message from the computers in this category.
-	 * 
+	 *
 	 * @return the error message from the computers in this category
 	 */
 	public String getErrorMessage() {
@@ -315,7 +315,7 @@ public final class CompletionProposalCategory {
 				fLastError= desc.getErrorMessage();
 		}
 	}
-	
+
 	/**
 	 * Notifies the computers in this category of a proposal computation session end.
 	 */
@@ -329,5 +329,5 @@ public final class CompletionProposalCategory {
 				fLastError= desc.getErrorMessage();
 		}
 	}
-	
+
 }

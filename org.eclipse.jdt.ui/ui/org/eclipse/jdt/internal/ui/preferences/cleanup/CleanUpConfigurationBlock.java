@@ -18,6 +18,11 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -25,11 +30,6 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
@@ -56,10 +56,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 
 
 /**
- * The clean up configuration block for the clean up preference page. 
+ * The clean up configuration block for the clean up preference page.
  */
 public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
-	
+
 	private static final String CLEANUP_PAGE_SETTINGS_KEY= "cleanup_page"; //$NON-NLS-1$
 	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".cleanup"; //$NON-NLS-1$
 
@@ -67,10 +67,10 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	private SelectionButtonDialogField fShowCleanUpWizardDialogField;
 	private CleanUpProfileManager fProfileManager;
 	private ProfileStore fProfileStore;
-    
+
     public CleanUpConfigurationBlock(IProject project, PreferencesAccess access) {
 	    super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
-	    
+
 		if (project != null) {
 			fCurrContext= null;
 		} else {
@@ -81,18 +81,18 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	protected IProfileVersioner createProfileVersioner() {
 	    return new CleanUpProfileVersioner();
     }
-	
+
 	protected ProfileStore createProfileStore(IProfileVersioner versioner) {
 	    fProfileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
 		return fProfileStore;
     }
-	
+
 	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
 		profiles.addAll(CleanUpPreferenceUtil.getBuiltInProfiles());
 	    fProfileManager= new CleanUpProfileManager(profiles, context, access, profileVersioner);
 		return fProfileManager;
     }
-	
+
 	/**
      * {@inheritDoc}
      */
@@ -100,21 +100,21 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
     	Map settings= profileManager.getSelected().getSettings();
 		final Map sharedSettings= new Hashtable();
 		fill(settings, sharedSettings);
-		
+
 		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
 		CleanUpOptions options= new MapCleanUpOptions(sharedSettings);
 		for (int i= 0; i < cleanUps.length; i++) {
 			cleanUps[i].setOptions(options);
 		}
-		
+
 		createLabel(composite, CleanUpMessages.CleanUpConfigurationBlock_SelectedCleanUps_label, numColumns);
-		
+
 		final BulletListBlock cleanUpListBlock= new BulletListBlock(composite, SWT.NONE);
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan= numColumns;
 		cleanUpListBlock.setLayoutData(gridData);
 		cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
-		
+
 		profileManager.addObserver(new Observer() {
 
 			public void update(Observable o, Object arg) {
@@ -128,16 +128,16 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 					cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 				}
             }
-			
+
 		});
     }
 
     private String getSelectedCleanUpsInfo(ICleanUp[] cleanUps) {
     	if (cleanUps.length == 0)
     		return ""; //$NON-NLS-1$
-    	
+
     	StringBuffer buf= new StringBuffer();
-    	
+
     	boolean first= true;
     	for (int i= 0; i < cleanUps.length; i++) {
 	        String[] descriptions= cleanUps[i].getDescriptions();
@@ -152,7 +152,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
                 }
 	        }
         }
-    	
+
     	return buf.toString();
     }
 
@@ -167,20 +167,20 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
         return new CleanUpModifyDialog(shell, profile, profileManager, profileStore, newProfile, CLEANUP_PAGE_SETTINGS_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Composite createContents(Composite parent) {
 	    Composite composite= super.createContents(parent);
-	    
+
 	    if (fCurrContext == null)
 	    	return composite;
-	    
+
 	    fShowCleanUpWizardDialogField= new SelectionButtonDialogField(SWT.CHECK);
 		fShowCleanUpWizardDialogField.setLabelText(CleanUpMessages.CleanUpConfigurationBlock_ShowCleanUpWizard_checkBoxLabel);
 	    fShowCleanUpWizardDialogField.doFillIntoGrid(composite, 5);
-	    
+
 	    IEclipsePreferences node= fCurrContext.getNode(JavaUI.ID_PLUGIN);
 		boolean showWizard;
 		if (node.get(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, null) != null) {
@@ -190,13 +190,13 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		}
 		if (showWizard)
 			fShowCleanUpWizardDialogField.setSelection(true);
-		
+
 	    fShowCleanUpWizardDialogField.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
             }
 	    });
-	        
+
 		return composite;
 	}
 
@@ -205,10 +205,10 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		if (preferences.get(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, null) != null &&
 				preferences.getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true) == showWizard)
 			return;
-		
+
 		preferences.putBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, showWizard);
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -216,7 +216,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		super.performDefaults();
 		if (fCurrContext == null)
 			return;
-		
+
 		fCurrContext.getNode(JavaUI.ID_PLUGIN).remove(CleanUpConstants.SHOW_CLEAN_UP_WIZARD);
 		boolean showWizard= new DefaultScope().getNode(JavaUI.ID_PLUGIN).getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
 		fShowCleanUpWizardDialogField.setDialogFieldListener(null);
@@ -227,7 +227,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
             }
 	    });
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -237,7 +237,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 				String id= fCurrContext.getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_PROFILE, null);
 				if (id == null)
 					fProfileManager.getDefaultProfile().getID();
-				
+
 				List oldProfiles= fProfileManager.getSortedProfiles();
 				Profile[] oldProfilesArray= (Profile[])oldProfiles.toArray(new Profile[oldProfiles.size()]);
 				for (int i= 0; i < oldProfilesArray.length; i++) {

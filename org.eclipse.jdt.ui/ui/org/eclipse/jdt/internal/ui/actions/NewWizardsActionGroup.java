@@ -38,31 +38,31 @@ import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
  */
 public class NewWizardsActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
-	
+
 	/**
 	 * Creates a new <code>NewWizardsActionGroup</code>. The group requires
 	 * that the selection provided by the part's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the view part that owns this action group
 	 */
 	public NewWizardsActionGroup(IWorkbenchSite site) {
 		fSite= site;
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		
+
 		ISelection selection= getContext().getSelection();
 		if (selection instanceof IStructuredSelection) {
 			if (canEnable((IStructuredSelection)selection)) {
@@ -70,14 +70,14 @@ public class NewWizardsActionGroup extends ActionGroup {
 		        menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 		        newMenu.add(new NewWizardMenu(fSite.getWorkbenchWindow()));
 			}
-		}		
-		
+		}
+
 	}
-	
+
 	private boolean canEnable(IStructuredSelection sel) {
 		if (sel.size() == 0)
 			return true;
-		
+
 		List list= sel.toList();
 		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
 			if (!isNewTarget(iterator.next()))
@@ -86,7 +86,7 @@ public class NewWizardsActionGroup extends ActionGroup {
 
 		return true;
 	}
-	
+
 	private boolean isNewTarget(Object element) {
 		if (element == null)
 			return true;
@@ -96,19 +96,19 @@ public class NewWizardsActionGroup extends ActionGroup {
 		if (element instanceof IJavaElement) {
 			int type= ((IJavaElement)element).getElementType();
 			return type == IJavaElement.JAVA_PROJECT ||
-				type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
+				type == IJavaElement.PACKAGE_FRAGMENT_ROOT ||
 				type == IJavaElement.PACKAGE_FRAGMENT ||
 				type == IJavaElement.COMPILATION_UNIT ||
 				type == IJavaElement.TYPE;
 		}
 		if (element instanceof IWorkingSet) {
 			String workingSetId= ((IWorkingSet)element).getId();
-			return 
-				JavaWorkingSetUpdater.ID.equals(workingSetId) || 
+			return
+				JavaWorkingSetUpdater.ID.equals(workingSetId) ||
 				"org.eclipse.ui.resourceWorkingSetPage".equals(workingSetId) || //$NON-NLS-1$
 				OthersWorkingSetUpdater.ID.equals(workingSetId);
 		}
 		return false;
-	}	
+	}
 
 }

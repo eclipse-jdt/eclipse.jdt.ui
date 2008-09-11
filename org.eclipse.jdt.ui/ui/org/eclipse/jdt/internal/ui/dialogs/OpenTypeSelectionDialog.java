@@ -41,7 +41,7 @@ public class OpenTypeSelectionDialog extends FilteredTypesSelectionDialog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	protected void configureShell(Shell newShell) {
@@ -51,7 +51,7 @@ public class OpenTypeSelectionDialog extends FilteredTypesSelectionDialog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog#getDialogSettings()
 	 */
 	protected IDialogSettings getDialogSettings() {

@@ -71,7 +71,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 * @since 3.4

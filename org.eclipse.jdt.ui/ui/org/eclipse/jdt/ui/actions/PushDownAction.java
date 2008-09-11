@@ -46,13 +46,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * Action is applicable to selections containing elements of type
  * <code>IField</code> and <code>IMethod</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class PushDownAction extends SelectionDispatchAction {
@@ -83,9 +83,9 @@ public class PushDownAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
-	 * 
+	 *
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public PushDownAction(JavaEditor editor) {
@@ -98,7 +98,7 @@ public class PushDownAction extends SelectionDispatchAction {
 	 * Creates a new <code>PushDownAction</code>. The action requires that
 	 * the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site
 	 *            the site providing context information for this action
 	 */
@@ -171,7 +171,7 @@ public class PushDownAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {

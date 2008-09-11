@@ -17,6 +17,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -27,13 +34,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSourceAdapter;
-import org.eclipse.swt.dnd.DragSourceEvent;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -58,9 +58,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * the packages view to another application.
  */
 public class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
-	
+
 	private ISelectionProvider fProvider;
-	
+
 	public FileTransferDragAdapter(ISelectionProvider provider) {
 		fProvider= provider;
 		Assert.isNotNull(fProvider);
@@ -69,11 +69,11 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	public Transfer getTransfer() {
 		return FileTransfer.getInstance();
 	}
-	
+
 	public void dragStart(DragSourceEvent event) {
 		event.doit= isDragable(fProvider.getSelection());
 	}
-	
+
 	private boolean isDragable(ISelection s) {
 		if (!(s instanceof IStructuredSelection))
 			return false;
@@ -98,25 +98,25 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		List resources= convertIntoResources(selection);
 		return resources.size() == selection.size();
 	}
-	
+
 	public void dragSetData(DragSourceEvent event){
 		List elements= getResources();
 		if (elements == null || elements.size() == 0) {
 			event.data= null;
 			return;
 		}
-		
+
 		event.data= getResourceLocations(elements);
 	}
 
 	private static String[] getResourceLocations(List resources) {
 		return Resources.getLocationOSStrings((IResource[]) resources.toArray(new IResource[resources.size()]));
 	}
-	
+
 	public void dragFinished(DragSourceEvent event) {
 		if (!event.doit)
 			return;
-		
+
 		if (event.detail == DND.DROP_MOVE) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=30543
 			// handleDropMove(event);
@@ -124,16 +124,16 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 			handleRefresh();
 		}
 	}
-	
+
 	/* package */ void handleDropMove() {
 		final List elements= getResources();
 		if (elements == null || elements.size() == 0)
 			return;
-		
+
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
-					monitor.beginTask(PackagesMessages.DragAdapter_deleting, elements.size()); 
+					monitor.beginTask(PackagesMessages.DragAdapter_deleting, elements.size());
 					MultiStatus status= createMultiStatus();
 					Iterator iter= elements.iterator();
 					while(iter.hasNext()) {
@@ -141,7 +141,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 						try {
 							monitor.subTask(BasicElementLabels.getPathLabel(resource.getFullPath(), true));
 							resource.delete(true, null);
-							
+
 						} catch (CoreException e) {
 							status.add(e.getStatus());
 						} finally {
@@ -158,14 +158,14 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		};
 		runOperation(op, true, false);
 	}
-	
+
 	private void handleRefresh() {
 		final Set roots= collectRoots(getResources());
-		
+
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
-					monitor.beginTask(PackagesMessages.DragAdapter_refreshing, roots.size()); 
+					monitor.beginTask(PackagesMessages.DragAdapter_refreshing, roots.size());
 					MultiStatus status= createMultiStatus();
 					Iterator iter= roots.iterator();
 					while (iter.hasNext()) {
@@ -174,7 +174,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 							r.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(monitor, 1));
 						} catch (CoreException e) {
 							status.add(e.getStatus());
-						}	
+						}
 					}
 					if (!status.isOK()) {
 						throw new CoreException(status);
@@ -184,13 +184,13 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 				}
 			}
 		};
-		
+
 		runOperation(op, true, false);
 	}
 
 	protected Set collectRoots(final List elements) {
 		final Set roots= new HashSet(10);
-		
+
 		Iterator iter= elements.iterator();
 		while (iter.hasNext()) {
 			IResource resource= (IResource)iter.next();
@@ -203,12 +203,12 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		}
 		return roots;
 	}
-	
+
 	private List getResources() {
 		ISelection s= fProvider.getSelection();
-		if (!(s instanceof IStructuredSelection)) 
+		if (!(s instanceof IStructuredSelection))
 			return null;
-		
+
 		return convertIntoResources((IStructuredSelection)s);
 	}
 
@@ -230,19 +230,19 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		}
 		return result;
 	}
-	
+
 	private MultiStatus createMultiStatus() {
-		return new MultiStatus(JavaPlugin.getPluginId(), 
-			IStatus.OK, PackagesMessages.DragAdapter_problem, null); 
+		return new MultiStatus(JavaPlugin.getPluginId(),
+			IStatus.OK, PackagesMessages.DragAdapter_problem, null);
 	}
-	
+
 	private void runOperation(IRunnableWithProgress op, boolean fork, boolean cancelable) {
 		try {
 			Shell parent= JavaPlugin.getActiveWorkbenchShell();
 			new ProgressMonitorDialog(parent).run(fork, cancelable, op);
 		} catch (InvocationTargetException e) {
-			String message= PackagesMessages.DragAdapter_problem; 
-			String title= PackagesMessages.DragAdapter_problemTitle; 
+			String message= PackagesMessages.DragAdapter_problem;
+			String title= PackagesMessages.DragAdapter_problemTitle;
 			ExceptionHandler.handle(e, title, message);
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.

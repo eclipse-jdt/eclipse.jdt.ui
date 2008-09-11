@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 
 /**
  * Refactoring contribution for the Convert Local Variable to Field refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class PromoteTempToFieldRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class PromoteTempToFieldRefactoringContribution extends JavaRefacto
 	public RefactoringDescriptor createDescriptor() {
 		return new ConvertLocalVariableDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ConvertLocalVariableDescriptor(project, description, comment, arguments, flags);
 	}

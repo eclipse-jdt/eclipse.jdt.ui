@@ -27,11 +27,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 public class InOutFlowAnalyzer extends FlowAnalyzer {
-	
+
 	public InOutFlowAnalyzer(FlowContext context) {
 		super(context);
 	}
-	
+
 	public FlowInfo perform(ASTNode[] selectedNodes) {
 		FlowContext context= getFlowContext();
 		GenericSequentialFlowInfo result= createSequential();
@@ -42,37 +42,37 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 		}
 		return result;
 	}
-	
+
 	protected boolean traverseNode(ASTNode node) {
 		// we are only traversing the selected nodes.
 		return true;
 	}
-	
+
 	protected boolean createReturnFlowInfo(ReturnStatement node) {
 		// we are only traversing selected nodes.
 		return true;
 	}
-	
+
 	public void endVisit(Block node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.statements());
 	}
-	
+
 	public void endVisit(CatchClause node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.getException());
 	}
-	
+
 	public void endVisit(EnhancedForStatement node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.getParameter());
 	}
-	
+
 	public void endVisit(ForStatement node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.initializers());
 	}
-	
+
 	public void endVisit(MethodDeclaration node) {
 		super.endVisit(node);
 		FlowInfo info= accessFlowInfo(node);
@@ -86,7 +86,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 		if (binding != null && !binding.isField())
 			info.clearAccessMode(binding, fFlowContext);
 	}
-	
+
 	private void clearAccessMode(FlowInfo info, List nodes) {
 		if (nodes== null || nodes.isEmpty() || info == null)
 			return;
@@ -105,7 +105,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 			}
 		}
 	}
-	
+
 	private void clearAccessMode(FlowInfo info, VariableDeclarationFragment fragment) {
 			IVariableBinding binding= fragment.resolveBinding();
 			if (binding != null && !binding.isField())

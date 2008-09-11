@@ -37,7 +37,7 @@ public final class FatJarPackagerUtil {
 	public static boolean askToCreateAntScriptDirectory(final Shell parent, File directory) {
 		if (parent == null)
 			return false;
-		
+
 		return queryDialog(parent, FatJarPackagerMessages.FatJarPackage_confirmCreate_title, Messages.format(FatJarPackagerMessages.FatJarPackageAntScript_confirmCreate_message, BasicElementLabels.getPathLabel(directory)));
 	}
 
@@ -45,7 +45,7 @@ public final class FatJarPackagerUtil {
 		Display display= parent.getDisplay();
 		if (display == null || display.isDisposed())
 			return false;
-		
+
 		final boolean[] returnValue= new boolean[1];
 		Runnable runnable= new Runnable() {
 			public void run() {
@@ -53,7 +53,7 @@ public final class FatJarPackagerUtil {
 			}
 		};
 		display.syncExec(runnable);
-		
+
 		return returnValue[0];
 	}
 

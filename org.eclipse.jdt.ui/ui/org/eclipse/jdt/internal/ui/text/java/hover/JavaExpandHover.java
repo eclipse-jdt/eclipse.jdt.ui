@@ -109,7 +109,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			if (fAnnotationAccess instanceof IAnnotationAccessExtension)
 				if (!((IAnnotationAccessExtension)fAnnotationAccess).isPaintable(annotation))
 					continue;
-			
+
 			if (annotation instanceof IJavaAnnotation && !isIncluded((IJavaAnnotation)annotation, showTemporaryProblems))
 				continue;
 
@@ -166,24 +166,24 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	}
 
 	private boolean isIncluded(IJavaAnnotation annotation, boolean showTemporaryProblems) {
-		
+
 		// XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=138601
 		if (annotation instanceof ProblemAnnotation && JavaMarkerAnnotation.TASK_ANNOTATION_TYPE.equals(annotation.getType()))
 			return false;
-		
+
 		if (!annotation.isProblem())
 			return true;
-		
+
 		if (annotation.isMarkedDeleted() && !annotation.hasOverlay())
 			return true;
-		
+
 		if (annotation.hasOverlay() && !annotation.isMarkedDeleted())
 			return true;
-		
-		
+
+
 		if (annotation.hasOverlay())
 			return (!isIncluded(annotation.getOverlay(), showTemporaryProblems));
-		
+
 		return showTemporaryProblems && JavaCorrectionProcessor.hasCorrections((Annotation)annotation);
 	}
 
@@ -191,7 +191,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getOrder(org.eclipse.jface.text.source.Annotation)
 	 */
 	protected int getOrder(Annotation annotation) {
-		if (isBreakpointAnnotation(annotation)) 
+		if (isBreakpointAnnotation(annotation))
 			return 1000;
 		else
 			return super.getOrder(annotation);

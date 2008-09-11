@@ -6,13 +6,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 /**
- * Marker interface for the call hierarchy view to be used outside. 
+ * Marker interface for the call hierarchy view to be used outside.
  */
 public interface ICallHierarchyViewPart {
 

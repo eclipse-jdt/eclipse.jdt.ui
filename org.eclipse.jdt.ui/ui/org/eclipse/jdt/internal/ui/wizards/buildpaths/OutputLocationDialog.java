@@ -13,6 +13,15 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -22,15 +31,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -42,7 +42,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
@@ -64,7 +63,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public class OutputLocationDialog extends StatusDialog {
-	
+
 	private StringButtonDialogField fContainerDialogField;
 	private SelectionButtonDialogField fUseDefault;
 	private SelectionButtonDialogField fUseSpecific;
@@ -75,34 +74,34 @@ public class OutputLocationDialog extends StatusDialog {
 	private final CPListElement fEntryToEdit;
 	private final boolean fAllowInvalidClasspath;
 	private CPJavaProject fCPJavaProject;
-		
+
 	public OutputLocationDialog(Shell parent, CPListElement entryToEdit, List classPathList, IPath defaultOutputFolder, boolean allowInvalidClasspath) {
 		super(parent);
 		fEntryToEdit= entryToEdit;
 		fAllowInvalidClasspath= allowInvalidClasspath;
-		setTitle(NewWizardMessages.OutputLocationDialog_title); 
+		setTitle(NewWizardMessages.OutputLocationDialog_title);
 		fContainerFieldStatus= new StatusInfo();
-	
+
 		OutputLocationAdapter adapter= new OutputLocationAdapter();
 
 		fUseDefault= new SelectionButtonDialogField(SWT.RADIO);
-		fUseDefault.setLabelText(Messages.format(NewWizardMessages.OutputLocationDialog_usedefault_label, BasicElementLabels.getPathLabel(defaultOutputFolder, false))); 
-		fUseDefault.setDialogFieldListener(adapter);		
+		fUseDefault.setLabelText(Messages.format(NewWizardMessages.OutputLocationDialog_usedefault_label, BasicElementLabels.getPathLabel(defaultOutputFolder, false)));
+		fUseDefault.setDialogFieldListener(adapter);
 
-		String label= Messages.format(NewWizardMessages.OutputLocationDialog_usespecific_label, BasicElementLabels.getResourceName(entryToEdit.getPath().segment(0))); 
+		String label= Messages.format(NewWizardMessages.OutputLocationDialog_usespecific_label, BasicElementLabels.getResourceName(entryToEdit.getPath().segment(0)));
 		fUseSpecific= new SelectionButtonDialogField(SWT.RADIO);
 		fUseSpecific.setLabelText(label);
-		fUseSpecific.setDialogFieldListener(adapter);		
-		
+		fUseSpecific.setDialogFieldListener(adapter);
+
 		fContainerDialogField= new StringButtonDialogField(adapter);
-		fContainerDialogField.setButtonLabel(NewWizardMessages.OutputLocationDialog_location_button); 
+		fContainerDialogField.setButtonLabel(NewWizardMessages.OutputLocationDialog_location_button);
 		fContainerDialogField.setDialogFieldListener(adapter);
-		
+
 		fUseSpecific.attachDialogField(fContainerDialogField);
-		
+
 		fCurrProject= entryToEdit.getJavaProject().getProject();
-		fCPJavaProject= new CPJavaProject(classPathList, defaultOutputFolder); 
-		
+		fCPJavaProject= new CPJavaProject(classPathList, defaultOutputFolder);
+
 		IPath outputLocation= (IPath) entryToEdit.getAttribute(CPListElement.OUTPUT);
 		if (outputLocation == null) {
 			fUseDefault.setSelection(true);
@@ -111,46 +110,46 @@ public class OutputLocationDialog extends StatusDialog {
 			fContainerDialogField.setText(outputLocation.removeFirstSegments(1).makeRelative().toString());
 		}
 	}
-	
+
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
-		
+
 		int widthHint= convertWidthInCharsToPixels(70);
 		int indent= convertWidthInCharsToPixels(4);
-		
+
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		inner.setLayout(layout);
-		
+
 		fUseDefault.doFillIntoGrid(inner, 2);
 		fUseSpecific.doFillIntoGrid(inner, 2);
-		
+
 		Text textControl= fContainerDialogField.getTextControl(inner);
 		GridData textData= new GridData();
 		textData.widthHint= widthHint;
 		textData.grabExcessHorizontalSpace= true;
 		textData.horizontalIndent= indent;
 		textControl.setLayoutData(textData);
-		
+
 		Button buttonControl= fContainerDialogField.getChangeControl(inner);
 		GridData buttonData= new GridData();
 		buttonData.widthHint= SWTUtil.getButtonWidthHint(buttonControl);
 		buttonControl.setLayoutData(buttonData);
-		
-		applyDialogFont(composite);		
+
+		applyDialogFont(composite);
 		return composite;
 	}
 
-		
+
 	// -------- OutputLocationAdapter --------
 
 	private class OutputLocationAdapter implements IDialogFieldListener, IStringButtonAdapter {
-		
+
 		// -------- IDialogFieldListener
-		
+
 		public void dialogFieldChanged(DialogField field) {
 			doStatusLineUpdate();
 		}
@@ -159,14 +158,14 @@ public class OutputLocationDialog extends StatusDialog {
 			doChangeControlPressed();
 		}
 	}
-	
+
 	protected void doChangeControlPressed() {
 		IContainer container= chooseOutputLocation();
 		if (container != null) {
 			fContainerDialogField.setText(container.getProjectRelativePath().toString());
 		}
 	}
-	
+
 	protected void doStatusLineUpdate() {
 		checkIfPathValid();
 		updateStatus(fContainerFieldStatus);
@@ -179,16 +178,16 @@ public class OutputLocationDialog extends StatusDialog {
 		if (fUseDefault.isSelected()) {
 			return;
 		}
-		
+
 		String pathStr= fContainerDialogField.getText();
 		if (pathStr.length() == 0) {
 			fContainerFieldStatus= new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			return;
 		}
-		
-		IPath projectPath= fCPJavaProject.getJavaProject().getProject().getFullPath();		
+
+		IPath projectPath= fCPJavaProject.getJavaProject().getProject().getFullPath();
 		IPath outputPath= projectPath.append(pathStr);
-		
+
 		try {
 	        fContainerFieldStatus= ClasspathModifier.checkSetOutputLocationPrecondition(fEntryToEdit, outputPath, fAllowInvalidClasspath, fCPJavaProject);
 	        if (fContainerFieldStatus.getSeverity() != IStatus.ERROR) {
@@ -202,7 +201,7 @@ public class OutputLocationDialog extends StatusDialog {
 	public IPath getOutputLocation() {
 		return fOutputLocation;
 	}
-		
+
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
@@ -210,7 +209,7 @@ public class OutputLocationDialog extends StatusDialog {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.OUTPUT_LOCATION_DIALOG);
 	}
-	
+
 	// ---------- util method ------------
 
 	private IContainer chooseOutputLocation() {
@@ -234,14 +233,14 @@ public class OutputLocationDialog extends StatusDialog {
 		}
 
 		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
-		dialog.setTitle(NewWizardMessages.OutputLocationDialog_ChooseOutputFolder_title); 
-        
+		dialog.setTitle(NewWizardMessages.OutputLocationDialog_ChooseOutputFolder_title);
+
         dialog.setValidator(new ISelectionStatusValidator() {
             ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
             public IStatus validate(Object[] selection) {
                 IStatus typedStatus= validator.validate(selection);
                 if (!typedStatus.isOK())
-                    return typedStatus;           
+                    return typedStatus;
                 if (selection[0] instanceof IFolder) {
                     IFolder folder= (IFolder) selection[0];
                     try {
@@ -257,7 +256,7 @@ public class OutputLocationDialog extends StatusDialog {
                 }
             }
         });
-		dialog.setMessage(NewWizardMessages.OutputLocationDialog_ChooseOutputFolder_description); 
+		dialog.setMessage(NewWizardMessages.OutputLocationDialog_ChooseOutputFolder_description);
 		dialog.addFilter(filter);
 		dialog.setInput(root);
 		dialog.setInitialSelection(initSelection);

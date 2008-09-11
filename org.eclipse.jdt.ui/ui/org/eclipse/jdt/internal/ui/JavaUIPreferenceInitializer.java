@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
-import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-
 import org.eclipse.swt.graphics.RGB;
+
+import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -31,7 +31,7 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = PreferenceConstants.getPreferenceStore();
-		
+
 		EditorsUI.useAnnotationsPreferencePage(store);
 		EditorsUI.useQuickDiffPreferencePage(store);
 		PreferenceConstants.initializeDefaultValues(store);
@@ -132,12 +132,12 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 				store,
 				PreferenceConstants.PROPERTIES_FILE_COLORING_KEY,
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_KEY, new RGB(0, 0, 0)), fireEvent);
-		
+
 		setDefault(
 				store,
 				PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE,
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_VALUE, new RGB(42, 0, 255)), fireEvent);
-		
+
 		setDefault(
 				store,
 				PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT,
@@ -155,11 +155,11 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 
 
 	}
-	
+
 	/**
 	 * Sets the default value and fires a property
 	 * change event if necessary.
-	 * 
+	 *
 	 * @param store	the preference store
 	 * @param key the preference key
 	 * @param newValue the new value
@@ -171,7 +171,7 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 			PreferenceConverter.setDefault(store, key, newValue);
 			return;
 		}
-		
+
 		RGB oldValue= null;
 		if (store.isDefault(key))
 			oldValue= PreferenceConverter.getDefaultColor(store, key);
@@ -184,7 +184,7 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	/**
 	 * Returns the RGB for the given key in the given color registry.
-	 * 
+	 *
 	 * @param registry the color registry
 	 * @param key the key for the constant in the registry
 	 * @param defaultRGB the default RGB if no entry is found
@@ -194,12 +194,12 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 	private static RGB findRGB(ColorRegistry registry, String key, RGB defaultRGB) {
 		if (registry == null)
 			return defaultRGB;
-			
+
 		RGB rgb= registry.getRGB(key);
 		if (rgb != null)
 			return rgb;
-		
+
 		return defaultRGB;
 	}
-	
+
 }

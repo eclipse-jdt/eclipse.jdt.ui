@@ -27,36 +27,36 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 
 public class CleanUpProfileManager extends ProfileManager {
-	
+
 	public static KeySet[] KEY_SETS= {
-		new KeySet(JavaUI.ID_PLUGIN, new ArrayList(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))		
+		new KeySet(JavaUI.ID_PLUGIN, new ArrayList(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))
 	};
-	
+
 	private final PreferencesAccess fPreferencesAccess;
 
 	public CleanUpProfileManager(List profiles, IScopeContext context, PreferencesAccess preferencesAccess, IProfileVersioner profileVersioner) {
 	    super(profiles, context, preferencesAccess, profileVersioner, KEY_SETS, CleanUpConstants.CLEANUP_PROFILE, CleanUpConstants.CLEANUP_SETTINGS_VERSION_KEY);
 		fPreferencesAccess= preferencesAccess;
     }
-	
+
 	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager#getDefaultProfile()
      */
     public Profile getDefaultProfile() {
     	return getProfile(CleanUpConstants.DEFAULT_PROFILE);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     protected void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
         super.updateProfilesWithName(oldName, newProfile, applySettings);
-        
+
         IEclipsePreferences node= fPreferencesAccess.getInstanceScope().getNode(JavaUI.ID_PLUGIN);
         String name= node.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
         if (name != null && name.equals(oldName)) {
         	if (newProfile == null) {
-        		node.remove(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE);	
+        		node.remove(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE);
         	} else {
     			node.put(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, newProfile.getID());
         	}

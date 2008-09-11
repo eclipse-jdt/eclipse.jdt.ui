@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
+
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 
@@ -68,11 +69,11 @@ class ConstantChecks {
 		}
 		public boolean visit(MethodInvocation node) {
 			if(node.getExpression() == null) {
-				visitName(node.getName());	
+				visitName(node.getName());
 			} else {
 				fResult= new LoadTimeConstantChecker((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(node.getExpression())).check();
 			}
-			
+
 			return false;
 		}
 		public boolean visit(QualifiedName node) {
@@ -81,19 +82,19 @@ class ConstantChecks {
 		public boolean visit(SimpleName node) {
 			return visitName(node);
 		}
-		
+
 		private boolean visitName(Name name) {
 			fResult= checkName(name);
-			return false; //Do not descend further                 
+			return false; //Do not descend further
 		}
-		
+
 		private boolean checkName(Name name) {
 			IBinding binding= name.resolveBinding();
 			if (binding == null)
-				return true;  /* If the binding is null because of compile errors etc., 
+				return true;  /* If the binding is null because of compile errors etc.,
 				                  scenarios which may have been deemed unacceptable in
 				                  the presence of semantic information will be admitted. */
-			
+
 			// If name represents a member:
 			if (binding instanceof IVariableBinding || binding instanceof IMethodBinding)
 				return isMemberReferenceValidInClassInitialization(name);
@@ -105,7 +106,7 @@ class ConstantChecks {
 					    expression.  Other types are not expected either.
 					 */
 					Assert.isTrue(false);
-					return true;		
+					return true;
 			}
 		}
 
@@ -126,7 +127,7 @@ class ConstantChecks {
 		public StaticFinalConstantChecker(IExpressionFragment ex) {
 			super(ex);
 		}
-		
+
 		public boolean visit(SuperFieldAccess node) {
 			fResult= false;
 			return false;
@@ -148,21 +149,21 @@ class ConstantChecks {
 		}
 		private boolean visitName(Name name) {
 			IBinding binding= name.resolveBinding();
-			if(binding == null) { 
-				/* If the binding is null because of compile errors etc., 
+			if(binding == null) {
+				/* If the binding is null because of compile errors etc.,
 				   scenarios which may have been deemed unacceptable in
-				   the presence of semantic information will be admitted. 
+				   the presence of semantic information will be admitted.
 				   Descend deeper.
 				 */
 				 return true;
 			}
-			
-			int modifiers= binding.getModifiers();	
+
+			int modifiers= binding.getModifiers();
 			if(binding instanceof IVariableBinding) {
 				if (!(Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers))) {
 					fResult= false;
 					return false;
-				}		
+				}
 			} else if(binding instanceof IMethodBinding) {
 				if (!Modifier.isStatic(modifiers)) {
 					fResult= false;
@@ -170,21 +171,21 @@ class ConstantChecks {
 				}
 			} else if(binding instanceof ITypeBinding) {
 				return false; // It's o.k.  Don't descend deeper.
-		
+
 			} else {
 					/*  IPackageBinding is not expected, as a package name not
 					    used as a type name prefix is not expected in such an
 					    expression.  Other types are not expected either.
 					 */
 					Assert.isTrue(false);
-					return false;		
+					return false;
 			}
-			
+
 			//Descend deeper:
 			return true;
 		}
 	}
-	
+
 	public static boolean isStaticFinalConstant(IExpressionFragment ex) {
 		return new StaticFinalConstantChecker(ex).check();
 	}

@@ -37,13 +37,13 @@ public class JdtASTMatcher extends ASTMatcher {
 		}
 		if (node.resolveTypeBinding() != name.resolveTypeBinding())
 			return false;
-		return true;	
+		return true;
 	}
-	
+
 	public static boolean doNodesMatch(ASTNode one, ASTNode other) {
 		Assert.isNotNull(one);
 		Assert.isNotNull(other);
-		
+
 		return one.subtreeMatch(new JdtASTMatcher(), other);
 	}
 }

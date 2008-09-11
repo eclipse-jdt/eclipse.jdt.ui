@@ -112,7 +112,7 @@ public class FatJarBuilder extends JarBuilder implements IJarBuilderExtension {
 	}
 
 	private void addFile(String destinationPath, ZipEntry jarEntry, ZipFile zipFile) {
-		// Handle META-INF/MANIFEST.MF 
+		// Handle META-INF/MANIFEST.MF
 		if (destinationPath.equalsIgnoreCase("META-INF/MANIFEST.MF") //$NON-NLS-1$
 				|| (isRemoveSigners() && destinationPath.startsWith("META-INF/") && destinationPath.endsWith(".SF"))) { //$NON-NLS-1$//$NON-NLS-2$
 			return;

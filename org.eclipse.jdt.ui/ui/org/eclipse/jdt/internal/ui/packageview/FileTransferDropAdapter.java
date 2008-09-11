@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
@@ -20,6 +17,9 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -39,26 +39,26 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Adapter to handle file drop from other applications.
- */ 
+ */
 public class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
-	
+
 	public FileTransferDropAdapter(StructuredViewer viewer) {
 		super(viewer);
-		
+
 		setScrollEnabled(true);
 		setExpandEnabled(true);
 		setFeedbackEnabled(false);
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Transfer getTransfer() {
 		return FileTransfer.getInstance();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -70,38 +70,38 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 	}
 
 	//---- Actual DND -----------------------------------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
-	
+
 		boolean isPackageFragment= target instanceof IPackageFragment;
 		boolean isJavaProject= target instanceof IJavaProject;
 		boolean isPackageFragmentRoot= target instanceof IPackageFragmentRoot;
 		boolean isContainer= target instanceof IContainer;
-		
-		if (!(isPackageFragment || isJavaProject || isPackageFragmentRoot || isContainer)) 
+
+		if (!(isPackageFragment || isJavaProject || isPackageFragmentRoot || isContainer))
 			return DND.DROP_NONE;
-			
+
 		if (isContainer) {
 			IContainer container= (IContainer)target;
 			if (container.isAccessible() && !Resources.isReadOnly(container))
 				return DND.DROP_COPY;
 		} else {
 			IJavaElement element= (IJavaElement)target;
-			if (!element.isReadOnly()) 
+			if (!element.isReadOnly())
 				return DND.DROP_COPY;
 		}
-			
-		return DND.DROP_NONE;	
+
+		return DND.DROP_NONE;
 	}
 
 	/**
@@ -117,9 +117,9 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 			final IContainer target= getActualTarget(getCurrentTarget());
 			if (target == null)
 				return false;
-			
-			// Run the import operation asynchronously. 
-			// Otherwise the drag source (e.g., Windows Explorer) will be blocked 
+
+			// Run the import operation asynchronously.
+			// Otherwise the drag source (e.g., Windows Explorer) will be blocked
 			// while the operation executes. Fixes bug 35796.
 			Display.getCurrent().asyncExec(new Runnable() {
 				public void run() {
@@ -127,25 +127,25 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 					new CopyFilesAndFoldersOperation(getShell()).copyFiles((String[]) data, target);
 				}
 			});
-			
+
 			return false;
 		} catch (JavaModelException e) {
-			String title= PackagesMessages.DropAdapter_errorTitle; 
-			String message= PackagesMessages.DropAdapter_errorMessage; 
+			String title= PackagesMessages.DropAdapter_errorTitle;
+			String message= PackagesMessages.DropAdapter_errorMessage;
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
-		
+
 		return true;
 	}
-	
+
 	private IContainer getActualTarget(Object dropTarget) throws JavaModelException{
 		if (dropTarget instanceof IContainer)
 			return (IContainer)dropTarget;
 		else if (dropTarget instanceof IJavaElement)
-			return getActualTarget(((IJavaElement)dropTarget).getCorrespondingResource());	
+			return getActualTarget(((IJavaElement)dropTarget).getCorrespondingResource());
 		return null;
 	}
-	
+
 	private Shell getShell() {
 		return getViewer().getControl().getShell();
 	}

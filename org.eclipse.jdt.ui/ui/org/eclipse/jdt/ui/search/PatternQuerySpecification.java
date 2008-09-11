@@ -20,11 +20,11 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * <p>
  * This class is not intended to be instantiated or subclassed by clients.
  * </p>
- * 
+ *
  * @see org.eclipse.jdt.ui.search.QuerySpecification
- * 
+ *
  * @since 3.0
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -46,7 +46,7 @@ public class PatternQuerySpecification extends QuerySpecification {
 	 *            The scope to search in.
 	 * @param scopeDescription
 	 *            A human readable description of the search scope.
-	 * 
+	 *
 	 * @see org.eclipse.jdt.core.search.SearchPattern#createPattern(java.lang.String, int, int, int)
 	 */
 	public PatternQuerySpecification(String pattern, int searchFor, boolean caseSensitive, int limitTo, IJavaSearchScope scope, String scopeDescription) {
@@ -65,7 +65,7 @@ public class PatternQuerySpecification extends QuerySpecification {
 	}
 
 	/**
-	 * Returns the search pattern the query should search for. 
+	 * Returns the search pattern the query should search for.
 	 * @return the search pattern
 	 * @see org.eclipse.jdt.core.search.SearchPattern#createPattern(java.lang.String, int, int, int)
 	 */
@@ -75,9 +75,9 @@ public class PatternQuerySpecification extends QuerySpecification {
 
 	/**
 	 * Returns what kind of <code>IJavaElement</code> the query should search for.
-	 * 
+	 *
 	 * @return The kind of <code>IJavaElement</code> to search for.
-	 * 
+	 *
 	 * @see org.eclipse.jdt.core.search.IJavaSearchConstants
 	 */
 	public int getSearchFor() {

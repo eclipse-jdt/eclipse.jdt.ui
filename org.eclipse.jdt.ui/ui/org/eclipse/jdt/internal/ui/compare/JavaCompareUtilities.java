@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSe
 
 
 class JavaCompareUtilities {
-	
+
 	private static final char PACKAGEDECLARATION= '%';
 	private static final char IMPORTDECLARATION= '#';
 	private static final char IMPORT_CONTAINER= '<';
@@ -61,9 +61,9 @@ class JavaCompareUtilities {
 	private static final char INITIALIZER= '|';
 	private static final char COMPILATIONUNIT= '{';
 	private static final char TYPE= '[';
-			
+
 	static String getString(ResourceBundle bundle, String key, String dfltValue) {
-		
+
 		if (bundle != null) {
 			try {
 				return bundle.getString(key);
@@ -73,13 +73,13 @@ class JavaCompareUtilities {
 		}
 		return dfltValue;
 	}
-	
+
 	static String getString(ResourceBundle bundle, String key) {
 		return getString(bundle, key, key);
 	}
-	
+
 	static int getInteger(ResourceBundle bundle, String key, int dfltValue) {
-		
+
 		if (bundle != null) {
 			try {
 				String s= bundle.getString(key);
@@ -95,10 +95,10 @@ class JavaCompareUtilities {
 	}
 
 	static ImageDescriptor getImageDescriptor(int type) {
-		switch (type) {			
+		switch (type) {
 		case IJavaElement.INITIALIZER:
 		case IJavaElement.METHOD:
-			return getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$			
+			return getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$
 		case IJavaElement.FIELD:
 			return getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
 		case IJavaElement.PACKAGE_DECLARATION:
@@ -112,7 +112,7 @@ class JavaCompareUtilities {
 		}
 		return ImageDescriptor.getMissingImageDescriptor();
 	}
-	
+
 	static ImageDescriptor getTypeImageDescriptor(boolean isClass) {
 		if (isClass)
 			return JavaPluginImages.DESC_OBJS_CLASS;
@@ -140,18 +140,18 @@ class JavaCompareUtilities {
 		}
 		return getImageDescriptor(t);
 	}
-	
+
 	/**
 	 * Returns a name for the given Java element that uses the same conventions
 	 * as the JavaNode name of a corresponding element.
 	 */
 	static String getJavaElementID(IJavaElement je) {
-		
+
 		if (je instanceof IMember && ((IMember)je).isBinary())
 			return null;
-			
+
 		StringBuffer sb= new StringBuffer();
-		
+
 		switch (je.getElementType()) {
 		case IJavaElement.COMPILATION_UNIT:
 			sb.append(COMPILATIONUNIT);
@@ -182,14 +182,14 @@ class JavaCompareUtilities {
 			break;
 		case IJavaElement.IMPORT_DECLARATION:
 			sb.append(IMPORTDECLARATION);
-			sb.append(je.getElementName());			
+			sb.append(je.getElementName());
 			break;
 		default:
 			return null;
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Returns a name which identifies the given typed name.
 	 * The type is encoded as a single character at the beginning of the string.
@@ -241,7 +241,7 @@ class JavaCompareUtilities {
 		IPath path= JavaPluginImages.ICONS_PATH.append(relativePath);
 		return JavaPluginImages.createImageDescriptor(JavaPlugin.getDefault().getBundle(), path, true);
 	}
-	
+
 	static boolean getBoolean(CompareConfiguration cc, String key, boolean dflt) {
 		if (cc != null) {
 			Object value= cc.getProperty(key);
@@ -262,24 +262,24 @@ class JavaCompareUtilities {
 			return plugin.getJavaTextTools();
 		return null;
 	}
-	
+
 	static IDocumentPartitioner createJavaPartitioner() {
 		JavaTextTools tools= getJavaTextTools();
 		if (tools != null)
 			return tools.createDocumentPartitioner();
 		return null;
 	}
-	
+
 	static void setupDocument(IDocument document) {
 		JavaTextTools tools= getJavaTextTools();
 		if (tools != null)
 			tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 	}
-	
+
 	static void setupPropertiesFileDocument(IDocument document) {
 		PropertiesFileDocumentSetupParticipant.setupDocument(document);
 	}
-	
+
 	/**
 	 * Reads the contents of the given input stream into a string.
 	 * The function assumes that the input stream uses the platform's default encoding
@@ -298,9 +298,9 @@ class JavaCompareUtilities {
 
 			while ((read= reader.read(part)) != -1)
 				buffer.append(part, 0, read);
-			
+
 			return buffer.toString();
-			
+
 		} catch (IOException ex) {
 			// NeedWork
 		} finally {
@@ -314,7 +314,7 @@ class JavaCompareUtilities {
 		}
 		return null;
 	}
-	
+
 	public static String readString(IStreamContentAccessor sa) throws CoreException {
 		InputStream is= sa.getContents();
 		if (is != null) {
@@ -333,7 +333,7 @@ class JavaCompareUtilities {
 	}
 
 	/**
-	 * Returns the contents of the given string as an array of bytes 
+	 * Returns the contents of the given string as an array of bytes
 	 * in the platform's default encoding.
 	 */
 	static byte[] getBytes(String s, String encoding) {
@@ -343,7 +343,7 @@ class JavaCompareUtilities {
 			return s.getBytes();
 		}
 	}
-	
+
 	/**
 	 * Breaks the contents of the given input stream into an array of strings.
 	 * The function assumes that the input stream uses the platform's default encoding
@@ -351,7 +351,7 @@ class JavaCompareUtilities {
 	 * Returns null if an error occurred.
 	 */
 	static String[] readLines(InputStream is2, String encoding) {
-		
+
 		BufferedReader reader= null;
 		try {
 			reader= new BufferedReader(new InputStreamReader(is2, encoding));
@@ -393,34 +393,34 @@ class JavaCompareUtilities {
 			}
 		}
 	}
-	
+
 	/*
 	 * Initialize the given Action from a ResourceBundle.
 	 */
 	static void initAction(IAction a, ResourceBundle bundle, String prefix) {
-		
+
 		String labelKey= "label"; //$NON-NLS-1$
 		String tooltipKey= "tooltip"; //$NON-NLS-1$
 		String imageKey= "image"; //$NON-NLS-1$
 		String descriptionKey= "description"; //$NON-NLS-1$
-		
+
 		if (prefix != null && prefix.length() > 0) {
 			labelKey= prefix + labelKey;
 			tooltipKey= prefix + tooltipKey;
 			imageKey= prefix + imageKey;
 			descriptionKey= prefix + descriptionKey;
 		}
-		
+
 		a.setText(getString(bundle, labelKey, labelKey));
 		a.setToolTipText(getString(bundle, tooltipKey, null));
 		a.setDescription(getString(bundle, descriptionKey, null));
-		
+
 		String relPath= getString(bundle, imageKey, null);
 		if (relPath != null && relPath.trim().length() > 0) {
-			
+
 			String dPath;
 			String ePath;
-			
+
 			if (relPath.indexOf("/") >= 0) { //$NON-NLS-1$
 				String path= relPath.substring(1);
 				dPath= 'd' + path;
@@ -429,7 +429,7 @@ class JavaCompareUtilities {
 				dPath= "dlcl16/" + relPath; //$NON-NLS-1$
 				ePath= "elcl16/" + relPath; //$NON-NLS-1$
 			}
-			
+
 			ImageDescriptor id= JavaCompareUtilities.getImageDescriptor(dPath);	// we set the disabled image first (see PR 1GDDE87)
 			if (id != null)
 				a.setDisabledImageDescriptor(id);
@@ -440,7 +440,7 @@ class JavaCompareUtilities {
 			}
 		}
 	}
-	
+
 	static void initToggleAction(IAction a, ResourceBundle bundle, String prefix, boolean checked) {
 
 		String tooltip= null;
@@ -450,10 +450,10 @@ class JavaCompareUtilities {
 			tooltip= getString(bundle, prefix + "tooltip.unchecked", null);	//$NON-NLS-1$
 		if (tooltip == null)
 			tooltip= getString(bundle, prefix + "tooltip", null);	//$NON-NLS-1$
-		
+
 		if (tooltip != null)
 			a.setToolTipText(tooltip);
-			
+
 		String description= null;
 		if (checked)
 			description= getString(bundle, prefix + "description.checked", null);	//$NON-NLS-1$
@@ -461,7 +461,7 @@ class JavaCompareUtilities {
 			description= getString(bundle, prefix + "description.unchecked", null);	//$NON-NLS-1$
 		if (description == null)
 			description= getString(bundle, prefix + "description", null);	//$NON-NLS-1$
-		
+
 		if (description != null)
 			a.setDescription(description);
 	}

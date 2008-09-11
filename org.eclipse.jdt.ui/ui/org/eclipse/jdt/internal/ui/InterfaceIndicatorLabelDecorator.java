@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.ListenerList;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
@@ -44,7 +44,7 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
-	
+
 	private class IntefaceIndicatorChangeListener implements IElementChangedListener {
 
 		/**
@@ -55,12 +55,12 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 			processDelta(event.getDelta(), changed);
 			if (changed.size() == 0)
 				return;
-			
+
 			fireChange((IJavaElement[])changed.toArray(new IJavaElement[changed.size()]));
 		}
-		
+
 	}
-	
+
 	private ListenerList fListeners;
 	private IElementChangedListener fChangeListener;
 
@@ -89,11 +89,11 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 			fChangeListener= new IntefaceIndicatorChangeListener();
 			JavaCore.addElementChangedListener(fChangeListener);
 		}
-		
+
 		if (fListeners == null) {
 			fListeners= new ListenerList();
 		}
-		
+
 		fListeners.add(listener);
 	}
 
@@ -127,9 +127,9 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 	public void removeListener(ILabelProviderListener listener) {
 		if (fListeners == null)
 			return;
-		
+
 		fListeners.remove(listener);
-		
+
 		if (fListeners.isEmpty() && fChangeListener != null) {
 			JavaCore.removeElementChangedListener(fChangeListener);
 			fChangeListener= null;
@@ -144,13 +144,13 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 			ImageDescriptor overlay= getOverlay(element);
 			if (overlay == null)
 				return;
-			
+
 			decoration.addOverlay(overlay, IDecoration.TOP_RIGHT);
 		} catch (JavaModelException e) {
 			return;
 		}
 	}
-	
+
 	private ImageDescriptor getOverlay(Object element) throws JavaModelException {
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit) element;
@@ -173,11 +173,11 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		}
 		return null;
 	}
-	
+
 	private ImageDescriptor getOverlayWithSearchEngine(ITypeRoot element, String typeName) {
 		SearchEngine engine= new SearchEngine();
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
-		
+
 		class Result extends RuntimeException {
 			private static final long serialVersionUID= 1L;
 			int modifiers;
@@ -185,7 +185,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 				this.modifiers= modifiers;
 			}
 		}
-		
+
 		TypeNameRequestor requestor= new TypeNameRequestor() {
 			public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 				if (enclosingTypeNames.length == 0 && Flags.isPublic(modifiers)) {
@@ -193,7 +193,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 				}
 			}
 		};
-		
+
 		try {
 			String packName = element.getParent().getElementName();
 			int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
@@ -229,17 +229,17 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 			}
 		}
 	}
-	
+
 	private void processDelta(IJavaElementDelta delta, List result) {
 		IJavaElement elem= delta.getElement();
-		
+
 		boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;
 		boolean isRemoved= delta.getKind() == IJavaElementDelta.REMOVED;
 		int flags= delta.getFlags();
-		
+
 		switch (elem.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
-				if (isRemoved || (isChanged && 
+				if (isRemoved || (isChanged &&
 						(flags & IJavaElementDelta.F_CLOSED) != 0)) {
 					return;
 				}
@@ -265,7 +265,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 				processChildrenDelta(delta, result);
 				return;
 			case IJavaElement.COMPILATION_UNIT:
-				// Not the primary compilation unit. Ignore it 
+				// Not the primary compilation unit. Ignore it
 				if (!JavaModelUtil.isPrimary((ICompilationUnit) elem)) {
 					return;
 				}
@@ -273,16 +273,16 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 				if (isChanged &&  ((flags & IJavaElementDelta.F_CONTENT) != 0 || (flags & IJavaElementDelta.F_FINE_GRAINED) != 0)) {
 					if (delta.getAffectedChildren().length == 0)
 						return;
-					
+
 					result.add(elem);
 				}
 				return;
 			default:
 				// fields, methods, imports ect
 				return;
-		}	
+		}
 	}
-	
+
 	private boolean processChildrenDelta(IJavaElementDelta delta, List result) {
 		IJavaElementDelta[] children= delta.getAffectedChildren();
 		for (int i= 0; i < children.length; i++) {

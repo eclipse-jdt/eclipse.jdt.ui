@@ -24,7 +24,7 @@ public final class ActionMessages extends NLS {
 	public static String ActionUtil_warning_derived_message;
 	public static String ActionUtil_warning_derived_title;
 	public static String AddDelegateMethodsAction_not_in_source_file;
-	
+
 	public static String AddDelegateMethodsAction_template_link_message;
 	public static String AddDelegateMethodsAction_template_link_tooltip;
 	public static String AddGetterSetterAction_allow_setters_for_finals_description;
@@ -33,7 +33,7 @@ public final class ActionMessages extends NLS {
 	public static String AddGetterSetterAction_template_link_tooltip;
 	public static String AddUnimplementedConstructorsAction_template_link_message;
 	public static String AddUnimplementedConstructorsAction_template_link_tooltip;
-	
+
 	public static String GenerateConstructorUsingFieldsSelectionDialog_template_link_message;
 	public static String GenerateConstructorUsingFieldsSelectionDialog_template_link_tooltip;
 	public static String CopyQualifiedNameAction_ActionName;
@@ -42,7 +42,7 @@ public final class ActionMessages extends NLS {
 	public static String CopyQualifiedNameAction_InfoDialogTitel;
 	public static String CopyQualifiedNameAction_NoElementToQualify;
 	public static String CopyQualifiedNameAction_ToolTipText;
-	
+
 	public static String FindBreakContinueTargetOccurrencesAction_label;
 	public static String FindBreakContinueTargetOccurrencesAction_tooltip;
 	public static String FindNLSProblemsAction_Description;
@@ -118,7 +118,7 @@ public final class ActionMessages extends NLS {
 	public static String OverrideMethodsAction_not_applicable;
 	public static String OverrideMethodsAction_interface_not_applicable;
 	public static String OverrideMethodsAction_annotation_not_applicable;
-	
+
 	public static String CleanUpAction_label;
 	public static String CleanUpAction_labelWizard;
 	public static String CleanUpAction_tooltip;
@@ -128,7 +128,7 @@ public final class ActionMessages extends NLS {
 	public static String CleanUpAction_CUNotOnBuildpathMessage;
 	public static String CleanUpAction_EmptySelection_description;
 	public static String CleanUpAction_actionName;
-	
+
 	public static String AddGetterSetterAction_no_primary_type_title;
 	public static String AddGetterSetterAction_no_primary_type_message;
 	public static String AddGetterSetterAction_label;
@@ -149,7 +149,7 @@ public final class ActionMessages extends NLS {
 	public static String AddGetterSetterAction_dialog_label;
 	public static String AddGetterSetterAction_methods_selected;
 	public static String AddGettSetterAction_typeContainsNoFields_message;
-	
+
 	public static String GenerateHashCodeEqualsAction_error_caption;
 	public static String GenerateHashCodeEqualsAction_error_not_applicable;
 	public static String GenerateHashCodeEqualsAction_error_removed_type;
@@ -172,7 +172,7 @@ public final class ActionMessages extends NLS {
 	public static String GenerateHashCodeEqualsAction_equals;
 	public static String GenerateHashCodeEqualsAction_hashCode;
 	public static String GenerateHashCodeEqualsAction_equals_and_hashCode;
-	
+
 	public static String GetterSetterTreeSelectionDialog_select_getters;
 	public static String GetterSetterTreeSelectionDialog_select_setters;
 	public static String GetterSetterTreeSelectionDialog_alpha_pair_sort;
@@ -283,7 +283,7 @@ public final class ActionMessages extends NLS {
 	public static String FormatAllAction_label;
 	public static String FormatAllAction_tooltip;
 	public static String FormatAllAction_description;
-	
+
 	public static String SortMembersAction_label;
 	public static String SortMembersAction_tooltip;
 	public static String SortMembersAction_description;
@@ -357,12 +357,12 @@ public final class ActionMessages extends NLS {
 	public static String AddDelegateMethodsAction_title;
 	public static String AddDelegateMethodsAction_message;
 	public static String AddDelegateMethodsAction_selectioninfo_more;
-	
+
 	public static String SurroundWithTemplateMenuAction_ConfigureTemplatesActionName;
 	public static String SurroundWithTemplateMenuAction_NoneApplicable;
 	public static String SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
 	public static String SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName;
-	
+
 	public static String ToggleLinkingAction_label;
 	public static String ToggleLinkingAction_tooltip;
 	public static String ToggleLinkingAction_description;

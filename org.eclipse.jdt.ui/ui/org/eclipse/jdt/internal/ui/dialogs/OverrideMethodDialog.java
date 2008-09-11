@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -25,6 +23,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
@@ -70,7 +70,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		private boolean fToggle;
 
 		public OverrideFlatTreeAction() {
-			setToolTipText(JavaUIMessages.OverrideMethodDialog_groupMethodsByTypes); 
+			setToolTipText(JavaUIMessages.OverrideMethodDialog_groupMethodsByTypes);
 
 			JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
 
@@ -252,7 +252,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			}
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-			return new StatusInfo(IStatus.INFO, Messages.format(JavaUIMessages.OverrideMethodDialog_selectioninfo_more, new String[] { String.valueOf(count), String.valueOf(fNumMethods)})); 
+			return new StatusInfo(IStatus.INFO, Messages.format(JavaUIMessages.OverrideMethodDialog_selectioninfo_more, new String[] { String.valueOf(count), String.valueOf(fNumMethods)}));
 		}
 	}
 
@@ -367,14 +367,14 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	 */
 	protected Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.WRAP);
-		link.setText(JavaUIMessages.OverrideMethodDialog_link_message); 
+		link.setText(JavaUIMessages.OverrideMethodDialog_link_message);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openCodeTempatePage(CodeTemplateContextType.OVERRIDECOMMENT_ID);
 			}
 		});
-		link.setToolTipText(JavaUIMessages.OverrideMethodDialog_link_tooltip); 
-		
+		link.setToolTipText(JavaUIMessages.OverrideMethodDialog_link_tooltip);
+
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 		link.setLayoutData(gridData);
@@ -387,7 +387,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	protected CheckboxTreeViewer createTreeViewer(Composite composite) {
 		initializeDialogUnits(composite);
 		ViewerPane pane= new ViewerPane(composite, SWT.BORDER | SWT.FLAT);
-		pane.setText(JavaUIMessages.OverrideMethodDialog_dialog_description); 
+		pane.setText(JavaUIMessages.OverrideMethodDialog_dialog_description);
 		CheckboxTreeViewer treeViewer= super.createTreeViewer(pane);
 		pane.setContent(treeViewer.getControl());
 		GridLayout paneLayout= new GridLayout();

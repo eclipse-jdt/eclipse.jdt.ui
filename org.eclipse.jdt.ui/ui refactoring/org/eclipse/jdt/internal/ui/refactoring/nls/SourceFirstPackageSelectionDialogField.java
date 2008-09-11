@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -106,7 +106,7 @@ class SourceFirstPackageSelectionDialogField {
 		public void dialogFieldChanged(DialogField field) {
 			String packName= fPackageSelection.getText();
 			if (packName.length() == 0)
-				fPackageSelection.setStatus(NLSUIMessages.NLSAccessorConfigurationDialog_default); 
+				fPackageSelection.setStatus(NLSUIMessages.NLSAccessorConfigurationDialog_default);
 			else
 				fPackageSelection.setStatus(""); //$NON-NLS-1$
 		}
@@ -121,7 +121,7 @@ class SourceFirstPackageSelectionDialogField {
 			}
 		}
 	}
-	
+
 	private IPackageFragmentRoot chooseSourceContainer(IJavaElement initElement) {
 		Class[] acceptedClasses= new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false) {
@@ -141,7 +141,7 @@ class SourceFirstPackageSelectionDialogField {
 				return false;
 			}
 		};
-		
+
 		acceptedClasses= new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaProject.class };
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses) {
 			public boolean select(Viewer viewer, Object parent, Object element) {
@@ -155,19 +155,19 @@ class SourceFirstPackageSelectionDialogField {
 				}
 				return super.select(viewer, parent, element);
 			}
-		};		
+		};
 
 		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
-		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
+		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, labelProvider, provider);
 		dialog.setValidator(validator);
 		dialog.setComparator(new JavaElementComparator());
-		dialog.setTitle(NLSUIMessages.SourceFirstPackageSelectionDialogField_ChooseSourceContainerDialog_title); 
-		dialog.setMessage(NLSUIMessages.SourceFirstPackageSelectionDialogField_ChooseSourceContainerDialog_description); 
+		dialog.setTitle(NLSUIMessages.SourceFirstPackageSelectionDialogField_ChooseSourceContainerDialog_title);
+		dialog.setMessage(NLSUIMessages.SourceFirstPackageSelectionDialogField_ChooseSourceContainerDialog_description);
 		dialog.addFilter(filter);
 		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		dialog.setInitialSelection(initElement);
-		
+
 		if (dialog.open() == Window.OK) {
 			Object element= dialog.getFirstResult();
 			if (element instanceof IJavaProject) {
@@ -179,7 +179,7 @@ class SourceFirstPackageSelectionDialogField {
 			return null;
 		}
 		return null;
-	}	
+	}
 
 
 	public IPackageFragment getSelected() {

@@ -58,7 +58,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	/**
 	 * Short cache to transfer the reconcile AST to
 	 * the {@link #reconciled()} method.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private CompilationUnit fAST;
@@ -98,7 +98,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 
 	/**
 	 * Performs the reconcile and returns the AST if it was computed.
-	 * 
+	 *
 	 * @param unit the compilation unit
 	 * @param initialReconcile <code>true</code> if this is the initial reconcile
 	 * @return the AST or <code>null</code> if none
@@ -117,10 +117,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 			boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
 			// reconcile
 			if (fIsJavaReconcilingListener && isASTNeeded) {
-				int reconcileFlags= ICompilationUnit.FORCE_PROBLEM_DETECTION 
+				int reconcileFlags= ICompilationUnit.FORCE_PROBLEM_DETECTION
 					| (ASTProvider.SHARED_AST_STATEMENT_RECOVERY ? ICompilationUnit.ENABLE_STATEMENTS_RECOVERY : 0)
 					| (ASTProvider.SHARED_BINDING_RECOVERY ? ICompilationUnit.ENABLE_BINDINGS_RECOVERY : 0);
-						
+
 				CompilationUnit ast= unit.reconcile(ASTProvider.SHARED_AST_LEVEL, reconcileFlags, null, fProgressMonitor);
 				if (ast != null) {
 					// mark as unmodifiable
@@ -138,7 +138,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 				extension.setIsActive(false);
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -197,7 +197,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 
 	/**
 	 * Called when reconcile has finished.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public void reconciled() {

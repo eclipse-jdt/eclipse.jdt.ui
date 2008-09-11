@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.MultiTextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,12 +19,15 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.MultiTextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -59,9 +59,9 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
  * If the parent type is open in an editor, be sure to pass over its working copy.
  */
 public class AddJavaDocStubOperation implements IWorkspaceRunnable {
-	
+
 	private IMember[] fMembers;
-	
+
 	public AddJavaDocStubOperation(IMember[] members) {
 		super();
 		fMembers= members;
@@ -70,11 +70,11 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	private String createTypeComment(IType type, String lineDelimiter) throws CoreException {
 		String[] typeParameterNames= StubUtility.getTypeParameterNames(type.getTypeParameters());
 		return CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), typeParameterNames, lineDelimiter);
-	}		
-	
+	}
+
 	private String createMethodComment(IMethod meth, String lineDelimiter) throws CoreException {
 		IType declaringType= meth.getDeclaringType();
-		
+
 		IMethod overridden= null;
 		if (!meth.isConstructor()) {
 			ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
@@ -83,13 +83,13 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		}
 		return CodeGeneration.getMethodComment(meth, overridden, lineDelimiter);
 	}
-	
+
 	private String createFieldComment(IField field, String lineDelimiter) throws JavaModelException, CoreException {
 		String typeName= Signature.toString(field.getTypeSignature());
 		String fieldName= field.getElementName();
 		return CodeGeneration.getFieldComment(field.getCompilationUnit(), typeName, fieldName, lineDelimiter);
-	}		
-		
+	}
+
 	/**
 	 * @return Returns the scheduling rule for this operation
 	 */
@@ -100,7 +100,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	/**
 	 * Runs the operation.
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
-	 */	
+	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
@@ -109,38 +109,38 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			return;
 		}
 		try {
-			monitor.beginTask(CodeGenerationMessages.AddJavaDocStubOperation_description, fMembers.length + 2); 
+			monitor.beginTask(CodeGenerationMessages.AddJavaDocStubOperation_description, fMembers.length + 2);
 
 			addJavadocComments(monitor);
 		} finally {
 			monitor.done();
 		}
 	}
-		
+
 	private void addJavadocComments(IProgressMonitor monitor) throws CoreException {
 		ICompilationUnit cu= fMembers[0].getCompilationUnit();
-		
+
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= cu.getPath();
-		
+
 		manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
 		try {
 			IDocument document= manager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
-			
+
 			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 			MultiTextEdit edit= new MultiTextEdit();
-			
+
 			for (int i= 0; i < fMembers.length; i++) {
 				IMember curr= fMembers[i];
 				int memberStartOffset= getMemberStartOffset(curr, document);
-				
+
 				String comment= null;
 				switch (curr.getElementType()) {
 					case IJavaElement.TYPE:
 						comment= createTypeComment((IType) curr, lineDelim);
 						break;
 					case IJavaElement.FIELD:
-						comment= createFieldComment((IField) curr, lineDelim);	
+						comment= createFieldComment((IField) curr, lineDelim);
 						break;
 					case IJavaElement.METHOD:
 						comment= createMethodComment((IMethod) curr, lineDelim);
@@ -151,19 +151,19 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 					buf.append("/**").append(lineDelim); //$NON-NLS-1$
 					buf.append(" *").append(lineDelim); //$NON-NLS-1$
 					buf.append(" */").append(lineDelim); //$NON-NLS-1$
-					comment= buf.toString();						
+					comment= buf.toString();
 				} else {
 					if (!comment.endsWith(lineDelim)) {
 						comment= comment + lineDelim;
 					}
 				}
-				
+
 				final IJavaProject project= cu.getJavaProject();
 				IRegion region= document.getLineInformationOfOffset(memberStartOffset);
-				
+
 				String line= document.get(region.getOffset(), region.getLength());
 				String indentString= Strings.getIndentString(line, project);
-				
+
 				String indentedComment= Strings.changeIndent(comment, 0, project, indentString, lineDelim);
 
 				edit.addChild(new InsertEdit(memberStartOffset, indentedComment));
@@ -188,5 +188,5 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		}
 		return offset;
 	}
-		
+
 }

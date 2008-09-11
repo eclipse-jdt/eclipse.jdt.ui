@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  *
  */
 public class SourceAttachmentDialog extends StatusDialog {
-	
+
 	private SourceAttachmentBlock fSourceAttachmentBlock;
 
 	/**
@@ -50,12 +50,12 @@ public class SourceAttachmentDialog extends StatusDialog {
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
-		};		
-		fSourceAttachmentBlock= new SourceAttachmentBlock(listener, entry);			
-	
-		setTitle(NewWizardMessages.SourceAttachmentDialog_title); 
+		};
+		fSourceAttachmentBlock= new SourceAttachmentBlock(listener, entry);
+
+		setTitle(NewWizardMessages.SourceAttachmentDialog_title);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
@@ -70,36 +70,36 @@ public class SourceAttachmentDialog extends StatusDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.SOURCE_ATTACHMENT_DIALOG);
-	}		
-			
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-			
+
 		Control inner= createSourceAttachmentControls(composite);
-		inner.setLayoutData(new GridData(GridData.FILL_BOTH));			
-		applyDialogFont(composite);		
+		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+		applyDialogFont(composite);
 		return composite;
 	}
 
 	/**
 	 * Creates the controls for the source attachment configuration.
-	 * 
+	 *
 	 * @param composite the parent composite
-	 * @return the control 
-	 */	
+	 * @return the control
+	 */
 	protected Control createSourceAttachmentControls(Composite composite) {
 		return fSourceAttachmentBlock.createControl(composite);
 	}
-	
+
 	/**
 	 * Returns the configured class path entry.
-	 * 
-	 * @return the configured class path entry 
+	 *
+	 * @return the configured class path entry
 	 */
 	public IClasspathEntry getResult() {
 		return fSourceAttachmentBlock.getNewEntry();
 	}
-}	
+}

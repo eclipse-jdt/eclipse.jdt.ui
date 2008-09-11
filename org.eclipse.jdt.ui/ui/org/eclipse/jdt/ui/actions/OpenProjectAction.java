@@ -52,27 +52,27 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Action to open a closed project. Action either opens the closed projects
  * provided by the structured selection or presents a dialog from which the
  * user can select the projects to be opened.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenProjectAction extends SelectionDispatchAction implements IResourceChangeListener {
-	
+
 	private int CLOSED_PROJECTS_SELECTED= 1;
 	private int OTHER_ELEMENTS_SELECTED= 2;
-	
+
 	private OpenResourceAction fWorkbenchAction;
 
 	/**
 	 * Creates a new <code>OpenProjectAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public OpenProjectAction(IWorkbenchSite site) {
@@ -83,7 +83,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_ACTION);
 		setEnabled(hasClosedProjectsInWorkspace());
 	}
-	
+
 	/*
 	 * @see IResourceChangeListener#resourceChanged(IResourceChangeEvent)
 	 */
@@ -100,22 +100,22 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 			}
 		}
 	}
-	
+
 	//---- normal selection -------------------------------------
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.ISelection)
 	 */
 	public void selectionChanged(ISelection selection) {
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.ISelection)
 	 */
 	public void run(ISelection selection) {
 		internalRun(null);
 	}
-	
+
 	private int evaluateSelection(IStructuredSelection selection, List allClosedProjects) {
 		Object[] array= selection.toArray();
 		int selectionStatus = 0;
@@ -143,15 +143,15 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		}
 		return selectionStatus;
 	}
-	
+
 	private static boolean isClosedProject(Object element) {
 		// assume all closed project are rendered as IProject
 		return element instanceof IProject && !((IProject) element).isOpen();
 	}
-	
-	
+
+
 	//---- structured selection ---------------------------------------
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
@@ -165,10 +165,10 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 			internalRun(allClosedProjects);
 		}
 	}
-	
+
 	private void internalRun(List initialSelection) {
 		ListSelectionDialog dialog= new ListSelectionDialog(getShell(), getClosedProjectsInWorkspace(), new ArrayContentProvider(), new JavaElementLabelProvider(), ActionMessages.OpenProjectAction_dialog_message);
-		dialog.setTitle(ActionMessages.OpenProjectAction_dialog_title); 
+		dialog.setTitle(ActionMessages.OpenProjectAction_dialog_title);
 		if (initialSelection != null && !initialSelection.isEmpty()) {
 			dialog.setInitialElementSelections(initialSelection);
 		}
@@ -180,12 +180,12 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		try {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.OpenProjectAction_dialog_title, ActionMessages.OpenProjectAction_error_message); 
+			ExceptionHandler.handle(e, getShell(), ActionMessages.OpenProjectAction_dialog_title, ActionMessages.OpenProjectAction_error_message);
 		} catch (InterruptedException e) {
 			// user cancelled
 		}
 	}
-	
+
 	private IWorkspaceRunnable createRunnable(final Object[] projects) {
 		return new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
@@ -197,7 +197,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 						project.open(new SubProgressMonitor(monitor, 1));
 					} catch (CoreException e) {
 						if (errorStatus == null)
-							errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.OpenProjectAction_error_message, null); 
+							errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.OpenProjectAction_error_message, null);
 						errorStatus.add(e.getStatus());
 					}
 				}
@@ -207,7 +207,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 			}
 		};
 	}
-	
+
 	private Object[] getClosedProjectsInWorkspace() {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		List result= new ArrayList(5);
@@ -218,7 +218,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		}
 		return result.toArray();
 	}
-	
+
 	private boolean hasClosedProjectsInWorkspace() {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {

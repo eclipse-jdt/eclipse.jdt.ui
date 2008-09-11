@@ -212,7 +212,7 @@ public class WorkingSetModel {
 		}
 		private Object getFirstElement(Map map, Object key) {
 			Object obj= map.get(key);
-			if (obj instanceof List) 
+			if (obj instanceof List)
 				return ((List)obj).get(0);
 			return obj;
 		}
@@ -235,15 +235,15 @@ public class WorkingSetModel {
 		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
 		addListenersToWorkingSetManagers();
 		fActiveWorkingSets= new ArrayList(2);
-		
+
 		if (memento == null || ! restoreState(memento)) {
-			IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]); 
+			IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]);
 			others.setId(OthersWorkingSetUpdater.ID);
 			fLocalWorkingSetManager.addWorkingSet(others);
 			fActiveWorkingSets.add(others);
 		}
 		Assert.isNotNull(fOthersWorkingSetUpdater);
-		
+
 		fElementMapper.rebuild(getActiveWorkingSets());
 		fOthersWorkingSetUpdater.updateElements();
 	}
@@ -320,7 +320,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Adds a property change listener.
-	 * 
+	 *
 	 * @param listener the property change listener to add
 	 */
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
@@ -329,7 +329,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Removes the property change listener.
-	 * 
+	 *
 	 * @param listener the property change listener to remove
 	 */
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
@@ -372,7 +372,7 @@ public class WorkingSetModel {
 			active.putString(TAG_WORKING_SET_NAME, workingSet.getName());
 		}
 	}
-	
+
 	public List getNonProjectTopLevelElements() {
 		return fElementMapper.getNonProjectTopLevelElements();
 	}
@@ -386,7 +386,7 @@ public class WorkingSetModel {
 		String configured= memento.getString(TAG_CONFIGURED);
 		if (configured == null)
 			return false;
-		
+
 		fConfigured= Boolean.valueOf(configured).booleanValue();
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
 
@@ -447,7 +447,7 @@ public class WorkingSetModel {
 			return false;
 		Object oldValue= event.getOldValue();
 		Object newValue= event.getNewValue();
-		if ((oldValue != null && fActiveWorkingSets.contains(oldValue)) 
+		if ((oldValue != null && fActiveWorkingSets.contains(oldValue))
 				|| (newValue != null && fActiveWorkingSets.contains(newValue))) {
 			return true;
 		}

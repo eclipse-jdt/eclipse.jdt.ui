@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefa
 
 /**
  * Refactoring contribution for the introduce indirection refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class IntroduceIndirectionRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class IntroduceIndirectionRefactoringContribution extends JavaRefac
 	public RefactoringDescriptor createDescriptor() {
 		return new IntroduceIndirectionDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new IntroduceIndirectionDescriptor(project, description, comment, arguments, flags);
 	}

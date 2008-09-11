@@ -30,14 +30,14 @@ import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
  * Refocuses the type hierarchy on a type selection from a all types dialog.
  */
 public class FocusOnTypeAction extends Action {
-			
+
 	private ITypeHierarchyViewPart fViewPart;
-	
+
 	public FocusOnTypeAction(ITypeHierarchyViewPart part) {
-		super(TypeHierarchyMessages.FocusOnTypeAction_label); 
-		setDescription(TypeHierarchyMessages.FocusOnTypeAction_description); 
-		setToolTipText(TypeHierarchyMessages.FocusOnTypeAction_tooltip); 
-		
+		super(TypeHierarchyMessages.FocusOnTypeAction_label);
+		setDescription(TypeHierarchyMessages.FocusOnTypeAction_description);
+		setToolTipText(TypeHierarchyMessages.FocusOnTypeAction_tooltip);
+
 		fViewPart= part;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this,	IJavaHelpContextIds.FOCUS_ON_TYPE_ACTION);
 	}
@@ -47,20 +47,20 @@ public class FocusOnTypeAction extends Action {
 	 */
 	public void run() {
 		Shell parent= fViewPart.getSite().getShell();
-		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(parent, false, 
-			PlatformUI.getWorkbench().getProgressService(), 
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(parent, false,
+			PlatformUI.getWorkbench().getProgressService(),
 			SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
-	
-		dialog.setTitle(TypeHierarchyMessages.FocusOnTypeAction_dialog_title); 
-		dialog.setMessage(TypeHierarchyMessages.FocusOnTypeAction_dialog_message); 
+
+		dialog.setTitle(TypeHierarchyMessages.FocusOnTypeAction_dialog_title);
+		dialog.setMessage(TypeHierarchyMessages.FocusOnTypeAction_dialog_message);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return;
 		}
-		
+
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
 			IType type= (IType)types[0];
 			fViewPart.setInputElement(type);
 		}
-	}	
+	}
 }

@@ -17,11 +17,11 @@ import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 
 public class DeleteUserInterfaceManager extends UserInterfaceManager {
 	private static final UserInterfaceManager fgInstance= new DeleteUserInterfaceManager();
-	
+
 	public static UserInterfaceManager getDefault() {
 		return fgInstance;
 	}
-	
+
 	private DeleteUserInterfaceManager() {
 		put(JavaDeleteProcessor.class, UserInterfaceStarter.class, DeleteWizard.class);
 	}

@@ -27,6 +27,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -38,35 +39,35 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 /**
  * Action group that adds the search for write references actions to a
  * context menu and the global menu bar.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class WriteReferencesSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.group_writeReferences; 
+	private static final String MENU_TEXT= SearchMessages.group_writeReferences;
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
 	private IActionBars fActionBars;
-		
+
 	private String fGroupId;
 
 	private FindWriteReferencesAction fFindWriteReferencesAction;
 	private FindWriteReferencesInProjectAction fFindWriteReferencesInProjectAction;
 	private FindWriteReferencesInHierarchyAction fFindWriteReferencesInHierarchyAction;
 	private FindWriteReferencesInWorkingSetAction fFindWriteReferencesInWorkingSetAction;
-	
+
 	/**
-	 * Creates a new <code>WriteReferencesSearchGroup</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of 
+	 * Creates a new <code>WriteReferencesSearchGroup</code>. The action
+	 * requires that the selection provided by the site's selection provider is of
 	 * type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the view part that owns this action group
 	 */
 	public WriteReferencesSearchGroup(IWorkbenchSite site) {
@@ -75,13 +76,13 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 
 	/**
 	 * Creates a new <code>WriteReferencesSearchGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public WriteReferencesSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
@@ -112,7 +113,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public WriteReferencesSearchGroup(JavaEditor editor) {
@@ -143,13 +144,13 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		if (specialSelectionProvider != null)
 			action.setSpecialSelectionProvider(specialSelectionProvider);
 	}
-	
+
 	private void addAction(IAction action, IMenuManager manager) {
 		if (action.isEnabled()) {
 			manager.add(action);
 		}
 	}
-	
+
 	private void addWorkingSetAction(IWorkingSet[] workingSets, IMenuManager manager) {
 		FindAction action;
 		if (fEditor != null)
@@ -159,8 +160,8 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		action.update(getContext().getSelection());
 		addAction(action, manager);
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
@@ -169,9 +170,9 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		addAction(fFindWriteReferencesAction, javaSearchMM);
 		addAction(fFindWriteReferencesInProjectAction, javaSearchMM);
 		addAction(fFindWriteReferencesInHierarchyAction, javaSearchMM);
-		
+
 		javaSearchMM.add(new Separator());
-		
+
 		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			addWorkingSetAction((IWorkingSet[]) iter.next(), javaSearchMM);
@@ -181,8 +182,8 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		if (!javaSearchMM.isEmpty())
 			manager.appendToGroup(fGroupId, javaSearchMM);
 	}
-	
-	/* 
+
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -192,7 +193,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		updateGlobalActionHandlers();
 	}
 
-	/* 
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void dispose() {
@@ -219,7 +220,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_WRITE_ACCESS_IN_WORKING_SET, fFindWriteReferencesInWorkingSetAction);
 		}
 	}
-	
+
 	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
 		if (action != null)
 			provider.removeSelectionChangedListener(action);

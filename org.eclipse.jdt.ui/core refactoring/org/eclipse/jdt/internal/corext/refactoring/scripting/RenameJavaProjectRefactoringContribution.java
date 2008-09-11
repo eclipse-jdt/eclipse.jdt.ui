@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProce
 
 /**
  * Refactoring contribution for the rename java project refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class RenameJavaProjectRefactoringContribution extends JavaRefactoringContribution {

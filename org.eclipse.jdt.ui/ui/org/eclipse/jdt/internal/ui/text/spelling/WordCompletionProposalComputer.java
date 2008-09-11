@@ -18,15 +18,14 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -60,33 +59,33 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 			try {
 				IDocument document= context.getDocument();
 				final int offset= context.getInvocationOffset();
-			
+
 				final IRegion region= document.getLineInformationOfOffset(offset);
 				final String content= document.get(region.getOffset(), region.getLength());
-			
+
 				int index= offset - region.getOffset() - 1;
 				while (index >= 0 && Character.isLetter(content.charAt(index)))
 					index--;
-			
+
 				final int start= region.getOffset() + index + 1;
 				final String candidate= content.substring(index + 1, offset - region.getOffset());
-			
+
 				if (candidate.length() > 0) {
-			
+
 					final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
 					final ISpellChecker checker= engine.getSpellChecker();
-			
+
 					if (checker != null) {
-			
+
 						final List proposals= new ArrayList(checker.getProposals(candidate, Character.isUpperCase(candidate.charAt(0))));
 						final List result= new ArrayList(proposals.size());
-			
+
 						for (Iterator it= proposals.iterator(); it.hasNext();) {
 							RankedWordProposal word= (RankedWordProposal) it.next();
 							String text= word.getText();
 							if (text.startsWith(candidate))
 								word.setRank(word.getRank() + PREFIX_RANK_SHIFT);
-							
+
 							result.add(new JavaCompletionProposal(text, start, candidate.length(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME), text, word.getRank()) {
 								/*
 								 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
@@ -96,7 +95,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 								}
 							});
 						}
-						
+
 						return result;
 					}
 				}

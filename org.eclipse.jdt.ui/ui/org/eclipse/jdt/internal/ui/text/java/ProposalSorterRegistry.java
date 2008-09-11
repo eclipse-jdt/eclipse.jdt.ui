@@ -81,9 +81,9 @@ public final class ProposalSorterRegistry {
 
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			IConfigurationElement element= (IConfigurationElement) iter.next();
-			
+
 			try {
-			
+
 				ProposalSorterHandle handle= new ProposalSorterHandle(element);
 				final String id= handle.getId();
 				sorters.put(id, handle);
@@ -104,10 +104,10 @@ public final class ProposalSorterRegistry {
 				informUser(x.getStatus());
 			}
 		}
-		
+
 		fSorters= sorters;
 	}
-	
+
 	private void informUser(IStatus status) {
 		JavaPlugin.log(status);
 		String title= JavaTextMessages.CompletionProposalComputerRegistry_error_dialog_title;
@@ -124,7 +124,7 @@ public final class ProposalSorterRegistry {
 	public void select(ProposalSorterHandle handle) {
 		Assert.isTrue(handle != null);
 		String id= handle.getId();
-		
+
 		fPreferenceStore.setValue(fKey, id);
 	}
 }

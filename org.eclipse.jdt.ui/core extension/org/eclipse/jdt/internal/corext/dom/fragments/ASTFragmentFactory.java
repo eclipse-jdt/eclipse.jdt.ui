@@ -29,42 +29,42 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
  * on properties of the parameters supplied to the factory methods, such
  * as the types and characteristics of AST nodes, or the location of
  * source ranges.
- * 
- * In general, the client will not be aware of exactly what kind of 
+ *
+ * In general, the client will not be aware of exactly what kind of
  * fragment is obtained from these methods.  Beyond the functionality
  * provided by the IASTFragment interface, the client can know, however,
  * based on the parameters passed, some things about the created fragment.
  * See the documentation of the factory methods.
- * 
+ *
  * @see IASTFragment
- * 
+ *
  */
 public class ASTFragmentFactory {
 
 	// Factory Methods: /////////////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * Creates and returns a fragment representing the entire subtree
 	 * rooted at <code>node</code>.  It is not true in general that
 	 * the node to which the produced IASTFragment maps (see {@link  org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment  IASTFragment})
 	 * will be <code>node</code>.
-	 * 
+	 *
 	 * XXX: more doc (current assertions about input vs. output)
 	 */
 	public static IASTFragment createFragmentForFullSubtree(ASTNode node) {
-		IASTFragment result= FragmentForFullSubtreeFactory.createFragmentFor(node);			
+		IASTFragment result= FragmentForFullSubtreeFactory.createFragmentFor(node);
 		Assert.isNotNull(result);
 		return result;
 	}
-	
+
 	/**
 	 * If possible, this method creates a fragment whose source code
 	 * range is <code>range</code> within compilation unit <code>cu</code>,
 	 * and which resides somewhere within the subtree identified by
 	 * <code>scope</code>.
-	 * 
+	 *
 	 * XXX: more doc (current assertions about input vs. output)
-	 * 
+	 *
 	 * @param range	The source range which the create fragment must have.
 	 * @param scope	A node identifying the AST subtree in which the fragment must lie.
 	 * @param cu		The compilation unit to which the source range applies, and to which the AST corresponds.
@@ -86,7 +86,7 @@ public class ASTFragmentFactory {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	
+
 	private static boolean isEmptySelectionCoveredByANode(SourceRange range, SelectionAnalyzer sa) {
 		return range.getLength() == 0 && sa.getFirstSelectedNode() == null && sa.getLastCoveringNode() != null;
 	}
@@ -97,7 +97,7 @@ public class ASTFragmentFactory {
 	private static boolean rangeIncludesNonWhitespaceOutsideNode(SourceRange range, ASTNode node, ICompilationUnit cu) throws JavaModelException {
 		return Util.rangeIncludesNonWhitespaceOutsideRange(range, new SourceRange(node), cu.getBuffer());
 	}
-	
+
 
 	/**
 	 * Returns <code>null</code> if the indices, taken with respect to
@@ -107,11 +107,11 @@ public class ASTFragmentFactory {
 	private static IASTFragment createFragmentForSubPartBySourceRange(ASTNode node, SourceRange range, ICompilationUnit cu) throws JavaModelException {
 		return FragmentForSubPartBySourceRangeFactory.createFragmentFor(node, range, cu);
 	}
-		
+
 	private static class FragmentForFullSubtreeFactory extends FragmentFactory {
 		public static IASTFragment createFragmentFor(ASTNode node) {
 			return new FragmentForFullSubtreeFactory().createFragment(node);
-		} 
+		}
 
 		public boolean visit(InfixExpression node) {
 			/* Try creating an associative infix expression fragment
@@ -121,7 +121,7 @@ public class ASTFragmentFactory {
 			IASTFragment fragment= AssociativeInfixExpressionFragment.createFragmentForFullSubtree(node);
 			if(fragment == null)
 				return visit((Expression) node);
-			
+
 			setFragment(fragment);
 			return false;
 		}
@@ -131,55 +131,55 @@ public class ASTFragmentFactory {
 		}
 		public boolean visit(ASTNode node) {
 			setFragment(new SimpleFragment(node));
-			return false;	
+			return false;
 		}
 	}
 	private static class FragmentForSubPartBySourceRangeFactory extends FragmentFactory {
 		private SourceRange fRange;
 		private ICompilationUnit fCu;
-		
+
 		private JavaModelException javaModelException= null;
-		
+
 		public static IASTFragment createFragmentFor(ASTNode node, SourceRange range, ICompilationUnit cu) throws JavaModelException {
-			return new FragmentForSubPartBySourceRangeFactory().createFragment(node, range, cu);	
+			return new FragmentForSubPartBySourceRangeFactory().createFragment(node, range, cu);
 		}
-		
+
 		public boolean visit(InfixExpression node) {
 			try {
 				setFragment(createInfixExpressionSubPartFragmentBySourceRange(node, fRange, fCu));
 			} catch(JavaModelException e) {
 				javaModelException= e;
 			}
-			return false;	
+			return false;
 		}
-		
+
 		public boolean visit(ASTNode node) {
 			//let fragment be null
-			return false;			
+			return false;
 		}
-		
+
 		protected IASTFragment createFragment(ASTNode node, SourceRange range, ICompilationUnit cu) throws JavaModelException {
 			fRange= range;
 			fCu= cu;
 			IASTFragment result= createFragment(node);
 			if(javaModelException != null)
 				throw javaModelException;
-			return result;	
+			return result;
 		}
-		
+
 		private static IExpressionFragment createInfixExpressionSubPartFragmentBySourceRange(InfixExpression node, SourceRange range, ICompilationUnit cu) throws JavaModelException {
 			return AssociativeInfixExpressionFragment.createSubPartFragmentBySourceRange(node, range, cu);
 		}
 	}
 	private static abstract class FragmentFactory extends HierarchicalASTVisitor {
 		private IASTFragment fFragment;
-		
+
 		protected IASTFragment createFragment(ASTNode node) {
 			fFragment= null;
 			node.accept(this);
-			return fFragment;				
+			return fFragment;
 		}
-		
+
 		protected final IASTFragment getFragment() {
 			return fFragment;
 		}
@@ -191,7 +191,7 @@ public class ASTFragmentFactory {
 			fFragment= null;
 		}
 		protected final boolean isFragmentSet() {
-			return getFragment() != null;	
+			return getFragment() != null;
 		}
 	}
 }

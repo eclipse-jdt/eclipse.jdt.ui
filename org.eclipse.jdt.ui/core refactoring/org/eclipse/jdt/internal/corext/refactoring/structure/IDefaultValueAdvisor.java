@@ -22,7 +22,7 @@ public interface IDefaultValueAdvisor {
 
 	/**
 	 * Creates a default expression for an added parameter for a given method invocation.
-	 * 
+	 *
 	 * @param invocationArguments arguments of the method invocation
 	 * @param addedInfo the added ParamterInfo object
 	 * @param parameterInfos all ParameterInfo objects, including the added ParameterInfo
@@ -35,7 +35,7 @@ public interface IDefaultValueAdvisor {
 
 	/**
 	 * Create a type for the added parameter.
-	 * 
+	 *
 	 * @param newTypeName the fully qualified name of the type
 	 * @param startPosition the position where the type is defined in a compilation unit
 	 * @param cuRewrite the CompilationUnitRewrite to use for rewrite, imports etc..

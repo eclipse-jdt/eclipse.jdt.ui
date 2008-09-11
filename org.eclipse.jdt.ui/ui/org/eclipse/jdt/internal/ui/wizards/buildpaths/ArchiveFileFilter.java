@@ -33,9 +33,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class ArchiveFileFilter extends ViewerFilter {
 
 	public static final String JARZIP_FILTER_STRING= "*.jar,*.zip"; //$NON-NLS-1$
-	
+
 	public static final String[] JAR_ZIP_FILTER_EXTENSIONS= new String[] {"*.jar;*.zip"}; //$NON-NLS-1$
-	
+
 	public static final String[] ALL_ARCHIVES_FILTER_EXTENSIONS= new String[] {"*.jar;*.zip", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final String[] fgArchiveExtensions= { "jar", "zip" }; //$NON-NLS-1$ //$NON-NLS-2$
@@ -43,14 +43,14 @@ public class ArchiveFileFilter extends ViewerFilter {
 	private List fExcludes;
 	private boolean fRecursive;
 	private boolean fAllowAllArchives;
-	
-	
+
+
 	public ArchiveFileFilter(List excludedFiles, boolean recusive, boolean allowAllArchives) {
 		fExcludes= excludedFiles;
 		fRecursive= recusive;
 		fAllowAllArchives= allowAllArchives;
 	}
-	
+
 	/*
 	 * @see ViewerFilter#select
 	 */
@@ -81,7 +81,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 		}
 		return false;
 	}
-	
+
 	public static boolean isArchivePath(IPath path, boolean allowAllAchives) {
 		if (allowAllAchives)
 			return true;
@@ -92,7 +92,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 		}
 		return false;
 	}
-	
+
 	public static boolean isArchiveFileExtension(String ext) {
 		for (int i= 0; i < fgArchiveExtensions.length; i++) {
 			if (ext.equalsIgnoreCase(fgArchiveExtensions[i])) {
@@ -101,7 +101,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 		}
 		return false;
 	}
-			
-	
-			
+
+
+
 }

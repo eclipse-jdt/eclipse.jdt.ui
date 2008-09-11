@@ -453,7 +453,7 @@ public final class JavaModelUtil {
 
 	/*
      * Don't log not-exists exceptions
-     * 
+     *
      * Also see bug http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253.
      * Since 3.4 we also don't log non-exists exception in non-working copies.
 	 */
@@ -590,7 +590,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Get all compilation units of a selection.
-	 * 
+	 *
 	 * @param javaElements the selected java elements
 	 * @return all compilation units containing and contained in elements from javaElements
 	 * @throws JavaModelException if this element does not exist or if an exception occurs while
@@ -681,7 +681,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Checks if the given project or workspace has source compliance 5.0 or greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 5.0 or greater.
 	 */
@@ -693,7 +693,7 @@ public final class JavaModelUtil {
 	/**
 	 * Checks if the JRE of the given project or workspace default JRE have source compliance 5.0 or
 	 * greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace JRE
 	 * @return <code>true</code> if the JRE of the given project or workspace default JRE have
 	 *         source compliance 5.0 or greater.
@@ -788,9 +788,9 @@ public final class JavaModelUtil {
 				if (!status.isOK()) {
 					throw new ValidateEditException(status);
 				}
-				
+
 				cu.applyTextEdit(edit, new SubProgressMonitor(monitor, 1));
-				
+
 				cu.save(new SubProgressMonitor(monitor, 1), true);
 			} finally {
 				monitor.done();
@@ -821,12 +821,12 @@ public final class JavaModelUtil {
 
 	/**
 	 * Returns true iff the given local variable is a parameter of its declaring method.
-	 * 
+	 *
 	 * TODO replace this method with new API when available:
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
-	 * 
+	 *
 	 * @param currentLocal the local variable to test
-	 * 
+	 *
 	 * @return returns true if the variable is a parameter
 	 * @throws JavaModelException if getting the method parameter names fails
 	 */

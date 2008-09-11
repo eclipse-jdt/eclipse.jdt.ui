@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
- 
+
 /**
  * A tree content provider for Java elements. It extends the
  * StandardJavaElementContentProvider with support for listening to changes.
@@ -43,16 +43,16 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * </p>
  * @deprecated use the StandardJavaElementContentProvider instead
  * @see StandardJavaElementContentProvider
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
-	
+
 	/** The tree viewer */
 	protected TreeViewer fViewer;
 	/** The input object */
 	protected Object fInput;
-	
+
 	/* (non-Javadoc)
 	 * Method declared on IContentProvider.
 	 */
@@ -82,19 +82,19 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 
 	/**
 	 * Creates a new content provider for Java elements.
-	 * 
+	 *
 	 * @param provideMembers if <code>true</code> members below compilation units
 	 * and class files are provided.
 	 * @param provideWorkingCopy if <code>true</code> the element provider provides
 	 * working copies for members of compilation units which have an associated working
 	 * copy. Otherwise only original elements are provided.
-	 * 
+	 *
 	 * @since 2.0
 	 */
 	public JavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		super(provideMembers, provideWorkingCopy);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on IElementChangedListener.
 	 */
@@ -105,14 +105,14 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	/**
 	 * Processes a delta recursively. When more than two children are affected the
 	 * tree is fully refreshed starting at this node. The delta is processed in the
 	 * current thread but the viewer updates are posted to the UI thread.
-	 * 
+	 *
 	 * @param delta the delta to be processed
-	 * 
+	 *
 	 * @throws JavaModelException if an error occurs while processing the delta
 	 */
 	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
@@ -123,13 +123,13 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		if (element instanceof ICompilationUnit) {
 			if (!getProvideWorkingCopy())
 				return;
-		
+
 			ICompilationUnit cu= (ICompilationUnit) element;
 			if (!JavaModelUtil.isPrimary(cu) || !isOnClassPath((ICompilationUnit)element)) {
 				return;
 			}
 		}
-			 
+
 		// handle open and closing of a solution or project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {
 			postRefresh(element);
@@ -182,23 +182,23 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		// we don't show the contents of a compilation or IClassFile, so don't go any deeper
 		if ((element instanceof ICompilationUnit) || (element instanceof IClassFile))
 			return;
-			
+
 		// the contents of an external JAR has changed
 		if (element instanceof IPackageFragmentRoot && ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0))
 			postRefresh(element);
-			
+
 		if (isClassPathChange(delta)) {
 			 // throw the towel and do a full refresh of the affected java project.
 			postRefresh(element.getJavaProject());
 		}
-		
+
 		if (delta.getResourceDeltas() != null) {
 			IResourceDelta[] rd= delta.getResourceDeltas();
 			for (int i= 0; i < rd.length; i++) {
 				processResourceDelta(rd[i], element);
 			}
 		}
-		
+
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		if (affectedChildren.length > 1) {
 			// a package fragment might become non empty refresh from the parent
@@ -232,7 +232,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		return project.isOnClasspath(element);
 	}
 
-	
+
 	/*
 	 * Updates the package icon
 	 */
@@ -256,7 +256,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		// filter out changes affecting the output folder
 		if (resource == null)
 			return;
-			
+
 		// this could be optimized by handling all the added children in the parent
 		if ((status & IResourceDelta.REMOVED) != 0) {
 			if (parent instanceof IPackageFragment)
@@ -273,7 +273,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 				postAdd(parent, resource);
 		}
 		IResourceDelta[] affectedChildren= delta.getAffectedChildren();
-		
+
 		if (affectedChildren.length > 1) {
 			// more than one child changed, refresh from here downwards
 			postRefresh(resource);
@@ -283,7 +283,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		for (int i= 0; i < affectedChildren.length; i++)
 			processResourceDelta(affectedChildren[i], resource);
 	}
-	
+
 	private void postRefresh(final Object root) {
 		postRunnable(new Runnable() {
 			public void run() {
@@ -294,7 +294,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			}
 		});
 	}
-	
+
 	private void postAdd(final Object parent, final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {

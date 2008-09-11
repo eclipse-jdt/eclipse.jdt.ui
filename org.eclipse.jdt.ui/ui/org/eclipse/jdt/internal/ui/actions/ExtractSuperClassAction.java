@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public class ExtractSuperClassAction extends SelectionDispatchAction {
@@ -60,7 +60,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * Action definition ID of the refactor -> extract supertype action (value
 	 * <code>"org.eclipse.jdt.ui.edit.text.java.extract.superclass"</code>).
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static final String EXTRACT_SUPERTYPE= "org.eclipse.jdt.ui.edit.text.java.extract.superclass"; //$NON-NLS-1$
@@ -68,7 +68,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * Refactor menu: name of standard Extract Supertype global action (value
 	 * <code>"org.eclipse.jdt.ui.actions.ExtractSuperclass"</code>).
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static final String EXTRACT_SUPERTYPES= "org.eclipse.jdt.ui.actions.ExtractSuperclass"; //$NON-NLS-1$
@@ -100,7 +100,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
-	 * 
+	 *
 	 * @param editor
 	 *            the java editor
 	 */
@@ -114,7 +114,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 	 * Creates a new extract super type action. The action requires that the
 	 * selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site
 	 *            the workbench site
 	 */

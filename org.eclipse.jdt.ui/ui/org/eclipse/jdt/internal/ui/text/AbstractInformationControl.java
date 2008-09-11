@@ -148,11 +148,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	/**
 	 * Field for tree style since it must be remembered by the instance.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private int fTreeStyle;
-	
+
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
 	 * styles are applied to the shell and the tree widget.
@@ -175,7 +175,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				getInvokingCommandKeySequences();
 		}
 		fTreeStyle= treeStyle;
-		// Title and status text must be set to get the title label created, so force empty values here. 
+		// Title and status text must be set to get the title label created, so force empty values here.
 		if (hasHeader())
 			setTitleText(""); //$NON-NLS-1$
 		setInfoText(""); //  //$NON-NLS-1$
@@ -189,7 +189,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	/**
 	 * Create the main content for this information control.
-	 * 
+	 *
 	 * @param parent The parent composite
 	 * @return The control representing the main content.
 	 * @since 3.2
@@ -273,7 +273,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		addDisposeListener(this);
 		return fTreeViewer.getControl();
 	}
-	
+
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
 	 * styles are applied to the shell and the tree widget.
@@ -304,7 +304,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * <p>
 	 * The default is to return <code>false</code>.
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> if the control has a header
 	 */
 	protected boolean hasHeader() {
@@ -412,7 +412,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
 			fStringMatcher= new StringMatcher(pattern, ignoreCase, false);
 		}
-		
+
 		if (update)
 			stringMatcherUpdated();
 	}
@@ -505,7 +505,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	/*
 	 * Overridden to call the old framework method.
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.PopupDialog#fillDialogMenu(IMenuManager)
 	 * @since 3.2
 	 */
@@ -534,7 +534,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			getShell().setVisible(false);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.PopupDialog#open()
 	 * @since 3.3
@@ -566,7 +566,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	/**
 	 * Adds handler and key binding support.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	protected void addHandlerAndKeyBindingSupport() {
@@ -579,7 +579,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	/**
 	 * Removes handler and key binding support.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	protected void removeHandlerAndKeyBindingSupport() {
@@ -621,7 +621,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		 * computed in Window#getInitialLocation, which will center it in the parent shell / main
 		 * monitor, which is wrong for two reasons:
 		 * - we want to center over the editor / subject control, not the parent shell
-		 * - the center is computed via the initalSize, which may be also wrong since the size may 
+		 * - the center is computed via the initalSize, which may be also wrong since the size may
 		 *   have been updated since via min/max sizing of AbstractInformationControlManager.
 		 * In that case, override the location with the one computed by the manager. Note that
 		 * the call to constrainShellSize in PopupDialog.open will still ensure that the shell is
@@ -727,10 +727,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 		return settings;
 	}
-	
+
 	/*
 	 * Overridden to insert the filter text into the title and menu area.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	protected Control createTitleMenuArea(Composite parent) {
@@ -770,7 +770,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		fFilterText= createFilterText(parent);
 		return fFilterText;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.PopupDialog#setTabOrder(org.eclipse.swt.widgets.Composite)
 	 */

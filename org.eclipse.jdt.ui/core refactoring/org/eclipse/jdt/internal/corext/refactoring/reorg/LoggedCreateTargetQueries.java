@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
  * Logged implementation of new create target queries.
- * 
+ *
  * @since 3.3
  */
 public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
@@ -109,7 +109,7 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 
 	/**
 	 * Creates a new logged create target queries.
-	 * 
+	 *
 	 * @param log
 	 *            the create target execution log
 	 */
@@ -127,7 +127,7 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 
 	/**
 	 * Returns the create target execution log.
-	 * 
+	 *
 	 * @return the create target execution log
 	 */
 	public CreateTargetExecutionLog getCreateTargetExecutionLog() {

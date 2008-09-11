@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *          (report 60714: Call Hierarchy: display search scope in view title)
@@ -43,7 +43,7 @@ class SearchScopeProjectAction extends SearchScopeAction {
 		if (members == null) {
 			return null;
 		}
-		
+
 		HashSet projects= new HashSet();
 		for (int i= 0; i < members.length; i++) {
 			projects.add(members[i].getJavaProject());

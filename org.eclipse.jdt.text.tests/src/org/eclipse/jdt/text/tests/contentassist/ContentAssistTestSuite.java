@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 
 /**
  * Content assist test suite.
- * 
+ *
  * @since 3.2
  */
 public class ContentAssistTestSuite {
@@ -36,7 +36,7 @@ public class ContentAssistTestSuite {
 		suite.addTest(SpecialMethodsCompletionTest.suite());
 		suite.addTest(CodeCompletionTest.suite());
 		//$JUnit-END$
-		
+
 		return suite;
 	}
 }

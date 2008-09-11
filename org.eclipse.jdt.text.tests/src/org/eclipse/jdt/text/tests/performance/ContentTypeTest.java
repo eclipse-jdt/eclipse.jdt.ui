@@ -33,11 +33,11 @@ import org.eclipse.jface.text.IDocument;
 
 /**
  * Measures the time to determine the content type of a file buffer.
- * 
+ *
  * @since 3.1
  */
 public class ContentTypeTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= ContentTypeTest.class;
 
 
@@ -50,7 +50,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 
 	private static final String JAVA_FILE= PerformanceTestSetup.TEXT_LAYOUT;
 
-	
+
 	private static final IContentType PROPERTIES_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.jdt.core.javaProperties"); //$NON-NLS-1$
 
 	private static final String PROPERTIES_FILE= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/common_j2se/org/eclipse/swt/internal/SWTMessages.properties";
@@ -69,7 +69,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	private static final int WARM_UP_RUNS= 5;
 
 	private static final int MEASURED_RUNS= 5;
-	
+
 	private static final int ITERATIONS= 10000;
 
 	private static final int PLUGIN_XML_ITERATIONS= 1000;
@@ -87,7 +87,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to retrieve the content type for a modified text file buffer.
-	 * 
+	 *
 	 * @throws Exception if measure fails
 	 */
 	public void testTextDirty() throws Exception {
@@ -99,7 +99,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to retrieve the content type for a modified Java file buffer.
-	 * 
+	 *
 	 * @throws Exception if measure fails
 	 */
 	public void testJavaDirty() throws Exception {
@@ -111,7 +111,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to retrieve the content type for a modified properties file buffer.
-	 * 
+	 *
 	 * @throws Exception if measure fails
 	 */
 	public void testPropertiesDirty() throws Exception {
@@ -123,7 +123,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to retrieve the content type for a modified plugin.xml file buffer.
-	 * 
+	 *
 	 * @throws Exception if measure fails
 	 */
 	public void testPluginXMLDirty() throws Exception {
@@ -137,7 +137,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to retrieve the content type for a modified plugin properties file buffer.
-	 * 
+	 *
 	 * @throws Exception if measure fails
 	 */
 	public void testPluginPropertiesDirty() throws Exception {

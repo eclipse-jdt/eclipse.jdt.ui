@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 /**
  * Java-aware model provider.
- * 
+ *
  * @since 3.2
  */
 public final class JavaModelProvider extends ModelProvider {
@@ -37,7 +37,7 @@ public final class JavaModelProvider extends ModelProvider {
 
 	/**
 	 * Returns the resource associated with the corresponding model element.
-	 * 
+	 *
 	 * @param element
 	 *            the model element
 	 * @return the associated resource, or <code>null</code>

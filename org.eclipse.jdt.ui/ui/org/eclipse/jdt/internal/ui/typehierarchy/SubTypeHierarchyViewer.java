@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
  * on construction (shared type hierarchy)
  */
 public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
-	
+
 	public SubTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle) {
 		super(parent, new SubTypeHierarchyContentProvider(lifeCycle), lifeCycle);
 	}
@@ -38,14 +38,14 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 			return TypeHierarchyMessages.SubTypeHierarchyViewer_title;
 		}
 	}
-	
+
 	/*
 	 * @see TypeHierarchyViewer#updateContent
 	 */
 	public void updateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
-		
+
 		if (expand) {
 			int expandLevel= 2;
 			if (isMethodFiltering()) {
@@ -55,7 +55,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 		}
 		getTree().setRedraw(true);
 	}
-	
+
 	/**
 	 * Content provider for the subtype hierarchy
 	 */
@@ -63,7 +63,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 		public SubTypeHierarchyContentProvider(TypeHierarchyLifeCycle lifeCycle) {
 			super(lifeCycle);
 		}
-		
+
 		protected final void getTypesInHierarchy(IType type, List res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
@@ -81,9 +81,9 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 					}
 				}
 			}
-			
+
 		}
-		
+
 		protected IType getParentType(IType type) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
@@ -94,7 +94,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 		}
 
 }
-	
-	
-	
+
+
+
 }

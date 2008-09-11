@@ -17,28 +17,28 @@ package org.eclipse.jdt.ui;
  * </p>
  *
  * @see JavaUI
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IJavaElementSearchConstants {
 
-	/** 
+	/**
 	 * Search scope constant indicating that classes should be considered.
 	 * Used when opening certain kinds of selection dialogs.
 	 */
 	public static final int CONSIDER_CLASSES= 1 << 1;
 
-	/** 
+	/**
 	 * Search scope constant indicating that interfaces should be considered.
 	 * Used when opening certain kinds of selection dialogs.
 	 */
 	public static final int CONSIDER_INTERFACES= 1 << 2;
 
 	/**
-	 * Search scope constant indicating that both classes and interfaces 
+	 * Search scope constant indicating that both classes and interfaces
 	 * should be considered. Equivalent to
 	 * <code>CONSIDER_CLASSES | CONSIDER_INTERFACES</code>.
-	 * 
+	 *
 	 * @deprecated use CONSIDER_ALL_TYPES or CONSIDER_CLASSES_AND_INTERFACES instead
 	 */
 	public static final int CONSIDER_TYPES= CONSIDER_CLASSES | CONSIDER_INTERFACES;
@@ -58,23 +58,23 @@ public interface IJavaElementSearchConstants {
 	/**
 	 * Search scope constant (bit mask) indicating that required projects should be considered.
 	 * Used when opening certain kinds of selection dialogs.
-	 * 
+	 *
 	 * @since 2.0
-	 */	
+	 */
 	public static final int CONSIDER_REQUIRED_PROJECTS= 1 << 5;
-	
-	/** 
+
+	/**
 	 * Search scope constant indicating that annotation types should be considered.
 	 * Used when opening certain kinds of selection dialogs.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int CONSIDER_ANNOTATION_TYPES= 1 << 6;
 
-	/** 
+	/**
 	 * Search scope constant indicating that enums should be considered.
 	 * Used when opening certain kinds of selection dialogs.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int CONSIDER_ENUMS= 1 << 7;
@@ -82,23 +82,23 @@ public interface IJavaElementSearchConstants {
 	/**
 	 * Search scope constant indicating that classes, interfaces, annotations
 	 * and enums should be considered.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int CONSIDER_ALL_TYPES= 1 << 8;
 
 	/**
-	 * Search scope constant indicating that only classes and interfaces 
+	 * Search scope constant indicating that only classes and interfaces
 	 * should be considered.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int CONSIDER_CLASSES_AND_INTERFACES= 1 << 9;
 
 	/**
-	 * Search scope constant indicating that only classes and enumeration types 
+	 * Search scope constant indicating that only classes and enumeration types
 	 * should be considered.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int CONSIDER_CLASSES_AND_ENUMS= 1 << 10;

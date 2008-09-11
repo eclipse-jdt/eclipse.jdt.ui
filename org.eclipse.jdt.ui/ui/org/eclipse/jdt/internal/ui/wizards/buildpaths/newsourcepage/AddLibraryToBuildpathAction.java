@@ -14,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -23,8 +25,6 @@ import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -59,7 +59,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_LIBRARY);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip);
     }
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -120,7 +120,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 						return false;
 					}
 					return true;
-				} 
+				}
 				return false;
 			}
 
@@ -128,7 +128,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 				IClasspathEntry[] selected= getNewEntries();
 				if (selected != null) {
 					try {
-						pm.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4); 
+						pm.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 
 						List addedEntries= new ArrayList();
 						for (int i= 0; i < selected.length; i++) {
@@ -145,7 +145,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 							throw new InterruptedException();
 
 						ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(pm, 1));
-						
+
 			        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 			        	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
 			        	informListeners(delta);
@@ -177,10 +177,10 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 	protected boolean canHandle(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;
-		
+
 		if (!(selection.getFirstElement() instanceof IJavaProject))
 			return false;
-			
+
 		return true;
 	}
 

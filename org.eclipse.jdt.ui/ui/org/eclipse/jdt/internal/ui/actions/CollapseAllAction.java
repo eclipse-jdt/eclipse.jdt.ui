@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * An {@link Action} that will collapse all nodes in a given {@link TreeViewer}.
- * 
+ *
  * @since 3.4
  */
 public class CollapseAllAction extends Action {

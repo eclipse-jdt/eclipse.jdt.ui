@@ -18,13 +18,13 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 
 /**
- * 
+ *
  * @since 3.2
  */
 public final class JavadocContentAssistInvocationContext extends JavaContentAssistInvocationContext {
 
 	private final int fFlags;
-	
+
 	/**
 	 * @param viewer
 	 * @param offset
@@ -35,36 +35,36 @@ public final class JavadocContentAssistInvocationContext extends JavaContentAssi
 		super(viewer, offset, editor);
 		fFlags= flags;
 	}
-	
+
 	/**
 	 * Returns the flags for this content assist invocation.
-	 * 
+	 *
 	 * @return the flags for this content assist invocation
 	 * @see org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor#RESTRICT_TO_MATCHING_CASE
 	 */
 	public int getFlags() {
 		return fFlags;
 	}
-	
+
 	/**
 	 * Returns the selection length of the viewer.
-	 * 
+	 *
 	 * @return the selection length of the viewer
 	 */
 	public int getSelectionLength() {
 		return getViewer().getSelectedRange().y;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
 		if (!super.equals(obj))
 			return false;
-		
+
 		return fFlags == ((JavadocContentAssistInvocationContext) obj).fFlags;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext#hashCode()
 	 */

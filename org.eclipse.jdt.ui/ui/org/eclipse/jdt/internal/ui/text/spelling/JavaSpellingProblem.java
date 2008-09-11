@@ -51,14 +51,14 @@ public class JavaSpellingProblem extends SpellingProblem {
 
 	/**
 	 * The associated document.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	private IDocument fDocument;
 
 	/**
 	 * Initialize with the given spell event.
-	 * 
+	 *
 	 * @param spellEvent the spell event
 	 * @param document the document
 	 */
@@ -108,10 +108,10 @@ public class JavaSpellingProblem extends SpellingProblem {
 		String[] arguments= getArguments();
 		if (arguments == null)
 			return new ICompletionProposal[0];
-		
+
 		if (arguments[0].indexOf('&') != -1 && isIgnoringAmpersand())
 			return new ICompletionProposal[0]; // no proposals for now
-		
+
 		final int threshold= PreferenceConstants.getPreferenceStore().getInt(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
 		int size= 0;
 		List proposals= null;
@@ -178,7 +178,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 
 		return result;
 	}
-	
+
 	private boolean isIgnoringAmpersand() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 	}

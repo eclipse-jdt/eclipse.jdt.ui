@@ -17,14 +17,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -111,7 +111,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * This processor provides common functionality to move members in a type
  * hierarchy, and to perform a "Use Supertype" refactoring afterwards.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
@@ -129,7 +129,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 		/**
 		 * Creates a new type variable mapper.
-		 * 
+		 *
 		 * @param rewrite
 		 *            The AST rewrite to use
 		 * @param mapping
@@ -235,7 +235,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			String newString= ASTNodes.getNodeSource(predecessor, false, true);
 			if (newString != null) {
 				newDeclaration.setJavadoc((Javadoc) rewrite.createStringPlaceholder(newString, ASTNode.JAVADOC));
-			}			
+			}
 		}
 	}
 
@@ -504,10 +504,10 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	/**
 	 * Creates a new hierarchy processor.
-	 * 
+	 *
 	 * @param members
 	 *            the members, or <code>null</code> if invoked by scripting
-	 * @param settings 
+	 * @param settings
 	 *            the code generation settings to use
 	 * @param layer
 	 *            <code>true</code> to create a working copy layer,

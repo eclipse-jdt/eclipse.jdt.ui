@@ -47,14 +47,14 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 
 /**
  * <p>
- * This is required because of 
+ * This is required because of
  * https://bugs.eclipse.org/bugs/show_bug.cgi?id=79162
  * and
  * https://bugs.eclipse.org/bugs/show_bug.cgi?id=137679
  * </p>
  */
 public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDelegate2 {
-	
+
 	private static Action NO_ACTION_AVAILABLE= new Action(ActionMessages.OccurrencesSearchMenuAction_no_entries_available) {
 		public boolean isEnabled() {
 			return false;
@@ -65,7 +65,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 
 	private IPartService fPartService;
 	private RetargetAction[] fRetargetActions;
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -118,7 +118,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		}
 		return action;
 	}
-	
+
 	private void disposeSubmenuActions() {
 		if (fPartService != null && fRetargetActions != null) {
 			for (int i= 0; i < fRetargetActions.length; i++) {
@@ -129,7 +129,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		fRetargetActions= null;
 		fPartService= null;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -145,20 +145,20 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 					createSubmenuAction(fPartService, JdtActionConstants.FIND_METHOD_EXIT_OCCURRENCES, ActionMessages.OccurrencesSearchMenuAction_method_exits_label, IJavaEditorActionDefinitionIds.SEARCH_METHOD_EXIT_OCCURRENCES),
 					createSubmenuAction(fPartService, JdtActionConstants.FIND_BREAK_CONTINUE_TARGET_OCCURRENCES, ActionMessages.OccurrencesSearchMenuAction_break_continue_target_label, IJavaEditorActionDefinitionIds.SEARCH_BREAK_CONTINUE_TARGET_OCCURRENCES)
 				};
-			}	
+			}
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void run(IAction a) {
 		if (fRetargetActions == null)
 			return;
-		
+
 		JavaEditor editor;
 		ISelection selection;
-		
+
 		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
 		if (activePart instanceof JavaEditor) {
 			selection= getEditorSelection((JavaEditor) activePart);
@@ -174,7 +174,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			editor= null;
 			selection= activePart.getSite().getSelectionProvider().getSelection();
 		}
-		
+
 		final ArrayList activeActions= new ArrayList(fRetargetActions.length);
 		for (int i= 0; i < fRetargetActions.length; i++) {
 			RetargetAction action= fRetargetActions[i];
@@ -214,7 +214,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			}
 		}
 	}
-	
+
 	private ISelection getEditorSelection(JavaEditor editor) {
 		ITypeRoot element= SelectionConverter.getInput(editor);
 		if (element == null)
@@ -228,14 +228,14 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			return new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
 		}
 	}
-	
-	
+
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
-	
+
 	private void fillQuickMenu(IMenuManager manager, List activeActions) {
 		if (activeActions.isEmpty()) {
 			manager.add(NO_ACTION_AVAILABLE);
@@ -245,7 +245,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			}
 		}
 	}
-	
+
 	/**
 	 * The menu to show in the workbench menu
 	 * @param menu the menu to fill
@@ -263,7 +263,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			item.fill(menu, -1);
 		}
 	}
-	
+
 	private void setMenu(Menu menu) {
 		if (fMenu != null) {
 			fMenu.dispose();

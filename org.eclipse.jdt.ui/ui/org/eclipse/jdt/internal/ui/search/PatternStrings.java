@@ -35,28 +35,28 @@ public class PatternStrings {
 					return element.getElementName();
 			}
 	}
-	
+
 	public static String getMethodSignature(IMethod method) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(JavaElementLabels.getElementLabel(
-			method.getDeclaringType(), 
+			method.getDeclaringType(),
 			JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED));
 		boolean isConstructor= method.getElementName().equals(method.getDeclaringType().getElementName());
 		if (!isConstructor) {
 			buffer.append('.');
 		}
 		buffer.append(getUnqualifiedMethodSignature(method, !isConstructor));
-		
+
 		return buffer.toString();
 	}
-	
+
 	private static String getUnqualifiedMethodSignature(IMethod method, boolean includeName) {
 		StringBuffer buffer= new StringBuffer();
 		if (includeName) {
 			buffer.append(method.getElementName());
 		}
 		buffer.append('(');
-		
+
 		String[] types= method.getParameterTypes();
 		for (int i= 0; i < types.length; i++) {
 			if (i > 0)
@@ -65,7 +65,7 @@ public class PatternStrings {
 			buffer.append(typeSig);
 		}
 		buffer.append(')');
-		
+
 		return buffer.toString();
 	}
 
@@ -74,11 +74,11 @@ public class PatternStrings {
 	}
 
 	public static String getTypeSignature(IType field) {
-		return JavaElementLabels.getElementLabel(field, 
+		return JavaElementLabels.getElementLabel(field,
 			JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.USE_RESOLVED);
-	}	
-	
+	}
+
 	public static String getFieldSignature(IField field) {
 		return JavaElementLabels.getElementLabel(field, JavaElementLabels.F_FULLY_QUALIFIED);
-	}	
+	}
 }

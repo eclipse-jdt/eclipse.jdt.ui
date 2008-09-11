@@ -94,10 +94,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
  * @since 2.1
  */
 public class JavadocHover extends AbstractJavaEditorTextHover {
-	
+
 	/**
 	 * Action to go back to the previous input in the hover control.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static final class BackAction extends Action {
@@ -109,10 +109,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK_DISABLED));
-			
+
 			update();
 		}
-		
+
 		public void run() {
 			BrowserInformationControlInput previous= (BrowserInformationControlInput) fInfoControl.getInput().getPrevious();
 			if (previous != null) {
@@ -136,7 +136,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Action to go forward to the next input in the hover control.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static final class ForwardAction extends Action {
@@ -148,10 +148,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_DISABLED));
-			
+
 			update();
 		}
-		
+
 		public void run() {
 			BrowserInformationControlInput next= (BrowserInformationControlInput) fInfoControl.getInput().getNext();
 			if (next != null) {
@@ -174,7 +174,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Action that shows the current hover contents in the Javadoc view.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static final class ShowInJavadocViewAction extends Action {
@@ -201,10 +201,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 		}
 	}
-	
+
 	/**
 	 * Action that opens the current hover input element.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static final class OpenDeclarationAction extends Action {
@@ -234,15 +234,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 		}
 	}
-	
+
 
 	/**
 	 * Presenter control creator.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	public static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -251,25 +251,25 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tbm);
-				
+
 				final BackAction backAction= new BackAction(iControl);
 				backAction.setEnabled(false);
 				tbm.add(backAction);
 				final ForwardAction forwardAction= new ForwardAction(iControl);
 				tbm.add(forwardAction);
 				forwardAction.setEnabled(false);
-				
+
 				final ShowInJavadocViewAction showInJavadocViewAction= new ShowInJavadocViewAction(iControl);
 				tbm.add(showInJavadocViewAction);
 				final OpenDeclarationAction openDeclarationAction= new OpenDeclarationAction(iControl);
 				tbm.add(openDeclarationAction);
-				
+
 				final SimpleSelectionProvider selectionProvider= new SimpleSelectionProvider();
 				OpenExternalBrowserAction openExternalJavadocAction= new OpenExternalBrowserAction(parent.getDisplay(), selectionProvider);
 				selectionProvider.addSelectionChangedListener(openExternalJavadocAction);
 				selectionProvider.setSelection(new StructuredSelection());
 				tbm.add(openExternalJavadocAction);
-				
+
 				IInputChangedListener inputChangeListener= new IInputChangedListener() {
 					public void inputChanged(Object newInput) {
 						backAction.update();
@@ -287,22 +287,22 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					}
 				};
 				iControl.addInputChangeListener(inputChangeListener);
-				
+
 				tbm.update(true);
-				
+
 				addLinkListener(iControl);
 				return iControl;
-				
+
 			} else {
 				return new DefaultInformationControl(parent, true);
 			}
 		}
 	}
 
-	
+
 	/**
 	 * Hover control creator.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	public static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
@@ -362,12 +362,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public boolean canReuse(IInformationControl control) {
 			if (!super.canReuse(control))
 				return false;
-			
+
 			if (control instanceof IInformationControlExtension4) {
 				String tooltipAffordanceString= fAdditionalInfoAffordance ? JavaPlugin.getAdditionalInfoAffordanceString() : EditorsUI.getTooltipAffordanceString();
 				((IInformationControlExtension4)control).setStatusText(tooltipAffordanceString);
 			}
-			
+
 			return true;
 		}
 	}
@@ -384,16 +384,16 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @since 3.4
 	 */
 	private static String fgStyleSheet;
-	
+
 	/**
 	 * The hover control creator.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private IInformationControlCreator fHoverControlCreator;
 	/**
 	 * The presentation control creator.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private IInformationControlCreator fPresenterControlCreator;
@@ -434,7 +434,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					JavaPlugin.log(e);
 				}
 			}
-			
+
 			/* (non-Javadoc)
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleInlineJavadocLink(org.eclipse.jdt.core.IJavaElement)
 			 */
@@ -445,7 +445,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				else
 					control.setInput(hoverInfo);
 			}
-			
+
 			/* (non-Javadoc)
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleDeclarationLink(org.eclipse.jdt.core.IJavaElement)
 			 */
@@ -471,15 +471,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 				// open external links in real browser:
 				OpenBrowserUtil.open(url, display, ""); //$NON-NLS-1$
-				
+
 				return true;
 			}
-			
+
 			public void handleTextSet() {
 			}
 		}));
 	}
-	
+
 	/**
 	 * @deprecated see {@link org.eclipse.jface.text.ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
@@ -499,20 +499,20 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		IJavaElement[] elements= getJavaElementsAt(textViewer, hoverRegion);
 		if (elements == null || elements.length == 0)
 			return null;
-		
+
 		String constantValue;
 		if (elements.length == 1 && elements[0].getElementType() == IJavaElement.FIELD) {
 			constantValue= getConstantValue((IField) elements[0], hoverRegion);
 		} else {
 			constantValue= null;
 		}
-		
+
 		return getHoverInfo(elements, constantValue, null);
 	}
 
 	/**
 	 * Computes the hover info.
-	 * 
+	 *
 	 * @param elements the resolved elements
 	 * @param constantValue a constant value iff result contains exactly 1 constant field, or <code>null</code>
 	 * @param previousInput the previous input, or <code>null</code>
@@ -525,9 +525,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		boolean hasContents= false;
 		String base= null;
 		IJavaElement element= null;
-		
+
 		int leadingImageWidth= 0;
-		
+
 		if (nResults > 1) {
 
 			for (int i= 0; i < elements.length; i++) {
@@ -552,7 +552,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 //					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
 					String content= JavadocContentAccess2.getHTMLContent(member, true);
 					reader= content == null ? null : new StringReader(content);
-					
+
 					// Provide hint why there's no Javadoc
 					if (reader == null && member.isBinary()) {
 						boolean hasAttachedJavadoc= JavaDocLocations.getJavadocBaseLocation(member) != null;
@@ -569,28 +569,28 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedSource);
 						else if (!hasSource)
 							reader= new StringReader(JavaHoverMessages.JavadocHover_noInformation);
-						
+
 					} else {
 						base= JavaDocLocations.getBaseURL(member);
 					}
-					
+
 				} catch (JavaModelException ex) {
 					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
 					JavaPlugin.log(ex);
 				}
-				
+
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 				hasContents= true;
-				
+
 			} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE || element.getElementType() == IJavaElement.TYPE_PARAMETER) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, constantValue, true));
 				hasContents= true;
 			}
 			leadingImageWidth= 20;
 		}
-		
+
 		if (!hasContents)
 			return null;
 
@@ -632,7 +632,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				label.append(constantValue);
 			}
 		}
-		
+
 		String imageName= null;
 		if (allowImage) {
 			URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
@@ -640,7 +640,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				imageName= imageUrl.toExternalForm();
 			}
 		}
-		
+
 		StringBuffer buf= new StringBuffer();
 		addImageAndLabel(buf, imageName, 16, 16, 2, 2, label.toString(), 20, 2);
 		return buf.toString();
@@ -660,7 +660,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Returns the constant value for the given field.
-	 * 
+	 *
 	 * @param field the field
 	 * @param hoverRegion the hover region
 	 * @return the constant value for the given field or <code>null</code> if none
@@ -669,17 +669,17 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	private String getConstantValue(IField field, IRegion hoverRegion) {
 		if (!isStaticFinal(field))
 			return null;
-		
+
 		ITypeRoot typeRoot= getEditorInputJavaElement();
 		if (typeRoot == null)
 			return null;
-		
+
 		Object constantValue= null;
-		
+
 		CompilationUnit unit= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (unit == null)
 			return null;
-		
+
 		ASTNode node= NodeFinder.perform(unit, hoverRegion.getOffset(),	hoverRegion.getLength());
 		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			IBinding binding= ((SimpleName)node).resolveBinding();
@@ -692,7 +692,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 		if (constantValue == null)
 			return null;
-		
+
 		if (constantValue instanceof String) {
 			StringBuffer result= new StringBuffer();
 			result.append('"');
@@ -705,10 +705,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 			result.append('"');
 			return result.toString();
-			
+
 		} else if (constantValue instanceof Character) {
 			String constantResult= '\'' + constantValue.toString() + '\'';
-			
+
 			char charValue= ((Character) constantValue).charValue();
 			String hexString= Integer.toHexString(charValue);
 			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
@@ -717,23 +717,23 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 			hexResult.append(hexString);
 			return formatWithHexValue(constantResult, hexResult.toString());
-			
+
 		} else if (constantValue instanceof Byte) {
 			int byteValue= ((Byte) constantValue).intValue() & 0xFF;
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(byteValue)); //$NON-NLS-1$
-			
+
 		} else if (constantValue instanceof Short) {
 			int shortValue= ((Short) constantValue).shortValue() & 0xFFFF;
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
-			
+
 		} else if (constantValue instanceof Integer) {
 			int intValue= ((Integer) constantValue).intValue();
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
-			
+
 		} else if (constantValue instanceof Long) {
 			long longValue= ((Long) constantValue).longValue();
 			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
-			
+
 		} else {
 			return constantValue.toString();
 		}
@@ -742,7 +742,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	/**
 	 * Creates and returns a formatted message for the given
 	 * constant with its hex value.
-	 * 
+	 *
 	 * @param constantValue the constant value
 	 * @param hexValue the hex value
 	 * @return a formatted string with constant and hex values
@@ -765,7 +765,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
 			css= HTMLPrinter.convertTopLevelFont(css, fontData);
 		}
-	
+
 		return css;
 	}
 
@@ -802,20 +802,20 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 		return null;
 	}
-	
+
 	public static void addImageAndLabel(StringBuffer buf, String imageName, int imageWidth, int imageHeight, int imageLeft, int imageTop, String label, int labelLeft, int labelTop) {
-		
+
 		if (imageName != null) {
 			StringBuffer imageStyle= new StringBuffer("position: absolute; "); //$NON-NLS-1$
 			imageStyle.append("width: ").append(imageWidth).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 			imageStyle.append("height: ").append(imageHeight).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 			imageStyle.append("top: ").append(imageTop).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 			imageStyle.append("left: ").append(imageLeft).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
-						
+
 			buf.append("<!--[if lte IE 6]><![if gte IE 5.5]>\n"); //$NON-NLS-1$
 			buf.append("<span style=\"").append(imageStyle).append("filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='").append(imageName).append("')\"></span>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			buf.append("<![endif]><![endif]-->\n"); //$NON-NLS-1$
-	
+
 			buf.append("<!--[if !IE]>-->\n"); //$NON-NLS-1$
 			buf.append("<img style='").append(imageStyle).append("' src='").append(imageName).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			buf.append("<!--<![endif]-->\n"); //$NON-NLS-1$
@@ -823,7 +823,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			buf.append("<img style='").append(imageStyle).append("' src='").append(imageName).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			buf.append("<![endif]-->\n"); //$NON-NLS-1$
 		}
-		
+
 		buf.append("<div style='word-wrap:break-word;"); //$NON-NLS-1$
 		if (imageName != null) {
 			buf.append("margin-left: ").append(labelLeft).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -832,6 +832,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		buf.append("'>"); //$NON-NLS-1$
 		buf.append(label);
 		buf.append("</div>"); //$NON-NLS-1$
-	}	
-	
+	}
+
 }

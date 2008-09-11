@@ -20,13 +20,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -100,12 +100,12 @@ public class JavaContext extends CompilationUnitContext {
 	private Set fUsedNames= new HashSet();
 	private Map fVariables= new HashMap();
 	private ImportRewrite fImportRewrite;
-	
+
 	private Set fCompatibleContextTypeIds;
-	
+
 	/**
 	 * Creates a java template context.
-	 * 
+	 *
 	 * @param type   the context type.
 	 * @param document the document.
 	 * @param completionOffset the completion offset within the document.
@@ -115,10 +115,10 @@ public class JavaContext extends CompilationUnitContext {
 	public JavaContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength, compilationUnit);
 	}
-	
+
 	/**
 	 * Creates a java template context.
-	 * 
+	 *
 	 * @param type   the context type.
 	 * @param document the document.
 	 * @param completionPosition the position defining the completion offset and length
@@ -128,10 +128,10 @@ public class JavaContext extends CompilationUnitContext {
 	public JavaContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		super(type, document, completionPosition, compilationUnit);
 	}
-	
+
 	/**
 	 * Adds a context type that is also compatible. That means the context can also process templates of that context type.
-	 * 
+	 *
 	 * @param contextTypeId the context type to accept
 	 */
 	public void addCompatibleContextType(String contextTypeId) {
@@ -139,11 +139,11 @@ public class JavaContext extends CompilationUnitContext {
 			fCompatibleContextTypeIds= new HashSet();
 		fCompatibleContextTypeIds.add(contextTypeId);
 	}
-	
-	
+
+
 	/**
 	 * Returns the indentation level at the position of code completion.
-	 * 
+	 *
 	 * @return the indentation level at the position of the code completion
 	 */
 	private int getIndentation() {
@@ -164,15 +164,15 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 		clear();
-		
+
 		if (!canEvaluate(template))
 			throw new TemplateException(JavaTemplateMessages.Context_error_cannot_evaluate);
-		
+
 		TemplateTranslator translator= new TemplateTranslator() {
 			protected TemplateVariable createVariable(TemplateVariableType type, String name, int[] offsets) {
 //				TemplateVariableResolver resolver= getContextType().getResolver(type.getName());
 //				return resolver.createVariable();
-				
+
 				MultiVariable variable= new JavaVariable(type, name, offsets);
 				fVariables.put(name, variable);
 				return variable;
@@ -181,7 +181,7 @@ public class JavaContext extends CompilationUnitContext {
 		TemplateBuffer buffer= translator.translate(template);
 
 		getContextType().resolve(buffer, this);
-		
+
 		rewriteImports();
 
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
@@ -190,7 +190,7 @@ public class JavaContext extends CompilationUnitContext {
 		IJavaProject project= getJavaProject();
 		JavaFormatter formatter= new JavaFormatter(TextUtilities.getDefaultLineDelimiter(getDocument()), getIndentation(), useCodeFormatter, project);
 		formatter.format(buffer, this);
-		
+
 		clear();
 
 		return buffer;
@@ -200,26 +200,26 @@ public class JavaContext extends CompilationUnitContext {
 		fUsedNames.clear();
 		fImportRewrite= null;
 	}
-	
+
 	/*
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
 	public boolean canEvaluate(Template template) {
 		if (!hasCompatibleContextType(template))
 			return false;
-		
+
 		if (fForceEvaluation)
 			return true;
-		
+
 		String key= getKey();
 		return key.length() != 0 && template.getName().toLowerCase().startsWith(key.toLowerCase());
 	}
-	
+
 	private boolean hasCompatibleContextType(Template template) {
 		String key= getKey();
 		if (template.matches(key, getContextType().getId()))
 			return true;
-		
+
 		if (fCompatibleContextTypeIds == null)
 			return false;
 
@@ -228,7 +228,7 @@ public class JavaContext extends CompilationUnitContext {
 			if (template.matches(key, (String)iter.next()))
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -239,22 +239,22 @@ public class JavaContext extends CompilationUnitContext {
 
 		if (fIsManaged && getCompletionLength() > 0)
 			return super.getStart();
-		
+
 		try {
 			IDocument document= getDocument();
 
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
-			
+
 			while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
 				start--;
-			
+
 			while (start != end && Character.isWhitespace(document.getChar(start)))
 				start++;
-			
+
 			if (start == end)
 				start= getCompletionOffset();
-			
+
 				return start;
 
 		} catch (BadLocationException e) {
@@ -266,7 +266,7 @@ public class JavaContext extends CompilationUnitContext {
 	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getEnd()
 	 */
 	public int getEnd() {
-		
+
 		if (fIsManaged || getCompletionLength() == 0)
 			return super.getEnd();
 
@@ -275,10 +275,10 @@ public class JavaContext extends CompilationUnitContext {
 
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
-			
+
 			while (start != end && Character.isWhitespace(document.getChar(end - 1)))
 				end--;
-			
+
 			return end;
 
 		} catch (BadLocationException e) {
@@ -302,7 +302,7 @@ public class JavaContext extends CompilationUnitContext {
 			return start <= end
 				? document.get(start, end - start)
 				: ""; //$NON-NLS-1$
-			
+
 		} catch (BadLocationException e) {
 			return super.getKey();
 		}
@@ -310,12 +310,12 @@ public class JavaContext extends CompilationUnitContext {
 
 	/**
 	 * Returns the character before the start position of the completion.
-	 * 
+	 *
 	 * @return the character before the start position of the completion
 	 */
 	public char getCharacterBeforeStart() {
 		int start= getStart();
-		
+
 		try {
 			return start == 0
 				? ' '
@@ -346,7 +346,7 @@ public class JavaContext extends CompilationUnitContext {
 		ICompilationUnit compilationUnit= getCompilationUnit();
 		if (fCompletion == null) {
 			fCompletion= new CompilationUnitCompletion(compilationUnit);
-			
+
 			if (compilationUnit != null) {
 				try {
 					compilationUnit.codeComplete(getStart(), fCompletion);
@@ -355,13 +355,13 @@ public class JavaContext extends CompilationUnitContext {
 				}
 			}
 		}
-		
+
 		return fCompletion;
 	}
 
 	/**
 	 * Returns the names of local arrays.
-	 * 
+	 *
 	 * @return the names of local arrays
 	 */
 	public Variable[] getArrays() {
@@ -369,10 +369,10 @@ public class JavaContext extends CompilationUnitContext {
 		arrange(localArrays);
 		return localArrays;
 	}
-	
+
 	/**
 	 * Sorts already used locals behind any that are not yet used.
-	 * 
+	 *
 	 * @param variables the variables to sort
 	 * @since 3.3
 	 */
@@ -381,7 +381,7 @@ public class JavaContext extends CompilationUnitContext {
 			public int compare(Object o1, Object o2) {
 				return rank((Variable) o1) - rank((Variable) o2);
 			}
-			
+
 			private int rank(Variable l) {
 				return fUsedNames.contains(l.getName()) ? 1 : 0;
 			}
@@ -390,7 +390,7 @@ public class JavaContext extends CompilationUnitContext {
 
 	/**
 	 * Returns the names of local variables matching <code>type</code>.
-	 * 
+	 *
 	 * @param type the type of the variables
 	 * @return the names of local variables matching <code>type</code>
 	 * @since 3.3
@@ -400,10 +400,10 @@ public class JavaContext extends CompilationUnitContext {
 		arrange(localVariables);
 		return localVariables;
 	}
-	
+
 	/**
 	 * Returns the names of fields matching <code>type</code>.
-	 * 
+	 *
 	 * @param type the type of the fields
 	 * @return the names of fields matching <code>type</code>
 	 * @since 3.3
@@ -413,10 +413,10 @@ public class JavaContext extends CompilationUnitContext {
 		arrange(fields);
 		return fields;
 	}
-	
+
 	/**
 	 * Returns the names of local iterables or arrays.
-	 * 
+	 *
 	 * @return the names of local iterables or arrays
 	 */
 	public Variable[] getIterables() {
@@ -424,7 +424,7 @@ public class JavaContext extends CompilationUnitContext {
 		arrange(iterables);
 		return iterables;
 	}
-	
+
 	public void markAsUsed(String name) {
 		fUsedNames.add(name);
 	}
@@ -435,7 +435,7 @@ public class JavaContext extends CompilationUnitContext {
 		String[] result= suggestVariableName(type, excludes);
 		return result;
 	}
-	
+
 	String[] computeExcludes() {
 		String[] excludes= getCompletion().getLocalVariableNames();
 		if (!fUsedNames.isEmpty()) {
@@ -453,19 +453,19 @@ public class JavaContext extends CompilationUnitContext {
 			dim++;
 			type= type.substring(0, type.length() - 2);
 		}
-		
+
 		IJavaProject project= getJavaProject();
 		if (project != null)
 			return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, type, dim, Arrays.asList(excludes), true);
-		
+
 		// fallback if we lack proper context: roll-our own lowercasing
 		return new String[] {Signature.getSimpleName(type).toLowerCase()};
 	}
-	
+
 	/**
 	 * Adds an import for type with type name <code>type</cod> if possible.
 	 * Returns a string which can be used to reference the type.
-	 * 
+	 *
 	 * @param type the fully qualified name of the type to import
 	 * @return returns a type to which the type binding can be assigned to.
 	 * 	The returned type contains is unqualified when an import could be added or was already known.
@@ -475,7 +475,7 @@ public class JavaContext extends CompilationUnitContext {
 	public String addImport(String type) {
 		if (isReadOnly())
 			return type;
-		
+
 		ICompilationUnit cu= getCompilationUnit();
 		if (cu == null)
 			return type;
@@ -490,7 +490,7 @@ public class JavaContext extends CompilationUnitContext {
 					return type;
 				type= matches[0].getFullyQualifiedName();
 			}
-			
+
 			CompilationUnit root= getASTRoot(cu);
 			if (fImportRewrite == null) {
 				if (root == null) {
@@ -516,7 +516,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Adds a static import for the member with name <code>qualifiedMemberName</code>. The member is
 	 * either a static field or a static method or a '*' to import all static members of a type.
-	 * 
+	 *
 	 * @param qualifiedMemberName the fully qualified name of the member to import or a qualified type
 	 * 			name plus a '.*' suffix.
 	 * @return returns either the simple member name if the import was successful or else the qualified name.
@@ -571,7 +571,7 @@ public class JavaContext extends CompilationUnitContext {
 				context= null;
 			else
 				context= new ContextSensitiveImportRewriteContext(root, getCompletionOffset(), fImportRewrite);
-			
+
 			return fImportRewrite.addStaticImport(typeName, memberName, isField, context);
 		} catch (JavaModelException e) {
 			handleException(null, e);
@@ -581,7 +581,7 @@ public class JavaContext extends CompilationUnitContext {
 
 	/**
 	 * Does <code>type</code> contain a method with <code>name</code>?
-	 * 
+	 *
 	 * @param type the type to inspect
 	 * @param name the name of the method to search for
 	 * @return true if has such a method
@@ -601,7 +601,7 @@ public class JavaContext extends CompilationUnitContext {
 	private void rewriteImports() {
 		if (fImportRewrite == null)
 			return;
-		
+
 		if (isReadOnly())
 			return;
 
@@ -620,7 +620,7 @@ public class JavaContext extends CompilationUnitContext {
 
 			try {
 				JavaModelUtil.applyEdit(cu, fImportRewrite.rewriteImports(null), false, null);
-				
+
 				setCompletionOffset(position.getOffset());
 			} catch (CoreException e) {
 				handleException(null, e);
@@ -635,22 +635,22 @@ public class JavaContext extends CompilationUnitContext {
 			handleException(null, e);
 		}
 	}
-	
+
 	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
 		return SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, new NullProgressMonitor());
 	}
-	
+
 	/*
 	 * Finds a type by the simple name. From AddImportsOperation
 	 */
 	private TypeNameMatch[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor, ICompilationUnit cu) throws JavaModelException {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
-		
+
 		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
 		if (nameNode != null) {
 			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
-		
+
 		ArrayList typeInfos= new ArrayList();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
 		new SearchEngine().searchAllTypeNames(null, 0, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, monitor);
@@ -666,7 +666,7 @@ public class JavaContext extends CompilationUnitContext {
 		}
 		return (TypeNameMatch[]) typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
 	}
-	
+
 	private int getSearchForConstant(int typeKinds) {
 		final int CLASSES= SimilarElementsRequestor.CLASSES;
 		final int INTERFACES= SimilarElementsRequestor.INTERFACES;
@@ -683,7 +683,7 @@ public class JavaContext extends CompilationUnitContext {
 			default: return IJavaSearchConstants.TYPE;
 		}
 	}
-	
+
 	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
@@ -698,7 +698,7 @@ public class JavaContext extends CompilationUnitContext {
 		return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
 	}
 
-	
+
 	private boolean isVisible(TypeNameMatch curr, ICompilationUnit cu) {
 		int flags= curr.getModifiers();
 		if (Flags.isPrivate(flags)) {
@@ -709,10 +709,10 @@ public class JavaContext extends CompilationUnitContext {
 		}
 		return curr.getPackageName().equals(cu.getParent().getElementName());
 	}
-	
+
 	/**
 	 * Evaluates a 'java' template in the context of a compilation unit
-	 * 
+	 *
 	 * @param template the template to be evaluated
 	 * @param compilationUnit the compilation unit in which to evaluate the template
 	 * @param position the position inside the compilation unit for which to evaluate the template
@@ -749,7 +749,7 @@ public class JavaContext extends CompilationUnitContext {
 
 	/**
 	 * Adds a multi-variable guess dependency.
-	 * 
+	 *
 	 * @param master the master variable - <code>slave</code> needs to be updated when
 	 *        <code>master</code> changes
 	 * @param slave the dependent variable
@@ -761,7 +761,7 @@ public class JavaContext extends CompilationUnitContext {
 			guess= new MultiVariableGuess();
 			setMultiVariableGuess(guess);
 		}
-		
+
 		guess.addDependency(master, slave);
 	}
 

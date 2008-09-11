@@ -26,16 +26,16 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class CopyPackageChange extends PackageReorgChange {
-	
+
 	public CopyPackageChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery){
 		super(pack, dest, nameQuery);
 	}
-	
+
 	protected Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException {
 		getPackage().copy(getDestination(), null, getNewName(), true, pm);
 		return null;
 	}
-	
+
 	public String getName() {
 		String packageName= JavaElementLabels.getElementLabel(getPackage(), JavaElementLabels.ALL_DEFAULT);
 		String destinationName= JavaElementLabels.getElementLabel(getDestination(), JavaElementLabels.ALL_DEFAULT);

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -29,6 +27,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -39,13 +39,13 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 /**
  * <code>TableTextCellEditor</code> is a copy of TextCellEditor, with the
  * following changes:
- * 
+ *
  * <ul>
  * <li> modify events are sent out as the text is changed, and not only after
  * editing is done </li>
- * 
+ *
  * <li>a content assistant is supported</li>
- * 
+ *
  * <li>the user can go to the next/previous row with up and down keys</li>
  * </ul>
  */
@@ -53,7 +53,7 @@ public class TableTextCellEditor extends CellEditor {
 	public interface IActivationListener {
 		public void activate();
 	}
-	
+
 	private final TableViewer fTableViewer;
 	private final int fColumn;
 	private final String fProperty;
@@ -64,7 +64,7 @@ public class TableTextCellEditor extends CellEditor {
 	String fOriginalValue;
 	SubjectControlContentAssistant fContentAssistant;
 	private IActivationListener fActivationListener;
-	
+
     protected Text text;
 
     private boolean isSelection = false;
@@ -73,27 +73,27 @@ public class TableTextCellEditor extends CellEditor {
 
     private static final int defaultStyle = SWT.SINGLE;
 	private ModifyListener fModifyListener;
-	
+
 	public TableTextCellEditor(TableViewer tableViewer, int column) {
 		super(tableViewer.getTable(), defaultStyle);
 		fTableViewer= tableViewer;
 		fColumn= column;
 		fProperty= (String) tableViewer.getColumnProperties()[column];
 	}
-	
+
 	public void activate() {
 		super.activate();
 		if (fActivationListener != null)
 			fActivationListener.activate();
 		fOriginalValue= text.getText();
 	}
-	
+
 	private void fireModifyEvent(Object newValue) {
 		fTableViewer.getCellModifier().modify(
 				((IStructuredSelection) fTableViewer.getSelection()).getFirstElement(),
 				fProperty, newValue);
 	}
-	
+
 	protected void focusLost() {
 		if (fContentAssistant != null && fContentAssistant.hasProposalPopupFocus()) {
 			// skip focus lost if it went to the content assist popup
@@ -101,19 +101,19 @@ public class TableTextCellEditor extends CellEditor {
 			super.focusLost();
 		}
 	}
-	
+
 	public void setContentAssistant(SubjectControlContentAssistant assistant) {
 		fContentAssistant= assistant;
 	}
-	
+
 	public void setActivationListener(IActivationListener listener) {
 		fActivationListener= listener;
 	}
-	
+
 	public Text getText() {
 		return text;
 	}
-	
+
     protected void checkDeleteable() {
         boolean oldIsDeleteable = isDeleteable;
         isDeleteable = isDeleteEnabled();
@@ -171,10 +171,10 @@ public class TableTextCellEditor extends CellEditor {
 						return;
 					}
 				}
-				
+
 				if (e.stateMask != SWT.NONE)
 					return;
-				
+
 				switch (e.keyCode) {
 				case SWT.ARROW_DOWN :
 					e.doit= false;
@@ -183,7 +183,7 @@ public class TableTextCellEditor extends CellEditor {
 						break;
 					editRow(nextRow);
 					break;
-					
+
 				case SWT.ARROW_UP :
 					e.doit= false;
 					int prevRow= fTableViewer.getTable().getSelectionIndex() - 1;
@@ -191,7 +191,7 @@ public class TableTextCellEditor extends CellEditor {
 						break;
 					editRow(prevRow);
 					break;
-					
+
 				case SWT.F2 :
 					e.doit= false;
 					deactivate();
@@ -207,7 +207,7 @@ public class TableTextCellEditor extends CellEditor {
 			}
 		});
         text.addKeyListener(new KeyAdapter() {
-            // hook key pressed - see PR 14201  
+            // hook key pressed - see PR 14201
             public void keyPressed(KeyEvent e) {
                 keyReleaseOccured(e);
 
@@ -252,7 +252,7 @@ public class TableTextCellEditor extends CellEditor {
         text.setBackground(parent.getBackground());
         text.setText("");//$NON-NLS-1$
         text.addModifyListener(getModifyListener());
-		
+
 		return text;
     }
 
@@ -261,7 +261,7 @@ public class TableTextCellEditor extends CellEditor {
     	text.setText(fOriginalValue);
 		super.fireApplyEditorValue();
     }
-		
+
     /**
      * The <code>TextCellEditor</code> implementation of
      * this <code>CellEditor</code> framework method returns
@@ -365,11 +365,11 @@ public class TableTextCellEditor extends CellEditor {
             // Enter is handled in handleDefaultSelection.
             // Do not apply the editor value in response to an Enter key event
             // since this can be received from the IME when the intent is -not-
-            // to apply the value.  
+            // to apply the value.
             // See bug 39074 [CellEditors] [DBCS] canna input mode fires bogus event from Text Control
             //
             // An exception is made for Ctrl+Enter for multi-line texts, since
-            // a default selection event is not sent in this case. 
+            // a default selection event is not sent in this case.
             if (text != null && !text.isDisposed()
                     && (text.getStyle() & SWT.MULTI) != 0) {
                 if ((keyEvent.stateMask & SWT.CTRL) != 0) {
@@ -421,7 +421,7 @@ public class TableTextCellEditor extends CellEditor {
         checkSelection();
         checkDeleteable();
     }
-    
+
     /*
 	 * @see org.eclipse.jface.viewers.CellEditor#dependsOnExternalFocusListener()
 	 */

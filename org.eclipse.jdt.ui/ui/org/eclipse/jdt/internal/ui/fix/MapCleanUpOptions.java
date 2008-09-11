@@ -18,14 +18,14 @@ import java.util.Set;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 public class MapCleanUpOptions extends CleanUpOptions {
-	
+
 	private final Map fOptions;
 
 	/**
 	 * Create new CleanUpOptions instance. <code>options</code>
-	 * maps named clean ups keys to {@link CleanUpOptions#TRUE}, 
+	 * maps named clean ups keys to {@link CleanUpOptions#TRUE},
 	 * {@link CleanUpOptions#FALSE} or any String value
-	 * 
+	 *
 	 * @param options map from String to String
 	 * @see CleanUpConstants
 	 */
@@ -33,7 +33,7 @@ public class MapCleanUpOptions extends CleanUpOptions {
 		super(options);
 		fOptions= options;
 	}
-	
+
 	public MapCleanUpOptions() {
 		this(new Hashtable());
 	}

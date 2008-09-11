@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 /**
  * Type constraints creator to determine the necessary constraints to replace type occurrences by a given super type.
- * 
+ *
  * @since 3.1
  */
 public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
@@ -82,7 +82,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * Returns the original methods of the method hierarchy of the specified method.
-	 * 
+	 *
 	 * @param binding the method binding
 	 * @param type the current type
 	 * @param originals the original methods which have already been found (element type: <code>IMethodBinding</code>)
@@ -128,7 +128,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * Creates a new super type constraints creator.
-	 * 
+	 *
 	 * @param model the model to create the type constraints for
 	 * @param instanceofs <code>true</code> to rewrite instanceof expressions, <code>false</code> otherwise
 	 */
@@ -313,7 +313,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the specified method declaration.
-	 * 
+	 *
 	 * @param binding the method binding
 	 */
 	private void endVisit(final IMethodBinding binding) {
@@ -335,7 +335,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the specified method invocation.
-	 * 
+	 *
 	 * @param binding the method binding
 	 * @param descendant the constraint variable of the invocation expression
 	 */
@@ -356,7 +356,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the thrown exception
-	 * 
+	 *
 	 * @param binding the type binding of the thrown exception
 	 * @param node the exception name node
 	 */
@@ -368,7 +368,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the field access.
-	 * 
+	 *
 	 * @param binding the variable binding
 	 * @param qualifier the qualifier expression, or <code>null</code>
 	 * @param access the access expression
@@ -391,7 +391,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the method argument list.
-	 * 
+	 *
 	 * @param arguments the arguments (element type: <code>Expression</code>)
 	 * @param binding the method binding
 	 */
@@ -410,7 +410,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the variable declaration fragment list.
-	 * 
+	 *
 	 * @param fragments the fragments (element type: <code>VariableDeclarationFragment</code>)
 	 * @param type the type of the fragments
 	 * @param parent the parent of the fragment list
@@ -526,7 +526,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the return type of a method invocation.
-	 * 
+	 *
 	 * @param invocation the method invocation
 	 * @param binding the method binding
 	 */
@@ -623,7 +623,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			}
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.EnhancedForStatement)
 	 */
@@ -733,7 +733,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * Returns the original methods of the method hierarchy of the specified method.
-	 * 
+	 *
 	 * @param binding the method binding
 	 * @return the original methods (element type: <code>IMethodBinding</code>)
 	 */

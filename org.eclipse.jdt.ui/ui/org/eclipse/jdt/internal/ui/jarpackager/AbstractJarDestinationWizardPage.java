@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 /**
  * A wizard page containing a destination block for a jar file. Including
  * all required validation code. Clients should overwrite <code>createControl</code>.
- * 
+ *
  * @since 3.4
  */
 public abstract class AbstractJarDestinationWizardPage extends WizardExportResourcesPage implements IJarPackageWizardPage {
@@ -139,7 +139,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/**
 	 * Answer the contents of the destination specification widget. If this
 	 * value does not have the required suffix then add it first.
-	 * 
+	 *
 	 * @return java.lang.String
 	 */
 	protected String getDestinationValue() {
@@ -227,7 +227,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	 */
 	protected boolean validateDestinationGroup() {
 		if (fDestinationNamesCombo.getText().length() == 0) {
-			// Clear error 
+			// Clear error
 			if (getErrorMessage() != null)
 				setErrorMessage(null);
 			if (getMessage() != null)
@@ -302,7 +302,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		}
 	}
 
-	/* 
+	/*
 	 * Implements method from IJarPackageWizardPage.
 	 */
 	public void finish() {

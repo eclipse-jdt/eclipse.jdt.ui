@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import com.ibm.icu.text.BreakIterator;
+
 import org.eclipse.swt.graphics.GC;
 
 /*
@@ -35,7 +36,7 @@ public class LineBreakingReader {
 
 	/**
 	 * Creates a reader that breaks an input text to fit in a given width.
-	 * 
+	 *
 	 * @param reader Reader of the input text
 	 * @param gc The graphic context that defines the currently used font sizes
 	 * @param maxLineWidth The max width (pixels) where the text has to fit in
@@ -57,9 +58,9 @@ public class LineBreakingReader {
 	/**
 	 * Reads the next line. The lengths of the line will not exceed the given maximum
 	 * width.
-	 * 
-	 * @return the next line 
-	 * @throws IOException 
+	 *
+	 * @return the next line
+	 * @throws IOException
 	 */
 	public String readLine() throws IOException {
 		if (fLine == null) {

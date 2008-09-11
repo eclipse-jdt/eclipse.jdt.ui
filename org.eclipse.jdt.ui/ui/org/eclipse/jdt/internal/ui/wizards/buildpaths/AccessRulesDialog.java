@@ -31,12 +31,11 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
-
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -61,40 +60,40 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 public class AccessRulesDialog extends StatusDialog {
-	
+
 	public static final int SWITCH_PAGE= 10;
-	
+
 	private final ListDialogField fAccessRulesList;
 	private final SelectionButtonDialogField fCombineRulesCheckbox;
 	private final CPListElement fCurrElement;
-	
+
 	private final IJavaProject fProject;
 	private final boolean fParentCanSwitchPage;
-	
+
 	private static final int IDX_ADD= 0;
 	private static final int IDX_EDIT= 1;
 	private static final int IDX_UP= 3;
 	private static final int IDX_DOWN= 4;
 	private static final int IDX_REMOVE= 6;
 
-	
+
 	public AccessRulesDialog(Shell parent, CPListElement entryToEdit, IJavaProject project, boolean parentCanSwitchPage) {
 		super(parent);
-		
+
 		fCurrElement= entryToEdit;
 		fProject= project; // can be null
 
-		setTitle(NewWizardMessages.AccessRulesDialog_title); 
-		
+		setTitle(NewWizardMessages.AccessRulesDialog_title);
+
 		fAccessRulesList= createListContents(entryToEdit);
-		
+
 		fCombineRulesCheckbox= new SelectionButtonDialogField(SWT.CHECK);
 		fCombineRulesCheckbox.setLabelText(NewWizardMessages.AccessRulesDialog_combine_label);
 		fCombineRulesCheckbox.setSelection(Boolean.TRUE.equals(entryToEdit.getAttribute(CPListElement.COMBINE_ACCESSRULES)));
-		
+
 		fParentCanSwitchPage= parentCanSwitchPage;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4
@@ -104,20 +103,20 @@ public class AccessRulesDialog extends StatusDialog {
 	}
 
 	private ListDialogField createListContents(CPListElement entryToEdit) {
-		String label= NewWizardMessages.AccessRulesDialog_rules_label; 
+		String label= NewWizardMessages.AccessRulesDialog_rules_label;
 		String[] buttonLabels= new String[] {
-				NewWizardMessages.AccessRulesDialog_rules_add, 
-				NewWizardMessages.AccessRulesDialog_rules_edit, 
+				NewWizardMessages.AccessRulesDialog_rules_add,
+				NewWizardMessages.AccessRulesDialog_rules_edit,
 				null,
-				NewWizardMessages.AccessRulesDialog_rules_up, 
-				NewWizardMessages.AccessRulesDialog_rules_down, 
+				NewWizardMessages.AccessRulesDialog_rules_up,
+				NewWizardMessages.AccessRulesDialog_rules_down,
 				null,
 				NewWizardMessages.AccessRulesDialog_rules_remove
 		};
-		
+
 		TypeRestrictionAdapter adapter= new TypeRestrictionAdapter();
 		AccessRulesLabelProvider labelProvider= new AccessRulesLabelProvider();
-		
+
 		ListDialogField patternList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		patternList.setDialogFieldListener(adapter);
 
@@ -126,7 +125,7 @@ public class AccessRulesDialog extends StatusDialog {
 		patternList.setUpButtonIndex(IDX_UP);
 		patternList.setDownButtonIndex(IDX_DOWN);
 		patternList.enableButton(IDX_EDIT, false);
-	
+
 		IAccessRule[] rules= (IAccessRule[]) entryToEdit.getAttribute(CPListElement.ACCESSRULES);
 		ArrayList elements= new ArrayList(rules.length);
 		for (int i= 0; i < rules.length; i++) {
@@ -140,7 +139,7 @@ public class AccessRulesDialog extends StatusDialog {
 
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-				
+
 		int maxLabelSize= 0;
 		GC gc= new GC(composite);
 		try {
@@ -156,49 +155,49 @@ public class AccessRulesDialog extends StatusDialog {
 		} finally {
 			gc.dispose();
 		}
-		
+
 		ColumnLayoutData[] columnDta= new ColumnLayoutData[] {
 				new ColumnPixelData(maxLabelSize + 40),
 				new ColumnWeightData(1),
 		};
 		fAccessRulesList.setTableColumns(new ListDialogField.ColumnsDescription(columnDta, null, false));
-		
+
 
 		Composite inner= new Composite(composite, SWT.NONE);
 		inner.setFont(composite.getFont());
-		
+
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		inner.setLayout(layout);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		Label description= new Label(inner, SWT.WRAP);
 
-		description.setText(getDescriptionString()); 
-		
+		description.setText(getDescriptionString());
+
 		GridData data= new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 		data.widthHint= convertWidthInCharsToPixels(70);
 		description.setLayoutData(data);
-		
+
 		fAccessRulesList.doFillIntoGrid(inner, 3);
-				
+
 		LayoutUtil.setHorizontalSpan(fAccessRulesList.getLabelControl(null), 2);
-		
+
 		data= (GridData) fAccessRulesList.getListControl(null).getLayoutData();
 		data.grabExcessHorizontalSpace= true;
 		data.heightHint= SWT.DEFAULT;
-		
+
 		if (fCurrElement.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
 			fCombineRulesCheckbox.doFillIntoGrid(inner, 2);
 		}
-		
+
 		if (fProject != null) {
 			String forbiddenSeverity=  fProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true);
 			String discouragedSeverity= fProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true);
 			String[] args= { getLocalizedString(discouragedSeverity), getLocalizedString(forbiddenSeverity) };
-			
+
 			FormToolkit toolkit= new FormToolkit(parent.getDisplay());
 			toolkit.setBackground(null);
 			try {
@@ -218,14 +217,14 @@ public class AccessRulesDialog extends StatusDialog {
 				}
 				data= new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 				data.widthHint= convertWidthInCharsToPixels(70);
-				text.setLayoutData(data);				
+				text.setLayoutData(data);
 			} catch (IllegalArgumentException e) {
 				JavaPlugin.log(e); // invalid string
 			} finally {
 				toolkit.dispose();
 			}
 		}
-		applyDialogFont(composite);		
+		applyDialogFont(composite);
 		return composite;
 	}
 
@@ -245,7 +244,7 @@ public class AccessRulesDialog extends StatusDialog {
 			return NewWizardMessages.AccessRulesDialog_severity_ignore;
 		}
 	}
-	
+
 	private String getDescriptionString() {
 		String desc;
 		String name= BasicElementLabels.getResourceName(fCurrElement.getPath().lastSegment());
@@ -263,7 +262,7 @@ public class AccessRulesDialog extends StatusDialog {
 			default:
 				desc=  NewWizardMessages.AccessRulesDialog_description;
 		}
-		
+
 		return Messages.format(desc, name);
 	}
 
@@ -275,22 +274,22 @@ public class AccessRulesDialog extends StatusDialog {
 			editEntry(field);
 		}
 	}
-	
+
 	protected void doDoubleClicked(ListDialogField field) {
 		editEntry(field);
 	}
-	
+
 	protected void doSelectionChanged(ListDialogField field) {
 		List selected= field.getSelectedElements();
 		field.enableButton(IDX_EDIT, canEdit(selected));
 	}
-	
+
 	private boolean canEdit(List selected) {
 		return selected.size() == 1;
 	}
-	
+
 	private void editEntry(ListDialogField field) {
-		
+
 		List selElements= field.getSelectedElements();
 		if (selElements.size() != 1) {
 			return;
@@ -307,10 +306,10 @@ public class AccessRulesDialog extends StatusDialog {
 		if (dialog.open() == Window.OK) {
 			field.addElement(dialog.getRule());
 		}
-	}	
-	
-	
-		
+	}
+
+
+
 	// -------- TypeRestrictionAdapter --------
 
 	private class TypeRestrictionAdapter implements IListAdapter, IDialogFieldListener {
@@ -339,24 +338,24 @@ public class AccessRulesDialog extends StatusDialog {
 		 */
 		public void dialogFieldChanged(DialogField field) {
 		}
-		
+
 	}
-	
+
 	protected void doStatusLineUpdate() {
-	}		
-	
+	}
+
 	protected void checkIfPatternValid() {
 	}
-	
+
 	public IAccessRule[] getAccessRules() {
 		List elements= fAccessRulesList.getElements();
 		return (IAccessRule[]) elements.toArray(new IAccessRule[elements.size()]);
 	}
-	
+
 	public boolean doCombineAccessRules() {
 		return fCombineRulesCheckbox.isSelected();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */

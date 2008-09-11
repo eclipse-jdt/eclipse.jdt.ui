@@ -12,14 +12,15 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import junit.framework.Test;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 class CompletionTestSetup extends ProjectTestSetup {
 
@@ -28,14 +29,14 @@ class CompletionTestSetup extends ProjectTestSetup {
 		IPackageFragmentRoot root= project.getPackageFragmentRoot("src");
 		if (!root.exists())
 			root= JavaProjectHelper.addSourceContainer(project, "src");
-		
+
 		IPackageFragment fragment= root.getPackageFragment("test1");
 		if (!fragment.exists())
 			fragment= root.createPackageFragment("test1", false, null);
-		
+
 		return fragment;
 	}
-	
+
 	private static int fAnonymousSoureFolderCounter= 0;
 	public static IPackageFragment getAnonymousTestPackage() throws CoreException {
 		IJavaProject project= getProject();
@@ -43,14 +44,14 @@ class CompletionTestSetup extends ProjectTestSetup {
 		IPackageFragmentRoot root= project.getPackageFragmentRoot(sourceFolder);
 		if (!root.exists())
 			root= JavaProjectHelper.addSourceContainer(project, sourceFolder);
-		
+
 		IPackageFragment fragment= root.getPackageFragment("test1");
 		if (!fragment.exists())
 			fragment= root.createPackageFragment("test1", false, null);
-		
+
 		return fragment;
 	}
-	
+
 	public CompletionTestSetup(Test test) {
 		super(test);
 	}

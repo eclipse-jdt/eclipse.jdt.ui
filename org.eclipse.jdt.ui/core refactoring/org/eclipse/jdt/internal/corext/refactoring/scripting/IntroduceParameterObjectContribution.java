@@ -37,7 +37,7 @@ public class IntroduceParameterObjectContribution extends JavaRefactoringContrib
 		}
 		return null;
 	}
-	
+
 	public RefactoringDescriptor createDescriptor() {
 		return new IntroduceParameterObjectDescriptor();
 	}

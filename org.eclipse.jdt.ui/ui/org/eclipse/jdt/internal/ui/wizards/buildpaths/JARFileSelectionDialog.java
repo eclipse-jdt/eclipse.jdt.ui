@@ -12,10 +12,10 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.io.File;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -48,7 +48,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders) {
 		this(parent, multiSelect, acceptFolders, false);
 	}
-	
+
 	/**
 	 * Constructor for JARFileSelectionDialog.
 	 * @param parent parent shell
@@ -67,13 +67,13 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 		setValidator(new FileSelectionValidator(multiSelect, acceptFolders));
 		setHelpAvailable(false);
 	}
-	
-	
+
+
 
 	private static class FileLabelProvider extends LabelProvider {
 		private final Image IMG_FOLDER= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 		private final Image IMG_JAR=  JavaPlugin.getDefault().getImageRegistry().get(JavaPluginImages.IMG_OBJS_EXTJAR);
-	
+
 		public Image getImage(Object element) {
 			if (element instanceof File) {
 				File curr= (File) element;
@@ -85,7 +85,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			}
 			return null;
 		}
-	
+
 		public String getText(Object element) {
 			if (element instanceof File) {
 				return BasicElementLabels.getResourceName(((File) element).getName());
@@ -93,11 +93,11 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			return super.getText(element);
 		}
 	}
-	
+
 	private static class FileContentProvider implements ITreeContentProvider {
-		
+
 		private final Object[] EMPTY= new Object[0];
-	
+
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof File) {
 				File[] children= ((File) parentElement).listFiles();
@@ -107,30 +107,30 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			}
 			return EMPTY;
 		}
-	
+
 		public Object getParent(Object element) {
 			if (element instanceof File) {
 				return ((File) element).getParentFile();
 			}
 			return null;
 		}
-	
+
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
-	
+
 		public Object[] getElements(Object element) {
 			return getChildren(element);
 		}
-	
+
 		public void dispose() {
 		}
-	
+
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
-	
+
 	}
-	
+
 	private static class JARZipFileFilter extends ViewerFilter {
 		private final boolean fAcceptFolders;
 
@@ -158,14 +158,14 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			}
 			return false;
 		}
-		
+
 		private static boolean isArchive(File file) {
 			String name= file.getName();
 			int detIndex= name.lastIndexOf('.');
 			return (detIndex != -1 && ArchiveFileFilter.isArchiveFileExtension(name.substring(detIndex + 1)));
-		}	
+		}
 	}
-	
+
 	private static class FileViewerComparator extends ViewerComparator {
 		public int category(Object element) {
 			if (element instanceof File) {
@@ -176,16 +176,16 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			return 0;
 		}
 	}
-	
+
 	private static class FileSelectionValidator implements ISelectionStatusValidator {
 		private boolean fMultiSelect;
 		private boolean fAcceptFolders;
-		
+
 		public FileSelectionValidator(boolean multiSelect, boolean acceptFolders) {
 			fMultiSelect= multiSelect;
 			fAcceptFolders= acceptFolders;
 		}
-		
+
 		public IStatus validate(Object[] selection) {
 			int nSelected= selection.length;
 			if (nSelected == 0 || (nSelected > 1 && !fMultiSelect)) {

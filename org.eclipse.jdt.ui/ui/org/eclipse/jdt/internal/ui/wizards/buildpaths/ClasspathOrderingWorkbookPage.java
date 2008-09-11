@@ -27,28 +27,28 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 
 public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
-	
+
 	private ListDialogField fClassPathList;
-	
+
 	public ClasspathOrderingWorkbookPage(ListDialogField classPathList) {
 		fClassPathList= classPathList;
 	}
-	
+
 	public Control getControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
-		
+
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		
+
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fClassPathList }, true, SWT.DEFAULT, SWT.DEFAULT);
 		LayoutUtil.setHorizontalGrabbing(fClassPathList.getListControl(null));
 
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fClassPathList.setButtonsMinWidth(buttonBarWidth);
-			
+
 		return composite;
 	}
-	
+
 	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
@@ -58,11 +58,11 @@ public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
 
 	/*
 	 * @see BuildPathBasePage#setSelection
-	 */	
+	 */
 	public void setSelection(List selElements, boolean expand) {
 		fClassPathList.selectElements(new StructuredSelection(selElements));
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
 	 */

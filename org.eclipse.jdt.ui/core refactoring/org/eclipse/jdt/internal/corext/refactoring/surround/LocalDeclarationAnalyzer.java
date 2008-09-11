@@ -39,25 +39,25 @@ public class LocalDeclarationAnalyzer extends ASTVisitor {
 		fSelection= selection;
 		fAffectedLocals= new ArrayList(1);
 	}
-	
+
 	public boolean visit(SimpleName node) {
-		IVariableBinding binding= null; 
+		IVariableBinding binding= null;
 		if (node.isDeclaration() || !considerNode(node) || (binding= ASTNodes.getLocalVariableBinding(node)) == null)
 			return false;
 		handleReferenceToLocal(node, binding);
 		return true;
-	}	
-	
+	}
+
 	private boolean considerNode(ASTNode node) {
 		return fSelection.getVisitSelectionMode(node) == Selection.AFTER;
 	}
-	
+
 	private void handleReferenceToLocal(SimpleName node, IVariableBinding binding) {
 		VariableDeclaration declaration= ASTNodes.findVariableDeclaration(binding, node);
 		if (declaration != null && fSelection.covers(declaration))
 			addLocalDeclaration(declaration);
 	}
-	
+
 	private void addLocalDeclaration(VariableDeclaration declaration) {
 		if (!fAffectedLocals.contains(declaration))
 			fAffectedLocals.add(declaration);

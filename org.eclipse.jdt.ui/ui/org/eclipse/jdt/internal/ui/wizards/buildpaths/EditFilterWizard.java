@@ -18,29 +18,29 @@ public class EditFilterWizard extends BuildPathWizard {
 
 	private SetFilterWizardPage fFilterPage;
 	private final IPath[] fOrginalInclusion, fOriginalExclusion;
-	
+
 	public EditFilterWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation) {
 		super(existingEntries, newEntry, outputLocation, NewWizardMessages.ExclusionInclusionDialog_title, null);
-		
+
 		IPath[] inc= (IPath[])newEntry.getAttribute(CPListElement.INCLUSION);
 		fOrginalInclusion= new IPath[inc.length];
 		System.arraycopy(inc, 0, fOrginalInclusion, 0, inc.length);
-		
+
 		IPath[] excl= (IPath[])newEntry.getAttribute(CPListElement.EXCLUSION);
 		fOriginalExclusion= new IPath[excl.length];
 		System.arraycopy(excl, 0, fOriginalExclusion, 0, excl.length);
 	}
-	
+
 	/*
 	 * @see Wizard#addPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
-		
+
 		fFilterPage= new SetFilterWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation());
 		addPage(fFilterPage);
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
@@ -48,7 +48,7 @@ public class EditFilterWizard extends BuildPathWizard {
 		CPListElement entryToEdit= getEntryToEdit();
 		entryToEdit.setAttribute(CPListElement.INCLUSION, fFilterPage.getInclusionPattern());
 		entryToEdit.setAttribute(CPListElement.EXCLUSION, fFilterPage.getExclusionPattern());
-		
+
 		return super.performFinish();
 	}
 

@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -30,15 +30,15 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.JavaBuildPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage"; //$NON-NLS-1$
-	
+
 	private JavaBuildConfigurationBlock fConfigurationBlock;
 
 	public JavaBuildPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		//setDescription(PreferencesMessages.JavaBuildPreferencePage_description); 
-		
+		//setDescription(PreferencesMessages.JavaBuildPreferencePage_description);
+
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.JavaBuildPreferencePage_title);		 
+		setTitle(PreferencesMessages.JavaBuildPreferencePage_title);
 	}
 
 	/*
@@ -47,7 +47,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new JavaBuildConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
-		
+
 		super.createControl(parent);
 		if (isProjectPreferencePage()) {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_BUILD_PROPERTY_PAGE);
@@ -59,25 +59,25 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
 	}
-	
+
 	protected boolean hasProjectSpecificOptions(IProject project) {
 		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
 	 */
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -87,7 +87,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 		}
 		super.dispose();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
 	 */
@@ -97,7 +97,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -114,10 +114,10 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 	public boolean performOk() {
 		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
-		}	
+		}
 		return super.performOk();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */
@@ -126,7 +126,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.performApply();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
 	 */
@@ -134,5 +134,5 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 		super.setElement(element);
 		setDescription(null); // no description for property page
 	}
-	
+
 }

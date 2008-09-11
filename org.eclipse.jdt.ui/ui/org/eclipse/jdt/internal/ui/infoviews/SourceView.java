@@ -286,7 +286,7 @@ public class SourceView extends AbstractInfoView {
 	protected void setBackground(Color color) {
 		fViewer.getTextWidget().setBackground(color);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getBackgroundColorKey()
 	 * @since 3.2
@@ -294,7 +294,7 @@ public class SourceView extends AbstractInfoView {
 	protected String getBackgroundColorKey() {
 		return "org.eclipse.jdt.ui.DeclarationView.backgroundColor";		 //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Converts the given selection to a structured selection
 	 * containing Java elements.
@@ -333,7 +333,7 @@ public class SourceView extends AbstractInfoView {
 	/**
 	 * Computes and returns the offset in the unclipped document based on the given text selection
 	 * from the clipped document.
-	 * 
+	 *
 	 * @param textSelection the text selection
 	 * @return the offset in the unclipped document or <code>-1</code> if the offset cannot be
 	 *         computed

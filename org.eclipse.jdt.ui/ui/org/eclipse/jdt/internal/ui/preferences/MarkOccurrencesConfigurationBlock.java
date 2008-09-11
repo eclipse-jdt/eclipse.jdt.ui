@@ -17,9 +17,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,8 +29,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
-import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -42,14 +41,14 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor hover preferences.
- * 
+ *
  * @since 2.1
  */
 class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	private OverlayPreferenceStore fStore;
-	
-	
+
+
 	private Map fCheckBoxes= new HashMap();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
 		public void widgetDefaultSelected(SelectionEvent e) {
@@ -59,26 +58,26 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
 		}
 	};
-	
+
 	/**
 	 * List of master/slave listeners when there's a dependency.
-	 * 
+	 *
 	 * @see #createDependency(Button, String, Control)
 	 * @since 3.0
 	 */
 	private ArrayList fMasterSlaveListeners= new ArrayList();
-	
+
 	private StatusInfo fStatus;
 
 	public MarkOccurrencesConfigurationBlock(OverlayPreferenceStore store) {
 		Assert.isNotNull(store);
 		fStore= store;
-		
+
 		fStore.addKeys(createOverlayStoreKeys());
 	}
-	
+
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		
+
 		ArrayList overlayKeys= new ArrayList();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_OCCURRENCES));
@@ -92,95 +91,95 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_IMPLEMENTORS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STICKY_OCCURRENCES));
-		
+
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
-	}	
+	}
 
 	/**
 	 * Creates page for mark occurrences preferences.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
 	public Control createControl(final Composite parent) {
-	
+
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
-		
+
 		Link link= new Link(composite, SWT.NONE);
 		link.setText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null); 
+				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null);
 			}
 		});
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		link.setToolTipText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link_tooltip); 
-		
+		link.setToolTipText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link_tooltip);
+
 		addFiller(composite);
-		
+
 		String label;
-		
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markOccurrences; 
+
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markOccurrences;
 		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0);
-		
+
 		addFiller(composite);
-		
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markTypeOccurrences; 
-		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, 0); 
+
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markTypeOccurrences;
+		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, 0);
 		createDependency(master, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, slave);
-		
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markMethodOccurrences; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, 0); 
+
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markMethodOccurrences;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, slave);
-		
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markConstantOccurrences; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, 0); 
+
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markConstantOccurrences;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, slave);
 
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markFieldOccurrences; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, 0); 
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markFieldOccurrences;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, slave);
 
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markLocalVariableOccurrences; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, 0); 
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markLocalVariableOccurrences;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, slave);
-		
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markExceptionOccurrences; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, 0); 
+
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markExceptionOccurrences;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, slave);
 
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markMethodExitPoints; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, 0); 
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markMethodExitPoints;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, slave);
 
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markImplementors; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, 0); 
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markImplementors;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, slave);
 
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markBreakContinueTargets; 
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_markBreakContinueTargets;
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS, 0);
 		createDependency(master, PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS, slave);
 
 		addFiller(composite);
-		
-		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_stickyOccurrences; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); 
+
+		label= PreferencesMessages.MarkOccurrencesConfigurationBlock_stickyOccurrences;
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0);
 		createDependency(master, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, slave);
 
 		return composite;
 	}
-	
+
 	private void addFiller(Composite composite) {
 		PixelConverter pixelConverter= new PixelConverter(composite);
-		
+
 		Label filler= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
@@ -188,18 +187,18 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		filler.setLayoutData(gd);
 	}
 
-	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
+	private Button addCheckBox(Composite parent, String label, String key, int indentation) {
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(label);
-		
+
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= indentation;
 		gd.horizontalSpan= 2;
 		checkBox.setLayoutData(gd);
 		checkBox.addSelectionListener(fCheckBoxListener);
-		
+
 		fCheckBoxes.put(checkBox, key);
-		
+
 		return checkBox;
 	}
 
@@ -221,7 +220,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	private static void indent(Control control) {
 		GridData gridData= new GridData();
 		gridData.horizontalIndent= 10;
-		control.setLayoutData(gridData);		
+		control.setLayoutData(gridData);
 	}
 
 	public void initialize() {
@@ -229,21 +228,21 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	}
 
 	void initializeFields() {
-		
+
 		Iterator iter= fCheckBoxes.keySet().iterator();
 		while (iter.hasNext()) {
 			Button b= (Button) iter.next();
 			String key= (String) fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}
-		
+
         // Update slaves
         iter= fMasterSlaveListeners.iterator();
         while (iter.hasNext()) {
             SelectionListener listener= (SelectionListener)iter.next();
             listener.widgetSelected(null);
         }
-        
+
 	}
 
 	public void performOk() {

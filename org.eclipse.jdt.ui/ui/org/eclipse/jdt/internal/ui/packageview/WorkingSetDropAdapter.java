@@ -19,14 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
+
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -35,7 +35,6 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 
 import org.eclipse.ui.IWorkingSet;
-
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -47,9 +46,9 @@ import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
-	
+
 	private PackageExplorerPart fPackageExplorer;
-	
+
 	private IStructuredSelection fSelection;
 	private Object[] fElementsToAdds;
 	private Set fCurrentElements;
@@ -60,23 +59,23 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	public WorkingSetDropAdapter(PackageExplorerPart part) {
 		super(part.getTreeViewer());
 		fPackageExplorer= part;
-		
+
 		fLocation= -1;
-		
+
 		setScrollEnabled(true);
 		setExpandEnabled(true);
 		setFeedbackEnabled(false);
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -90,20 +89,20 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		}
 		if (!isValidTarget(target))
 			return false;
-		
+
 		initializeState(target, selection);
 		return true;
 	}
 
 	//---- Actual DND -----------------------------------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -116,9 +115,9 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			default:
 				return DND.DROP_NONE;
 		}
-		
+
 	}
-	
+
 	private int validateTarget(Object target, int operation) {
 		setFeedbackEnabled(false);
 		setScrollEnabled(true);
@@ -129,9 +128,9 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		if (!isValidSelection(s)) {
 			return DND.DROP_NONE;
 		}
-		
+
 		initializeState(target, s);
-		
+
 		if (isWorkingSetSelection()) {
 			setExpandEnabled(false);
 			if (getCurrentLocation() == LOCATION_BEFORE || getCurrentLocation() == LOCATION_AFTER) {
@@ -142,7 +141,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		} else {
 			if (isOthersWorkingSet(fWorkingSet) && operation == DND.DROP_COPY)
 				return DND.DROP_NONE;
-			
+
 			List realJavaElements= new ArrayList();
 			List realResource= new ArrayList();
 			ReorgUtils.splitIntoJavaElementsAndResources(fElementsToAdds, realJavaElements, realResource);
@@ -184,22 +183,22 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	private boolean isValidTarget(Object target) {
 		return target instanceof IWorkingSet;
 	}
-	
+
 	private boolean isValidSelection(ISelection selection) {
 		return selection instanceof IStructuredSelection;
 	}
-	
+
 	private boolean isOthersWorkingSet(IWorkingSet ws) {
 		return OthersWorkingSetUpdater.ID.equals(ws.getId());
 	}
-	
+
 	private void initializeState(Object target, ISelection s) {
 		fWorkingSet= (IWorkingSet)target;
 		fSelection= (IStructuredSelection)s;
 		fElementsToAdds= fSelection.toArray();
 		fCurrentElements= new HashSet(Arrays.asList(fWorkingSet.getElements()));
 	}
-	
+
 	private boolean isWorkingSetSelection() {
 		for (int i= 0; i < fElementsToAdds.length; i++) {
 			if (!(fElementsToAdds[i] instanceof IWorkingSet))
@@ -244,7 +243,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			model.setActiveWorkingSets((IWorkingSet[])result.toArray(new IWorkingSet[result.size()]));
 		}
 	}
-	
+
 	private void performElementRearrange(int eventDetail) {
 		// only move if target isn't the other working set. If this is the case
 		// the move will happenn automatically by refreshing the other working set
@@ -280,13 +279,13 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		}
 		return result;
 	}
-	
+
 	//---- test methods for JUnit test since DnD is hard to simulate
-	
+
 	public int internalTestValidateTarget(Object target, int operation) {
 		return validateTarget(target, operation);
 	}
-	
+
 	public void internalTestDrop(Object target, int eventDetail) {
 		if (isWorkingSetSelection()) {
 			performWorkingSetReordering();
@@ -298,14 +297,14 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	public void internalTestSetLocation(int location) {
 		fLocation= location;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected int getCurrentLocation() {
 		if (fLocation == -1)
 			return super.getCurrentLocation();
-		
+
 		return fLocation;
 	}
 }

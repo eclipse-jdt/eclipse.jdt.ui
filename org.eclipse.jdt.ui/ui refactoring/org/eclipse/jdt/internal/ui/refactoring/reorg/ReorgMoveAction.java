@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.List;
 
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -22,7 +21,6 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.MoveProjectAction;
-
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -43,8 +41,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class ReorgMoveAction extends SelectionDispatchAction {
 	public ReorgMoveAction(IWorkbenchSite site) {
 		super(site);
-		setText(ReorgMessages.ReorgMoveAction_3); 
-		setDescription(ReorgMessages.ReorgMoveAction_4); 
+		setText(ReorgMessages.ReorgMoveAction_3);
+		setDescription(ReorgMessages.ReorgMoveAction_4);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 
@@ -106,7 +104,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 			if (RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements))
 				RefactoringExecutionStarter.startMoveRefactoring(resources, javaElements, getShell());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
 	}
 }

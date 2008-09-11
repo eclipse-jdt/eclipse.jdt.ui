@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -42,7 +42,7 @@ public class ClasspathContainerWizard extends Wizard {
 	private IClasspathContainerPage fContainerPage;
 	private final IJavaProject fCurrProject;
 	private final IClasspathEntry[] fCurrClasspath;
-	
+
 	private ClasspathContainerSelectionPage fSelectionWizardPage;
 
 	/**
@@ -54,7 +54,7 @@ public class ClasspathContainerWizard extends Wizard {
 	public ClasspathContainerWizard(IClasspathEntry entryToEdit, IJavaProject currProject, IClasspathEntry[] currEntries) {
 		this(entryToEdit, null, currProject, currEntries);
 	}
-	
+
 	/**
 	 * Constructor for ClasspathContainerWizard.
 	 * @param pageDesc page description
@@ -62,26 +62,26 @@ public class ClasspathContainerWizard extends Wizard {
 	 * @param currEntries entries currently in classpath
 	 */
 	public ClasspathContainerWizard(ClasspathContainerDescriptor pageDesc, IJavaProject currProject, IClasspathEntry[] currEntries) {
-		this(null, pageDesc, currProject, currEntries);	
+		this(null, pageDesc, currProject, currEntries);
 	}
 
 	private ClasspathContainerWizard(IClasspathEntry entryToEdit, ClasspathContainerDescriptor pageDesc, IJavaProject currProject, IClasspathEntry[] currEntries) {
 		fEntryToEdit= entryToEdit;
 		fPageDesc= pageDesc;
 		fNewEntries= null;
-		
+
 		fCurrProject= currProject;
 		fCurrClasspath= currEntries;
-		
+
 		String title;
 		if (entryToEdit == null) {
-			title= NewWizardMessages.ClasspathContainerWizard_new_title; 
+			title= NewWizardMessages.ClasspathContainerWizard_new_title;
 		} else {
-			title= NewWizardMessages.ClasspathContainerWizard_edit_title; 
+			title= NewWizardMessages.ClasspathContainerWizard_edit_title;
 		}
 		setWindowTitle(title);
 	}
-		
+
 	public IClasspathEntry[] getNewEntries() {
 		return fNewEntries;
 	}
@@ -110,7 +110,7 @@ public class ClasspathContainerWizard extends Wizard {
 	public void addPages() {
 		if (fPageDesc != null) {
 			fContainerPage= getContainerPage(fPageDesc);
-			addPage(fContainerPage);			
+			addPage(fContainerPage);
 		} else if (fEntryToEdit == null) { // new entry: show selection page as first page
 			ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
 
@@ -124,11 +124,11 @@ public class ClasspathContainerWizard extends Wizard {
 			ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
 			ClasspathContainerDescriptor descriptor= findDescriptorPage(containers, fEntryToEdit);
 			fContainerPage= getContainerPage(descriptor);
-			addPage(fContainerPage);				
+			addPage(fContainerPage);
 		}
 		super.addPages();
 	}
-	
+
 	private IClasspathContainerPage getContainerPage(ClasspathContainerDescriptor pageDesc) {
 		IClasspathContainerPage containerPage= null;
 		if (pageDesc != null) {
@@ -158,7 +158,7 @@ public class ClasspathContainerWizard extends Wizard {
 		containerPage.setWizard(this);
 		return containerPage;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IWizard#getNextPage(IWizardPage)
 	 */
@@ -167,19 +167,19 @@ public class ClasspathContainerWizard extends Wizard {
 
 			ClasspathContainerDescriptor selected= fSelectionWizardPage.getSelected();
 			fContainerPage= getContainerPage(selected);
-			
+
 			return fContainerPage;
 		}
 		return super.getNextPage(page);
 	}
-	
+
 	private void handlePageCreationFailed(CoreException e) {
-		String title= NewWizardMessages.ClasspathContainerWizard_pagecreationerror_title; 
-		String message= NewWizardMessages.ClasspathContainerWizard_pagecreationerror_message; 
+		String title= NewWizardMessages.ClasspathContainerWizard_pagecreationerror_title;
+		String message= NewWizardMessages.ClasspathContainerWizard_pagecreationerror_message;
 		ExceptionHandler.handle(e, getShell(), title, message);
 	}
-	
-	
+
+
 	private ClasspathContainerDescriptor findDescriptorPage(ClasspathContainerDescriptor[] containers, IClasspathEntry entry) {
 		for (int i = 0; i < containers.length; i++) {
 			if (containers[i].canEdit(entry)) {
@@ -188,7 +188,7 @@ public class ClasspathContainerWizard extends Wizard {
 		}
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#dispose()
 	 */
@@ -216,7 +216,7 @@ public class ClasspathContainerWizard extends Wizard {
 		}
 		return false;
 	}
-	
+
 	public static int openWizard(Shell shell, ClasspathContainerWizard wizard) {
 		WizardDialog dialog= new WizardDialog(shell, wizard);
 		PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
@@ -224,5 +224,5 @@ public class ClasspathContainerWizard extends Wizard {
 		dialog.create();
 		return dialog.open();
 	}
-	
+
 }

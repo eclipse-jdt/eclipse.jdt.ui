@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNested
 
 /**
  * Refactoring contribution for the convert anonymous refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ConvertAnonymousRefactoringContribution extends JavaRefactoringContribution {
@@ -39,11 +39,11 @@ public final class ConvertAnonymousRefactoringContribution extends JavaRefactori
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		return new ConvertAnonymousToNestedRefactoring(arguments, status);
 	}
-	
+
 	public RefactoringDescriptor createDescriptor() {
 		return new ConvertAnonymousDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ConvertAnonymousDescriptor(project, description, comment, arguments, flags);
 	}

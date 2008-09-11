@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.corext.refactoring;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
- * 
+ *
  */
 public abstract class RefactoringElementFilter {
 

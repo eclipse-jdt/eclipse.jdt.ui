@@ -27,23 +27,23 @@ import org.eclipse.jface.text.ITextViewer;
  * <p>
  * Clients may instantiate and subclass.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public class ContentAssistInvocationContext {
-	
+
 	/* state */
 	private final ITextViewer fViewer;
 	private final IDocument fDocument;
 	private final int fOffset;
-	
+
 	/* cached additional info */
 	private CharSequence fPrefix;
-	
+
 	/**
 	 * Equivalent to
 	 * {@linkplain #ContentAssistInvocationContext(ITextViewer, int) ContentAssistInvocationContext(viewer, viewer.getSelectedRange().x)}.
-	 * 
+	 *
 	 * @param viewer the text viewer that content assist is invoked in
 	 */
 	public ContentAssistInvocationContext(ITextViewer viewer) {
@@ -52,7 +52,7 @@ public class ContentAssistInvocationContext {
 
 	/**
 	 * Creates a new context for the given viewer and offset.
-	 * 
+	 *
 	 * @param viewer the text viewer that content assist is invoked in
 	 * @param offset the offset into the viewer's document where content assist is invoked at
 	 */
@@ -62,7 +62,7 @@ public class ContentAssistInvocationContext {
 		fDocument= null;
 		fOffset= offset;
 	}
-	
+
 	/**
 	 * Creates a new context with no viewer or invocation offset set.
 	 */
@@ -71,10 +71,10 @@ public class ContentAssistInvocationContext {
 		fViewer= null;
 		fOffset= -1;
 	}
-	
+
 	/**
 	 * Creates a new context for the given document and offset.
-	 * 
+	 *
 	 * @param document the document that content assist is invoked in
 	 * @param offset the offset into the document where content assist is invoked at
 	 */
@@ -85,28 +85,28 @@ public class ContentAssistInvocationContext {
 		fDocument= document;
 		fOffset= offset;
 	}
-	
+
 	/**
 	 * Returns the invocation offset.
-	 * 
+	 *
 	 * @return the invocation offset
 	 */
 	public final int getInvocationOffset() {
 		return fOffset;
 	}
-	
+
 	/**
 	 * Returns the viewer, <code>null</code> if not available.
-	 * 
+	 *
 	 * @return the viewer, possibly <code>null</code>
 	 */
 	public final ITextViewer getViewer() {
 		return fViewer;
 	}
-	
+
 	/**
 	 * Returns the document that content assist is invoked on, or <code>null</code> if not known.
-	 * 
+	 *
 	 * @return the document or <code>null</code>
 	 */
 	public IDocument getDocument() {
@@ -117,11 +117,11 @@ public class ContentAssistInvocationContext {
 		}
 		return fDocument;
 	}
-	
+
 	/**
 	 * Computes the identifier (as specified by {@link Character#isJavaIdentifierPart(char)}) that
 	 * immediately precedes the invocation offset.
-	 * 
+	 *
 	 * @return the prefix preceding the content assist invocation offset, <code>null</code> if
 	 *         there is no document
 	 * @throws BadLocationException if accessing the document fails
@@ -140,10 +140,10 @@ public class ContentAssistInvocationContext {
 			start++;
 			fPrefix= document.get(start, end - start);
 		}
-		
+
 		return fPrefix;
 	}
-	
+
 	/**
 	 * Invocation contexts are equal if they describe the same context and are of the same type.
 	 * This implementation checks for <code>null</code> values and class equality. Subclasses
@@ -151,14 +151,14 @@ public class ContentAssistInvocationContext {
 	 * necessarily cached values).
 	 * <p>
 	 * Example:
-	 * 
+	 *
 	 * <pre>
 	 * class MyContext extends ContentAssistInvocationContext {
 	 * 	private final Object fState;
 	 * 	private Object fCachedInfo;
-	 * 
+	 *
 	 * 	...
-	 * 
+	 *
 	 * 	public boolean equals(Object obj) {
 	 * 		if (!super.equals(obj))
 	 * 			return false;
@@ -167,12 +167,12 @@ public class ContentAssistInvocationContext {
 	 * 	}
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * </p>
 	 * <p>
 	 * Subclasses should also extend {@link Object#hashCode()}.
 	 * </p>
-	 * 
+	 *
 	 * @param obj {@inheritDoc}
 	 * @return {@inheritDoc}
 	 */
@@ -184,7 +184,7 @@ public class ContentAssistInvocationContext {
 		ContentAssistInvocationContext other= (ContentAssistInvocationContext) obj;
 		return (fViewer == null && other.fViewer == null || fViewer != null && fViewer.equals(other.fViewer)) && fOffset == other.fOffset && (fDocument == null && other.fDocument == null || fDocument != null && fDocument.equals(other.fDocument));
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */

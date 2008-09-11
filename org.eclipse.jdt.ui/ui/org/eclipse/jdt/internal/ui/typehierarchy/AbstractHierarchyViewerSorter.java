@@ -29,29 +29,29 @@ import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
 /**
   */
 public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
-	
+
 	private static final int OTHER= 1;
 	private static final int CLASS= 2;
 	private static final int INTERFACE= 3;
 	private static final int ANONYM= 4;
-	
+
 	private JavaElementComparator fNormalSorter;
 	private SourcePositionComparator fSourcePositonSorter;
-	
+
 	public AbstractHierarchyViewerSorter() {
 		fNormalSorter= new JavaElementComparator();
 		fSourcePositonSorter= new SourcePositionComparator();
 	}
-	
+
 	protected abstract ITypeHierarchy getHierarchy(IType type);
 	public abstract boolean isSortByDefiningType();
 	public abstract boolean isSortAlphabetically();
-	
-	
+
+
 	protected int getTypeFlags(IType type) throws JavaModelException {
 		return type.getFlags();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
 	 */
@@ -82,13 +82,13 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 		if (!isSortAlphabetically() && !isSortByDefiningType()) {
 			return fSourcePositonSorter.compare(viewer, e1, e2);
 		}
-		
+
 		int cat1= category(e1);
 		int cat2= category(e2);
 
 		if (cat1 != cat2)
 			return cat1 - cat2;
-		
+
 		if (cat1 == OTHER) { // method or field
 			if (isSortByDefiningType()) {
 				try {
@@ -100,12 +100,12 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 								return compareInHierarchy(def1, def2);
 							}
 						} else {
-							return -1;						
-						}					
+							return -1;
+						}
 					} else {
 						if (def2 != null) {
 							return 1;
-						}	
+						}
 					}
 				} catch (JavaModelException e) {
 					// ignore, default to normal comparison
@@ -118,19 +118,19 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 		} else if (cat1 == ANONYM) {
 			return 0;
 		} else if (isSortAlphabetically()) {
-			String name1= ((IType) e1).getElementName(); 
-			String name2= ((IType) e2).getElementName(); 
+			String name1= ((IType) e1).getElementName();
+			String name2= ((IType) e2).getElementName();
 			return getComparator().compare(name1, name2);
 		}
 		return 0;
 	}
-	
+
 	private IType getDefiningType(IMethod method) throws JavaModelException {
 		int flags= method.getFlags();
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
 			return null;
 		}
-	
+
 		IType declaringType= method.getDeclaringType();
 		ITypeHierarchy hierarchy= getHierarchy(declaringType);
 		if (hierarchy != null) {
@@ -142,7 +142,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 		}
 		return null;
 	}
-	
+
 
 	private int compareInHierarchy(IType def1, IType def2) {
 		if (JavaModelUtil.isSuperType(getHierarchy(def1), def2, def1)) {
@@ -166,7 +166,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 		}
 		String name1= def1.getElementName();
 		String name2= def2.getElementName();
-		
+
 		return getComparator().compare(name1, name2);
 	}
 

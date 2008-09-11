@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 
 /**
  * Adds view menus to switch between flat and hierarchical layout.
- * 
+ *
  * @since 3.2
  */
 public class CommonLayoutActionGroup extends MultiActionGroup {
@@ -87,7 +87,7 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ActionGroup#fillActionBars(IActionBars)
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -137,7 +137,7 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 	public void setFlatLayout(boolean flatLayout) {
 		if (fActions == null) {
 			fActions = createActions();
-			
+
 			// indicates check the flat action
 			setActions(fActions, flatLayout ? 0	: 1);
 		}

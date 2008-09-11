@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.CellEditor;
 
 
 public class MultiStateCellEditor extends CellEditor {
-	
+
 	private int fValue;
 	private final int fStateCount;
-	
+
 	/**
 	 * @param stateCount must be > 1
 	 * @param initialValue initialValue
@@ -31,10 +31,10 @@ public class MultiStateCellEditor extends CellEditor {
 		super(parent);
 		Assert.isTrue(stateCount > 1, "incorrect state count"); //$NON-NLS-1$
 		fStateCount= stateCount;
-		
+
 		Assert.isTrue(initialValue >= 0 && initialValue < stateCount, "incorrect initial value"); //$NON-NLS-1$
 		fValue= initialValue;
-		
+
 		setValueValid(true);
 	}
 
@@ -45,7 +45,7 @@ public class MultiStateCellEditor extends CellEditor {
 		fValue= getNextValue(fStateCount, fValue);
 		fireApplyEditorValue();
 	}
-	
+
 	public static int getNextValue(int stateCount, int currentValue){
 		Assert.isTrue(stateCount > 1, "incorrect state count"); //$NON-NLS-1$
 		Assert.isTrue(currentValue >= 0 && currentValue < stateCount, "incorrect initial value"); //$NON-NLS-1$

@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Region;
@@ -46,15 +46,15 @@ public class CleanUpPreview extends JavaPreview {
 		fPreviewCleanUps= cleanUps;
 		fFormat= false;
 	}
-	
+
 	public void setCleanUps(ICleanUp[] fCleanUps) {
 		fPreviewCleanUps= fCleanUps;
 	}
-	
+
 	public void setFormat(boolean enable) {
 		fFormat= enable;
 	}
-	
+
 	public void setCorrectIndentation(boolean enabled) {
 		fCorrectIndentation= enabled;
 	}
@@ -63,7 +63,7 @@ public class CleanUpPreview extends JavaPreview {
 	 * {@inheritDoc}
 	 */
 	protected void doFormatPreview() {
-	
+
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < fPreviewCleanUps.length; i++) {
 			buf.append(fPreviewCleanUps[i].getPreview());
@@ -71,30 +71,30 @@ public class CleanUpPreview extends JavaPreview {
 		}
 		format(buf.toString());
 	}
-	
-	private void format(String text) {		
+
+	private void format(String text) {
         if (text == null) {
             fPreviewDocument.set(""); //$NON-NLS-1$
             return;
         }
         fPreviewDocument.set(text);
-		
+
         if (!fFormat) {
         	if (!fCorrectIndentation)
         		return;
-        	
+
         	fSourceViewer.setRedraw(false);
         	try {
         		IndentAction.indent(fPreviewDocument, null);
         	} catch (BadLocationException e) {
 				JavaPlugin.log(e);
 			} finally {
-        		fSourceViewer.setRedraw(true);	
+        		fSourceViewer.setRedraw(true);
         	}
-			
+
 			return;
         }
-        
+
 		fSourceViewer.setRedraw(false);
 		final IFormattingContext context = new JavaFormattingContext();
 		try {
@@ -107,8 +107,8 @@ public class CleanUpPreview extends JavaPreview {
 			} else
 				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
 		} catch (Exception e) {
-			final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
-				MultiFixMessages.CleanUpRefactoringWizard_formatterException_errorMessage, e); 
+			final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR,
+				MultiFixMessages.CleanUpRefactoringWizard_formatterException_errorMessage, e);
 			JavaPlugin.log(status);
 		} finally {
 		    context.dispose();
@@ -119,5 +119,5 @@ public class CleanUpPreview extends JavaPreview {
     public void setWorkingValues(Map workingValues) {
     	//Don't change the formatter settings
     }
-    
+
 }

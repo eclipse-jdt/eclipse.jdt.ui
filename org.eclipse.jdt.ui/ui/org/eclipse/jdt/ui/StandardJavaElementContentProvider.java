@@ -35,13 +35,13 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
- 
+
 /**
  * A base content provider for Java elements. It provides access to the
  * Java element hierarchy without listening to changes in the Java model.
- * If updating the presentation on Java model change is required than 
+ * If updating the presentation on Java model change is required than
  * clients have to subclass, listen to Java model changes and have to update
- * the UI using corresponding methods provided by the JFace viewers or their 
+ * the UI using corresponding methods provided by the JFace viewers or their
  * own UI presentation.
  * <p>
  * The following Java element hierarchy is surfaced by this content provider:
@@ -54,13 +54,13 @@ Java model (<code>IJavaModel</code>)
             compilation unit (<code>ICompilationUnit</code>)
             binary class file (<code>IClassFile</code>)
  * </pre>
- * </p> 			
+ * </p>
  * <p>
  * Note that when the entire Java project is declared to be package fragment root,
  * the corresponding package fragment root element that normally appears between the
  * Java project and the package fragments is automatically filtered out.
  * </p>
- * 
+ *
  * @since 2.0
  */
 public class StandardJavaElementContentProvider implements ITreeContentProvider, IWorkingCopyProvider {
@@ -68,18 +68,18 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected static final Object[] NO_CHILDREN= new Object[0];
 	protected boolean fProvideMembers;
 	protected boolean fProvideWorkingCopy;
-	
+
 	/**
 	 * Creates a new content provider. The content provider does not
 	 * provide members of compilation units or class files.
-	 */	
+	 */
 	public StandardJavaElementContentProvider() {
 		this(false);
 	}
-	
+
 	/**
-	 * @param provideMembers if <code>true</code> members below compilation units 
-	 * @param provideWorkingCopy if <code>true</code> working copies are provided 
+	 * @param provideMembers if <code>true</code> members below compilation units
+	 * @param provideWorkingCopy if <code>true</code> working copies are provided
 	 * @deprecated Use {@link #StandardJavaElementContentProvider(boolean)} instead.
 	 * Since 3.0 compilation unit children are always provided as working copies. The Java Model
 	 * does not support the 'original' mode anymore.
@@ -87,24 +87,24 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	public StandardJavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		this(provideMembers);
 	}
-	
-	
+
+
 	/**
 	 * Creates a new <code>StandardJavaElementContentProvider</code>.
 	 *
-	 * @param provideMembers if <code>true</code> members below compilation units 
-	 * and class files are provided. 
+	 * @param provideMembers if <code>true</code> members below compilation units
+	 * and class files are provided.
 	 */
 	public StandardJavaElementContentProvider(boolean provideMembers) {
 		fProvideMembers= provideMembers;
 		fProvideWorkingCopy= provideMembers;
 	}
-	
+
 	/**
 	 * Returns whether members are provided when asking
 	 * for a compilation units or class file for its children.
-	 * 
-	 * @return <code>true</code> if the content provider provides members; 
+	 *
+	 * @return <code>true</code> if the content provider provides members;
 	 * otherwise <code>false</code> is returned
 	 */
 	public boolean getProvideMembers() {
@@ -114,8 +114,8 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	/**
 	 * Sets whether the content provider is supposed to return members
 	 * when asking a compilation unit or class file for its children.
-	 * 
-	 * @param b if <code>true</code> then members are provided. 
+	 *
+	 * @param b if <code>true</code> then members are provided.
 	 * If <code>false</code> compilation units and class files are the
 	 * leaves provided by this content provider.
 	 */
@@ -123,11 +123,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		//hello
 		fProvideMembers= b;
 	}
-	
+
 	/**
 	 * @return returns <code>true</code> if working copies are provided
 	 * @deprecated Since 3.0 compilation unit children are always provided as working copies. The Java model
-	 * does not support the 'original' mode anymore. 
+	 * does not support the 'original' mode anymore.
 	 */
 	public boolean getProvideWorkingCopy() {
 		return fProvideWorkingCopy;
@@ -136,7 +136,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	/**
 	 * @param b specifies if working copies should be provided
 	 * @deprecated Since 3.0 compilation unit children are always provided from the working copy. The Java model
-	 * offers a unified world and does not support the 'original' mode anymore. 
+	 * offers a unified world and does not support the 'original' mode anymore.
 	 */
 	public void setProvideWorkingCopy(boolean b) {
 		fProvideWorkingCopy= b;
@@ -155,7 +155,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	public Object[] getElements(Object parent) {
 		return getChildren(parent);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on IContentProvider.
 	 */
@@ -174,34 +174,34 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
 			return NO_CHILDREN;
-			
+
 		try {
-			if (element instanceof IJavaModel) 
+			if (element instanceof IJavaModel)
 				return getJavaProjects((IJavaModel)element);
-			
-			if (element instanceof IJavaProject) 
+
+			if (element instanceof IJavaProject)
 				return getPackageFragmentRoots((IJavaProject)element);
-			
-			if (element instanceof IPackageFragmentRoot) 
+
+			if (element instanceof IPackageFragmentRoot)
 				return getPackageFragmentRootContent((IPackageFragmentRoot)element);
-			
-			if (element instanceof IPackageFragment) 
+
+			if (element instanceof IPackageFragment)
 				return getPackageContent((IPackageFragment)element);
-				
+
 			if (element instanceof IFolder)
 				return getFolderContent((IFolder)element);
-			
+
 			if (element instanceof IJarEntryResource) {
 				return ((IJarEntryResource) element).getChildren();
 			}
-			
+
 			if (getProvideMembers() && element instanceof ISourceReference && element instanceof IParent) {
 				return ((IParent)element).getChildren();
 			}
 		} catch (CoreException e) {
 			return NO_CHILDREN;
-		}		
-		return NO_CHILDREN;	
+		}
+		return NO_CHILDREN;
 	}
 
 	/* (non-Javadoc)
@@ -221,14 +221,14 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 				element instanceof IFile)
 			return false;
 		}
-			
+
 		if (element instanceof IJavaProject) {
 			IJavaProject jp= (IJavaProject)element;
 			if (!jp.getProject().isOpen()) {
 				return false;
-			}	
+			}
 		}
-		
+
 		if (element instanceof IParent) {
 			try {
 				// when we have Java children return true, else we fetch all the children
@@ -241,23 +241,23 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		Object[] children= getChildren(element);
 		return (children != null) && children.length > 0;
 	}
-	 
+
 	/* (non-Javadoc)
 	 * Method declared on ITreeContentProvider.
 	 */
 	public Object getParent(Object element) {
 		if (!exists(element))
 			return null;
-		return internalGetParent(element);			
+		return internalGetParent(element);
 	}
-	
+
 	/**
 	 * Evaluates all children of a given {@link IPackageFragmentRoot}. Clients can override this method.
 	 * @param root The root to evaluate the children for.
 	 * @return The children of the root
 	 * @exception JavaModelException if the package fragment root does not exist or if an
 	 *      exception occurs while accessing its corresponding resource
-	 *      
+	 *
 	 * @since 3.3
 	 */
 	protected Object[] getPackageFragmentRootContent(IPackageFragmentRoot root) throws JavaModelException {
@@ -270,7 +270,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			return fragments;
 		return concatenate(fragments, nonJavaResources);
 	}
-	
+
 	/**
 	 * Evaluates all children of a given {@link IJavaProject}. Clients can override this method.
 	 * @param project The Java project to evaluate the children for.
@@ -281,7 +281,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
-			
+
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		List list= new ArrayList(roots.length);
 		// filter out package fragments that correspond to projects and
@@ -295,7 +295,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 				}
 			} else {
 				list.add(root);
-			} 
+			}
 		}
 		Object[] resources= project.getNonJavaResources();
 		for (int i= 0; i < resources.length; i++) {
@@ -306,7 +306,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 
 	/**
 	 * Evaluates all Java projects of a given {@link IJavaModel}. Clients can override this method.
-	 * 
+	 *
 	 * @param jm the Java model
 	 * @return the projects
 	 * @throws JavaModelException thrown if accessing the model failed
@@ -314,14 +314,14 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
 		return jm.getJavaProjects();
 	}
-	
+
 	/**
 	 * Evaluates all children of a given {@link IPackageFragment}. Clients can override this method.
 	 * @param fragment The fragment to evaluate the children for.
 	 * @return The children of the given package fragment.
 	 * @exception JavaModelException if the package fragment does not exist or if an
 	 *      exception occurs while accessing its corresponding resource
-	 *      
+	 *
 	 * @since 3.3
 	 */
 	protected Object[] getPackageContent(IPackageFragment fragment) throws JavaModelException {
@@ -330,13 +330,13 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 		return concatenate(fragment.getClassFiles(), fragment.getNonJavaResources());
 	}
-	
+
 	/**
 	 * Evaluates all children of a given {@link IFolder}. Clients can override this method.
 	 * @param folder The folder to evaluate the children for.
 	 * @return The children of the given package fragment.
 	 * @exception CoreException if the folder does not exist.
-	 *      
+	 *
 	 * @since 3.3
 	 */
 	protected Object[] getFolderContent(IFolder folder) throws CoreException {
@@ -356,50 +356,50 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			if (isFolderOnClasspath) {
 				if (javaProject.findPackageFragmentRoot(member.getFullPath()) == null) {
 					nonJavaResources.add(member);
-				} 
+				}
 			} else if (!javaProject.isOnClasspath(member)) {
 				nonJavaResources.add(member);
 			}
 		}
 		return nonJavaResources.toArray();
 	}
-	
+
 	/**
 	 * Tests if the a Java element delta contains a class path change
-	 * 
+	 *
 	 * @param delta the Java element delta
 	 * @return returns <code>true</code> if the delta contains a class path change
 	 */
 	protected boolean isClassPathChange(IJavaElementDelta delta) {
-		
+
 		// need to test the flags only for package fragment roots
 		if (delta.getElement().getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 			return false;
-		
+
 		int flags= delta.getFlags();
-		return (delta.getKind() == IJavaElementDelta.CHANGED && 
+		return (delta.getKind() == IJavaElementDelta.CHANGED &&
 			((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0) ||
 			 ((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) ||
 			 ((flags & IJavaElementDelta.F_REORDER) != 0));
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @param root the package fragment root
 	 * @return returns the element representing the root.
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected Object skipProjectPackageFragmentRoot(IPackageFragmentRoot root) {
 		if (isProjectPackageFragmentRoot(root))
-			return root.getParent(); 
+			return root.getParent();
 		return root;
 	}
-	
+
 	/**
 	 * Tests if the given element is a empty package fragment.
-	 * 
+	 *
 	 * @param element the element to test
 	 * @return returns <code>true</code> if the package fragment is empty
 	 * @throws JavaModelException thrown if accessing the element failed
@@ -407,7 +407,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected boolean isPackageFragmentEmpty(IJavaElement element) throws JavaModelException {
 		if (element instanceof IPackageFragment) {
 			IPackageFragment fragment= (IPackageFragment)element;
-			if (fragment.exists() && !(fragment.hasChildren() || fragment.getNonJavaResources().length > 0) && fragment.hasSubpackages()) 
+			if (fragment.exists() && !(fragment.hasChildren() || fragment.getNonJavaResources().length > 0) && fragment.hasSubpackages())
 				return true;
 		}
 		return false;
@@ -415,21 +415,21 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 
 	/**
 	 * Tests if the package fragment root is located on the project.
-	 * 
-	 * @param root the package fragment root 
+	 *
+	 * @param root the package fragment root
 	 * @return returns <code>true</code> if the package fragment root is the located on the project
 	 */
 	protected boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) {
 		IJavaProject javaProject= root.getJavaProject();
 		return javaProject != null && javaProject.getPath().equals(root.getPath());
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @param element the element to test
 	 * @return returns <code>true</code> if the element exists
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected boolean exists(Object element) {
@@ -444,13 +444,13 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @param element the element
 	 * @return the parent of the element
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected Object internalGetParent(Object element) {
@@ -460,7 +460,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			IResource parent= ((IResource)element).getParent();
 			IJavaElement jParent= JavaCore.create(parent);
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=31374
-			if (jParent != null && jParent.exists()) 
+			if (jParent != null && jParent.exists())
 				return jParent;
 			return parent;
 		} else if (element instanceof IJavaElement) {
@@ -476,10 +476,10 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 		return null;
 	}
-		
+
 	/**
 	 * Utility method to concatenate two arrays.
-	 * 
+	 *
 	 * @param a1 the first array
 	 * @param a2 the second array
 	 * @return the concatenated array
@@ -491,7 +491,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		if (a2Len == 0) return a1;
 		Object[] res= new Object[a1Len + a2Len];
 		System.arraycopy(a1, 0, res, 0, a1Len);
-		System.arraycopy(a2, 0, res, a1Len, a2Len); 
+		System.arraycopy(a2, 0, res, a1Len, a2Len);
 		return res;
 	}
 

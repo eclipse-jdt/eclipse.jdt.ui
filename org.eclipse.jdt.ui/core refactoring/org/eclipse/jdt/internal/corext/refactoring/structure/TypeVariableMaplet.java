@@ -31,7 +31,7 @@ public final class TypeVariableMaplet {
 
 	/**
 	 * Creates a new type variable maplet.
-	 * 
+	 *
 	 * @param source
 	 *        the simple name of the type variable in the source class
 	 * @param index
@@ -64,7 +64,7 @@ public final class TypeVariableMaplet {
 
 	/**
 	 * Returns the source index of this type variable maplet.
-	 * 
+	 *
 	 * @return the source index of this maplet
 	 */
 	public final int getSourceIndex() {
@@ -73,7 +73,7 @@ public final class TypeVariableMaplet {
 
 	/**
 	 * Returns the source of this type variable maplet.
-	 * 
+	 *
 	 * @return the source of this maplet
 	 */
 	public final String getSourceName() {
@@ -82,7 +82,7 @@ public final class TypeVariableMaplet {
 
 	/**
 	 * Returns the target index of this type variable maplet.
-	 * 
+	 *
 	 * @return the target index of this maplet
 	 */
 	public final int getTargetIndex() {
@@ -91,7 +91,7 @@ public final class TypeVariableMaplet {
 
 	/**
 	 * Returns the target of this type variable maplet.
-	 * 
+	 *
 	 * @return the target of this maplet
 	 */
 	public final String getTargetName() {

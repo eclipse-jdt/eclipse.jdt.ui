@@ -60,10 +60,10 @@ public class CallHierarchyLabelDecorator implements ILabelDecorator {
         }
         return image;
     }
-    
+
     /**
      * Note: This method is for internal use only. Clients should not call this method.
-     * 
+     *
 	 * @param element the element for which to compute the flags
 	 * @return the flags
      */
@@ -84,7 +84,7 @@ public class CallHierarchyLabelDecorator implements ILabelDecorator {
     private boolean isMaxCallDepthExceeded(MethodWrapper methodWrapper) {
         return methodWrapper.getLevel() > CallHierarchyUI.getDefault().getMaxCallDepth();
     }
-    
+
     /* (non-Javadoc)
      * @see IBaseLabelProvider#addListener(ILabelProviderListener)
      */

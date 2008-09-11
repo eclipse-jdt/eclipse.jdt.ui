@@ -19,6 +19,6 @@ public interface ITypeSet {
 	public ITypeSet restrictedTo(ITypeSet restrictionSet);
 
 	public String toString();
-	
+
 	public boolean isEmpty();
 }

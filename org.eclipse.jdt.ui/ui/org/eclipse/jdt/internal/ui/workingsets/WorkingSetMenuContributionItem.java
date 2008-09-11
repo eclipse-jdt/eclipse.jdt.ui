@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -28,7 +28,7 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * Menu contribution item which shows and lets select a working set.
- * 
+ *
  * @since 2.0
  */
 public class WorkingSetMenuContributionItem extends ContributionItem {
@@ -40,7 +40,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 
 	/**
 	 * Constructor for WorkingSetMenuContributionItem.
-	 * 
+	 *
 	 * @param id the id
 	 * @param actionGroup the action group
 	 * @param workingSet the working set
@@ -59,9 +59,9 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	 */
 	public void fill(Menu menu, int index) {
 		MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
-		
+
 		String name= fWorkingSet.getLabel();
-		
+
 		mi.setText("&" + fId + " " + name);  //$NON-NLS-1$  //$NON-NLS-2$
 		if (fImage == null) {
 			ImageDescriptor imageDescriptor= fWorkingSet.getImageDescriptor();
@@ -78,7 +78,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 			}
 		});
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.action.ContributionItem#dispose()
 	 * @since 3.0
@@ -87,10 +87,10 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 		if (fImage != null && !fImage.isDisposed())
 			fImage.dispose();
 		fImage= null;
-		
+
 		super.dispose();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.action.IContributionItem#isDynamic()
 	 */

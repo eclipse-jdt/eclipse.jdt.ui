@@ -85,7 +85,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		final IMethodBinding constructor= fDialog.getSuperConstructorChoice();
 		createSignature(constructor, buffer, selection);
 		if (fSignatures.contains(buffer.toString()))
-			return new StatusInfo(IStatus.WARNING, ActionMessages.GenerateConstructorUsingFieldsAction_error_duplicate_constructor); 
-		return new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.GenerateConstructorUsingFieldsAction_fields_selected, new Object[] { String.valueOf(countSelectedFields(selection)), String.valueOf(fEntries)})); 
+			return new StatusInfo(IStatus.WARNING, ActionMessages.GenerateConstructorUsingFieldsAction_error_duplicate_constructor);
+		return new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.GenerateConstructorUsingFieldsAction_fields_selected, new Object[] { String.valueOf(countSelectedFields(selection)), String.valueOf(fEntries)}));
 	}
 }

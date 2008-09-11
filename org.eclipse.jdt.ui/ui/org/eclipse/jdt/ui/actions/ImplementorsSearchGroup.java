@@ -27,6 +27,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -38,23 +39,23 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 /**
  * Action group that adds the search for implementors actions to a
  * context menu and the global menu bar.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ImplementorsSearchGroup extends ActionGroup  {
 
-	private static final String MENU_TEXT= SearchMessages.group_implementors; 
+	private static final String MENU_TEXT= SearchMessages.group_implementors;
 
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
 	private IActionBars fActionBars;
-	
+
 	private String fGroupId;
 
 	private FindImplementorsAction fFindImplementorsAction;
@@ -62,10 +63,10 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	private FindImplementorsInWorkingSetAction fFindImplementorsInWorkingSetAction;
 
 	/**
-	 * Creates a new <code>ImplementorsSearchGroup</code>. The group 
-	 * requires that the selection provided by the site's selection provider 
+	 * Creates a new <code>ImplementorsSearchGroup</code>. The group
+	 * requires that the selection provided by the site's selection provider
 	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the view part that owns this action group
 	 */
 	public ImplementorsSearchGroup(IWorkbenchSite site) {
@@ -74,13 +75,13 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 
 	/**
 	 * Creates a new <code>ImplementorsSearchGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public ImplementorsSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
@@ -107,7 +108,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ImplementorsSearchGroup(JavaEditor editor) {
@@ -134,13 +135,13 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		if (specialSelectionProvider != null)
 			action.setSpecialSelectionProvider(specialSelectionProvider);
 	}
-	
+
 	private void addAction(IAction action, IMenuManager manager) {
 		if (action.isEnabled()) {
 			manager.add(action);
 		}
 	}
-	
+
 	private void addWorkingSetAction(IWorkingSet[] workingSets, IMenuManager manager) {
 		FindAction action;
 		if (fEditor != null)
@@ -150,8 +151,8 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		action.update(getContext().getSelection());
 		addAction(action, manager);
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * Method declared on ActionGroup.
 	 */
@@ -159,9 +160,9 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		MenuManager javaSearchMM= new MenuManager(MENU_TEXT, IContextMenuConstants.GROUP_SEARCH);
 		addAction(fFindImplementorsAction, javaSearchMM);
 		addAction(fFindImplementorsInProjectAction, javaSearchMM);
-		
+
 		javaSearchMM.add(new Separator());
-		
+
 		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			addWorkingSetAction((IWorkingSet[]) iter.next(), javaSearchMM);
@@ -171,9 +172,9 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		if (!javaSearchMM.isEmpty())
 			manager.appendToGroup(fGroupId, javaSearchMM);
 	}
-	
 
-	/* 
+
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void fillActionBars(IActionBars actionBars) {
@@ -182,8 +183,8 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		fActionBars= actionBars;
 		updateGlobalActionHandlers();
 	}
-	
-	/* 
+
+	/*
 	 * Method declared on ActionGroup.
 	 */
 	public void dispose() {

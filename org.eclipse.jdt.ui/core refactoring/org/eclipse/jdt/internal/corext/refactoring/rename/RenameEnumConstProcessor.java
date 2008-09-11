@@ -43,7 +43,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 
 	/**
 	 * Creates a new rename enum const processor.
-	 * 
+	 *
 	 * @param field
 	 *            the enum constant
 	 */
@@ -53,10 +53,10 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 
 	/**
 	 * Creates a new rename enum const processor.
-	 * 
+	 *
 	 * @param arguments
 	 *            the arguments
-	 *            
+	 *
 	 * @param status
 	 *            the status
 	 */
@@ -65,7 +65,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		RefactoringStatus initializeStatus= initialize(arguments);
 		status.merge(initializeStatus);
 	}
-	
+
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#canEnableGetterRenaming()
@@ -92,7 +92,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_const_already_defined);
 		return result;
 	}
-	
+
 	protected RenameJavaElementDescriptor createRefactoringDescriptor() {
 		final IField field= getField();
 		String project= null;

@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 public interface ICreateTargetQueries {
-	
+
 	ICreateTargetQuery createNewPackageQuery();
 
 }

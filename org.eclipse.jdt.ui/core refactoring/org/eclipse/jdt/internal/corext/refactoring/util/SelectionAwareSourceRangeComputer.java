@@ -31,16 +31,16 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 	private IBuffer fBuffer;
 	private int fSelectionStart;
 	private int fSelectionLength;
-	
+
 	private Map/*<ASTNode, SourceRange>*/ fRanges;
-	
+
 	public SelectionAwareSourceRangeComputer(ASTNode[] selectedNodes, IBuffer buffer, int selectionStart, int selectionLength) {
 		fSelectedNodes= selectedNodes;
 		fBuffer= buffer;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 	}
-	
+
 	public SourceRange computeSourceRange(ASTNode node) {
 		try {
 			if (fRanges == null)
@@ -60,22 +60,22 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		fRanges= new HashMap();
 		if (fSelectedNodes.length == 0)
 			return;
-		
+
 		fRanges.put(fSelectedNodes[0], super.computeSourceRange(fSelectedNodes[0]));
 		int last= fSelectedNodes.length - 1;
 		fRanges.put(fSelectedNodes[last], super.computeSourceRange(fSelectedNodes[last]));
-		
+
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		String documentPortionToScan= fBuffer.getText(fSelectionStart, fSelectionLength);
 		scanner.setSource(documentPortionToScan.toCharArray());
 		TokenScanner tokenizer= new TokenScanner(scanner);
 		int pos= tokenizer.getNextStartOffset(0, false);
-		
+
 		ASTNode currentNode= fSelectedNodes[0];
 		int newStart= Math.min(fSelectionStart + pos, currentNode.getStartPosition());
 		SourceRange range= (SourceRange)fRanges.get(currentNode);
 		fRanges.put(currentNode, new SourceRange(newStart, range.getLength() + range.getStartPosition() - newStart));
-		
+
 		currentNode= fSelectedNodes[last];
 		int scannerStart= currentNode.getStartPosition() + currentNode.getLength() - fSelectionStart;
 		tokenizer.setOffset(scannerStart);
@@ -95,7 +95,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 				index--;
 			}
 		}
-		
+
 		int newEnd= Math.max(fSelectionStart + pos, currentNode.getStartPosition() + currentNode.getLength());
 		range= (SourceRange)fRanges.get(currentNode);
 		fRanges.put(currentNode, new SourceRange(range.getStartPosition(), newEnd - range.getStartPosition()));

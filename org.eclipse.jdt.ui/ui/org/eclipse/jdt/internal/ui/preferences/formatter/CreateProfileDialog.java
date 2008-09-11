@@ -44,32 +44,32 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
- * The dialog to create a new profile. 
+ * The dialog to create a new profile.
  */
 public class CreateProfileDialog extends StatusDialog {
-	
-    
+
+
     private static final String PREF_OPEN_EDIT_DIALOG= JavaUI.ID_PLUGIN + ".codeformatter.create_profile_dialog.open_edit"; //$NON-NLS-1$
-    
-    
+
+
 	private Text fNameText;
 	private Combo fProfileCombo;
 	private Button fEditCheckbox;
-	
+
 	private final static StatusInfo fOk= new StatusInfo();
-	private final static StatusInfo fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.CreateProfileDialog_status_message_profile_name_is_empty); 
-	private final static StatusInfo fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.CreateProfileDialog_status_message_profile_with_this_name_already_exists); 
+	private final static StatusInfo fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.CreateProfileDialog_status_message_profile_name_is_empty);
+	private final static StatusInfo fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.CreateProfileDialog_status_message_profile_with_this_name_already_exists);
 
 	private final ProfileManager fProfileManager;
 	private final List fSortedProfiles;
 	private final String [] fSortedNames;
-	
+
 	private CustomProfile fCreatedProfile;
 	protected boolean fOpenEditDialog;
 
 
 	private final IProfileVersioner fProfileVersioner;
-	
+
 	public CreateProfileDialog(Shell parentShell, ProfileManager profileManager, IProfileVersioner profileVersioner) {
 		super(parentShell);
 		fProfileManager= profileManager;
@@ -77,19 +77,19 @@ public class CreateProfileDialog extends StatusDialog {
 		fSortedProfiles= fProfileManager.getSortedProfiles();
 		fSortedNames= fProfileManager.getSortedDisplayNames();
 	}
-	
-	
+
+
 	public void create() {
 		super.create();
-		setTitle(FormatterMessages.CreateProfileDialog_dialog_title); 
+		setTitle(FormatterMessages.CreateProfileDialog_dialog_title);
 	}
-	
+
 	public Control createDialogArea(Composite parent) {
-				
+
 		final int numColumns= 2;
-		
+
 		GridData gd;
-		
+
 		final GridLayout layout= new GridLayout(numColumns, false);
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
@@ -98,15 +98,15 @@ public class CreateProfileDialog extends StatusDialog {
 
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(layout);
-		
+
 		// Create "Profile name:" label
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		final Label nameLabel = new Label(composite, SWT.WRAP);
-		nameLabel.setText(FormatterMessages.CreateProfileDialog_profile_name_label_text); 
+		nameLabel.setText(FormatterMessages.CreateProfileDialog_profile_name_label_text);
 		nameLabel.setLayoutData(gd);
-		
+
 		// Create text field to enter name
 		gd = new GridData( GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= numColumns;
@@ -117,26 +117,26 @@ public class CreateProfileDialog extends StatusDialog {
 				doValidation();
 			}
 		});
-		
+
 		// Create "Initialize settings ..." label
 		gd = new GridData();
 		gd.horizontalSpan = numColumns;
 		Label profileLabel = new Label(composite, SWT.WRAP);
-		profileLabel.setText(FormatterMessages.CreateProfileDialog_base_profile_label_text); 
+		profileLabel.setText(FormatterMessages.CreateProfileDialog_base_profile_label_text);
 		profileLabel.setLayoutData(gd);
-		
+
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= numColumns;
 		fProfileCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
 		fProfileCombo.setLayoutData(gd);
 		SWTUtil.setDefaultVisibleItemCount(fProfileCombo);
-		
-		
+
+
 		// "Open the edit dialog now" checkbox
 		gd= new GridData();
 		gd.horizontalSpan= numColumns;
 		fEditCheckbox= new Button(composite, SWT.CHECK);
-		fEditCheckbox.setText(FormatterMessages.CreateProfileDialog_open_edit_dialog_checkbox_text); 
+		fEditCheckbox.setText(FormatterMessages.CreateProfileDialog_open_edit_dialog_checkbox_text);
 		fEditCheckbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				fOpenEditDialog= ((Button)e.widget).getSelection();
@@ -144,7 +144,7 @@ public class CreateProfileDialog extends StatusDialog {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-		
+
 		final IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();//.get(PREF_OPEN_EDIT_DIALOG);
 		if (dialogSettings.get(PREF_OPEN_EDIT_DIALOG) != null) {
 		    fOpenEditDialog= dialogSettings.getBoolean(PREF_OPEN_EDIT_DIALOG);
@@ -152,15 +152,15 @@ public class CreateProfileDialog extends StatusDialog {
 		    fOpenEditDialog= true;
 		}
 		fEditCheckbox.setSelection(fOpenEditDialog);
-		
+
 		fProfileCombo.setItems(fSortedNames);
 		fProfileCombo.setText(fProfileManager.getDefaultProfile().getName());
 		updateStatus(fEmpty);
-		
+
 		applyDialogFont(composite);
-		
+
 		fNameText.setFocus();
-		
+
 		return composite;
 	}
 
@@ -170,7 +170,7 @@ public class CreateProfileDialog extends StatusDialog {
 	 */
 	protected void doValidation() {
 		final String name= fNameText.getText().trim();
-		
+
 		if (fProfileManager.containsName(name)) {
 			updateStatus(fDuplicate);
 			return;
@@ -181,26 +181,26 @@ public class CreateProfileDialog extends StatusDialog {
 		}
 		updateStatus(fOk);
 	}
-	
-	
+
+
 	protected void okPressed() {
-		if (!getStatus().isOK()) 
+		if (!getStatus().isOK())
 			return;
 
 		JavaPlugin.getDefault().getDialogSettings().put(PREF_OPEN_EDIT_DIALOG, fOpenEditDialog);
 
 		final Map baseSettings= new HashMap(((Profile)fSortedProfiles.get(fProfileCombo.getSelectionIndex())).getSettings());
 		final String profileName= fNameText.getText();
-		
+
 		fCreatedProfile= new CustomProfile(profileName, baseSettings, fProfileVersioner.getCurrentVersion(), fProfileVersioner.getProfileKind());
 		fProfileManager.addProfile(fCreatedProfile);
 		super.okPressed();
 	}
-	
+
 	public final CustomProfile getCreatedProfile() {
 		return fCreatedProfile;
 	}
-	
+
 	public final boolean openEditDialog() {
 		return fOpenEditDialog;
 	}

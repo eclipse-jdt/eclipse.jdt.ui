@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -44,42 +44,42 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Links inside Javadoc hovers and Javadoc view.
- * 
+ *
  * @since 3.4
  */
 public class JavaElementLinks {
 
 	/**
 	 * A handler is asked to handle links to targets.
-	 * 
+	 *
 	 * @see JavaElementLinks#createLocationListener(JavaElementLinks.ILinkHandler)
 	 */
 	public interface ILinkHandler {
 
 		/**
 		 * Handle normal kind of link to given target.
-		 * 
+		 *
 		 * @param target the target to show
 		 */
 		void handleInlineJavadocLink(IJavaElement target);
 
 		/**
 		 * Handle link to given target to open in javadoc view.
-		 * 
+		 *
 		 * @param target the target to show
 		 */
 		void handleJavadocViewLink(IJavaElement target);
 
 		/**
 		 * Handle link to given target to open its declaration
-		 * 
+		 *
 		 * @param target the target to show
 		 */
 		void handleDeclarationLink(IJavaElement target);
 
 		/**
 		 * Handle link to given link to open in external browser
-		 * 
+		 *
 		 * @param url the url to show
 		 * @param display the current display
 		 * @return <code>true</code> if the handler could open the link
@@ -95,12 +95,12 @@ public class JavaElementLinks {
 
 	private static final class JavaElementLinkedLabelComposer extends JavaElementLabelComposer {
 		private final IJavaElement fElement;
-	
+
 		public JavaElementLinkedLabelComposer(IJavaElement member, StringBuffer buf) {
 			super(buf);
 			fElement= member;
 		}
-	
+
 		public String getElementName(IJavaElement element) {
 			String elementName= element.getElementName();
 			if (fElement.equals(element)) { // linking to the member itself would be a no-op
@@ -117,19 +117,19 @@ public class JavaElementLinks {
 				return elementName;
 			}
 		}
-	
+
 		private String createLink(String uri, String elementName) {
 			return "<a class='header' href='" + uri + ("'>" + elementName + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-	
+
 		protected String getGT() {
 			return "&gt;"; //$NON-NLS-1$
 		}
-	
+
 		protected String getLT() {
 			return "&lt;"; //$NON-NLS-1$
 		}
-	
+
 		protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
 			String typeName= super.getSimpleTypeName(enclosingElement, typeSig);
 			try {
@@ -146,7 +146,7 @@ public class JavaElementLinks {
 	public static final String JAVADOC_SCHEME= "eclipse-javadoc"; //$NON-NLS-1$
 	public static final String JAVADOC_VIEW_SCHEME= "eclipse-javadoc-view"; //$NON-NLS-1$
 	private static final char LINK_BRACKET_REPLACEMENT= '\u2603';
-	
+
 	/**
 	 * The link is composed of a number of segments, separated by LINK_SEPARATOR:
 	 * <p>
@@ -161,13 +161,13 @@ public class JavaElementLinks {
 	private JavaElementLinks() {
 		// static only
 	}
-	
+
 	/**
 	 * Creates a location listener which uses the given handler
 	 * to handle java element links.
-	 * 
+	 *
 	 * The location listener can be attached to a {@link Browser}
-	 * 
+	 *
 	 * @param handler the handler to use to handle links
 	 * @return a new {@link LocationListener}
 	 */
@@ -185,7 +185,7 @@ public class JavaElementLinks {
 					handler.handleTextSet();
 					return;
 				}
-				
+
 				event.doit= false;
 
 				if (loc.startsWith("about:")) { //$NON-NLS-1$
@@ -198,7 +198,7 @@ public class JavaElementLinks {
 				try {
 					uri= new URI(loc);
 				} catch (URISyntaxException e) {
-					// try it with a file (workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=237903 ): 
+					// try it with a file (workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=237903 ):
 					File file= new File(loc);
 					if (! file.exists()) {
 						JavaPlugin.log(e);
@@ -213,7 +213,7 @@ public class JavaElementLinks {
 					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
 					if (linkTarget == null)
 						return;
-					
+
 					handler.handleJavadocViewLink(linkTarget);
 				} else if (JavaElementLinks.JAVADOC_SCHEME.equals(scheme)) {
 					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
@@ -243,7 +243,7 @@ public class JavaElementLinks {
 
 	/**
 	 * Creates an {@link URI} with the given scheme for the given element.
-	 * 
+	 *
 	 * @param scheme the scheme
 	 * @param element the element
 	 * @return an {@link URI}, encoded as {@link URI#toASCIIString() ASCII} string, ready to be used
@@ -257,7 +257,7 @@ public class JavaElementLinks {
 	/**
 	 * Creates an {@link URI} with the given scheme based on the given element.
 	 * The additional arguments specify a member referenced from the given element.
-	 * 
+	 *
 	 * @param scheme a scheme
 	 * @param element the declaring element
 	 * @param refTypeName a (possibly qualified) type name, can be <code>null</code>
@@ -272,10 +272,10 @@ public class JavaElementLinks {
 		/*
 		 * We use an opaque URI, not ssp and fragments (to work around Safari bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=212527 (wrongly encodes #)).
 		 */
-		
+
 		StringBuffer ssp= new StringBuffer(60);
 		ssp.append(LINK_SEPARATOR); // make sure first character is not a / (would be hierarchical URI)
-		
+
 		// replace '[' manually, since URI confuses it for an IPv6 address as per RFC 2732:
 		ssp.append(element.getHandleIdentifier().replace('[', LINK_BRACKET_REPLACEMENT)); // segments[1]
 
@@ -304,7 +304,7 @@ public class JavaElementLinks {
 	public static IJavaElement parseURI(URI uri) {
 		String ssp= uri.getSchemeSpecificPart();
 		String[] segments= ssp.split(String.valueOf(LINK_SEPARATOR), -1);
-		
+
 		// replace '[' manually, since URI confuses it for an IPv6 address as per RFC 2732:
 		IJavaElement element= JavaCore.create(segments[1].replace(LINK_BRACKET_REPLACEMENT, '['));
 
@@ -319,7 +319,7 @@ public class JavaElementLinks {
 					JavaPlugin.log(e);
 				}
 			}
-			
+
 			if (element instanceof ILocalVariable) {
 				element= element.getAncestor(IJavaElement.TYPE);
 			} else if (element instanceof ITypeParameter) {
@@ -351,7 +351,7 @@ public class JavaElementLinks {
 									//TODO: methods whose signature contains type parameters can not be found
 									// easily, since the Javadoc references are erasures
 									//TODO: reference can also point to method from supertype
-									
+
 									//Shortcut: only check name and parameter count:
 									methods= type.getMethods();
 									for (int i= 0; i < methods.length; i++) {
@@ -359,7 +359,7 @@ public class JavaElementLinks {
 										if (method.getElementName().equals(refMemberName) && method.getNumberOfParameters() == paramSignatures.length)
 											return method;
 									}
-									
+
 								}
 							} else {
 								IField field= type.getField(refMemberName);
@@ -374,7 +374,7 @@ public class JavaElementLinks {
 									}
 								}
 							}
-							
+
 						}
 					} else {
 						// FIXME: either remove or show dialog
@@ -402,7 +402,7 @@ public class JavaElementLinks {
 						}
 					}
 					break;
-					
+
 				case IJavaElement.TYPE:
 					IType type= (IType)baseElement;
 					typeParameters= type.getTypeParameters();
@@ -413,24 +413,24 @@ public class JavaElementLinks {
 						}
 					}
 					break;
-					
+
 				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.JAVA_PROJECT:
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					
+
 				case IJavaElement.CLASS_FILE:
 				case IJavaElement.COMPILATION_UNIT:
-					
+
 				case IJavaElement.PACKAGE_DECLARATION:
 				case IJavaElement.IMPORT_CONTAINER:
 				case IJavaElement.IMPORT_DECLARATION:
 					return null;
-					
+
 				default:
 					break;
 			}
-			// look for type parameters in enclosing members: 
+			// look for type parameters in enclosing members:
 			baseElement= baseElement.getParent();
 		}
 		return null;
@@ -439,11 +439,11 @@ public class JavaElementLinks {
 	private static IType resolveType(IType baseType, String refTypeName) throws JavaModelException {
 		if (refTypeName.length() == 0)
 			return baseType;
-		
+
 		String[][] resolvedNames= baseType.resolveType(refTypeName);
 		if (resolvedNames != null && resolvedNames.length > 0) {
 			return baseType.getJavaProject().findType(resolvedNames[0][0], resolvedNames[0][1].replace('$', '.'), (IProgressMonitor) null);
-			
+
 		} else if (baseType.isBinary()) {
 			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=206597
 			IType type= baseType.getJavaProject().findType(refTypeName, (IProgressMonitor) null);
@@ -452,7 +452,7 @@ public class JavaElementLinks {
 				type= baseType.getJavaProject().findType(baseType.getPackageFragment().getElementName() + '.' + refTypeName, (IProgressMonitor) null);
 			}
 			return type;
-			
+
 		} else {
 			return null;
 		}
@@ -461,7 +461,7 @@ public class JavaElementLinks {
 	/**
 	 * Returns the label for a Java element with the flags as defined by {@link JavaElementLabels}.
 	 * Referenced element names in the label (except the given element's name) are rendered as Javadoc links.
-	 * 
+	 *
 	 * @param element the element to render
 	 * @param flags the rendering flags
 	 * @return the label of the Java element
@@ -469,10 +469,10 @@ public class JavaElementLinks {
 	 */
 	public static String getElementLabel(IJavaElement element, long flags) {
 		StringBuffer buf= new StringBuffer();
-		
+
 		new JavaElementLinkedLabelComposer(element, buf).appendElementLabel(element, flags);
 		return Strings.markLTR(buf.toString(), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
-		
+
 //		new JavaElementLabelComposer(buf).appendElementLabel(element, flags);
 //		String string= buf.toString().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 //		return Strings.markLTR(string, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);

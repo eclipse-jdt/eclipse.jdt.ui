@@ -21,46 +21,46 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.jdt.core.IJavaElement;
 
 public class JavaElementProperties implements IPropertySource {
-	
+
 	private IJavaElement fSource;
-	
+
 	// Property Descriptors
 	private static final IPropertyDescriptor[] fgPropertyDescriptors= new IPropertyDescriptor[1];
 	static {
 		PropertyDescriptor descriptor;
 
 		// resource name
-		descriptor= new PropertyDescriptor(IBasicPropertyConstants.P_TEXT, JavaUIMessages.JavaElementProperties_name); 
+		descriptor= new PropertyDescriptor(IBasicPropertyConstants.P_TEXT, JavaUIMessages.JavaElementProperties_name);
 		descriptor.setAlwaysIncompatible(true);
 		fgPropertyDescriptors[0]= descriptor;
 	}
-	
+
 	public JavaElementProperties(IJavaElement source) {
 		fSource= source;
 	}
-	
+
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return fgPropertyDescriptors;
 	}
-	
+
 	public Object getPropertyValue(Object name) {
 		if (name.equals(IBasicPropertyConstants.P_TEXT)) {
 			return fSource.getElementName();
 		}
 		return null;
 	}
-	
+
 	public void setPropertyValue(Object name, Object value) {
 	}
-	
+
 	public Object getEditableValue() {
 		return this;
 	}
-	
+
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
-	
+
 	public void resetPropertyValue(Object property) {
 	}
 }

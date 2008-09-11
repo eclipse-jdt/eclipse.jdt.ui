@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -19,6 +17,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -39,16 +39,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Dialog for the generate hashCode() and equals() action.
- * 
+ *
  * @since 3.2
  */
 public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 	/**
 	 * Content provider for the generate hashCode() and equals() tree viewer.
-	 * 
+	 *
 	 * @since 3.2
-	 * 
+	 *
 	 */
 	private static class GenerateHashCodeEqualsContentProvider implements ITreeContentProvider {
 
@@ -84,9 +84,9 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 	/**
 	 * Validator for the input of the generate hashCode() and equals() dialog.
-	 * 
+	 *
 	 * @since 3.2
-	 * 
+	 *
 	 */
 	private static class GenerateHashCodeEqualsValidator implements ISelectionStatusValidator {
 

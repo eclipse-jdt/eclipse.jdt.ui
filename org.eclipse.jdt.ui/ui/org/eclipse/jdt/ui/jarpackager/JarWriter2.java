@@ -24,6 +24,8 @@ import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -33,8 +35,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -48,19 +48,19 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * <p>
  * Clients may subclass.
  * </p>
- * 
+ *
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.1
- * 
+ *
  * @deprecated Use {@link JarWriter3} instead which leverages new {@link org.eclipse.core.filesystem.EFS EFS} support
  */
 public class JarWriter2 {
-	
+
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
 
 	private Set fDirectories= new HashSet();
-	
+
 	/**
 	 * Creates an instance which is used to create a JAR based
 	 * on the given JarPackage.
@@ -93,7 +93,7 @@ public class JarWriter2 {
 			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 		}
 	}
-	
+
 	/**
 	 * Closes the archive and does all required cleanup.
 	 *
@@ -110,7 +110,7 @@ public class JarWriter2 {
 				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 			}
 	}
-	
+
 	/**
 	 * Writes the passed resource to the current archive.
 	 *
@@ -134,13 +134,13 @@ public class JarWriter2 {
 			// Ensure full path is visible
 			String message= null;
 			if (ex.getLocalizedMessage() != null)
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {BasicElementLabels.getPathLabel(resource.getFullPath(), false), ex.getLocalizedMessage()}); 
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {BasicElementLabels.getPathLabel(resource.getFullPath(), false), ex.getLocalizedMessage()});
 			else
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(resource.getFullPath(), false)); 
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(resource.getFullPath(), false));
 			throw JarPackagerUtil.createCoreException(message, ex);
-		}					
+		}
 	}
-	
+
 	/**
 	 * Creates a new JarEntry with the passed path and contents, and writes it
 	 * to the current archive.
@@ -154,7 +154,7 @@ public class JarWriter2 {
 	 */
 	protected void addFile(IFile resource, IPath path, File correspondingFile) throws IOException, CoreException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
-		byte[] readBuffer= new byte[4096];             
+		byte[] readBuffer= new byte[4096];
 
 		if (fJarPackage.isCompressed())
 			newEntry.setMethod(ZipEntry.DEFLATED);
@@ -170,7 +170,7 @@ public class JarWriter2 {
 
 		InputStream contentStream = resource.getContents(false);
 
-		try {		
+		try {
 			fJarOutputStream.putNextEntry(newEntry);
 			int count;
 			while ((count= contentStream.read(readBuffer, 0, readBuffer.length)) != -1)
@@ -191,11 +191,11 @@ public class JarWriter2 {
 
 	/**
 	 * Calculates the CRC and size of the resource and updates the jarEntry.
-	 * 
+	 *
 	 * @param jarEntry			the JarEntry to update
-	 * @param resource			the file to calculate 
+	 * @param resource			the file to calculate
 	 * @param readBuffer 		a shared read buffer to store temporary data
-	 * 
+	 *
      * @throws	IOException		if an I/O error has occurred
 	 * @throws	CoreException 	if the resource can-t be accessed
 	 */
@@ -216,15 +216,15 @@ public class JarWriter2 {
 		jarEntry.setSize(size);
 		jarEntry.setCrc(checksumCalculator.getValue());
 	}
-	
+
 	/**
-	 * Creates the directory entries for the given path and writes it to the 
+	 * Creates the directory entries for the given path and writes it to the
 	 * current archive.
-	 * 
+	 *
 	 * @param destinationPath 	the path to add
-	 * @param correspondingFile the corresponding file in the file system 
+	 * @param correspondingFile the corresponding file in the file system
 	 *  						or <code>null</code> if it doesn't exist
-	 * @throws IOException if an I/O error has occurred  
+	 * @throws IOException if an I/O error has occurred
 	 */
 	protected void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
@@ -237,20 +237,20 @@ public class JarWriter2 {
 
 			if (correspondingFile != null)
 				correspondingFile= correspondingFile.getParentFile();
-			long timeStamp= correspondingFile != null && correspondingFile.exists() 
-				? correspondingFile.lastModified() 
+			long timeStamp= correspondingFile != null && correspondingFile.exists()
+				? correspondingFile.lastModified()
 				: System.currentTimeMillis();
-				
+
 			JarEntry newEntry= new JarEntry(path);
 			newEntry.setMethod(ZipEntry.STORED);
 			newEntry.setSize(0);
 			newEntry.setCrc(0);
 			newEntry.setTime(timeStamp);
 			directories.add(newEntry);
-			
+
 			lastSlash= path.lastIndexOf('/', lastSlash - 1);
 		}
-			
+
 		for(int i= directories.size() - 1; i >= 0; --i) {
 			fJarOutputStream.putNextEntry((JarEntry)directories.get(i));
 		}
@@ -260,7 +260,7 @@ public class JarWriter2 {
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR
 	 * then a dialog will ask the user again.
-	 * 
+	 *
 	 * @param	parent	the parent for the dialog,
 	 * 			or <code>null</code> if no dialog should be presented
 	 * @return	<code>true</code> if it is OK to create the JAR
@@ -274,7 +274,7 @@ public class JarWriter2 {
 				return true;
 			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fJarPackage.getAbsoluteJarLocation(), true);
 		}
-					
+
 		// Test if directory exists
 		String path= file.getAbsolutePath();
 		int separatorIndex = path.lastIndexOf(File.separator);

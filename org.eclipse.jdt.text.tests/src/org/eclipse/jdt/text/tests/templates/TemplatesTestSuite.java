@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 
 /**
  * Template test suite.
- * 
+ *
  * @since 3.4
  */
 public class TemplatesTestSuite {

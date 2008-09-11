@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  * <p>
  * Note: Must be public since it is referenced from plugin.xml
  * </p>
- * 
+ *
  * @since 3.3
  */
 public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage {
@@ -36,7 +36,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new CodeAssistFavoritesConfigurationBlock(getNewStatusChangedListener(), container);
-		
+
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
 	}
@@ -56,7 +56,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 	protected String getPropertyPageID() {
 		return null;
 	}
-	
+
 		/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -66,7 +66,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 		}
 		super.dispose();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -86,7 +86,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 		}
 		return super.performOk();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */

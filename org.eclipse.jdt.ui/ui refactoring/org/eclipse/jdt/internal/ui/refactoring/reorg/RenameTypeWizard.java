@@ -42,7 +42,7 @@ public class RenameTypeWizard extends RenameRefactoringWizard {
 
 	/*
 	 * non java-doc
-	 * 
+	 *
 	 * @see RefactoringWizard#addUserInputPages
 	 */
 	protected void addUserInputPages() {

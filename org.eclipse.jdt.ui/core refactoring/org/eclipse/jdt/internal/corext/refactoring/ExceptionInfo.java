@@ -24,7 +24,7 @@ public class ExceptionInfo {
 	public static final int OLD= 0;
 	public static final int ADDED= 1;
 	public static final int DELETED= 2;
-	
+
 	public ExceptionInfo(IType type, int kind, ITypeBinding binding) {
 		Assert.isNotNull(type);
 		fType= type;
@@ -38,44 +38,44 @@ public class ExceptionInfo {
 	public static ExceptionInfo createInfoForAddedException(IType type){
 		return new ExceptionInfo(type, ADDED, null);
 	}
-	
+
 	public void markAsDeleted(){
 		Assert.isTrue(! isAdded());//added exception infos should be simply removed from the list
 		fKind= DELETED;
 	}
-	
+
 	public void markAsOld(){
 		Assert.isTrue(isDeleted());
 		fKind= OLD;
 	}
-	
+
 	public boolean isAdded(){
 		return fKind == ADDED;
 	}
-	
+
 	public boolean isDeleted(){
 		return fKind == DELETED;
 	}
-	
+
 	public boolean isOld(){
 		return fKind == OLD;
 	}
-	
+
 	public IType getType() {
 		return fType;
 	}
-	
+
 	public int getKind() {
 		return fKind;
 	}
-	
+
 	/**
 	 * @return ITypeBinding the typeBinding (for OLD and DELETED exceptions) or <code>null</code>
 	 */
 	public ITypeBinding getTypeBinding() {
 		return fTypeBinding;
 	}
-	
+
 	public String toString() {
 		StringBuffer result= new StringBuffer();
 		switch (fKind) {

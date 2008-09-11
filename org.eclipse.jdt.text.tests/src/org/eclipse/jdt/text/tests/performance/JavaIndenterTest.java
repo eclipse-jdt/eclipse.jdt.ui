@@ -14,10 +14,10 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
@@ -27,7 +27,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 public class JavaIndenterTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= JavaIndenterTest.class;
 
 	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
@@ -37,24 +37,24 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	private static final int MEASURED_RUNS= 2;
 
 	private static final int[] CTRL_END= new int[] { SWT.CTRL, SWT.END };
-	
+
 	private ITextEditor fEditor;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.runEventQueue();
-		
+
 		EditorTestHelper.bringToTop();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		runAction(fEditor.getAction("ToggleComment"));
 		SWTEventHelper.pressKeyCodeCombination(EditorTestHelper.getActiveDisplay(), CTRL_END);
 		EditorTestHelper.joinJobs(2000, 5000, 100);
-		
+
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
@@ -63,7 +63,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 	}
-	
+
 	public void testJavaIndenter2() {
 		measureJavaIndenter(getNullPerformanceMeter(), getWarmUpRuns());
 		measureJavaIndenter(createPerformanceMeter(), getMeasuredRuns());

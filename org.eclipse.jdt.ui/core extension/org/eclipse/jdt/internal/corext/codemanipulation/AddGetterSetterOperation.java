@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,6 +22,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -54,7 +54,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Workspace runnable to add accessor methods to fields.
- * 
+ *
  * @since 3.1
  */
 public final class AddGetterSetterOperation implements IWorkspaceRunnable {
@@ -106,7 +106,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Creates a new add getter setter operation.
-	 * 
+	 *
 	 * @param type the type to add the accessors to
 	 * @param getters the fields to create getters for
 	 * @param setters the fields to create setters for
@@ -136,7 +136,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Adds a new accessor for the specified field.
-	 * 
+	 *
 	 * @param type the type
 	 * @param field the field
 	 * @param contents the contents of the accessor method
@@ -155,7 +155,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Generates a new getter method for the specified field
-	 * 
+	 *
 	 * @param field the field
 	 * @param rewrite the list rewrite to use
 	 * @throws CoreException if an error occurs
@@ -179,9 +179,9 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Generates a new setter method for the specified field
-	 * 
+	 *
 	 * @param field the field
-	 * @param astRewrite 
+	 * @param astRewrite
 	 * @param rewrite the list rewrite to use
 	 * @throws CoreException if an error occurs
 	 * @throws OperationCanceledException if the operation has been cancelled
@@ -205,13 +205,13 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 					ModifierRewrite.create(astRewrite, fieldDecl).setModifiers(0, Modifier.FINAL, null);
 				}
 			}
-			
+
 		}
 	}
 
 	/**
 	 * Returns the resulting text edit.
-	 * 
+	 *
 	 * @return the resulting text edit
 	 */
 	public final TextEdit getResultingEdit() {
@@ -220,7 +220,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the scheduling rule for this operation.
-	 * 
+	 *
 	 * @return the scheduling rule
 	 */
 	public final ISchedulingRule getSchedulingRule() {
@@ -229,7 +229,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the visibility modifier of the generated constructors.
-	 * 
+	 *
 	 * @return the visibility modifier
 	 */
 	public final int getVisibility() {
@@ -238,7 +238,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Should all existing members be skipped?
-	 * 
+	 *
 	 * @return <code>true</code> if they should be skipped, <code>false</code> otherwise
 	 */
 	public final boolean isSkipAllExisting() {
@@ -247,7 +247,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Queries the user whether to skip existing methods.
-	 * 
+	 *
 	 * @param method the method in question
 	 * @return <code>true</code> to skip existing methods, <code>false</code> otherwise
 	 * @throws OperationCanceledException if the operation has been cancelled
@@ -268,7 +268,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Removes an existing accessor method.
-	 * 
+	 *
 	 * @param accessor the accessor method to remove
 	 * @param rewrite the list rewrite to use
 	 * @throws JavaModelException if an error occurs
@@ -286,7 +286,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.setTaskName(CodeGenerationMessages.AddGetterSetterOperation_description); 
+			monitor.setTaskName(CodeGenerationMessages.AddGetterSetterOperation_description);
 			monitor.beginTask("", fGetterFields.length + fSetterFields.length); //$NON-NLS-1$
 			final ICompilationUnit unit= fType.getCompilationUnit();
 			final ASTRewrite astRewrite= ASTRewrite.create(fASTRoot.getAST());
@@ -306,7 +306,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			if (listRewriter == null) {
 				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, CodeGenerationMessages.AddGetterSetterOperation_error_input_type_not_found, null));
 			}
-			
+
 			fSkipAllExisting= (fSkipExistingQuery == null);
 			if (!fSort) {
 				for (int index= 0; index < fAccessorFields.length; index++) {
@@ -343,7 +343,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Determines whether existing members should be skipped.
-	 * 
+	 *
 	 * @param skip <code>true</code> to skip existing members, <code>false</code> otherwise
 	 */
 	public final void setSkipAllExisting(final boolean skip) {
@@ -356,7 +356,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Sets the visibility modifier of the generated constructors.
-	 * 
+	 *
 	 * @param visibility the visibility modifier
 	 */
 	public final void setVisibility(final int visibility) {

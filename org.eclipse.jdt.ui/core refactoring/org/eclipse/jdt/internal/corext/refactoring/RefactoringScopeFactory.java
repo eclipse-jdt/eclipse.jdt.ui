@@ -92,7 +92,7 @@ public class RefactoringScopeFactory {
 	/**
 	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>,
 	 * considering the visibility of the element, references only from source
-	 * 
+	 *
 	 * @param javaElement the java element
 	 * @return the search scope
 	 * @throws JavaModelException if an error occurs
@@ -100,11 +100,11 @@ public class RefactoringScopeFactory {
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
 		return RefactoringScopeFactory.create(javaElement, true, true);
 	}
-	
+
 	/**
 	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>,
 	 * references only from source
-	 * 
+	 *
 	 * @param javaElement the java element
 	 * @param considerVisibility consider visibility of javaElement iff <code>true</code>
 	 * @return the search scope
@@ -113,11 +113,11 @@ public class RefactoringScopeFactory {
 	public static IJavaSearchScope create(IJavaElement javaElement, boolean considerVisibility) throws JavaModelException {
 		return RefactoringScopeFactory.create(javaElement, considerVisibility, true);
 	}
-	
-	
+
+
 	/**
 	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>.
-	 * 
+	 *
 	 * @param javaElement the java element
 	 * @param considerVisibility consider visibility of javaElement iff <code>true</code>
 	 * @param sourceReferencesOnly consider references in source only (no references in binary)
@@ -137,15 +137,15 @@ public class RefactoringScopeFactory {
 			// there can be a package fragment with the same name in a different source folder or project. So we
 			// have to treat package visible members like public or protected members.
 		}
-		
-		
+
+
 		IJavaProject javaProject= javaElement.getJavaProject();
 		return SearchEngine.createJavaSearchScope(getAllScopeElements(javaProject, sourceReferencesOnly), false);
 	}
 
 	/**
 	 * Creates a new search scope comprising <code>members</code>.
-	 * 
+	 *
 	 * @param members the members
 	 * @return the search scope
 	 * @throws JavaModelException if an error occurs
@@ -153,10 +153,10 @@ public class RefactoringScopeFactory {
 	public static IJavaSearchScope create(IMember[] members) throws JavaModelException {
 		return create(members, true);
 	}
-	
+
 	/**
 	 * Creates a new search scope comprising <code>members</code>.
-	 * 
+	 *
 	 * @param members the members
 	 * @param sourceReferencesOnly consider references in source only (no references in binary)
 	 * @return the search scope
@@ -179,7 +179,7 @@ public class RefactoringScopeFactory {
 	/**
 	 * Creates a new search scope with all projects possibly referenced
 	 * from the given <code>javaElements</code>.
-	 * 
+	 *
 	 * @param javaElements the java elements
 	 * @return the search scope
 	 */
@@ -195,7 +195,7 @@ public class RefactoringScopeFactory {
 	/**
 	 * Creates a new search scope with all projects possibly referenced
 	 * from the given <code>javaElements</code>.
-	 * 
+	 *
 	 * @param javaElements the java elements
 	 * @param includeMask the include mask
 	 * @return the search scope
@@ -211,7 +211,7 @@ public class RefactoringScopeFactory {
 
 	/**
 	 * Creates a new search scope containing all projects which reference or are referenced by the specified project.
-	 * 
+	 *
 	 * @param project the project
 	 * @param includeMask the include mask
 	 * @return the search scope

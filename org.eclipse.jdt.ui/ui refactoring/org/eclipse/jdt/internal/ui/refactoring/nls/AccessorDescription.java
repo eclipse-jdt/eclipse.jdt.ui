@@ -27,13 +27,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  *
  */
 public class AccessorDescription {
-	
+
 	private final static String KEY_ACCESSOR_NAME= "accessorName"; //$NON-NLS-1$
 	private final static String KEY_ACCESSOR_PACK= "accessorPackage"; //$NON-NLS-1$
 	private final static String KEY_RESOURCE_BUNDLE_NAME= "bundleName"; //$NON-NLS-1$
 	private final static String KEY_RESOURCE_BUNDLE_PACK= "bundlePackage"; //$NON-NLS-1$
-	
-	
+
+
 	private final IPackageFragment fResourceBundlePackage;
 	private final String fAccessorClassName;
 	private final IPackageFragment fAccessorClassPackage;
@@ -46,7 +46,7 @@ public class AccessorDescription {
 		fResourceBundleName= propertyFileName;
 		fResourceBundlePackage= propertyFilePackage;
 	}
-	
+
 	public String getLabel() {
 		StringBuffer buf= new StringBuffer();
 		buf.append(getAccessorClassPackage().getElementName());
@@ -59,7 +59,7 @@ public class AccessorDescription {
 		buf.append(BasicElementLabels.getPathLabel(propertyFilePath, false));
 		return buf.toString();
 	}
-	
+
 	public void serialize(IDialogSettings settings) {
 		settings.put(KEY_ACCESSOR_NAME, getAccessorClassName());
 		settings.put(KEY_ACCESSOR_PACK, getAccessorClassPackage().getHandleIdentifier());
@@ -91,7 +91,7 @@ public class AccessorDescription {
 	public IPackageFragment getResourceBundlePackage() {
 		return fResourceBundlePackage;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -106,20 +106,20 @@ public class AccessorDescription {
 		}
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
 		return fAccessorClassName.hashCode() + fAccessorClassPackage.hashCode() + fResourceBundleName.hashCode() + fResourceBundlePackage.hashCode();
 	}
-	
+
 	public static AccessorDescription deserialize(IDialogSettings settings) {
 		String accessorName= settings.get(KEY_ACCESSOR_NAME);
 		if (accessorName == null) {
 			return null;
 		}
-		
+
 		String accessorPackHandle= settings.get(KEY_ACCESSOR_PACK);
 		if (accessorPackHandle == null) {
 			return null;
@@ -128,12 +128,12 @@ public class AccessorDescription {
 		if (!(accessorPack instanceof IPackageFragment) || !accessorPack.exists()) {
 			return null;
 		}
-		
+
 		String bundleName= settings.get(KEY_RESOURCE_BUNDLE_NAME);
 		if (bundleName == null) {
 			return null;
 		}
-		
+
 		String bundlePackHandle= settings.get(KEY_RESOURCE_BUNDLE_PACK);
 		if (bundlePackHandle == null) {
 			return null;
@@ -142,7 +142,7 @@ public class AccessorDescription {
 		if (!(bundlePack instanceof IPackageFragment) || !bundlePack.exists()) {
 			return null;
 		}
-		
+
 		return new AccessorDescription(accessorName, (IPackageFragment) accessorPack, bundleName, (IPackageFragment) bundlePack);
 	}
 }

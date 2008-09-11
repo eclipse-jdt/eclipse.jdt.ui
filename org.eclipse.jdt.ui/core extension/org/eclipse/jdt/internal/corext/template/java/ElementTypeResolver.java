@@ -25,7 +25,7 @@ public class ElementTypeResolver extends TemplateVariableResolver {
 
 	public ElementTypeResolver() {
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 	 * @since 3.3
@@ -41,7 +41,7 @@ public class ElementTypeResolver extends TemplateVariableResolver {
 			super.resolve(variable, context);
 			return;
 		}
-		
+
 		JavaContext jc= (JavaContext) context;
 		String reference= (String) params.get(0);
 		TemplateVariable refVar= jc.getTemplateVariable(reference);
@@ -50,7 +50,7 @@ public class ElementTypeResolver extends TemplateVariableResolver {
 			resolve(mv, jvar, jc);
 			return;
 		}
-		
+
 		super.resolve(variable, context);
 	}
 

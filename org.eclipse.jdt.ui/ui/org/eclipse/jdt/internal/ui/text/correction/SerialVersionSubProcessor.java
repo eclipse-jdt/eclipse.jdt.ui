@@ -59,7 +59,7 @@ public final class SerialVersionSubProcessor {
 		public boolean isDefaultProposal() {
 			return fIsDefaultProposal;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -71,8 +71,8 @@ public final class SerialVersionSubProcessor {
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Determines the serial version quickfix proposals.
 	 *

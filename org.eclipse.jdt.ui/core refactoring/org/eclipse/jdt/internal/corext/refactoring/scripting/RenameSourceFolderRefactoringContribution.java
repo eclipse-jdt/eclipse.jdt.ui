@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProc
 
 /**
  * Refactoring contribution for the rename source folder refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class RenameSourceFolderRefactoringContribution extends JavaRefactoringContribution {

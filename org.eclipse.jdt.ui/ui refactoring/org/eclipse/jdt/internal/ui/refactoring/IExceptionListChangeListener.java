@@ -17,8 +17,8 @@ public interface IExceptionListChangeListener {
 	* Gets fired if the exception list got modified by adding or removing exceptions
 	*/
 	public void exceptionListChanged();
-	
-	
+
+
 //	/**
 //	 * Gets fired when the given parameter has changed
 //	 * @param parameter the parameter that has changed.
@@ -30,10 +30,10 @@ public interface IExceptionListChangeListener {
 //	 * @param exception the exception that has been added.
 //	 */
 //	public void exceptionAdded(ExceptionInfo exception);
-//	
-//	
+//
+//
 //	/**
-//	 * Gets fired if the exception list got modified by reordering or removing 
+//	 * Gets fired if the exception list got modified by reordering or removing
 //	 * exceptions (note that adding is handled by <code>exceptionAdded</code>))
 //	 */
 //	public void exceptionListChanged();

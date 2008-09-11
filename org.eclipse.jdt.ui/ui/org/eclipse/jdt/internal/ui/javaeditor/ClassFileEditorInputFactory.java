@@ -42,7 +42,7 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 		String identifier= memento.getString(KEY);
 		if (identifier == null)
 			return null;
-			
+
 		IJavaElement element= JavaCore.create(identifier);
 		try {
 			if (!element.exists() && element instanceof IClassFile) {

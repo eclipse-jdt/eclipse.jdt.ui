@@ -93,16 +93,16 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 			}
 			return null;
 		}
-		
+
 	}
-	
+
 	private final TemplateVariableProcessor fProcessor;
 
 	public CodeTemplateSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore store, ITextEditor editor, TemplateVariableProcessor processor) {
 		super(colorManager, store, editor, IJavaPartitions.JAVA_PARTITIONING, false);
 		fProcessor= processor;
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getContentAssistant(ISourceViewer)
 	 */
@@ -111,7 +111,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		IColorManager manager= textTools.getColorManager();
-		
+
 
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.setContentAssistProcessor(fProcessor, IDocument.DEFAULT_CONTENT_TYPE);
@@ -148,7 +148,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 		RGB rgb= PreferenceConverter.getColor(store, key);
 		return manager.getColor(rgb);
 	}
-	
+
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 * @since 2.1

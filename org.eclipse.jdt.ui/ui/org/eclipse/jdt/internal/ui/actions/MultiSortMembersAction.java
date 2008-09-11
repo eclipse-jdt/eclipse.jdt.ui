@@ -39,21 +39,21 @@ public class MultiSortMembersAction extends CleanUpAction {
 
 	public MultiSortMembersAction(IWorkbenchSite site) {
 		super(site);
-		
-		setText(ActionMessages.SortMembersAction_label); 
-		setDescription(ActionMessages.SortMembersAction_description); 
-		setToolTipText(ActionMessages.SortMembersAction_tooltip); 
-		
+
+		setText(ActionMessages.SortMembersAction_label);
+		setDescription(ActionMessages.SortMembersAction_description);
+		setToolTipText(ActionMessages.SortMembersAction_tooltip);
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_MEMBERS_ACTION);
 	}
 
 	public MultiSortMembersAction(JavaEditor editor) {
 		super(editor);
-		
-		setText(ActionMessages.SortMembersAction_label); 
-		setDescription(ActionMessages.SortMembersAction_description); 
-		setToolTipText(ActionMessages.SortMembersAction_tooltip); 
-		
+
+		setText(ActionMessages.SortMembersAction_label);
+		setDescription(ActionMessages.SortMembersAction_description);
+		setToolTipText(ActionMessages.SortMembersAction_tooltip);
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_MEMBERS_ACTION);
 	}
 
@@ -95,7 +95,7 @@ public class MultiSortMembersAction extends CleanUpAction {
 	 * {@inheritDoc}
 	 */
 	protected String getActionName() {
-		return ActionMessages.SortMembersAction_dialog_title; 
+		return ActionMessages.SortMembersAction_dialog_title;
 	}
 
 	private boolean hasMembersToSort(ICompilationUnit[] units) throws JavaModelException {

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -22,9 +20,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
-
 
 import org.eclipse.ui.PlatformUI;
 
@@ -41,19 +40,19 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 public class ExtractTempWizard extends RefactoringWizard {
 
 	/* package */ static final String DIALOG_SETTING_SECTION= "ExtractTempWizard"; //$NON-NLS-1$
-	
+
 	public ExtractTempWizard(ExtractTempRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
-		setDefaultPageTitle(RefactoringMessages.ExtractTempWizard_defaultPageTitle); 
+		setDefaultPageTitle(RefactoringMessages.ExtractTempWizard_defaultPageTitle);
 	}
 
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
-	 */ 
+	 */
 	protected void addUserInputPages(){
 		addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempNames()));
 	}
-	
+
 	private ExtractTempRefactoring getExtractTempRefactoring(){
 		return (ExtractTempRefactoring)getRefactoring();
 	}
@@ -62,19 +61,19 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 		private static final String DECLARE_FINAL= "declareFinal";  //$NON-NLS-1$
 		private static final String REPLACE_ALL= "replaceOccurrences";  //$NON-NLS-1$
-		
+
 		private final boolean fInitialValid;
-		private static final String DESCRIPTION = RefactoringMessages.ExtractTempInputPage_enter_name; 
+		private static final String DESCRIPTION = RefactoringMessages.ExtractTempInputPage_enter_name;
 		private String[] fTempNameProposals;
 		private IDialogSettings fSettings;
-		
+
 		public ExtractTempInputPage(String[] tempNameProposals) {
 			super(DESCRIPTION, true, tempNameProposals.length == 0 ? "" : tempNameProposals[0]); //$NON-NLS-1$
 			Assert.isNotNull(tempNameProposals);
-			fTempNameProposals= tempNameProposals; 
-			fInitialValid= tempNameProposals.length > 0; 
+			fTempNameProposals= tempNameProposals;
+			fInitialValid= tempNameProposals.length > 0;
 		}
-	
+
 		public void createControl(Composite parent) {
 			loadSettings();
 			Composite result= new Composite(parent, SWT.NONE);
@@ -84,24 +83,24 @@ public class ExtractTempWizard extends RefactoringWizard {
 			layout.verticalSpacing= 8;
 			result.setLayout(layout);
 			RowLayouter layouter= new RowLayouter(2);
-			
+
 			Label label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.ExtractTempInputPage_variable_name); 
-			
+			label.setText(RefactoringMessages.ExtractTempInputPage_variable_name);
+
 			Text text= createTextInputField(result);
 			text.selectAll();
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			ControlContentAssistHelper.createTextContentAssistant(text, new VariableNamesProcessor(fTempNameProposals));
-					
+
 			layouter.perform(label, text, 1);
-			
+
 			addReplaceAllCheckbox(result, layouter);
 			addDeclareFinalCheckbox(result, layouter);
-			
+
 			validateTextField(text.getText());
-			
+
 			Dialog.applyDialogFont(result);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_TEMP_WIZARD_PAGE);		
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_TEMP_WIZARD_PAGE);
 		}
 
 		private void loadSettings() {
@@ -113,10 +112,10 @@ public class ExtractTempWizard extends RefactoringWizard {
 			}
 			getExtractTempRefactoring().setDeclareFinal(fSettings.getBoolean(DECLARE_FINAL));
 			getExtractTempRefactoring().setReplaceAllOccurrences(fSettings.getBoolean(REPLACE_ALL));
-		}	
+		}
 
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.ExtractTempInputPage_replace_all; 
+			String title= RefactoringMessages.ExtractTempInputPage_replace_all;
 			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrences();
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
@@ -125,11 +124,11 @@ public class ExtractTempWizard extends RefactoringWizard {
 					fSettings.put(REPLACE_ALL, checkBox.getSelection());
 					getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 				}
-			});		
+			});
 		}
-		
+
 		private void addDeclareFinalCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.ExtractTempInputPage_declare_final; 
+			String title= RefactoringMessages.ExtractTempInputPage_declare_final;
 			boolean defaultValue= getExtractTempRefactoring().declareFinal();
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
@@ -138,9 +137,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 					fSettings.put(DECLARE_FINAL, checkBox.getSelection());
 					getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
 				}
-			});		
+			});
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#textModified(java.lang.String)
 		 */
@@ -148,27 +147,27 @@ public class ExtractTempWizard extends RefactoringWizard {
 			getExtractTempRefactoring().setTempName(text);
 			super.textModified(text);
 		}
-		
-		
+
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
 		protected RefactoringStatus validateTextField(String text) {
 			return getExtractTempRefactoring().checkTempName(text);
-		}	
-		
+		}
+
 		private ExtractTempRefactoring getExtractTempRefactoring(){
 			return (ExtractTempRefactoring)getRefactoring();
 		}
-		
+
 		private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter){
 			Button checkBox= new Button(parent, SWT.CHECK);
 			checkBox.setText(title);
 			checkBox.setSelection(value);
 			layouter.perform(checkBox);
-			return checkBox;		
+			return checkBox;
 		}
-	
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
 		 */

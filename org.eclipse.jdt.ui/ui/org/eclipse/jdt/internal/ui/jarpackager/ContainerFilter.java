@@ -21,16 +21,16 @@ import org.eclipse.jdt.core.IJavaElement;
  * Filters out all packages and folders
  */
 class ContainerFilter  extends ViewerFilter {
-	
+
 	private boolean fFilterContainers;
-	
+
 	public static boolean FILTER_CONTAINERS= true;
 	public static boolean FILTER_NON_CONTAINERS= false;
 
 	public ContainerFilter(boolean filterContainers) {
 		fFilterContainers= filterContainers;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */

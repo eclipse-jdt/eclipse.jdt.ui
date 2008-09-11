@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * This implementation of <code>IRangeComparator</code> compares lines of a document.
  * The lines are compared using a DJB hash function.
- * 
+ *
  * @since 3.4
  */
 public class LineComparator implements IRangeComparator {
@@ -35,7 +35,7 @@ public class LineComparator implements IRangeComparator {
 
     /**
 	 * Create a line comparator for the given document.
-	 * 
+	 *
 	 * @param document
 	 */
 	public LineComparator(IDocument document) {
@@ -90,7 +90,7 @@ public class LineComparator implements IRangeComparator {
 
 	/**
 	 * Compute a hash using the DJB hash algorithm
-	 * 
+	 *
 	 * @param string the string for which to compute a hash
 	 * @return the DJB hash value of the string
 	 */

@@ -13,6 +13,11 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -23,11 +28,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -66,10 +66,10 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 public class JavadocConfigurationPropertyPage extends PropertyPage implements IStatusChangeListener {
 
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavadocConfigurationPropertyPage"; //$NON-NLS-1$
-	
+
 	private JavadocConfigurationBlock fJavadocConfigurationBlock;
 	private boolean fIsValidElement;
-	
+
 	private IPath fContainerPath;
 	private IClasspathEntry fEntry;
 	private URL fInitalLocation;
@@ -85,7 +85,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		try {
 			if (elem instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) elem).getKind() == IPackageFragmentRoot.K_BINARY) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
-				
+
 				IClasspathEntry entry= root.getRawClasspathEntry();
 				if (entry == null) {
 					fIsValidElement= false;
@@ -99,13 +99,13 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 						fContainerPath= null;
 						fEntry= entry;
 						fIsValidElement= true;
-						setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description); 
+						setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description);
 					}
 				}
 
 			} else if (elem instanceof IJavaProject) {
 				fIsValidElement= true;
-				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsJavaProject_description); 
+				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsJavaProject_description);
 			} else {
 				fIsValidElement= false;
 				setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsIncorrectElement_description);
@@ -117,7 +117,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
 	}
-	
+
 	private IClasspathEntry handleContainerEntry(IPath containerPath, IJavaProject jproject, IPath jarPath) throws JavaModelException {
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
@@ -137,7 +137,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		}
 		IClasspathEntry entry= JavaModelUtil.findEntryInContainer(container, jarPath);
 		Assert.isNotNull(entry);
-		setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description); 
+		setDescription(PreferencesMessages.JavadocConfigurationPropertyPage_IsPackageFragmentRoot_description);
 		return entry;
 	}
 
@@ -148,7 +148,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		if (!fIsValidElement) {
 			return new Composite(parent, SWT.NONE);
 		}
-		
+
 		IJavaElement elem= getJavaElement();
 		fInitalLocation= null;
 		if (elem != null) {
@@ -158,7 +158,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 				JavaPlugin.log(e);
 			}
 		}
-		
+
 		boolean isProject= (elem instanceof IJavaProject);
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, fInitalLocation, isProject);
 		Control control= fJavadocConfigurationBlock.createContents(parent);
@@ -209,15 +209,15 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			if (javadocLocation == null && fInitalLocation == null || javadocLocation != null && javadocLocation.equals(fInitalLocation)) {
 				return true; // no change
 			}
-			
-			
+
+
 			IJavaElement elem= getJavaElement();
 			try {
 				IRunnableWithProgress runnable= getRunnable(getShell(), elem, javadocLocation, fEntry, fContainerPath);
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
 			} catch (InvocationTargetException e) {
-				String title= PreferencesMessages.SourceAttachmentPropertyPage_error_title; 
-				String message= PreferencesMessages.SourceAttachmentPropertyPage_error_message; 
+				String title= PreferencesMessages.SourceAttachmentPropertyPage_error_title;
+				String message= PreferencesMessages.SourceAttachmentPropertyPage_error_message;
 				ExceptionHandler.handle(e, getShell(), title, message);
 				return false;
 			} catch (InterruptedException e) {
@@ -227,11 +227,11 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		}
 		return true;
 	}
-	
-	
+
+
 	private static IRunnableWithProgress getRunnable(final Shell shell, final IJavaElement elem, final URL javadocLocation, final IClasspathEntry entry, final IPath containerPath) {
 		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					IJavaProject project= elem.getJavaProject();
 					if (elem instanceof IPackageFragmentRoot) {

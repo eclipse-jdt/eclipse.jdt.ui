@@ -26,24 +26,24 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionGroup;
 
 public class WorkingSetShowActionGroup extends ActionGroup implements IWorkingSetActionGroup {
-	
+
 	private List fContributions= new ArrayList();
-	private ConfigureWorkingSetAction fConfigureWorkingSetAction;	
+	private ConfigureWorkingSetAction fConfigureWorkingSetAction;
 	private WorkingSetModel fWorkingSetModel;
-	private final IWorkbenchPartSite fSite; 
-	
+	private final IWorkbenchPartSite fSite;
+
 	public WorkingSetShowActionGroup(IWorkbenchPartSite site) {
 		Assert.isNotNull(site);
 		fSite= site;
 	}
-	
+
 	public void setWorkingSetMode(WorkingSetModel model) {
 		Assert.isNotNull(model);
 		fWorkingSetModel= model;
 		if (fConfigureWorkingSetAction != null)
 			fConfigureWorkingSetAction.setWorkingSetModel(fWorkingSetModel);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -52,14 +52,14 @@ public class WorkingSetShowActionGroup extends ActionGroup implements IWorkingSe
 		IMenuManager menuManager= actionBars.getMenuManager();
 		fillViewMenu(menuManager);
 	}
-	
+
 	public void fillViewMenu(IMenuManager menuManager) {
 		fConfigureWorkingSetAction=  new ConfigureWorkingSetAction(fSite);
 		if (fWorkingSetModel != null)
 			fConfigureWorkingSetAction.setWorkingSetModel(fWorkingSetModel);
 		addAction(menuManager, fConfigureWorkingSetAction);
 	}
-	
+
 	public void cleanViewMenu(IMenuManager menuManager) {
 		for (Iterator iter= fContributions.iterator(); iter.hasNext();) {
 			IContributionItem removed= menuManager.remove((IContributionItem) iter.next());

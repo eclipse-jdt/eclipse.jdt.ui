@@ -16,12 +16,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,6 +26,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.bindings.TriggerSequence;
@@ -56,6 +56,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.keys.IBindingService;
+
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -83,15 +84,15 @@ import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
  * <li><code>getErrorMessage</code> to change error reporting</li>
  * </ul>
  * </p>
- * 
+ *
  * @since 3.2
  */
 public class ContentAssistProcessor implements IContentAssistProcessor {
-	
-	
+
+
 	/**
 	 * The completion listener class for this processor.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private final class CompletionListener implements ICompletionListener, ICompletionListenerExtension {
@@ -111,7 +112,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 				CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
 				cat.sessionStarted();
 			}
-			
+
 			fRepetition= 0;
 			if (event.assistant instanceof IContentAssistantExtension2) {
 				IContentAssistantExtension2 extension= (IContentAssistantExtension2) event.assistant;
@@ -129,7 +130,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 						((ContentAssistant) ext3).setRepeatedInvocationTrigger(binding);
 					}
 				}
-			
+
 			}
 		}
 
@@ -180,7 +181,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/**
 	 * Dialog settings key for the "all categories are disabled" warning dialog. See
 	 * {@link OptionalMessageDialog}.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	private static final String PREF_WARN_ABOUT_EMPTY_ASSIST_CATEGORY= "EmptyDefaultAssistCategory"; //$NON-NLS-1$
@@ -190,28 +191,28 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		public int compare(Object o1, Object o2) {
 			CompletionProposalCategory d1= (CompletionProposalCategory) o1;
 			CompletionProposalCategory d2= (CompletionProposalCategory) o2;
-			
+
 			return d1.getSortOrder() - d2.getSortOrder();
 		}
-		
+
 	};
-	
+
 	private final List fCategories;
 	private final String fPartition;
 	private final ContentAssistant fAssistant;
-	
+
 	private char[] fCompletionAutoActivationCharacters;
-	
+
 	/* cycling stuff */
 	private int fRepetition= -1;
 	private List/*<List<CompletionProposalCategory>>*/ fCategoryIteration= null;
 	private String fIterationGesture= null;
 	private int fNumberOfComputedResults= 0;
 	private String fErrorMessage;
-	
+
 	/**
 	 * The completion proposal registry.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private CompletionProposalComputerRegistry fComputerRegistry;
@@ -232,15 +233,15 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 */
 	public final ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		long start= DEBUG ? System.currentTimeMillis() : 0;
-		
+
 		clearState();
-		
+
 		IProgressMonitor monitor= createProgressMonitor();
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_proposals, fCategories.size() + 1);
 
 		ContentAssistInvocationContext context= createContext(viewer, offset);
 		long setup= DEBUG ? System.currentTimeMillis() : 0;
-		
+
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_collecting_proposals);
 		List proposals= collectProposals(viewer, offset, monitor, context);
 		long collect= DEBUG ? System.currentTimeMillis() : 0;
@@ -249,17 +250,17 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		List filtered= filterAndSortProposals(proposals, monitor, context);
 		fNumberOfComputedResults= filtered.size();
 		long filter= DEBUG ? System.currentTimeMillis() : 0;
-		
+
 		ICompletionProposal[] result= (ICompletionProposal[]) filtered.toArray(new ICompletionProposal[filtered.size()]);
 		monitor.done();
-		
+
 		if (DEBUG) {
 			System.err.println("Code Assist Stats (" + result.length + " proposals)"); //$NON-NLS-1$ //$NON-NLS-2$
 			System.err.println("Code Assist (setup):\t" + (setup - start) ); //$NON-NLS-1$
 			System.err.println("Code Assist (collect):\t" + (collect - setup) ); //$NON-NLS-1$
 			System.err.println("Code Assist (sort):\t" + (filter - collect) ); //$NON-NLS-1$
 		}
-		
+
 		return result;
 	}
 
@@ -270,7 +271,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	/**
 	 * Collects the proposals.
-	 * 
+	 *
 	 * @param viewer the text viewer
 	 * @param offset the offset
 	 * @param monitor the progress monitor
@@ -287,14 +288,14 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			if (fErrorMessage == null)
 				fErrorMessage= cat.getErrorMessage();
 		}
-		
+
 		return proposals;
 	}
 
 	/**
 	 * Filters and sorts the proposals. The passed list may be modified
 	 * and returned, or a new list may be created and returned.
-	 * 
+	 *
 	 * @param proposals the list of collected proposals (element type:
 	 *        {@link ICompletionProposal})
 	 * @param monitor a progress monitor
@@ -314,14 +315,14 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 		IProgressMonitor monitor= createProgressMonitor();
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_contexts, fCategories.size() + 1);
-		
+
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_collecting_contexts);
 		List proposals= collectContextInformation(viewer, offset, monitor);
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_sorting_contexts);
 		List filtered= filterAndSortContextInformation(proposals, monitor);
 		fNumberOfComputedResults= filtered.size();
-		
+
 		IContextInformation[] result= (IContextInformation[]) filtered.toArray(new IContextInformation[filtered.size()]);
 		monitor.done();
 		return result;
@@ -330,7 +331,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private List collectContextInformation(ITextViewer viewer, int offset, IProgressMonitor monitor) {
 		List proposals= new ArrayList();
 		ContentAssistInvocationContext context= createContext(viewer, offset);
-		
+
 		List providers= getCategories();
 		for (Iterator it= providers.iterator(); it.hasNext();) {
 			CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
@@ -339,7 +340,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			if (fErrorMessage == null)
 				fErrorMessage= cat.getErrorMessage();
 		}
-		
+
 		return proposals;
 	}
 
@@ -347,7 +348,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * Filters and sorts the context information objects. The passed
 	 * list may be modified and returned, or a new list may be created
 	 * and returned.
-	 * 
+	 *
 	 * @param contexts the list of collected proposals (element type:
 	 *        {@link IContextInformation})
 	 * @param monitor a progress monitor
@@ -407,7 +408,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * The default implementation creates a
 	 * <code>NullProgressMonitor</code>.
 	 * </p>
-	 * 
+	 *
 	 * @return a progress monitor
 	 */
 	protected IProgressMonitor createProgressMonitor() {
@@ -417,7 +418,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/**
 	 * Creates the context that is passed to the completion proposal
 	 * computers.
-	 * 
+	 *
 	 * @param viewer the viewer that content assist is invoked on
 	 * @param offset the content assist offset
 	 * @return the context to be passed to the computers
@@ -429,12 +430,12 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private List getCategories() {
 		if (fCategoryIteration == null)
 			return fCategories;
-		
+
 		int iteration= fRepetition % fCategoryIteration.size();
 		fAssistant.setStatusMessage(createIterationMessage());
 		fAssistant.setEmptyMessage(createEmptyMessage());
 		fRepetition++;
-		
+
 //		fAssistant.setShowMessage(fRepetition % 2 != 0);
 
 		return (List) fCategoryIteration.get(iteration);
@@ -477,7 +478,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/**
 	 * Informs the user about the fact that there are no enabled categories in the default content
 	 * assist set and shows a link to the preferences.
-	 * 
+	 *
 	 * @return  <code>true</code> if the default should be restored
 	 * @since 3.3
 	 */
@@ -503,7 +504,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 					layout.marginWidth= 0;
 					layout.verticalSpacing= 0;
 					parent.setLayout(layout);
-					
+
 					Composite linkComposite= new Composite(parent, SWT.NONE);
 					layout= new GridLayout();
 					layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
@@ -525,10 +526,10 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 					// create checkbox and "don't show this message" prompt
 					super.createCustomArea(parent);
-					
+
 					return parent;
 	        	}
-				
+
 				/*
 				 * @see org.eclipse.jface.dialogs.MessageDialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 				 */
@@ -565,22 +566,22 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		Collections.sort(sorted, ORDER_COMPARATOR);
 		return sorted;
 	}
-	
+
 	private String createEmptyMessage() {
 		return Messages.format(JavaTextMessages.ContentAssistProcessor_empty_message, new String[]{getCategoryLabel(fRepetition)});
 	}
-	
+
 	private String createIterationMessage() {
 		return Messages.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_update_message, new String[]{ getCategoryLabel(fRepetition), fIterationGesture, getCategoryLabel(fRepetition + 1) });
 	}
-	
+
 	private String getCategoryLabel(int repetition) {
 		int iteration= repetition % fCategoryIteration.size();
 		if (iteration == 0)
 			return JavaTextMessages.ContentAssistProcessor_defaultProposalCategory;
 		return toString((CompletionProposalCategory) ((List) fCategoryIteration.get(iteration)).get(0));
 	}
-	
+
 	private String toString(CompletionProposalCategory category) {
 		return category.getDisplayName();
 	}

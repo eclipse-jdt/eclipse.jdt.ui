@@ -36,7 +36,7 @@ public class JavaProcessors {
 		IJavaProject project= element.getJavaProject();
 		return ResourceProcessors.computeAffectedNatures(project.getProject());
 	}
-	
+
 	public static String[] computeAffectedNaturs(IJavaElement[] elements) throws CoreException {
 		Set result= new HashSet();
 		for (int i= 0; i < elements.length; i++) {

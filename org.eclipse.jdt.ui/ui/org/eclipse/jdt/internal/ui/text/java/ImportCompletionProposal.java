@@ -11,11 +11,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Completion proposal for required imports.
- * 
+ *
  * @since 3.3
   */
 public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
@@ -54,7 +54,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	private ContextSensitiveImportRewriteContext fImportContext;
 	private final CompletionProposal fProposal;
 	private boolean fReplacementStringComputed;
-	
+
 
 	public ImportCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, int parentProposalKind) {
 		super(context);
@@ -71,10 +71,10 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 			setReplacementString(computeReplacementString());
 		return super.getReplacementString();
 	}
-	
+
 	/**
 	 * Computes the replacement string.
-	 * 
+	 *
 	 * @return the replacement string
 	 */
 	private String computeReplacementString() {
@@ -94,7 +94,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 			 */
 			 Assert.isTrue(false);
 		}
-		
+
  		/* Add imports if the preference is on. */
  		fImportRewrite= createImportRewrite();
  		if (fImportRewrite != null) {
@@ -112,17 +112,17 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 			}
 	 		return ""; //$NON-NLS-1$
 	 	}
-		
+
 		// Case where we don't have an import rewrite (see allowAddingImports)
-		
+
 		if (fCompilationUnit != null && JavaModelUtil.isImplicitImport(Signature.getQualifier(qualifiedTypeName), fCompilationUnit)) {
 			/* No imports for implicit imports. */
-			
+
 			if (fProposal.getKind() == CompletionProposal.TYPE_IMPORT && fParentProposalKind == CompletionProposal.FIELD_REF)
 				return ""; //$NON-NLS-1$
 			qualifiedTypeName= String.valueOf(Signature.getSignatureSimpleName(qualifiedType));
 		}
-		
+
 		return qualifiedTypeName + "."; //$NON-NLS-1$
 	}
 
@@ -144,11 +144,11 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
 	/**
 	 * Creates and returns the import rewrite
 	 * if imports should be added at all.
-	 * 
+	 *
 	 * @return the import rewrite or <code>null</code> if no imports can or should be added
 	 */
 	private ImportRewrite createImportRewrite() {
@@ -192,20 +192,20 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	 * The decision whether a qualified type or the simple type name should be inserted must take
 	 * into account these different scenarios.
 	 * </p>
-	 * 
+	 *
 	 * @return <code>true</code> if imports may be added, <code>false</code> if not
 	 */
 	private boolean shouldAddImports() {
 		if (isInJavadoc() && !isJavadocProcessingEnabled())
 			return false;
-		
+
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		return preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
 	}
 
 	/**
 	 * Returns whether Javadoc processing is enabled.
-	 * 
+	 *
 	 * @return <code>true</code> if Javadoc processing is enabled, <code>false</code> otherwise
 	 */
 	private boolean isJavadocProcessingEnabled() {

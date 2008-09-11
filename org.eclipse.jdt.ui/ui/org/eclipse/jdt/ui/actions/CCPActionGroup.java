@@ -23,6 +23,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.part.Page;
+
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
@@ -34,13 +35,13 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 /**
  * Action group that adds the copy, cut, paste actions to a view part's context
  * menu and installs handlers for the corresponding global menu actions.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class CCPActionGroup extends ActionGroup {
@@ -53,23 +54,23 @@ public class CCPActionGroup extends ActionGroup {
 	private final SelectionDispatchAction fPasteAction;
 	private final SelectionDispatchAction fCutAction;
 	private final ISelectionProvider fSelectionProvider;
-	
+
 	/**
 	 * Creates a new <code>CCPActionGroup</code>. The group requires that
 	 * the selection provided by the view part's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 */
 	public CCPActionGroup(IViewPart  part) {
 		this(part.getSite(), null);
 	}
-	
+
 	/**
 	 * Creates a new <code>CCPActionGroup</code>.  The group requires that
 	 * the selection provided by the page's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param page the page that owns this action group
 	 */
 	public CCPActionGroup(Page page) {
@@ -78,40 +79,40 @@ public class CCPActionGroup extends ActionGroup {
 
 	/**
 	 * Creates a new <code>CCPActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 *  
+	 *
 	 * @since 3.4
 	 */
 	public CCPActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		fSelectionProvider= specialSelectionProvider == null ? site.getSelectionProvider() : specialSelectionProvider;
-		
+
 		fPasteAction= new PasteAction(site);
 		fPasteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
-		
+
 		fCopyAction= new CopyToClipboardAction(site);
 		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
-		
+
 		fCopyQualifiedNameAction= new CopyQualifiedNameAction(site);
 		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
-		
+
 		fCutAction= new CutAction(site);
 		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
-		
+
 		fDeleteAction= new DeleteAction(site);
 		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
-		
+
 		fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fCopyQualifiedNameAction, fPasteAction, fDeleteAction };
 		if (specialSelectionProvider != null) {
 			for (int i= 0; i < fActions.length; i++) {
 				fActions[i].setSpecialSelectionProvider(specialSelectionProvider);
 			}
 		}
-		
+
 		registerActionsAsSelectionChangeListeners();
 	}
 
@@ -124,18 +125,18 @@ public class CCPActionGroup extends ActionGroup {
 			provider.addSelectionChangedListener(action);
 		}
 	}
-	
+
 	private void deregisterActionsAsSelectionChangeListeners() {
 		ISelectionProvider provider= fSelectionProvider;
 		for (int i= 0; i < fActions.length; i++) {
 			provider.removeSelectionChangedListener(fActions[i]);
 		}
 	}
-	
-	
+
+
 	/**
-	 * Returns the delete action managed by this action group. 
-	 * 
+	 * Returns the delete action managed by this action group.
+	 *
 	 * @return the delete action. Returns <code>null</code> if the group
 	 * 	doesn't provide any delete action
 	 */
@@ -154,7 +155,7 @@ public class CCPActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), fCutAction);
 		actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -165,9 +166,9 @@ public class CCPActionGroup extends ActionGroup {
 			if (action == fCutAction && !fCutAction.isEnabled())
 				continue;
 			menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, action);
-		}		
-	}		
-	
+		}
+	}
+
 	/*
 	 * @see ActionGroup#dispose()
 	 */

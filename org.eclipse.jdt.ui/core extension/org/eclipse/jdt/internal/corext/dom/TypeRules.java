@@ -42,7 +42,7 @@ public class TypeRules {
 		}
 		return getTypeOrder(definedTypeCode) > getTypeOrder(toAssignCode);
 	}
-		
+
 	/**
 	 * Tests if two types are assign compatible. Void types are never compatible.
 	 * @param typeToAssign The binding of the type to assign
@@ -50,10 +50,10 @@ public class TypeRules {
 	 * @return boolean Returns true if definedType = typeToAssign is true
 	 */
 	public static boolean canAssign(ITypeBinding typeToAssign, ITypeBinding definedType) {
-		//see bug 80715 
-		
+		//see bug 80715
+
 		// definedType = typeToAssign;
-		
+
 		String voidName= PrimitiveType.VOID.toString();
 		if (voidName.equals(typeToAssign.getName()) || voidName.equals(definedType.getName())) {
 			return false;
@@ -97,7 +97,7 @@ public class TypeRules {
 			if (typeToAssign.isArray()) {
 				return isArrayCompatible(definedType);
 			}
-			if (isJavaLangObject(definedType)) { 
+			if (isJavaLangObject(definedType)) {
 				return true;
 			}
 			return Bindings.isSuperType(definedType, typeToAssign);
@@ -121,7 +121,7 @@ public class TypeRules {
 			return 7;
 		return 0;
 	}
-	
+
 	public static boolean isArrayCompatible(ITypeBinding definedType) {
 		if (definedType.isTopLevel()) {
 			if (definedType.isClass()) {
@@ -130,12 +130,12 @@ public class TypeRules {
 				String qualifiedName= definedType.getQualifiedName();
 				return "java.io.Serializable".equals(qualifiedName) || "java.lang.Cloneable".equals(qualifiedName); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		} 
+		}
 		return false;
 	}
-	
+
 	public static boolean isJavaLangObject(ITypeBinding definedType) {
-		return definedType.isTopLevel() && definedType.isClass() && "Object".equals(definedType.getName()) && "java.lang".equals(definedType.getPackage().getName());  //$NON-NLS-1$//$NON-NLS-2$	
+		return definedType.isTopLevel() && definedType.isClass() && "Object".equals(definedType.getName()) && "java.lang".equals(definedType.getPackage().getName());  //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	/**
@@ -145,22 +145,22 @@ public class TypeRules {
 	 * @return boolean Returns true if (castType) bindingToCast is a valid cast expression (can be unnecessary, but not invalid).
 	 */
 	public static boolean canCast(ITypeBinding castType, ITypeBinding bindingToCast) {
-		//see bug 80715 
-		
+		//see bug 80715
+
 		String voidName= PrimitiveType.VOID.toString();
-		
+
 		if (castType.isAnonymous() || castType.isNullType() || voidName.equals(castType.getName())) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		if (castType == bindingToCast) {
 			return true;
 		}
-		
+
 		if (voidName.equals(bindingToCast.getName())) {
 			return false;
 		}
-		
+
 		if (bindingToCast.isArray()) {
 			if (!castType.isArray()) {
 				return isArrayCompatible(castType); // can not cast an arraytype to a non array type (except to Object, Serializable...)
@@ -211,9 +211,9 @@ public class TypeRules {
 			if (isJavaLangObject(castType)) {
 				return true;
 			}
-			
+
 			return Bindings.isSuperType(bindingToCast, castType) || Bindings.isSuperType(castType, bindingToCast);
 		}
 	}
-	
+
 }

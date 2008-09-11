@@ -31,9 +31,9 @@ public class CPListElementAttribute {
 	private Object fValue;
 	private final boolean fBuiltIn;
 	private IStatus fStatus;
-	
+
 	private ClasspathAttributeAccess fCachedAccess;
-	
+
 	public CPListElementAttribute(CPListElement parent, String key, Object value, boolean builtIn) {
 		fKey= key;
 		fValue= value;
@@ -41,10 +41,10 @@ public class CPListElementAttribute {
 		fBuiltIn= builtIn;
 		if (!builtIn) {
 			Assert.isTrue(value instanceof String || value == null);
-		}	
+		}
 		fStatus= getContainerChildStatus();
 	}
-	
+
     private CPListElementAttribute(boolean buildIn) {
     	fBuiltIn= buildIn;
     }
@@ -53,40 +53,40 @@ public class CPListElementAttribute {
 		Assert.isTrue(!fBuiltIn);
 		return JavaCore.newClasspathAttribute(fKey, (String) fValue);
 	}
-	
+
 	public CPListElement getParent() {
 		return fParent;
 	}
-	
+
 	/**
 	 * @return Returns <code>true</code> if the attribute is a built in attribute.
 	 */
 	public boolean isBuiltIn() {
 		return fBuiltIn;
 	}
-	
+
 	/**
 	 * @return Returns <code>true</code> if the attribute a on a container child and is read-only
 	 */
 	public boolean isNonModifiable() {
 		return fStatus != null && !fStatus.isOK();
 	}
-	
+
 	/**
 	 * @return Returns <code>true</code> if the attribute a on a container child and is not supported
 	 */
 	public boolean isNotSupported() {
 		return fStatus != null && fStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED;
 	}
-	
+
 	/**
 	 * @return Returns the container child status or <code>null</code> if the attribute is not in a container child
 	 */
 	private IStatus getContainerChildStatus() {
 		return fParent.getContainerChildStatus(this);
 	}
-	
-	
+
+
 	/**
 	 * Returns the key.
 	 * @return String
@@ -102,7 +102,7 @@ public class CPListElementAttribute {
 	public Object getValue() {
 		return fValue;
 	}
-	
+
 	/**
 	 * Returns the value.
 	 * @param value value to set
@@ -112,7 +112,7 @@ public class CPListElementAttribute {
 		fCachedAccess= null;
 		getParent().attributeChanged(fKey);
 	}
-	
+
     public boolean equals(Object obj) {
         if (!(obj instanceof CPListElementAttribute))
             return false;
@@ -128,7 +128,7 @@ public class CPListElementAttribute {
     	result.fStatus= fStatus;
 	    return result;
     }
-    
+
     public ClasspathAttributeAccess getClasspathAttributeAccess() {
     	if (fCachedAccess == null) {
 	    	fCachedAccess= new ClasspathAttributeAccess() {
@@ -145,6 +145,6 @@ public class CPListElementAttribute {
     	}
     	return fCachedAccess;
     }
-    
-    
+
+
 }

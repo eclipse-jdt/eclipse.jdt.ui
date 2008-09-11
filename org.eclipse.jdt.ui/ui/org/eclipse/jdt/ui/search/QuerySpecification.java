@@ -22,13 +22,13 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
  * participant might consider the "class" attribute of an extension in a
  * plugin.xml file to be a reference to the class mentioned in the attribute.
  * </p>
- * 
+ *
  * <p>
  * This class is not intended to be instantiated or subclassed by clients.
  * </p>
- * 
+ *
  * @since 3.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public abstract class QuerySpecification {
@@ -49,16 +49,16 @@ public abstract class QuerySpecification {
 	public IJavaSearchScope getScope() {
 		return fScope;
 	}
-	
+
 	/**
 	 * Returns a human readable description of the search scope.
-	 * @return A description of the search scope. 
+	 * @return A description of the search scope.
 	 * @see QuerySpecification#getScope()
 	 */
 	public String getScopeDescription() {
 		return fScopeDescription;
 	}
-	
+
 	/**
 	 * Returns what kind of occurrences the query should look for.
 	 * @return Whether to search for reference, declaration, etc.

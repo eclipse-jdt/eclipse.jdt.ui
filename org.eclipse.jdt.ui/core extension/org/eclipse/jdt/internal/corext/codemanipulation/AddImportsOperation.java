@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * If the compilation unit is open in an editor, be sure to pass over its working copy.
  */
 public class AddImportsOperation implements IWorkspaceRunnable {
-	
+
 	public static interface IChooseImportQuery {
 		/**
 		 * Selects an import from a list of choices.
@@ -90,7 +90,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		 */
 		TypeNameMatch chooseImport(TypeNameMatch[] openChoices, String containerName);
 	}
-	
+
 	private ICompilationUnit fCompilationUnit;
 	private final int fSelectionOffset;
 	private final int fSelectionLength;
@@ -99,7 +99,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	private boolean fDoSave;
 	private final boolean fApply;
 	private MultiTextEdit fResultingEdit;
-	
+
 	/**
 	 * Generate import statements for the passed java elements
 	 * Elements must be of type IType (-> single import) or IPackageFragment
@@ -114,7 +114,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	public AddImportsOperation(ICompilationUnit cu, int selectionOffset, int selectionLength, IChooseImportQuery query, boolean save) {
 		this(cu, selectionOffset, selectionLength, query, save, true);
 	}
-	
+
 	/**
 	 * Generate import statements for the passed java elements
 	 * Elements must be of type IType (-> single import) or IPackageFragment
@@ -130,7 +130,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	public AddImportsOperation(ICompilationUnit cu, int selectionOffset, int selectionLength, IChooseImportQuery query, boolean save, boolean apply) {
 		super();
 		Assert.isNotNull(cu);
-		
+
 		fCompilationUnit= cu;
 		fSelectionOffset= selectionOffset;
 		fSelectionLength= selectionLength;
@@ -139,7 +139,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		fDoSave= save;
 		fApply= apply;
 	}
-	
+
 	/**
 	 * @return Returns the status.
 	 */
@@ -159,24 +159,24 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		try {
 			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4);
-			
+
 			CompilationUnit astRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
 
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(astRoot, true);
-			
+
 			MultiTextEdit res= new MultiTextEdit();
-			
+
 			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 1));
 			if (edit == null) {
 				return;
 			}
 			res.addChild(edit);
-				
+
 			TextEdit importsEdit= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
 			res.addChild(importsEdit);
-			
+
 			fResultingEdit= res;
-			
+
 			if (fApply) {
 				JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
 			}
@@ -184,16 +184,16 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			monitor.done();
 		}
 	}
-	
+
 	/**
 	 * Returns the resulting edit
-	 * 
+	 *
 	 * @return the resulting edit
 	 */
 	public MultiTextEdit getResultingEdit() {
 		return fResultingEdit;
 	}
-	
+
 	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws JavaModelException {
 		SimpleName nameNode= null;
 		if (root != null) { // got an AST
@@ -207,7 +207,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				nameNode= (SimpleName) node;
 			}
 		}
-		
+
 		String name, simpleName, containerName;
 		int qualifierStart;
 		int simpleNameStart;
@@ -239,7 +239,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				name= simpleName;
 				qualifierStart= simpleNameStart;
 			}
-			
+
 			IBinding binding= nameNode.resolveBinding();
 			if (binding != null && !binding.isRecovered()) {
 				if (binding instanceof ITypeBinding) {
@@ -248,7 +248,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 					if (containerName.length() > 0 && !qualifiedBindingName.equals(name)) {
 						return null;
 					}
-					
+
 					String res= importRewrite.addImport(typeBinding);
 					if (containerName.length() > 0 && !res.equals(simpleName)) {
 						// adding import failed
@@ -266,7 +266,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())), null);
 							return null;
 						}
-						
+
 						if (containerName.length() > 0) {
 							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
 								String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
@@ -287,10 +287,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				// recovered binding
 				return null;
 			}
-			
+
 		} else {
 			IBuffer buffer= fCompilationUnit.getBuffer();
-			
+
 			qualifierStart= getNameStart(buffer, offset);
 			int nameEnd= getNameEnd(buffer, offset + length);
 			int len= nameEnd - qualifierStart;
@@ -298,19 +298,19 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			if (name.length() == 0) {
 				return null;
 			}
-			
+
 			simpleName= Signature.getSimpleName(name);
 			containerName= Signature.getQualifier(name);
-			
+
 			IJavaProject javaProject= fCompilationUnit.getJavaProject();
 			if (simpleName.length() == 0 || JavaConventionsUtil.validateJavaTypeName(simpleName, javaProject).matches(IStatus.ERROR)
 					|| (containerName.length() > 0 && JavaConventionsUtil.validateJavaTypeName(containerName, javaProject).matches(IStatus.ERROR))) {
 				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_invalid_selection, null);
 				return null;
 			}
-			
+
 			simpleNameStart= getSimpleNameStart(buffer, qualifierStart, containerName);
-			
+
 			int res= importRewrite.getDefaultImportRewriteContext().findInContext(containerName, simpleName, ImportRewriteContext.KIND_TYPE);
 			if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
 				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_importclash, null);
@@ -320,13 +320,13 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
-		
+
 		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
 		if (types.length == 0) {
 			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, BasicElementLabels.getJavaElementName(simpleName)), null);
 			return null;
 		}
-		
+
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
@@ -343,7 +343,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 	}
 
-	
+
 	private int getNameStart(IBuffer buffer, int pos) {
 		while (pos > 0) {
 			char ch= buffer.getChar(pos - 1);
@@ -354,7 +354,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		return pos;
 	}
-	
+
 	private int getNameEnd(IBuffer doc, int pos) {
 		if (pos > 0) {
 			if (Character.isWhitespace(doc.getChar(pos - 1))) {
@@ -371,7 +371,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		return pos;
 	}
-	
+
 	private int getSimpleNameStart(IBuffer buffer, int nameStart, String containerName) {
 		int containerLen= containerName.length();
 		int docLen= buffer.getLength();
@@ -387,7 +387,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		return nameStart;
 	}
-	
+
 	private int getSearchForConstant(int typeKinds) {
 		final int CLASSES= SimilarElementsRequestor.CLASSES;
 		final int INTERFACES= SimilarElementsRequestor.INTERFACES;
@@ -404,19 +404,19 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			default: return IJavaSearchConstants.TYPE;
 		}
 	}
-	
-	
+
+
 	/*
 	 * Finds a type by the simple name.
 	 */
 	private TypeNameMatch[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) throws JavaModelException {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject());
-		
+
 		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
 		if (nameNode != null) {
 			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
-		
+
 		ArrayList typeInfos= new ArrayList();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
 		int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
@@ -433,7 +433,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		return (TypeNameMatch[]) typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
 	}
-	
+
 	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
@@ -448,7 +448,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
 	}
 
-	
+
 	private boolean isVisible(TypeNameMatch curr) {
 		int flags= curr.getModifiers();
 		if (Flags.isPrivate(flags)) {
@@ -459,13 +459,13 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		return curr.getPackageName().equals(fCompilationUnit.getParent().getElementName());
 	}
-	
-	
+
+
 	/**
 	 * @return Returns the scheduling rule for this operation
 	 */
 	public ISchedulingRule getScheduleRule() {
 		return fCompilationUnit.getJavaProject().getResource();
 	}
-		
+
 }

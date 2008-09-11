@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.help.HelpSystem;
+import org.eclipse.help.IContext;
+import org.eclipse.help.IContextProvider;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.HelpEvent;
 import org.eclipse.swt.events.HelpListener;
 
-import org.eclipse.help.HelpSystem;
-import org.eclipse.help.IContext;
-import org.eclipse.help.IContextProvider;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -46,13 +46,13 @@ public class JavaUIHelp {
 		JavaUIHelpListener listener= new JavaUIHelpListener(editor, contextId);
 		text.addHelpListener(listener);
 	}
-	
+
 	/**
 	 * Creates and returns a help context provider for the given part.
-	 * 
+	 *
 	 * @param part the part for which to create the help context provider
 	 * @param contextId	the optional context ID used to retrieve static help
-	 * @return the help context provider 
+	 * @return the help context provider
 	 */
 	public static IContextProvider getHelpContextProvider(IWorkbenchPart part, String contextId) {
 		IStructuredSelection selection;
@@ -84,7 +84,7 @@ public class JavaUIHelp {
 
 		/*
 		 * @see HelpListener#helpRequested(HelpEvent)
-		 * 
+		 *
 		 */
 		public void helpRequested(HelpEvent e) {
 			try {

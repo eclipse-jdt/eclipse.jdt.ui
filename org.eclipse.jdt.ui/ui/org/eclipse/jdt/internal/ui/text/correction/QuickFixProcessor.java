@@ -218,7 +218,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		try {
 			IBuffer buf= cu.getBuffer();
 			while (offset >= start) {
-				if (ignoreCharacters.indexOf(buf.getChar(offset - 1)) == -1) { 
+				if (ignoreCharacters.indexOf(buf.getChar(offset - 1)) == -1) {
 					return offset;
 				}
 				offset--;
@@ -322,7 +322,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidCatchBlockSequence:
 				LocalCorrectionsSubProcessor.addUnreachableCatchProposals(context, problem, proposals);
 				break;
-			case IProblem.RedundantSuperinterface:	
+			case IProblem.RedundantSuperinterface:
 				LocalCorrectionsSubProcessor.addRedundantSuperInterfaceProposal(context, problem, proposals);
 				break;
 			case IProblem.VoidMethodReturnsValue:
@@ -392,7 +392,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForEnum:
 			case IProblem.IllegalModifierForEnumConstant:
 			case IProblem.IllegalModifierForEnumConstructor:
-			case IProblem.IllegalModifierForMemberEnum:				
+			case IProblem.IllegalModifierForMemberEnum:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
 			case IProblem.UnexpectedStaticModifierForMethod:
 				ModifierCorrectionSubProcessor.addRemoveInvalidModfiersProposal(context, problem, proposals, 5);
@@ -418,7 +418,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.MissingValueForAnnotationMember:
 				LocalCorrectionsSubProcessor.addValueForAnnotationProposals(context, problem, proposals);
-				break;				
+				break;
 			case IProblem.BodyForNativeMethod:
 				ModifierCorrectionSubProcessor.addNativeMethodProposals(context, problem, proposals);
 				break;
@@ -490,7 +490,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocInvalidMemberTypeQualification:
 				JavadocTagsSubProcessor.getInvalidQualificationProposals(context, problem, proposals);
 				break;
-				
+
 			case IProblem.LocalVariableHidingLocalVariable:
 			case IProblem.LocalVariableHidingField:
 			case IProblem.FieldHidingLocalVariable:

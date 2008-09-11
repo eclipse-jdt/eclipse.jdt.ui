@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.wizards;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 /**
- * Classpath container pages that implement {@link IClasspathContainerPage} can 
+ * Classpath container pages that implement {@link IClasspathContainerPage} can
  * optionally implement {@link IClasspathContainerPageExtension2} to return more
  * than one element when creating new containers. If implemented, the method {@link #getNewContainers()}
  * is used instead of the method {@link IClasspathContainerPage#getSelection() } to get the
@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
  * @since 3.0
  */
 public interface IClasspathContainerPageExtension2 {
-	
+
 	/**
 	 * Method {@link #getNewContainers()} is called instead of {@link IClasspathContainerPage#getSelection() }
 	 * to get the newly added containers. {@link IClasspathContainerPage#getSelection() } is still used

@@ -84,32 +84,32 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	 * Property in <code>ASTNode</code>s that holds the node's <code>ConstraintVariable</code>.
 	 */
 	private static final String CV_PROP= "org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CONSTRAINT_VARIABLE"; //$NON-NLS-1$
-	
+
 	private InferTypeArgumentsTCModel fTCModel;
 	private ICompilationUnit fCU;
 
 	private final boolean fAssumeCloneReturnsSameType;
-	
+
 
 	public InferTypeArgumentsConstraintCreator(InferTypeArgumentsTCModel model, boolean assumeCloneReturnsSameType) {
 		fTCModel= model;
 		fAssumeCloneReturnsSameType= assumeCloneReturnsSameType;
 	}
-	
+
 	public boolean visit(CompilationUnit node) {
 		fTCModel.newCu(); //TODO: make sure that accumulators are reset after last CU!
 		fCU= (ICompilationUnit) node.getJavaElement();
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(Javadoc node) {
 		return false;
 	}
-	
+
 	public boolean visit(Type node) {
 		return false; //TODO
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.Type)
 	 */
@@ -123,7 +123,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			setConstraintVariable(node, typeVariable);
 		}
 	}
-	
+
 	public void endVisit(SimpleName node) {
 		if (node.resolveBoxing()) {
 			ImmutableTypeVariable2 boxed= fTCModel.makeImmutableTypeVariable(node.resolveTypeBinding(), node);
@@ -140,13 +140,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 				if (receiver != null) {
 					ConstraintVariable2 receiverCv= getConstraintVariable(receiver);
 					Assert.isNotNull(receiverCv); // the type variable must come from the receiver!
-					
+
 					ConstraintVariable2 elementCv= fTCModel.getElementVariable(receiverCv, declaredVariableType);
 					// [retVal] =^= Elem[receiver]:
 					setConstraintVariable(node, elementCv);
 					return;
 				}
-				
+
 			} else if (declaredVariableType.isParameterizedType()){
 				Expression receiver= getSimpleNameReceiver(node);
 				if (receiver != null) {
@@ -161,13 +161,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 						return;
 					}
 				}
-				
+
 			} else {
 				//TODO: array...
 				//logUnexpectedNode(node, null);
 			}
-			
-			// default: 
+
+			// default:
 			VariableVariable2 cv= fTCModel.makeVariableVariable(variableBinding);
 			setConstraintVariable(node, cv);
 		}
@@ -189,7 +189,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		else
 			return receiver;
 	}
-	
+
 	public void endVisit(FieldAccess node) {
 		if (node.resolveBoxing()) {
 			ImmutableTypeVariable2 boxed= fTCModel.makeImmutableTypeVariable(node.resolveTypeBinding(), node);
@@ -199,7 +199,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ConstraintVariable2 nameCv= getConstraintVariable(node.getName());
 		setConstraintVariable(node, nameCv);
 	}
-	
+
 	public void endVisit(QualifiedName node) {
 		if (node.resolveBoxing()) {
 			ImmutableTypeVariable2 boxed= fTCModel.makeImmutableTypeVariable(node.resolveTypeBinding(), node);
@@ -209,26 +209,26 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ConstraintVariable2 cv= getConstraintVariable(node.getName());
 		setConstraintVariable(node, cv);
 	}
-	
+
 	public void endVisit(ArrayAccess node) {
 		if (node.resolveBoxing()) {
 			ImmutableTypeVariable2 boxed= fTCModel.makeImmutableTypeVariable(node.resolveTypeBinding(), node);
 			setConstraintVariable(node, boxed);
 			return;
 		}
-		
+
 		ConstraintVariable2 arrayCv= getConstraintVariable(node.getArray());
 		if (arrayCv == null)
 			return;
-		
+
 		ArrayElementVariable2 arrayElementCv= fTCModel.getArrayElementVariable(arrayCv);
 		setConstraintVariable(node, arrayElementCv);
 	}
-	
+
 	public void endVisit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
 		Expression rhs= node.getRightHandSide();
-		
+
 		ConstraintVariable2 left= getConstraintVariable(lhs);
 		ConstraintVariable2 right= getConstraintVariable(rhs);
 		if (node.resolveBoxing()) {
@@ -239,7 +239,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		}
 		if (left == null || right == null)
 			return;
-		
+
 		Assignment.Operator op= node.getOperator();
 		if (op == Assignment.Operator.PLUS_ASSIGN && (lhs.resolveTypeBinding() == node.getAST().resolveWellKnownType("java.lang.String"))) { //$NON-NLS-1$
 			//Special handling for automatic String conversion: do nothing; the RHS can be anything.
@@ -249,11 +249,11 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		}
 		//TODO: other implicit conversions: numeric promotion, autoboxing?
 	}
-	
+
 	public void endVisit(CastExpression node) {
 //		if (! (expressionCv instanceof CollectionElementVariable2))
 //			return; //TODO: returns too early when dealing with nested collections.
-		
+
 		Type type= node.getType();
 		ITypeBinding typeBinding= type.resolveBinding();
 		if (typeBinding.isPrimitive()) {
@@ -261,17 +261,17 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			setConstraintVariable(node, boxed);
 			return; // avoid removing numeric conversions
 		}
-		
+
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
 		if (typeCv == null)
 			return;
-		
+
 		//TODO: can this be loosened when we remove casts?
 		setConstraintVariable(node, typeCv);
-		
+
 		Expression expression= node.getExpression();
 		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
-		
+
 		//Avoid removing casts that have not been made obsolete by this refactoring:
 		if (expressionCv == null)
 			return;
@@ -280,9 +280,9 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		if (! (expressionCv instanceof TypeVariable2 || expressionCv instanceof IndependentTypeVariable2 || expressionCv instanceof CollectionElementVariable2)
 				&& fTCModel.getElementVariables(expressionCv).size() == 0 && fTCModel.getArrayElementVariable(expressionCv) == null)
 			return;
-		
+
 		fTCModel.createAssignmentElementConstraints(typeCv, expressionCv);
-		
+
 		if (expression instanceof MethodInvocation) {
 			MethodInvocation invoc= (MethodInvocation) expression;
 			if (! isSpecialCloneInvocation(invoc.resolveMethodBinding(), invoc.getExpression())) {
@@ -291,15 +291,15 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		} else {
 			fTCModel.makeCastVariable(node, expressionCv);
 		}
-		
+
 		boolean eitherIsIntf= typeBinding.isInterface() || expression.resolveTypeBinding().isInterface();
 		if (eitherIsIntf)
 			return;
-		
+
 		//TODO: preserve up- and down-castedness!
-		
+
 	}
-	
+
 	public void endVisit(ParenthesizedExpression node) {
 		if (node.resolveBoxing()) {
 			ImmutableTypeVariable2 boxed= fTCModel.makeImmutableTypeVariable(node.resolveTypeBinding(), node);
@@ -309,13 +309,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ConstraintVariable2 expressionCv= getConstraintVariable(node.getExpression());
 		setConstraintVariable(node, expressionCv);
 	}
-	
+
 	public void endVisit(ConditionalExpression node) {
 		// for now, no support for passing generic types through conditional expressions
 		ImmutableTypeVariable2 boxed= fTCModel.makeImmutableTypeVariable(node.resolveTypeBinding(), node);
 		setConstraintVariable(node, boxed);
 	}
-	
+
 	public boolean visit(CatchClause node) {
 		SingleVariableDeclaration exception= node.getException();
 		IVariableBinding variableBinding= exception.resolveBinding();
@@ -323,31 +323,31 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		setConstraintVariable(exception, cv);
 		return true;
 	}
-	
+
 	public void endVisit(StringLiteral node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, /*no boxing*/null);
 		setConstraintVariable(node, cv);
 	}
-	
+
 	public void endVisit(NumberLiteral node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, node);
 		setConstraintVariable(node, cv);
 	}
-	
+
 	public void endVisit(BooleanLiteral node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, node);
 		setConstraintVariable(node, cv);
 	}
-	
+
 	public void endVisit(CharacterLiteral node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, node);
 		setConstraintVariable(node, cv);
 	}
-	
+
 	public void endVisit(ThisExpression node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, /*no boxing*/null);
@@ -359,13 +359,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, /*no boxing*/null);
 		setConstraintVariable(node, cv);
 	}
-	
+
 	public void endVisit(MethodDeclaration node) {
 		IMethodBinding methodBinding= node.resolveBinding();
-	
+
 		if (methodBinding == null)
 			return; //TODO: emit error?
-		
+
 		int parameterCount= node.parameters().size();
 		ConstraintVariable2[] parameterTypeCvs= new ConstraintVariable2[parameterCount];
 		for (int i= 0; i < parameterCount; i++) {
@@ -375,16 +375,16 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			parameterTypeCvs[i]= parameterTypeCv;
 			if (parameterTypeCv == null)
 				continue;
-			
+
 			//creating equals constraint between parameterTypeVariable's elements and the Type's elements
 			ConstraintVariable2 typeCv= getConstraintVariable(paramDecl.getType());
 			fTCModel.createElementEqualsConstraints(parameterTypeCv, typeCv);
-			
+
 			//TODO: should avoid having a VariableVariable as well as a ParameterVariable for a parameter
 			ConstraintVariable2 nameCv= getConstraintVariable(paramDecl.getName());
 			fTCModel.createElementEqualsConstraints(parameterTypeCv, nameCv);
 		}
-		
+
 		ConstraintVariable2 returnTypeCv= null;
 		if (! methodBinding.isConstructor()) {
 			//TODO: should only create return type variable if type is generic?
@@ -399,55 +399,55 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			addConstraintsForOverriding(methodBinding, returnTypeCv, parameterTypeCvs);
 		}
 	}
-	
+
 	private void addConstraintsForOverriding(IMethodBinding methodBinding, ConstraintVariable2 returnTypeCv, ConstraintVariable2[] parameterTypeCvs) {
 		boolean hasParameterElementCvs= false;
 		for (int i= 0; i < parameterTypeCvs.length; i++)
 			if (parameterTypeCvs[i] != null)
 				hasParameterElementCvs= true;
-		
+
 		if (returnTypeCv == null && ! hasParameterElementCvs)
 			return;
-		
+
 		ITypeBinding[] allSuperTypes= Bindings.getAllSuperTypes(methodBinding.getDeclaringClass());
 		for (int i= 0; i < allSuperTypes.length; i++) {
 			ITypeBinding superType= allSuperTypes[i];
 			IMethodBinding superMethod= Bindings.findOverriddenMethodInType(superType, methodBinding);
 			if (superMethod == null)
 				continue;
-			
+
 			for (int p= 0; p < parameterTypeCvs.length; p++) {
 				if (parameterTypeCvs[p] == null)
 					continue;
 				ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(superMethod, p);
 				fTCModel.createElementEqualsConstraints(parameterTypeCv, parameterTypeCvs[p]);
 			}
-			
+
 			if (returnTypeCv != null) {
 				ReturnTypeVariable2 superMethodReturnTypeCv= fTCModel.makeReturnTypeVariable(superMethod);
 				fTCModel.createElementEqualsConstraints(superMethodReturnTypeCv, returnTypeCv);
 			}
 		}
 	}
-	
+
 	public void endVisit(MethodInvocation node) {
 		IMethodBinding methodBinding= node.resolveMethodBinding();
 		if (methodBinding == null)
 			return;
-		
+
 		Expression receiver;
 		if (JdtFlags.isStatic(methodBinding))
 			receiver= null;
 		else
 			receiver= node.getExpression();
-		
+
 		//TODO: Expression can be null when visiting a non-special method in a subclass of a container type.
-		
+
 		if (isSpecialCloneInvocation(methodBinding, receiver)) {
 			ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
 			// [retVal] =^= [receiver]:
 			setConstraintVariable(node, expressionCv);
-			
+
 		} else if ("getClass".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) { //$NON-NLS-1$
 			//special case: see JLS3 4.3.2
 			ITypeBinding returnType= node.resolveTypeBinding();
@@ -455,27 +455,27 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			ParameterizedTypeVariable2 expressionCv= fTCModel.makeParameterizedTypeVariable(returnTypeDeclaration);
 			setConstraintVariable(node, expressionCv);
 			ConstraintVariable2 classTypeVariable= fTCModel.getElementVariable(expressionCv, returnTypeDeclaration.getTypeParameters()[0]);
-			
+
 			//type of expression 'e.getClass()' is 'Class<? extends X>' where X is the static type of e
 			ITypeBinding capture= returnType.getTypeArguments()[0];
 			ITypeBinding wildcard= capture.getWildcard();
 			if (wildcard.getBound() == null)
 				return; // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=234619
-			
+
 			ImmutableTypeVariable2 wildcardType= fTCModel.makeImmutableTypeVariable(wildcard,  /*no boxing*/null);
 			fTCModel.createSubtypeConstraint(classTypeVariable, wildcardType);
-			
+
 //			ITypeBinding bound= wildcard.getBound();
 //			ImmutableTypeVariable2 boundType= fTCModel.makeImmutableTypeVariable(bound, node.getAST());
 //			fTCModel.createSubtypeConstraint(classTypeVariable, boundType);
-			
+
 		} else {
 			Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables= createMethodTypeArguments(methodBinding);
-			
+
 			doVisitMethodInvocationReturnType(node, methodBinding, receiver, methodTypeVariables);
 			doVisitMethodInvocationArguments(methodBinding, node.arguments(), receiver, methodTypeVariables, /*no created type*/null);
 		}
-		
+
 	}
 
 	/**
@@ -498,20 +498,20 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		}
 		return methodTypeVariables;
 	}
-	
+
 	private void doVisitMethodInvocationReturnType(MethodInvocation node, IMethodBinding methodBinding, Expression receiver, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables) {
 		ITypeBinding declaredReturnType= methodBinding.getMethodDeclaration().getReturnType();
-		
+
 		if (declaredReturnType.isPrimitive()) {
 			ImmutableTypeVariable2 boxed= fTCModel.makeImmutableTypeVariable(declaredReturnType, node);
 			setConstraintVariable(node, boxed);
-			
+
 		} else 	if (declaredReturnType.isTypeVariable()) {
 			ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredReturnType.getKey());
 			if (methodTypeVariableCv != null) {
 				// e.g. in Collections: <T ..> T min(Collection<? extends T> coll):
 				setConstraintVariable(node, methodTypeVariableCv); //TODO: should be [retVal] <= Elem[arg] in this case?
-				
+
 	//			TODO:
 	//			} else if (methodBinding.getErasure().getTypeParameters().length == 1 &&
 	//					(genericReturnType.isTypeVariable() || genericReturnType.isWildcardType()) &&
@@ -522,10 +522,10 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	//				ConstraintVariable2 elementCv= fTCModel.makeElementVariable(argCv);
 	//				// [retVal] =^= Elem[arg]:
 	//				setConstraintVariable(node, elementCv); //TODO: should be [retVal] <= Elem[arg]
-				
+
 			} else {
 				//TODO: nested generic classes and methods?
-				
+
 				if (receiver == null) //TODO: deal with methods inside generic types
 					return;
 				// e.g. in List<E>: E get(int index):
@@ -534,7 +534,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 				// [retVal] =^= Elem[receiver]:
 				setConstraintVariable(node, elementCv);
 			}
-		
+
 		} else if (declaredReturnType.isParameterizedType()) {
 			ConstraintVariable2 returnTypeCv= fTCModel.makeParameterizedTypeVariable(declaredReturnType.getTypeDeclaration());
 			setConstraintVariable(node, returnTypeCv);
@@ -545,7 +545,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			// Elem[retVal] =^= Elem[receiver]
 			TType declaredReturnTType= fTCModel.createTType(declaredReturnType);
 			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, methodTypeVariables, returnTypeCv, declaredReturnTType);
-		
+
 		} else if (declaredReturnType.isArray()) {
 			ConstraintVariable2 returnTypeCv= fTCModel.makeArrayTypeVariable(declaredReturnType);
 			setConstraintVariable(node, returnTypeCv);
@@ -560,7 +560,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			// Elem[retVal] =^= Elem[receiver]
 			TType declaredReturnTType= fTCModel.createTType(declaredReturnType);
 			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, methodTypeVariables, returnTypeCv, declaredReturnTType);
-					
+
 		} else {
 			ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
 			setConstraintVariable(node, returnTypeCv);
@@ -584,7 +584,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			ConstraintVariable2 argCv= getConstraintVariable(arg);
 			if (argCv == null)
 				continue;
-			
+
 			TType declaredParameterType;
 			int iParam;
 			if (! methodBinding.isVarargs() || i < lastParamIdx) {
@@ -601,14 +601,14 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 					declaredParameterType= ((org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType) declaredParameterType).getComponentType();
 				}
 			}
-			
+
 			if (declaredParameterType.isTypeVariable()) {
-				
+
 				ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredParameterType.getBindingKey());
 				if (methodTypeVariableCv != null) {
 					// e.g. t in "<T> void take(T t, List<T> ts)"
 					fTCModel.createSubtypeConstraint(argCv, methodTypeVariableCv);
-					
+
 				} else {
 					if (createdType != null) {
 						//e.g. Tuple<T1, T2>: constructor Tuple(T1 t1, T2 t2)
@@ -621,7 +621,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 						//e.g. "Collection<E>: boolean add(E o)"
 						ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
 						ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, (TypeVariable) declaredParameterType);
-	
+
 						//	//TypeVariableConstraintVariable2 typeVariableCv= fTCModel.makeTypeVariableVariable(declaredParameterType);
 						//				ConstraintVariable2 elementCv= fTCModel.makeElementVariable(expressionCv, typeVariableCv);
 						//TODO: Somebody must connect typeVariableCv to corresponding typeVariableCVs of supertypes.
@@ -629,7 +629,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 						//- Do when passing for sources.
 						//- Keep a flag in CV whether done?
 						//- Do in one pass over all TypeVarCvs at the end?
-	
+
 						// [arg] <= Elem[receiver]:
 						fTCModel.createSubtypeConstraint(argCv, elementCv);
 					} else {
@@ -666,11 +666,11 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 									//TODO: ???
 								}
 							}
-						
+
 						} else {
 							//TODO
 						}
-						
+
 					} else if (typeArgument.isTypeVariable()) {
 						ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(typeArgument.getBindingKey());
 						if (methodTypeVariableCv != null) {
@@ -690,13 +690,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 								//TODO: ???
 							}
 						}
-						
+
 					} else {
 						ImmutableTypeVariable2 typeArgumentCv= fTCModel.makeImmutableTypeVariable(typeArgument);
 						fTCModel.createEqualsConstraint(argElementCv, typeArgumentCv);
 					}
 				}
-				
+
 			} else if (declaredParameterType.isArrayType()) {
 				//TODO: check methodBinding.isVarargs() !
 				TType declaredElementType= ((org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType) declaredParameterType).getElementType();
@@ -737,7 +737,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	public void endVisit(ClassInstanceCreation node) {
 		Expression receiver= node.getExpression();
 		Type createdType= node.getType();
-		
+
 		ConstraintVariable2 typeCv;
 		if (node.getAnonymousClassDeclaration() == null) {
 			typeCv= getConstraintVariable(createdType);
@@ -746,13 +746,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			setConstraintVariable(createdType, typeCv);
 		}
 		setConstraintVariable(node, typeCv);
-		
+
 		IMethodBinding methodBinding= node.resolveConstructorBinding();
 		Map methodTypeVariables= createMethodTypeArguments(methodBinding);
 		List arguments= node.arguments();
 		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables, createdType);
 	}
-	
+
 	public void endVisit(ArrayCreation node) {
 		ArrayType arrayType= node.getType();
 		TypeVariable2 arrayTypeCv= (TypeVariable2) getConstraintVariable(arrayType);
@@ -761,7 +761,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		setConstraintVariable(node, arrayTypeCv);
 		//TODO: constraints for array initializer?
 	}
-	
+
 	public void endVisit(ReturnStatement node) {
 		Expression expression= node.getExpression();
 		if (expression == null)
@@ -769,7 +769,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
 		if (expressionCv == null)
 			return;
-		
+
 		MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
 		if (methodDeclaration == null)
 			return;
@@ -779,10 +779,10 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
 		if (returnTypeCv == null)
 			return;
-		
+
 		fTCModel.createElementEqualsConstraints(returnTypeCv, expressionCv);
 	}
-	
+
 	public void endVisit(VariableDeclarationExpression node) {
 		// Constrain the types of the child VariableDeclarationFragments to be equal to one
 		// another, since the initializers in a 'for' statement can only have one type.
@@ -791,9 +791,9 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
 		if (typeCv == null)
 			return;
-		
+
 		setConstraintVariable(node, typeCv);
-		
+
 		List fragments= node.fragments();
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
@@ -801,7 +801,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			fTCModel.createElementEqualsConstraints(typeCv, fragmentCv);
 		}
 	}
-	
+
 	public void endVisit(VariableDeclarationStatement node) {
 		// TODO: in principle, no need to tie the VariableDeclarationFragments together.
 		// The VariableDeclarationExpression can be split up when fragments get different types.
@@ -815,12 +815,12 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		// Warning: still need to connect fragments with type!
 		endVisitFieldVariableDeclaration(node.getType(), node.fragments());
 	}
-	
+
 	private void endVisitFieldVariableDeclaration(Type type, List variableDeclarationFragments) {
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
 		if (typeCv == null)
 			return;
-		
+
 		for (Iterator iter= variableDeclarationFragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
 			ConstraintVariable2 fragmentCv= getConstraintVariable(fragment);
@@ -831,9 +831,9 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	public void endVisit(SingleVariableDeclaration node) {
 		// used for formal method parameters and catch clauses
 		//TODO: extra dimensions?
-		
+
 //		ConstraintVariable2 typeCv= getConstraintVariable(node.getType()); //TODO: who needs this?
-		
+
 //		ConstraintVariable2 nameCv;
 //		switch (node.getParent().getNodeType()) {
 //			case ASTNode.METHOD_DECLARATION :
@@ -844,60 +844,60 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 //				break;
 //			case ASTNode.CATCH_CLAUSE :
 //				nameCv= fTCFactory.makeVariableVariable(node.resolveBinding());
-//			
+//
 //				break;
 //			default:
 //				unexpectedNode(node.getParent());
 //		}
 //		setConstraintVariable(node, nameCv);
-		
+
 		//TODO: Move this into visit(SimpleName) or leave it here?
 //		ExpressionVariable2 name= fTCFactory.makeExpressionVariable(node.getName());
 //		TypeVariable2 type= fTCFactory.makeTypeVariable(node.getType());
 //		ITypeConstraint2[] nameEqualsType= fTCFactory.createEqualsConstraint(name, type);
 //		addConstraints(nameEqualsType);
-		
+
 		//TODO: When can a SingleVariableDeclaration have an initializer? Never up to Java 1.5?
 		Expression initializer= node.getInitializer();
 		if (initializer == null)
 			return;
-		
+
 //		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
 //		ConstraintVariable2 nameCv= getConstraintVariable(node);
 		//TODO: check: property has been set in visit(CatchClause), visit(MethodDeclaration), visit(EnhancedForStatament)
 		//fTCFactory.createSubtypeConstraint(initializerCv, nameCv); //TODO: not for augment raw container clients
 	}
-	
+
 	public void endVisit(VariableDeclarationFragment node) {
 		VariableVariable2 cv= fTCModel.makeDeclaredVariableVariable(node.resolveBinding(), fCU);
 		if (cv == null)
 			return;
-		
+
 		setConstraintVariable(node, cv);
-		
+
 		//TODO: prune unused CV for local variables (but not fields)
-		
+
 		Expression initializer= node.getInitializer();
 		if (initializer == null)
 			return;
-		
+
 		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
 		if (initializerCv == null)
 			return;
-		
+
 		fTCModel.createElementEqualsConstraints(cv, initializerCv);
-		
+
 		// name= initializer  -->  [initializer] <= [name]
 //		if (initializerCv instanceof CollectionElementVariable2)
 //			fTCModel.createSubtypeConstraint(initializerCv, cv);
 	}
-	
+
 	//--------- private helpers ----------------//
-	
+
 	public InferTypeArgumentsTCModel getTCModel() {
 		return fTCModel;
 	}
-	
+
 	/**
 	 * @param node the ASTNode
 	 * @return the {@link ConstraintVariable2} associated with the node, or <code>null</code>
@@ -905,7 +905,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	protected static ConstraintVariable2 getConstraintVariable(ASTNode node) {
 		return (ConstraintVariable2) node.getProperty(CV_PROP);
 	}
-	
+
 	/**
 	 * @param node the ASTNode
 	 * @param constraintVariable the {@link ConstraintVariable2} to be associated with node
@@ -913,7 +913,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	protected static void setConstraintVariable(ASTNode node, ConstraintVariable2 constraintVariable) {
 		node.setProperty(CV_PROP, constraintVariable);
 	}
-	
+
 //	private void logUnexpectedNode(ASTNode node, String msg) {
 //		String message= msg == null ? "" : msg + ":\n";  //$NON-NLS-1$//$NON-NLS-2$
 //		if (node == null) {

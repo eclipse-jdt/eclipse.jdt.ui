@@ -20,17 +20,17 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 /**
  * Clears the selected working set in the action group's view.
- * 
+ *
  * @since 2.0
  */
 public class ClearWorkingSetAction extends Action {
-	
+
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public ClearWorkingSetAction(WorkingSetFilterActionGroup actionGroup) {
-		super(WorkingSetMessages.ClearWorkingSetAction_text); 
+		super(WorkingSetMessages.ClearWorkingSetAction_text);
 		Assert.isNotNull(actionGroup);
-		setToolTipText(WorkingSetMessages.ClearWorkingSetAction_toolTip); 
+		setToolTipText(WorkingSetMessages.ClearWorkingSetAction_toolTip);
 		setEnabled(actionGroup.getWorkingSet() != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CLEAR_WORKING_SET_ACTION);
 		fActionGroup= actionGroup;

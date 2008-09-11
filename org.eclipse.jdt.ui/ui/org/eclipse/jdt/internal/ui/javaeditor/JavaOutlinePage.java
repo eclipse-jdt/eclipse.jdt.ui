@@ -545,7 +545,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		/**
 		 * Empty selection provider.
-		 * 
+		 *
 		 * @since 3.2
 		 */
 		private static final class EmptySelectionProvider implements ISelectionProvider {
@@ -593,7 +593,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * @since 3.2
 	 */
 	private CategoryFilterActionGroup fCategoryFilterActionGroup;
-	
+
 	private JdtViewerDropSupport fDropSupport;
 
 	/**
@@ -756,9 +756,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		IPageSite site= getSite();
 		site.registerContextMenu(JavaPlugin.getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
-		
+
 		updateSelectionProvider(site);
-		
+
 		// we must create the groups after we have set the selection provider to the site
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenViewActionGroup(this),
@@ -778,7 +778,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		action= fEditor.getAction(ITextEditorActionConstants.PREVIOUS);
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
-		
+
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 
 		fActionGroups.fillActionBars(actionBars);
@@ -842,7 +842,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fMemberFilterActionGroup.dispose();
 			fMemberFilterActionGroup= null;
 		}
-		
+
 		if (fCategoryFilterActionGroup != null) {
 			fCategoryFilterActionGroup.dispose();
 			fCategoryFilterActionGroup= null;
@@ -1058,23 +1058,23 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private void initDragAndDrop() {
 		fDropSupport= new JdtViewerDropSupport(fOutlineViewer);
 		fDropSupport.start();
-		
+
 		new JdtViewerDragSupport(fOutlineViewer).start();
 	}
-	
+
 	/**
 	 * Returns whether only the contents of the top level type is to be shown.
-	 * 
+	 *
 	 * @return <code>true</code> if only the contents of the top level type is to be shown.
 	 * @since 3.3
 	 */
 	protected final boolean isTopLevelTypeOnly() {
 		return fTopLevelTypeOnly;
 	}
-	
+
 	/**
 	 * Returns the <code>JavaOutlineViewer</code> of this view.
-	 * 
+	 *
 	 * @return the {@link JavaOutlineViewer}
 	 * @since 3.3
 	 */

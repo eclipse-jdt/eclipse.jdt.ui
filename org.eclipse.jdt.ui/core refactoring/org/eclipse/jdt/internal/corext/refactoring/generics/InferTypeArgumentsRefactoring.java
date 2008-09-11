@@ -99,14 +99,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	private static final String ATTRIBUTE_LEAVE= "leave"; //$NON-NLS-1$
 
 	private static final String REWRITTEN= "InferTypeArgumentsRefactoring.rewritten"; //$NON-NLS-1$
-	
+
 	private TextChangeManager fChangeManager;
 	private IJavaElement[] fElements;
 	private InferTypeArgumentsTCModel fTCModel;
 
 	private boolean fAssumeCloneReturnsSameType;
 	private boolean fLeaveUnconstrainedRaw;
-	
+
 	/**
 	 * Creates a new infer type arguments refactoring.
 	 * @param elements the elements to process, or <code>null</code> if invoked by scripting
@@ -114,36 +114,36 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	public InferTypeArgumentsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
 	}
-	
+
     public InferTypeArgumentsRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this(null);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
     }
-	
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.InferTypeArgumentsRefactoring_name; 
+		return RefactoringCoreMessages.InferTypeArgumentsRefactoring_name;
 	}
-	
+
 	public void setAssumeCloneReturnsSameType(boolean assume) {
 		fAssumeCloneReturnsSameType= assume;
 	}
-	
+
 	public boolean getAssumeCloneReturnsSameType() {
 		return fAssumeCloneReturnsSameType;
 	}
-	
+
 	public void setLeaveUnconstrainedRaw(boolean raw) {
 		fLeaveUnconstrainedRaw= raw;
 	}
-	
+
 	public boolean getLeaveUnconstrainedRaw() {
 		return fLeaveUnconstrainedRaw;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -163,25 +163,25 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		try {
 			fTCModel= new InferTypeArgumentsTCModel();
 			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel, fAssumeCloneReturnsSameType);
-			
+
 			for (Iterator iter= projectsToElements.entrySet().iterator(); iter.hasNext(); ) {
 				Entry entry= (Entry) iter.next();
 				IJavaProject project= (IJavaProject) entry.getKey();
 				List javaElementsList= (List) entry.getValue();
 				IJavaElement[] javaElements= (IJavaElement[]) javaElementsList.toArray(new IJavaElement[javaElementsList.size()]);
 				List cus= Arrays.asList(JavaModelUtil.getAllCompilationUnits(javaElements));
-				
+
 				int batchSize= 150;
 				int batches= ((cus.size()-1) / batchSize) + 1;
 				SubProgressMonitor projectMonitor= new SubProgressMonitor(pm, 1);
 				projectMonitor.beginTask("", batches); //$NON-NLS-1$
-				projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building); 
+				projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building);
 				for (int i= 0; i < batches; i++) {
 					List batch= cus.subList(i * batchSize, Math.min(cus.size(), (i + 1) * batchSize));
 					ICompilationUnit[] batchCus= (ICompilationUnit[]) batch.toArray(new ICompilationUnit[batch.size()]);
 					final SubProgressMonitor batchMonitor= new SubProgressMonitor(projectMonitor, 1);
-					batchMonitor.subTask(RefactoringCoreMessages.InferTypeArgumentsRefactoring_calculating_dependencies); 
-					
+					batchMonitor.subTask(RefactoringCoreMessages.InferTypeArgumentsRefactoring_calculating_dependencies);
+
 					ASTParser parser= ASTParser.newParser(AST.JLS3);
 					parser.setProject(project);
 					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
@@ -189,7 +189,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					parser.createASTs(batchCus, new String[0], new ASTRequestor() {
 						public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
 							batchMonitor.subTask(BasicElementLabels.getFileName(source));
-	
+
 							SafeRunner.run(new ISafeRunnable() {
 								public void run() throws Exception {
 									IProblem[] problems= ast.getProblems();
@@ -211,7 +211,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 									result.addError(msg2, JavaStatusContext.create(source));
 								}
 							});
-							
+
 							fTCModel.newCu();
 						}
 						public void acceptBinding(String bindingKey, IBinding binding) {
@@ -219,25 +219,25 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 						}
 					}, batchMonitor);
 				}
-				
+
 				projectMonitor.done();
 				fTCModel.newCu();
 			}
-			
+
 //			Display.getDefault().syncExec(new Runnable() {
 //				public void run() {
 //					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Debugging...", "after constraint gen");
 //				}
 //			});
-			
-			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_solving); 
+
+			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_solving);
 			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(fTCModel);
 			InferTypeArgumentsUpdate updates= solver.solveConstraints(new SubProgressMonitor(pm, 1));
 			solver= null; //free caches
-			
+
 			fChangeManager= new TextChangeManager();
 			rewriteDeclarations(updates, new SubProgressMonitor(pm, 1));
-			
+
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext()));
 			return result;
@@ -246,7 +246,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			clearGlobalState();
 		}
 	}
-	
+
 	private void clearGlobalState() {
 		TypeSet.resetCount();
 		EnumeratedTypeSet.resetCount();
@@ -271,12 +271,12 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	private RefactoringStatus check15() throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		HashSet/*<IJavaProject>*/ checkedProjects= new HashSet/*<IJavaProject>*/();
-		
+
 		for (int i= 0; i < fElements.length; i++) {
 			IJavaProject javaProject= fElements[i].getJavaProject();
 			if (! checkedProjects.contains(javaProject)) {
 				if (! JavaModelUtil.is50OrHigher(javaProject)) {
-					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50, BasicElementLabels.getJavaElementName(javaProject.getElementName())); 
+					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50, BasicElementLabels.getJavaElementName(javaProject.getElementName()));
 					result.addFatalError(message);
 				} else if (! JavaModelUtil.is50OrHigherJRE(javaProject)) {
 					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50Library, BasicElementLabels.getJavaElementName(javaProject.getElementName()));
@@ -290,14 +290,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private void rewriteDeclarations(InferTypeArgumentsUpdate update, IProgressMonitor pm) throws CoreException {
 		HashMap/*<ICompilationUnit, CuUpdate>*/ updates= update.getUpdates();
-		
+
 		Set entrySet= updates.entrySet();
 		pm.beginTask("", entrySet.size()); //$NON-NLS-1$
-		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_creatingChanges); 
+		pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_creatingChanges);
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			
+
 			Map.Entry entry= (Map.Entry) iter.next();
 			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
 			pm.worked(1);
@@ -306,25 +306,25 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
 			rewrite.setResolveBindings(false);
 			CuUpdate cuUpdate= (CuUpdate) entry.getValue();
-			
+
 			for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
 				rewriteConstraintVariable(cv, rewrite, fTCModel, fLeaveUnconstrainedRaw, null);
 			}
-			
+
 			for (Iterator castsIter= cuUpdate.getCastsToRemove().iterator(); castsIter.hasNext();) {
 				CastVariable2 castCv= (CastVariable2) castsIter.next();
 				rewriteCastVariable(castCv, rewrite, fTCModel);
 			}
-			
+
 			CompilationUnitChange change= rewrite.createChange();
 			if (change != null) {
 				fChangeManager.manage(cu, change);
 			}
 		}
-		
+
 	}
-	
+
 	public static ParameterizedType[] inferArguments(SimpleType[] types, InferTypeArgumentsUpdate update, InferTypeArgumentsTCModel model, CompilationUnitRewrite rewrite) {
 		for (int i= 0; i < types.length; i++) {
 			types[i].setProperty(REWRITTEN, null);
@@ -333,12 +333,12 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		HashMap/*<ICompilationUnit, CuUpdate>*/ updates= update.getUpdates();
 		Set entrySet= updates.entrySet();
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
-			
+
 			Map.Entry entry= (Map.Entry) iter.next();
-			
+
 			rewrite.setResolveBindings(false);
 			CuUpdate cuUpdate= (CuUpdate) entry.getValue();
-			
+
 			for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
 				ParameterizedType newNode= rewriteConstraintVariable(cv, rewrite, model, false, types);
@@ -366,24 +366,24 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
 		if (node instanceof Name && node.getParent() instanceof Type) {
 			Type originalType= (Type) node.getParent();
-			
+
 			if (types != null && !has(types, originalType))
 				return null;
-			
+
 			// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
-			Object rewritten= originalType.getProperty(REWRITTEN); 
+			Object rewritten= originalType.getProperty(REWRITTEN);
 			if (rewritten == REWRITTEN)
 				return null;
 			originalType.setProperty(REWRITTEN, REWRITTEN);
-			
+
 			ArrayList typeArgumentCvs= getTypeArgumentCvs(typeCv, tCModel);
 			Type[] typeArguments= getTypeArguments(originalType, typeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw);
 			if (typeArguments == null)
 				return null;
-			
+
 			Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 			ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
-			
+
 			for (int i= 0; i < typeArguments.length; i++) {
 				newType.typeArguments().add(typeArguments[i]);
 			}
@@ -404,17 +404,17 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	}
 
 	/**
-	 * @param baseType 
-	 * @param typeArgumentCvs 
-	 * @param rewrite 
-	 * @param tCModel 
-	 * @param leaveUnconstraindRaw 
+	 * @param baseType
+	 * @param typeArgumentCvs
+	 * @param rewrite
+	 * @param tCModel
+	 * @param leaveUnconstraindRaw
 	 * @return the new type arguments, or <code>null</code> iff an argument could not be infered
 	 */
 	private static Type[] getTypeArguments(Type baseType, ArrayList typeArgumentCvs, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
 		if (typeArgumentCvs.size() == 0)
 			return null;
-		
+
 		Type[] typeArguments= new Type[typeArgumentCvs.size()];
 		for (int i= 0; i < typeArgumentCvs.size(); i++) {
 			CollectionElementVariable2 elementCv= (CollectionElementVariable2) typeArgumentCvs.get(i);
@@ -484,7 +484,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		ASTNode parent= originalType.getParent();
 		while (parent instanceof Type)
 			parent= parent.getParent();
-		
+
 		if (parent instanceof ClassInstanceCreation) {
 			return false;
 		} else if (parent instanceof AbstractTypeDeclaration) {
@@ -497,7 +497,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private static ASTNode rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel) {//, List positionGroups) {
 		ASTNode node= castCv.getRange().getNode(rewrite.getRoot());
-		
+
 		ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
 		ConstraintVariable2 methodReceiverCv= tCModel.getMethodReceiverCv(expressionVariable);
 		if (methodReceiverCv != null) {
@@ -509,7 +509,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			else if (hasUnboundElement(methodReceiverCv, tCModel))
 				return null;
 		}
-		
+
 		CastExpression castExpression= (CastExpression) node;
 		Expression expression= castExpression.getExpression();
 		ASTNode nodeToReplace;
@@ -517,9 +517,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			nodeToReplace= castExpression.getParent();
 		else
 			nodeToReplace= castExpression;
-		
+
 		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
-		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_removeCast)); 
+		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_removeCast));
 		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
 		return newExpression;
 	}
@@ -542,7 +542,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InferTypeArgumentsRefactoring_name, fChangeManager.getAllChanges()) {
-			
+
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					final IJavaProject project= getSingleProject();
@@ -565,11 +565,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
 					return new RefactoringChangeDescriptor(descriptor);
 				}
-			}; 
+			};
 			return result;
 		} finally {
 			pm.done();
-		}	
+		}
 	}
 
 	private IJavaProject getSingleProject() {

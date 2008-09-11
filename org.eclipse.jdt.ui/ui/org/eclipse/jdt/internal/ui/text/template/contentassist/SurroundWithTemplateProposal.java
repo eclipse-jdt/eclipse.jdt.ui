@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.MalformedTreeException;
-
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.MalformedTreeException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -59,31 +59,31 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.SurroundWith;
 
 public class SurroundWithTemplateProposal extends TemplateProposal {
-	
+
 	private static class SurroundWithTemplate extends SurroundWith {
-		
+
 		private static final String $_LINE_SELECTION= "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		private final Template fTemplate;
 		private final IJavaProject fCurrentProject;
 		private ASTNode fTemplateNode;
-		
+
 		public SurroundWithTemplate(IInvocationContext context, Statement[] selectedNodes, Template template) {
 			super(context.getASTRoot(), selectedNodes);
 			fTemplate= template;
 			fCurrentProject= context.getCompilationUnit().getJavaProject();
 		}
-		
+
 		protected List getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
 			if (isNewContext())
 				return super.getVariableDeclarationReadsInside(selectedNodes, maxVariableId);
 			return new ArrayList();
 		}
-		
+
 		protected boolean isNewContext() {
 
 			final String templateVariableRegEx= "\\$\\{[^\\}]*\\}"; //$NON-NLS-1$
-			
+
 			String template= fTemplate.getPattern();
 			int currentPosition= template.indexOf($_LINE_SELECTION);
 			int insertionPosition= -1;
@@ -107,7 +107,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 				parser.setKind(ASTParser.K_EXPRESSION);
 				root= parser.createAST(null);
 			}
-			
+
 			final int lineSelectionPosition= insertionPosition;
 			root.accept(new GenericVisitor() {
 				public void endVisit(Block node) {
@@ -117,14 +117,14 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 					}
 				}
 			});
-			
+
 			if (fTemplateNode != null && ASTNodes.getParent(fTemplateNode, MethodDeclaration.class) != null) {
 				return true;
 			}
-			
+
 			return false;
 		}
-		
+
 	}
 
 
@@ -144,7 +144,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		fRegion= region;
 		fSelectedStatements= selectedStatements;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal#getAdditionalProposalInfo()
 	 */
@@ -152,12 +152,12 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		try {
 			IDocument document= new Document(fCompilationUnit.getBuffer().getContents());
 			CompilationUnitContext context= createNewContext(document);
-			
+
 			int offset= context.getCompletionOffset();
 			int start= context.getStart();
 			int end= context.getEnd();
 			IRegion region= new Region(start, end - start);
-			
+
 			context.setReadOnly(false);
 			TemplateBuffer templateBuffer;
 			try {
@@ -166,16 +166,16 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 				JavaPlugin.log(e1);
 				return null;
 			}
-			
+
 			start= region.getOffset();
 			end= region.getOffset() + region.getLength();
 			end= Math.max(end, offset);
 
 			String templateString= templateBuffer.getString();
 			document.replace(start, end - start, templateString);
-			
+
 			return document.get();
-			
+
 		} catch (MalformedTreeException e) {
 			JavaPlugin.log(e);
 		} catch (IllegalArgumentException e) {
@@ -196,7 +196,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			setRedraw(viewer, false);
 			IDocument document= viewer.getDocument();
 			CompilationUnitContext context= createNewContext(document);
-			
+
 			int start= context.getStart();
 			int end= context.getEnd();
 			IRegion region= new Region(start, end - start);
@@ -216,7 +216,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			setRedraw(viewer, true);
 		}
 	}
-	
+
 	private void setRedraw(ITextViewer viewer, boolean redraw) {
 		if (viewer instanceof ITextViewerExtension) {
 			ITextViewerExtension extension= (ITextViewerExtension) viewer;
@@ -234,19 +234,19 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			return null;
 		}
 	}
-	
+
 	private CompilationUnitContext createNewContext(IDocument document) throws CoreException, BadLocationException {
 		AssistContext invocationContext= new AssistContext(fCompilationUnit, fContext.getStart(), fContext.getEnd() - fContext.getStart());
-		
+
 		SurroundWithTemplate surroundWith= new SurroundWithTemplate(invocationContext, fSelectedStatements, fTemplate);
 		Map options= fCompilationUnit.getJavaProject().getOptions(true);
-		
+
 		surroundWith.getRewrite().rewriteAST(document, options).apply(document);
-		
+
 		int offset= surroundWith.getBodyStart();
 		int length= surroundWith.getBodyLength();
 		String newSelection= document.get(offset, length);
-		
+
 		//Create the new context
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(fTemplate.getContextTypeId());
 		CompilationUnitContext context= contextType.createContext(document, offset, newSelection.length(), fCompilationUnit);
@@ -254,7 +254,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		context.setForceEvaluation(true);
 		return context;
 	}
-	
+
 	private void handleException(ITextViewer viewer, Exception e, IRegion region) {
 		JavaPlugin.log(e);
 		openErrorDialog(viewer.getTextWidget().getShell(), e);
@@ -264,7 +264,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 	private void openErrorDialog(Shell shell, Exception e) {
 		MessageDialog.openError(shell, TemplateContentAssistMessages.TemplateEvaluator_error_title, e.getMessage());
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

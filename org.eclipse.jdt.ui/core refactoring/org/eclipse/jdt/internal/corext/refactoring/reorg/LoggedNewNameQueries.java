@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 /**
  * Logged implementation of new name queries.
- * 
+ *
  * @since 3.3
  */
 public final class LoggedNewNameQueries implements INewNameQueries {
@@ -36,7 +36,7 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 
 		/**
 		 * Creates a new new name query.
-		 * 
+		 *
 		 * @param object
 		 *            the object
 		 * @param name
@@ -49,7 +49,7 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 
 		/**
 		 * Returns the new name of the compilation unit, without any extension.
-		 * 
+		 *
 		 * @return the new name, or <code>null</code>
 		 */
 		private String getCompilationUnitName() {
@@ -82,7 +82,7 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 
 	/**
 	 * Creates a new logged new name queries.
-	 * 
+	 *
 	 * @param log
 	 *            the reorg execution log
 	 */

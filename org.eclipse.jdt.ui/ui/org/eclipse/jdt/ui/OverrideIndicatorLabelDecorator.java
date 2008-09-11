@@ -46,13 +46,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 /**
  * LabelDecorator that decorates an method's image with override or implements overlays.
  * The viewer using this decorator is responsible for updating the images on element changes.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
@@ -71,28 +71,28 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	/*
 	 * Creates decorator with a shared image registry.
-	 * 
+	 *
 	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
 	 * image registry.
 	 */
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param registry The registry to use.
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public OverrideIndicatorLabelDecorator(ImageDescriptorRegistry registry) {
 		fRegistry= registry;
 	}
-	
+
 	private ImageDescriptorRegistry getRegistry() {
 		if (fRegistry == null) {
 			fRegistry= fUseNewRegistry ? new ImageDescriptorRegistry() : JavaPlugin.getImageDescriptorRegistry();
 		}
 		return fRegistry;
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see ILabelDecorator#decorateText(String, Object)
 	 */
@@ -115,13 +115,13 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		}
 		return image;
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param element The element to decorate
 	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS
 	 * and JavaElementImageDescriptor.OVERRIDES)
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public int computeAdornmentFlags(Object element) {
@@ -147,14 +147,14 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param method The element to decorate
 	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS
 	 * and JavaElementImageDescriptor.OVERRIDES)
 	 * @throws JavaModelException
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
@@ -165,9 +165,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 				return res;
 			}
 		}
-		
+
 		IType type= method.getDeclaringType();
-		
+
 		MethodOverrideTester methodOverrideTester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
 		IMethod defining= methodOverrideTester.findOverriddenMethod(method, true);
 		if (defining != null) {
@@ -179,7 +179,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		}
 		return 0;
 	}
-	
+
 	private int findInHierarchyWithAST(CompilationUnit astRoot, IMethod method) throws JavaModelException {
 		ASTNode node= NodeFinder.perform(astRoot, method.getNameRange());
 		if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration) {
@@ -208,7 +208,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @return The resulting decoration.
 	 * @throws JavaModelException
 	 * @deprecated Not used anymore. This method is not accurate for methods in generic types.
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
@@ -236,7 +236,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		}
 		return 0;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#addListener(ILabelProviderListener)
 	 */
@@ -264,7 +264,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */
 	public void removeListener(ILabelProviderListener listener) {
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
 	 */

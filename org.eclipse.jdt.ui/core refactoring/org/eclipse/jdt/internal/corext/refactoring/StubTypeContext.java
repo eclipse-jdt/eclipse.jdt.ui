@@ -18,21 +18,21 @@ public class StubTypeContext {
 	private String fBeforeString;
 	private String fAfterString;
 	private final ICompilationUnit fCuHandle;
-	
+
 	public StubTypeContext(ICompilationUnit cuHandle, String beforeString, String afterString) {
 		fCuHandle= cuHandle;
 		fBeforeString= beforeString;
 		fAfterString= afterString;
 	}
-	
+
 	public ICompilationUnit getCuHandle() {
 		return fCuHandle;
 	}
-	
+
 	public String getBeforeString() {
 		return fBeforeString;
 	}
-	
+
 	public String getAfterString() {
 		return fAfterString;
 	}

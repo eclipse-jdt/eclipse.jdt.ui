@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -38,13 +40,11 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.osgi.framework.Bundle;
-
 /**
  * The description of an extension to the
  * <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code> extension point. Instances are
  * immutable. Instances can be obtained from a {@link CompletionProposalComputerRegistry}.
- * 
+ *
  * @see CompletionProposalComputerRegistry
  * @since 3.2
  */
@@ -77,13 +77,13 @@ final class CompletionProposalComputerDescriptor {
 	 * {@link #fIsReportingDelay}.
 	 */
 	private static final long MAX_DELAY= 5000;
-	
+
 	/* log constants */
 	private static final String COMPUTE_COMPLETION_PROPOSALS= "computeCompletionProposals()"; //$NON-NLS-1$
 	private static final String COMPUTE_CONTEXT_INFORMATION= "computeContextInformation()"; //$NON-NLS-1$
 	private static final String SESSION_STARTED= "sessionStarted()"; //$NON-NLS-1$
 	private static final String SESSION_ENDED= "sessionEnded()"; //$NON-NLS-1$
-	
+
 	static {
 		Set partitions= new HashSet();
 		partitions.add(IDocument.DEFAULT_CONTENT_TYPE);
@@ -92,7 +92,7 @@ final class CompletionProposalComputerDescriptor {
 		partitions.add(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		partitions.add(IJavaPartitions.JAVA_STRING);
 		partitions.add(IJavaPartitions.JAVA_CHARACTER);
-		
+
 		PARTITION_SET= Collections.unmodifiableSet(partitions);
 	}
 
@@ -130,10 +130,10 @@ final class CompletionProposalComputerDescriptor {
 	 */
 	boolean fTriedLoadingComputer= false;
 
-	
+
 	/**
 	 * Creates a new descriptor.
-	 * 
+	 *
 	 * @param element the configuration element to read
 	 * @param registry the computer registry creating this descriptor
 	 * @param categories the categories
@@ -143,7 +143,7 @@ final class CompletionProposalComputerDescriptor {
 	CompletionProposalComputerDescriptor(IConfigurationElement element, CompletionProposalComputerRegistry registry, List categories) throws InvalidRegistryObjectException, CoreException {
 		Assert.isLegal(registry != null);
 		Assert.isLegal(element != null);
-		
+
 		fRegistry= registry;
 		fElement= element;
 		IExtension extension= element.getDeclaringExtension();
@@ -155,7 +155,7 @@ final class CompletionProposalComputerDescriptor {
 			fName= fId;
 		else
 			fName= name;
-		
+
 		Set partitions= new HashSet();
 		IConfigurationElement[] children= element.getChildren(PARTITION);
 		if (children.length == 0) {
@@ -168,13 +168,13 @@ final class CompletionProposalComputerDescriptor {
 			}
 			fPartitions= Collections.unmodifiableSet(partitions);
 		}
-		
+
 		String activateAttribute= element.getAttribute(ACTIVATE);
 		fActivate= Boolean.valueOf(activateAttribute).booleanValue();
 
 		fClass= element.getAttribute(CLASS);
 		checkNotNull(fClass, CLASS);
-		
+
 		String categoryId= element.getAttribute(CATEGORY_ID);
 		if (categoryId == null)
 			categoryId= DEFAULT_CATEGORY_ID;
@@ -197,7 +197,7 @@ final class CompletionProposalComputerDescriptor {
 
 	/**
 	 * Checks that the given attribute value is not <code>null</code>.
-	 * 
+	 *
 	 * @param value the object to check if not null
 	 * @param attribute the attribute
 	 * @throws InvalidRegistryObjectException if the registry element is no longer valid
@@ -223,16 +223,16 @@ final class CompletionProposalComputerDescriptor {
 
 	/**
 	 * Returns the name of the described extension.
-	 * 
+	 *
 	 * @return Returns the name
 	 */
 	public String getName() {
 		return fName;
 	}
-	
+
 	/**
 	 * Returns the partition types of the described extension.
-	 * 
+	 *
 	 * @return the set of partition types (element type: {@link String})
 	 */
 	public Set getPartitions() {
@@ -244,7 +244,7 @@ final class CompletionProposalComputerDescriptor {
 	 * extension's xml. If the computer is not yet created and
 	 * <code>canCreate</code> is <code>true</code> then {@link #createComputer()}
 	 * is called and the result cached.
-	 * 
+	 *
 	 * @param canCreate <code>true</code> if the proposal computer can be created
 	 * @return a new instance of the completion proposal computer as
 	 *         described by this descriptor
@@ -280,7 +280,7 @@ final class CompletionProposalComputerDescriptor {
 	 * {@linkplain #computeContextInformation(ContentAssistInvocationContext, IProgressMonitor) computeContextInformation}
 	 * methods. These delegate the functionality to the contributed
 	 * computer, but handle instance creation and any exceptions thrown.
-	 * 
+	 *
 	 * @return a new instance of the completion proposal computer as
 	 *         described by this descriptor
 	 * @throws CoreException if the creation fails
@@ -290,12 +290,12 @@ final class CompletionProposalComputerDescriptor {
 	public IJavaCompletionProposalComputer createComputer() throws CoreException, InvalidRegistryObjectException {
 		return (IJavaCompletionProposalComputer) fElement.createExecutableExtension(CLASS);
 	}
-	
+
 	/**
 	 * Safely computes completion proposals through the described extension. If the extension
 	 * is disabled, throws an exception or otherwise does not adhere to the contract described in
 	 * {@link IJavaCompletionProposalComputer}, an empty list is returned.
-	 * 
+	 *
 	 * @param context the invocation context passed on to the extension
 	 * @param monitor the progress monitor passed on to the extension
 	 * @return the list of computed completion proposals (element type:
@@ -310,12 +310,12 @@ final class CompletionProposalComputerDescriptor {
 			IJavaCompletionProposalComputer computer= getComputer(true);
 			if (computer == null) // not active yet
 				return Collections.EMPTY_LIST;
-			
+
 			try {
 				PerformanceStats stats= startMeter(context, computer);
 				List proposals= computer.computeCompletionProposals(context, monitor);
 				stopMeter(stats, COMPUTE_COMPLETION_PROPOSALS);
-				
+
 				if (proposals != null) {
 					fLastError= computer.getErrorMessage();
 					return proposals;
@@ -343,7 +343,7 @@ final class CompletionProposalComputerDescriptor {
 	 * Safely computes context information objects through the described extension. If the extension
 	 * is disabled, throws an exception or otherwise does not adhere to the contract described in
 	 * {@link IJavaCompletionProposalComputer}, an empty list is returned.
-	 * 
+	 *
 	 * @param context the invocation context passed on to the extension
 	 * @param monitor the progress monitor passed on to the extension
 	 * @return the list of computed context information objects (element type:
@@ -352,7 +352,7 @@ final class CompletionProposalComputerDescriptor {
 	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!isEnabled())
 			return Collections.EMPTY_LIST;
-		
+
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer(true);
@@ -362,12 +362,12 @@ final class CompletionProposalComputerDescriptor {
 			PerformanceStats stats= startMeter(context, computer);
 			List proposals= computer.computeContextInformation(context, monitor);
 			stopMeter(stats, COMPUTE_CONTEXT_INFORMATION);
-			
+
 			if (proposals != null) {
 				fLastError= computer.getErrorMessage();
 				return proposals;
 			}
-			
+
 			status= createAPIViolationStatus(COMPUTE_CONTEXT_INFORMATION);
 		} catch (InvalidRegistryObjectException x) {
 			status= createExceptionStatus(x);
@@ -378,12 +378,12 @@ final class CompletionProposalComputerDescriptor {
 		} finally {
 			monitor.done();
 		}
-		
+
 		fRegistry.informUser(this, status);
-		
+
 		return Collections.EMPTY_LIST;
 	}
-	
+
 
 	/**
 	 * Notifies the described extension of a proposal computation session start.
@@ -395,17 +395,17 @@ final class CompletionProposalComputerDescriptor {
 	public void sessionStarted() {
 		if (!isEnabled())
 			return;
-		
+
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer(true);
 			if (computer == null) // not active yet
 				return;
-			
+
 			PerformanceStats stats= startMeter(SESSION_STARTED, computer);
 			computer.sessionStarted();
 			stopMeter(stats, SESSION_ENDED);
-			
+
 			return;
 		} catch (InvalidRegistryObjectException x) {
 			status= createExceptionStatus(x);
@@ -414,7 +414,7 @@ final class CompletionProposalComputerDescriptor {
 		} catch (RuntimeException x) {
 			status= createExceptionStatus(x);
 		}
-		
+
 		fRegistry.informUser(this, status);
 	}
 
@@ -459,11 +459,11 @@ final class CompletionProposalComputerDescriptor {
 		} else {
 			stats= null;
 		}
-		
+
 		if (fIsReportingDelay) {
 			fStart= System.currentTimeMillis();
 		}
-		
+
 		return stats;
 	}
 
@@ -476,7 +476,7 @@ final class CompletionProposalComputerDescriptor {
 				return;
 			}
 		}
-		
+
 		if (fIsReportingDelay) {
 			long current= System.currentTimeMillis();
 			if (current - fStart > MAX_DELAY) {
@@ -499,7 +499,7 @@ final class CompletionProposalComputerDescriptor {
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_instantiation;
 		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, blame + " " + reason, x); //$NON-NLS-1$
 	}
-	
+
 	private IStatus createExceptionStatus(RuntimeException x) {
 		// misbehaving extension - log
 		String blame= createBlameMessage();
@@ -526,23 +526,23 @@ final class CompletionProposalComputerDescriptor {
 		String disable= Messages.format( JavaTextMessages.CompletionProposalComputerDescriptor_blame_message, args);
 		return disable;
 	}
-	
+
 	/**
 	 * Returns the enablement state of the described extension.
-	 * 
+	 *
 	 * @return the enablement state of the described extension
 	 */
 	private boolean isEnabled() {
 		return fCategory.isEnabled();
 	}
-	
+
 	CompletionProposalCategory getCategory() {
 		return fCategory;
 	}
 
 	/**
 	 * Returns the error message from the described extension.
-	 * 
+	 *
 	 * @return the error message from the described extension
 	 */
 	public String getErrorMessage() {
@@ -551,7 +551,7 @@ final class CompletionProposalComputerDescriptor {
 
 	/**
 	 * Returns the contributor of the described extension.
-	 * 
+	 *
 	 * @return the contributor of the described extension
 	 */
     IContributor getContributor()  {
@@ -561,5 +561,5 @@ final class CompletionProposalComputerDescriptor {
         	return null;
         }
     }
-	
+
 }

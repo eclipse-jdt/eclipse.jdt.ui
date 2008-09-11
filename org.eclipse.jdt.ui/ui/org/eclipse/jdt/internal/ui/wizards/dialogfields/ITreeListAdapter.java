@@ -16,15 +16,15 @@ import org.eclipse.swt.events.KeyEvent;
  * Change listener used by <code>TreeListDialogField</code>
  */
 public interface ITreeListAdapter {
-	
+
 	/**
 	 * A button from the button bar has been pressed.
 	 */
 	void customButtonPressed(TreeListDialogField field, int index);
-	
+
 	/**
 	 * The selection of the list has changed.
-	 */	
+	 */
 	void selectionChanged(TreeListDialogField field);
 
 	/**

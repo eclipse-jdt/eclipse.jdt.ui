@@ -34,24 +34,24 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 public class LevelTreeContentProvider extends JavaSearchContentProvider implements ITreeContentProvider {
 	private Map fChildrenMap;
 	private StandardJavaElementContentProvider fContentProvider;
-	
+
 	public static final int LEVEL_TYPE= 1;
 	public static final int LEVEL_FILE= 2;
 	public static final int LEVEL_PACKAGE= 3;
 	public static final int LEVEL_PROJECT= 4;
-	
+
 	private static final int[][] JAVA_ELEMENT_TYPES= {{IJavaElement.TYPE},
 			{IJavaElement.CLASS_FILE, IJavaElement.COMPILATION_UNIT},
 			{IJavaElement.PACKAGE_FRAGMENT},
 			{IJavaElement.JAVA_PROJECT, IJavaElement.PACKAGE_FRAGMENT_ROOT},
 			{IJavaElement.JAVA_MODEL}};
 	private static final int[][] RESOURCE_TYPES= {
-			{}, 
+			{},
 			{IResource.FILE},
-			{IResource.FOLDER}, 
-			{IResource.PROJECT}, 
+			{IResource.FOLDER},
+			{IResource.PROJECT},
 			{IResource.ROOT}};
-	
+
 	private static final int MAX_LEVEL= JAVA_ELEMENT_TYPES.length - 1;
 	private int fCurrentLevel;
 	static class FastJavaElementProvider extends StandardJavaElementContentProvider {
@@ -152,7 +152,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 
 	protected void remove(Set toRemove, Set toUpdate, Object element) {
 		// precondition here:  fResult.getMatchCount(child) <= 0
-	
+
 		if (hasChildren(element)) {
 			if (toUpdate != null)
 				toUpdate.add(element);
@@ -205,7 +205,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 			}
 			return limitedArray;
 		}
-		
+
 		return children.toArray();
 	}
 
@@ -217,7 +217,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	public synchronized void elementsChanged(Object[] updatedElements) {
 		if (getSearchResult() == null)
 			return;
-		
+
 		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
 
 		Set toRemove= new HashSet();
@@ -229,7 +229,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 			else
 				remove(toRemove, toUpdate, updatedElements[i]);
 		}
-		
+
 		viewer.remove(toRemove.toArray());
 		for (Iterator iter= toAdd.keySet().iterator(); iter.hasNext();) {
 			Object parent= iter.next();
@@ -239,9 +239,9 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		for (Iterator elementsToUpdate= toUpdate.iterator(); elementsToUpdate.hasNext();) {
 			viewer.refresh(elementsToUpdate.next());
 		}
-		
+
 	}
-	
+
 	public void clear() {
 		initialize(getSearchResult());
 		getPage().getViewer().refresh();

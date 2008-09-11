@@ -29,22 +29,22 @@ public final class CastVariable2 extends ConstraintVariable2 implements ITypeCon
 		fRange= range;
 		fExpressionVariable= expressionVariable;
 	}
-	
+
 	public CompilationUnitRange getRange() {
 		return fRange;
 	}
-	
+
 	public ICompilationUnit getCompilationUnit() {
 		return fRange.getCompilationUnit();
 	}
-	
+
 	public void setCompilationUnit(ICompilationUnit unit) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	public ConstraintVariable2 getExpressionVariable() {
 		return fExpressionVariable;
 	}
-	
+
 	// hashCode() and equals(..) not necessary (unique per construction)
 }

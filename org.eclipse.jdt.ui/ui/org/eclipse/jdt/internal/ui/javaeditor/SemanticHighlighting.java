@@ -34,7 +34,7 @@ public abstract class SemanticHighlighting {
 	 * @since 3.3
 	 */
 	public abstract RGB getDefaultDefaultTextColor();
-	
+
 	/**
 	 * @return the default default text color
 	 */
@@ -89,7 +89,7 @@ public abstract class SemanticHighlighting {
 	 * @return <code>true</code> iff the semantic highlighting consumes the semantic token
 	 */
 	public abstract boolean consumes(SemanticToken token);
-	
+
 	/**
 	 * Returns <code>true</code> iff the semantic highlighting consumes the
 	 * semantic token.
@@ -107,14 +107,14 @@ public abstract class SemanticHighlighting {
 	public boolean consumesLiteral(SemanticToken token) {
 		return false;
 	}
-	
+
 	private String getThemeColorKey() {
 		return JavaUI.ID_PLUGIN + "." + getPreferenceKey() + "Highlighting";  //$NON-NLS-1$//$NON-NLS-2$
 	}
-	
+
 	/**
 	 * Returns the RGB for the given key in the given color registry.
-	 * 
+	 *
 	 * @param key the key for the constant in the registry
 	 * @param defaultRGB the default RGB if no entry is found
 	 * @return RGB the RGB
@@ -123,12 +123,12 @@ public abstract class SemanticHighlighting {
 	private static RGB findRGB(String key, RGB defaultRGB) {
 		if (!PlatformUI.isWorkbenchRunning())
 			return defaultRGB;
-		
+
 		ColorRegistry registry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry();
 		RGB rgb= registry.getRGB(key);
 		if (rgb != null)
 			return rgb;
 		return defaultRGB;
 	}
-	
+
 }

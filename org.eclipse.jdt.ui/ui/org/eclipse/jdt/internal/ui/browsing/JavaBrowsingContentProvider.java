@@ -16,10 +16,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;

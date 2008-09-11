@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringPr
 
 /**
  * Refactoring contribution for the pull up refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class PullUpRefactoringContribution extends JavaRefactoringContribution {
@@ -45,7 +45,7 @@ public final class PullUpRefactoringContribution extends JavaRefactoringContribu
 	public RefactoringDescriptor createDescriptor() {
 		return new PullUpDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new PullUpDescriptor(project, description, comment, arguments, flags);
 	}

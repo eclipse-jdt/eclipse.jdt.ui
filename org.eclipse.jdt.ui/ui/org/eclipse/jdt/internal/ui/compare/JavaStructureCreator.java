@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -65,15 +65,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class JavaStructureCreator extends StructureCreator {
-	
+
 	private Map fDefaultCompilerOptions;
-	
+
 	/**
 	 * A root node for the structure. It is similar to {@link StructureRootNode} but needed
 	 * to be a subclass of {@link JavaNode} because of the code used to build the structure.
 	 */
 	private final class RootJavaNode extends JavaNode implements IDisposable {
-		
+
 		private final Object fInput;
 		private final boolean fEditable;
 		private final ISharedDocumentAdapter fAdapter;
@@ -91,7 +91,7 @@ public class JavaStructureCreator extends StructureCreator {
 		public boolean isEditable() {
 			return fEditable;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#nodeChanged(org.eclipse.compare.structuremergeviewer.DocumentRangeNode)
 		 */
@@ -117,8 +117,8 @@ public class JavaStructureCreator extends StructureCreator {
 			}
 			return super.getAdapter(adapter);
 		}
-		
-		
+
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#isReadOnly()
 		 */
@@ -129,7 +129,7 @@ public class JavaStructureCreator extends StructureCreator {
 			}
 			return super.isReadOnly();
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#validateEdit(org.eclipse.swt.widgets.Shell)
 		 */
@@ -147,29 +147,29 @@ public class JavaStructureCreator extends StructureCreator {
 	 * in order to combine similar diff nodes ("smart folding").
 	 */
 	static class RewriteInfo {
-		
+
 		boolean fIsOut= false;
-		
+
 		JavaNode fAncestor= null;
 		JavaNode fLeft= null;
 		JavaNode fRight= null;
-		
+
 		ArrayList fChildren= new ArrayList();
-		
+
 		void add(IDiffElement diff) {
 			fChildren.add(diff);
 		}
-		
+
 		void setDiff(ICompareInput diff) {
 			if (fIsOut)
 				return;
-			
+
 			fIsOut= true;
-			
+
 			JavaNode a= (JavaNode) diff.getAncestor();
 			JavaNode y= (JavaNode) diff.getLeft();
 			JavaNode m= (JavaNode) diff.getRight();
-			
+
 			if (a != null) {
 				if (fAncestor != null)
 					return;
@@ -185,10 +185,10 @@ public class JavaStructureCreator extends StructureCreator {
 					return;
 				fRight= m;
 			}
-			
+
 			fIsOut= false;
 		}
-				
+
 		/**
 		 * @return true if some nodes could be successfully combined into one
 		 */
@@ -196,21 +196,21 @@ public class JavaStructureCreator extends StructureCreator {
 			return !fIsOut && fAncestor != null && fLeft != null && fRight != null;
 		}
 	}
-	
+
 	public JavaStructureCreator() {
 	}
-	
+
 	void setDefaultCompilerOptions(Map compilerSettings) {
 		fDefaultCompilerOptions= compilerSettings;
 	}
-	
+
 	/**
 	 * @return the name that appears in the enclosing pane title bar
 	 */
 	public String getName() {
 		return CompareMessages.JavaStructureViewer_title;
 	}
-	
+
 	/**
 	 * @param input implement the IStreamContentAccessor interface
 	 * @return a tree of JavaNodes for the given input.
@@ -230,17 +230,17 @@ public class JavaStructureCreator extends StructureCreator {
 					return null;
 				}
 			}
-			
+
 			if (contents != null) {
 				int n= contents.length();
 				buffer= new char[n];
 				contents.getChars(0, n, buffer, 0);
-				
+
 				doc= new Document(contents);
 				setupDocument(doc);
 			}
 		}
-		
+
 		return createStructureComparator(input, buffer, doc, null, null);
 	}
 
@@ -252,11 +252,11 @@ public class JavaStructureCreator extends StructureCreator {
 			IProgressMonitor monitor) throws CoreException {
 		return createStructureComparator(element, null, document, sharedDocumentAdapter, monitor);
 	}
-	
+
 	private IStructureComparator createStructureComparator(final Object input, char[] buffer, IDocument doc, ISharedDocumentAdapter adapter, IProgressMonitor monitor) {
 		String contents;
 		Map compilerOptions= null;
-		
+
 		if (input instanceof IResourceProvider) {
 			IResource resource= ((IResourceProvider) input).getResource();
 			if (resource != null) {
@@ -270,22 +270,22 @@ public class JavaStructureCreator extends StructureCreator {
 		}
 		if (compilerOptions == null)
 			compilerOptions= fDefaultCompilerOptions;
-		
+
 		if (doc != null) {
 			boolean isEditable= false;
 			if (input instanceof IEditableContent)
 				isEditable= ((IEditableContent) input).isEditable();
-			
+
 			// we hook into the root node to intercept all node changes
 			JavaNode root= new RootJavaNode(doc, isEditable, input, adapter);
-			
+
 			if (buffer == null) {
 				contents= doc.get();
 				int n= contents.length();
 				buffer= new char[n];
 				contents.getChars(0, n, buffer, 0);
 			}
-						
+
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			if (compilerOptions != null)
 				parser.setCompilerOptions(compilerOptions);
@@ -293,12 +293,12 @@ public class JavaStructureCreator extends StructureCreator {
 			parser.setFocalPosition(0);
 			CompilationUnit cu= (CompilationUnit) parser.createAST(monitor);
 			cu.accept(new JavaParseTreeBuilder(root, buffer, true));
-			
+
 			return root;
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the contents of the given node as a string.
 	 * This string is used to test the content of a Java element
@@ -309,11 +309,11 @@ public class JavaStructureCreator extends StructureCreator {
 	 * @return contents for equality test
 	 */
 	public String getContents(Object node, boolean ignoreWhiteSpace) {
-		
+
 		if (! (node instanceof IStreamContentAccessor))
 			return null;
-		
-			
+
+
 		IStreamContentAccessor sca= (IStreamContentAccessor) node;
 		String content= null;
 		try {
@@ -371,7 +371,7 @@ public class JavaStructureCreator extends StructureCreator {
 	public boolean canRewriteTree() {
 		return true;
 	}
-	
+
 	/**
 	 * Tries to detect certain combinations of additions and deletions
 	 * as renames or signature changes and folders them into a single node.
@@ -379,21 +379,21 @@ public class JavaStructureCreator extends StructureCreator {
 	 * @param root
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
-		
+
 		HashMap map= new HashMap(10);
-				
+
 		Object[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			DiffNode diff= (DiffNode) children[i];
 			JavaNode jn= (JavaNode) diff.getId();
-			
+
 			if (jn == null)
 				continue;
 			int type= jn.getTypeCode();
-			
+
 			// we can only combine methods or constructors
 			if (type == JavaNode.METHOD || type == JavaNode.CONSTRUCTOR) {
-				
+
 				// find or create a RewriteInfo for all methods with the same name
 				String name= jn.extractMethodName();
 				RewriteInfo nameInfo= (RewriteInfo) map.get(name);
@@ -402,7 +402,7 @@ public class JavaStructureCreator extends StructureCreator {
 					map.put(name, nameInfo);
 				}
 				nameInfo.add(diff);
-				
+
 				// find or create a RewriteInfo for all methods with the same
 				// (non-empty) argument list
 				String argList= jn.extractArgumentList();
@@ -415,7 +415,7 @@ public class JavaStructureCreator extends StructureCreator {
 					}
 					argInfo.add(diff);
 				}
-				
+
 				switch (diff.getKind() & Differencer.CHANGE_TYPE_MASK) {
 				case Differencer.ADDITION:
 				case Differencer.DELETION:
@@ -424,7 +424,7 @@ public class JavaStructureCreator extends StructureCreator {
 					// like a pair of addition and deletions
 					if (type != JavaNode.CONSTRUCTOR)
 						nameInfo.setDiff(diff);
-					
+
 					if (argInfo != null)
 						argInfo.setDiff(diff);
 					break;
@@ -432,11 +432,11 @@ public class JavaStructureCreator extends StructureCreator {
 					break;
 				}
 			}
-			
+
 			// recurse
 			rewriteTree(differencer, diff);
 		}
-		
+
 		// now we have to rebuild the diff tree according to the combined
 		// changes
 		Iterator it= map.keySet().iterator();
@@ -444,7 +444,7 @@ public class JavaStructureCreator extends StructureCreator {
 			String name= (String) it.next();
 			RewriteInfo i= (RewriteInfo) map.get(name);
 			if (i.matches()) { // we found a RewriteInfo that could be successfully combined
-				
+
 				// we have to find the differences of the newly combined node
 				// (because in the first pass we only got a deletion and an addition)
 				DiffNode d= (DiffNode) differencer.findDifferences(true, null, root, i.fAncestor, i.fLeft, i.fRight);
@@ -478,14 +478,14 @@ public class JavaStructureCreator extends StructureCreator {
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return JavaCompareUtilities.createJavaPartitioner();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getDocumentPartitioning()
 	 */
 	protected String getDocumentPartitioning() {
 		return IJavaPartitions.JAVA_PARTITIONING;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getPath(java.lang.Object, java.lang.Object)
 	 */
@@ -506,13 +506,13 @@ public class JavaStructureCreator extends StructureCreator {
 					break;
 				je= je.getParent();
 			}
-			
+
 			// revert the path
 			int n= args.size();
 			String[] path= new String[n];
 			for (int i= 0; i < n; i++)
 				path[i]= (String) args.get(n-1-i);
-				
+
 			return path;
 		}
 		return null;

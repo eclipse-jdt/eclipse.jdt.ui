@@ -22,7 +22,7 @@ public class JavaElementMatch extends Match {
 	private final boolean fIsReadAccess;
 	private final boolean fIsJavadoc;
 	private final boolean fIsSuperInvocation;
-	
+
 	JavaElementMatch(Object element, int matchRule, int offset, int length, int accuracy, boolean isReadAccess, boolean isWriteAccess, boolean isJavadoc, boolean isSuperInvocation) {
 		super(element, offset, length);
 		fAccuracy= accuracy;
@@ -48,11 +48,11 @@ public class JavaElementMatch extends Match {
 	public boolean isJavadoc() {
 		return fIsJavadoc;
 	}
-	
+
 	public boolean isSuperInvocation() {
 		return fIsSuperInvocation;
 	}
-	
+
 	public int getMatchRule() {
 		return fMatchRule;
 	}

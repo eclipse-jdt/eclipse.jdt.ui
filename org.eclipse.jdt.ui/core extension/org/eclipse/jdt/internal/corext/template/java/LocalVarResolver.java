@@ -15,18 +15,18 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.V
 /**
  * Resolves template variables to a local variable that is assignment-compatible with the variable
  * instance' class parameter.
- * 
+ *
  * @since 3.3
  */
 public class LocalVarResolver extends AbstractVariableResolver {
-	
+
 	/**
 	 * Default ctor for instantiation by the extension point.
 	 */
 	public LocalVarResolver() {
 		this("java.lang.Object"); //$NON-NLS-1$
 	}
-	
+
 	LocalVarResolver(String defaultType) {
 		super(defaultType);
 	}
@@ -37,5 +37,5 @@ public class LocalVarResolver extends AbstractVariableResolver {
 	protected Variable[] getVisibleVariables(String type, JavaContext context) {
 		return context.getLocalVariables(type);
 	}
-	
+
 }

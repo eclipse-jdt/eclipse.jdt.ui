@@ -16,18 +16,18 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public class AccessorClassReference {
-    
+
     private ITypeBinding fBinding;
     private Region fRegion;
     private String fResourceBundleName;
-    
+
     public AccessorClassReference(ITypeBinding typeBinding, String resourceBundleName, Region accessorRegion) {
         super();
         fBinding= typeBinding;
         fRegion= accessorRegion;
         fResourceBundleName= resourceBundleName;
     }
-    
+
 	public ITypeBinding getBinding() {
 		return fBinding;
 	}
@@ -39,19 +39,19 @@ public class AccessorClassReference {
 	public Region getRegion() {
 		return fRegion;
 	}
-	
+
 	public String getResourceBundleName() {
 		return fResourceBundleName;
 	}
-	
+
     public boolean equals(Object obj) {
         if (obj instanceof AccessorClassReference) {
             AccessorClassReference cmp = (AccessorClassReference) obj;
-            return fBinding == cmp.fBinding;          
+            return fBinding == cmp.fBinding;
         }
-        return false;        
+        return false;
     }
-    
+
     public int hashCode() {
         return fBinding.hashCode();
     }

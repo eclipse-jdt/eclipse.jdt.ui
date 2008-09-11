@@ -72,12 +72,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * <pre>
  * ICompilationUnit unit= ...
  * int offset= ...
- * 
+ *
  * CompletionProposalCollector collector= new CompletionProposalCollector(unit);
  * unit.codeComplete(offset, collector);
  * IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
  * String errorMessage= collector.getErrorMessage();
- * 
+ *
  * &#x2f;&#x2f; display &#x2f; process proposals
  * </pre>
  * Note that after a code completion operation, the collector will store any
@@ -123,7 +123,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 	/**
 	 * The UI invocation context or <code>null</code>.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private JavaContentAssistInvocationContext fInvocationContext;
@@ -186,7 +186,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	public CompletionProposalCollector(ICompilationUnit cu, boolean ignoreAll) {
 		this(cu.getJavaProject(), cu, ignoreAll);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.CompletionRequestor#setIgnored(int, boolean)
 	 */
@@ -202,7 +202,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * <p>
 	 * Subclasses may extend.
 	 * </p>
-	 * 
+	 *
 	 * @param context the invocation context
 	 * @see #getInvocationContext()
 	 * @since 3.2
@@ -212,11 +212,11 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		fInvocationContext= context;
 		context.setCollector(this);
 	}
-	
+
 	/**
 	 * Returns the invocation context. If none has been set via
 	 * {@link #setInvocationContext(JavaContentAssistInvocationContext)}, a new one is created.
-	 * 
+	 *
 	 * @return invocationContext the invocation context
 	 * @since 3.2
 	 */
@@ -664,14 +664,14 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		char[] declarationKey= proposal.getDeclarationKey();
 		if (declarationKey == null)
 			return null;
-		
+
 		try {
 			IJavaElement element= fJavaProject.findElement(new String(declarationKey), null);
 			if (!(element instanceof IType))
 				return null;
-			
+
 			IType type= (IType) element;
-			
+
 			String completion= String.valueOf(proposal.getCompletion());
 			int start= proposal.getReplaceStart();
 			int length= getLength(proposal);
@@ -707,7 +707,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	/**
 	 * Creates the Java completion proposal for the JDT Core
 	 * {@link CompletionProposal#FIELD_REF_WITH_CASTED_RECEIVER} proposal.
-	 * 
+	 *
 	 * @param proposal the JDT Core proposal
 	 * @return the Java completion proposal
 	 * @since 3.4
@@ -750,7 +750,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 //		adaptLength(proposal, javadocProposal);
 		return proposal;
 	}
-	
+
 	private IJavaCompletionProposal createJavadocInlineTagProposal(CompletionProposal javadocProposal) {
 		LazyJavaCompletionProposal proposal= new JavadocInlineTagCompletionProposal(javadocProposal, getInvocationContext());
 		adaptLength(proposal, javadocProposal);
@@ -839,7 +839,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		adaptLength(proposal, typeProposal);
 		return proposal;
 	}
-	
+
 	private IJavaCompletionProposal createJavadocLinkTypeProposal(CompletionProposal typeProposal) {
 		LazyJavaCompletionProposal proposal= new JavadocLinkTypeCompletionProposal(typeProposal, getInvocationContext());
 		adaptLength(proposal, typeProposal);

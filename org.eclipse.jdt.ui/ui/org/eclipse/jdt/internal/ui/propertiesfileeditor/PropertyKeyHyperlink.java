@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
-import com.ibm.icu.text.Collator;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import com.ibm.icu.text.Collator;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -28,15 +30,13 @@ import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -55,6 +55,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -197,7 +198,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
 			int start= matchAccess.getMatchOffset();
 			int length= matchAccess.getMatchLength();
-			
+
 			if (fIsKeyDoubleQuoted) {
 				start= start + 1;
 				length= length - 2;
@@ -432,23 +433,23 @@ public class PropertyKeyHyperlink implements IHyperlink {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						if (monitor == null)
 							monitor= new NullProgressMonitor();
-						
+
 						monitor.beginTask("", 5); //$NON-NLS-1$
 						try {
 							ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
 							TextSearchEngine engine= TextSearchEngine.create();
 							Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
 							engine.search(createScope(scope), collector, searchPattern, new SubProgressMonitor(monitor, 4));
-							
+
 							if (result.size() == 0 && useDoubleQuotedKey) {
 								//Try without, maybe an eclipse style NLS string
 								IJavaElement element= JavaCore.create(scope);
 								if (element == null)
 									return;
-								
+
 								int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
 								IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
-	
+
 								SearchPattern pattern= SearchPattern.createPattern(fPropertiesKey, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
 								try {
 									new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
@@ -480,7 +481,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 	private static TextSearchScope createScope(IResource scope) {
 		ArrayList fileNamePatternStrings= new ArrayList();
-		
+
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
 		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
 		for (int i= 0; i < javaExtensions.length; i++)
@@ -490,7 +491,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		String[] allPatternStrings= (String[]) fileNamePatternStrings.toArray(new String[fileNamePatternStrings.size()]);
 		Pattern fileNamePattern= PatternConstructor.createPattern(allPatternStrings, false, false);
-		
+
 		return TextSearchScope.newSearchScope(new IResource[] { scope }, fileNamePattern, false);
 	}
 

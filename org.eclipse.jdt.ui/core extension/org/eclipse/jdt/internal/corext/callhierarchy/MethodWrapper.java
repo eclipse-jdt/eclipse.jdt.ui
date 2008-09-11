@@ -129,12 +129,12 @@ public abstract class MethodWrapper extends PlatformObject {
         if (oth == null) {
             return false;
         }
-        
+
         if (oth instanceof MethodWrapperWorkbenchAdapter) {
             //Note: A MethodWrapper is equal to a referring MethodWrapperWorkbenchAdapter and vice versa (bug 101677).
         	oth= ((MethodWrapperWorkbenchAdapter) oth).getMethodWrapper();
         }
-        
+
         if (oth.getClass() != getClass()) {
             return false;
         }
@@ -243,12 +243,12 @@ public abstract class MethodWrapper extends PlatformObject {
 	 * @return whether this member can have children
 	 */
 	public abstract boolean canHaveChildren();
-	
+
     /**
      * This method finds the children of the current IMember (either callers or
      * callees, depending on the concrete subclass).
      * @param progressMonitor a progress monitor
-     * 
+     *
      * @return a map from handle identifier ({@link String}) to {@link MethodCall}
      */
     protected abstract Map findChildren(IProgressMonitor progressMonitor);
@@ -306,11 +306,11 @@ public abstract class MethodWrapper extends PlatformObject {
             throw new OperationCanceledException();
         }
     }
-    
+
     /**
      * Allows a visitor to traverse the call hierarchy. The visiting is stopped when
      * a recursive node is reached.
-     *  
+     *
      * @param visitor
      * @param progressMonitor the progress monitor
      */
@@ -319,7 +319,7 @@ public abstract class MethodWrapper extends PlatformObject {
             return;
         }
         checkCanceled(progressMonitor);
-        
+
         visitor.preVisit(this);
         if (visitor.visit(this)) {
             MethodWrapper[] methodWrappers= getCalls(progressMonitor);
@@ -329,7 +329,7 @@ public abstract class MethodWrapper extends PlatformObject {
         }
         visitor.postVisit(this);
 
-        if (progressMonitor != null) {        
+        if (progressMonitor != null) {
             progressMonitor.worked(1);
         }
     }

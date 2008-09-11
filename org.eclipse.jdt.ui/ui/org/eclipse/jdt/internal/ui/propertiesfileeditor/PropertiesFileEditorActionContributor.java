@@ -14,6 +14,7 @@ import org.eclipse.jface.action.IStatusLineManager;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ui.editors.text.TextEditorActionContributor;
@@ -28,7 +29,7 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
  */
 public class PropertiesFileEditorActionContributor extends TextEditorActionContributor {
 
-	
+
 	/*
 	 * @see EditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */

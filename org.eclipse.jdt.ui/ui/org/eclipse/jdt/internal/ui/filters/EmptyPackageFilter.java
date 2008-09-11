@@ -40,7 +40,7 @@ public class EmptyPackageFilter extends ViewerFilter {
 
 	/**
 	 * Tells whether the given package has unfiltered resources.
-	 * 
+	 *
 	 * @param viewer the viewer
 	 * @param pkg the package
 	 * @return <code>true</code> if the package has unfiltered resources

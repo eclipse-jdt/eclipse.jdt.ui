@@ -85,7 +85,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper;
 
 /**
  * The breadcrumb for the Java editor. Shows Java elements. Requires a Java editor.
- * 
+ *
  * @since 3.4
  */
 public class JavaEditorBreadcrumb extends EditorBreadcrumb {
@@ -167,7 +167,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/**
 		 * Answers whether this viewer can ignore label provider changes resulting from marker
 		 * changes in annotation models.
-		 * 
+		 *
 		 * @return <code>true</code> if annotation model changes can be ignored
 		 */
 		private boolean canIgnoreChangesFromAnnotionModel() {
@@ -273,7 +273,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		/**
 		 * Returns all accessible projects of the given Java model.
-		 * 
+		 *
 		 * @param model the Java model
 		 * @return the accessible projects of the given model
 		 */
@@ -309,7 +309,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				if (declaringType != null)
 					return declaringType;
 			}
-			
+
 			Object result= fParent.getParent(element);
 
 			if (result instanceof ITypeRoot) {
@@ -356,13 +356,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 							result.add(types[j]);
 					}
 				}
-				
+
 				IClassFile[] classFiles= pack.getClassFiles();
 				for (int i= 0; i < classFiles.length; i++) {
 					if (isValidType(classFiles[i].getType()))
 						result.add(classFiles[i].getType());
 				}
-				
+
 				Object[] nonJavaResources= pack.getNonJavaResources();
 				for (int i= 0; i < nonJavaResources.length; i++) {
 					result.add(nonJavaResources[i]);
@@ -404,7 +404,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	}
 
 	private class ElementChangeListener implements IElementChangedListener {
-		
+
 		private Runnable fRunnable;
 
 		/*
@@ -414,11 +414,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		public void elementChanged(ElementChangedEvent event) {
 			if (fViewer == null)
 				return;
-			
+
 			Object input= fViewer.getInput();
 			if (!(input instanceof IJavaElement))
 				return;
-			
+
 			if (fRunnable != null)
 				return;
 
@@ -430,11 +430,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				public void run() {
 					if (fViewer == null)
 						return;
-					
+
 					Object newInput= getCurrentInput();
 					if (newInput instanceof IJavaElement)
 						newInput= getInput((IJavaElement) newInput);
-					
+
 					fViewer.setInput(newInput);
 					fRunnable= null;
 				}
@@ -445,7 +445,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/**
 		 * Returns the most generic ancestor of the given input which has a change, or <b>null</b>
 		 * if no such ancestor exists.
-		 * 
+		 *
 		 * @param input the input of which the result must be an ancestor
 		 * @param delta the delta describing the model change
 		 * @return the changed element or <code>null</code>
@@ -455,7 +455,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			if (!isAncestor(element, input))
 				return null;
-			
+
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit cu= (ICompilationUnit) element;
 				if (!cu.getPrimary().equals(cu))
@@ -467,20 +467,20 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				if (!onlyChildrenChanged(delta))
 					return element;
 			}
-			
+
 			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 			for (int i= 0; i < affectedChildren.length; i++) {
 				IJavaElement res= getChangedParentElement(input, affectedChildren[i]);
 				if (res != null)
 					return res;
 			}
-			
+
 			return null;
 		}
 
 		/**
 		 * Tells whether the given element is an ancestor of the given input.
-		 * 
+		 *
 		 * @param element the element which might be a parent
 		 * @param input the element to resolve the parent chain for
 		 * @return <code>true</code> if <code>element</code> is a parent of <code>input</code>
@@ -499,7 +499,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			return (delta.getFlags() & IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED) == IJavaElementDelta.F_CONTENT;
 		}
-		
+
 		private boolean onlyChildrenChanged(IJavaElementDelta delta) {
 			if (delta.getKind() != IJavaElementDelta.CHANGED)
 				return false;
@@ -508,13 +508,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 	}
 
-	
+
 	private ActionGroup fBreadcrumbActionGroup;
 	private BreadcrumbViewer fViewer;
 	private ISelection fEditorSelection;
 	private ElementChangeListener fElementChangeListener;
 
-	
+
 	public JavaEditorBreadcrumb(JavaEditor javaEditor) {
 		super(javaEditor);
 		setTextViewer(javaEditor.getViewer());
@@ -530,7 +530,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		getJavaEditor().setActionsActivated(false);
 		fBreadcrumbActionGroup.fillActionBars(editorSite.getActionBars());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#deactivateBreadcrumb()
 	 */
@@ -562,7 +562,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		fElementChangeListener= new ElementChangeListener();
 		JavaCore.addElementChangedListener(fElementChangeListener);
-		
+
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
 
 		return fViewer;
@@ -570,7 +570,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 	/**
 	 * Create a new instance of the content provider to use for the Java editor breadcrumb.
-	 * 
+	 *
 	 * @return a new content provider
 	 */
 	private static JavaEditorBreadcrumbContentProvider createContentProvider() {
@@ -580,7 +580,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 	/**
 	 * Create a new instance of the label provider to use for the Java editor breadcrumb.
-	 * 
+	 *
 	 * @return a new label provider
 	 */
 	private static ILabelProvider createLabelProvider() {
@@ -589,7 +589,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 		return new DecoratingJavaLabelProvider(result) {
-			
+
 			/*
 			 * @see
 			 * org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider#getText(java.lang.Object
@@ -602,10 +602,10 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 						return JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
 					}
 				}
-				
+
 				return result.getText(element);
 			}
-			
+
 			/*
 			 * @see org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider#getStyledText(java.lang.Object)
 			 */
@@ -614,10 +614,10 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			}
 		};
 	}
-	
+
 	/**
 	 * Returns the label provider to use for the tool tips.
-	 * 
+	 *
 	 * @return a label provider for the tool tips
 	 */
 	private ILabelProvider createToolTipLabelProvider() {
@@ -657,7 +657,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				element= ((IType) element).getDeclaringType();
 			}
 		}
-		
+
 		if (element instanceof IJavaElement) {
 			super.setInput(getInput((IJavaElement) element));
 		} else {
@@ -673,7 +673,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			ITypeRoot input= SelectionConverter.getInput(getJavaEditor());
 			if (input == null)
 				return null;
-			
+
 			ITextSelection selection;
 			if (fEditorSelection instanceof ITextSelection) {
 				selection= (ITextSelection) fEditorSelection;
@@ -696,7 +696,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 * 		<li><code>IImportContainer</li>
 	 * 		<li><code>IImportDeclaration</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param element the potential input element
 	 * @return the element to use as input
 	 */
@@ -719,27 +719,27 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			if (element instanceof IClassFile)
 				element= ((IClassFile) element).getType();
-			
+
 			return element;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return null;
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#open(java.lang.Object)
 	 */
 	protected boolean open(Object element) {
 		if (element instanceof IFile)
 			return openInNewEditor(element);
-		
+
 		if (element instanceof IJarEntryResource)
 			return openInNewEditor(element);
-		
+
 		if (!(element instanceof IJavaElement))
 			return false;
-		
+
 		IJavaElement javaElement= (IJavaElement) element;
 
 		ITypeRoot root= (ITypeRoot) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
@@ -766,13 +766,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		ITypeRoot root= (ITypeRoot) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (root == null)
 			root= (ITypeRoot) javaElement.getAncestor(IJavaElement.CLASS_FILE);
-		
+
 		if (root == null)
 			return false;
 
 		if (!root.equals(inputElement))
 			return false;
-			
+
 		return revealInEditor(javaElement);
 	}
 

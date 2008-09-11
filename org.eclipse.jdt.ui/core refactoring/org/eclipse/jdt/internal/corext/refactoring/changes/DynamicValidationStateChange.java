@@ -32,34 +32,34 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 //import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class DynamicValidationStateChange extends CompositeChange implements WorkspaceTracker.Listener {
-	
+
 	private boolean fListenerRegistered= false;
 	private RefactoringStatus fValidationState= null;
 	private long fTimeStamp;
 	private ISchedulingRule fSchedulingRule;
-	
+
 	// 30 minutes
 	private static final long LIFE_TIME= 30 * 60 * 1000;
-	
+
 	public DynamicValidationStateChange(Change change) {
 		super(change.getName());
 		add(change);
 		markAsSynthetic();
 		fSchedulingRule= ResourcesPlugin.getWorkspace().getRoot();
 	}
-	
+
 	public DynamicValidationStateChange(String name) {
 		super(name);
 		markAsSynthetic();
 		fSchedulingRule= ResourcesPlugin.getWorkspace().getRoot();
 	}
-	
+
 	public DynamicValidationStateChange(String name, Change[] changes) {
 		super(name, changes);
 		markAsSynthetic();
 		fSchedulingRule= ResourcesPlugin.getWorkspace().getRoot();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -69,7 +69,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		fListenerRegistered= true;
 		fTimeStamp= System.currentTimeMillis();
 	}
-	
+
 	public void dispose() {
 		if (fListenerRegistered) {
 			WorkspaceTracker.INSTANCE.removeListener(this);
@@ -77,7 +77,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		}
 		super.dispose();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -87,7 +87,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		}
 		return fValidationState;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -112,7 +112,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		}
 		return result;
 	}
-	
+
 	public void workspaceChanged() {
 		long currentTime= System.currentTimeMillis();
 		if (currentTime - fTimeStamp < LIFE_TIME)
@@ -135,11 +135,11 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 			});
 		}
 	}
-	
+
 	public void setSchedulingRule(ISchedulingRule schedulingRule) {
-		fSchedulingRule= schedulingRule;	
+		fSchedulingRule= schedulingRule;
 	}
-	
+
 	public ISchedulingRule getSchedulingRule() {
 		return fSchedulingRule;
 	}

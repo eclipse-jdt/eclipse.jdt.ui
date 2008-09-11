@@ -31,7 +31,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaDocContextType() {
-		
+
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
 		addResolver(new GlobalTemplateVariables.LineSelection());
@@ -41,7 +41,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		addResolver(new GlobalTemplateVariables.Year());
 		addResolver(new GlobalTemplateVariables.Time());
 		addResolver(new GlobalTemplateVariables.User());
-		
+
 		// compilation unit
 		addResolver(new File());
 		addResolver(new PrimaryTypeName());
@@ -52,14 +52,14 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		addResolver(new Package());
 		addResolver(new Project());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
 		return new JavaDocContext(this, document, offset, length, compilationUnit);
-	}	
-	
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
 	 */

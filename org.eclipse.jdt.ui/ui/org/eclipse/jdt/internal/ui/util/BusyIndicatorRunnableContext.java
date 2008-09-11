@@ -31,14 +31,14 @@ import org.eclipse.jface.operation.ModalContext;
 public class BusyIndicatorRunnableContext implements IRunnableContext {
 
 	private static class BusyRunnable implements Runnable {
-		
+
 		private static class ThreadContext extends Thread {
 			IRunnableWithProgress fRunnable;
 			Throwable fThrowable;
-			
+
 			public ThreadContext(IRunnableWithProgress runnable) {
 				this(runnable, "BusyCursorRunnableContext-Thread"); //$NON-NLS-1$
-			}			
+			}
 			protected ThreadContext(IRunnableWithProgress runnable, String name) {
 				super(name);
 				fRunnable= runnable;
@@ -67,7 +67,7 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 				}
 			}
 		}
-		
+
 		public Throwable fThrowable;
 		private boolean fFork;
 		private IRunnableWithProgress fRunnable;
@@ -90,7 +90,7 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 			// thread or inside a busy context thread.
 			if (thread instanceof ThreadContext || ModalContext.isModalContextThread(thread))
 				fork= false;
-				
+
 			if (fork) {
 				final ThreadContext t= new ThreadContext(runnable);
 				t.start();
@@ -113,7 +113,7 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 					runnable.run(new NullProgressMonitor());
 				} catch (OperationCanceledException e) {
 					throw new InterruptedException();
-				}	
+				}
 			}
 		}
 	}
@@ -130,5 +130,5 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 		} else if (throwable instanceof InterruptedException) {
 			throw (InterruptedException)throwable;
 		}
-	}	
+	}
 }

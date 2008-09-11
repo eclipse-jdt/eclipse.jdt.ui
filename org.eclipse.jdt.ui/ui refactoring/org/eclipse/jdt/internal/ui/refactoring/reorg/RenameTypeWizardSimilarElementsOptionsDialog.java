@@ -33,9 +33,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 
 /**
  * Option dialog for selecting a similarly named element renaming strategy
- * 
+ *
  * @since 3.2
- * 
+ *
  */
 public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog {
 
@@ -62,7 +62,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createMessageArea(Composite parent) {
@@ -155,8 +155,8 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 
 		return messageComposite;
 	}
-	
-	
+
+
 	protected boolean customShouldTakeFocus() {
 		return true;
 	}

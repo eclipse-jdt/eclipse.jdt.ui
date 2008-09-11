@@ -28,15 +28,15 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RenameCuWizard extends RenameTypeWizard {
-	
+
 	public RenameCuWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.RenameCuWizard_defaultPageTitle, 
-			RefactoringMessages.RenameCuWizard_inputPage_description, 
+			RefactoringMessages.RenameCuWizard_defaultPageTitle,
+			RefactoringMessages.RenameCuWizard_inputPage_description,
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_CU,
 			IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE);
 	}
-	
+
 	protected RefactoringStatus validateNewName(String newName) {
 		String fullName= JavaModelUtil.getRenamedCUName(getCompilationUnit(), newName);
 		return super.validateNewName(fullName);
@@ -62,7 +62,7 @@ public class RenameCuWizard extends RenameTypeWizard {
 	protected boolean isRenameType() {
 		// the flag 'willRenameType' may change in checkInitialConditions(), but
 		// only from true to false.
-		return getCompilationUnitProcessor().isWillRenameType(); 
+		return getCompilationUnitProcessor().isWillRenameType();
 	}
 
 	private RenameCompilationUnitProcessor getCompilationUnitProcessor() {

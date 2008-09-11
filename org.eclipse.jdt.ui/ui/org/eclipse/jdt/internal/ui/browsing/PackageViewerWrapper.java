@@ -12,9 +12,6 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.ListenerList;
-
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.Transfer;
@@ -22,6 +19,9 @@ import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -204,7 +204,7 @@ class PackageViewerWrapper extends StructuredViewer {
 	public void addFilter(ViewerFilter filter) {
 		fViewer.addFilter(filter);
 	}
-	
+
 	public void setFilters(ViewerFilter[] filters) {
 		fViewer.setFilters(filters);
 	}
@@ -252,11 +252,11 @@ class PackageViewerWrapper extends StructuredViewer {
 	public void setSorter(ViewerSorter sorter) {
 		fViewer.setSorter(sorter);
 	}
-	
+
 	public void setComparator(ViewerComparator comparator) {
 		fViewer.setComparator(comparator);
 	}
-	
+
 	public void setUseHashlookup(boolean enable) {
 		fViewer.setUseHashlookup(enable);
 	}

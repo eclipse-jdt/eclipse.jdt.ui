@@ -64,21 +64,21 @@ import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWi
  * </p>
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * IWizard wizard= new JarImportWizard();
  * wizard.init(workbench, selection);
  * WizardDialog dialog= new WizardDialog(shell, wizard);
  * dialog.open();
  * </pre>
- * 
+ *
  * During the call to <code>open</code>, the wizard dialog is presented to
  * the user. When the user hits Finish, the user-selected JAR file is inspected
  * for associated refactorings, the wizard executes eventual refactorings,
  * copies the JAR file over its old version, the dialog closes, and the call to
  * <code>open</code> returns.
  * </p>
- * 
+ *
  * @since 3.2
  */
 public final class JarImportWizard extends BinaryRefactoringHistoryWizard implements IImportWizard {
@@ -164,7 +164,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	/**
 	 * Is the specified class path entry pointing to a valid location for
 	 * import?
-	 * 
+	 *
 	 * @param entry
 	 *            the class path entry
 	 * @return <code>true</code> if it is a valid package fragment root,
@@ -182,10 +182,10 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 
 	/**
 	 * Is the specified java project a valid project for import?
-	 * 
+	 *
 	 * @param project
 	 *            the java project
-	 * @return 
+	 * @return
 	 * 	           returns <code>true</code> if the project is valid
 	 * @throws JavaModelException
 	 *             if an error occurs
@@ -241,7 +241,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 
 	/**
 	 * Creates a new jar import wizard.
-	 * 
+	 *
 	 * @param wizard
 	 *            <code>true</code> if the wizard is part of an import wizard,
 	 *            <code>false</code> otherwise
@@ -292,7 +292,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 
 	/**
 	 * Returns the jar import data.
-	 * 
+	 *
 	 * @return the jar import data
 	 */
 	public JarImportData getImportData() {
@@ -324,7 +324,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 
 	/**
 	 * Returns the target path to be used for the updated classpath entry.
-	 * 
+	 *
 	 * @param entry
 	 *            the classpath entry
 	 * @return the target path, or <code>null</code>
@@ -353,7 +353,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 
 	/**
 	 * Returns the target uri taking any renaming of the jar file into account.
-	 * 
+	 *
 	 * @param uri
 	 *            the location uri
 	 * @return the target uri
@@ -405,7 +405,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 
 	/**
 	 * Replaces the old jar file with the new one.
-	 * 
+	 *
 	 * @param monitor
 	 *            the progress monitor to use
 	 * @throws CoreException

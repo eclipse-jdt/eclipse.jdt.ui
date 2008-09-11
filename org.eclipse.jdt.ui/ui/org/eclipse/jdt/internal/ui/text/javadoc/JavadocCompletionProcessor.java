@@ -19,8 +19,8 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 

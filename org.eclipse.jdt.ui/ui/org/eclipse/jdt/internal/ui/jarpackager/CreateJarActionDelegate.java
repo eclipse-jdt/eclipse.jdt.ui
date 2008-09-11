@@ -14,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -21,8 +23,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -51,13 +51,13 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		if (length < 1)
 			return;
 
-		// Create read multi status		
+		// Create read multi status
 		String message;
 		if (length > 1)
-			message= JarPackagerMessages.JarFileExportOperation_creationOfSomeJARsFailed; 
+			message= JarPackagerMessages.JarFileExportOperation_creationOfSomeJARsFailed;
 		else
-			message= JarPackagerMessages.JarFileExportOperation_jarCreationFailed; 
-		MultiStatus readStatus= new MultiStatus(JavaPlugin.getPluginId(), 0, message, null); 
+			message= JarPackagerMessages.JarFileExportOperation_jarCreationFailed;
+		MultiStatus readStatus= new MultiStatus(JavaPlugin.getPluginId(), 0, message, null);
 		JarPackageData[] jarPackages= readJarPackages(descriptions, readStatus);
 		if (jarPackages.length > 0) {
 			IStatus status= export(jarPackages);
@@ -72,9 +72,9 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			mergedStatus.merge(status);
 		} else
 			mergedStatus= readStatus;
-		
+
 		if (!mergedStatus.isOK())
-			ErrorDialog.openError(getShell(), JarPackagerMessages.CreateJarActionDelegate_jarExport_title, null, mergedStatus); 
+			ErrorDialog.openError(getShell(), JarPackagerMessages.CreateJarActionDelegate_jarExport_title, null, mergedStatus);
 	}
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {
@@ -95,7 +95,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			//PlatformUI.getWorkbench().getProgressService().run(false, true, op); // see bug 118152
 		} catch (InvocationTargetException ex) {
 			if (ex.getTargetException() != null) {
-				ExceptionHandler.handle(ex, shell, JarPackagerMessages.CreateJarActionDelegate_jarExportError_title, JarPackagerMessages.CreateJarActionDelegate_jarExportError_message); 
+				ExceptionHandler.handle(ex, shell, JarPackagerMessages.CreateJarActionDelegate_jarExportError_title, JarPackagerMessages.CreateJarActionDelegate_jarExportError_message);
 				return null;
 			}
 		} catch (InterruptedException e) {
@@ -104,7 +104,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		}
 		return op.getStatus();
 	}
-	
+
 	/**
 	 * Reads the JAR package spec from file.
 	 * @param description the description file
@@ -124,7 +124,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			jarPackage.setSaveManifest(false);
 			jarPackage.setSaveDescription(false);
 		} catch (CoreException ex) {
-				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorReadingFile, new Object[] {BasicElementLabels.getPathLabel(description.getFullPath(), false), ex.getStatus().getMessage()}); 
+				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorReadingFile, new Object[] {BasicElementLabels.getPathLabel(description.getFullPath(), false), ex.getStatus().getMessage()});
 				addToStatus(readStatus, message, ex);
 				return null;
 		} finally {
@@ -136,7 +136,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 					reader.close();
 			}
 			catch (CoreException ex) {
-				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorClosingJarPackageDescriptionReader, BasicElementLabels.getPathLabel(description.getFullPath(), false)); 
+				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorClosingJarPackageDescriptionReader, BasicElementLabels.getPathLabel(description.getFullPath(), false));
 				addToStatus(readStatus, message, ex);
 			}
 		}

@@ -37,11 +37,11 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 
 /* package */ class SnippetFinder extends GenericVisitor {
-	
+
 	public static class Match {
 		private List fNodes;
 		private Map fLocalMappings;
-		
+
 		public Match() {
 			fNodes= new ArrayList(10);
 			fLocalMappings= new HashMap();
@@ -56,8 +56,8 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 			if(((ASTNode)fNodes.get(0)).getParent() != parent)
 				return false;
 			// Here we know that we have two elements. In this case the
-			// parent must be a block or a switch statement. Otherwise a 
-			// snippet like "if (true) foo(); else foo();" would match 
+			// parent must be a block or a switch statement. Otherwise a
+			// snippet like "if (true) foo(); else foo();" would match
 			// the pattern "foo(); foo();"
 			int nodeType= parent.getNodeType();
 			return nodeType == ASTNode.BLOCK || nodeType == ASTNode.SWITCH_STATEMENT;
@@ -82,7 +82,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		 * Tests if the whole duplicate is the full body of a method. If so
 		 * don't replace it since we would replace a method body with a new
 		 * method body which doesn't make to much sense.
-		 * 
+		 *
 		 * @return whether the duplicte is the whole method body
 		 */
 		public boolean isMethodBody() {
@@ -100,16 +100,16 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 			return (MethodDeclaration)ASTNodes.getParent(first, ASTNode.METHOD_DECLARATION);
 		}
 	}
-	
+
 	private class Matcher extends ASTMatcher {
 		public boolean match(SimpleName candidate, Object s) {
 			if (!(s instanceof SimpleName))
 				return false;
-				
+
 			SimpleName snippet= (SimpleName)s;
 			if (candidate.isDeclaration() != snippet.isDeclaration())
 				return false;
-			
+
 			IBinding cb= candidate.resolveBinding();
 			IBinding sb= snippet.resolveBinding();
 			if (cb == null || sb == null)
@@ -128,7 +128,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 				fMatch.addLocal(vsb, candidate);
 				return true;
 			}
-			return Bindings.equals(cb, sb);	
+			return Bindings.equals(cb, sb);
 		}
 	}
 
@@ -138,14 +138,14 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	private int fIndex;
 	private Matcher fMatcher;
 	private int fTypes;
-	
+
 	private SnippetFinder(ASTNode[] snippet) {
 		super(true);
 		fSnippet= snippet;
 		fMatcher= new Matcher();
 		reset();
 	}
-	
+
 	public static Match[] perform(ASTNode start, ASTNode[] snippet) {
 		Assert.isTrue(start instanceof AbstractTypeDeclaration || start instanceof AnonymousClassDeclaration);
 		SnippetFinder finder= new SnippetFinder(snippet);
@@ -153,7 +153,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		for (Iterator iter = finder.fResult.iterator(); iter.hasNext();) {
 			Match match = (Match)iter.next();
 			ASTNode[] nodes= match.getNodes();
-			// doesn't match if the candidate is the left hand side of an 
+			// doesn't match if the candidate is the left hand side of an
 			// assignment and the snippet consists of a single node.
 			// Otherwise y= i; i= z; results in y= e(); e()= z;
 			if (nodes.length == 1 && isLeftHandSideOfAssignment(nodes[0])) {
@@ -162,45 +162,45 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		}
 		return (Match[])finder.fResult.toArray(new Match[finder.fResult.size()]);
 	}
-	
+
 	private static boolean isLeftHandSideOfAssignment(ASTNode node) {
 		ASTNode parent= node.getParent();
 		return parent != null && parent.getNodeType() == ASTNode.ASSIGNMENT && ((Assignment)parent).getLeftHandSide() == node;
 	}
-	
+
 	public boolean visit(TypeDeclaration node) {
 		if (++fTypes > 1)
 			return false;
 		return super.visit(node);
 	}
-	
+
 	public void endVisit(TypeDeclaration node) {
 		--fTypes;
 		super.endVisit(node);
 	}
-	
+
 	public boolean visit(EnumDeclaration node) {
 		if (++fTypes > 1)
 			return false;
 		return super.visit(node);
 	}
-	
+
 	public void endVisit(EnumDeclaration node) {
 		--fTypes;
 		super.endVisit(node);
 	}
-	
+
 	public boolean visit(AnnotationTypeDeclaration node) {
 		if (++fTypes > 1)
 			return false;
 		return super.visit(node);
 	}
-	
+
 	public void endVisit(AnnotationTypeDeclaration node) {
 		--fTypes;
 		super.endVisit(node);
 	}
-	
+
 	protected boolean visitNode(ASTNode node) {
 		if (matches(node)) {
 			return false;
@@ -211,7 +211,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		}
 		return true;
 	}
-	
+
 	private boolean matches(ASTNode node) {
 		if (isSnippetNode(node))
 			return false;
@@ -235,7 +235,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		fIndex= 0;
 		fMatch= new Match();
 	}
-	
+
 	private boolean isSnippetNode(ASTNode node) {
 		for (int i= 0; i < fSnippet.length; i++) {
 			if (node == fSnippet[i])

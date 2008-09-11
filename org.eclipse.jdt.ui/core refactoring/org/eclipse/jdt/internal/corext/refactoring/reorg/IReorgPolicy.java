@@ -34,40 +34,40 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public interface IReorgPolicy extends IReorgDestinationValidator {
-	
+
 	/**
 	 * @return the unique id of this policy
 	 */
 	public String getPolicyId();
-	
+
 	/**
 	 * @return the source resources to reorg
 	 */
 	public IResource[] getResources();
-	
+
 	/**
 	 * @return the source java elements to reorg
 	 */
 	public IJavaElement[] getJavaElements();
-	
+
 	/**
 	 * @return true if this policy can handle the source elements
 	 * @throws JavaModelException
 	 */
 	public boolean canEnable() throws JavaModelException;
-	
+
 	/**
 	 * @return the save mode required for this reorg policy
-	 * 
+	 *
 	 * @see RefactoringSaveHelper#SAVE_ALL
 	 * @see RefactoringSaveHelper#SAVE_JAVA_ONLY_UPDATES
 	 * @see RefactoringSaveHelper#SAVE_NON_JAVA_UPDATES
 	 */
 	public int getSaveMode();
-	
+
 	/**
 	 * Can destination be a target for the given source elements?
-	 * 
+	 *
 	 * @param destination the destination to verify
 	 * @return OK status if valid destination
 	 * @throws JavaModelException
@@ -78,26 +78,26 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	 * @param destination the destination for this reorg
 	 */
 	public void setDestination(IReorgDestination destination);
-	
+
 	/**
 	 * @return the destination of this reorg or null if not a resource
 	 */
 	public IResource getResourceDestination();
-	
+
 	/**
 	 * @return the destination of this reorg or null if not a java element
 	 */
 	public IJavaElement getJavaElementDestination();
-	
+
 	/**
 	 * @return a descriptor describing a reorg from source to target
 	 */
 	public ChangeDescriptor getDescriptor();
 
-	
+
 	/**
 	 * Initializes the reorg policy with arguments from a script.
-	 * 
+	 *
 	 * @param arguments
 	 *            the arguments
 	 * @return an object describing the status of the initialization. If the
@@ -105,16 +105,16 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	 *         will not be executed.
 	 */
 	public RefactoringStatus initialize(JavaRefactoringArguments arguments);
-	
+
 	public RefactoringStatus checkFinalConditions(IProgressMonitor monitor, CheckConditionsContext context, IReorgQueries queries) throws CoreException;
-	
+
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException;
-	
+
 	public static interface ICopyPolicy extends IReorgPolicy{
 		public Change createChange(IProgressMonitor monitor, INewNameQueries queries) throws JavaModelException;
 		public ReorgExecutionLog getReorgExecutionLog();
 	}
-	
+
 	public static interface IMovePolicy extends IReferenceUpdating, IQualifiedNameUpdating, IReorgPolicy{
 		public Change createChange(IProgressMonitor monitor) throws JavaModelException;
 		public Change postCreateChange(Change[] participantChanges, IProgressMonitor monitor) throws CoreException;

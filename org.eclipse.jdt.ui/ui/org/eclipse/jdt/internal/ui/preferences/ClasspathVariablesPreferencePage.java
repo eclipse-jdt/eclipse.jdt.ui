@@ -12,10 +12,10 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Map;
 
-import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -38,10 +38,10 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	public static final String ID= JavaUI.ID_CLASSPATH_VARIABLES_PREFERENCE_PAGE;
 
 	public static final String DATA_SELECT_VARIABLE= "ClasspathVariablesPreferencePage.select_var"; //$NON-NLS-1$
-	
+
 	private VariableBlock fVariableBlock;
 	private String fStoredSettings;
-	
+
 	/**
 	 * Constructor for ClasspathVariablesPreferencePage
 	 */
@@ -49,13 +49,13 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		fVariableBlock= new VariableBlock(true, null);
 		fStoredSettings= null;
-		
+
 		// title only used when page is shown programatically
-		setTitle(PreferencesMessages.ClasspathVariablesPreferencePage_title); 
-		setDescription(PreferencesMessages.ClasspathVariablesPreferencePage_description); 
+		setTitle(PreferencesMessages.ClasspathVariablesPreferencePage_title);
+		setDescription(PreferencesMessages.ClasspathVariablesPreferencePage_description);
 		noDefaultAndApplyButton();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -63,7 +63,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);
-	}	
+	}
 
 	/*
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
@@ -73,13 +73,13 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		Dialog.applyDialogFont(result);
 		return result;
 	}
-	
+
 	/*
 	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
 	}
-	
+
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
@@ -96,7 +96,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		JavaPlugin.getDefault().savePluginPreferences();
 		return fVariableBlock.performOk();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
@@ -108,8 +108,8 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 			}
 		} else {
 			if (fVariableBlock.hasChanges()) {
-				String title= PreferencesMessages.ClasspathVariablesPreferencePage_savechanges_title; 
-				String message= PreferencesMessages.ClasspathVariablesPreferencePage_savechanges_message; 
+				String title= PreferencesMessages.ClasspathVariablesPreferencePage_savechanges_title;
+				String message= PreferencesMessages.ClasspathVariablesPreferencePage_savechanges_message;
 				if (MessageDialog.openQuestion(getShell(), title, message)) {
 					performOk();
 				}
@@ -119,7 +119,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		}
 		super.setVisible(visible);
 	}
-	
+
 	private String getCurrentSettings() {
 		StringBuffer buf= new StringBuffer();
 		String[] names= JavaCore.getClasspathVariableNames();
@@ -134,7 +134,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		}
 		return buf.toString();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */

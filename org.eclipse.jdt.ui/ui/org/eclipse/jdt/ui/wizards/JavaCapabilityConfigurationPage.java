@@ -13,6 +13,12 @@ package org.eclipse.jdt.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.filesystem.URIUtil;
 
 import org.eclipse.core.runtime.CoreException;
@@ -24,12 +30,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -46,8 +46,8 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
- * Basic wizard page for creating new Java projects. This page can be used in 
- * project creation wizards. The page shows UI to configure the project with a Java 
+ * Basic wizard page for creating new Java projects. This page can be used in
+ * project creation wizards. The page shows UI to configure the project with a Java
  * build path and output location. On finish the page will also configure the Java nature.
  * <p>
  * This is a replacement for {@link NewJavaProjectWizardPage} with a cleaner API.
@@ -59,32 +59,32 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
  * <p>
  * Clients may instantiate or subclass.
  * </p>
- * 
+ *
  * @since 2.0
  */
 public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 
 	private static final String PAGE_NAME= "JavaCapabilityConfigurationPage"; //$NON-NLS-1$
-	
+
 	private IJavaProject fJavaProject;
 	private BuildPathsBlock fBuildPathsBlock;
-	
+
 	/**
 	 * Creates a wizard page that can be used in a Java project creation wizard.
 	 * It contains UI to configure a the classpath and the output folder.
-	 * 
+	 *
 	 * <p>
 	 * After constructing, a call to {@link #init(IJavaProject, IPath, IClasspathEntry[], boolean)} is required.
 	 * </p>
-	 */	
+	 */
 	public JavaCapabilityConfigurationPage() {
         super(PAGE_NAME);
         fJavaProject= null;
-        
-        setTitle(NewWizardMessages.JavaCapabilityConfigurationPage_title); 
-        setDescription(NewWizardMessages.JavaCapabilityConfigurationPage_description); 
+
+        setTitle(NewWizardMessages.JavaCapabilityConfigurationPage_title);
+        setDescription(NewWizardMessages.JavaCapabilityConfigurationPage_description);
 	}
-    
+
     private BuildPathsBlock getBuildPathsBlock() {
         if (fBuildPathsBlock == null) {
             IStatusChangeListener listener= new IStatusChangeListener() {
@@ -96,7 +96,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
         }
         return fBuildPathsBlock;
     }
-    
+
     /*
      * @see org.eclipse.jface.dialogs.DialogPage#dispose()
      * @since 3.3
@@ -111,7 +111,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
         	}
         }
     }
-	
+
 	/**
 	 * Clients can override this method to choose if the new source page is used. The new source page
 	 * requires that the project is already created as Java project. The page will directly manipulate the classpath.
@@ -149,11 +149,11 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}
 		getBuildPathsBlock().init(jproject, defaultOutputLocation, defaultEntries);
 		fJavaProject= jproject;
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see WizardPage#createControl
-	 */	
+	 */
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
@@ -164,11 +164,11 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
 		setControl(composite);
 	}
-		
+
 	/**
-	 * Returns the currently configured output location. Note that the returned path 
+	 * Returns the currently configured output location. Note that the returned path
 	 * might not be a valid path.
-	 * 
+	 *
 	 * @return the currently configured output location
 	 */
 	public IPath getOutputLocation() {
@@ -176,34 +176,34 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 
 	/**
-	 * Returns the currently configured classpath. Note that the classpath might 
+	 * Returns the currently configured classpath. Note that the classpath might
 	 * not be valid.
-	 * 
+	 *
 	 * @return the currently configured classpath
-	 */	
+	 */
 	public IClasspathEntry[] getRawClassPath() {
 		return getBuildPathsBlock().getRawClassPath();
 	}
-	
-	/**
-	 * Returns the Java project that was passed in {@link #init(IJavaProject, IPath, IClasspathEntry[], boolean)} or <code>null</code> if the 
-	 * page has not been initialized yet.
-	 * 
-	 * @return the managed Java project or <code>null</code>
-	 */	
-	public IJavaProject getJavaProject() {
-		return fJavaProject;
-	}	
-	
 
 	/**
-	 * Returns the runnable that will create the Java project or <code>null</code> if the page has 
-	 * not been initialized. The runnable sets the project's classpath and output location to the values 
-	 * configured in the page and adds the Java nature if not set yet. The method requires that the 
+	 * Returns the Java project that was passed in {@link #init(IJavaProject, IPath, IClasspathEntry[], boolean)} or <code>null</code> if the
+	 * page has not been initialized yet.
+	 *
+	 * @return the managed Java project or <code>null</code>
+	 */
+	public IJavaProject getJavaProject() {
+		return fJavaProject;
+	}
+
+
+	/**
+	 * Returns the runnable that will create the Java project or <code>null</code> if the page has
+	 * not been initialized. The runnable sets the project's classpath and output location to the values
+	 * configured in the page and adds the Java nature if not set yet. The method requires that the
 	 * project is created and opened.
 	 *
 	 * @return the runnable that creates the new Java project
-	 */		
+	 */
 	public IRunnableWithProgress getRunnable() {
 		if (getJavaProject() != null) {
 			return new IRunnableWithProgress() {
@@ -216,13 +216,13 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 				}
 			};
 		}
-		return null;	
+		return null;
 	}
 
 	/**
 	 * Helper method to create and open a IProject. The project location
 	 * is configured. No natures are added.
-	 * 
+	 *
 	 * @param project The handle of the project to create.
 	 * @param locationPath The location of the project <code>null</code> to create the project in the workspace
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
@@ -234,11 +234,11 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
 		createProject(project, locationPath != null ? URIUtil.toURI(locationPath) : null, monitor);
 	}
-	
+
 	/**
 	 * Helper method to create and open a IProject. The project location
 	 * is configured. No natures are added.
-	 * 
+	 *
 	 * @param project The handle of the project to create.
 	 * @param locationURI The location of the project or <code>null</code> to create the project in the workspace
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
@@ -250,10 +250,10 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	public static void createProject(IProject project, URI locationURI, IProgressMonitor monitor) throws CoreException {
 		BuildPathsBlock.createProject(project, locationURI, monitor);
 	}
-	
+
 	/**
 	 * Adds the Java nature to the project (if not set yet) and configures the build classpath.
-	 * 
+	 *
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
 	 * progress reporting is not desired
 	 * @throws CoreException Thrown when the configuring the Java project failed.
@@ -263,10 +263,10 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		
-		int nSteps= 6;			
-		monitor.beginTask(NewWizardMessages.JavaCapabilityConfigurationPage_op_desc_java, nSteps); 
-		
+
+		int nSteps= 6;
+		monitor.beginTask(NewWizardMessages.JavaCapabilityConfigurationPage_op_desc_java, nSteps);
+
 		try {
 			IProject project= getJavaProject().getProject();
 			BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
@@ -275,12 +275,12 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 			throw new InterruptedException();
 		} finally {
 			monitor.done();
-		}			
+		}
 	}
-	
+
 	/**
 	 * Transfers the focus into this page.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	protected void setFocus() {

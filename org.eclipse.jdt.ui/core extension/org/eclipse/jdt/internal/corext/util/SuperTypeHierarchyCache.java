@@ -22,42 +22,42 @@ import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
- * A thread-safe cache for super type hierarchies.  
+ * A thread-safe cache for super type hierarchies.
  */
 public class SuperTypeHierarchyCache {
-	
+
 	private static class HierarchyCacheEntry implements ITypeHierarchyChangedListener {
-		
+
 		private ITypeHierarchy fTypeHierarchy;
 		private long fLastAccess;
-		
+
 		public HierarchyCacheEntry(ITypeHierarchy hierarchy) {
 			fTypeHierarchy= hierarchy;
 			fTypeHierarchy.addTypeHierarchyChangedListener(this);
 			markAsAccessed();
 		}
-		
+
 		public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 			removeHierarchyEntryFromCache(this);
 		}
 
 		public ITypeHierarchy getTypeHierarchy() {
 			return fTypeHierarchy;
-		}		
+		}
 
 		public void markAsAccessed() {
 			fLastAccess= System.currentTimeMillis();
 		}
-		
+
 		public long getLastAccess() {
 			return fLastAccess;
 		}
-		
+
 		public void dispose() {
 			fTypeHierarchy.removeTypeHierarchyChangedListener(this);
 			fTypeHierarchy= null;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */
@@ -66,26 +66,26 @@ public class SuperTypeHierarchyCache {
 		}
 
 	}
-	
+
 
 	private static final int CACHE_SIZE= 8;
 
 	private static ArrayList fgHierarchyCache= new ArrayList(CACHE_SIZE);
 	private static Map fgMethodOverrideTesterCache= new LRUMap(CACHE_SIZE);
-	
+
 	private static int fgCacheHits= 0;
 	private static int fgCacheMisses= 0;
-	
+
 	/**
 	 * Returns a super type hierarchy that contains the given type.
 	 * The returned hierarchy may actually be based on a subtype of the
 	 * requested type. Therefore, queries such as {@link ITypeHierarchy#getAllClasses()}
 	 * or {@link ITypeHierarchy#getRootInterfaces()} may return more types than the same
 	 * queries on a type hierarchy for just the given type.
-	 * 
-	 * @param type the focus type 
+	 *
+	 * @param type the focus type
 	 * @return a supertype hierarchy that contains <code>type</code>
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type) throws JavaModelException {
 		return getTypeHierarchy(type, null);
@@ -108,7 +108,7 @@ public class SuperTypeHierarchyCache {
 		}
 		return test;
 	}
-	
+
 	private static void removeMethodOverrideTester(ITypeHierarchy hierarchy) {
 		synchronized (fgMethodOverrideTesterCache) {
 			for (Iterator iter= fgMethodOverrideTesterCache.values().iterator(); iter.hasNext();) {
@@ -126,11 +126,11 @@ public class SuperTypeHierarchyCache {
 	 * requested type. Therefore, queries such as {@link ITypeHierarchy#getAllClasses()}
 	 * or {@link ITypeHierarchy#getRootInterfaces()} may return more types than the same
 	 * queries on a type hierarchy for just the given type.
-	 * 
-	 * @param type the focus type 
+	 *
+	 * @param type the focus type
 	 * @param progressMonitor progress monitor
 	 * @return a supertype hierarchy that contains <code>type</code>
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type, IProgressMonitor progressMonitor) throws JavaModelException {
 		ITypeHierarchy hierarchy= findTypeHierarchyInCache(type);
@@ -143,7 +143,7 @@ public class SuperTypeHierarchyCache {
 		}
 		return hierarchy;
 	}
-	
+
 	private static void addTypeHierarchyToCache(ITypeHierarchy hierarchy) {
 		synchronized (fgHierarchyCache) {
 			int nEntries= fgHierarchyCache.size();
@@ -165,7 +165,7 @@ public class SuperTypeHierarchyCache {
 				if (!obsoleteHierarchies.isEmpty()) {
 					for (int i= 0; i < obsoleteHierarchies.size(); i++) {
 						removeHierarchyEntryFromCache((HierarchyCacheEntry) obsoleteHierarchies.get(i));
-					}			
+					}
 				} else if (oldest != null) {
 					removeHierarchyEntryFromCache(oldest);
 				}
@@ -174,18 +174,18 @@ public class SuperTypeHierarchyCache {
 			fgHierarchyCache.add(newEntry);
 		}
 	}
-	
+
 
 	/**
 	 * Check if the given type is in the hierarchy cache.
 	 * @param type a type
 	 * @return <code>true</code> if a hierarchy for the given type is cached
-	 */	
+	 */
 	public static boolean hasInCache(IType type) {
 		return findTypeHierarchyInCache(type) != null;
 	}
-	
-			
+
+
 	private static ITypeHierarchy findTypeHierarchyInCache(IType type) {
 		synchronized (fgHierarchyCache) {
 			for (int i= fgHierarchyCache.size() - 1; i>= 0; i--) {
@@ -203,7 +203,7 @@ public class SuperTypeHierarchyCache {
 		}
 		return null;
 	}
-	
+
 	private static void removeHierarchyEntryFromCache(HierarchyCacheEntry entry) {
 		synchronized (fgHierarchyCache) {
 			removeMethodOverrideTester(entry.getTypeHierarchy());
@@ -211,8 +211,8 @@ public class SuperTypeHierarchyCache {
 			fgHierarchyCache.remove(entry);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Gets the number of times the hierarchy could be taken from the hierarchy.
 	 * @return Returns a int
@@ -220,11 +220,11 @@ public class SuperTypeHierarchyCache {
 	public static int getCacheHits() {
 		return fgCacheHits;
 	}
-	
+
 	/**
 	 * Gets the number of times the hierarchy was build. Used for testing.
 	 * @return Returns a int
-	 */	
+	 */
 	public static int getCacheMisses() {
 		return fgCacheMisses;
 	}

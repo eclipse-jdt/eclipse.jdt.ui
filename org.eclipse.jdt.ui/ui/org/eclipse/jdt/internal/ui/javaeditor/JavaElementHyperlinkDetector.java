@@ -81,7 +81,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	/**
 	 * Selects the openable elements out of the given ones.
-	 * 
+	 *
 	 * @param elements the elements to filter
 	 * @return the openable elements
 	 * @since 3.4

@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * <p>Note, if a extension does not specify marker types it will be only called for problem of type
  * <code>org.eclipse.jdt.core.problem</code>, <code>org.eclipse.jdt.core.buildpath_problem</code>
  * and <code>org.eclipse.jdt.core.task</code>; compatible with the behavior prior to 3.2</p>
- * 
+ *
  * @since 3.0
  */
 public interface IQuickFixProcessor {

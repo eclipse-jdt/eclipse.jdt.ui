@@ -30,27 +30,27 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @see SaveParticipantDescriptor
  * @see CompilationUnitDocumentProvider
  * @since 3.3
  */
 public interface IPostSaveListener {
-	
+
 	/**
 	 * A human readable name of this listener.
-	 * 
+	 *
 	 * @return the name
 	 */
 	String getName();
-	
+
 	/**
 	 * The unique id of this listener.
-	 * 
+	 *
 	 * @return a non-empty id
 	 */
 	String getId();
-	
+
 	/**
 	 * Does this save participant need to be informed about the changed
 	 * regions in the given compilation unit on next call to
@@ -59,7 +59,7 @@ public interface IPostSaveListener {
 	 * <strong>This should return <code>false</code> whenever possible
 	 * because calculating changed regions is expensive.</strong>
 	 * </p>
-	 * 
+	 *
 	 * @param compilationUnit
 	 * 				the compilation unit which is about to be saved
 	 * @return true
@@ -69,7 +69,7 @@ public interface IPostSaveListener {
 	 * @since 3.4
 	 */
 	boolean needsChangedRegions(ICompilationUnit compilationUnit) throws CoreException;
-	
+
 	/**
 	 * Informs this post save listener that the given <code>compilationUnit</code>
 	 * has been saved by the {@link CompilationUnitDocumentProvider}. The listener
@@ -97,7 +97,7 @@ public interface IPostSaveListener {
 	 * 				the progress monitor for reporting progress
 	 * @throws CoreException
 	 * 				if something went wrong
-	 * 
+	 *
 	 * @see CompilationUnitDocumentProvider
 	 */
 	void saved(ICompilationUnit compilationUnit, IRegion[] changedRegions, IProgressMonitor monitor) throws CoreException;

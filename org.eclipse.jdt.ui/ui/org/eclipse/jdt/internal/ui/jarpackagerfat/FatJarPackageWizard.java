@@ -16,11 +16,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Wizard for exporting resources from the workspace to a Fat Java Archive (JAR) file.
  * The exported jar will contain all required libraries.
- * 
+ *
  * @since 3.4
  */
 public class FatJarPackageWizard extends Wizard implements IExportWizard {
@@ -99,7 +99,7 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 
 	/**
 	 * Exports the JAR package.
-	 * 
+	 *
 	 * @param op the operation to run
 	 * @param wizardPageStatus the status returned by the wizard page
 	 * @return a boolean indicating success or failure
@@ -175,7 +175,7 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 
 	/**
 	 * Initializes this wizard from the given JAR package description.
-	 * 
+	 *
 	 * @param workbench
 	 *            the workbench which launched this wizard
 	 * @param jarPackage
@@ -210,9 +210,9 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 			if (dialog.open() != Window.OK)
 				return false;
 		}
-		
-		fJarPackageWizardPage.exportAntScript(status); 
-		
+
+		fJarPackageWizardPage.exportAntScript(status);
+
 		if (!executeExportOperation(fJarPackage.createJarExportRunnable(getShell()), status))
 			return false;
 

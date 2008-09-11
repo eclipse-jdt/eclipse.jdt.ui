@@ -31,20 +31,20 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 
 /**
- * The code formatter preference page. 
+ * The code formatter preference page.
  */
 
 public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
-    
+
     private static final String FORMATTER_DIALOG_PREFERENCE_KEY= "formatter_page"; //$NON-NLS-1$
 
 	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".codeformatter"; //$NON-NLS-1$
-    
+
 	/**
      * Some Java source code used for preview.
      */
     protected final String PREVIEW= "/**\n* " + //$NON-NLS-1$
-    		FormatterMessages.CodingStyleConfigurationBlock_preview_title + 
+    		FormatterMessages.CodingStyleConfigurationBlock_preview_title +
     		"\n*/\n\n" + //$NON-NLS-1$
     		"package mypackage; import java.util.LinkedList; public class MyIntStack {" + //$NON-NLS-1$
     		"private final LinkedList fStack;" + //$NON-NLS-1$
@@ -53,7 +53,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
     		"public void push(int elem){fStack.addFirst(new Integer(elem));}" + //$NON-NLS-1$
     		"public boolean isEmpty() {return fStack.isEmpty();}" + //$NON-NLS-1$
     		"}"; //$NON-NLS-1$
-    
+
 	private class PreviewController implements Observer {
 
 		public PreviewController(ProfileManager profileManager) {
@@ -76,7 +76,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 
 	}
 
-    
+
     /**
 	 * The JavaPreview.
 	 */
@@ -89,15 +89,15 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 	protected IProfileVersioner createProfileVersioner() {
 	    return new ProfileVersioner();
     }
-	
+
 	protected ProfileStore createProfileStore(IProfileVersioner versioner) {
 	    return new FormatterProfileStore(versioner);
     }
-	
+
 	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
 	    return new FormatterProfileManager(profiles, context, access, profileVersioner);
     }
-	
+
 	protected void configurePreview(Composite composite, int numColumns, ProfileManager profileManager) {
 		createLabel(composite, FormatterMessages.CodingStyleConfigurationBlock_preview_label_text, numColumns);
 		CompilationUnitPreview result= new CompilationUnitPreview(profileManager.getSelected().getSettings(), composite);
@@ -110,11 +110,11 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 		gd.widthHint = 0;
 		gd.heightHint = 0;
 		fJavaPreview.getControl().setLayoutData(gd);
-		
+
 		new PreviewController(profileManager);
 	}
 
-    
+
     protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
         return new FormatterModifyDialog(shell, profile, profileManager, profileStore, newProfile, FORMATTER_DIALOG_PREFERENCE_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }

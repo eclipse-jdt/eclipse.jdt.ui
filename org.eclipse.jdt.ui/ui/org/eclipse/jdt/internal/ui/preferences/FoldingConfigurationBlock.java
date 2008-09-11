@@ -58,18 +58,18 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * Configures Java Editor folding preferences.
- * 
+ *
  * @since 3.0
  */
 class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
-	
+
 	private static class ErrorPreferences implements IJavaFoldingPreferenceBlock {
 		private String fMessage;
-		
+
 		protected ErrorPreferences(String message) {
 			fMessage= message;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferences#createControl(org.eclipse.swt.widgets.Group)
 		 */
@@ -79,7 +79,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 
 			Label label= new Label(inner, SWT.CENTER);
 			label.setText(fMessage);
-			
+
 			return inner;
 		}
 
@@ -94,24 +94,24 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 
 		public void dispose() {
 		}
-		
+
 	}
 
 	/** The overlay preference store. */
 	private final OverlayPreferenceStore fStore;
-	
+
 	/* The controls */
 	private Combo fProviderCombo;
 	private Button fFoldingCheckbox;
 	private ComboViewer fProviderViewer;
 	private Composite fGroup;
 	private StackLayout fStackLayout;
-	
+
 	/* the model */
 	private final Map fProviderDescriptors;
 	private final Map fProviderPreferences;
 	private final Map fProviderControls;
-	
+
 
 	public FoldingConfigurationBlock(OverlayPreferenceStore store) {
 		Assert.isNotNull(store);
@@ -134,12 +134,12 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 	}
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		
+
 		ArrayList overlayKeys= new ArrayList();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_ENABLED));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOLDING_PROVIDER));
-		
+
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
@@ -147,7 +147,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	/**
 	 * Creates page for folding preferences.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
@@ -164,16 +164,16 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		PixelConverter pc= new PixelConverter(composite);
 		layout.verticalSpacing= pc.convertHeightInCharsToPixels(1) / 2;
 		composite.setLayout(layout);
-		
-		
+
+
 		/* check box for new editors */
 		fFoldingCheckbox= new Button(composite, SWT.CHECK);
-		fFoldingCheckbox.setText(PreferencesMessages.FoldingConfigurationBlock_enable); 
+		fFoldingCheckbox.setText(PreferencesMessages.FoldingConfigurationBlock_enable);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
 		fFoldingCheckbox.setLayoutData(gd);
 		fFoldingCheckbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				boolean enabled= fFoldingCheckbox.getSelection(); 
+				boolean enabled= fFoldingCheckbox.getSelection();
 				fStore.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, enabled);
 				updateCheckboxDependencies();
 			}
@@ -181,7 +181,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-		
+
 		Label label= new Label(composite, SWT.CENTER);
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		label.setLayoutData(gd);
@@ -193,16 +193,16 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			GridLayout gridLayout= new GridLayout(2, false);
 			gridLayout.marginWidth= 0;
 			comboComp.setLayout(gridLayout);
-		
+
 			Label comboLabel= new Label(comboComp, SWT.CENTER);
 			gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER);
 			comboLabel.setLayoutData(gd);
-			comboLabel.setText(PreferencesMessages.FoldingConfigurationBlock_combo_caption); 
-			
+			comboLabel.setText(PreferencesMessages.FoldingConfigurationBlock_combo_caption);
+
 			label= new Label(composite, SWT.CENTER);
 			gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 			label.setLayoutData(gd);
-			
+
 			fProviderCombo= new Combo(comboComp, SWT.READ_ONLY | SWT.DROP_DOWN);
 			SWTUtil.setDefaultVisibleItemCount(fProviderCombo);
 			gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_CENTER);
@@ -210,7 +210,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 
 			fProviderViewer= createProviderViewer();
 		}
-		
+
 		Composite groupComp= new Composite(composite, SWT.NONE);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan= 2;
@@ -218,14 +218,14 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		GridLayout gridLayout= new GridLayout(1, false);
 		gridLayout.marginWidth= 0;
 		groupComp.setLayout(gridLayout);
-		
+
 		/* contributed provider preferences. */
 		fGroup= new Composite(groupComp, SWT.NONE);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
 		fGroup.setLayoutData(gd);
 		fStackLayout= new StackLayout();
 		fGroup.setLayout(fStackLayout);
-		
+
 		return composite;
 	}
 
@@ -260,7 +260,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			public Image getImage(Object element) {
 				return null;
 			}
-			
+
 			/*
 			 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 			 */
@@ -280,7 +280,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		});
 		viewer.setInput(fProviderDescriptors);
 		viewer.refresh();
-		
+
 		return viewer;
 	}
 
@@ -291,7 +291,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		String id= fStore.getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		JavaFoldingStructureProviderDescriptor desc= (JavaFoldingStructureProviderDescriptor) fProviderDescriptors.get(id);
 		IJavaFoldingPreferenceBlock prefs;
-		
+
 		if (desc == null) {
 			// safety in case there is no such descriptor
 			String message= Messages.format(PreferencesMessages.FoldingConfigurationBlock_error_not_exist, id);
@@ -309,12 +309,12 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 				}
 			}
 		}
-		
+
 		Control control= (Control) fProviderControls.get(id);
 		if (control == null) {
 			control= prefs.createControl(fGroup);
 			if (control == null) {
-				String message= PreferencesMessages.FoldingConfigurationBlock_info_no_preferences; 
+				String message= PreferencesMessages.FoldingConfigurationBlock_info_no_preferences;
 				control= new ErrorPreferences(message).createControl(fGroup);
 			} else {
 				fProviderControls.put(id, control);
@@ -325,7 +325,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		control.pack();
 		fGroup.layout();
 		fGroup.getParent().layout();
-		
+
 		prefs.initialize();
 	}
 
@@ -339,7 +339,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			prefs.performOk();
 		}
 	}
-	
+
 	public void performDefaults() {
 		restoreFromPreferences();
 		for (Iterator it= fProviderPreferences.values().iterator(); it.hasNext();) {
@@ -347,7 +347,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			prefs.performDefaults();
 		}
 	}
-	
+
 	public void dispose() {
 		for (Iterator it= fProviderPreferences.values().iterator(); it.hasNext();) {
 			IJavaFoldingPreferenceBlock prefs= (IJavaFoldingPreferenceBlock) it.next();
@@ -359,23 +359,23 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		boolean enabled= fStore.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 		fFoldingCheckbox.setSelection(enabled);
 		updateCheckboxDependencies();
-		
+
 		String id= fStore.getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		Object provider= fProviderDescriptors.get(id);
-		
+
 		// Fallback to default
 		if (provider == null) {
 			String message= Messages.format(PreferencesMessages.FoldingConfigurationBlock_warning_providerNotFound_resetToDefault, id);
 			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null));
-			
+
 			id= JavaPlugin.getDefault().getPreferenceStore().getDefaultString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
-			
+
 			provider= fProviderDescriptors.get(id);
 			Assert.isNotNull(provider);
-			
+
 			fStore.setToDefault(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		}
-		
+
 		if (fProviderViewer == null)
 			updateListDependencies();
 		else

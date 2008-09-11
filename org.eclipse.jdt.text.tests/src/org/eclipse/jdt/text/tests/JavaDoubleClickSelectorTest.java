@@ -28,18 +28,18 @@ import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
  * @since 3.1
  */
 public class JavaDoubleClickSelectorTest extends TestCase {
-	
+
 	private static class PublicSelector extends JavaDoubleClickSelector {
-		
+
 		public IRegion selectWord(IDocument document, int anchor) {
 			return super.selectWord(document, anchor);
 		}
 	}
-	
+
 	public static Test suite() {
 		return new TestSuite(JavaDoubleClickSelectorTest.class);
 	}
-	
+
 	private void assert14Selection(String content, int offset, int selOffset, int selLength) {
 		IDocument document= new Document(content);
 		PublicSelector selector= new PublicSelector();
@@ -47,7 +47,7 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 		IRegion selection= selector.selectWord(document, offset);
 		assertEquals(new Region(selOffset, selLength), selection);
 	}
-	
+
 	private void assert15Selection(String content, int offset, int selOffset, int selLength) {
 		IDocument document= new Document(content);
 		PublicSelector selector= new PublicSelector();
@@ -55,23 +55,23 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 		IRegion selection= selector.selectWord(document, offset);
 		assertEquals(new Region(selOffset, selLength), selection);
 	}
-	
+
 	public void testIdentifierBefore() throws Exception {
 		assert14Selection("  foobar  ", 2, 2, 6);
 	}
-	
+
 	public void testIdentifierInside() throws Exception {
 		assert14Selection("  foobar  ", 3, 2, 6);
 	}
-	
+
 	public void testIdentifierBehind() throws Exception {
 		assert14Selection("  foobar  ", 8, 8, 0);
 	}
-	
+
 	public void testWhitespaceBefore() throws Exception {
 		assert14Selection("  foobar  ", 1, 1, 0);
 	}
-	
+
 	public void testWhitespaceBehind() throws Exception {
 		assert14Selection("  foobar  ", 9, 9, 0);
 	}
@@ -139,19 +139,19 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 	public void test15AnnotationNoSpaceBehind() throws Exception {
 		assert15Selection("  @Deprecated  ", 13, 13, 0);
 	}
-	
+
 	public void testAnnotationNoIdStartBefore() {
 		assert15Selection("  @2foobar  ", 2, 2, 0);
 	}
-	
+
 	public void testAnnotationNoIdStartInside1() {
 		assert15Selection("  @2foobar  ", 3, 3, 7);
 	}
-	
+
 	public void testAnnotationNoIdStartInside2() {
 		assert15Selection("  @2foobar  ", 4, 3, 7);
 	}
-	
+
 	public void testAnnotationNoIdStartBehind() {
 		assert15Selection("  @2foobar  ", 10, 10, 0);
 	}

@@ -39,16 +39,16 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 abstract class JavaMatchFilter extends MatchFilter {
-	
+
 	public abstract boolean filters(JavaElementMatch match);
-	
+
 	/**
 	 * Returns whether this filter is applicable for this query
-	 * @param query 
+	 * @param query
 	 * @return returns <code>true</code> if this match filter is applicable for the given query
 	 */
 	public abstract boolean isApplicable(JavaSearchQuery query);
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.MatchFilter#filters(org.eclipse.search.ui.text.Match)
 	 */
@@ -58,9 +58,9 @@ abstract class JavaMatchFilter extends MatchFilter {
 		}
 		return false;
 	}
-	
+
 	private static final String SETTINGS_LAST_USED_FILTERS= "filters_last_used";  //$NON-NLS-1$
-	
+
 	public static MatchFilter[] getLastUsedFilters() {
 		String string= JavaPlugin.getDefault().getDialogSettings().get(SETTINGS_LAST_USED_FILTERS);
 		if (string != null && string.length() > 0) {
@@ -68,16 +68,16 @@ abstract class JavaMatchFilter extends MatchFilter {
 		}
 		return getDefaultFilters();
 	}
-	
+
 	public static void setLastUsedFilters(MatchFilter[] filters) {
 		String encoded= encodeFilters(filters);
 		JavaPlugin.getDefault().getDialogSettings().put(SETTINGS_LAST_USED_FILTERS, encoded);
 	}
-	
+
 	public static MatchFilter[] getDefaultFilters() {
 		return new MatchFilter[] { IMPORT_FILTER };
 	}
-	
+
 	private static String encodeFilters(MatchFilter[] enabledFilters) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < enabledFilters.length; i++) {
@@ -87,7 +87,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 		}
 		return buf.toString();
 	}
-	
+
 	private static JavaMatchFilter[] decodeFiltersString(String encodedString) {
 		StringTokenizer tokenizer= new StringTokenizer(encodedString, String.valueOf(';'));
 		HashSet result= new HashSet();
@@ -99,45 +99,45 @@ abstract class JavaMatchFilter extends MatchFilter {
 		}
 		return (JavaMatchFilter[]) result.toArray(new JavaMatchFilter[result.size()]);
 	}
-		
-	private static final JavaMatchFilter POTENTIAL_FILTER= new PotentialFilter(); 
-	private static final JavaMatchFilter IMPORT_FILTER= new ImportFilter(); 
-	private static final JavaMatchFilter JAVADOC_FILTER= new JavadocFilter(); 
-	private static final JavaMatchFilter READ_FILTER= new ReadFilter(); 
-	private static final JavaMatchFilter WRITE_FILTER= new WriteFilter(); 
-	
-	private static final JavaMatchFilter POLYMORPHIC_FILTER= new PolymorphicFilter(); 
-	private static final JavaMatchFilter INEXACT_FILTER= new InexactMatchFilter(); 
-	private static final JavaMatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
-	
+
+	private static final JavaMatchFilter POTENTIAL_FILTER= new PotentialFilter();
+	private static final JavaMatchFilter IMPORT_FILTER= new ImportFilter();
+	private static final JavaMatchFilter JAVADOC_FILTER= new JavadocFilter();
+	private static final JavaMatchFilter READ_FILTER= new ReadFilter();
+	private static final JavaMatchFilter WRITE_FILTER= new WriteFilter();
+
+	private static final JavaMatchFilter POLYMORPHIC_FILTER= new PolymorphicFilter();
+	private static final JavaMatchFilter INEXACT_FILTER= new InexactMatchFilter();
+	private static final JavaMatchFilter ERASURE_FILTER= new ErasureMatchFilter();
+
 	private static final JavaMatchFilter NON_PUBLIC_FILTER= new NonPublicFilter();
 	private static final JavaMatchFilter STATIC_FILTER= new StaticFilter();
 	private static final JavaMatchFilter NON_STATIC_FILTER= new NonStaticFilter();
 	private static final JavaMatchFilter DEPRECATED_FILTER= new DeprecatedFilter();
 	private static final JavaMatchFilter NON_DEPRECATED_FILTER= new NonDeprecatedFilter();
-	
+
 	private static final JavaMatchFilter[] ALL_FILTERS= new JavaMatchFilter[] {
 			POTENTIAL_FILTER,
 			IMPORT_FILTER,
 			JAVADOC_FILTER,
 			READ_FILTER,
 			WRITE_FILTER,
-			
+
             POLYMORPHIC_FILTER,
 			INEXACT_FILTER,
 			ERASURE_FILTER,
-			
+
 			NON_PUBLIC_FILTER,
 			STATIC_FILTER,
 			NON_STATIC_FILTER,
 			DEPRECATED_FILTER,
 			NON_DEPRECATED_FILTER
 	};
-		
+
 	public static JavaMatchFilter[] allFilters() {
 		return ALL_FILTERS;
 	}
-	
+
 	public static JavaMatchFilter[] allFilters(JavaSearchQuery query) {
 		ArrayList res= new ArrayList();
 		for (int i= 0; i < ALL_FILTERS.length; i++) {
@@ -148,7 +148,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 		}
 		return (JavaMatchFilter[]) res.toArray(new JavaMatchFilter[res.size()]);
 	}
-	
+
 	private static JavaMatchFilter findMatchFilter(String id) {
 		for (int i= 0; i < ALL_FILTERS.length; i++) {
 			JavaMatchFilter matchFilter= ALL_FILTERS[i];
@@ -163,23 +163,23 @@ class PotentialFilter extends JavaMatchFilter {
 	public boolean filters(JavaElementMatch match) {
 		return match.getAccuracy() == SearchMatch.A_INACCURATE;
 	}
-	
+
 	public String getName() {
-		return SearchMessages.MatchFilter_PotentialFilter_name; 
+		return SearchMessages.MatchFilter_PotentialFilter_name;
 	}
-	
+
 	public String getActionLabel() {
-		return SearchMessages.MatchFilter_PotentialFilter_actionLabel; 
+		return SearchMessages.MatchFilter_PotentialFilter_actionLabel;
 	}
-	
+
 	public String getDescription() {
-		return SearchMessages.MatchFilter_PotentialFilter_description; 
+		return SearchMessages.MatchFilter_PotentialFilter_description;
 	}
-	
+
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
-	
+
 	public String getID() {
 		return "filter_potential"; //$NON-NLS-1$
 	}
@@ -191,17 +191,17 @@ class ImportFilter extends JavaMatchFilter {
 	}
 
 	public String getName() {
-		return SearchMessages.MatchFilter_ImportFilter_name; 
+		return SearchMessages.MatchFilter_ImportFilter_name;
 	}
 
 	public String getActionLabel() {
-		return SearchMessages.MatchFilter_ImportFilter_actionLabel; 
+		return SearchMessages.MatchFilter_ImportFilter_actionLabel;
 	}
 
 	public String getDescription() {
-		return SearchMessages.MatchFilter_ImportFilter_description; 
+		return SearchMessages.MatchFilter_ImportFilter_description;
 	}
-	
+
 	public boolean isApplicable(JavaSearchQuery query) {
 		QuerySpecification spec= query.getSpecification();
 		if (spec instanceof ElementQuerySpecification) {
@@ -248,13 +248,13 @@ class WriteFilter extends VariableFilter {
 		return match.isWriteAccess() && !match.isReadAccess();
 	}
 	public String getName() {
-		return SearchMessages.MatchFilter_WriteFilter_name; 
+		return SearchMessages.MatchFilter_WriteFilter_name;
 	}
 	public String getActionLabel() {
-		return SearchMessages.MatchFilter_WriteFilter_actionLabel; 
+		return SearchMessages.MatchFilter_WriteFilter_actionLabel;
 	}
 	public String getDescription() {
-		return SearchMessages.MatchFilter_WriteFilter_description; 
+		return SearchMessages.MatchFilter_WriteFilter_description;
 	}
 	public String getID() {
 		return "filter_writes"; //$NON-NLS-1$
@@ -266,13 +266,13 @@ class ReadFilter extends VariableFilter {
 		return match.isReadAccess() && !match.isWriteAccess();
 	}
 	public String getName() {
-		return SearchMessages.MatchFilter_ReadFilter_name; 
+		return SearchMessages.MatchFilter_ReadFilter_name;
 	}
 	public String getActionLabel() {
-		return SearchMessages.MatchFilter_ReadFilter_actionLabel; 
+		return SearchMessages.MatchFilter_ReadFilter_actionLabel;
 	}
 	public String getDescription() {
-		return SearchMessages.MatchFilter_ReadFilter_description; 
+		return SearchMessages.MatchFilter_ReadFilter_description;
 	}
 	public String getID() {
 		return "filter_reads"; //$NON-NLS-1$
@@ -284,13 +284,13 @@ class JavadocFilter extends JavaMatchFilter {
 		return match.isJavadoc();
 	}
 	public String getName() {
-		return SearchMessages.MatchFilter_JavadocFilter_name; 
+		return SearchMessages.MatchFilter_JavadocFilter_name;
 	}
 	public String getActionLabel() {
-		return SearchMessages.MatchFilter_JavadocFilter_actionLabel; 
+		return SearchMessages.MatchFilter_JavadocFilter_actionLabel;
 	}
 	public String getDescription() {
-		return SearchMessages.MatchFilter_JavadocFilter_description; 
+		return SearchMessages.MatchFilter_JavadocFilter_description;
 	}
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
@@ -306,17 +306,17 @@ class PolymorphicFilter extends JavaMatchFilter {
     }
 
     public String getName() {
-        return SearchMessages.MatchFilter_PolymorphicFilter_name; 
+        return SearchMessages.MatchFilter_PolymorphicFilter_name;
     }
 
     public String getActionLabel() {
-        return SearchMessages.MatchFilter_PolymorphicFilter_actionLabel; 
+        return SearchMessages.MatchFilter_PolymorphicFilter_actionLabel;
     }
 
     public String getDescription() {
-        return SearchMessages.MatchFilter_PolymorphicFilter_description; 
+        return SearchMessages.MatchFilter_PolymorphicFilter_description;
     }
-    
+
     public boolean isApplicable(JavaSearchQuery query) {
         QuerySpecification spec= query.getSpecification();
         switch (spec.getLimitTo()) {
@@ -365,13 +365,13 @@ class ErasureMatchFilter extends GenericTypeFilter {
 		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH | SearchPattern.R_EQUIVALENT_MATCH)) == 0;
 	}
 	public String getName() {
-		return SearchMessages.MatchFilter_ErasureFilter_name; 
+		return SearchMessages.MatchFilter_ErasureFilter_name;
 	}
 	public String getActionLabel() {
-		return SearchMessages.MatchFilter_ErasureFilter_actionLabel; 
+		return SearchMessages.MatchFilter_ErasureFilter_actionLabel;
 	}
 	public String getDescription() {
-		return SearchMessages.MatchFilter_ErasureFilter_description; 
+		return SearchMessages.MatchFilter_ErasureFilter_description;
 	}
 	public String getID() {
 		return "filter_erasure"; //$NON-NLS-1$
@@ -383,13 +383,13 @@ class InexactMatchFilter extends GenericTypeFilter {
 		return (match.getMatchRule() & (SearchPattern.R_FULL_MATCH)) == 0;
 	}
 	public String getName() {
-		return SearchMessages.MatchFilter_InexactFilter_name; 
+		return SearchMessages.MatchFilter_InexactFilter_name;
 	}
 	public String getActionLabel() {
-		return SearchMessages.MatchFilter_InexactFilter_actionLabel; 
+		return SearchMessages.MatchFilter_InexactFilter_actionLabel;
 	}
 	public String getDescription() {
-		return SearchMessages.MatchFilter_InexactFilter_description; 
+		return SearchMessages.MatchFilter_InexactFilter_description;
 	}
 	public String getID() {
 		return "filter_inexact"; //$NON-NLS-1$

@@ -18,7 +18,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 /**
  * Action to show the global refactoring history.
- * 
+ *
  * TODO: remove once bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=131746 is fixed
  */
 public final class ShowRefactoringHistoryAction implements IWorkbenchWindowActionDelegate {

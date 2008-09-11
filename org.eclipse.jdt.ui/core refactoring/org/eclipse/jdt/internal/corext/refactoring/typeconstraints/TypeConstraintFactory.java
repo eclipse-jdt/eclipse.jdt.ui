@@ -21,12 +21,12 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 
 	private Map/*<ConstraintVariable, Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>*/ fSimpleConstraints= new HashMap();
 	private Map/*<ConstraintVariable, Map<String, CompositeOrTypeConstraint>>*/ fOrConstraints= new HashMap();
-	
+
 	protected static final boolean PRINT_STATS= false;
 	protected int fNrCreated= 0;
 	protected int fNrFiltered= 0;
-	protected int fNrRetrieved= 0;	
-	
+	protected int fNrRetrieved= 0;
+
 	// Only to be called by the createXXXConstraint() methods
 	private SimpleTypeConstraint createSimpleTypeConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator) {
 		if (fSimpleConstraints.containsKey(v1)){
@@ -53,7 +53,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 			return storeConstraint(v1, v2, operator, m3);
 		}
 	}
-	
+
 	private SimpleTypeConstraint storeConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator, Map m3) {
 		SimpleTypeConstraint constraint= new SimpleTypeConstraint(v1, v2, operator);
 		m3.put(operator, constraint);
@@ -61,7 +61,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 		if (PRINT_STATS) dumpStats();
 		return constraint;
 	}
-	
+
 	public ITypeConstraint[] createConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator){
 		if (filter(v1, v2, operator)){
 			return new ITypeConstraint[0];
@@ -69,19 +69,19 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 			return new ITypeConstraint[]{ createSimpleTypeConstraint(v1, v2, operator) };
 		}
 	}
-	
+
 	public ITypeConstraint[] createSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createSubTypeOperator());
 	}
-	
+
 	public ITypeConstraint[] createStrictSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createStrictSubtypeOperator());
 	}
-	
+
 	public ITypeConstraint[] createEqualsConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createEqualsOperator());
 	}
-	
+
 	public ITypeConstraint[] createDefinesConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createDefinesOperator());
 	}
@@ -103,7 +103,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraintFactory#createCompositeOrTypeConstraint(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint[])
 	 */
 	public CompositeOrTypeConstraint createCompositeOrTypeConstraint(ITypeConstraint[] constraints){
@@ -115,7 +115,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 			String typeName= binding.getQualifiedName();
 			bounds= bounds + typeName +","; //$NON-NLS-1$
 		}
-		
+
 		if (fOrConstraints.containsKey(left)){
 			Map m2= (Map)fOrConstraints.get(left);
 			if (m2.containsKey(bounds)){
@@ -139,9 +139,9 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 			return constraint;
 		}
 	}
-	
+
 	protected void dumpStats() {
 		System.out.println("Constraints: " + fNrCreated + " created, " + fNrRetrieved + " retrieved, " + fNrFiltered + " filtered");	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
-	
+
 }

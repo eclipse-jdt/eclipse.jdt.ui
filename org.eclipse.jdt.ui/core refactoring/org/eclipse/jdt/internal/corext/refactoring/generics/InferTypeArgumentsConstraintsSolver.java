@@ -58,45 +58,45 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 		public static TTypeComparator INSTANCE= new TTypeComparator();
 	}
-	
+
 	private final static String CHOSEN_TYPE= "chosenType"; //$NON-NLS-1$
-	
+
 	private final InferTypeArgumentsTCModel fTCModel;
 	private TypeSetEnvironment fTypeSetEnvironment;
-	
+
 	/**
 	 * The work-list used by the type constraint solver to hold the set of
 	 * nodes in the constraint graph that remain to be (re-)processed. Entries
 	 * are <code>ConstraintVariable2</code>s.
 	 */
 	private LinkedList/*<ConstraintVariable2>*/ fWorkList;
-	
+
 	private InferTypeArgumentsUpdate fUpdate;
-	
-	
+
+
 	public InferTypeArgumentsConstraintsSolver(InferTypeArgumentsTCModel typeConstraintFactory) {
 		fTCModel= typeConstraintFactory;
 		fWorkList= new LinkedList();
 	}
-	
+
 	public InferTypeArgumentsUpdate solveConstraints(IProgressMonitor pm) {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		fUpdate= new InferTypeArgumentsUpdate();
-		
+
 		ConstraintVariable2[] allConstraintVariables= fTCModel.getAllConstraintVariables();
 		if (allConstraintVariables.length == 0)
 			return fUpdate;
-		
+
 		fTypeSetEnvironment= new TypeSetEnvironment(fTCModel.getTypeEnvironment());
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
 		Collection/*<CollectionElementVariable2>*/ newVars= parametricStructureComputer.createElemConstraintVariables();
-		
+
 		ArrayList newAllConstraintVariables= new ArrayList();
 		newAllConstraintVariables.addAll(Arrays.asList(allConstraintVariables));
 		newAllConstraintVariables.addAll(newVars);
 		allConstraintVariables= (ConstraintVariable2[]) newAllConstraintVariables.toArray(new ConstraintVariable2[newAllConstraintVariables.size()]);
-		
-		
+
+
 		//loop over all TypeEquivalenceSets and unify the elements from the fElemStructureEnv with the existing TypeEquivalenceSets
 		HashSet allTypeEquivalenceSets= new HashSet();
 		for (int i= 0; i < allConstraintVariables.length; i++) {
@@ -120,7 +120,7 @@ public class InferTypeArgumentsConstraintsSolver {
 			ITypeConstraint2 typeConstraint= allTypeConstraints[i];
 			fTCModel.createElementEqualsConstraints(typeConstraint.getLeft(), typeConstraint.getRight());
 		}
-		
+
 		initializeTypeEstimates(allConstraintVariables);
 		if (pm.isCanceled())
 			throw new OperationCanceledException();
@@ -160,11 +160,11 @@ public class InferTypeArgumentsConstraintsSolver {
 //		if (parametricStructure != null && parametricStructure != ParametricStructureComputer.ParametricStructure.NONE) {
 //			return SubTypesOfSingleton.create(parametricStructure.getBase());
 //		}
-		
+
 		TType type= cv.getType();
 		if (type == null) {
 			return fTypeSetEnvironment.getUniverseTypeSet();
-			
+
 		} else if (cv instanceof IndependentTypeVariable2) {
 			return fTypeSetEnvironment.getUniverseTypeSet();
 			//TODO: solve problem with recursive bounds
@@ -175,7 +175,7 @@ public class InferTypeArgumentsConstraintsSolver {
 //				result= result.intersectedWith(SubTypesOfSingleton.create(bounds[i].getErasure()));
 //			}
 //			return result;
-			
+
 		} else if (cv instanceof ArrayTypeVariable2) {
 			return fTypeSetEnvironment.getUniverseTypeSet();
 		} else if (cv instanceof ArrayElementVariable2) {
@@ -184,7 +184,7 @@ public class InferTypeArgumentsConstraintsSolver {
 			} else {
 				return new SingletonTypeSet(type, fTypeSetEnvironment);
 			}
-			
+
 		} else if (type.isVoidType()) {
 			return fTypeSetEnvironment.getEmptyTypeSet();
 		} else {
@@ -205,13 +205,13 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 		pm.done();
 	}
-	
+
 	/**
 	 * Given a list of <code>ITypeConstraint2</code>s that all refer to a
 	 * given <code>ConstraintVariable2</code> (whose type bound has presumably
 	 * just changed), process each <code>ITypeConstraint</code>, propagating
 	 * the type bound across the constraint as needed.
-	 * 
+	 *
 	 * @param usedIn the <code>List</code> of <code>ITypeConstraint2</code>s
 	 * to process
 	 * @param changedCv the constraint variable whose type bound has changed
@@ -229,7 +229,7 @@ public class InferTypeArgumentsConstraintsSolver {
 //					fTypeConstraintFactory.removeUsedIn(stc, changedCv);
 		}
 	}
-	
+
 	private void maintainSimpleConstraint(ConstraintVariable2 changedCv, ITypeConstraint2 stc) {
 		ConstraintVariable2 left= stc.getLeft();
 		ConstraintVariable2 right= stc.getRight();
@@ -238,7 +238,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		TypeEquivalenceSet rightSet= right.getTypeEquivalenceSet();
 		TypeSet leftEstimate= (TypeSet) leftSet.getTypeEstimate();
 		TypeSet rightEstimate= (TypeSet) rightSet.getTypeEstimate();
-			
+
 		if (leftEstimate.isUniverse() && rightEstimate.isUniverse())
 			return; // nothing to do
 
@@ -272,19 +272,19 @@ public class InferTypeArgumentsConstraintsSolver {
 		pm.beginTask("", allConstraintVariables.length); //$NON-NLS-1$
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
-				
+
 			TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
 			if (set == null)
 				continue; //TODO: should not happen iff all unused constraint variables got pruned
 			//TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
 			TType type= chooseSingleType((TypeSet) cv.getTypeEstimate()); //TODO: is null for Universe TypeSet
 			setChosenType(cv, type);
-			
+
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
 				fUpdate.addDeclaration(elementCv);
 			}
-			
+
 			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
@@ -295,10 +295,10 @@ public class InferTypeArgumentsConstraintsSolver {
 	private TType chooseSingleType(TypeSet typeEstimate) {
 		if (typeEstimate.isUniverse() || typeEstimate.isEmpty()) {
 			return null;
-		
+
 		} else if (typeEstimate.hasUniqueLowerBound()) {
 			return typeEstimate.uniqueLowerBound();
-		
+
 		} else {
 			EnumeratedTypeSet lowerBound= typeEstimate.lowerBound().enumerate();
 			ArrayList/*<TType>*/ interfaceCandidates= null;
@@ -312,7 +312,7 @@ public class InferTypeArgumentsConstraintsSolver {
 					interfaceCandidates.add(type);
 				}
 			}
-			
+
 			if (interfaceCandidates == null || interfaceCandidates.size() == 0) {
 				return null;
 			} else if (interfaceCandidates.size() == 1) {
@@ -335,11 +335,11 @@ public class InferTypeArgumentsConstraintsSolver {
 			return size() > MAX_CACHE;
 		}
 	};
-	
+
 	private ArrayList getNonTaggingInterfaces(ArrayList interfaceCandidates) {
 		ArrayList unresolvedTypes= new ArrayList();
 		ArrayList nonTagging= new ArrayList();
-		
+
 		for (int i= 0; i < interfaceCandidates.size(); i++) {
 			TType interf= (TType) interfaceCandidates.get(i);
 			Object isTagging= fInterfaceTaggingCache.get(interf);
@@ -348,7 +348,7 @@ public class InferTypeArgumentsConstraintsSolver {
 			else if (isTagging == Boolean.FALSE)
 				nonTagging.add(interf);
 		}
-		
+
 		if (unresolvedTypes.size() != 0) {
 			TType[] interfaces= (TType[]) unresolvedTypes.toArray(new TType[unresolvedTypes.size()]);
 			HierarchyType firstInterface= (HierarchyType) interfaces[0];
@@ -363,7 +363,7 @@ public class InferTypeArgumentsConstraintsSolver {
 				}
 			}
 		}
-		
+
 		return nonTagging;
 	}
 
@@ -378,9 +378,9 @@ public class InferTypeArgumentsConstraintsSolver {
 				if (chosenType.equals(expressionType))
 					continue; // The type has not changed. Don't remove the cast, since it could be
 							   // there to get access to default-visible members or to
-							   // unify types of conditional expressions. 
+							   // unify types of conditional expressions.
 				fUpdate.addCastToRemove(castCv);
-				
+
 			} else if (expressionVariable instanceof ArrayTypeVariable2 && castType.isArrayType()) { // bug 97258
 				ArrayElementVariable2 arrayElementCv= fTCModel.getArrayElementVariable(expressionVariable);
 				if (arrayElementCv == null)

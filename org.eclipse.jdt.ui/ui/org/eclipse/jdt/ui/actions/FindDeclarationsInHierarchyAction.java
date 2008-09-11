@@ -35,22 +35,22 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 /**
  * Finds declarations of the selected element in its hierarchy.
  * The action is applicable to selections representing a Java element.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 
 	/**
-	 * Creates a new <code>FindDeclarationsInHierarchyAction</code>. The action 
-	 * requires that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>FindDeclarationsInHierarchyAction</code>. The action
+	 * requires that the selection provided by the site's selection provider is of type
 	 * <code>IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public FindDeclarationsInHierarchyAction(IWorkbenchSite site) {
@@ -60,27 +60,27 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindDeclarationsInHierarchyAction(JavaEditor editor) {
 		super(editor);
 	}
-	
+
 	Class[] getValidTypes() {
 		return new Class[] { IField.class, IMethod.class, ILocalVariable.class, ITypeParameter.class };
 	}
-	
+
 	void init() {
-		setText(SearchMessages.Search_FindHierarchyDeclarationsAction_label); 
-		setToolTipText(SearchMessages.Search_FindHierarchyDeclarationsAction_tooltip); 
+		setText(SearchMessages.Search_FindHierarchyDeclarationsAction_label);
+		setToolTipText(SearchMessages.Search_FindHierarchyDeclarationsAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_HIERARCHY_ACTION);
 	}
-	
+
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
-		
+
 		IType type= getType(element);
 		if (type == null) {
 			return super.createQuery(element);

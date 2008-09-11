@@ -34,10 +34,10 @@ public class NLSSubstitution {
 	private int fInitialState;
 	private String fInitialKey;
 	private String fInitialValue;
-	
+
 	private NLSElement fNLSElement;
 	private AccessorClassReference fAccessorClassReference;
-	
+
 	private String fNewAccessorClassName;
 
 	private String fPrefix= ""; //$NON-NLS-1$
@@ -86,23 +86,23 @@ public class NLSSubstitution {
 	public NLSElement getNLSElement() {
 		return fNLSElement;
 	}
-	
+
 	public String getKeyWithoutPrefix() {
 		return fKey;
 	}
 
 	/**
-	 * Returns key dependent on state. 
-	 * @return prefix + key when 
+	 * Returns key dependent on state.
+	 * @return prefix + key when
 	 */
 	public String getKey() {
 		if ((fState == EXTERNALIZED) && hasStateChanged()) {
 			if (fCachedPrefixPlusKey == null) {
 				int length= 0;
 				if (fPrefix != null)
-					length= length + fPrefix.length(); 
+					length= length + fPrefix.length();
 				if (fKey != null)
-					length= length + fKey.length(); 
+					length= length + fKey.length();
 				StringBuffer sb= new StringBuffer(length);
 				sb.append(fPrefix);
 				sb.append(fKey);
@@ -124,7 +124,7 @@ public class NLSSubstitution {
 	public void setValue(String value) {
 		fValue= value;
 	}
-	
+
 	public void setInitialValue(String value) {
 		fInitialValue= value;
 	}
@@ -135,7 +135,7 @@ public class NLSSubstitution {
 	public String getValue() {
 		return fValue;
 	}
-	
+
 	public String getValueNonEmpty() {
 		if (fValue == null) {
 			return ""; //$NON-NLS-1$
@@ -151,11 +151,11 @@ public class NLSSubstitution {
 		fCachedPrefixPlusKey= null;
 		fState= state;
 	}
-	
+
 	public void setUpdatedAccessor(String accessorClassName) {
 		fNewAccessorClassName= accessorClassName;
 	}
-	
+
 	public String getUpdatedAccessor() {
 		return fNewAccessorClassName;
 	}
@@ -163,20 +163,20 @@ public class NLSSubstitution {
 	public boolean hasStateChanged() {
 		return fState != fInitialState;
 	}
-	
+
 	public boolean isKeyRename() {
 		return 	(fInitialKey != null && !fInitialKey.equals(fKey));
 	}
-	
+
 	public boolean isValueRename() {
 		return 	(fInitialValue != null && !fInitialValue.equals(fValue));
 	}
-	
+
 	public boolean isAccessorRename() {
 		return (fAccessorClassReference != null) && (fNewAccessorClassName != null) && !fNewAccessorClassName.equals(fAccessorClassReference.getName());
 	}
-	
-	
+
+
 	public boolean hasPropertyFileChange() {
 		if (fInitialState != EXTERNALIZED && fState != EXTERNALIZED) {
 			return false;
@@ -196,7 +196,7 @@ public class NLSSubstitution {
 		}
 		return false;
 	}
-	
+
 	public boolean hasAccessorClassChange() {
 		if (fInitialState != EXTERNALIZED && fState != EXTERNALIZED) {
 			return false;
@@ -216,7 +216,7 @@ public class NLSSubstitution {
 		}
 		return false;
 	}
-	
+
 	public boolean hasSourceChange() {
 		if (hasStateChanged()) {
 			return true;
@@ -235,7 +235,7 @@ public class NLSSubstitution {
 		}
 		return false;
 	}
-	
+
 	public int getInitialState() {
 		return fInitialState;
 	}

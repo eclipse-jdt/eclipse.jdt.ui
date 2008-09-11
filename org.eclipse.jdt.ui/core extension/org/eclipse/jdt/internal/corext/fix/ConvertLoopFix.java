@@ -29,13 +29,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 
 	private final static class ControlStatementFinder extends GenericVisitor {
-		
+
 		private final List/*<CompilationUnitRewriteOperation>*/fResult;
 		private final Hashtable fUsedNames;
 		private final boolean fFindForLoopsToConvert;
 		private final boolean fConvertIterableForLoops;
 		private final boolean fMakeFinal;
-		
+
 		public ControlStatementFinder(boolean findForLoopsToConvert, boolean convertIterableForLoops, boolean makeFinal, List resultingCollection) {
 			fFindForLoopsToConvert= findForLoopsToConvert;
 			fConvertIterableForLoops= convertIterableForLoops;
@@ -43,7 +43,7 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 			fResult= resultingCollection;
 			fUsedNames= new Hashtable();
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
@@ -58,7 +58,7 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 					} else {
 						oldOperation.setBodyConverter(operation);
 					}
-					
+
 					if (current.getBody() instanceof ForStatement) {
 						current= (ForStatement)current.getBody();
 						oldOperation= operation;
@@ -70,12 +70,12 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 				current.getBody().accept(this);
 				return false;
 			}
-			
+
 			return super.visit(node);
 		}
-		
+
 		private ConvertLoopOperation getConvertOperation(ForStatement node) {
-			
+
 			Collection usedNamesCollection= fUsedNames.values();
 			String[] usedNames= (String[])usedNamesCollection.toArray(new String[usedNamesCollection.size()]);
 			ConvertLoopOperation convertForLoopOperation= new ConvertForLoopOperation(node, usedNames, fMakeFinal);
@@ -91,10 +91,10 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 					return iterableConverter;
 				}
 			}
-			
+
 			return null;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#endVisit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
@@ -104,35 +104,35 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 			}
 			super.endVisit(node);
 		}
-		
+
 	}
-	
+
 	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops, boolean makeFinal) {
 		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
-		
+
 		if (!convertForLoops && !convertIterableForLoops)
 			return null;
-		
+
 		List operations= new ArrayList();
 		ControlStatementFinder finder= new ControlStatementFinder(convertForLoops, convertIterableForLoops, makeFinal, operations);
 		compilationUnit.accept(finder);
-		
+
 		if (operations.isEmpty())
 			return null;
-		
+
 		CompilationUnitRewriteOperation[] ops= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new ConvertLoopFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops, null);
 	}
-	
+
 	public static ConvertLoopFix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
 		ConvertLoopOperation convertForLoopOperation= new ConvertForLoopOperation(loop);
 		if (!convertForLoopOperation.satisfiesPreconditions().isOK())
 			return null;
-		
+
 		return new ConvertLoopFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new CompilationUnitRewriteOperation[] {convertForLoopOperation}, null);
 	}
-	
+
 	public static ConvertLoopFix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
 		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(loop);
 		IStatus status= loopConverter.satisfiesPreconditions();
@@ -143,7 +143,7 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private final IStatus fStatus;
-	
+
 	protected ConvertLoopFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations, IStatus status) {
 		super(name, compilationUnit, fixRewriteOperations);
 		fStatus= status;
@@ -155,5 +155,5 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 	public IStatus getStatus() {
 		return fStatus;
 	}
-	
+
 }

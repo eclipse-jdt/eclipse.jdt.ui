@@ -36,7 +36,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	protected final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	/** Triggers for method name proposals (static imports). Do not modify. */
 	protected final static char[] METHOD_NAME_TRIGGERS= new char[] { ';' };
-	
+
 	private boolean fHasParameters;
 	private boolean fHasParametersComputed= false;
 	private FormatterPrefs fFormatterPrefs;
@@ -57,7 +57,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	protected boolean needsLinkedMode() {
 		return hasArgumentList() && hasParameters();
 	}
-	
+
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		if (hasArgumentList()) {
 			String completion= String.valueOf(fProposal.getName());
@@ -70,7 +70,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		}
 		return super.getPrefixCompletionText(document, completionOffset);
 	}
-	
+
 	protected IContextInformation computeContextInformation() {
 		// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
@@ -82,7 +82,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		}
 		return super.computeContextInformation();
 	}
-	
+
 	protected char[] computeTriggerCharacters() {
 		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE)
 			return METHOD_NAME_TRIGGERS;
@@ -90,13 +90,13 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			return METHOD_WITH_ARGUMENTS_TRIGGERS;
 		return METHOD_TRIGGERS;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the method being inserted has at least one parameter. Note
 	 * that this does not say anything about whether the argument list should be inserted. This
 	 * depends on the position in the document and the kind of proposal; see
 	 * {@link #hasArgumentList() }.
-	 * 
+	 *
 	 * @return <code>true</code> if the method has any parameters, <code>false</code> if it has
 	 *         no parameters
 	 */
@@ -115,7 +115,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/**
 	 * Returns <code>true</code> if the argument list should be inserted by the proposal,
 	 * <code>false</code> if not.
-	 * 
+	 *
 	 * @return <code>true</code> when the proposal is not in javadoc nor within an import and comprises the
 	 *         parameter list
 	 */
@@ -130,7 +130,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 
 	/**
 	 * Returns the method formatter preferences.
-	 * 
+	 *
 	 * @return the formatter settings
 	 */
 	protected final FormatterPrefs getFormatterPrefs() {
@@ -138,23 +138,23 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			fFormatterPrefs= new FormatterPrefs(fInvocationContext.getProject());
 		return fFormatterPrefs;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
 	protected String computeReplacementString() {
 		if (!hasArgumentList())
 			return super.computeReplacementString();
-		
+
 		// we're inserting a method plus the argument list - respect formatter preferences
 		StringBuffer buffer= new StringBuffer();
 		appendMethodNameReplacement(buffer);
-		
+
 		FormatterPrefs prefs= getFormatterPrefs();
-		
+
 		if (hasParameters()) {
 			setCursorPosition(buffer.length());
-			
+
 			if (prefs.afterOpeningParen)
 				buffer.append(SPACE);
 
@@ -179,7 +179,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * In case of {@link CompletionProposal#METHOD_REF_WITH_CASTED_RECEIVER}
 	 * it add cast.
 	 * </p>
-	 * 
+	 *
 	 * @param buffer the string buffer
 	 * @since 3.4
 	 */
@@ -198,14 +198,14 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			buffer.append(SPACE);
 		buffer.append(LPAREN);
 	}
-	
+
 	protected ProposalInfo computeProposalInfo() {
 		IJavaProject project= fInvocationContext.getProject();
 		if (project != null)
 			return new MethodProposalInfo(project, fProposal);
 		return super.computeProposalInfo();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeSortString()
 	 */
@@ -221,7 +221,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		char[] parameterList= Signature.toCharArray(fProposal.getSignature(), null, null, false, false);
 		int parameterCount= Signature.getParameterCount(fProposal.getSignature()) % 10; // we don't care about insane methods with >9 parameters
 		StringBuffer buf= new StringBuffer(name.length + 2 + parameterList.length);
-		
+
 		buf.append(name);
 		buf.append('\0'); // separator
 		buf.append(parameterCount);
@@ -235,7 +235,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	protected boolean isValidPrefix(String prefix) {
 		if (super.isValidPrefix(prefix))
 			return true;
-		
+
 		String word= getDisplayString();
 		if (isInJavadoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$

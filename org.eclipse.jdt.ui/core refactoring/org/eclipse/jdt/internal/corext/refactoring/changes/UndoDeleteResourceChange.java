@@ -36,17 +36,17 @@ public class UndoDeleteResourceChange extends Change {
 	public UndoDeleteResourceChange(ResourceDescription resourceDescription) {
 		fResourceDescription= resourceDescription;
 	}
-	
+
 	public void initializeValidationData(IProgressMonitor pm) {
-		
+
 	}
-	
+
 	public Object getModifiedElement() {
 		return null;
 	}
 
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.UndoDeleteResourceChange_change_name, BasicElementLabels.getResourceName(fResourceDescription.getName())); 
+		return Messages.format(RefactoringCoreMessages.UndoDeleteResourceChange_change_name, BasicElementLabels.getResourceName(fResourceDescription.getName()));
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException, OperationCanceledException {
@@ -56,14 +56,14 @@ public class UndoDeleteResourceChange extends Change {
 							RefactoringCoreMessages.UndoDeleteResourceChange_cannot_restore,
 							BasicElementLabels.getResourceName(fResourceDescription.getName())));
 		}
-		
+
 		if (fResourceDescription.verifyExistence(true)) {
 			return RefactoringStatus.createFatalErrorStatus(
 					Messages.format(
 							RefactoringCoreMessages.UndoDeleteResourceChange_already_exists,
 							BasicElementLabels.getResourceName(fResourceDescription.getName())));
 		}
-		
+
 		return new RefactoringStatus();
 	}
 
@@ -72,7 +72,7 @@ public class UndoDeleteResourceChange extends Change {
 		created.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(pm, 1));
 		return new DeleteResourceChange(created.getFullPath(), true);
 	}
-	
+
 	public String toString() {
 		return "Remove " + fResourceDescription.getName(); //$NON-NLS-1$
 	}

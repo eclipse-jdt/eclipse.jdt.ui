@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -33,7 +33,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
     private DeferredTreeContentManager fManager;
     private CallHierarchyViewPart fPart;
-    
+
     private class MethodWrapperRunnable implements IRunnableWithProgress {
         private MethodWrapper fMethodWrapper;
         private MethodWrapper[] fCalls= null;
@@ -41,11 +41,11 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         MethodWrapperRunnable(MethodWrapper methodWrapper) {
             fMethodWrapper= methodWrapper;
         }
-                
+
         public void run(IProgressMonitor pm) {
         	fCalls= fMethodWrapper.getCalls(pm);
         }
-        
+
         MethodWrapper[] getCalls() {
             if (fCalls != null) {
                 return fCalls;
@@ -66,7 +66,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         if (parentElement instanceof TreeRoot) {
             TreeRoot dummyRoot = (TreeRoot) parentElement;
             return dummyRoot.getRoots();
-            
+
         } else if (parentElement instanceof MethodWrapper) {
             MethodWrapper methodWrapper = ((MethodWrapper) parentElement);
 
@@ -78,7 +78,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
                     if (children != null)
                         return children;
                 }
-                return fetchChildren(methodWrapper);            
+                return fetchChildren(methodWrapper);
             }
         }
 
@@ -91,12 +91,12 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         try {
             context.run(true, true, runnable);
         } catch (InvocationTargetException e) {
-            ExceptionHandler.handle(e, CallHierarchyMessages.CallHierarchyContentProvider_searchError_title, CallHierarchyMessages.CallHierarchyContentProvider_searchError_message);  
+            ExceptionHandler.handle(e, CallHierarchyMessages.CallHierarchyContentProvider_searchError_title, CallHierarchyMessages.CallHierarchyContentProvider_searchError_message);
             return EMPTY_ARRAY;
         } catch (InterruptedException e) {
             return new Object[] { TreeTermination.SEARCH_CANCELED };
         }
-        
+
         return runnable.getCalls();
     }
 
@@ -174,7 +174,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     }
 
     /**
-     * Cancel all current jobs. 
+     * Cancel all current jobs.
      * @param wrappers the parents to cancel jobs for
      */
     void cancelJobs(MethodWrapper[] wrappers) {
@@ -190,7 +190,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     }
 
     /**
-     * 
+     *
      */
     public void doneFetching() {
         if (fPart != null) {
@@ -199,7 +199,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     }
 
     /**
-     * 
+     *
      */
     public void startFetching() {
         if (fPart != null) {

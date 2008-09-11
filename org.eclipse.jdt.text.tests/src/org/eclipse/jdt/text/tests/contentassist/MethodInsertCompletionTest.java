@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.core.JavaCore;
+
 /**
- * 
+ *
  * @since 3.2
  */
 public class MethodInsertCompletionTest extends AbstractCompletionTest {
@@ -33,7 +33,7 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public static Test suite() {
 		return new CompletionTestSetup(allTests());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
@@ -44,42 +44,42 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void testThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|", "hashCode(", "this.hashCode()|");
 	}
-	
+
 	public void testMethod() throws Exception {
 		assertMethodBodyProposal("h", "hashCode(", "hashCode()");
 	}
-	
+
 	public void testMethodWithParam() throws Exception {
 		assertMethodBodyProposal("e", "equals(", "equals(|)");
 	}
-	
+
 	/* inserting */
-	
+
 	public void testInsertThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|class", "hashCode(", "this.hashCode()|class");
 	}
-	
+
 	public void testInsertMethod() throws Exception {
 		assertMethodBodyProposal("h|foobar", "hashCode(", "hashCode()|foobar");
 	}
-	
+
 	public void testInsertMethodWithParam() throws Exception {
 		assertMethodBodyProposal("e|foobar", "equals(", "equals(|)foobar");
 	}
-	
+
 	public void testFieldThisQualification() throws Exception {
 		addMembers("private String qqqString;");
 		addLocalVariables("String qqqString;");
 		assertMethodBodyProposal("q|", "this.qqqString", "this.qqqString|");
 	}
-	
+
 	/* camel case */
-	
+
 	public void testCamelCase() throws Exception {
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		assertMethodBodyProposal("hC", "hashCode(", "hashCode()");
     }
-	
+
 	public void testCamelCaseWithEmptyPrefix() throws Exception {
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		assertMethodBodyProposal("", "hashCode(", "hashCode()");

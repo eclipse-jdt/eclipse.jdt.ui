@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Inlines a method.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class InlineMethodAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
@@ -68,12 +68,12 @@ public class InlineMethodAction extends SelectionDispatchAction {
 
 	public InlineMethodAction(IWorkbenchSite site) {
 		super(site);
-		setText(RefactoringMessages.InlineMethodAction_inline_Method); 
+		setText(RefactoringMessages.InlineMethodAction_inline_Method);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
 	//---- structured selection ----------------------------------------------
-	
+
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
@@ -96,7 +96,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			ISourceRange nameRange= method.getNameRange();
 			run(nameRange.getOffset(), nameRange.getLength(), method.getTypeRoot());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception);
 		}
 	}
 
@@ -106,10 +106,10 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * @param selection 
+	 * @param selection
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -118,10 +118,10 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		ITypeRoot typeRoot= SelectionConverter.getInputAsTypeRoot(fEditor);
 		if (typeRoot == null)

@@ -31,21 +31,21 @@ import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public class SurroundWithActionGroup extends ActionGroup {
-	
+
 	private CompilationUnitEditor fEditor;
 	private SurroundWithTryCatchAction fSurroundWithTryCatchAction;
 	private final String fGroup;
-	
+
 	public SurroundWithActionGroup(CompilationUnitEditor editor, String group) {
 		fEditor= editor;
 		fGroup= group;
 		fSurroundWithTryCatchAction= createSurroundWithTryCatchAction(fEditor);
 	}
-	
+
 	public void fillActionBars(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatchAction);
 	}
-	
+
 	/**
 	 * The Menu to show when right click on the editor
 	 * {@inheritDoc}
@@ -54,24 +54,24 @@ public class SurroundWithActionGroup extends ActionGroup {
 		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
 		if (selectionProvider == null)
 			return;
-		
+
 		ISelection selection= selectionProvider.getSelection();
 		if (!(selection instanceof ITextSelection))
 			return;
-		
+
 		ITextSelection textSelection= (ITextSelection)selection;
 		if (textSelection.getLength() == 0)
 			return;
-		
+
 		String menuText= ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTemplateSubMenuName;
-				
+
 		String shortcutString= getShortcutString();
 		if (shortcutString != null) {
 			menuText= menuText + '\t' + shortcutString;
 		}
-		
-		MenuManager subMenu = new MenuManager(menuText, SurroundWithTemplateMenuAction.SURROUND_WITH_QUICK_MENU_ACTION_ID);	
-		menu.appendToGroup(fGroup, subMenu);	
+
+		MenuManager subMenu = new MenuManager(menuText, SurroundWithTemplateMenuAction.SURROUND_WITH_QUICK_MENU_ACTION_ID);
+		menu.appendToGroup(fGroup, subMenu);
 		subMenu.add(new Action() {});
 		subMenu.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
@@ -80,19 +80,19 @@ public class SurroundWithActionGroup extends ActionGroup {
 			}
 		});
 	}
-	
+
 	private String getShortcutString() {
 		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		if (bindingService == null)
 			return null;
 		return bindingService.getBestActiveBindingFormattedFor(SurroundWithTemplateMenuAction.SURROUND_WITH_QUICK_MENU_ACTION_ID);
 	}
-	
+
 	private static SurroundWithTryCatchAction createSurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		SurroundWithTryCatchAction result= new SurroundWithTryCatchAction(editor);
 		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryCatchActionName);
 		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
-		editor.setAction("SurroundWithTryCatch", result); //$NON-NLS-1$		
+		editor.setAction("SurroundWithTryCatch", result); //$NON-NLS-1$
 		return result;
 	}
 }

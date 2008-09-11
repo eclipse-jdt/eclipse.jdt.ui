@@ -11,9 +11,9 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 
 public class RenameUserInterfaceStarter extends UserInterfaceStarter {
-	
+
 	public boolean activate(Refactoring refactoring, Shell parent, int saveMode) throws CoreException {
 		RenameProcessor processor= (RenameProcessor)refactoring.getAdapter(RenameProcessor.class);
 		Object[] elements= processor.getElements();
@@ -34,7 +34,7 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 			Object newElement= nameUpdating.getNewElement();
 			if (newElement != null) {
 				state.restore(newElement);
-			}			
+			}
 		}
 		return executed;
 	}

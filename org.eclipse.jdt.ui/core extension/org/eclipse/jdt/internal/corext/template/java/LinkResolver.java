@@ -21,7 +21,7 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
  * Resolver for the <code>link</code> variable. Resolves to a
  * first parameter puts the value into linked mode. Shows proposals
  * for each parameter.
- * 
+ *
  * @since 3.4
  */
 public class LinkResolver extends TemplateVariableResolver {

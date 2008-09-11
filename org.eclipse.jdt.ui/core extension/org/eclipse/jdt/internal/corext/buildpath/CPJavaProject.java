@@ -72,7 +72,7 @@ public class CPJavaProject {
     public IPath getDefaultOutputLocation() {
 	    return fDefaultOutputLocation;
     }
-    
+
     public IJavaProject getJavaProject() {
 	    return ((CPListElement)fCPListElements.get(0)).getJavaProject();
     }

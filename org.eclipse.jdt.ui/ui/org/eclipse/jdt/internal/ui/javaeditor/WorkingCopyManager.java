@@ -18,7 +18,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;

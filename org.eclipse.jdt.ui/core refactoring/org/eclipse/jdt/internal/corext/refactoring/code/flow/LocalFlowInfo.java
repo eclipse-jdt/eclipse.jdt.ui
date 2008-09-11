@@ -25,7 +25,7 @@ class LocalFlowInfo extends FlowInfo {
 			context.manageLocal(binding);
 		}
 	}
-	
+
 	public LocalFlowInfo(LocalFlowInfo info, int localAccessMode, FlowContext context) {
 		super(NO_RETURN);
 		fVariableId= info.fVariableId;
@@ -34,7 +34,7 @@ class LocalFlowInfo extends FlowInfo {
 			fAccessModes[fVariableId - context.getStartingIndex()]= localAccessMode;
 		}
 	}
-	
+
 	public void setWriteAccess(FlowContext context) {
 		if (context.considerAccessMode()) {
 			fAccessModes[fVariableId - context.getStartingIndex()]= FlowInfo.WRITE;

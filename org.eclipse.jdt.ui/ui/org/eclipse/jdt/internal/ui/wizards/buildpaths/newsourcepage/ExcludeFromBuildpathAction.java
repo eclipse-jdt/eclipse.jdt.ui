@@ -51,49 +51,49 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 //SelectedElements iff enabled: IPackageFragment || ICompilationUnit
 public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
- 
+
 	private final IRunnableContext fContext;
-	
+
 	public ExcludeFromBuildpathAction(IWorkbenchSite site) {
 		this(site, null, PlatformUI.getWorkbench().getProgressService());
 	}
-	
+
 	public ExcludeFromBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
     }
-	
+
 	private ExcludeFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.EXCLUDE);
-		
+
 		fContext= context;
-		
+
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getDetailedDescription() {
 		if (!isEnabled())
 			return null;
-		
+
 		if (getSelectedElements().size() != 1)
 			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Exclude;
-			
+
 		IJavaElement elem= (IJavaElement) getSelectedElements().get(0);
         String name= ClasspathModifier.escapeSpecialChars(JavaElementLabels.getElementLabel(elem, JavaElementLabels.ALL_DEFAULT));
         if (elem instanceof IPackageFragment) {
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, name);
         } else if (elem instanceof ICompilationUnit) {
-        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, name); 
+        	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludeFile, name);
         }
-        
+
         return null;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -105,7 +105,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
         } else {
         	project= ((IPackageFragment)object).getJavaProject();
         }
-        
+
         try {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -127,12 +127,12 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 		} catch (final InterruptedException e) {
 		}
 	}
-	
+
 	private List exclude(List javaElements, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Excluding, javaElements.size() + 4); 
+			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Excluding, javaElements.size() + 4);
 
 			List existingEntries= ClasspathModifier.getExistingEntries(project);
 			List resources= new ArrayList();
@@ -148,11 +148,11 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 			}
 
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 4));
-			
+
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries((CPListElement[])existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
-			
+
 			return resources;
 		} finally {
 			monitor.done();
@@ -162,7 +162,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 	protected boolean canHandle(IStructuredSelection elements) {
         if (elements.size() == 0)
             return false;
-        
+
         for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IPackageFragment) {
@@ -174,7 +174,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 			} else if (element instanceof ICompilationUnit) {
 			} else {
 				return false;
-			}	
+			}
 		}
 		return true;
 	}

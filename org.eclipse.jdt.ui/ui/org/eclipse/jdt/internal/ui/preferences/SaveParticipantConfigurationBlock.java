@@ -10,21 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.preferences.IScopeContext;
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.jface.preference.PreferencePage;
@@ -36,28 +36,28 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantReg
 
 /**
  * Configures Java Editor save participants.
- * 
+ *
  * @since 3.3
  */
 class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigurationBlock {
-	
+
 	private interface IDelegateOperation {
 		public void run(ISaveParticipantPreferenceConfiguration block);
 	}
-	
+
 	private final PreferencePage fPreferencePage;
 	private final IScopeContext fContext;
 	private final ArrayList fConfigurations;
-	
+
 	public SaveParticipantConfigurationBlock(IScopeContext context, PreferencePage preferencePage) {
 		Assert.isNotNull(context);
 		Assert.isNotNull(preferencePage);
-		
+
 		fContext= context;
 		fPreferencePage= preferencePage;
 		fConfigurations= new ArrayList();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#createControl(org.eclipse.swt.widgets.Composite)
 	 * @since 3.3
@@ -69,13 +69,13 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
     	gridLayout.marginHeight= 0;
     	gridLayout.marginWidth= 0;
 		composite.setLayout(gridLayout);
-		
+
 		SaveParticipantRegistry registry= JavaPlugin.getDefault().getSaveParticipantRegistry();
 		SaveParticipantDescriptor[] descriptors= registry.getSaveParticipantDescriptors();
-		
+
 		if (descriptors.length == 0)
 			return composite;
-		
+
 		Arrays.sort(descriptors, new Comparator() {
 			public int compare(Object o1, Object o2) {
 				SaveParticipantDescriptor d1= (SaveParticipantDescriptor)o1;
@@ -83,7 +83,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 				return Collator.getInstance().compare(d1.getPostSaveListener().getName(), d2.getPostSaveListener().getName());
 			}
 		});
-		
+
 		IPreferencePageContainer container= fPreferencePage.getContainer();
 		for (int i= 0; i < descriptors.length; i++) {
 			final SaveParticipantDescriptor descriptor= descriptors[i];
@@ -91,10 +91,10 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			configuration.createControl(composite, container);
 			fConfigurations.add(configuration);
 		}
-		
+
 		return composite;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 */
@@ -105,7 +105,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			}
 		});
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
 	 */
@@ -120,7 +120,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			}
 		});
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
 	 */
@@ -131,7 +131,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			}
 		});
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performOk()
 	 */
@@ -142,7 +142,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			}
 		});
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -153,7 +153,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			}
 		});
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -164,7 +164,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			}
 		});
 	}
-	
+
 	private void delegateToPreferenceConfiguration(IDelegateOperation op) {
 		for (int i= 0; i < fConfigurations.size(); i++) {
 	        ISaveParticipantPreferenceConfiguration block= (ISaveParticipantPreferenceConfiguration)fConfigurations.get(i);

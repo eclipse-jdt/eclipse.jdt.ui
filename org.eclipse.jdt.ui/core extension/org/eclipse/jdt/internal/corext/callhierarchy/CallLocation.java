@@ -13,14 +13,14 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -71,7 +71,7 @@ public class CallLocation implements IAdaptable {
     	initCallTextAndLineNumber();
         return fLineNumber;
     }
-    
+
     public String getCallText() {
     	initCallTextAndLineNumber();
         return fCallText;
@@ -80,7 +80,7 @@ public class CallLocation implements IAdaptable {
     private void initCallTextAndLineNumber() {
     	if (fCallText != null)
     		return;
-    	
+
         IBuffer buffer= getBufferForMember();
         if (buffer == null || buffer.getLength() < fEnd) { //binary, without source attachment || buffer contents out of sync (bug 121900)
         	fCallText= ""; //$NON-NLS-1$
@@ -89,7 +89,7 @@ public class CallLocation implements IAdaptable {
         }
 
         fCallText= buffer.getText(fStart, (fEnd - fStart));
-        
+
         if (fLineNumber == UNKNOWN_LINE_NUMBER) {
             Document document= new Document(buffer.getContents());
             try {
@@ -99,10 +99,10 @@ public class CallLocation implements IAdaptable {
             }
         }
     }
-    
+
     /**
      * Returns the IBuffer for the IMember represented by this CallLocation.
-     * 
+     *
      * @return IBuffer for the IMember or null if the member doesn't have a buffer (for
      *          example if it is a binary file without source attachment).
      */
@@ -122,7 +122,7 @@ public class CallLocation implements IAdaptable {
     public String toString() {
         return getCallText();
     }
-    
+
     public Object getAdapter(Class adapter) {
         if (IJavaElement.class.isAssignableFrom(adapter)) {
             return getMember();

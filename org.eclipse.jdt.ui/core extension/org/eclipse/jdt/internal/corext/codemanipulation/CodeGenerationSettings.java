@@ -11,18 +11,18 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 public class CodeGenerationSettings {
-	
+
 	public boolean createComments= true;
 	public boolean useKeywordThis= false;
-	
+
 	public boolean importIgnoreLowercase= true;
 	public boolean overrideAnnotation= false;
-		
+
 	public int tabWidth;
 	public int indentWidth;
 
 
-	
+
 	public void setSettings(CodeGenerationSettings settings) {
 		settings.createComments= createComments;
 		settings.useKeywordThis= useKeywordThis;
@@ -31,7 +31,7 @@ public class CodeGenerationSettings {
 		settings.tabWidth= tabWidth;
 		settings.indentWidth= indentWidth;
 	}
-	
+
 
 }
 

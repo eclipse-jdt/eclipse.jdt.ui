@@ -18,6 +18,12 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.core.expressions.EvaluationContext;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.expressions.ExpressionTagNames;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -26,12 +32,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.expressions.EvaluationContext;
-import org.eclipse.core.expressions.EvaluationResult;
-import org.eclipse.core.expressions.Expression;
-import org.eclipse.core.expressions.ExpressionConverter;
-import org.eclipse.core.expressions.ExpressionTagNames;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -49,16 +49,16 @@ public final class ClasspathFixProcessorDescriptor {
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
-	
+
 	private static final String OVERRIDES= "overrides"; //$NON-NLS-1$
 
 	private static ClasspathFixProcessorDescriptor[] fgContributedClasspathFixProcessors;
-	
+
 	private final IConfigurationElement fConfigurationElement;
 	private ClasspathFixProcessor fProcessorInstance;
 	private List fOverriddenIds;
 	private Boolean fStatus;
-		
+
 	public ClasspathFixProcessorDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;
 		fProcessorInstance= null;
@@ -76,11 +76,11 @@ public final class ClasspathFixProcessorDescriptor {
 			fOverriddenIds= Collections.EMPTY_LIST;
 		}
 	}
-	
+
 	public String getID() {
 		return fConfigurationElement.getAttribute(ID);
 	}
-	
+
 	public Collection/*String*/ getOverridenIds() {
 		return fOverriddenIds;
 	}
@@ -115,7 +115,7 @@ public final class ClasspathFixProcessorDescriptor {
 		fStatus= Boolean.FALSE;
 		return false;
 	}
-	
+
 	public ClasspathFixProcessor getProcessor(IJavaProject project) {
 		if (matches(project)) {
 			if (fProcessorInstance == null) {
@@ -140,7 +140,7 @@ public final class ClasspathFixProcessorDescriptor {
 		}
 		return null;
 	}
-	
+
 	private static ClasspathFixProcessorDescriptor[] getCorrectionProcessors() {
 		if (fgContributedClasspathFixProcessors == null) {
 			IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
@@ -172,7 +172,7 @@ public final class ClasspathFixProcessorDescriptor {
 		}
 		return fgContributedClasspathFixProcessors;
 	}
-		
+
 	public static ClasspathFixProposal[] getProposals(final IJavaProject project, final String missingType, final MultiStatus status) {
 		final ArrayList proposals= new ArrayList();
 
@@ -193,7 +193,7 @@ public final class ClasspathFixProcessorDescriptor {
 								overriddenIds.addAll(curr.getOverridenIds());
 							}
 						}
-					}	
+					}
 					public void handleException(Throwable exception) {
 						if (status != null) {
 							status.merge(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, CorrectionMessages.ClasspathFixProcessorDescriptor_error_processing_processors, exception));

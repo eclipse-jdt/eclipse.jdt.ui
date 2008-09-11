@@ -17,7 +17,7 @@ public interface IScheduledRefactoring {
 	/**
 	 * The scheduling rule used to perform the
 	 * refactoring.
-	 * 
+	 *
 	 * @return {@link ISchedulingRule} not null
 	 */
 	public ISchedulingRule getSchedulingRule();

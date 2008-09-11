@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  * Dialog Field containing a single button such as a radio or checkbox button.
  */
 public class SelectionButtonDialogField extends DialogField {
-	
+
 	private Button fButton;
 	private boolean fIsSelected;
 	private DialogField[] fAttachedDialogFields;
@@ -40,7 +40,7 @@ public class SelectionButtonDialogField extends DialogField {
 		fAttachedDialogFields= null;
 		fButtonStyle= buttonStyle;
 	}
-	
+
 	/**
 	 * Attaches a field to the selection state of the selection button.
 	 * The attached field will be disabled if the selection button is not selected.
@@ -52,14 +52,14 @@ public class SelectionButtonDialogField extends DialogField {
 	/**
 	 * Attaches fields to the selection state of the selection button.
 	 * The attached fields will be disabled if the selection button is not selected.
-	 */	
+	 */
 	public void attachDialogFields(DialogField[] dialogFields) {
 		fAttachedDialogFields= dialogFields;
 		for (int i= 0; i < dialogFields.length; i++) {
 			dialogFields[i].setEnabled(fIsSelected);
 		}
-	}	
-	
+	}
+
 	/**
 	 * Returns <code>true</code> is  teh gived field is attached to the selection button.
 	 */
@@ -73,48 +73,48 @@ public class SelectionButtonDialogField extends DialogField {
 		}
 		return false;
 	}
-	
+
 	// ------- layout helpers
-	
+
 	/*
 	 * @see DialogField#doFillIntoGrid
 	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
-		
+
 		Button button= getSelectionButton(parent);
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
 		gd.horizontalAlignment= GridData.FILL;
 		if (fButtonStyle == SWT.PUSH) {
 			gd.widthHint = SWTUtil.getButtonWidthHint(button);
-		}			
-		
+		}
+
 		button.setLayoutData(gd);
-		
+
 		return new Control[] { button };
-	}	
+	}
 
 	/*
 	 * @see DialogField#getNumberOfControls
-	 */	
+	 */
 	public int getNumberOfControls() {
-		return 1;	
-	}	
-	
-	// ------- ui creation			
+		return 1;
+	}
+
+	// ------- ui creation
 
 	/**
 	 * Returns the selection button widget. When called the first time, the widget will be created.
 	 * @param group The parent composite when called the first time, or <code>null</code>
 	 * after.
-	 */		
+	 */
 	public Button getSelectionButton(Composite group) {
 		if (fButton == null) {
 			assertCompositeNotNull(group);
-			
+
 			fButton= new Button(group, fButtonStyle);
-			fButton.setFont(group.getFont());			
+			fButton.setFont(group.getFont());
 			fButton.setText(fLabelText);
 			fButton.setEnabled(isEnabled());
 			fButton.setSelection(fIsSelected);
@@ -125,23 +125,23 @@ public class SelectionButtonDialogField extends DialogField {
 				public void widgetSelected(SelectionEvent e) {
 					doWidgetSelected(e);
 				}
-			});				
+			});
 		}
 		return fButton;
 	}
-	
+
 	private void doWidgetSelected(SelectionEvent e) {
 		if (isOkToUse(fButton)) {
 			changeValue(fButton.getSelection());
 		}
-	}	
-	
+	}
+
 	private void changeValue(boolean newState) {
 		if (fIsSelected != newState) {
-			fIsSelected= newState;			
+			fIsSelected= newState;
 			if (fAttachedDialogFields != null) {
 				boolean focusSet= false;
-				for (int i= 0; i < fAttachedDialogFields.length; i++) {		
+				for (int i= 0; i < fAttachedDialogFields.length; i++) {
 					fAttachedDialogFields[i].setEnabled(fIsSelected);
 					if (fIsSelected && !focusSet) {
 						focusSet= fAttachedDialogFields[i].setFocus();
@@ -152,7 +152,7 @@ public class SelectionButtonDialogField extends DialogField {
 		} else if (fButtonStyle == SWT.PUSH) {
 			dialogFieldChanged();
 		}
-	}		
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#setLabelText(java.lang.String)
@@ -163,10 +163,10 @@ public class SelectionButtonDialogField extends DialogField {
 			fButton.setText(labeltext);
 		}
 	}
-	
-	
-	// ------ model access	
-	
+
+
+	// ------ model access
+
 	/**
 	 * Returns the selection state of the button.
 	 */
@@ -176,7 +176,7 @@ public class SelectionButtonDialogField extends DialogField {
 
 	/**
 	 * Sets the selection state of the button.
-	 */	
+	 */
 	public void setSelection(boolean selected) {
 		changeValue(selected);
 		if (isOkToUse(fButton)) {
@@ -188,14 +188,14 @@ public class SelectionButtonDialogField extends DialogField {
 
 	/*
 	 * @see DialogField#updateEnableState
-	 */	
+	 */
 	protected void updateEnableState() {
 		super.updateEnableState();
 		if (isOkToUse(fButton)) {
 			fButton.setEnabled(isEnabled());
-		}		
+		}
 	}
-	
+
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
 	 */
@@ -205,6 +205,6 @@ public class SelectionButtonDialogField extends DialogField {
 			fButton.setSelection(fIsSelected);
 		}
 	}
-	
-		
+
+
 }

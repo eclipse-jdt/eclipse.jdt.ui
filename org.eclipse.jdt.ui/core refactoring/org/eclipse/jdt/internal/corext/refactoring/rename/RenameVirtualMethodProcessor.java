@@ -44,14 +44,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
-	
+
 	private IMethod fOriginalMethod;
 	private boolean fActivationChecked;
 	private ITypeHierarchy fCachedHierarchy= null;
-	
+
 	/**
 	 * Creates a new rename method processor.
-	 * 
+	 *
 	 * @param method the method
 	 */
 	public RenameVirtualMethodProcessor(IMethod method) {
@@ -61,7 +61,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
 	/**
 	 * Creates a new rename method processor from arguments
-	 * 
+	 *
 	 * @param method the method
 	 * @param arguments the arguments
 	 * @param status the resulting status
@@ -72,14 +72,14 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		status.merge(initializeStatus);
 		fOriginalMethod= getMethod();
 	}
-	
+
 	/*
 	 * int. not javadoc'd
-	 * 
+	 *
 	 * Protected constructor; only called from RenameTypeProcessor. Initializes
 	 * the method processor with an already resolved top level and ripple
 	 * methods.
-	 * 
+	 *
 	 */
 	RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
 		super(topLevel, changeManager, categorySet);
@@ -103,9 +103,9 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameVirtualMethodAvailable(getMethod());
 	}
-	
+
 	//------------ preconditions -------------
-	
+
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException {
 		RefactoringStatus result= super.checkInitialConditions(monitor);
 		if (result.hasFatalError())
@@ -116,7 +116,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				// the following code may change the method to be changed.
 				IMethod method= getMethod();
 				fOriginalMethod= method;
-				
+
 				ITypeHierarchy hierarchy= null;
 				IType declaringType= method.getDeclaringType();
 				if (!declaringType.isInterface())
@@ -150,34 +150,34 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			final String name= getNewElementName();
 			if (declaring.isInterface()) {
 				if (isSpecialCase())
-					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_special_case); 
+					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_special_case);
 				pm.worked(1);
 				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 1), method, name);
 				for (int i= 0; i < relatedMethods.length; i++) {
 					IMethod relatedMethod= relatedMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(relatedMethod);
-					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_already_defined, context); 
+					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_already_defined, context);
 				}
 			} else {
 				if (classesDeclareOverridingNativeMethod(hierarchy.getAllSubtypes(declaring))) {
 					result.addError(Messages.format(
-						RefactoringCoreMessages.RenameVirtualMethodRefactoring_requieres_renaming_native,  
+						RefactoringCoreMessages.RenameVirtualMethodRefactoring_requieres_renaming_native,
 						new String[]{ BasicElementLabels.getJavaElementName(method.getElementName()), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
-	
+
 				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), hierarchy, method, name);
 				for (int i= 0; i < hierarchyMethods.length; i++) {
 					IMethod hierarchyMethod= hierarchyMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 					if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 						result.addError(Messages.format(
-							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares2, 
-							BasicElementLabels.getJavaElementName(name)), context); 
+							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares2,
+							BasicElementLabels.getJavaElementName(name)), context);
 					} else {
 						result.addWarning(Messages.format(
-							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares1, 
-							BasicElementLabels.getJavaElementName(name)), context); 
-					}					
+							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares1,
+							BasicElementLabels.getJavaElementName(name)), context);
+					}
 				}
 			}
 			fCachedHierarchy= null;
@@ -186,9 +186,9 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			pm.done();
 		}
 	}
-	
+
 	//---- Interface checks -------------------------------------
-	
+
 	private IMethod[] relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
 		try{
 			Set result= new HashSet();
@@ -202,7 +202,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			return (IMethod[]) result.toArray(new IMethod[result.size()]);
 		} finally {
 			pm.done();
-		}	
+		}
 	}
 
 	private boolean isSpecialCase() throws CoreException {
@@ -220,15 +220,15 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 												   Signature.SIG_VOID, Signature.SIG_VOID};
 		Assert.isTrue((specialNames.length == specialParamTypes.length) && (specialParamTypes.length == specialReturnTypes.length));
 		for (int i= 0; i < specialNames.length; i++){
-			if (specialNames[i].equals(getNewElementName()) 
-				&& Checks.compareParamTypes(getMethod().getParameterTypes(), specialParamTypes[i]) 
+			if (specialNames[i].equals(getNewElementName())
+				&& Checks.compareParamTypes(getMethod().getParameterTypes(), specialParamTypes[i])
 				&& !specialReturnTypes[i].equals(getMethod().getReturnType())){
 					return true;
 			}
 		}
-		return false;		
+		return false;
 	}
-	
+
 	private Set getRelatedTypes() {
 		Set methods= getMethodsToRename();
 		Set result= new HashSet(methods.size());
@@ -237,9 +237,9 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		}
 		return result;
 	}
-	
+
 	//---- Class checks -------------------------------------
-	
+
 	private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws CoreException {
 		for (int i= 0; i < classes.length; i++){
 			IMethod[] methods= classes[i].getMethods();

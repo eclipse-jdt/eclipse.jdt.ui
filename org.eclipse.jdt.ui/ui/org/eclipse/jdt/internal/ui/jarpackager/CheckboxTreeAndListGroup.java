@@ -70,14 +70,14 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	the width and/or height of the combined widget (to only hardcode one of the
 	 *	sizing dimensions, specify the other dimension's value as -1)
 	 * @param parent parent composite
-	 * @param rootObject 
-	 * @param treeContentProvider 
-	 * @param treeLabelProvider 
-	 * @param listContentProvider 
-	 * @param listLabelProvider 
-	 * @param style 
-	 * @param width the width 
-	 * @param height the height 
+	 * @param rootObject
+	 * @param treeContentProvider
+	 * @param treeLabelProvider
+	 * @param listContentProvider
+	 * @param listLabelProvider
+	 * @param style
+	 * @param width the width
+	 * @param height the height
 	 */
 	public CheckboxTreeAndListGroup(
 			Composite parent,
@@ -124,7 +124,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 * Adds the receiver and all of it's ancestors to the checkedStateStore if they
 	 * are not already there.
-	 * @param treeElement 
+	 * @param treeElement
 	 */
 	private void addToHierarchyToCheckedStore(Object treeElement) {
 
@@ -169,7 +169,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Iterates through the passed elements which are being realized for the first
 	 *	time and check each one in the tree viewer as appropriate
-	 * @param elements 
+	 * @param elements
 	 */
 	protected void checkNewTreeElements(Object[] elements) {
 		for (int i= 0; i < elements.length; ++i) {
@@ -207,7 +207,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	@param parent org.eclipse.swt.widgets.Composite
 	 *	@param width int
 	 *	@param height int
-	 * @param style 
+	 * @param style
 	 */
 	protected void createContents(
 		Composite parent,
@@ -231,9 +231,9 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 *	Creates this group's list viewer.
-	 * @param parent the parent composite 
-	 * @param width the width 
-	 * @param height the height 
+	 * @param parent the parent composite
+	 * @param width the width
+	 * @param height the height
 	 */
 	protected void createListViewer(Composite parent, int width, int height) {
 		fListViewer= CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
@@ -250,7 +250,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	Creates this group's tree viewer.
 	 * @param parent parent composite
 	 * @param width the width
-	 * @param height the height 
+	 * @param height the height
 	 */
 	protected void createTreeViewer(Composite parent, int width, int height) {
 		Tree tree= new Tree(parent, SWT.CHECK | SWT.BORDER);
@@ -375,7 +375,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 * Gets the table that displays the folder content
-	 * 
+	 *
 	 * @return the table used to show the list
 	 */
 	public Table getTable() {
@@ -383,7 +383,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 * Gets the tree that displays the list for a folder
-	 * 
+	 *
 	 * @return the tree used to show the folders
 	 */
 	public Tree getTree() {
@@ -410,7 +410,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Logically gray-check all ancestors of treeItem by ensuring that they
 	 *	appear in the checked table
-	 * @param treeElement 
+	 * @param treeElement
 	 */
 	protected void grayCheckHierarchy(Object treeElement) {
 
@@ -428,19 +428,19 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 *	Sets the initial checked state of the passed list element to true.
-	 * @param element 
+	 * @param element
 	 */
 	public void initialCheckListItem(Object element) {
 		Object parent= fTreeContentProvider.getParent(element);
 		fCurrentTreeSelection= parent;
-		//As this is not done from the UI then set the box for updating from the selection to false 
+		//As this is not done from the UI then set the box for updating from the selection to false
 		listItemChecked(element, true, false);
 		updateHierarchy(parent);
 	}
 	/**
 	 *	Sets the initial checked state of the passed element to true,
 	 *	as well as to all of its children and associated list elements
-	 * @param element 
+	 * @param element
 	 */
 	public void initialCheckTreeItem(Object element) {
 		treeItemChecked(element, true);
@@ -455,9 +455,9 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	Callback that's invoked when the checked status of an item in the list
 	 *	is changed by the user. Do not try and update the hierarchy if we are building the
 	 *  initial list.
-	 * @param listElement 
-	 * @param state 
-	 * @param updatingFromSelection 
+	 * @param listElement
+	 * @param state
+	 * @param updatingFromSelection
 	 */
 	protected void listItemChecked(
 		Object listElement,
@@ -488,7 +488,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Notifies all checked state listeners that the passed element has had
 	 *	its checked state changed to the passed state
-	 * @param event 
+	 * @param event
 	 */
 	protected void notifyCheckStateChangeListeners(CheckStateChangedEvent event) {
 		Iterator listenersEnum= fListeners.iterator();
@@ -546,7 +546,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 * Selects or deselect all of the elements in the tree depending on the value of the selection
 	 * boolean. Be sure to update the displayed files as well.
-	 * @param selection 
+	 * @param selection
 	 */
 	public void setAllSelections(final boolean selection) {
 
@@ -573,7 +573,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 *	Sets the sorter that is to be applied to self's list viewer
-	 * @param comparator 
+	 * @param comparator
 	 */
 	public void setListComparator(ViewerComparator comparator) {
 		fListViewer.setComparator(comparator);
@@ -581,8 +581,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 * Sets the root of the widget to be new Root. Regenerate all of the tables and lists from this
 	 * value.
-	 * 
-	 * @param newRoot 
+	 *
+	 * @param newRoot
 	 */
 	public void setRoot(Object newRoot) {
 		this.fRoot= newRoot;
@@ -591,8 +591,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *	Sets the checked state of the passed tree element appropriately, and
 	 *	do so recursively to all of its child tree elements as well
-	 * @param treeElement 
-	 * @param state 
+	 * @param treeElement
+	 * @param state
 	 */
 	protected void setTreeChecked(Object treeElement, boolean state) {
 
@@ -634,7 +634,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 *	Sets the sorter that is to be applied to self's tree viewer
-	 * @param sorter 
+	 * @param sorter
 	 */
 	public void setTreeComparator(ViewerComparator sorter) {
 		fTreeViewer.setComparator(sorter);
@@ -654,7 +654,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 *	Handle the collapsing of an element in a tree viewer
-	 * @param event 
+	 * @param event
 	 */
 	public void treeCollapsed(TreeExpansionEvent event) {
 		// We don't need to do anything with this
@@ -662,7 +662,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 	/**
 	 *	Handles the expansionsion of an element in a tree viewer
-	 * @param event 
+	 * @param event
 	 */
 	public void treeExpanded(TreeExpansionEvent event) {
 
@@ -679,8 +679,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 *  Callback that's invoked when the checked status of an item in the tree
 	 *  is changed by the user.
-	 * @param treeElement 
-	 * @param state 
+	 * @param treeElement
+	 * @param state
 	 */
 	protected void treeItemChecked(Object treeElement, boolean state) {
 
@@ -691,7 +691,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		if (parent == null)
 			return;
 
-		// now update upwards in the tree hierarchy 
+		// now update upwards in the tree hierarchy
 		if (state)
 			grayCheckHierarchy(parent);
 		else
@@ -701,7 +701,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 *	Logically un-gray-check all ancestors of treeItem iff appropriate.
-	 * @param treeElement 
+	 * @param treeElement
 	 */
 	protected void ungrayCheckHierarchy(Object treeElement) {
 		if (!determineShouldBeAtLeastGrayChecked(treeElement))
@@ -713,7 +713,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 *	Sets the checked state of self and all ancestors appropriately
-	 * @param treeElement 
+	 * @param treeElement
 	 */
 	protected void updateHierarchy(Object treeElement) {
 
@@ -736,7 +736,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	/**
 	 * Update the selections of the tree elements in items to reflect the new
 	 * selections provided.
-	 * 
+	 *
 	 * @param items with keys of Object (the tree element) and values of List (the selected
 	 * list elements).
 	 */
@@ -751,7 +751,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 * Returns the result of running the given elements through the filters.
-	 * @param filters 
+	 * @param filters
 	 *
 	 * @param elements the elements to filter
 	 * @return only the elements which all filters accept
@@ -818,24 +818,24 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 				fListViewer.setCheckedElements(((List) items.get(key)).toArray());
 			}
 		}
-	}		
-	
+	}
+
 	/**
 	 * Checks if an element is grey checked.
-	 * @param object 
+	 * @param object
 	 * @return if an element is grey checked.
 	 */
 	public boolean isTreeItemGreyChecked(Object object) {
-		return fTreeViewer.getGrayed(object);	
-	}	
+		return fTreeViewer.getGrayed(object);
+	}
 
 	/**
 	 * For a given element, expand its chidren to a level.
-	 * @param object 
-	 * @param level 
-	 */	
+	 * @param object
+	 * @param level
+	 */
 	public void expandTreeToLevel(Object object, int level) {
-		fTreeViewer.expandToLevel(object, level);	
+		fTreeViewer.expandToLevel(object, level);
 	}
 	/**
 	 * @param selection

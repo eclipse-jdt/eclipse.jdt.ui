@@ -32,20 +32,20 @@ public class JavaContextType extends AbstractJavaContextType {
 	 * The context type id for templates working on member locations
 	 */
 	public static final String ID_MEMBERS= "java-members"; //$NON-NLS-1$
-	
+
 	/**
 	 * The context type id for templates working on statement locations
 	 */
 	public static final String ID_STATEMENTS= "java-statements"; //$NON-NLS-1$
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType#initializeContext(org.eclipse.jdt.internal.corext.template.java.JavaContext)
 	 */
 	protected void initializeContext(JavaContext context) {
-		if (!getId().equals(JavaContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere 
-			context.addCompatibleContextType(JavaContextType.ID_ALL); 
+		if (!getId().equals(JavaContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
+			context.addCompatibleContextType(JavaContextType.ID_ALL);
 		}
 	}
-	
+
 }

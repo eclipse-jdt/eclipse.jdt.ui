@@ -32,7 +32,7 @@ import org.eclipse.jface.viewers.Viewer;
  *   <li><code>validateDrop</code> - identifies valid drop targets in viewer</li>
  *   <li><code>performDrop</code> - carries out a drop into a viewer</li>
  * </ul>
- * The <code>setFeedbackEnabled</code> method can be called to turn on and off 
+ * The <code>setFeedbackEnabled</code> method can be called to turn on and off
  * visual insertion feedback (on by default).
  * </p>
  * <p>
@@ -43,7 +43,7 @@ import org.eclipse.jface.viewers.Viewer;
 public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
 
     /**
-     * Constant describing the position of the cursor relative 
+     * Constant describing the position of the cursor relative
      * to the target object.  This means the mouse is positioned
      * slightly before the target.
      * @see #getCurrentLocation()
@@ -51,7 +51,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     public static final int LOCATION_BEFORE = 1;
 
     /**
-     * Constant describing the position of the cursor relative 
+     * Constant describing the position of the cursor relative
      * to the target object.  This means the mouse is positioned
      * slightly after the target.
      * @see #getCurrentLocation()
@@ -59,7 +59,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     public static final int LOCATION_AFTER = 2;
 
     /**
-     * Constant describing the position of the cursor relative 
+     * Constant describing the position of the cursor relative
      * to the target object.  This means the mouse is positioned
      * directly on the target.
      * @see #getCurrentLocation()
@@ -67,7 +67,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     public static final int LOCATION_ON = 3;
 
     /**
-     * Constant describing the position of the cursor relative 
+     * Constant describing the position of the cursor relative
      * to the target object.  This means the mouse is not positioned
      * over or near any valid target.
      * @see #getCurrentLocation()
@@ -118,7 +118,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * expanding on or off. Default is <code>true</code>.
      */
     private boolean expandEnabled = true;
-    
+
     /**
      * A flag that allows adapter users to turn selection feedback
      *  on or off. Default is <code>true</code>.
@@ -271,7 +271,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
 
     /**
      * Returns a constant describing the position of the mouse relative to the
-     * target (before, on, or after the target.  
+     * target (before, on, or after the target.
      *
      * @return one of the <code>LOCATION_* </code> constants defined in this type
      */
@@ -305,7 +305,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     /**
      * Returns whether visible insertion feedback should be presented to the user.
      * <p>
-     * Typical insertion feedback is the horizontal insertion bars that appear 
+     * Typical insertion feedback is the horizontal insertion bars that appear
      * between adjacent items while dragging.
      * </p>
      *
@@ -318,7 +318,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     /**
      * Returns the object currently selected by the viewer.
      *
-     * @return the selected object, or <code>null</code> if either no object or 
+     * @return the selected object, or <code>null</code> if either no object or
      *   multiple objects are selected
      */
     protected Object getSelectedObject() {
@@ -338,9 +338,9 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     }
 
     /**
-     * @deprecated this method should not be used. Exception handling has been 
+     * @deprecated this method should not be used. Exception handling has been
      * 	removed from DropTargetAdapter methods overridden by this class.
-     * Handles any exception that occurs during callback, including 
+     * Handles any exception that occurs during callback, including
      * rethrowing behavior.
      * <p>
      * [Issue: Implementation prints stack trace and eats exception to avoid
@@ -368,7 +368,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * </p>
      *
      * @param data the drop data
-     * @return <code>true</code> if the drop was successful, and 
+     * @return <code>true</code> if the drop was successful, and
      *   <code>false</code> otherwise
      */
     public abstract boolean performDrop(Object data);
@@ -394,7 +394,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
                 break;
             }
         }
-        
+
          // Explicitly inhibit SELECT feedback if desired
 		if (!selectFeedbackEnabled) {
 			event.feedback &= ~DND.FEEDBACK_SELECT;
@@ -414,7 +414,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
 	 * Typical insertion feedback is the horizontal insertion bars that appear
 	 * between adjacent items while dragging.
 	 * </p>
-	 * 
+	 *
 	 * @param value
 	 *            <code>true</code> if visual feedback is desired, and
 	 *            <code>false</code> if not
@@ -428,7 +428,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      *
      * @param value <code>true</code> if selection feedback is desired, and
      *   <code>false</code> if not
-     *   
+     *
      * @since 3.2
      */
     public void setSelectionFeedbackEnabled(boolean value) {
@@ -457,7 +457,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     public void setExpandEnabled(boolean value) {
         expandEnabled = value;
     }
-    
+
     /**
      * Sets whether auto scrolling should be provided during dragging.
      *
@@ -470,12 +470,12 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
     }
 
     /**
-     * Validates dropping on the given object. This method is called whenever some 
+     * Validates dropping on the given object. This method is called whenever some
      * aspect of the drop operation changes.
      * <p>
      * Subclasses must implement this method to define which drops make sense.
      * </p>
-     * 
+     *
      * @param target the object that the mouse is currently hovering over, or
      *   <code>null</code> if the mouse is hovering over empty space
      * @param operation the current drag operation (copy, move, etc.)
@@ -485,10 +485,10 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      */
     public abstract boolean validateDrop(Object target, int operation,
             TransferData transferType);
-    
+
     /**
      * Determine the operation which should be executed given the target and the operation
-     * requested by the user. This method is called whenever some aspect of the drop operation 
+     * requested by the user. This method is called whenever some aspect of the drop operation
      * changes. The operation is one of DND#DROP_DEFAULT, DND#DROP_COPY, DND#DROP_MOVE, DND#DROP_LINK.
      * <p>
      * The method returns the operation valid in the given context. The result is one of
@@ -498,7 +498,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * Subclasses can overwrite this method to define which operation does make
      * sense in the given context.
      * </p>
-     * 
+     *
      * @param target the object that the mouse is currently hovering over, or
      *   <code>null</code> if the mouse is hovering over empty space
      * @param operation the current drag operation (copy, move, etc.)
@@ -506,7 +506,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * @param operations a bitwise OR'ing of the operations that the DragSource can support
      * @return the operation which will be executed if no modifier key is pressed
      * 		by the user
-     * 
+     *
      * @see DND#DROP_NONE
 	 * @see DND#DROP_MOVE
 	 * @see DND#DROP_COPY

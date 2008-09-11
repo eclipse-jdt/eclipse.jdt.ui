@@ -20,14 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -41,6 +33,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -73,11 +73,11 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class JavadocStandardWizardPage extends JavadocWizardPage {
-	
-	
+
+
 	private final int STYLESHEETSTATUS= 1;
 	private final int LINK_REFERENCES= 2;
-	
+
 	private JavadocOptionsManager fStore;
 	private Composite fUpperComposite;
 
@@ -98,7 +98,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 	private StatusInfo fStyleSheetStatus;
 	private StatusInfo fLinkRefStatus;
-	
+
 	private ArrayList fButtonsList;
 	private JavadocTreeWizardPage fFirstPage;
 
@@ -106,7 +106,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	public JavadocStandardWizardPage(String pageName, JavadocTreeWizardPage firstPage, JavadocOptionsManager store) {
 		super(pageName);
 		fFirstPage= firstPage;
-		setDescription(JavadocExportMessages.JavadocStandardWizardPage_description); 
+		setDescription(JavadocExportMessages.JavadocStandardWizardPage_description);
 
 		fStore= store;
 		fButtonsList= new ArrayList();
@@ -139,10 +139,10 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	}
 	private void createBasicOptionsGroup(Composite composite) {
 
-		fTitleButton= createButton(composite, SWT.CHECK, JavadocExportMessages.JavadocStandardWizardPage_titlebutton_label, createGridData(1)); 
+		fTitleButton= createButton(composite, SWT.CHECK, JavadocExportMessages.JavadocStandardWizardPage_titlebutton_label, createGridData(1));
 		fTitleText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 3, 0));
 		SWTUtil.setAccessibilityText(fTitleText, JavadocExportMessages.JavadocStandardWizardPage_titlebutton_description);
-		
+
 		String text= fStore.getTitle();
 		if (!text.equals("")) { //$NON-NLS-1$
 			fTitleText.setText(text);
@@ -153,15 +153,15 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fBasicOptionsGroup= new Group(composite, SWT.SHADOW_ETCHED_IN);
 		fBasicOptionsGroup.setLayout(createGridLayout(1));
 		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
-		fBasicOptionsGroup.setText(JavadocExportMessages.JavadocStandardWizardPage_basicgroup_label); 
+		fBasicOptionsGroup.setText(JavadocExportMessages.JavadocStandardWizardPage_basicgroup_label);
 
-		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_usebutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.USE, true); 
-		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_hierarchybutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NOTREE, false); 
-		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_navigartorbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NONAVBAR, false); 
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_usebutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.USE, true);
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_hierarchybutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NOTREE, false);
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_navigartorbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NONAVBAR, false);
 
-		fIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_indexbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NOINDEX, false); 
+		fIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_indexbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NOINDEX, false);
 
-		fSeperatedIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_seperateindexbutton_label, createGridData(GridData.GRAB_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.SPLITINDEX, true); 
+		fSeperatedIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_seperateindexbutton_label, createGridData(GridData.GRAB_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.SPLITINDEX, true);
 		fSeperatedIndexCheck.getButton().setEnabled(fIndexCheck.getButton().getSelection());
 
 		fIndexCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fSeperatedIndexCheck.getButton()}));
@@ -173,12 +173,12 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fTagsGroup= new Group(composite, SWT.SHADOW_ETCHED_IN);
 		fTagsGroup.setLayout(createGridLayout(1));
 		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
-		fTagsGroup.setText(JavadocExportMessages.JavadocStandardWizardPage_tagsgroup_label); 
+		fTagsGroup.setText(JavadocExportMessages.JavadocStandardWizardPage_tagsgroup_label);
 
-		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_authorbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true); 
-		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_versionbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true); 
-		fDeprecatedCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_deprecatedbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NODEPRECATED, false); 
-		fDeprecatedList= new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_deprecatedlistbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.NODEPRECATEDLIST, false); 
+		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_authorbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true);
+		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_versionbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true);
+		fDeprecatedCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_deprecatedbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NODEPRECATED, false);
+		fDeprecatedList= new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_deprecatedlistbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1, convertWidthInCharsToPixels(3)), fStore.NODEPRECATEDLIST, false);
 		fDeprecatedList.getButton().setEnabled(fDeprecatedCheck.getButton().getSelection());
 
 		fDeprecatedCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fDeprecatedList.getButton()}));
@@ -190,12 +190,12 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, 0));
 		((GridLayout) c.getLayout()).marginWidth= 0;
 
-		fStyleSheetButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocStandardWizardPage_stylesheettext_label, createGridData(1)); 
+		fStyleSheetButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocStandardWizardPage_stylesheettext_label, createGridData(1));
 		fStyleSheetText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		SWTUtil.setAccessibilityText(fStyleSheetText, JavadocExportMessages.JavadocStandardWizardPage_stylesheettext_description);
 		//there really aught to be a way to specify this
 		 ((GridData) fStyleSheetText.getLayoutData()).widthHint= 200;
-		fStyleSheetBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocStandardWizardPage_stylesheetbrowsebutton_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); 
+		fStyleSheetBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocStandardWizardPage_stylesheetbrowsebutton_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fStyleSheetBrowseButton);
 
 		String str= fStore.getStyleSheet();
@@ -236,19 +236,19 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 4, 0));
 		((GridLayout) c.getLayout()).marginWidth= 0;
 
-		String[] buttonlabels= new String[] { JavadocExportMessages.JavadocStandardWizardPage_selectallbutton_label, JavadocExportMessages.JavadocStandardWizardPage_clearallbutton_label, JavadocExportMessages.JavadocStandardWizardPage_configurebutton_label}; 
+		String[] buttonlabels= new String[] { JavadocExportMessages.JavadocStandardWizardPage_selectallbutton_label, JavadocExportMessages.JavadocStandardWizardPage_clearallbutton_label, JavadocExportMessages.JavadocStandardWizardPage_configurebutton_label};
 
 		JavadocLinkDialogLabelProvider labelProvider= new JavadocLinkDialogLabelProvider();
-		
+
 		ListAdapter adapter= new ListAdapter();
-		
+
 		fListDialogField= new CheckedListDialogField(adapter, buttonlabels, labelProvider);
 		fListDialogField.setDialogFieldListener(adapter);
 		fListDialogField.setCheckAllButtonIndex(0);
 		fListDialogField.setUncheckAllButtonIndex(1);
 		fListDialogField.setViewerComparator(new ViewerComparator());
 
-		createLabel(c, SWT.NONE, JavadocExportMessages.JavadocStandardWizardPage_referencedclasses_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 4, 0)); 
+		createLabel(c, SWT.NONE, JavadocExportMessages.JavadocStandardWizardPage_referencedclasses_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 4, 0));
 		fListDialogField.doFillIntoGrid(c, 3);
 
 		LayoutUtil.setHorizontalGrabbing(fListDialogField.getListControl(null));
@@ -258,7 +258,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 	private List getCheckedReferences(JavadocLinkRef[] referencesClasses) {
 		List checkedElements= new ArrayList();
-		
+
 		String hrefs[]= fStore.getHRefs();
 		if (hrefs.length > 0) {
 			HashSet set= new HashSet();
@@ -275,11 +275,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		}
 		return checkedElements;
 	}
-	
 
-	
+
+
 	/**
-	 * Returns IJavaProjects and IPaths that will be on the classpath  
+	 * Returns IJavaProjects and IPaths that will be on the classpath
 	 * @param checkedProjects the list of checked projects
 	 * @return all IJavaProjects and IPaths that will be on the classpath
 	 */
@@ -294,9 +294,9 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				// ignore
 			}
 		}
-		return (JavadocLinkRef[]) result.toArray(new JavadocLinkRef[result.size()]);	
+		return (JavadocLinkRef[]) result.toArray(new JavadocLinkRef[result.size()]);
 	}
-	
+
 	private void collectReferencedElements(IJavaProject project, HashSet result) throws CoreException {
 		IRuntimeClasspathEntry[] unresolved = JavaRuntime.computeUnresolvedRuntimeClasspath(project);
 		for (int i= 0; i < unresolved.length; i++) {
@@ -323,7 +323,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			}
 		}
 	}
-	
+
 	final void doValidation(int VALIDATE) {
 		switch (VALIDATE) {
 			case STYLESHEETSTATUS :
@@ -331,14 +331,14 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				if (fStyleSheetButton.getSelection()) {
 					String filename= fStyleSheetText.getText();
 					if (filename.length() == 0) {
-						fStyleSheetStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewnotfound_error); 
+						fStyleSheetStatus.setError(JavadocExportMessages.JavadocSpecificsWizardPage_overviewnotfound_error);
 					} else {
 						File file= new File(filename);
 						String ext= filename.substring(filename.lastIndexOf('.') + 1);
 						if (!file.isFile()) {
-							fStyleSheetStatus.setError(JavadocExportMessages.JavadocStandardWizardPage_stylesheetnopath_error); 
+							fStyleSheetStatus.setError(JavadocExportMessages.JavadocStandardWizardPage_stylesheetnopath_error);
 						} else if (!ext.equalsIgnoreCase("css")) { //$NON-NLS-1$
-							fStyleSheetStatus.setError(JavadocExportMessages.JavadocStandardWizardPage_stylesheetnotcss_error); 
+							fStyleSheetStatus.setError(JavadocExportMessages.JavadocStandardWizardPage_stylesheetnotcss_error);
 						}
 					}
 				}
@@ -350,11 +350,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 					JavadocLinkRef curr= (JavadocLinkRef) list.get(i);
 					URL url= curr.getURL();
 					if (url == null) {
-						fLinkRefStatus.setWarning(JavadocExportMessages.JavadocStandardWizardPage_nolinkref_error); 
+						fLinkRefStatus.setWarning(JavadocExportMessages.JavadocStandardWizardPage_nolinkref_error);
 						break;
 					} else if ("jar".equals(url.getProtocol())) { //$NON-NLS-1$
-						fLinkRefStatus.setWarning(JavadocExportMessages.JavadocStandardWizardPage_nojarlinkref_error); 
-						break;					
+						fLinkRefStatus.setWarning(JavadocExportMessages.JavadocStandardWizardPage_nojarlinkref_error);
+						break;
 					}
 				}
 				break;
@@ -430,7 +430,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	private void updateHRefList(IJavaProject[] checkedProjects) {
 		JavadocLinkRef[] res= getReferencedElements(checkedProjects);
 		fListDialogField.setElements(Arrays.asList(res));
-			
+
 		List checked= getCheckedReferences(res);
 		fListDialogField.setCheckedElements(checked);
 	}
@@ -492,11 +492,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				fListDialogField.enableButton(2, true);
 			}
 		}
-		
+
 		public void doubleClicked(ListDialogField field) {
 			doEditButtonPressed();
 		}
-		
+
 		public void dialogFieldChanged(DialogField field) {
 			doValidation(LINK_REFERENCES);
 		}
@@ -529,7 +529,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 		public JavadocPropertyDialog(Shell parent, JavadocLinkRef selection) {
 			super(parent);
-			setTitle(JavadocExportMessages.JavadocStandardWizardPage_javadocpropertydialog_title); 
+			setTitle(JavadocExportMessages.JavadocStandardWizardPage_javadocpropertydialog_title);
 
 			fElement= selection;
 			URL initialLocation= selection.getURL();
@@ -540,7 +540,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			Control inner= fJavadocConfigurationBlock.createContents(composite);
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-			applyDialogFont(composite);		
+			applyDialogFont(composite);
 			return composite;
 		}
 
@@ -563,13 +563,13 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
 
 			} catch (InvocationTargetException e) {
-				String title= JavadocExportMessages.JavadocStandardWizardPage_configurecontainer_error_title; 
-				String message= JavadocExportMessages.JavadocStandardWizardPage_configurecontainer_error_message; 
+				String title= JavadocExportMessages.JavadocStandardWizardPage_configurecontainer_error_title;
+				String message= JavadocExportMessages.JavadocStandardWizardPage_configurecontainer_error_message;
 				ExceptionHandler.handle(e, getShell(), title, message);
 			} catch (InterruptedException e) {
 				// user cancelled
 			}
-			
+
 			fListDialogField.refresh();
 			doValidation(LINK_REFERENCES);
 			super.okPressed();

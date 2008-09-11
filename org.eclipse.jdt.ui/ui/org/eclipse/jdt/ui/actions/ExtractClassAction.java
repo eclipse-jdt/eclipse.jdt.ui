@@ -35,13 +35,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Extracts selected fields into a new class and replaces the fields with a new field to the new class.
- *  * 
+ *  *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.4
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ExtractClassAction extends SelectionDispatchAction {
@@ -50,7 +50,7 @@ public class ExtractClassAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ExtractClassAction(JavaEditor editor) {
@@ -63,7 +63,7 @@ public class ExtractClassAction extends SelectionDispatchAction {
 	 * Creates a new <code>ExtractClassAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public ExtractClassAction(IWorkbenchSite site) {
@@ -110,8 +110,8 @@ public class ExtractClassAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * @param selection the changed selection 
-	 * 
+	 * @param selection the changed selection
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {

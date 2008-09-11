@@ -28,15 +28,15 @@ final class NLSSearchMessages extends NLS {
 	public static String NLSSearchQuery_propertiesNotExists;
 	public static String NLSSearchQuery_wrapperNotExists;
 	public static String NLSSearchQuery_xProblemsInScope_description;
-	
+
 	public static String NLSSearchResultCollector_duplicateKeys;
 	public static String NLSSearchResultCollector_unusedKeys;
 	public static String NLSSearchResultLabelProvider2_undefinedKeys;
 	public static String NLSSearchResultRequestor_searching;
-	
+
 	public static String SearchOperation_pluralLabelPatternPostfix;
 	public static String SearchOperation_singularLabelPostfix;
-	
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NLSSearchMessages.class);
 	}

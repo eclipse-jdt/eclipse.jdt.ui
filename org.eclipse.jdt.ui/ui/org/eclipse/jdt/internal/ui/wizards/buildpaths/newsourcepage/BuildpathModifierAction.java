@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -33,9 +33,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.part.ISetSelectionTarget;
-
 import org.eclipse.ui.forms.widgets.FormText;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
@@ -43,7 +42,7 @@ import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class BuildpathModifierAction extends Action implements ISelectionChangedListener {
-	
+
 	public static final int ADD_SEL_SF_TO_BP= 0;
 	public static final int REMOVE_FROM_BP= 1;
 	public static final int EXCLUDE= 2;
@@ -72,27 +71,27 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	public BuildpathModifierAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, int id) {
 		this(site, selectionTarget, id, IAction.AS_PUSH_BUTTON);
     }
-	
+
 	public BuildpathModifierAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, int id, int style) {
 		super("", style); //$NON-NLS-1$
-		
+
 		fSite= site;
 		fSelectionTarget= selectionTarget;
 		fSelectedElements= new ArrayList();
 		fListeners= new ArrayList();
-		
+
 		setId(Integer.toString(id));
     }
 
 	/**
-	 * A detailed description usable for a {@link FormText} 
+	 * A detailed description usable for a {@link FormText}
 	 * depending on the current selection, or <code>null</code>
 	 * if <code>!enabled()</code>
-	 * 
+	 *
 	 * @return A detailed description or null if <code>!enabled()</code>
 	 */
 	public abstract String getDetailedDescription();
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -109,15 +108,15 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	}
 
 	protected abstract boolean canHandle(IStructuredSelection elements);
-	
+
 	protected List getSelectedElements() {
 		return fSelectedElements;
 	}
-	
+
 	public void addBuildpathModifierListener(IBuildpathModifierListener listener) {
 		fListeners.add(listener);
 	}
-	
+
 	public void removeBuildpathModifierListener(IBuildpathModifierListener listener) {
 		fListeners.remove(listener);
 	}
@@ -125,20 +124,20 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	protected void informListeners(BuildpathDelta delta) {
 		for (Iterator iterator= fListeners.iterator(); iterator.hasNext();) {
 	        ((IBuildpathModifierListener)iterator.next()).buildpathChanged(delta);
-        }	
+        }
 	}
-	
+
 	protected Shell getShell() {
 		if (fSite == null)
 			return JavaPlugin.getActiveWorkbenchShell();
-		
+
 	    return fSite.getShell() != null ? fSite.getShell() : JavaPlugin.getActiveWorkbenchShell();
     }
-	
+
 	protected void showExceptionDialog(CoreException exception, String title) {
 		showError(exception, getShell(), title, exception.getMessage());
 	}
-	
+
 	protected void showError(CoreException e, Shell shell, String title, String message) {
 		IStatus status= e.getStatus();
 		if (status != null) {
@@ -147,14 +146,14 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 			MessageDialog.openError(shell, title, message);
 		}
 	}
-	
+
 	protected void selectAndReveal(final ISelection selection) {
 		if (fSelectionTarget != null)
 			fSelectionTarget.selectReveal(selection);
-		
+
 		if (fSite == null)
 			return;
-			
+
 		// validate the input
 		IWorkbenchPage page= fSite.getPage();
 		if (page == null)

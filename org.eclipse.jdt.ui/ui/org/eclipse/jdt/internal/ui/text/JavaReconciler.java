@@ -12,6 +12,12 @@
 package org.eclipse.jdt.internal.ui.text;
 
 
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.core.resources.IMarker;
@@ -21,12 +27,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
-
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.events.ShellListener;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -41,6 +41,7 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
@@ -151,7 +152,7 @@ public class JavaReconciler extends MonoReconciler {
 		public void elementChanged(ElementChangedEvent event) {
 			if (isRunningInReconcilerThread())
 				return;
-			
+
 			if (event.getDelta().getFlags() == IJavaElementDelta.F_AST_AFFECTED || canIgnore(event.getDelta().getAffectedChildren()))
 				return;
 
@@ -163,7 +164,7 @@ public class JavaReconciler extends MonoReconciler {
 		/**
 		 * Check whether the given delta has been
 		 * sent when saving this reconciler's editor.
-		 * 
+		 *
 		 * @param delta the deltas
 		 * @return <code>true</code> if the given delta
 		 * @since 3.5
@@ -226,7 +227,7 @@ public class JavaReconciler extends MonoReconciler {
 		}
 	}
 
-	
+
 	/** The reconciler's editor */
 	private ITextEditor fTextEditor;
 	/** The part listener */
@@ -264,7 +265,7 @@ public class JavaReconciler extends MonoReconciler {
 	private IPropertyChangeListener fPropertyChangeListener;
 
 	private boolean fIninitalProcessDone= false;
-	
+
 	/**
 	 * The element that this reconciler reconciles.
 	 * @since 3.4
@@ -273,7 +274,7 @@ public class JavaReconciler extends MonoReconciler {
 
 	/**
 	 * Creates a new reconciler.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param strategy the reconcile strategy
 	 * @param isIncremental <code>true</code> if this is an incremental reconciler
@@ -319,7 +320,7 @@ public class JavaReconciler extends MonoReconciler {
 		fResourceChangeListener= new ResourceChangeListener();
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		workspace.addResourceChangeListener(fResourceChangeListener);
-		
+
 		fPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (SpellingService.PREFERENCE_SPELLING_ENABLED.equals(event.getProperty()) || SpellingService.PREFERENCE_SPELLING_ENGINE.equals(event.getProperty()))
@@ -327,7 +328,7 @@ public class JavaReconciler extends MonoReconciler {
 			}
 		};
 		JavaPlugin.getDefault().getCombinedPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
-		
+
 		fReconciledElement= EditorUtility.getEditorInputJavaElement(fTextEditor, false);
 	}
 
@@ -352,7 +353,7 @@ public class JavaReconciler extends MonoReconciler {
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(fResourceChangeListener);
 		fResourceChangeListener= null;
-		
+
 		JavaPlugin.getDefault().getCombinedPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 		fPropertyChangeListener= null;
 
@@ -418,7 +419,7 @@ public class JavaReconciler extends MonoReconciler {
 	private synchronized void setJavaModelChanged(boolean state) {
 		fHasJavaModelChanged= state;
 	}
-	
+
 	/**
 	 * Tells whether this reconciler's editor is active.
 	 *
@@ -429,7 +430,7 @@ public class JavaReconciler extends MonoReconciler {
 		return fIsEditorActive;
 	}
 
-	
+
 	/**
 	 * Sets whether this reconciler's editor is active.
 	 *

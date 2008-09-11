@@ -23,7 +23,7 @@ package org.eclipse.jdt.internal.corext.template.java;
  * @since 3.4
  */
 public class SWTContextType extends AbstractJavaContextType {
-	
+
 	/**
 	 * The context type id for templates working on all Java code locations in SWT projects
 	 */
@@ -33,19 +33,19 @@ public class SWTContextType extends AbstractJavaContextType {
 	 * The context type id for templates working on member locations in SWT projects
 	 */
 	public static final String ID_MEMBERS= "swt-members"; //$NON-NLS-1$
-	
+
 	/**
 	 * The context type id for templates working on statement locations in SWT projects
 	 */
 	public static final String ID_STATEMENTS= "swt-statements"; //$NON-NLS-1$
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType#initializeContext(org.eclipse.jdt.internal.corext.template.java.JavaContext)
 	 */
 	protected void initializeContext(JavaContext context) {
-		if (!getId().equals(SWTContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere 
-			context.addCompatibleContextType(SWTContextType.ID_ALL); 
+		if (!getId().equals(SWTContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
+			context.addCompatibleContextType(SWTContextType.ID_ALL);
 		}
-	}	
+	}
 }

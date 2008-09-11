@@ -27,14 +27,14 @@ public class TypeHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 		super(viewer);
 		fTypeHierarchyViewPart= viewPart;
 	}
-		
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void doInputView(Object inputElement) {
 		fTypeHierarchyViewPart.setInputElement((IJavaElement) inputElement);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -42,11 +42,11 @@ public class TypeHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 		Object single= SelectionUtil.getSingleElement(selection);
 		if (single == null)
 			return null;
-		
+
 		IJavaElement[] candidates= OpenTypeHierarchyUtil.getCandidates(single);
-		if (candidates != null && candidates.length > 0) 
+		if (candidates != null && candidates.length > 0)
 			return candidates[0];
-		
+
 		return null;
 	}
 

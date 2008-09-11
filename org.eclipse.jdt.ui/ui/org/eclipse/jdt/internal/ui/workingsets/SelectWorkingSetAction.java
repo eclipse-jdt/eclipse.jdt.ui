@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.window.Window;
@@ -27,9 +27,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Displays an IWorkingSetSelectionDialog and sets the selected 
+ * Displays an IWorkingSetSelectionDialog and sets the selected
  * working set in the action group's view.
- * 
+ *
  * @since 2.0
  */
 public class SelectWorkingSetAction extends Action {
@@ -38,23 +38,23 @@ public class SelectWorkingSetAction extends Action {
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, IWorkbenchPartSite site) {
-		this(actionGroup); 
+		this(actionGroup);
 		fSite= site;
 	}
-	
+
 	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, Shell shell) {
-		this(actionGroup); 
+		this(actionGroup);
 		fShell= shell;
 	}
-	
+
 	private SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup) {
-		super(WorkingSetMessages.SelectWorkingSetAction_text); 
+		super(WorkingSetMessages.SelectWorkingSetAction_text);
 		Assert.isNotNull(actionGroup);
-		setToolTipText(WorkingSetMessages.SelectWorkingSetAction_toolTip); 
+		setToolTipText(WorkingSetMessages.SelectWorkingSetAction_toolTip);
 		fActionGroup= actionGroup;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELECT_WORKING_SET_ACTION);
 	}
-	
+
 	/*
 	 * Overrides method from Action
 	 */
@@ -76,7 +76,7 @@ public class SelectWorkingSetAction extends Action {
 				fActionGroup.setWorkingSet(null, true);
 		}
 	}
-	
+
 	private Shell getShell() {
 		if (fSite != null) {
 			return fSite.getShell();

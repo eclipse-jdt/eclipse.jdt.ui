@@ -19,7 +19,7 @@ import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.internal.ui.packageview.HierarchicalDecorationContext;
 
 public class DecoratingJavaLabelProvider extends ColoringLabelProvider {
-	
+
 	/**
 	 * Decorating label provider for Java. Combines a JavaUILabelProvider
 	 * with problem and override indicator with the workbench decorator (label
@@ -40,7 +40,7 @@ public class DecoratingJavaLabelProvider extends ColoringLabelProvider {
 	public DecoratingJavaLabelProvider(JavaUILabelProvider labelProvider, boolean errorTick) {
 		this(labelProvider, errorTick, true);
 	}
-	
+
 	/**
 	 * Decorating label provider for Java. Combines a JavaUILabelProvider
 	 * (if enabled with problem indicator) with the workbench
@@ -56,7 +56,7 @@ public class DecoratingJavaLabelProvider extends ColoringLabelProvider {
 		}
 		setFlatPackageMode(flatPackageMode);
 	}
-	
+
 	/**
 	 * Tells the label decorator if the view presents packages flat or hierarchical.
 	 * @param enable If set, packages are presented in flat mode.

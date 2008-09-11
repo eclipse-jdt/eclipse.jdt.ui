@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -30,6 +27,12 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -43,16 +46,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 public class ExtractConstantWizard extends RefactoringWizard {
 
-	private static final String MESSAGE = RefactoringMessages.ExtractConstantInputPage_enter_name; 
+	private static final String MESSAGE = RefactoringMessages.ExtractConstantInputPage_enter_name;
 
 	public ExtractConstantWizard(ExtractConstantRefactoring ref) {
-		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
-		setDefaultPageTitle(RefactoringMessages.ExtractConstantWizard_defaultPageTitle); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		setDefaultPageTitle(RefactoringMessages.ExtractConstantWizard_defaultPageTitle);
 	}
 
 	/* non java-doc
@@ -61,15 +61,15 @@ public class ExtractConstantWizard extends RefactoringWizard {
 	protected void addUserInputPages() {
 
 		String message= null;
-		int messageType= IMessageProvider.NONE;			
+		int messageType= IMessageProvider.NONE;
 		if(!getExtractConstantRefactoring().selectionAllStaticFinal()) {
-			message= RefactoringMessages.ExtractConstantInputPage_selection_refers_to_nonfinal_fields;  
+			message= RefactoringMessages.ExtractConstantInputPage_selection_refers_to_nonfinal_fields;
 			messageType= IMessageProvider.INFORMATION;
-		} else {	
+		} else {
 			message= MESSAGE;
 			messageType= IMessageProvider.NONE;
 		}
-		
+
 		String[] guessedNames= getExtractConstantRefactoring().guessConstantNames();
 		String initialValue= guessedNames.length == 0 ? "" : guessedNames[0]; //$NON-NLS-1$
 		addPage(new ExtractConstantInputPage(message, messageType, initialValue, guessedNames));
@@ -86,13 +86,13 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		private final boolean fInitialValid;
 		private final int fOriginalMessageType;
 		private final String fOriginalMessage;
-		
+
 		private Button fQualifyReferences;
 		private String[] fConstNameProposals;
 
 		private VariableNamesProcessor fContentAssistProcessor;
 		private String fAccessModifier;
-	
+
 		public ExtractConstantInputPage(String description, int messageType, String initialValue, String[] guessedNames) {
 			super(description, true, initialValue);
 			fOriginalMessage= description;
@@ -109,10 +109,10 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			layout.verticalSpacing= 8;
 			result.setLayout(layout);
 			RowLayouter layouter= new RowLayouter(2);
-		
+
 			Label label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.ExtractConstantInputPage_constant_name); 
-		
+			label.setText(RefactoringMessages.ExtractConstantInputPage_constant_name);
+
 			Text text= createTextInputField(result);
 			text.selectAll();
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -120,45 +120,45 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				fContentAssistProcessor= new VariableNamesProcessor(fConstNameProposals);
 				ControlContentAssistHelper.createTextContentAssistant(text, fContentAssistProcessor);
 			}
-				
+
 			layouter.perform(label, text, 1);
-		
+
 			addAccessModifierGroup(result, layouter);
 			addReplaceAllCheckbox(result, layouter);
 			addQualifyReferencesCheckbox(result, layouter);
 			addSeparator(result, layouter);
 			addLabel(result, layouter);
-		
+
 			validateTextField(text.getText());
-		
+
 			Dialog.applyDialogFont(result);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_CONSTANT_WIZARD_PAGE);		
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_CONSTANT_WIZARD_PAGE);
 		}
-	
+
 		private void addAccessModifierGroup(Composite result, RowLayouter layouter) {
 			fAccessModifier= getExtractConstantRefactoring().getVisibility();
 			if (getExtractConstantRefactoring().getTargetIsInterface())
 				return;
-			
+
 			Label label= new Label(result, SWT.NONE);
-			label.setText(RefactoringMessages.ExtractConstantInputPage_access_modifiers); 
-		
+			label.setText(RefactoringMessages.ExtractConstantInputPage_access_modifiers);
+
 			Composite group= new Composite(result, SWT.NONE);
 			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			GridLayout layout= new GridLayout();
 			layout.numColumns= 4; layout.marginWidth= 0;
 			group.setLayout(layout);
-		
+
 			String[] labels= new String[] {
-				RefactoringMessages.ExtractMethodInputPage_public,  
-				RefactoringMessages.ExtractMethodInputPage_protected, 
-				RefactoringMessages.ExtractMethodInputPage_default, 
+				RefactoringMessages.ExtractMethodInputPage_public,
+				RefactoringMessages.ExtractMethodInputPage_protected,
+				RefactoringMessages.ExtractMethodInputPage_default,
 				RefactoringMessages.ExtractMethodInputPage_private
 			};
 			String[] data= new String[] { JdtFlags.VISIBILITY_STRING_PUBLIC,
 										  JdtFlags.VISIBILITY_STRING_PROTECTED,
 										  JdtFlags.VISIBILITY_STRING_PACKAGE,
-										  JdtFlags.VISIBILITY_STRING_PRIVATE }; //   
+										  JdtFlags.VISIBILITY_STRING_PRIVATE }; //
 
 			updateContentAssistImage();
 			for (int i= 0; i < labels.length; i++) {
@@ -173,13 +173,13 @@ public class ExtractConstantWizard extends RefactoringWizard {
 					}
 				});
 			}
-			layouter.perform(label, group, 1);	
+			layouter.perform(label, group, 1);
 		}
-	
+
 		private void updateContentAssistImage() {
 			if (fContentAssistProcessor == null)
 				return;
-			
+
 			int flags;
 			if (fAccessModifier == JdtFlags.VISIBILITY_STRING_PRIVATE) {
 				flags= Flags.AccPrivate;
@@ -196,7 +196,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		}
 
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.ExtractConstantInputPage_replace_all; 
+			String title= RefactoringMessages.ExtractConstantInputPage_replace_all;
 			boolean defaultValue= getExtractConstantRefactoring().replaceAllOccurrences();
 			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractConstantRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
@@ -204,11 +204,11 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				public void widgetSelected(SelectionEvent e) {
 					getExtractConstantRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 				}
-			});		
+			});
 		}
 
 		private void addQualifyReferencesCheckbox(Composite result, RowLayouter layouter) {
-			String title= RefactoringMessages.ExtractConstantInputPage_qualify_constant_references_with_class_name; 
+			String title= RefactoringMessages.ExtractConstantInputPage_qualify_constant_references_with_class_name;
 			boolean defaultValue= getBooleanSetting(QUALIFY_REFERENCES, getExtractConstantRefactoring().qualifyReferencesWithDeclaringClassName());
 			fQualifyReferences= createCheckbox(result,  title, defaultValue, layouter);
 			getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(fQualifyReferences.getSelection());
@@ -216,7 +216,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				public void widgetSelected(SelectionEvent e) {
 					getExtractConstantRefactoring().setQualifyReferencesWithDeclaringClassName(fQualifyReferences.getSelection());
 				}
-			});	
+			});
 		}
 
 		private void addLabel(Composite result, RowLayouter layouter) {
@@ -233,16 +233,16 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			separator.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 			layouter.perform(separator);
 		}
-	
+
 		private void updatePreviewLabel(){
 			try {
 				if (fLabel != null)
-					fLabel.setText(RefactoringMessages.ExtractConstantInputPage_signature_preview + getExtractConstantRefactoring().getConstantSignaturePreview()); 
+					fLabel.setText(RefactoringMessages.ExtractConstantInputPage_signature_preview + getExtractConstantRefactoring().getConstantSignaturePreview());
 			} catch(JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.ExtractTempInputPage_extract_local, RefactoringMessages.ExtractConstantInputPage_exception); 
+				ExceptionHandler.handle(e, RefactoringMessages.ExtractTempInputPage_extract_local, RefactoringMessages.ExtractConstantInputPage_exception);
 			}
 		}
-	
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
@@ -253,11 +253,11 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				RefactoringStatus result= getExtractConstantRefactoring().checkConstantNameOnChange();
 				if (fOriginalMessageType == IMessageProvider.INFORMATION && result.getSeverity() == RefactoringStatus.OK)
 					return RefactoringStatus.createInfoStatus(fOriginalMessage);
-				else 
+				else
 					return result;
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.ExtractConstantInputPage_Internal_Error); 
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.ExtractConstantInputPage_Internal_Error);
 			}
 		}
 
@@ -267,17 +267,17 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			updateContentAssistImage();
 			updatePreviewLabel();
 		}
-	
+
 		private ExtractConstantRefactoring getExtractConstantRefactoring(){
 			return (ExtractConstantRefactoring)getRefactoring();
 		}
-	
+
 		private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter){
 			Button checkBox= new Button(parent, SWT.CHECK);
 			checkBox.setText(title);
 			checkBox.setSelection(value);
 			layouter.perform(checkBox);
-			return checkBox;		
+			return checkBox;
 		}
 
 		/*
@@ -293,7 +293,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		protected void restoreMessage() {
 			setMessage(fOriginalMessage, fOriginalMessageType);
 		}
-		
+
 		private boolean getBooleanSetting(String key, boolean defaultValue) {
 			String update= getRefactoringSettings().get(key);
 			if (update != null)
@@ -301,18 +301,18 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			else
 				return defaultValue;
 		}
-		
+
 		private void saveBooleanSetting(String key, Button checkBox) {
 			if (checkBox != null)
 				getRefactoringSettings().put(key, checkBox.getSelection());
 		}
-		
+
 		private boolean saveSettings() {
 			if (getContainer() instanceof Dialog)
 				return ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
 			return true;
 		}
-		
+
 		public void dispose() {
 			if (saveSettings()) {
 				saveBooleanSetting(QUALIFY_REFERENCES, fQualifyReferences);
@@ -320,5 +320,5 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			super.dispose();
 		}
 
-	}	
+	}
 }

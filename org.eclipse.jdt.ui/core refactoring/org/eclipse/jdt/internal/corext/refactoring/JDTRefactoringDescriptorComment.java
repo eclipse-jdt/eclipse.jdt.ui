@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Helper class to generate a refactoring descriptor comment.
- * 
+ *
  * @since 3.2
  */
 public final class JDTRefactoringDescriptorComment {
@@ -51,7 +51,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Creates a composite setting.
-	 * 
+	 *
 	 * @param caption
 	 *            the caption
 	 * @param settings
@@ -89,7 +89,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Creates a new JDT refactoring descriptor comment.
-	 * 
+	 *
 	 * @param project
 	 *            the project name, or <code>null</code>
 	 * @param object
@@ -108,7 +108,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Adds the specified setting to this comment.
-	 * 
+	 *
 	 * @param index
 	 *            the index
 	 * @param setting
@@ -123,7 +123,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Adds the specified setting to this comment.
-	 * 
+	 *
 	 * @param setting
 	 *            the setting to add, or <code>null</code> for no setting
 	 */
@@ -134,7 +134,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Returns this comment in a human-readable string representation.
-	 * 
+	 *
 	 * @return this comment in string representation
 	 */
 	public String asString() {
@@ -154,7 +154,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Returns the number of settings.
-	 * 
+	 *
 	 * @return the number of settings
 	 */
 	public int getCount() {
@@ -163,7 +163,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Initializes the inferred settings.
-	 * 
+	 *
 	 * @param object
 	 *            the refactoring object
 	 */
@@ -290,7 +290,7 @@ public final class JDTRefactoringDescriptorComment {
 
 	/**
 	 * Removes the setting at the specified index.
-	 * 
+	 *
 	 * @param index
 	 *            the index
 	 */

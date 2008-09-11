@@ -15,14 +15,14 @@ import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringHistoryResource
 
 /**
  * Refactoring history resource mapping for the Java model provider.
- * 
+ *
  * @since 3.2
  */
 public final class JavaRefactoringHistoryResourceMapping extends AbstractRefactoringHistoryResourceMapping {
 
 	/**
 	 * Creates a new refactoring history resource mapping.
-	 * 
+	 *
 	 * @param history
 	 *            the refactoring history
 	 */

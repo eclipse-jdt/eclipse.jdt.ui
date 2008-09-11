@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 class PackageSelectionStringButtonAdapter implements IStringButtonAdapter {
 

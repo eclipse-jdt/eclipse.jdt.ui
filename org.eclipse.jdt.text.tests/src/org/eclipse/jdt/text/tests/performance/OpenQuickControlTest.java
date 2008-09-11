@@ -14,9 +14,9 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jface.action.IAction;
-
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
@@ -28,13 +28,13 @@ public abstract class OpenQuickControlTest extends TextPerformanceTestCase {
 	private static final Class THIS= OpenQuickControlTest.class;
 
 	private static final int MEASURED_RUNS= 200;
-	
+
 	private static final int WARM_UP_RUNS= 10;
-	
+
 	private static final String PATH= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/";
-	
+
 	private static final String ORIG_NAME= "StyledText";
-	
+
 	private static final String ORIG_FILE= PATH + ORIG_NAME + ".java";
 
 	public static Test suite() {
@@ -43,7 +43,7 @@ public abstract class OpenQuickControlTest extends TextPerformanceTestCase {
 		suite.addTest(OpenJavaContentAssistTest.suite());
 		return suite;
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		ResourceTestHelper.delete(PATH + ORIG_NAME, ".java", getWarmUpRuns() + getMeasuredRuns());
@@ -76,10 +76,10 @@ public abstract class OpenQuickControlTest extends TextPerformanceTestCase {
 			String file= PATH + name + ".java";
 			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
 			EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editor), 100, 10000, 100);
-			
+
 			measureOpenQuickControl(editor, coldMeter);
 			measureOpenQuickControl(editor, warmMeter);
-			
+
 			EditorTestHelper.closeAllEditors();
 		}
 	}

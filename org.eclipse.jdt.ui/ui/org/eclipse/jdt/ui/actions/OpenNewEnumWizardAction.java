@@ -30,17 +30,17 @@ import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
  * as configured by {@link #setSelection(IStructuredSelection)} or takes a preconfigured
  * new enum wizard page, see {@link #setConfiguredWizardPage(NewEnumWizardPage)}.
  * </p>
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *  
- * @since 3.2 
- * 
+ *
+ * @since 3.2
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenNewEnumWizardAction extends AbstractOpenWizardAction {
-	
+
 	private NewEnumWizardPage fPage;
 	private boolean fOpenEditorOnFinish;
 
@@ -48,16 +48,16 @@ public class OpenNewEnumWizardAction extends AbstractOpenWizardAction {
 	 * Creates an instance of the <code>OpenNewEnumWizardAction</code>.
 	 */
 	public OpenNewEnumWizardAction() {
-		setText(ActionMessages.OpenNewEnumWizardAction_text); 
-		setDescription(ActionMessages.OpenNewEnumWizardAction_description); 
-		setToolTipText(ActionMessages.OpenNewEnumWizardAction_tooltip); 
+		setText(ActionMessages.OpenNewEnumWizardAction_text);
+		setDescription(ActionMessages.OpenNewEnumWizardAction_description);
+		setToolTipText(ActionMessages.OpenNewEnumWizardAction_tooltip);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWENUM);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_ENUM_WIZARD_ACTION);
-		
+
 		fPage= null;
 		fOpenEditorOnFinish= true;
 	}
-	
+
 	/**
 	 * Sets a page to be used by the wizard or <code>null</code> to use a page initialized with values
 	 * from the current selection (see {@link #getSelection()} and {@link #setSelection(IStructuredSelection)}).
@@ -66,19 +66,19 @@ public class OpenNewEnumWizardAction extends AbstractOpenWizardAction {
 	public void setConfiguredWizardPage(NewEnumWizardPage page) {
 		fPage= page;
 	}
-	
+
 	/**
 	 * Specifies if the wizard will open the created type with the default editor. The default behaviour is to open
 	 * an editor.
-	 * 
+	 *
 	 * @param openEditorOnFinish if set, the wizard will open the created type with the default editor
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	public void setOpenEditorOnFinish(boolean openEditorOnFinish) {
 		fOpenEditorOnFinish= openEditorOnFinish;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */

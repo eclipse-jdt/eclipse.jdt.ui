@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
-
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 

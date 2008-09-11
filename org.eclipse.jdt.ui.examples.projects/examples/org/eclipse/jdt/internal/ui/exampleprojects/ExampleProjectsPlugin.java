@@ -12,15 +12,19 @@ package org.eclipse.jdt.internal.ui.exampleprojects;
 
 import java.net.URL;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.osgi.framework.Bundle;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -29,7 +33,7 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 
 	// The shared instance.
 	private static ExampleProjectsPlugin fgPlugin;
-	
+
 	/**
 	 * The constructor.
 	 */
@@ -43,7 +47,7 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 	public static ExampleProjectsPlugin getDefault() {
 		return fgPlugin;
 	}
-	
+
 	/**
 	 * @return Returns the workspace instance.
 	 */
@@ -61,10 +65,10 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 		}
 		return ImageDescriptor.getMissingImageDescriptor();
 	}
-	
+
 	public static String getPluginId() {
 		return "org.eclipse.jdt.ui.examples.projects"; //$NON-NLS-1$
-	}	
+	}
 
 
 	public static void log(IStatus status) {

@@ -35,6 +35,7 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.IPageSite;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.NewSearchUI;
@@ -72,7 +73,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 
 		private ITextEditor fActiveEditor;
 		private boolean fIsVisible;
-		
+
 		public void install(IWorkbenchPage page) {
 			page.addPartListener(this);
 			fIsVisible= page.isPartVisible(getViewPart());
@@ -99,7 +100,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		private void uninstallOnActiveEditor() {
 			if (fActiveEditor != null) {
 				SelectionListenerWithASTManager.getDefault().removeListener(fActiveEditor, this);
-				fActiveEditor= null;	
+				fActiveEditor= null;
 			}
 		}
 
@@ -169,7 +170,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			setLinkingEnabled(isChecked());
 		}
 	}
-	
+
 	public OccurrencesSearchResultPage() {
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
 		fLinkWithEditorListener= new LinkWithEditorListener();
@@ -202,11 +203,11 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		IActionBars bars= getSite().getActionBars();
 		IMenuManager menu= bars.getMenuManager();
 		menu.add(fToggleLinkingAction);
-		
+
 		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match, int, int)
 	 */
@@ -252,7 +253,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	protected void configureTreeViewer(TreeViewer viewer) {
 		throw new IllegalStateException("Doesn't support tree mode."); //$NON-NLS-1$
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
@@ -278,7 +279,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			fLinkingEnabled= enabled;
 			fToggleLinkingAction.setChecked(enabled);
 			getDialogSettings().put(DIALOGSTORE_LINKEDITORS, enabled);
-	
+
 			if (enabled) {
 				fLinkWithEditorListener.install(getSite().getPage());
 			} else {
@@ -311,7 +312,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 				finder= new ImplementOccurrencesFinder();
 			}
 		}
-		
+
 		int offset= selection.getOffset();
 		int length= selection.getLength();
 		if (finder.initialize(astRoot, offset, length) == null) {
@@ -319,7 +320,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			query.run(null);
 			OccurrencesSearchResult result= (OccurrencesSearchResult) query.getSearchResult();
 			final JavaElementLine line= getMatchingLine(result, offset, length);
-			
+
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					setInput(query.getSearchResult(), line == null ? null : new StructuredSelection(line));

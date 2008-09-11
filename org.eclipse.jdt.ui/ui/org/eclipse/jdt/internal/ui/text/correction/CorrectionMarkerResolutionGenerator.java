@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -24,8 +26,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -36,10 +36,10 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
+import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.MarkerUtilities;
-
-import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -120,8 +120,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				JavaPlugin.log(e);
 			}
 		}
-		
-		
+
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -130,18 +130,18 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				run(markers[0]);
 				return;
 			}
-			
+
 			if (!(fProposal instanceof FixCorrectionProposal))
 				return;
-			
+
 			if (monitor == null)
 				monitor= new NullProgressMonitor();
-			
+
 			try {
 				MultiFixTarget[] problems= getCleanUpTargets(markers);
-			
+
 				((FixCorrectionProposal)fProposal).resolve(problems, monitor);
-				
+
 				IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
 				if (part instanceof ITextEditor) {
 					((ITextEditor) part).selectAndReveal(fOffset, fLength);
@@ -173,7 +173,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					}
 				}
 			}
-			
+
 			MultiFixTarget[] result= new MultiFixTarget[problemLocations.size()];
 			int i= 0;
 			for (Iterator iterator= problemLocations.entrySet().iterator(); iterator.hasNext();) {
@@ -183,10 +183,10 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				result[i]= new MultiFixTarget(cu, (IProblemLocation[]) locations.toArray(new IProblemLocation[locations.size()]));
 				i++;
 			}
-			
+
 			return result;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
 		 */
@@ -200,14 +200,14 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		public Image getImage() {
 			return fProposal.getImage();
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public IMarker[] findOtherMarkers(IMarker[] markers) {
 			if (!(fProposal instanceof FixCorrectionProposal))
 				return NO_MARKERS;
-			
+
 			FixCorrectionProposal fix= (FixCorrectionProposal)fProposal;
 			final ICleanUp cleanUp= fix.getCleanUp();
 			if (!(cleanUp instanceof IMultiFix))
@@ -218,9 +218,9 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			final Hashtable fileMarkerTable= getMarkersForFiles(markers);
 			if (fileMarkerTable.isEmpty())
 				return NO_MARKERS;
-			
+
 			final List result= new ArrayList();
-			
+
 			for (Iterator iterator= fileMarkerTable.entrySet().iterator(); iterator.hasNext();) {
 				Map.Entry entry= (Map.Entry) iterator.next();
 				IFile file= (IFile) entry.getKey();
@@ -242,7 +242,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 			if (result.size() == 0)
 				return NO_MARKERS;
-			
+
 			return (IMarker[])result.toArray(new IMarker[result.size()]);
 		}
 
@@ -253,7 +253,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		 */
 		private Hashtable/*<IFile, List<IMarker>>*/ getMarkersForFiles(IMarker[] markers) {
 			final Hashtable result= new Hashtable();
-			
+
 			String markerType;
 			try {
 				markerType= fMarker.getType();
@@ -261,7 +261,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				JavaPlugin.log(e1);
 				return result;
 			}
-			
+
 			for (int i= 0; i < markers.length; i++) {
 				IMarker marker= markers[i];
 				if (!marker.equals(fMarker)) {
@@ -271,7 +271,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					} catch (CoreException e1) {
 						JavaPlugin.log(e1);
 					}
-				
+
 					if (currMarkerType != null && currMarkerType.equals(markerType)) {
 						IResource res= marker.getResource();
 						if (res instanceof IFile && res.isAccessible()) {
@@ -312,13 +312,13 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	public IMarkerResolution[] getResolutions(IMarker marker) {
 		return internalGetResolutions(marker);
 	}
-	
+
 	private static boolean internalHasResolutions(IMarker marker) {
 		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 		ICompilationUnit cu= getCompilationUnit(marker);
 		return cu != null && JavaCorrectionProcessor.hasCorrections(cu, id, MarkerUtilities.getMarkerType(marker));
 	}
-	
+
 	private static IMarkerResolution[] internalGetResolutions(IMarker marker) {
 		if (!internalHasResolutions(marker)) {
 			return NO_RESOLUTIONS;
@@ -410,6 +410,6 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 		return null;
 	}
-	
+
 
 }

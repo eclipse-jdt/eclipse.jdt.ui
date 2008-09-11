@@ -152,7 +152,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	public DefaultSpellChecker(IPreferenceStore store, Locale locale) {
 		Assert.isLegal(store != null);
 		Assert.isLegal(locale != null);
-		
+
 		fPreferences= store;
 		fLocale= locale;
 	}
@@ -203,7 +203,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 			if (dictionary.acceptsWords())
 				dictionary.addWord(addable);
 		}
-	
+
 	}
 
 	/*
@@ -227,9 +227,9 @@ public class DefaultSpellChecker implements ISpellChecker {
 		final boolean ignoreNonLetters= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS);
 		final boolean ignoreSingleLetters= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS);
 		final int problemsThreshold= PreferenceConstants.getPreferenceStore().getInt(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD);
-		
+
 		iterator.setIgnoreSingleLetters(ignoreSingleLetters);
-		
+
 		Iterator iter= fDictionaries.iterator();
 		while (iter.hasNext())
 			((ISpellDictionary)iter.next()).setStripNonLetters(ignoreNonLetters);

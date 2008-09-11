@@ -14,6 +14,16 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -24,16 +34,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Menu;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 /**
- * A package explorer widget that can be used in dialogs. It uses its own 
+ * A package explorer widget that can be used in dialogs. It uses its own
  * content provider, label provider, element sorter and filter to display
  * elements that are not shown usually in the package explorer of the
  * workspace.
@@ -92,10 +92,10 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
         public PackageContentProvider() {
             super(false);
         }
-        
+
         /**
          * Get the elements of the current project
-         * 
+         *
          * @param element the element to get the children from, will
          * not be used, instead the project children are returned directly
          * @return returns the children of the project
@@ -105,19 +105,19 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                 return new Object[0];
             return new Object[] {fCurrJProject};
         }
-        
+
         /**
          * Get the children of the current <code>element</code>. If the
          * element is of type <code>IPackageFragmentRoot</code> and
          * displaying the output folders is selected, then an icon for
          * the output folder is created and displayed additionally.
-         * 
+         *
          * @param element the current element to get the children from
          * @return an array of children
          */
         public Object[] getChildren(Object element) {
             Object[] children= super.getChildren(element);
-            if (((element instanceof IPackageFragmentRoot && !ClasspathModifier.isInExternalOrArchive((IPackageFragmentRoot) element)) || 
+            if (((element instanceof IPackageFragmentRoot && !ClasspathModifier.isInExternalOrArchive((IPackageFragmentRoot) element)) ||
                     (element instanceof IJavaProject && fCurrJProject.isOnClasspath(fCurrJProject))) && fShowOutputFolders) {
                 try {
                     IClasspathEntry entry;
@@ -125,8 +125,8 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                         entry= ((IPackageFragmentRoot) element).getRawClasspathEntry();
                     else
                         entry= ClasspathModifier.getClasspathEntryFor(fCurrJProject.getPath(), fCurrJProject, IClasspathEntry.CPE_SOURCE);
-                    CPListElement parent= CPListElement.createFromExisting(entry, fCurrJProject);                    
-                    CPListElementAttribute outputFolder= new CPListElementAttribute(parent, CPListElement.OUTPUT, 
+                    CPListElement parent= CPListElement.createFromExisting(entry, fCurrJProject);
+                    CPListElementAttribute outputFolder= new CPListElementAttribute(parent, CPListElement.OUTPUT,
                             parent.getAttribute(CPListElement.OUTPUT), true);
                     Object[] extendedChildren= new Object[children.length + 1];
                     System.arraycopy(children, 0, extendedChildren, 1, children.length);
@@ -138,22 +138,22 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                 return null;
             }
             else
-                return children;                    
+                return children;
         }
     }
-    
+
     /**
      * A extended label provider for the package explorer which can additionally display
      * an output folder item.
      */
     private final class PackageLabelProvider extends AppearanceAwareLabelProvider {
         private CPListLabelProvider outputFolderLabel;
-        
+
         public PackageLabelProvider(long textFlags, int imageFlags) {
             super(textFlags, imageFlags);
             outputFolderLabel= new CPListLabelProvider();
         }
-        
+
         public String getText(Object element) {
             if (element instanceof CPListElementAttribute)
                 return outputFolderLabel.getText(element);
@@ -165,9 +165,9 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                         IClasspathEntry entry= root.getRawClasspathEntry();
                         int excluded= entry.getExclusionPatterns().length;
                         if (excluded == 1)
-                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_SingleExcluded, text); 
+                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_SingleExcluded, text);
                         else if (excluded > 1)
-                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, new Integer(excluded)}); 
+                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, new Integer(excluded)});
                     }
                 }
                 if (element instanceof IJavaProject) {
@@ -178,23 +178,23 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                             IClasspathEntry entry= root.getRawClasspathEntry();
                             int excluded= entry.getExclusionPatterns().length;
                             if (excluded == 1)
-                                return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_SingleExcluded, text); 
+                                return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_SingleExcluded, text);
                             else if (excluded > 1)
-                                return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, new Integer(excluded)}); 
+                                return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, new Integer(excluded)});
                         }
                     }
                 }
                 if (element instanceof IFile || element instanceof IFolder) {
                     IResource resource= (IResource)element;
                         if (resource.exists() && ClasspathModifier.isExcluded(resource, fCurrJProject))
-                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_Excluded, text); 
+                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_Excluded, text);
                 }
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
             }
             return text;
         }
-        
+
         /* (non-Javadoc)
          * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getForeground(java.lang.Object)
          */
@@ -217,29 +217,29 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                     IResource resource= (IResource)element;
                     if (resource.exists() && ClasspathModifier.isExcluded(resource, fCurrJProject))
                         return getBlueColor();
-                } 
+                }
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
             }
             return null;
         }
-        
+
         private Color getBlueColor() {
             return Display.getCurrent().getSystemColor(SWT.COLOR_BLUE);
         }
-        
+
         public Image getImage(Object element) {
             if (element instanceof CPListElementAttribute)
                 return outputFolderLabel.getImage(element);
             return super.getImage(element);
         }
-        
+
         public void dispose() {
             outputFolderLabel.dispose();
             super.dispose();
         }
     }
-    
+
     /**
      * A extended element sorter for the package explorer which displays the output
      * folder (if any) as first child of a source folder. The other java elements
@@ -249,7 +249,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
         public ExtendedJavaElementSorter() {
             super();
         }
-        
+
         public int compare(Viewer viewer, Object e1, Object e2) {
             if (e1 instanceof CPListElementAttribute)
                 return -1;
@@ -258,7 +258,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
             return super.compare(viewer, e1, e2);
         }
     }
-    
+
     /**
      * An extended filter for the package explorer which filters
      * libraries,
@@ -300,7 +300,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
             return /*super.select(viewer, parentElement, element) &&*/ fOutputFolderFilter.select(viewer, parentElement, element);
         }
     }
-    
+
     /** The tree showing the project like in the package explorer */
     private TreeViewer fPackageViewer;
     /** The tree's context menu */
@@ -313,28 +313,28 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
      * can be created or not. This is used to
      * set the content correctly in the case
      * that a IPackageFragmentRoot is selected.
-     * 
+     *
      * @see #showOutputFolders(boolean)
      */
     private boolean fShowOutputFolders= false;
-    
-    /** Stores the current selection in the tree 
+
+    /** Stores the current selection in the tree
      * @see #getSelection()
      */
     private IStructuredSelection fCurrentSelection;
-    
+
     /** The current java project
      * @see #setInput(IJavaProject)
      */
     private IJavaProject fCurrJProject;
 	private PackageContentProvider fContentProvider;
-    
+
     public DialogPackageExplorer() {
         fActionGroup= null;
         fCurrJProject= null;
         fCurrentSelection= new StructuredSelection();
     }
-    
+
     public Control createControl(Composite parent) {
         fPackageViewer= new TreeViewer(parent, SWT.MULTI);
         fPackageViewer.setComparer(WorkingSetModel.COMPARER);
@@ -355,7 +355,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                 }
             }
         });
-        
+
         MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
         menuMgr.setRemoveAllWhenShown(true);
         menuMgr.addMenuListener(this);
@@ -366,29 +366,29 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                 fContextMenu.dispose();
             }
         });
-        
+
         return fPackageViewer.getControl();
     }
-    
+
     /**
      * Sets the action group for the package explorer.
-     * The action group is necessary to populate the 
-     * context menu with available actions. If no 
-     * context menu is needed, then this method does not 
+     * The action group is necessary to populate the
+     * context menu with available actions. If no
+     * context menu is needed, then this method does not
      * have to be called.
-     * 
+     *
      * Should only be called once.
-     *  
-     * @param actionGroup the action group to be used for 
+     *
+     * @param actionGroup the action group to be used for
      * the context menu.
      */
     public void setActionGroup(final DialogPackageExplorerActionGroup actionGroup) {
         fActionGroup= actionGroup;
     }
-    
+
     /**
      * Populate the context menu with the necessary actions.
-     * 
+     *
      * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
      */
     public void menuAboutToShow(IMenuManager manager) {
@@ -397,7 +397,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
         JavaPlugin.createStandardGroups(manager);
         fActionGroup.fillContextMenu(manager);
     }
-    
+
     /**
      * Set the content and label provider of the
      * <code>fPackageViewer</code>
@@ -413,10 +413,10 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
 		fPackageViewer.setContentProvider(fContentProvider);
 		fPackageViewer.setLabelProvider(new DecoratingJavaLabelProvider(labelProvider, false));
     }
-    
+
     /**
      * Set the input for the package explorer.
-     * 
+     *
      * @param project the project to be displayed
      */
     public void setInput(IJavaProject project) {
@@ -425,12 +425,12 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
     	if (fContentProvider != null)
         	fContentProvider.inputChanged(fPackageViewer, oldProject, fCurrJProject);
 		fPackageViewer.setInput(new Object[0]);
-		
+
         List selectedElements= new ArrayList();
         selectedElements.add(fCurrJProject);
         setSelection(selectedElements);
     }
-    
+
     public void dispose() {
     	if (fContentProvider != null) {
     		fContentProvider.dispose();
@@ -442,7 +442,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
     	}
     	fPackageViewer= null;
     }
-    
+
     /**
      * Set the selection and focus to the list of elements
      * @param elements the object to be selected and displayed
@@ -457,7 +457,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
 	                IStructuredSelection selection= new StructuredSelection(elements);
 	                fPackageViewer.setSelection(selection, true);
 	                fPackageViewer.getTree().setFocus();
-	                
+
 	                if (elements.size() == 1 && elements.get(0) instanceof IJavaProject)
 	                    fPackageViewer.expandToLevel(elements.get(0), 1);
 	            }
@@ -466,32 +466,32 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
 	        JavaPlugin.log(e);
         }
     }
-    
+
     /**
-     * The current list of selected elements. The 
+     * The current list of selected elements. The
      * list may be empty if no element is selected.
-     * 
+     *
      * @return the current selection
      */
     public ISelection getSelection() {
         return fCurrentSelection;
     }
-    
+
     /**
      * Get the viewer's control
-     * 
+     *
      * @return the viewers control
      */
     public Control getViewerControl() {
         return fPackageViewer.getControl();
     }
-    
+
     /**
-     * Method that is called whenever setting of 
-     * output folders is allowed or forbidden (for example 
+     * Method that is called whenever setting of
+     * output folders is allowed or forbidden (for example
      * on changing a checkbox with this setting):
-     * 
-     * @param showOutputFolders <code>true</code> if output 
+     *
+     * @param showOutputFolders <code>true</code> if output
      * folders should be shown, <code>false</code> otherwise.
      */
     public void showOutputFolders(boolean showOutputFolders) {

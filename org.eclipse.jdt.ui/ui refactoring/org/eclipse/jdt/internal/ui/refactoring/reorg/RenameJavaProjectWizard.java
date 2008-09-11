@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
-
 public class RenameJavaProjectWizard extends RenameRefactoringWizard {
-	
+
 	public RenameJavaProjectWizard(Refactoring refactoring) {
 		super(refactoring,
-			RefactoringMessages.RenameJavaProject_defaultPageTitle, 
-			RefactoringMessages.RenameJavaProject_inputPage_description, 
+			RefactoringMessages.RenameJavaProject_defaultPageTitle,
+			RefactoringMessages.RenameJavaProject_inputPage_description,
 			JavaPluginImages.DESC_WIZBAN_REFACTOR,
 			IJavaHelpContextIds.RENAME_JAVA_PROJECT_WIZARD_PAGE);
 	}

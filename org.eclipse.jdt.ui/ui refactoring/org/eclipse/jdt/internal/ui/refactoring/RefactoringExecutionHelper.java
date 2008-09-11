@@ -64,17 +64,17 @@ public class RefactoringExecutionHelper {
 		public PerformChangeOperation fPerformChangeOperation;
 		private final boolean fForked;
 		private final boolean fForkChangeExecution;
-		
+
 		public Operation(boolean forked, boolean forkChangeExecution) {
 			fForked= forked;
 			fForkChangeExecution= forkChangeExecution;
         }
-		
+
 		public void run(IProgressMonitor pm) throws CoreException {
 			try {
 				pm.beginTask("", fForked && !fForkChangeExecution ? 7 : 11); //$NON-NLS-1$
 				pm.subTask(""); //$NON-NLS-1$
-				
+
 				final RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				if (status.getSeverity() >= fStopSeverity) {
 					final boolean[] canceled= { false };
@@ -94,12 +94,12 @@ public class RefactoringExecutionHelper {
 
 				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				
+
 				fPerformChangeOperation= new PerformChangeOperation(fChange);//RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
 				if (fRefactoring instanceof IScheduledRefactoring)
 					fPerformChangeOperation.setSchedulingRule(((IScheduledRefactoring)fRefactoring).getSchedulingRule());
-				
+
 				if (!fForked || fForkChangeExecution)
 					fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
@@ -119,7 +119,7 @@ public class RefactoringExecutionHelper {
 
 	/**
 	 * Creates a new refactoring execution helper.
-	 * 
+	 *
 	 * @param refactoring the refactoring
 	 * @param stopSeverity a refactoring status constant from {@link RefactoringStatus}
 	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
@@ -137,7 +137,7 @@ public class RefactoringExecutionHelper {
 		fExecContext= context;
 		fSaveMode= saveMode;
 	}
-	
+
 	/**
 	 * Must be called in the UI thread.
 	 * @param fork if set, the operation will be forked
@@ -152,7 +152,7 @@ public class RefactoringExecutionHelper {
 	/**
 	 * Must be called in the UI thread.<br>
 	 * <strong>Use {@link #perform(boolean, boolean)} unless you know exactly what you are doing!</strong>
-	 * 
+	 *
 	 * @param fork if set, the operation will be forked
 	 * @param forkChangeExecution if the change should not be executed in the UI thread: This may not work in any case
 	 * @param cancelable  if set, the operation will be cancelable
@@ -187,7 +187,7 @@ public class RefactoringExecutionHelper {
 			} catch (OperationCanceledException e) {
 				throw new InterruptedException(e.getMessage());
 			}
-			
+
 			RefactoringSaveHelper saveHelper= new RefactoringSaveHelper(fSaveMode);
 			if (!saveHelper.saveEditors(fParent))
 				throw new InterruptedException();

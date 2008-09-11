@@ -34,24 +34,24 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  *
  */
 public class StringCleanUp extends AbstractMultiFix {
-	
+
 	public StringCleanUp(Map options) {
 		super(options);
 	}
-	
+
 	public StringCleanUp() {
 		super();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
 	}
-	
+
 	private boolean requireAST() {
-	    return isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || 
+	    return isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) ||
 		       isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 	}
 
@@ -62,8 +62,8 @@ public class StringCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		return StringFix.createCleanUp(compilationUnit, 
-				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS), 
+		return StringFix.createCleanUp(compilationUnit,
+				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
 
@@ -73,18 +73,18 @@ public class StringCleanUp extends AbstractMultiFix {
 	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		
+
 		return StringFix.createCleanUp(compilationUnit, problems,
-				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS), 
+				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
 
 	private Map getRequiredOptions() {
 		Map result= new Hashtable();
-		
+
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
 			result.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
-		
+
 		return result;
 	}
 
@@ -99,24 +99,24 @@ public class StringCleanUp extends AbstractMultiFix {
 			result.add(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS)) {
 			buf.append("public String s;"); //$NON-NLS-1$
 		} else {
 			buf.append("public String s; //$NON-NLS-1$"); //$NON-NLS-1$
 		}
-		
+
 		return buf.toString();
 	}
 
 	/**
-	 * {@inheritDoc} 
+	 * {@inheritDoc}
 	 */
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() == IProblem.UnnecessaryNLSTag)
@@ -136,10 +136,10 @@ public class StringCleanUp extends AbstractMultiFix {
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS))
 			result+= getNumberOfProblems(problems, IProblem.NonExternalizedStringLiteral);
-		
+
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
 			result+= getNumberOfProblems(problems, IProblem.UnnecessaryNLSTag);
-		
+
 		return result;
-	}	
+	}
 }

@@ -14,13 +14,12 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.Assert;
 
-
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public class SingletonTypeSet extends TypeSet {
 	private final TType fType;
 
-	
+
 	//TODO: encapsulate in factory method and return the same set for known types
 	public SingletonTypeSet(TType t, TypeSetEnvironment typeSetEnvironment) {
 		super(typeSetEnvironment);

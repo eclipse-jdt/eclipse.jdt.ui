@@ -31,7 +31,7 @@ public final class PrimitiveType extends TType {
 	public static final int DOUBLE = 6;
 	/** Type code for the primitive type "byte". */
 	public static final int BYTE = 7;
-	
+
 	static final String[] NAMES= {
 		"int",  //$NON-NLS-1$
 		"char",  //$NON-NLS-1$
@@ -41,22 +41,22 @@ public final class PrimitiveType extends TType {
 		"float",  //$NON-NLS-1$
 		"double",  //$NON-NLS-1$
 		"byte"};  //$NON-NLS-1$
-	
+
 	private int fId;
-	
+
 	protected PrimitiveType(TypeEnvironment environment, int id, String signature) {
 		super(environment, signature);
 		fId= id;
 	}
-	
+
 	public int getId() {
 		return fId;
 	}
-	
+
 	public int getKind() {
 		return PRIMITIVE_TYPE;
 	}
-	
+
 	protected boolean doEquals(TType type) {
 		return fId == ((PrimitiveType)type).fId;
 	}
@@ -69,7 +69,7 @@ public final class PrimitiveType extends TType {
 			}
 			return false;
 		}
-		
+
 		switch (((PrimitiveType)lhs).fId) {
 			case BOOLEAN :
 			case BYTE :
@@ -122,11 +122,11 @@ public final class PrimitiveType extends TType {
 		}
 		return false;
 	}
-	
+
 	public String getName() {
 		return NAMES[fId];
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		return NAMES[fId];
 	}

@@ -47,13 +47,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Action is applicable to selections containing elements of type
  * <code>IType</code> (top-level types only), <code>IField</code> and
  * <code>IMethod</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class PullUpAction extends SelectionDispatchAction {
@@ -84,10 +84,10 @@ public class PullUpAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
-	 * 
+	 *
 	 * @param editor
 	 *            the java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public PullUpAction(JavaEditor editor) {
@@ -100,7 +100,7 @@ public class PullUpAction extends SelectionDispatchAction {
 	 * Creates a new <code>PullUpAction</code>. The action requires that the
 	 * selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site
 	 *            the site providing context information for this action
 	 */
@@ -173,7 +173,7 @@ public class PullUpAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {

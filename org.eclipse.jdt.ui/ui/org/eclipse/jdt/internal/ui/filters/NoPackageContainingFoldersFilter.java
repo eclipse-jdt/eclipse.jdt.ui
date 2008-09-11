@@ -41,7 +41,7 @@ public class NoPackageContainingFoldersFilter extends ViewerFilter {
 
 		return true;
 	}
-	
+
 	private boolean containsPackage(IFolder folder) throws CoreException {
 		IJavaElement element= JavaCore.create(folder);
 		if (element instanceof IPackageFragment)

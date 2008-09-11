@@ -14,13 +14,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -58,7 +58,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	public SelectionTransferDropAdapter(StructuredViewer viewer) {
 		super(viewer);
-		
+
 		setScrollEnabled(true);
 		setExpandEnabled(true);
 		setSelectionFeedbackEnabled(false);
@@ -66,14 +66,14 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -85,7 +85,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 
 	//---- Actual DND -----------------------------------------------------------------
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -93,7 +93,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		clear();
 		super.dragEnter(event);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -101,7 +101,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		clear();
 		super.dragLeave(event);
 	}
-	
+
 	private void clear() {
 		setSelectionFeedbackEnabled(false);
 		fElements= null;
@@ -118,53 +118,53 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
 		int result= internalDetermineOperation(target, operation, operations);
-		
+
 		if (result == DND.DROP_NONE) {
 			setSelectionFeedbackEnabled(false);
 		} else {
 			setSelectionFeedbackEnabled(true);
 		}
-		
+
 		return result;
 	}
-		
+
 	private int internalDetermineOperation(Object target, int operation, int operations) {
-		
+
 		initializeSelection();
-		
+
 		if (target == null)
 			return DND.DROP_NONE;
-		
+
 		//Do not allow to drop on itself, bug 14228
 		if (getCurrentLocation() == LOCATION_ON) {
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-			if (contains(javaElements, target)) 
+			if (contains(javaElements, target))
 				return DND.DROP_NONE;
-			
+
 			IResource[] resources= ReorgUtils.getResources(fElements);
 			if (contains(resources, target))
 				return DND.DROP_NONE;
 		}
-				
+
 		try {
 			switch(operation) {
 				case DND.DROP_DEFAULT:
 					return handleValidateDefault(target, operations);
-				case DND.DROP_COPY: 
+				case DND.DROP_COPY:
 					return handleValidateCopy(target);
-				case DND.DROP_MOVE: 	
+				case DND.DROP_MOVE:
 					return handleValidateMove(target);
 			}
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
+			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message);
 		}
-		
+
 		return DND.DROP_NONE;
 	}
 
@@ -173,7 +173,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			if (resources[i].equals(target))
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -182,7 +182,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			if (elements[i].equals(target))
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -195,10 +195,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			fElements= Collections.EMPTY_LIST;
 			return;
 		}
-		fSelection= s;	
+		fSelection= s;
 		fElements= ((IStructuredSelection)s).toList();
 	}
-	
+
 	protected ISelection getSelection(){
 		return fSelection;
 	}
@@ -213,9 +213,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				case DND.DROP_COPY: handleDropCopy(getCurrentTarget()); break;
 			}
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
+			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message);
 		} catch(InvocationTargetException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		} catch (InterruptedException e) {
 			//ok
 		}
@@ -223,20 +223,20 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		// since this drop adapter did the remove of the source even
 		// if we moved something.
 		return false;
-		
+
 	}
-	
+
 	private int handleValidateDefault(Object target, int operations) throws JavaModelException{
-		if ((operations & DND.DROP_MOVE) != 0) {			
+		if ((operations & DND.DROP_MOVE) != 0) {
 			int result= handleValidateMove(target);
 			if (result != DND.DROP_NONE)
 				return result;
 		}
-			
+
 		return handleValidateCopy(target);
 	}
-	
-	private int handleValidateMove(Object target) throws JavaModelException{		
+
+	private int handleValidateMove(Object target) throws JavaModelException{
 		if (fMoveProcessor == null) {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
 			if (policy.canEnable())
@@ -244,17 +244,17 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}
 
 		if (!canMoveElements())
-			return DND.DROP_NONE;	
-		
+			return DND.DROP_NONE;
+
 		if (fMoveProcessor == null)
 			return DND.DROP_NONE;
 
 		if (!fMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(target, getCurrentLocation())).isOK())
-			return DND.DROP_NONE;	
+			return DND.DROP_NONE;
 
 		return DND.DROP_MOVE;
 	}
-	
+
 	private boolean canMoveElements() {
 		if (fCanMoveElements == 0) {
 			fCanMoveElements= 2;
@@ -282,16 +282,16 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 		if (!canCopyElements())
 			return DND.DROP_NONE;
-		
+
 		if (fCopyProcessor == null)
 			return DND.DROP_NONE;
-		
+
 		if (!fCopyProcessor.setDestination(ReorgDestinationFactory.createDestination(target, getCurrentLocation())).isOK())
 			return DND.DROP_NONE;
-			
-		return DND.DROP_COPY;					
+
+		return DND.DROP_COPY;
 	}
-			
+
 	private boolean canCopyElements() {
 		if (fCanCopyElements == 0) {
 			fCanCopyElements= 2;
@@ -299,13 +299,13 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				fCanCopyElements= 1;
 		}
 		return fCanCopyElements == 2;
-	}		
-	
+	}
+
 	private void handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
 		ReorgCopyStarter starter= ReorgCopyStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target, getCurrentLocation()));
-		
+
 		if (starter != null)
 			starter.run(getShell());
 	}
@@ -313,7 +313,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private Shell getShell() {
 		return getViewer().getControl().getShell();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

@@ -40,7 +40,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	private List fCheckBoxes;
 	private List fRadioButtons;
 	private List fTextControls;
-	
+
 	/**
 	 * creates a new preference page.
 	 */
@@ -51,20 +51,20 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		fTextControls= new ArrayList();
 	}
 
-	Button addCheckBox(Composite parent, String label, String key) { 
+	Button addCheckBox(Composite parent, String label, String key) {
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		
+
 		Button button= new Button(parent, SWT.CHECK);
 		button.setText(label);
 		button.setData(key);
 		button.setLayoutData(gd);
 
 		button.setSelection(getPreferenceStore().getBoolean(key));
-		
+
 		fCheckBoxes.add(button);
 		return button;
 	}
-	
+
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
@@ -75,7 +75,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
-		
+
 		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
@@ -89,8 +89,8 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		applyDialogFont(result);
 		return result;
 	}
-	
- 
+
+
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
@@ -131,7 +131,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
-		
+
 		super.performDefaults();
 	}
 
@@ -157,7 +157,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 			String key= (String) text.getData();
 			store.setValue(key, text.getText());
 		}
-		
+
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}

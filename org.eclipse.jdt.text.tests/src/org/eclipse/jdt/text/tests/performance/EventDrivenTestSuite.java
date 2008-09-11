@@ -18,7 +18,7 @@ import junit.framework.TestSuite;
  * Depends on {@link PerformanceTestSetup}, which is currently run by
  * {@link PerformanceTestSuite}. {@link PerformanceTestSuite} precedes
  * this suite in the test.xml.
- * 
+ *
  * @since 3.1
  */
 public class EventDrivenTestSuite extends TestSuite {
@@ -26,7 +26,7 @@ public class EventDrivenTestSuite extends TestSuite {
 	public static Test suite() {
 		return new PerformanceTestSetup(new EventDrivenTestSuite());
 	}
-	
+
 	public EventDrivenTestSuite() {
 		addTest(ScrollJavaEditorTest.suite());
 		addTest(ScrollTextEditorTest.suite());
@@ -36,15 +36,15 @@ public class EventDrivenTestSuite extends TestSuite {
 		addTest(OpenPreferencePageTest.suite());
 		addTest(ScrollAnnotatedJavaEditorTest.suite());
 		addTest(ScrollVerticalRulerTest.suite());
-		
+
 		//FIXME: The test is currently excluded because it only takes 0..2ms.
 //		addTest(JavaDocIndentStrategyTest.suite());
-		
+
 		addTest(TextMoveLineTest.suite());
 		addTest(JavaMoveLineTest.suite());
 		addTest(JavaReplaceAllTest.suite());
 		addTest(JavaReplaceAllWithQuickDiffTest.suite());
-		
+
 		// TODO: enable when Bug 72244: "Posting mouse events locks up event handling" is fixed
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=72244
 //		addTest(MouseScrollJavaEditorTest.suite());

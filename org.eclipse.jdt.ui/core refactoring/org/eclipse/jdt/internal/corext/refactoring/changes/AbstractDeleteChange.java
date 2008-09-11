@@ -14,12 +14,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
@@ -27,22 +27,22 @@ import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 abstract class AbstractDeleteChange extends ResourceChange {
-	
+
 	protected abstract Change doDelete(IProgressMonitor pm) throws CoreException;
-	
+
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.AbstractDeleteChange_deleting, 1); 
+			pm.beginTask(RefactoringCoreMessages.AbstractDeleteChange_deleting, 1);
 			Change undo= doDelete(pm);
 			return undo;
 		} finally {
 			pm.done();
 		}
 	}
-	
+
 	protected static void saveFileIfNeeded(IFile file, IProgressMonitor pm) throws CoreException {
 		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
 		if (buffer != null && buffer.isDirty() &&  buffer.isStateValidated() && buffer.isSynchronized()) {

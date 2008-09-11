@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -28,7 +28,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.BuildAction;
-
 import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,13 +41,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.IRefreshable;
 /**
  * Contributes all build related actions to the context menu and installs handlers for the
  * corresponding global menu actions.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class BuildActionGroup extends ActionGroup {
@@ -59,7 +58,7 @@ public class BuildActionGroup extends ActionGroup {
 			super(part.getSite());
 			fPart= part;
 		}
-		
+
 		public void run(IStructuredSelection selection) {
 			super.run(selection);
 			if (fPart instanceof IRefreshable) {
@@ -67,10 +66,10 @@ public class BuildActionGroup extends ActionGroup {
 			}
 		}
 	}
-	
+
 	/**
 	 * Adapts a shell the a shell provider.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	private static class ShellProviderAdapter implements IShellProvider {
@@ -81,14 +80,14 @@ public class BuildActionGroup extends ActionGroup {
 			fShell= shell;
 		}
 
-		/* 
+		/*
 		 * @see org.eclipse.jface.window.IShellProvider#getShell()
 		 */
 		public Shell getShell() {
 			return fShell;
 		}
 	}
-	
+
 	private final ISelectionProvider fSelectionProvider;
 	private final BuildAction fBuildAction;
 	private final RefreshAction fRefreshAction;
@@ -97,7 +96,7 @@ public class BuildActionGroup extends ActionGroup {
 	 * Creates a new <code>BuildActionGroup</code>. The group requires that
 	 * the selection provided by the view part's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 */
 	public BuildActionGroup(final IViewPart part) {
@@ -108,39 +107,39 @@ public class BuildActionGroup extends ActionGroup {
 	 * Creates a new <code>BuildActionGroup</code>. The group requires
 	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the
 	 *  sites selection provider.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public BuildActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		this(site, specialSelectionProvider, new RefreshAction(site));
 	}
-	
+
 	private BuildActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider, RefreshAction refreshAction) {
 		fSelectionProvider= specialSelectionProvider != null ? specialSelectionProvider : site.getSelectionProvider();
-		
+
 		fBuildAction= new BuildAction(new ShellProviderAdapter(site.getShell()), IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
 		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
-				
+
 		fRefreshAction= refreshAction;
 		fRefreshAction.setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
-		
+
 		if (specialSelectionProvider != null) {
 			fRefreshAction.setSpecialSelectionProvider(specialSelectionProvider);
 		}
-		
+
 		fSelectionProvider.addSelectionChangedListener(fBuildAction);
 		fSelectionProvider.addSelectionChangedListener(fRefreshAction);
 	}
-	
-	
+
+
 	/**
 	 * Returns the refresh action managed by this group.
-	 * 
+	 *
 	 * @return the refresh action. If this group doesn't manage a refresh action
 	 * 	<code>null</code> is returned
 	 */
@@ -155,7 +154,7 @@ public class BuildActionGroup extends ActionGroup {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -167,7 +166,7 @@ public class BuildActionGroup extends ActionGroup {
 		appendToGroup(menu, fRefreshAction);
 		super.fillContextMenu(menu);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */
@@ -176,17 +175,17 @@ public class BuildActionGroup extends ActionGroup {
 		fSelectionProvider.removeSelectionChangedListener(fRefreshAction);
 		super.dispose();
 	}
-	
+
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(IDEActionFactory.BUILD_PROJECT.getId(), fBuildAction);
 		actionBar.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
 	}
-	
+
 	private void appendToGroup(IMenuManager menu, IAction action) {
 		if (action.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, action);
 	}
-	
+
 	private boolean isBuildTarget(ISelection s) {
 		if (!(s instanceof IStructuredSelection))
 			return false;

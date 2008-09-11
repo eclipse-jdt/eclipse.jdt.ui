@@ -34,27 +34,27 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  *
  */
 public class Java50CleanUp extends AbstractMultiFix {
-		
+
 	public Java50CleanUp(Map options) {
 		super(options);
 	}
-	
+
 	public Java50CleanUp() {
 		super();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
 	}
-	
+
 	private boolean requireAST() {
 		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-		
-		return addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE) || 
-		       addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED) || 
+
+		return addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE) ||
+		       addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED) ||
 		       isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
 	}
 
@@ -63,9 +63,9 @@ public class Java50CleanUp extends AbstractMultiFix {
 	 */
 	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-		return Java50Fix.createCleanUp(compilationUnit, 
-				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE), 
-				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED), 
+		return Java50Fix.createCleanUp(compilationUnit,
+				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE),
+				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED),
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
 	}
 
@@ -75,9 +75,9 @@ public class Java50CleanUp extends AbstractMultiFix {
 	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		
+
 		return Java50Fix.createCleanUp(compilationUnit, problems,
-				isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE), 
+				isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE),
 				isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED),
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
 	}
@@ -86,16 +86,16 @@ public class Java50CleanUp extends AbstractMultiFix {
 		Map result= new Hashtable();
 		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE))
 			result.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, JavaCore.WARNING);
-		
+
 		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED))
 			result.put(JavaCore.COMPILER_PB_MISSING_DEPRECATED_ANNOTATION, JavaCore.WARNING);
-		
+
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES))
 			result.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
-				
+
 		return result;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -109,13 +109,13 @@ public class Java50CleanUp extends AbstractMultiFix {
 			result.add(MultiFixMessages.Java50CleanUp_AddTypeParameters_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf.append("class E {\n"); //$NON-NLS-1$
 		buf.append("    /**\n"); //$NON-NLS-1$
 		buf.append("     * @deprecated\n"); //$NON-NLS-1$
@@ -131,7 +131,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 		}
 		buf.append("    public void foo() {}\n"); //$NON-NLS-1$
 		buf.append("}\n"); //$NON-NLS-1$
-		
+
 		return buf.toString();
 	}
 
@@ -176,5 +176,5 @@ public class Java50CleanUp extends AbstractMultiFix {
 		}
 		return result;
 	}
-	
+
 }

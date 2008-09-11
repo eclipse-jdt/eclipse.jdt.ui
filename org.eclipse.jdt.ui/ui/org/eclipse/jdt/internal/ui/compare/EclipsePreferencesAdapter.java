@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import org.osgi.service.prefs.BackingStoreException;
+
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.swt.widgets.Display;
-import org.osgi.service.prefs.BackingStoreException;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * Adapts an options {@link IEclipsePreferences} to {@link org.eclipse.jface.preference.IPreferenceStore}.

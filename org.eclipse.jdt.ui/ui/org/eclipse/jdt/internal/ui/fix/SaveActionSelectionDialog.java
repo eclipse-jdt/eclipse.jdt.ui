@@ -26,32 +26,32 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
 
 public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
-	
+
 	private static final String PREFERENCE_KEY= "clean_up_save_particpant_modify_dialog"; //$NON-NLS-1$
-	
+
 	public SaveActionSelectionDialog(Shell parentShell, Map settings) {
 		super(parentShell, settings, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_CleanUpSaveParticipantConfiguration_Title);
 	}
-	
-	protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {	
+
+	protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {
 		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors();
-		
+
 		NamedCleanUpTabPage[] result= new NamedCleanUpTabPage[descriptors.length];
-		
+
 		for (int i= 0; i < descriptors.length; i++) {
 			String name= descriptors[i].getName();
 			ICleanUpTabPage page= descriptors[i].createTabPage();
-			
+
 			page.setOptionsKind(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS);
 			page.setModifyListener(this);
 			page.setWorkingValues(workingValues);
-			
+
 			result[i]= new NamedCleanUpTabPage(name, page);
 		}
-		
+
 		return result;
 	}
-	
+
 	protected void createButtonsForButtonBar(Composite parent) {
 		GridLayout layout= (GridLayout)parent.getLayout();
 		layout.numColumns++;
@@ -66,7 +66,7 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 	protected String getEmptySelectionMessage() {
 		return SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_SelectAnAction_Error;
 	}
-	
+
 	protected String getSelectionCountMessage(int selectionCount, int size) {
 		return Messages.format(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_XofYSelected_Label, new Object[] {new Integer(selectionCount), new Integer(size)});
 	}

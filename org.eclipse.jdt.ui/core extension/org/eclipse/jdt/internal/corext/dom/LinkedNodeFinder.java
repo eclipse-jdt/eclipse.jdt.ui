@@ -33,18 +33,18 @@ import org.eclipse.jdt.core.dom.SimpleName;
   */
 
 public class LinkedNodeFinder  {
-	
+
 	private LinkedNodeFinder() {
 	}
-	
-	
+
+
 	/**
 	 * Find all nodes connected to the given binding. e.g. Declaration of a field and all references.
 	 * For types this includes also the constructor declaration, for methods also overridden methods
 	 * or methods overriding (if existing in the same AST)
 	 * @param root The root of the AST tree to search
 	 * @param binding The binding of the searched nodes
-	 * @return Return 
+	 * @return Return
 	 */
 	public static SimpleName[] findByBinding(ASTNode root, IBinding binding) {
 		ArrayList res= new ArrayList();
@@ -52,16 +52,16 @@ public class LinkedNodeFinder  {
 		root.accept(nodeFinder);
 		return (SimpleName[]) res.toArray(new SimpleName[res.size()]);
 	}
-	
+
 	/**
 	 * Find all nodes connected to the given name node. If the node has a binding then all nodes connected
 	 * to this binding are returned. If the node has no binding, then all nodes that also miss a binding and have
 	 * the same name are returned.
 	 * @param root The root of the AST tree to search
 	 * @param name The node to find linked nodes for
-	 * @return Return 
+	 * @return Return
 	 */
-	public static SimpleName[] findByNode(ASTNode root, SimpleName name) { 
+	public static SimpleName[] findByNode(ASTNode root, SimpleName name) {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			return findByBinding(root, binding);
@@ -79,15 +79,15 @@ public class LinkedNodeFinder  {
 		}
 		return new SimpleName[] { name };
 	}
-	
-	
-	
+
+
+
 	private static final int FIELD= 1;
 	private static final int METHOD= 2;
 	private static final int TYPE= 4;
 	private static final int LABEL= 8;
 	private static final int NAME= FIELD | TYPE;
-	
+
 	private static int getProblemKind(IProblem problem) {
 		switch (problem.getID()) {
 			case IProblem.UndefinedField:
@@ -103,11 +103,11 @@ public class LinkedNodeFinder  {
 		}
 		return 0;
 	}
-	
+
 	private static int getNameNodeProblemKind(IProblem[] problems, SimpleName nameNode) {
 		int nameOffset= nameNode.getStartPosition();
 		int nameInclEnd= nameOffset + nameNode.getLength() - 1;
-		
+
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
 			if (curr.getSourceStart() == nameOffset && curr.getSourceEnd() == nameInclEnd) {
@@ -119,32 +119,32 @@ public class LinkedNodeFinder  {
 		}
 		return 0;
 	}
-	
-	
+
+
 	public static SimpleName[] findByProblems(ASTNode parent, SimpleName nameNode) {
 		ArrayList res= new ArrayList();
-		
+
 		ASTNode astRoot = parent.getRoot();
 		if (!(astRoot instanceof CompilationUnit)) {
 			return null;
 		}
-			
+
 		IProblem[] problems= ((CompilationUnit) astRoot).getProblems();
 		int nameNodeKind= getNameNodeProblemKind(problems, nameNode);
 		if (nameNodeKind == 0) { // no problem on node
 			return null;
 		}
-			
+
 		int bodyStart= parent.getStartPosition();
 		int bodyEnd= bodyStart + parent.getLength();
-		
+
 		String name= nameNode.getIdentifier();
 
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
 			int probStart= curr.getSourceStart();
 			int probEnd= curr.getSourceEnd() + 1;
-			
+
 			if (probStart > bodyStart && probEnd < bodyEnd) {
 				int currKind= getProblemKind(curr);
 				if ((nameNodeKind & currKind) != 0) {
@@ -157,24 +157,24 @@ public class LinkedNodeFinder  {
 		}
 		return (SimpleName[]) res.toArray(new SimpleName[res.size()]);
 	}
-	
+
 	private static class LabelFinder extends ASTVisitor {
-		
+
 		private SimpleName fLabel;
 		private ASTNode fDefiningLabel;
 		private ArrayList fResult;
-		
+
 		public LabelFinder(SimpleName label, ArrayList result) {
 			super(true);
 			fLabel= label;
 			fResult= result;
 			fDefiningLabel= null;
 		}
-		
+
 		private boolean isSameLabel(SimpleName label) {
 			return label != null && fLabel.getIdentifier().equals(label.getIdentifier());
 		}
-		
+
 		public boolean visit(BreakStatement node) {
 			SimpleName label= node.getLabel();
 			if (fDefiningLabel != null && isSameLabel(label) && ASTNodes.isParent(label, fDefiningLabel)) {
@@ -182,7 +182,7 @@ public class LinkedNodeFinder  {
 			}
 			return false;
 		}
-				
+
 		public boolean visit(ContinueStatement node) {
 			SimpleName label= node.getLabel();
 			if (fDefiningLabel != null && isSameLabel(label) && ASTNodes.isParent(label, fDefiningLabel)) {
@@ -203,25 +203,25 @@ public class LinkedNodeFinder  {
 			return false;
 		}
 	}
-	
+
 	private static class BindingFinder extends ASTVisitor {
-	
+
 		private IBinding fBinding;
 		private ArrayList fResult;
-		
+
 		public BindingFinder(IBinding binding, ArrayList result) {
 			super(true);
 			fBinding= getDeclaration(binding);
 			fResult= result;
 		}
-		
+
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding == null) {
 				return false;
 			}
 			binding= getDeclaration(binding);
-			
+
 			if (fBinding == binding) {
 				fResult.add(node);
 			} else if (binding.getKind() != fBinding.getKind()) {
@@ -235,7 +235,7 @@ public class LinkedNodeFinder  {
 			}
 			return false;
 		}
-		
+
 		private static IBinding getDeclaration(IBinding binding) {
 			if (binding instanceof ITypeBinding) {
 				return ((ITypeBinding) binding).getTypeDeclaration();

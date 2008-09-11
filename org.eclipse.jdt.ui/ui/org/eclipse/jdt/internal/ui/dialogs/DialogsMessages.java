@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * 
+ *
  */
 public class DialogsMessages extends NLS {
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.dialogs.DialogsMessages"; //$NON-NLS-1$

@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public abstract class WildcardType extends TType {
 	protected TType fBound;
-	
+
 	protected WildcardType(TypeEnvironment environment) {
 		super(environment);
 	}
@@ -30,32 +30,32 @@ public abstract class WildcardType extends TType {
 			fBound= getEnvironment().create(bound);
 		}
 	}
-	
+
 	public TType getBound() {
 		return fBound;
 	}
-	
+
 	public TType[] getSubTypes() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	public boolean doEquals(TType type) {
 		WildcardType other= (WildcardType)type;
 		if (fBound == null)
 			return other.fBound == null;
 		return fBound.equals(other.fBound);
 	}
-	
+
 	public int hashCode() {
 		if (fBound == null)
 			return super.hashCode();
 		return fBound.hashCode() << WILDCARD_TYPE_SHIFT;
 	}
-	
+
 	protected abstract boolean checkAssignmentBound(TType rhs);
-	
+
 	// protected abstract boolean checkTypeArgumentBound(TType rhs);
-	
+
 	protected String internalGetName(String keyword) {
 		StringBuffer result= new StringBuffer("?"); //$NON-NLS-1$
 		TType bound= getBound();
@@ -67,7 +67,7 @@ public abstract class WildcardType extends TType {
 		}
 		return result.toString();
 	}
-	
+
 	protected String internalGetPrettySignature(String keyword) {
 		StringBuffer result= new StringBuffer("?"); //$NON-NLS-1$
 		TType bound= getBound();
@@ -78,5 +78,5 @@ public abstract class WildcardType extends TType {
 			result.append(bound.getPlainPrettySignature());
 		}
 		return result.toString();
-	}	
+	}
 }

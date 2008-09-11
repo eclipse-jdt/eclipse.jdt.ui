@@ -14,13 +14,13 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -65,19 +65,19 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		super(tree);
 		initMapper();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper.IContentViewerAccessor#doUpdateItem(org.eclipse.swt.widgets.Widget)
 	 */
 	public void doUpdateItem(Widget item) {
 		doUpdateItem(item, item.getData(), true);
 	}
-	
+
 	private void initMapper() {
 		fResourceToItemsMapper= new ResourceToItemsMapper(this);
 	}
-	
-	
+
+
 	/*
 	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
@@ -94,7 +94,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	protected void unmapElement(Object element, Widget item) {
 		if (item instanceof Item) {
 			fResourceToItemsMapper.removeFromMap(element, (Item) item);
-		}		
+		}
 		super.unmapElement(element, item);
 	}
 
@@ -105,10 +105,10 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		fResourceToItemsMapper.clearMap();
 		super.unmapAllElements();
 	}
-	
-	
+
+
 	// ---------------- filter sessions ----------------------------
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#addFilter(org.eclipse.jface.viewers.ViewerFilter)
 	 */
@@ -118,7 +118,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		super.addFilter(filter);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#removeFilter(org.eclipse.jface.viewers.ViewerFilter)
 	 */
@@ -128,7 +128,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 			((JavaViewerFilter) filter).filteringEnd();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#setFilters(org.eclipse.jface.viewers.ViewerFilter[])
 	 */
@@ -143,7 +143,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
     	endFilterSessions(oldFilters);
 		super.setFilters(filters);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#resetFilters()
 	 */
@@ -151,7 +151,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
     	endFilterSessions(getFilters());
 		super.resetFilters();
 	}
-	
+
 	private boolean findAndRemove(ViewerFilter[] filters, ViewerFilter filter) {
 		for (int i= 0; i < filters.length; i++) {
 			if (filters[i] == filter) {
@@ -161,7 +161,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		return false;
 	}
-	
+
 	private void endFilterSessions(ViewerFilter[] filters) {
 		for (int i= 0; i < filters.length; i++) {
 			ViewerFilter curr= filters[i];
@@ -170,7 +170,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 			}
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
 	 */
@@ -178,8 +178,8 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
     	endFilterSessions(getFilters());
     	super.handleDispose(event);
     }
-    
-	
+
+
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
@@ -191,7 +191,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 			}
 		}
 		Object[] changed= addAditionalProblemParents(event.getElements());
-		
+
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
 			ArrayList others= new ArrayList();
 			for (int i= 0; i < changed.length; i++) {
@@ -213,7 +213,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		super.handleLabelProviderChanged(event);
 	}
-	
+
 	/**
 	 * Answers whether this viewer can ignore label provider changes resulting from
 	 * marker changes in annotation models
@@ -223,8 +223,8 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		Object contentProvider= getContentProvider();
 		return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider)contentProvider).providesWorkingCopies();
 	}
-	
-		
+
+
 	/**
 	 * Decides if {@link #isExpandable(Object)} should also test filters. The default behaviour is to
 	 * do this only for IMembers. Implementors can replace this behaviour.
@@ -234,7 +234,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	protected boolean evaluateExpandableWithFilters(Object parent) {
 		return parent instanceof IMember;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
 	 */
@@ -245,7 +245,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		return super.isExpandable(parent);
 	}
-	
+
 	/**
 	 * Public method to test if a element has any children that passed the filters
 	 * @param parent the element to test
@@ -255,14 +255,14 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		Object[] rawChildren= getRawChildren(parent);
 		return containsNonFiltered(rawChildren, parent);
     }
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#getFilteredChildren(java.lang.Object)
 	 */
 	protected final Object[] getFilteredChildren(Object parent) {
 		return filter(getRawChildren(parent), parent);
 	}
-	
+
 	private Object[] filter(Object[] elements, Object parent) {
 		if (!hasFilters() || elements.length == 0) {
 			return elements;
@@ -277,7 +277,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		return list.toArray();
 	}
-	
+
 	private boolean containsNonFiltered(Object[] elements, Object parent) {
 		if (elements.length == 0) {
 			return false;
@@ -294,11 +294,11 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		return false;
 	}
-	
+
 	/**
 	 * All element filter tests must go through this method.
 	 * Can be overridden by subclasses.
-	 * 
+	 *
 	 * @param object the object to filter
 	 * @param parent the parent
 	 * @param filters the filters to apply
@@ -312,18 +312,18 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
 	 */
 	protected final Object[] filter(Object[] elements) {
 		return filter(elements, getRoot());
 	}
-	
+
 	protected Object[] addAditionalProblemParents(Object[] elements) {
 		return elements;
 	}
-	
+
 	/**
 	 * Public method to test if a element is filtered by the views active filters
 	 * @param object the element to test for

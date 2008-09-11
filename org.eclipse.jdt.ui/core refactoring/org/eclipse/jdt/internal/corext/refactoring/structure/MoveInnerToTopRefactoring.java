@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
@@ -193,7 +193,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			node.getQualifier().accept(this);
 			return false;
 		}
-		
+
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof IVariableBinding) {
@@ -206,7 +206,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			}
 			return false;
 		}
-		
+
 		public boolean visit(ThisExpression node) {
 			final Name qualifier= node.getQualifier();
 			if (qualifier != null) {
@@ -217,7 +217,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			}
 			return super.visit(node);
 		}
-		
+
 		private boolean isAccessToOuter(ITypeBinding binding) {
 			if (Bindings.isSuperType(binding, fCurrentType)) {
 				return false;
@@ -231,8 +231,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			}
 			return false;
 		}
-		
-		
+
+
 	}
 
 	private class TypeReferenceQualifier extends ASTVisitor {
@@ -509,7 +509,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (fType != null)
 			initialize();
 	}
-	
+
     public MoveInnerToTopRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
 		fType= null;
 		fCodeGenerationSettings= null;
@@ -677,7 +677,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
 				if (fEnclosingInstanceFieldName.equals(param.getName().getIdentifier())) {
 					String[] keys= new String[] { BasicElementLabels.getJavaElementName(param.getName().getIdentifier()), BasicElementLabels.getJavaElementName(fType.getElementName())};
-					String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_name_used, keys); 
+					String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_name_used, keys);
 					result.addError(msg, JavaStatusContext.create(fType.getCompilationUnit(), param));
 				}
 			}
@@ -690,11 +690,11 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			return new RefactoringStatus();
 		RefactoringStatus result= Checks.checkFieldName(name, fType);
 		if (!Checks.startsWithLowerCase(name))
-			result.addWarning(RefactoringCoreMessages.MoveInnerToTopRefactoring_names_start_lowercase); 
+			result.addWarning(RefactoringCoreMessages.MoveInnerToTopRefactoring_names_start_lowercase);
 
 		if (fType.getField(name).exists()) {
 			Object[] keys= new String[] { BasicElementLabels.getJavaElementName(name), BasicElementLabels.getJavaElementName(fType.getElementName())};
-			String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_already_declared, keys); 
+			String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_already_declared, keys);
 			result.addError(msg, JavaStatusContext.create(fType.getField(name)));
 		}
 		return result;
@@ -733,7 +733,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		IType type= Checks.findTypeInPackage(fType.getPackageFragment(), fType.getElementName());
 		if (type == null || !type.exists())
 			return null;
-		String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_type_exists, new String[] { BasicElementLabels.getJavaElementName(fType.getElementName()), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)}); 
+		String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_type_exists, new String[] { BasicElementLabels.getJavaElementName(fType.getElementName()), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)});
 		return RefactoringStatus.createErrorStatus(message);
 	}
 
@@ -785,7 +785,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		Assert.isNotNull(status);
 		final TextChangeManager manager= new TextChangeManager();
 		try {
-			monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_preview, 4); 
+			monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_preview, 4);
 			final Map rewrites= new HashMap(2);
 			fSourceRewrite.clearASTAndImportRewrites();
 			rewrites.put(fSourceRewrite.getCu(), fSourceRewrite);
@@ -867,7 +867,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		final ASTRewrite rewrite= targetRewrite.getASTRewrite();
 		if (targetUnit.equals(sourceUnit)) {
 			final AbstractTypeDeclaration declaration= findTypeDeclaration(fType, root);
-			final TextEditGroup qualifierGroup= fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_qualifier); 
+			final TextEditGroup qualifierGroup= fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_qualifier);
 			ITypeBinding binding= declaration.resolveBinding();
 			if (!remove) {
 				if (!JdtFlags.isStatic(fType) && fCreateInstanceField) {
@@ -892,18 +892,18 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				if (declaring != null)
 					declaration.accept(new TypeReferenceQualifier(binding, null));
 			}
-			final TextEditGroup groupMove= targetRewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_label); 
+			final TextEditGroup groupMove= targetRewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_label);
 			if (remove) {
 				rewrite.remove(declaration, groupMove);
 				targetRewrite.getImportRemover().registerRemovedNode(declaration);
 			} else {
 				// Bug 101017/96308: Rewrite the visibility of the element to be
 				// moved and add a warning.
-				
+
 				// Note that this cannot be done in the MemberVisibilityAdjustor, as the private and
 				// static flags must always be cleared when moving to new type.
 				int newFlags= JdtFlags.clearFlag(Modifier.STATIC, declaration.getModifiers());
-				
+
 				if (!visibilityWasAdjusted) {
 					if (Modifier.isPrivate(declaration.getModifiers()) || Modifier.isProtected(declaration.getModifiers())) {
 						newFlags= JdtFlags.clearFlag(Modifier.PROTECTED | Modifier.PRIVATE, newFlags);
@@ -1159,7 +1159,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.MoveInnerToTopRefactoring_name; 
+		return RefactoringCoreMessages.MoveInnerToTopRefactoring_name;
 	}
 
 	private String getNameForEnclosingInstanceConstructorParameter() throws JavaModelException {
@@ -1364,7 +1364,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			setEnclosingInstanceFieldInConstructor(rewrite, declarations[index]);
 		}
 	}
-	
+
 	private void modifyInterfaceMemberModifiers(final ITypeBinding binding) {
 		Assert.isNotNull(binding);
 		ITypeBinding declaring= binding.getDeclaringClass();
@@ -1434,7 +1434,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private void updateConstructorReference(ITypeBinding[] parameters, ASTNode reference, CompilationUnitRewrite targetRewrite, ICompilationUnit cu) throws CoreException {
-		final TextEditGroup group= targetRewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_update_constructor_reference); 
+		final TextEditGroup group= targetRewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_update_constructor_reference);
 		if (reference instanceof SuperConstructorInvocation)
 			updateConstructorReference((SuperConstructorInvocation) reference, targetRewrite, cu, group);
 		else if (reference instanceof ClassInstanceCreation)
@@ -1541,7 +1541,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (enclosingImport != null)
 			updateReferenceInImport(enclosingImport, node, rewrite);
 		else {
-			final TextEditGroup group= rewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_update_type_reference); 
+			final TextEditGroup group= rewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_update_type_reference);
 			updateReference(parameters, node, rewrite, group);
 			if (!fType.getPackageFragment().equals(cu.getParent())) {
 				final String name= fType.getPackageFragment().getElementName() + '.' + fType.getElementName();

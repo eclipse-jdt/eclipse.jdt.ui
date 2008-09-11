@@ -34,13 +34,13 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * Action to open the selection in an external browser. If the
  * selection is a java element its corresponding javadoc is shown
  * if possible. If it is an URL the URL's content is shown.
- * 
+ *
  * The action is disabled if the selection can not be opened.
- * 
+ *
  * @since 3.4
  */
 public class OpenExternalBrowserAction extends Action implements ISelectionChangedListener {
-	
+
 	/**
 	 * The display the display this action is working on.
 	 */
@@ -52,17 +52,17 @@ public class OpenExternalBrowserAction extends Action implements ISelectionChang
 
 	/**
 	 * Create a new ShowExternalJavadocAction
-	 * 
+	 *
 	 * @param display the display this action is working on
 	 * @param selectionProvider the selection provider
 	 */
 	public OpenExternalBrowserAction(Display display, ISelectionProvider selectionProvider) {
 		fDisplay= display;
 		fSelectionProvider= selectionProvider;
-		
+
 		setText(ActionMessages.OpenExternalBrowserAction_javadoc_label);
 		setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
-		
+
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXTERNAL_BROWSER);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXTERNAL_BROWSER);
 	}
@@ -74,7 +74,7 @@ public class OpenExternalBrowserAction extends Action implements ISelectionChang
 		ISelection selection= event.getSelection();
 		if (!(selection instanceof IStructuredSelection))
 			return;
-		
+
 		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 		if (canEnable(structuredSelection)) {
 			setEnabled(true);
@@ -89,12 +89,12 @@ public class OpenExternalBrowserAction extends Action implements ISelectionChang
 			}
 		} else {
 			setEnabled(false);
-			
+
 			setText(ActionMessages.OpenExternalBrowserAction_javadoc_label);
 			setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
@@ -102,7 +102,7 @@ public class OpenExternalBrowserAction extends Action implements ISelectionChang
 		ISelection selection= fSelectionProvider.getSelection();
 		if (!(selection instanceof IStructuredSelection))
 			return;
-		
+
 		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 		Object element= structuredSelection.getFirstElement();
 		URL url;
@@ -122,7 +122,7 @@ public class OpenExternalBrowserAction extends Action implements ISelectionChang
 
 	/**
 	 * True if this action can operate on the given selection
-	 * 
+	 *
 	 * @param selection the selection to inspect
 	 * @return <code>true</code> if this action can operate on the selection
 	 */
@@ -133,7 +133,7 @@ public class OpenExternalBrowserAction extends Action implements ISelectionChang
 		Object element= selection.getFirstElement();
 		if (element instanceof URL)
 			return true;
-		
+
 		if (!(element instanceof IJavaElement))
 			return false;
 

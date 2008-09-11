@@ -39,35 +39,35 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 	public String getName() {
 		return fDeclaration.getName().getIdentifier();
 	}
-	
+
 	public ITypeBinding getTypeBinding() {
 		return fDeclaration.resolveBinding().getType();
 	}
-	
+
 	public void addReference(ASTNode node) {
 		fReferences.add(node);
 	}
-	
+
 	public List references() {
 		return fReferences;
 	}
-	
+
 	public void setAccessMode(int mode) {
 		fAccessMode= mode;
 	}
-	
+
 	public boolean isUnused() {
 		return fAccessMode == FlowInfo.UNUSED;
 	}
-	
+
 	public boolean isReadOnly() {
 		return (fAccessMode & (FlowInfo.READ | FlowInfo.READ_POTENTIAL)) != 0;
 	}
-	
+
 	public boolean isWrite() {
 		return (fAccessMode & (FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN)) != 0;
 	}
-	
+
 	public int getSimplifiedAccessMode() {
 		if (isWrite())
 			return FlowInfo.WRITE;
@@ -75,17 +75,17 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 			return FlowInfo.READ;
 		return FlowInfo.UNUSED;
 	}
-	
+
 	public int getNumberOfAccesses() {
 		return fReferences.size();
 	}
-	
+
 	public boolean needsEvaluation() {
 		if (fReferences.size() <= 1)
 			return false;
 		return true;
 	}
-	
+
 	public void setOperatorPrecedence(int newValue) {
 		if (newValue == -1) {
 			fOperatorPrecedence= newValue;
@@ -98,5 +98,5 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 
 	public int getOperatorPrecedence() {
 		return fOperatorPrecedence;
-	}	
+	}
 }

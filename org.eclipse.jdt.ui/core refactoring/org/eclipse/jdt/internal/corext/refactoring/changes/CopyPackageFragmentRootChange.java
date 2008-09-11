@@ -43,6 +43,6 @@ public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChang
 	public String getName() {
 		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
 		String destinationName= BasicElementLabels.getResourceName(getDestination());
-		return Messages.format(RefactoringCoreMessages.CopyPackageFragmentRootChange_copy, new String[] {rootName, destinationName}); 
+		return Messages.format(RefactoringCoreMessages.CopyPackageFragmentRootChange_copy, new String[] {rootName, destinationName});
 	}
 }

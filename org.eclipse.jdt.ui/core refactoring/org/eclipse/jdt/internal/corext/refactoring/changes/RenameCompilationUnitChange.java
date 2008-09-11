@@ -37,7 +37,7 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 
 	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
 		super(resourcePath, oldName, newName, stampToRestore);
-		
+
 		setValidationMethod(VALIDATE_NOT_READ_ONLY | SAVE_IF_DIRTY);
 	}
 

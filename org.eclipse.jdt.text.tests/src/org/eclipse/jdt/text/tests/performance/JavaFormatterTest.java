@@ -13,10 +13,10 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.IAction;
 
@@ -25,13 +25,13 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * Measures the time to format a large compilation unit.
- * 
+ *
  * @since 3.1
  */
 public class JavaFormatterTest extends TextPerformanceTestCase {
-	
+
 	private static final Class THIS= JavaFormatterTest.class;
-	
+
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
 	private static final int WARM_UP_RUNS= 3;
@@ -39,7 +39,7 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 	private static final int MEASURED_RUNS= 3;
 
 	private AbstractTextEditor fEditor;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -51,7 +51,7 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
@@ -59,7 +59,7 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to format a large compilation unit.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test() throws Exception {

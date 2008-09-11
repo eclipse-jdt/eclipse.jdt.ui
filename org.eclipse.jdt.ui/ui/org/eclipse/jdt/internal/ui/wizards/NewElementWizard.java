@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -22,9 +25,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -38,9 +38,8 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
-
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -58,7 +57,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	public NewElementWizard() {
 		setNeedsProgressMonitor(true);
 	}
-			
+
 	protected void openResource(final IFile resource) {
 		final IWorkbenchPage activePage= JavaPlugin.getActivePage();
 		if (activePage != null) {
@@ -76,7 +75,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			}
 		}
 	}
-	
+
 	/**
 	 * Subclasses should override to perform the actions of the wizard.
 	 * This method is run in the wizard container's context as a workspace runnable.
@@ -85,7 +84,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	 * @throws CoreException
 	 */
 	protected abstract void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException;
-	
+
 	/**
 	 * Returns the scheduling rule for creating the element.
 	 * @return returns the scheduling rule
@@ -93,23 +92,23 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	protected ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot(); // look all by default
 	}
-	
-	
+
+
 	protected boolean canRunForked() {
 		return true;
 	}
-	
+
 	public abstract IJavaElement getCreatedElement();
-	
+
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
-		String title= NewWizardMessages.NewElementWizard_op_error_title; 
-		String message= NewWizardMessages.NewElementWizard_op_error_message; 
+		String title= NewWizardMessages.NewElementWizard_op_error_title;
+		String message= NewWizardMessages.NewElementWizard_op_error_message;
 		ExceptionHandler.handle(e, shell, title, message);
 	}
-	
+
 	/*
 	 * @see Wizard#performFinish
-	 */		
+	 */
 	public boolean performFinish() {
 		IWorkspaceRunnable op= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
@@ -139,7 +138,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 		}
 		return true;
 	}
-	
+
 	protected void warnAboutTypeCommentDeprecation() {
 		String key= IUIConstants.DIALOGSTORE_TYPECOMMENT_DEPRECATED;
 		if (OptionalMessageDialog.isDialogEnabled(key)) {
@@ -148,8 +147,8 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			if (!isOldWorkspace) {
 				OptionalMessageDialog.setDialogEnabled(key, false);
 			}
-			String title= NewWizardMessages.NewElementWizard_typecomment_deprecated_title; 
-			String message= NewWizardMessages.NewElementWizard_typecomment_deprecated_message; 
+			String title= NewWizardMessages.NewElementWizard_typecomment_deprecated_title;
+			String message= NewWizardMessages.NewElementWizard_typecomment_deprecated_message;
 			OptionalMessageDialog.open(key, getShell(), title, null, message, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
 		}
 	}
@@ -161,7 +160,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 		fWorkbench= workbench;
 		fSelection= currentSelection;
 	}
-	
+
 	public IStructuredSelection getSelection() {
 		return fSelection;
 	}

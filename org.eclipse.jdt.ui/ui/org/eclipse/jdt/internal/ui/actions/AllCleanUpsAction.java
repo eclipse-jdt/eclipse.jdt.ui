@@ -94,7 +94,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 			setText(ActionMessages.CleanUpAction_label);
 		}
 	}
-	
+
 	private void installPreferenceListener() {
 	    fPreferenceChangeListener= new IPreferenceChangeListener() {
 			public void preferenceChange(PreferenceChangeEvent event) {
@@ -105,7 +105,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 		};
 		new InstanceScope().getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceChangeListener);
     }
-	
+
 	public void dispose() {
 		if (fPreferenceChangeListener != null) {
 			new InstanceScope().getNode(JavaUI.ID_PLUGIN).removePreferenceChangeListener(fPreferenceChangeListener);

@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
@@ -55,7 +55,7 @@ public class NLSSourceModifier {
 
 		NLSSourceModifier sourceModification= new NLSSourceModifier(substitutionPattern, isEclipseNLS);
 
-		String message= Messages.format(NLSMessages.NLSSourceModifier_change_description, BasicElementLabels.getFileName(cu)); 
+		String message= Messages.format(NLSMessages.NLSSourceModifier_change_description, BasicElementLabels.getFileName(cu));
 
 		TextChange change= new CompilationUnitChange(message, cu);
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
@@ -125,30 +125,30 @@ public class NLSSourceModifier {
 			Region region= accessorClassRef.getRegion();
 			int len= accessorClassRef.getName().length();
 			String[] args= {BasicElementLabels.getJavaElementName(accessorClassRef.getName()), BasicElementLabels.getJavaElementName(substitution.getUpdatedAccessor())};
-			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args), 
-					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); // 
+			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args),
+					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); //
 		}
-		
+
 	}
 
 	private void replaceKey(NLSSubstitution substitution, TextChange change) {
 		Region region= substitution.getNLSElement().getPosition();
 		String[] args= {substitution.getInitialKey(), BasicElementLabels.getJavaElementName(substitution.getKey())};
-		
+
 		ReplaceEdit replaceEdit;
 		if (fIsEclipseNLS)
 			replaceEdit= new ReplaceEdit(region.getOffset(), region.getLength(), substitution.getKey());
 		else
-			replaceEdit= new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getKey()) + '\"'); // 
-		
-		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_key, args), replaceEdit); 
+			replaceEdit= new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getKey()) + '\"'); //
+
+		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_key, args), replaceEdit);
 	}
-	
+
 	private void replaceValue(NLSSubstitution substitution, TextChange change) {
 		Region region= substitution.getNLSElement().getPosition();
 		String[] args= {substitution.getInitialValue(), substitution.getValueNonEmpty()};
-		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_value, args), 
-				new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); // 
+		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_value, args),
+				new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //
 	}
 
 	private void deleteAccessor(NLSSubstitution substitution, TextChange change, ICompilationUnit cu) throws CoreException {
@@ -158,9 +158,9 @@ public class NLSSourceModifier {
 			String[] args= {substitution.getValueNonEmpty(), BasicElementLabels.getJavaElementName(substitution.getKey())};
 			String label= Messages.format(NLSMessages.NLSSourceModifier_remove_accessor, args);
 			String replaceString= '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"';
-			TextChangeCompatibility.addTextEdit(change, label, new ReplaceEdit(region.getOffset(), region.getLength(), replaceString));			
+			TextChangeCompatibility.addTextEdit(change, label, new ReplaceEdit(region.getOffset(), region.getLength(), replaceString));
 			if (fIsEclipseNLS && substitution.getState() != NLSSubstitution.INTERNALIZED) {
-				
+
 				Region position= substitution.getNLSElement().getPosition();
 				int lineStart= getLineStart(cu.getBuffer(), position.getOffset());
 				int lineEnd= getLineEnd(cu.getBuffer(), position.getOffset());
@@ -169,19 +169,19 @@ public class NLSSourceModifier {
 				buf.replace(region.getOffset() - lineStart, region.getOffset() + region.getLength() - lineStart, replaceString);
 				try {
 					NLSLine[] allLines= NLSScanner.scan(buf.toString());
-					
+
 					NLSLine nlsLine= allLines[0];
 					NLSElement element= findElement(nlsLine, position.getOffset() - lineStart - accessorClassRef.getName().length() - 1);
 					if (element == null || element.hasTag())
 						return;
-					
+
 					NLSElement[] elements= nlsLine.getElements();
 					int indexInElementList= Arrays.asList(elements).indexOf(element);
 					String editText= ' ' + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based
 					TextChangeCompatibility.addTextEdit(change, label, new InsertEdit(lineEnd, editText));
 
 				} catch (InvalidInputException e) {
-					
+
 				}
 			}
 		}
@@ -212,7 +212,7 @@ public class NLSSourceModifier {
 		}
 		return false;
 	}
-	
+
 	private static boolean isPositionInElement(NLSElement element, int position) {
 		Region elementPosition= element.getPosition();
 		return (elementPosition.getOffset() <= position && position <= elementPosition.getOffset() + elementPosition.getLength());
@@ -248,7 +248,7 @@ public class NLSSourceModifier {
 			case '\n' :
 				return "\\n";//$NON-NLS-1$
 			case '\f' :
-				return "\\f";//$NON-NLS-1$	
+				return "\\f";//$NON-NLS-1$
 			case '\r' :
 				return "\\r";//$NON-NLS-1$
 			case '\\' :
@@ -260,7 +260,7 @@ public class NLSSourceModifier {
 	private void deleteTag(NLSSubstitution substitution, TextChange change) {
 		Region textRegion= substitution.getNLSElement().getTagPosition();
 
-		TextChangeCompatibility.addTextEdit(change, NLSMessages.NLSSourceModifier_remove_tag, 
+		TextChangeCompatibility.addTextEdit(change, NLSMessages.NLSSourceModifier_remove_tag,
 				new DeleteEdit(textRegion.getOffset(), textRegion.getLength()));
 	}
 
@@ -279,15 +279,15 @@ public class NLSSourceModifier {
 	private void addNLS(NLSSubstitution sub, TextChange change, String accessorName) {
 		if (sub.getState() == NLSSubstitution.INTERNALIZED)
 			return;
-		
+
 		NLSElement element= sub.getNLSElement();
 
 		addAccessor(sub, change, accessorName);
-		
+
 		if (!fIsEclipseNLS || sub.getState() == NLSSubstitution.IGNORED) {
 			// Add $NON-NLS-n tag
-			String arg= sub.getState() == NLSSubstitution.EXTERNALIZED ? sub.getKey() : sub.getValueNonEmpty();		
-			String name= Messages.format(NLSMessages.NLSSourceModifier_add_tag, arg); 
+			String arg= sub.getState() == NLSSubstitution.EXTERNALIZED ? sub.getKey() : sub.getValueNonEmpty();
+			String name= Messages.format(NLSMessages.NLSSourceModifier_add_tag, arg);
 			TextChangeCompatibility.addTextEdit(change, name, createAddTagChange(element));
 		}
 	}
@@ -297,10 +297,10 @@ public class NLSSourceModifier {
 			NLSElement element= sub.getNLSElement();
 			Region position= element.getPosition();
 			String[] args= {sub.getValueNonEmpty(), BasicElementLabels.getJavaElementName(sub.getKey())};
-			String text= Messages.format(NLSMessages.NLSSourceModifier_externalize, args); 
+			String text= Messages.format(NLSMessages.NLSSourceModifier_externalize, args);
 
 			String resourceGetter= createResourceGetter(sub.getKey(), accessorName);
-			
+
 			TextEdit edit= new ReplaceEdit(position.getOffset(), position.getLength(), resourceGetter);
 			if (fIsEclipseNLS && element.getTagPosition() != null) {
 				MultiTextEdit multiEdit= new MultiTextEdit();
@@ -315,7 +315,7 @@ public class NLSSourceModifier {
 
 	private TextEdit createAddTagChange(NLSElement element) {
 		int offset= element.getTagPosition().getOffset(); //to be changed
-		String text= ' ' + element.getTagText(); 
+		String text= ' ' + element.getTagText();
 		return new InsertEdit(offset, text);
 	}
 
@@ -323,7 +323,7 @@ public class NLSSourceModifier {
 		StringBuffer buf= new StringBuffer();
 		buf.append(accessorName);
 		buf.append('.');
-		
+
 		if (fIsEclipseNLS)
 			buf.append(key);
 		else {

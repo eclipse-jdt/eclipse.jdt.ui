@@ -24,12 +24,12 @@ public class TypeSetEnvironment {
 	private final TypeEnvironment fTypeEnvironment;
 	private final TypeUniverseSet fUniverse;
 	private final EmptyTypeSet fEmptyTypeSet;
-	
+
 	private final Map/*<TType, SubTypesOfSingleton>*/ fSubtypesOfSingletons= new LinkedHashMap();//@perf
 	private final Map/*<TType, SubTypesSet>*/ fSubTypesSets= new LinkedHashMap();//@perf
 	private final Map/*<TType, SuperTypesOfSingleton>*/ fSuperTypesOfSingletons= new LinkedHashMap();//@perf
 	private final Map/*<TType, SuperTypesSet>*/ fSuperTypesSets= new LinkedHashMap();//@perf
-	
+
 	private int fgCommonExprHits= 0;
 	private int fgCommonExprMisses= 0;
 
@@ -59,7 +59,7 @@ public class TypeSetEnvironment {
 			return (SubTypesOfSingleton) fSubtypesOfSingletons.get(superType);
 		} else {
 			SubTypesOfSingleton s= new SubTypesOfSingleton(superType, this);
-	
+
 			fgCommonExprMisses++;
 			fSubtypesOfSingletons.put(superType, s);
 			return s;
@@ -72,7 +72,7 @@ public class TypeSetEnvironment {
 			return (SubTypesSet) fSubTypesSets.get(superTypes);
 		} else {
 			SubTypesSet s= new SubTypesSet(superTypes);
-	
+
 			fgCommonExprMisses++;
 			fSubTypesSets.put(superTypes, s);
 			return s;
@@ -85,7 +85,7 @@ public class TypeSetEnvironment {
 			return (SuperTypesOfSingleton) fSuperTypesOfSingletons.get(subType);
 		} else {
 			SuperTypesOfSingleton s= new SuperTypesOfSingleton(subType, this);
-	
+
 			fgCommonExprMisses++;
 			fSuperTypesOfSingletons.put(subType, s);
 			return s;
@@ -98,7 +98,7 @@ public class TypeSetEnvironment {
 			return (SuperTypesSet) fSuperTypesSets.get(subType);
 		} else {
 			SuperTypesSet s= new SuperTypesSet(subType, this);
-	
+
 			fgCommonExprMisses++;
 			fSuperTypesSets.put(subType, s);
 			return s;
@@ -110,7 +110,7 @@ public class TypeSetEnvironment {
 			return (SuperTypesSet) fSuperTypesSets.get(subTypes);
 		else {
 			SuperTypesSet s= new SuperTypesSet(subTypes, this);
-	
+
 			fSuperTypesSets.put(subTypes, s);
 			return s;
 		}

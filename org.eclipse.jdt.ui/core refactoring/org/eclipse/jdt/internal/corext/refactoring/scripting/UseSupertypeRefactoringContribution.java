@@ -28,11 +28,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcess
 
 /**
  * Refactoring contribution for the use supertype refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class UseSupertypeRefactoringContribution extends JavaRefactoringContribution {
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

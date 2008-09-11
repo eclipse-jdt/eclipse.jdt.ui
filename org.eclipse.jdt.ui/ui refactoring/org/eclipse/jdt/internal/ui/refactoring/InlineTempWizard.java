@@ -25,8 +25,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class InlineTempWizard extends RefactoringWizard {
 
 	public InlineTempWizard(InlineTempRefactoring ref) {
-		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE | NO_BACK_BUTTON_ON_STATUS_DIALOG); 
-		setDefaultPageTitle(RefactoringMessages.InlineTempWizard_defaultPageTitle); 
+		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE | NO_BACK_BUTTON_ON_STATUS_DIALOG);
+		setDefaultPageTitle(RefactoringMessages.InlineTempWizard_defaultPageTitle);
 	}
 
 	protected void addUserInputPages() {
@@ -36,20 +36,20 @@ public class InlineTempWizard extends RefactoringWizard {
 	public int getMessageLineWidthInChars() {
 		return 0;
 	}
-	
+
 	private static class InlineTempInputPage extends MessageWizardPage {
 
 		public static final String PAGE_NAME= "InlineTempInputPage"; //$NON-NLS-1$
-	
+
 		public InlineTempInputPage() {
 			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
 		}
-		
+
 		public void createControl(Composite parent) {
 			super.createControl(parent);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_TEMP_WIZARD_PAGE);
 		}
-		
+
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring) getRefactoring();
 			int occurrences= refactoring.getReferences().length;

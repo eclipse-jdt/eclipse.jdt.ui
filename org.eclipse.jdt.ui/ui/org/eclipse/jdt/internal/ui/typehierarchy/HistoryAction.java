@@ -31,33 +31,33 @@ public class HistoryAction extends Action {
 
 	private TypeHierarchyViewPart fViewPart;
 	private IJavaElement fElement;
-	
+
 	public HistoryAction(TypeHierarchyViewPart viewPart, IJavaElement element) {
         super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 		fViewPart= viewPart;
-		fElement= element;		
-		
+		fElement= element;
+
 		String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.ALL_DEFAULT);
 		setText(elementName);
 		setImageDescriptor(getImageDescriptor(element));
-				
-		setDescription(Messages.format(TypeHierarchyMessages.HistoryAction_description, elementName)); 
-		setToolTipText(Messages.format(TypeHierarchyMessages.HistoryAction_tooltip, elementName)); 
+
+		setDescription(Messages.format(TypeHierarchyMessages.HistoryAction_description, elementName));
+		setToolTipText(Messages.format(TypeHierarchyMessages.HistoryAction_tooltip, elementName));
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.HISTORY_ACTION);
 	}
-	
+
 	private ImageDescriptor getImageDescriptor(IJavaElement elem) {
 		JavaElementImageProvider imageProvider= new JavaElementImageProvider();
 		ImageDescriptor desc= imageProvider.getBaseImageDescriptor(elem, 0);
 		imageProvider.dispose();
 		return desc;
 	}
-	
+
 	/*
 	 * @see Action#run()
 	 */
 	public void run() {
 		fViewPart.gotoHistoryEntry(fElement);
 	}
-	
+
 }

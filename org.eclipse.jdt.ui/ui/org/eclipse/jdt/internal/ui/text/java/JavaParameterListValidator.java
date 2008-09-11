@@ -87,7 +87,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 	private int getCharCount(IDocument document, final int start, final int end, String increments, String decrements, boolean considerNesting) throws BadLocationException {
 
 		Assert.isTrue((increments.length() != 0 || decrements.length() != 0) && !increments.equals(decrements));
-		
+
 		final int NONE= 0;
 		final int BRACKET= 1;
 		final int BRACE= 2;
@@ -96,7 +96,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 
 		int nestingMode= NONE;
 		int nestingLevel= 0;
-		
+
 		int charCount= 0;
 		int offset= start;
 		while (offset < end) {
@@ -282,7 +282,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 			presentation.addStyleRange(new StyleRange(0, s.length(), null, null, SWT.NORMAL));
 			return true;
 		}
-		
+
 		int start= commas[fCurrentParameter] + 1;
 		int end= commas[fCurrentParameter + 1];
 		if (start > 0)
@@ -296,7 +296,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 
 		return true;
 	}
-	
+
 	private int[] computeCommaPositions(String code) {
 		final int length= code.length();
 	    int pos= 0;
@@ -321,7 +321,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 				pos++;
 		}
 		positions.add(new Integer(length));
-		
+
 		int[] fields= new int[positions.size()];
 		for (int i= 0; i < fields.length; i++)
 	        fields[i]= ((Integer) positions.get(i)).intValue();

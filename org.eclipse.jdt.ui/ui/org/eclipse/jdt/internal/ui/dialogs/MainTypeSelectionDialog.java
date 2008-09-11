@@ -10,24 +10,28 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
- 
+
 import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.TwoPaneElementSelector;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 
 /**
  * A dialog to select a type from a list of types. The dialog allows
@@ -38,28 +42,28 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
 	private int fStyle;
-	
+
 	private static class PackageRenderer extends JavaElementLabelProvider {
 		public PackageRenderer() {
-			super(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);	
+			super(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);
 		}
 
 		public Image getImage(Object element) {
 			return super.getImage(((IType)element).getPackageFragment());
 		}
-		
+
 		public String getText(Object element) {
 			return super.getText(((IType)element).getPackageFragment());
 		}
 	}
-	
+
 	/**
 	 * Constructor.
 	 */
 	public MainTypeSelectionDialog(Shell shell, IRunnableContext context,
 		IJavaSearchScope scope, int style)
 	{
-		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
+		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS),
 			new PackageRenderer());
 
 		Assert.isNotNull(context);
@@ -69,7 +73,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		fScope= scope;
 		fStyle= style;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
@@ -89,12 +93,12 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.MainTypeSelectionDialog_errorTitle, e.getMessage()); 
+			ExceptionHandler.handle(e, JavaUIMessages.MainTypeSelectionDialog_errorTitle, e.getMessage());
 			return CANCEL;
 		}
-		
+
 		setElements(types);
 		return super.open();
 	}
-	
+
 }

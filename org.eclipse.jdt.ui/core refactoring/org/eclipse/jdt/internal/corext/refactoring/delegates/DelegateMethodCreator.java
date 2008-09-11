@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * Delegate creator for static and non-static methods.
- * 
+ *
  * @since 3.2
  */
 public class DelegateMethodCreator extends DelegateCreator {
@@ -52,8 +52,8 @@ public class DelegateMethodCreator extends DelegateCreator {
 
 		if (getNewElementName() == null)
 			setNewElementName(((MethodDeclaration) getDeclaration()).getName().getIdentifier());
-		
-		setInsertBefore(true); 
+
+		setInsertBefore(true);
 	}
 
 	protected ASTNode createBody(BodyDeclaration bd) throws JavaModelException {
@@ -99,7 +99,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 
 	/**
 	 * @return the javadoc reference to the old method in the javadoc comment.
-	 * 		   May be null if no comment was created. 
+	 * 		   May be null if no comment was created.
 	 */
 	public MethodRef getJavadocReference() {
 		return fDocMethodReference;
@@ -108,7 +108,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 	/**
 	 * Creates the corresponding statement for the method invocation, based on
 	 * the return type.
-	 * 
+	 *
 	 * @param declaration the method declaration where the invocation statement
 	 *            is inserted
 	 * @param invocation the method invocation being encapsulated by the
@@ -195,7 +195,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 
 	/**
 	 * Creates a new expression statement for the method invocation.
-	 * 
+	 *
 	 * @param invocation the method invocation
 	 * @return the corresponding statement
 	 */
@@ -206,7 +206,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 
 	/**
 	 * Creates a new return statement for the method invocation.
-	 * 
+	 *
 	 * @param invocation the method invocation to create a return statement for
 	 * @return the corresponding statement
 	 */

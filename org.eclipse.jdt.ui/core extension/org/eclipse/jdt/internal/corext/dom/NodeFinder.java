@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
 /**
  * For a give range finds the node covered and the node covering.
- * 
+ *
  * @since		2.1
  */
 public class NodeFinder extends GenericVisitor {
@@ -37,13 +37,13 @@ public class NodeFinder extends GenericVisitor {
 	 *       start or end position matches <code>start</code>.</li>
 	 *   <li>otherwise <code>null</code> is returned.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param root the root node from which the search starts
 	 * @param start the start offset
 	 * @param length the length
-	 * 
+	 *
 	 * @return the result node
-	 * 
+	 *
 	 * @since		2.1
 	 */
 	public static ASTNode perform(ASTNode root, int start, int length) {
@@ -55,11 +55,11 @@ public class NodeFinder extends GenericVisitor {
 		}
 		return result;
 	}
-	
+
 	public static ASTNode perform(ASTNode root, ISourceRange range) {
 		return perform(root, range.getOffset(), range.getLength());
 	}
-	
+
 	/**
 	 * A visitor that maps a selection to a given ASTNode. The result node is
 	 * determined as follows:
@@ -74,15 +74,15 @@ public class NodeFinder extends GenericVisitor {
 	 *       start or end position matches <code>start</code>.</li>
 	 *   <li>otherwise <code>null</code> is returned.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param root the root node from which the search starts
 	 * @param start the start offset
 	 * @param length the length
 	 * @param source the source of the compilation unit
-	 * 
+	 *
 	 * @return the result node
 	 * @throws JavaModelException if an error occurs in the Java model
-	 * 
+	 *
 	 * @since		3.0
 	 */
 	public static ASTNode perform(ASTNode root, int start, int length, ITypeRoot source) throws JavaModelException {
@@ -117,10 +117,10 @@ public class NodeFinder extends GenericVisitor {
 
 	private int fStart;
 	private int fEnd;
-	
+
 	private ASTNode fCoveringNode;
 	private ASTNode fCoveredNode;
-	
+
 	public NodeFinder(int offset, int length) {
 		super(true); // include Javadoc tags
 		fStart= offset;
@@ -165,5 +165,5 @@ public class NodeFinder extends GenericVisitor {
 	public ASTNode getCoveringNode() {
 		return fCoveringNode;
 	}
-	
+
 }

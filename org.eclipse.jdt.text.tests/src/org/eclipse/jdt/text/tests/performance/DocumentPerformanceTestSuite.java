@@ -22,7 +22,7 @@ public class DocumentPerformanceTestSuite extends TestSuite {
 	public static Test suite() {
 		return new PerformanceTestSetup(new DocumentPerformanceTestSuite());
 	}
-	
+
 	public DocumentPerformanceTestSuite() {
 		addTest(DocumentPerformanceTest.suite());
 		addTest(GapTextStorePerformanceTest.suite());

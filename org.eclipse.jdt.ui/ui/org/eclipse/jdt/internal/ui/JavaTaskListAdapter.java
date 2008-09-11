@@ -28,8 +28,8 @@ public class JavaTaskListAdapter implements ITaskListResourceAdapter {
 		IJavaElement java = (IJavaElement) element;
 		IResource resource= java.getResource();
 		if (resource != null)
-			return resource; 
-		
+			return resource;
+
 		ICompilationUnit cu= (ICompilationUnit) java.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null) {
 			return cu.getPrimary().getResource();

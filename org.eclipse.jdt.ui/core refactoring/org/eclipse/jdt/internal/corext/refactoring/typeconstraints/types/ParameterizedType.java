@@ -21,7 +21,7 @@ public final class ParameterizedType extends HierarchyType {
 
 	private GenericType fTypeDeclaration;
 	private TType[] fTypeArguments;
-	
+
 	protected ParameterizedType(TypeEnvironment environment) {
 		super(environment);
 	}
@@ -37,7 +37,7 @@ public final class ParameterizedType extends HierarchyType {
 			fTypeArguments[i]= environment.create(typeArguments[i]);
 		}
 	}
-	
+
 	public int getKind() {
 		return PARAMETERIZED_TYPE;
 	}
@@ -45,15 +45,15 @@ public final class ParameterizedType extends HierarchyType {
 	public TType getTypeDeclaration() {
 		return fTypeDeclaration;
 	}
-	
+
 	public TType getErasure() {
 		return fTypeDeclaration;
 	}
-	
+
 	public TType[] getTypeArguments() {
 		return (TType[]) fTypeArguments.clone();
 	}
-	
+
 	public boolean doEquals(TType type) {
 		ParameterizedType other= (ParameterizedType)type;
 		if (! getBindingKey().equals(other.getBindingKey()))
@@ -62,37 +62,37 @@ public final class ParameterizedType extends HierarchyType {
 			return false;
 		return true;
 	}
-	
+
 	public int hashCode() {
 		return getBindingKey().hashCode();
 	}
-	
+
 	protected boolean doCanAssignTo(TType lhs) {
 		int targetType= lhs.getKind();
 		switch (targetType) {
-			case NULL_TYPE: return false;  
+			case NULL_TYPE: return false;
 			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE: return false;
-			
+
 			case ARRAY_TYPE: return false;
-			
-			case STANDARD_TYPE: return canAssignToStandardType((StandardType)lhs); 
+
+			case STANDARD_TYPE: return canAssignToStandardType((StandardType)lhs);
 			case GENERIC_TYPE: return false;
 			case PARAMETERIZED_TYPE: return canAssignToParameterizedType((ParameterizedType)lhs);
 			case RAW_TYPE: return canAssignToRawType((RawType)lhs);
-			
+
 			case UNBOUND_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE:
-			case EXTENDS_WILDCARD_TYPE: 
+			case EXTENDS_WILDCARD_TYPE:
 				return ((WildcardType)lhs).checkAssignmentBound(this);
-				
+
 			case TYPE_VARIABLE: return false;
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
 		}
 		return false;
 	}
-	
+
 	protected boolean isTypeEquivalentTo(TType other) {
 		int otherElementType= other.getKind();
 		if (otherElementType == RAW_TYPE || otherElementType == GENERIC_TYPE)
@@ -103,7 +103,7 @@ public final class ParameterizedType extends HierarchyType {
 	private boolean canAssignToRawType(RawType target) {
 		return fTypeDeclaration.isSubType(target.getHierarchyType());
 	}
-	
+
 	private boolean canAssignToParameterizedType(ParameterizedType target) {
 		GenericType targetDeclaration= target.fTypeDeclaration;
 		ParameterizedType sameSourceType= findSameDeclaration(targetDeclaration);
@@ -119,7 +119,7 @@ public final class ParameterizedType extends HierarchyType {
 		}
 		return true;
 	}
-	
+
 	private ParameterizedType findSameDeclaration(GenericType targetDeclaration) {
 		if (fTypeDeclaration.equals(targetDeclaration))
 			return this;
@@ -141,7 +141,7 @@ public final class ParameterizedType extends HierarchyType {
 		}
 		return null;
 	}
-	
+
 	public String getName() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getElementName());
 		result.append("<"); //$NON-NLS-1$
@@ -153,7 +153,7 @@ public final class ParameterizedType extends HierarchyType {
 		result.append(">"); //$NON-NLS-1$
 		return result.toString();
 	}
-	
+
 	protected String getPlainPrettySignature() {
 		StringBuffer result= new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
 		result.append("<"); //$NON-NLS-1$

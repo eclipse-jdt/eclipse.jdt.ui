@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ISourceRange;

@@ -30,28 +30,28 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 /**
  * Extracts an expression into a new local variable and replaces all occurrences of
  * the expression with the local variable.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ExtractTempAction extends SelectionDispatchAction {
 
 	private final JavaEditor fEditor;
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public ExtractTempAction(JavaEditor editor) {
 		super(editor.getEditorSite());
-		setText(RefactoringMessages.ExtractTempAction_label); 
+		setText(RefactoringMessages.ExtractTempAction_label);
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_TEMP_ACTION);
@@ -59,15 +59,15 @@ public class ExtractTempAction extends SelectionDispatchAction {
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 	}
-	
+
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection the Java text selection (internal type)
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
@@ -76,11 +76,11 @@ public class ExtractTempAction extends SelectionDispatchAction {
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
-	 */		
+	 */
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
 		ExtractTempRefactoring refactoring= new ExtractTempRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-		new RefactoringStarter().activate(new ExtractTempWizard(refactoring), getShell(), RefactoringMessages.ExtractTempAction_extract_temp, RefactoringSaveHelper.SAVE_NOTHING);	
+		new RefactoringStarter().activate(new ExtractTempWizard(refactoring), getShell(), RefactoringMessages.ExtractTempAction_extract_temp, RefactoringSaveHelper.SAVE_NOTHING);
 	}
 }

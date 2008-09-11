@@ -17,16 +17,16 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 
 public class ReorgDestinationFactory {
-	
+
 	private static class Destination implements IReorgDestination {
-		
+
 		private final Object fDestination;
 		private final int fLocation;
 
 		public Destination(Object destination, int location) {
 			Assert.isNotNull(destination);
 			Assert.isLegal(location == LOCATION_AFTER || location == LOCATION_BEFORE || location == LOCATION_ON);
-			
+
 			fDestination= destination;
 			fLocation= location;
 		}
@@ -44,11 +44,11 @@ public class ReorgDestinationFactory {
 		public int getLocation() {
 			return fLocation;
 		}
-		
+
 	}
-	
+
 	static final class ResourceDestination extends Destination {
-		
+
 		private ResourceDestination(IResource destination, int location) {
 			super(destination, location);
 		}
@@ -56,9 +56,9 @@ public class ReorgDestinationFactory {
 		public IResource getResource() {
 			return (IResource) getDestination();
 		}
-		
+
 	}
-	
+
 	static final class JavaElementDestination extends Destination {
 
 		private JavaElementDestination(IJavaElement destination, int location) {
@@ -68,9 +68,9 @@ public class ReorgDestinationFactory {
 		public IJavaElement getJavaElement() {
 			return (IJavaElement) getDestination();
 		}
-		
+
 	}
-	
+
 	/**
 	 * Wrap the given object into a destination
 	 * @param destination the object to wrap
@@ -79,14 +79,14 @@ public class ReorgDestinationFactory {
 	public static IReorgDestination createDestination(Object destination) {
 		return createDestination(destination, IReorgDestination.LOCATION_ON);
 	}
-	
+
 	public static IReorgDestination createDestination(Object destination, int location) {
 		if (destination instanceof IJavaElement) {
 			return new JavaElementDestination((IJavaElement) destination, location);
 		} if (destination instanceof IResource) {
 			return new ResourceDestination((IResource) destination, location);
 		}
-		
+
 		return null;
 	}
 

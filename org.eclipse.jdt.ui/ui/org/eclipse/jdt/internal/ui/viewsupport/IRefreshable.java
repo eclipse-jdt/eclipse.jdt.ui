@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 public interface IRefreshable {
-	
+
 	/**
 	 * Refreshes the view for the elements in the selection
-	 * 
+	 *
 	 * @param selection the elements to refresh
 	 */
 	public void refresh(IStructuredSelection selection);

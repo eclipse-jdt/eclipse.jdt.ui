@@ -50,50 +50,50 @@ import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
 
 /**
- * Viewer comparator for Java elements. Ordered by element category, then by element name. 
+ * Viewer comparator for Java elements. Ordered by element category, then by element name.
  * Package fragment roots are sorted as ordered on the classpath.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.3
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaElementComparator extends ViewerComparator {
-	
+
 	private static final int PROJECTS= 1;
 	private static final int PACKAGEFRAGMENTROOTS= 2;
 	private static final int PACKAGEFRAGMENT= 3;
 
 	private static final int COMPILATIONUNITS= 4;
 	private static final int CLASSFILES= 5;
-	
+
 	private static final int RESOURCEFOLDERS= 7;
 	private static final int RESOURCES= 8;
-	
+
 	private static final int PACKAGE_DECL=	10;
 	private static final int IMPORT_CONTAINER= 11;
 	private static final int IMPORT_DECLARATION= 12;
-	
+
 	// Includes all categories ordered using the OutlineSortOrderPage:
 	// types, initializers, methods & fields
 	private static final int MEMBERSOFFSET= 15;
-	
+
 	private static final int JAVAELEMENTS= 50;
 	private static final int OTHERS= 51;
-	
+
 	private MembersOrderPreferenceCache fMemberOrderCache;
-	
+
 	/**
 	 * Constructor.
 	 */
-	public JavaElementComparator() {	
+	public JavaElementComparator() {
 		super(null); // delay initialization of collator
 		fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerComparator#category(java.lang.Object)
 	 */
@@ -175,12 +175,12 @@ public class JavaElementComparator extends ViewerComparator {
 		}
 		return OTHERS;
 	}
-	
+
 	private int getMemberCategory(int kind) {
 		int offset= fMemberOrderCache.getCategoryIndex(kind);
 		return offset + MEMBERSOFFSET;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
@@ -209,7 +209,7 @@ public class JavaElementComparator extends ViewerComparator {
 				}
 			}
 		}
-		
+
 		if (cat1 != cat2)
 			return cat1 - cat2;
 
@@ -222,7 +222,7 @@ public class JavaElementComparator extends ViewerComparator {
 			return 0; // can't compare
 		}
 		// only java elements from this point
-		
+
 		if (e1 instanceof IMember) {
 			if (fMemberOrderCache.isSortByVisibility()) {
 				try {
@@ -236,10 +236,10 @@ public class JavaElementComparator extends ViewerComparator {
 				}
 			}
 		}
-		
+
 		String name1= getElementName(e1);
 		String name2= getElementName(e2);
-		
+
 		if (e1 instanceof IType) { // handle anonymous types
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
@@ -255,12 +255,12 @@ public class JavaElementComparator extends ViewerComparator {
 				return -1;
 			}
 		}
-				
+
 		int cmp= getComparator().compare(name1, name2);
 		if (cmp != 0) {
 			return cmp;
 		}
-		
+
 		if (e1 instanceof IMethod) {
 			String[] params1= ((IMethod) e1).getParameterTypes();
 			String[] params2= ((IMethod) e2).getParameterTypes();
@@ -275,7 +275,7 @@ public class JavaElementComparator extends ViewerComparator {
 		}
 		return 0;
 	}
-	
+
 	private IPackageFragmentRoot getPackageFragmentRoot(Object element) {
 		if (element instanceof PackageFragmentRootContainer) {
 			// return first package fragment root from the container
@@ -288,7 +288,7 @@ public class JavaElementComparator extends ViewerComparator {
 		}
 		return JavaModelUtil.getPackageFragmentRoot((IJavaElement)element);
 	}
-	
+
 	private String getNonJavaElementLabel(Viewer viewer, Object element) {
 		// try to use the workbench adapter for non - java resources or if not available, use the viewers label provider
 		if (element instanceof IResource) {
@@ -311,7 +311,7 @@ public class JavaElementComparator extends ViewerComparator {
 		}
 		return null;
 	}
-			
+
 	private int getClassPathIndex(IPackageFragmentRoot root) {
 		try {
 			IPath rootPath= root.getPath();
@@ -326,21 +326,21 @@ public class JavaElementComparator extends ViewerComparator {
 
 		return Integer.MAX_VALUE;
 	}
-		
+
 	private boolean needsClasspathComparision(Object e1, int cat1, Object e2, int cat2) {
 		if ((cat1 == PACKAGEFRAGMENTROOTS && cat2 == PACKAGEFRAGMENTROOTS) ||
-			(cat1 == PACKAGEFRAGMENT && 
-				((IPackageFragment)e1).getParent().getResource() instanceof IProject && 
+			(cat1 == PACKAGEFRAGMENT &&
+				((IPackageFragment)e1).getParent().getResource() instanceof IProject &&
 				cat2 == PACKAGEFRAGMENTROOTS) ||
 			(cat1 == PACKAGEFRAGMENTROOTS &&
-				cat2 == PACKAGEFRAGMENT && 
+				cat2 == PACKAGEFRAGMENT &&
 				((IPackageFragment)e2).getParent().getResource() instanceof IProject)) {
 			IJavaProject p1= getJavaProject(e1);
 			return p1 != null && p1.equals(getJavaProject(e2));
 		}
 		return false;
 	}
-	
+
 	private IJavaProject getJavaProject(Object element) {
 		if (element instanceof IJavaElement) {
 			return ((IJavaElement)element).getJavaProject();
@@ -349,7 +349,7 @@ public class JavaElementComparator extends ViewerComparator {
 		}
 		return null;
 	}
-	
+
 	private String getElementName(Object element) {
 		if (element instanceof IJavaElement) {
 			return ((IJavaElement)element).getElementName();

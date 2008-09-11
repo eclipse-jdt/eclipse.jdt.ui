@@ -28,6 +28,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -48,15 +52,11 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 /**
  * Create an ANT script for a runnable JAR.
- * The script is generated based on the classpath of the 
- * selected launch-configuration. 
- * 
+ * The script is generated based on the classpath of the
+ * selected launch-configuration.
+ *
  * @since 3.4
  */
 public class FatJarAntExporter {
@@ -82,8 +82,8 @@ public class FatJarAntExporter {
 	 * Create an instance of the ANT exporter. An ANT exporter can generate an ANT script
 	 * at the given ant script location for the given launch configuration
 	 * @param antScriptLocation the location of the ANT script to generate
-	 * @param jarLocation the location of the jar file which the ANT script will generate  
-	 * @param launchConfiguration the launch configuration to generate a ANT script for 
+	 * @param jarLocation the location of the jar file which the ANT script will generate
+	 * @param launchConfiguration the launch configuration to generate a ANT script for
 	 */
 	public FatJarAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
 		fLaunchConfiguration= launchConfiguration;
@@ -94,29 +94,29 @@ public class FatJarAntExporter {
 	/**
 	 * Create the ANT script based on the information
 	 * given in the constructor.
-	 * 
+	 *
 	 * @param status to report warnings to
 	 * @throws CoreException if something went wrong while generating the ant script
 	 */
 	public void run(MultiStatus status) throws CoreException {
 		try {
-			
+
 			IPath[] classpath= getClasspath(fLaunchConfiguration);
 			String mainClass= getMainClass(fLaunchConfiguration, status);
 			String projectName= fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
-			
+
 			buildANTScript(new FileOutputStream(fAntScriptLocation.toFile()), projectName, fAbsJarfile, mainClass, convert(classpath));
-			
+
 		} catch (FileNotFoundException e) {
 			throw new CoreException(
-					new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 
+					new Status(IStatus.ERROR, JavaUI.ID_PLUGIN,
 							Messages.format(FatJarPackagerMessages.FatJarPackageWizard_antScript_error_readingOutputFile, new Object[] {
 									BasicElementLabels.getPathLabel(fAntScriptLocation, true), e.getLocalizedMessage() })
 							)
 					);
 		} catch (IOException e) {
 			throw new CoreException(
-					new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 
+					new Status(IStatus.ERROR, JavaUI.ID_PLUGIN,
 							Messages.format(FatJarPackagerMessages.FatJarPackageWizard_antScript_error_writingOutputFile, new Object[] {
 									BasicElementLabels.getPathLabel(fAntScriptLocation, true), e.getLocalizedMessage() })
 							)
@@ -174,19 +174,19 @@ public class FatJarAntExporter {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
 	/**
 	 * Create an ANT script to outputStream.
-	 * 
+	 *
 	 * @param outputStream to write ANT script to
-	 * @param projectName base project for informational purpose only 
+	 * @param projectName base project for informational purpose only
 	 * @param absJarfile path to the destination
 	 * @param mainClass the optional main-class
 	 * @param sourceInfos array of sources
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void buildANTScript(OutputStream outputStream, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws IOException {
 
@@ -219,7 +219,7 @@ public class FatJarAntExporter {
 		project.appendChild(target);
 
 		Element jar= document.createElement("jar"); //$NON-NLS-1$
-		jar.setAttribute("destfile", absJarname); //$NON-NLS-1$s 
+		jar.setAttribute("destfile", absJarname); //$NON-NLS-1$s
 		jar.setAttribute("filesetmanifest", "mergewithoutmain"); //$NON-NLS-1$ //$NON-NLS-2$
 		target.appendChild(jar);
 
@@ -227,18 +227,18 @@ public class FatJarAntExporter {
 		jar.appendChild(manifest);
 
 		Element attribute= document.createElement("attribute"); //$NON-NLS-1$
-		attribute.setAttribute("name", "Built-By"); //$NON-NLS-1$ //$NON-NLS-2$s 
-		attribute.setAttribute("value", "${user.name}"); //$NON-NLS-1$ //$NON-NLS-2$s 
+		attribute.setAttribute("name", "Built-By"); //$NON-NLS-1$ //$NON-NLS-2$s
+		attribute.setAttribute("value", "${user.name}"); //$NON-NLS-1$ //$NON-NLS-2$s
 		manifest.appendChild(attribute);
 
 		attribute= document.createElement("attribute"); //$NON-NLS-1$
-		attribute.setAttribute("name", "Main-Class"); //$NON-NLS-1$ //$NON-NLS-2$s 
-		attribute.setAttribute("value", mainClass); //$NON-NLS-1$ 
+		attribute.setAttribute("name", "Main-Class"); //$NON-NLS-1$ //$NON-NLS-2$s
+		attribute.setAttribute("value", mainClass); //$NON-NLS-1$
 		manifest.appendChild(attribute);
 
 		attribute= document.createElement("attribute"); //$NON-NLS-1$
-		attribute.setAttribute("name", "Class-Path"); //$NON-NLS-1$ //$NON-NLS-2$s 
-		attribute.setAttribute("value", "."); //$NON-NLS-1$ //$NON-NLS-2$ 
+		attribute.setAttribute("name", "Class-Path"); //$NON-NLS-1$ //$NON-NLS-2$s
+		attribute.setAttribute("value", "."); //$NON-NLS-1$ //$NON-NLS-2$
 		manifest.appendChild(attribute);
 
 		for (int i= 0; i < sourceInfos.length; i++) {

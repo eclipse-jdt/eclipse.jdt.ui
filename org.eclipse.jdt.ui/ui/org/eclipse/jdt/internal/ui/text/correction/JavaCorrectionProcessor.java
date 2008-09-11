@@ -38,11 +38,11 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.keys.IBindingService;
+
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
-
-import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.ltk.core.refactoring.NullChange;
 
@@ -168,11 +168,11 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	public JavaCorrectionProcessor(JavaCorrectionAssistant assistant) {
 		fAssistant= assistant;
 		fAssistant.addCompletionListener(new ICompletionListener() {
-		
+
 			public void assistSessionEnded(ContentAssistEvent event) {
 				fAssistant.setStatusLineVisible(false);
 			}
-		
+
 			public void assistSessionStarted(ContentAssistEvent event) {
 				fAssistant.setStatusLineVisible(true);
 				fAssistant.setStatusMessage(getJumpHintStatusLineMessage());
@@ -206,7 +206,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 				} else
 					return ""; //$NON-NLS-1$
 			}
-			
+
 			private String getQuickAssistBinding() {
 				final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 				return bindingSvc.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.QUICK_ASSIST);
@@ -220,19 +220,19 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
 		ISourceViewer viewer= quickAssistContext.getSourceViewer();
 		int documentOffset= quickAssistContext.getOffset();
-		
+
 		IEditorPart part= fAssistant.getEditor();
 
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(part.getEditorInput());
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(part.getEditorInput());
-		
+
 		int length= viewer != null ? viewer.getSelectedRange().y : 0;
 		AssistContext context= new AssistContext(cu, viewer, documentOffset, length);
 
 		Annotation[] annotations= fAssistant.getAnnotationsAtOffset();
-		
+
 		fErrorMessage= null;
-		
+
 		ICompletionProposal[] res= null;
 		if (model != null && annotations != null) {
 			ArrayList proposals= new ArrayList(10);
@@ -243,7 +243,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 				JavaPlugin.log(status);
 			}
 		}
-		
+
 		if (res == null || res.length == 0) {
 			return new ICompletionProposal[] { new ChangeCorrectionProposal(CorrectionMessages.NoCorrectionProposal_description, new NullChange(""), 0, null) }; //$NON-NLS-1$
 		}
@@ -255,7 +255,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 
 	public static IStatus collectProposals(IInvocationContext context, IAnnotationModel model, Annotation[] annotations, boolean addQuickFixes, boolean addQuickAssists, Collection proposals) {
 		ArrayList problems= new ArrayList();
-		
+
 		// collect problem locations and corrections from marker annotations
 		for (int i= 0; i < annotations.length; i++) {
 			Annotation curr= annotations[i];
@@ -271,7 +271,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 			}
 		}
 		MultiStatus resStatus= null;
-		
+
 		IProblemLocation[] problemLocations= (IProblemLocation[]) problems.toArray(new IProblemLocation[problems.size()]);
 		if (addQuickFixes) {
 			IStatus status= collectCorrections(context, problemLocations, proposals);
@@ -294,7 +294,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	private static ProblemLocation getProblemLocation(IJavaAnnotation javaAnnotation, IAnnotationModel model) {
 		int problemId= javaAnnotation.getId();
 		if (problemId != -1) {
@@ -363,7 +363,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 			fContext= context;
 			fProposals= proposals;
 		}
-		
+
 		public void setProblemLocations(IProblemLocation[] locations) {
 			fLocations= locations;
 		}
@@ -528,5 +528,5 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 			return hasAssists((IInvocationContext)invocationContext);
 		return false;
 	}
-	
+
 }

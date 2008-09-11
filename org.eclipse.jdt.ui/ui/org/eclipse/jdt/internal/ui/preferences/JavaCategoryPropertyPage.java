@@ -10,14 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferencePageContainer;
@@ -37,7 +38,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  * Top level node for Java property pages
  */
 public class JavaCategoryPropertyPage extends PropertyPage {
-	
+
 	private IProject fProject;
 
 	private final static String HREF_BUILDPATH= BuildPathsPropertyPage.PROP_ID;
@@ -51,7 +52,7 @@ public class JavaCategoryPropertyPage extends PropertyPage {
 	private final static String HREF_TEMPLATES= ""; // Code //$NON-NLS-1$
 	private final static String HREF_IMPORTORDER= ImportOrganizePreferencePage.PROP_ID;
 	private final static String HREF_BUILDING= JavaBuildPreferencePage.PROP_ID;
-	
+
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
@@ -65,15 +66,15 @@ public class JavaCategoryPropertyPage extends PropertyPage {
 	        		fProject.getName(), HREF_BUILDPATH, HREF_COMPILER, HREF_TODO, HREF_PSEVERITIES, HREF_JAVADOC, HREF_BUILDING,
 					HREF_CODESTYLE, HREF_FORMATTER, HREF_TEMPLATES, HREF_IMPORTORDER, HREF_JLOC
 	        };
-	        String msg= Messages.format(PreferencesMessages.JavaCategoryPropertyPage_text, args); 
-	        
+	        String msg= Messages.format(PreferencesMessages.JavaCategoryPropertyPage_text, args);
+
 	        FormText formText = toolkit.createFormText(composite, true);
 	        try {
 	            formText.setText(msg, true, false);
 	        } catch (SWTException e) {
 	            formText.setText(e.getMessage(), false, false);
 	        }
-	        
+
 	        formText.setBackground(null);
 	        formText.setLayoutData(new TableWrapData(TableWrapData.FILL_GRAB));
 	        formText.addHyperlinkListener(new HyperlinkAdapter() {
@@ -84,11 +85,11 @@ public class JavaCategoryPropertyPage extends PropertyPage {
         } finally {
             toolkit.dispose();
         }
-        
+
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	protected void doLinkActivated(String string) {
 		if (string.length() > 0) {
 			IPreferencePageContainer container= getContainer();

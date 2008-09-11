@@ -26,15 +26,15 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class JavaElementLine {
-	
-	
+
+
 	private final ITypeRoot fElement;
 	private final String fLineContents;
 	private final int fLineNumber;
 	private final int fLineStartOffset;
-	
+
 	private int fFlags;
-	
+
 	/**
 	 * @param element either an ICompilationUnit or an IClassFile
 	 * @param lineNumber the line number
@@ -44,21 +44,21 @@ public class JavaElementLine {
 	public JavaElementLine(ITypeRoot element, int lineNumber, int lineStartOffset) throws CoreException {
 		fElement= element;
 		fFlags= 0;
-		
+
 		IBuffer buffer= element.getBuffer();
 		if (buffer == null) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format( SearchMessages.JavaElementLine_error_nobuffer, BasicElementLabels.getFileName(element))));
 		}
-		
+
 		int length= buffer.getLength();
 		int i= lineStartOffset;
-		
+
 		char ch= buffer.getChar(i);
 		while (lineStartOffset < length && IndentManipulation.isIndentChar(ch)) {
 			ch= buffer.getChar(++i);
 		}
 		fLineStartOffset= i;
-		
+
 		StringBuffer buf= new StringBuffer();
 
 		while (i < length && !IndentManipulation.isLineDelimiterChar(ch)) {
@@ -84,15 +84,15 @@ public class JavaElementLine {
 	public ITypeRoot getJavaElement() {
 		return fElement;
 	}
-	
+
 	public int getLine() {
 		return fLineNumber;
 	}
-	
+
 	public String getLineContents() {
 		return fLineContents;
 	}
-	
+
 	public int getLineStartOffset() {
 		return fLineStartOffset;
 	}

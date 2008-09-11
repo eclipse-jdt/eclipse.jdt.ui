@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefac
 
 /**
  * Refactoring contribution for the self encapsulate field refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class SelfEncapsulateRefactoringContribution extends JavaRefactoringContribution {

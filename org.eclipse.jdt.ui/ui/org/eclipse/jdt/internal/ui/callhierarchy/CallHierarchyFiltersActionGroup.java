@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -35,11 +35,11 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
 
     class ShowFilterDialogAction extends Action {
         ShowFilterDialogAction() {
-            setText(CallHierarchyMessages.ShowFilterDialogAction_text); 
+            setText(CallHierarchyMessages.ShowFilterDialogAction_text);
             setImageDescriptor(JavaPluginImages.DESC_ELCL_FILTER);
 			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_FILTER);
         }
-        
+
         public void run() {
             openDialog();
         }
@@ -49,7 +49,7 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
 
     /**
      * Creates a new <code>CustomFiltersActionGroup</code>.
-     * 
+     *
      * @param part      the view part that owns this action group
      * @param viewer    the viewer to be filtered
      */
@@ -77,13 +77,13 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     public void dispose() {
         super.dispose();
     }
-    
+
     // ---------- dialog related code ----------
 
     private void openDialog() {
         FiltersDialog dialog= new FiltersDialog(
             fPart.getViewSite().getShell());
-        
+
         dialog.open();
     }
 }

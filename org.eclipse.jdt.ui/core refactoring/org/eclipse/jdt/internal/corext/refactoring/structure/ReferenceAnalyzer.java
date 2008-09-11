@@ -32,15 +32,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * Accepts <code>CompilationUnit</code>s.
  */
 /* package */ class ReferenceAnalyzer extends MoveStaticMemberAnalyzer {
-	
+
 	public ReferenceAnalyzer(CompilationUnitRewrite cuRewrite, IBinding[] members, ITypeBinding target, ITypeBinding source) {
 		super(cuRewrite, members, source, target);
 	}
-	
+
 	public boolean needsTargetImport() {
 		return fNeedsImport;
 	}
-	
+
 	//---- Moved members are handled by the MovedMemberAnalyzer --------------
 
 	public boolean visit(TypeDeclaration node) {
@@ -52,13 +52,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(VariableDeclarationFragment node) {
 		if (isMovedMember(node.resolveBinding()))
 			return false;
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(FieldDeclaration node) {
 		//see bug 42383: multiple VariableDeclarationFragments not supported:
 		VariableDeclarationFragment singleFragment= (VariableDeclarationFragment) node.fragments().get(0);
@@ -66,27 +66,27 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 			return false; // don't update javadoc of moved field here
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(MethodDeclaration node) {
 		if (isMovedMember(node.resolveBinding()))
 			return false;
 		return super.visit(node);
 	}
-	
-	
+
+
 	//---- types and fields --------------------------
-		
+
 	public boolean visit(SimpleName node) {
 		if (! node.isDeclaration() && isMovedMember(node.resolveBinding()) && ! isProcessed(node))
 			rewrite(node, fTarget);
 		return false;
 	}
-	
+
 	public boolean visit(QualifiedName node) {
 		if (isMovedMember(node.resolveBinding())) {
 			if (node.getParent() instanceof ImportDeclaration) {
 				ITypeBinding typeBinding= node.resolveTypeBinding();
-				if (typeBinding != null) 
+				if (typeBinding != null)
 				 	fCuRewrite.getImportRewrite().removeImport(typeBinding.getQualifiedName());
 				String imp= fCuRewrite.getImportRewrite().addImport(fTarget.getQualifiedName() + '.' + node.getName().getIdentifier());
 				fCuRewrite.getImportRemover().registerAddedImport(imp);
@@ -98,15 +98,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 			return super.visit(node);
 		}
 	}
-	
+
 	public boolean visit(FieldAccess node) {
 		if (isMovedMember(node.resolveFieldBinding()))
 			rewrite(node, fTarget);
 		return super.visit(node);
 	}
-	
+
 	//---- method invocations ----------------------------------
-	
+
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding binding= node.resolveMethodBinding();
 		if (binding != null) {
@@ -116,15 +116,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 		}
 		return super.visit(node);
 	}
-	
+
 	//---- javadoc references ----------------------------------
-	
+
 	public boolean visit(MemberRef node) {
 		if (isMovedMember(node.resolveBinding()))
 			rewrite(node, fTarget);
 		return false;
 	}
-	
+
 	public boolean visit(MethodRef node) {
 		if (isMovedMember(node.resolveBinding()))
 			rewrite(node, fTarget);

@@ -14,21 +14,21 @@ package org.eclipse.jdt.internal.ui.refactoring.code;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-
 public class ExtractMethodWizard extends RefactoringWizard {
-	
+
 	/* package */ static final String DIALOG_SETTING_SECTION= "ExtractMethodWizard"; //$NON-NLS-1$
-	
+
 	public ExtractMethodWizard(ExtractMethodRefactoring ref){
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
-		setDefaultPageTitle(RefactoringMessages.ExtractMethodWizard_extract_method); 
+		setDefaultPageTitle(RefactoringMessages.ExtractMethodWizard_extract_method);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 
@@ -39,9 +39,9 @@ public class ExtractMethodWizard extends RefactoringWizard {
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return null;
-		}	
+		}
 	}
-		
+
 	protected void addUserInputPages(){
 		addPage(new ExtractMethodInputPage());
 	}

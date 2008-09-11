@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProc
 
 /**
  * Refactoring contribution for the change method signature refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ChangeMethodSignatureRefactoringContribution extends JavaRefactoringContribution {

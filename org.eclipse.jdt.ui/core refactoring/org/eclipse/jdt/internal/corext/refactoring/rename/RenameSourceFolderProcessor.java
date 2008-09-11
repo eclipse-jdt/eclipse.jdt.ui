@@ -50,10 +50,10 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
-	
+
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
-	
+
 	private IPackageFragmentRoot fSourceFolder;
 
 	/**
@@ -70,24 +70,24 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		this(null);
 		status.merge(initialize(arguments));
 	}
-	
+
 
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_SOURCE_FOLDER_PROCESSOR;
 	}
-	
+
 	public boolean isApplicable() throws CoreException {
 		return RefactoringAvailabilityTester.isRenameAvailable(fSourceFolder);
 	}
-	
+
 	public String getProcessorName() {
 		return RefactoringCoreMessages.RenameSourceFolderRefactoring_rename;
 	}
-	
+
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fSourceFolder);
 	}
-	
+
 	public Object[] getElements() {
 		return new Object[] {fSourceFolder};
 	}
@@ -96,31 +96,31 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		IPackageFragmentRoot[] roots= fSourceFolder.getJavaProject().getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			if (roots[i].getElementName().equals(getNewElementName()))
-				return roots[i];	
+				return roots[i];
 		}
 		return null;
 	}
-	
+
 	public int getSaveMode() {
 		return RefactoringSaveHelper.SAVE_ALL;
 	}
-	
+
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fSourceFolder, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
-	
+
 	protected IFile[] getChangedFiles() throws CoreException {
 		return new IFile[0];
 	}
-	
+
 	//---- IRenameProcessor ----------------------------------------------
-	
+
 	public String getCurrentElementName() {
 		return fSourceFolder.getElementName();
 	}
-			
+
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return new RefactoringStatus();
 	}
@@ -128,30 +128,30 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		if (! newName.trim().equals(newName))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_blank); 
-		
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_blank);
+
 		IContainer c= 	fSourceFolder.getResource().getParent();
 		if (! c.getFullPath().isValidSegment(newName))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_invalid_name); 
-		
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_invalid_name);
+
 		RefactoringStatus result= RefactoringStatus.create(c.getWorkspace().validateName(newName, IResource.FOLDER));
 		if (result.hasFatalError())
-			return result;		
-				
-		result.merge(RefactoringStatus.create(c.getWorkspace().validatePath(createNewPath(newName), IResource.FOLDER)));		
+			return result;
+
+		result.merge(RefactoringStatus.create(c.getWorkspace().validatePath(createNewPath(newName), IResource.FOLDER)));
 		if (result.hasFatalError())
 			return result;
-			
+
 		IJavaProject project= fSourceFolder.getJavaProject();
 		IPath p= project.getProject().getFullPath().append(newName);
 		if (project.findPackageFragmentRoot(p) != null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_already_exists); 
-		
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_already_exists);
+
 		if (project.getProject().findMember(new Path(newName)) != null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_alread_exists); 
-		return result;		
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameSourceFolderRefactoring_alread_exists);
+		return result;
 	}
-	
+
 	private String createNewPath(String newName) {
 		return fSourceFolder.getPath().removeLastSegments(1).append(newName).toString();
 	}
@@ -162,9 +162,9 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
-		}		
+		}
 	}
-	
+
 	public boolean getUpdateReferences() {
 		return true;
 	}

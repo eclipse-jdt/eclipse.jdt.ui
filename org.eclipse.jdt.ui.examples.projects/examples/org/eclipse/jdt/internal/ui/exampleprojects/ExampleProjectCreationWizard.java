@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.ui.exampleprojects;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
+import org.osgi.framework.Bundle;
+
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -22,7 +24,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,7 +44,6 @@ import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
-import org.osgi.framework.Bundle;
 
 public class ExampleProjectCreationWizard extends Wizard implements INewWizard, IExecutableExtension {
 
@@ -51,10 +53,10 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	public ExampleProjectCreationWizard() {
 		super();
 		setDialogSettings(ExampleProjectsPlugin.getDefault().getDialogSettings());
-		setWindowTitle(ExampleProjectMessages.ExampleProjectCreationWizard_title);		 
+		setWindowTitle(ExampleProjectMessages.ExampleProjectCreationWizard_title);
 		setNeedsProgressMonitor(true);
 	}
-	
+
 	private void initializeDefaultPageImageDescriptor(IConfigurationElement pageConfigElement) {
 		String banner= pageConfigElement.getAttribute("banner"); //$NON-NLS-1$
 		if (banner != null) {
@@ -65,21 +67,21 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 
 	/*
 	 * @see Wizard#addPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
 		if (fPage != null) {
 			addPage(fPage);
 		}
 	}
-	
+
 	/*
 	 * @see Wizard#performFinish
-	 */		
+	 */
 	public boolean performFinish() {
 		if (fPage != null) {
 			ExampleProjectCreationOperation runnable= new ExampleProjectCreationOperation(fPage, new ImportOverwriteQuery());
-			
+
 			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 			try {
 				getContainer().run(false, true, op);
@@ -97,10 +99,10 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 		}
 		return true;
 	}
-	
+
 	private void handleException(Throwable target) {
-		String title= ExampleProjectMessages.ExampleProjectCreationWizard_op_error_title; 
-		String message= ExampleProjectMessages.ExampleProjectCreationWizard_op_error_message; 
+		String title= ExampleProjectMessages.ExampleProjectCreationWizard_op_error_title;
+		String message= ExampleProjectMessages.ExampleProjectCreationWizard_op_error_message;
 		if (target instanceof CoreException) {
 			IStatus status= ((CoreException)target).getStatus();
 			ErrorDialog.openError(getShell(), title, message, status);
@@ -110,7 +112,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 			ExampleProjectsPlugin.log(target);
 		}
 	}
-	
+
 	private void openResource(final IResource resource) {
 		if (resource.getType() != IResource.FILE) {
 			return;
@@ -133,8 +135,8 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 			});
 			BasicNewResourceWizard.selectAndReveal(resource, activePage.getWorkbenchWindow());
 		}
-	}	
-		
+	}
+
 	/*
 	 * Stores the configuration element for the wizard.  The config element will be used
 	 * in <code>performFinish</code> to set the result perspective.
@@ -150,22 +152,22 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 			initializeDefaultPageImageDescriptor(pageConfigElement);
 		}
 	}
-	
+
 	// overwrite dialog
-	
+
 	private class ImportOverwriteQuery implements IOverwriteQuery {
 		public String queryOverwrite(String file) {
 			String[] returnCodes= { YES, NO, ALL, CANCEL};
 			int returnVal= openDialog(file);
 			return returnVal < 0 ? CANCEL : returnCodes[returnVal];
-		}	
-		
+		}
+
 		private int openDialog(final String file) {
 			final int[] result= { IDialogConstants.CANCEL_ID };
 			getShell().getDisplay().syncExec(new Runnable() {
 				public void run() {
-					String title= ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_title; 
-					String msg= MessageFormat.format(ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_message, new Object[] {file}); 
+					String title= ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_title;
+					String msg= MessageFormat.format(ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_message, new Object[] {file});
 					String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
 					MessageDialog dialog= new MessageDialog(getShell(), title, null, msg, MessageDialog.QUESTION, options, 0);
 					result[0]= dialog.open();
@@ -180,5 +182,5 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
-	}		
+	}
 }

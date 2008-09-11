@@ -26,11 +26,11 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 	public TextSearchLabelProvider(AbstractTextSearchViewPage page) {
 		fPage= page;
 	}
-	
+
 	public AbstractTextSearchViewPage getPage() {
 		return fPage;
 	}
-			
+
 	protected final StyledString getColoredLabelWithCounts(Object element, StyledString coloredName) {
 		String name= coloredName.getString();
 		String decorated= getLabelWithCounts(element, name);
@@ -39,12 +39,12 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 		}
 		return coloredName;
 	}
-	
+
 	protected final String getLabelWithCounts(Object element, String elementName) {
 		int matchCount= fPage.getInput().getMatchCount(element);
 		if (matchCount < 2)
 			return elementName;
-		
+
 		return Messages.format(SearchMessages.TextSearchLabelProvider_matchCountFormat, new String[] { elementName, String.valueOf(matchCount)});
 	}
 }

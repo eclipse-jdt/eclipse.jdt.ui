@@ -25,7 +25,7 @@ public final class VariableVariable2 extends ConstraintVariable2 implements ISou
 
 	private final String fKey;
 	private ICompilationUnit fCompilationUnit;
-	
+
 	public VariableVariable2(TType type, IVariableBinding binding) {
 		super(type);
 		fKey= binding.getKey();
@@ -34,7 +34,7 @@ public final class VariableVariable2 extends ConstraintVariable2 implements ISou
 	public void setCompilationUnit(ICompilationUnit unit) {
 		fCompilationUnit= unit;
 	}
-	
+
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
@@ -58,7 +58,7 @@ public final class VariableVariable2 extends ConstraintVariable2 implements ISou
 			return true;
 		if (other.getClass() != VariableVariable2.class)
 			return false;
-		
+
 		return fKey.equals(((VariableVariable2) other).getKey());
 	}
 }

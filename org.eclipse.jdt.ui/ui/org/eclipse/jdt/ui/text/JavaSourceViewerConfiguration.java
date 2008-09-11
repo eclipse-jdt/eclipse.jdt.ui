@@ -13,10 +13,10 @@ package org.eclipse.jdt.ui.text;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -51,6 +51,7 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -109,7 +110,7 @@ import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration {
@@ -399,7 +400,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 			ContentAssistProcessor stringProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_STRING);
 			assistant.setContentAssistProcessor(stringProcessor, IJavaPartitions.JAVA_STRING);
-			
+
 			ContentAssistProcessor multiLineProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 			assistant.setContentAssistProcessor(multiLineProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
@@ -414,7 +415,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 					return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 				}
 			});
-			
+
 			return assistant;
 		}
 
@@ -499,7 +500,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		final int tabWidth= CodeFormatterUtil.getTabWidth(project);
 		final int indentWidth= CodeFormatterUtil.getIndentWidth(project);
 		boolean allowTabs= tabWidth <= indentWidth;
-		
+
 		String indentMode;
 		if (project == null)
 			indentMode= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
@@ -507,9 +508,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			indentMode= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
 
 		boolean useSpaces= JavaCore.SPACE.equals(indentMode) || DefaultCodeFormatterConstants.MIXED.equals(indentMode);
-		
+
 		Assert.isLegal(allowTabs || useSpaces);
-		
+
 		if (!allowTabs) {
 			char[] spaces= new char[indentWidth];
 			Arrays.fill(spaces, ' ');
@@ -523,7 +524,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	/**
 	 * Computes and returns the indent prefixes for space indentation
 	 * and the given <code>tabWidth</code>.
-	 * 
+	 *
 	 * @param tabWidth the display tab width
 	 * @return the indent prefixes
 	 * @see #getIndentPrefixes(ISourceViewer, String)
@@ -532,7 +533,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	private String[] getIndentPrefixesForSpaces(int tabWidth) {
 		String[] indentPrefixes= new String[tabWidth + 2];
 		indentPrefixes[0]= getStringWithSpaces(tabWidth);
-		
+
 		for (int i= 0; i < tabWidth; i++) {
 			String spaces= getStringWithSpaces(i);
 			if (i < tabWidth)
@@ -540,7 +541,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			else
 				indentPrefixes[i+1]= new String(spaces);
 		}
-		
+
 		indentPrefixes[tabWidth + 1]= ""; //$NON-NLS-1$
 
 		return indentPrefixes;
@@ -548,7 +549,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 	/**
 	 * Creates and returns a String with <code>count</code> spaces.
-	 * 
+	 *
 	 * @param count	the space count
 	 * @return the string with the spaces
 	 * @since 3.3
@@ -762,13 +763,13 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
 		InformationPresenter presenter= new InformationPresenter(getInformationPresenterControlCreator(sourceViewer));
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		
+
 		// Register information provider
 		IInformationProvider provider= new JavaInformationProvider(getEditor());
 		String[] contentTypes= getConfiguredContentTypes(sourceViewer);
 		for (int i= 0; i < contentTypes.length; i++)
 			presenter.setInformationProvider(provider, contentTypes[i]);
-		
+
 		// sizes: see org.eclipse.jface.text.TextViewer.TEXT_HOVER_*_CHARS
 		presenter.setSizeConstraints(100, 12, true, true);
 		return presenter;
@@ -827,11 +828,11 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @since 3.0
 	 */
 	public IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
-		
+
 		// Do not create hierarchy presenter if there's no CU.
 		if (getEditor() != null && getEditor().getEditorInput() != null && JavaUI.getEditorInputJavaElement(getEditor().getEditorInput()) == null)
 			return null;
-		
+
 		InformationPresenter presenter= new InformationPresenter(getHierarchyPresenterControlCreator());
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		presenter.setAnchor(AbstractInformationControlManager.ANCHOR_GLOBAL);

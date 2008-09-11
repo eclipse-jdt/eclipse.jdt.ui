@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * <code>CodeTemplates</code> gives access to the available code templates.
  * @since 3.0
- * @deprecated use {@link org.eclipse.jdt.internal.ui.JavaPlugin#getCodeTemplateStore()} instead 
+ * @deprecated use {@link org.eclipse.jdt.internal.ui.JavaPlugin#getCodeTemplateStore()} instead
  */
 public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java.TemplateSet {
 
@@ -42,17 +42,17 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 	public static CodeTemplates getInstance() {
 		if (fgTemplates == null)
 			fgTemplates= new CodeTemplates();
-		
+
 		return fgTemplates;
 	}
-	
+
 	private CodeTemplates() {
 		super("codetemplate", JavaPlugin.getDefault().getCodeTemplateContextRegistry()); //$NON-NLS-1$
 		create();
 	}
-	
+
 	private void create() {
-		
+
 		try {
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
@@ -64,33 +64,33 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 			clear();
 		}
 
-	}	
-	
+	}
+
 	/**
 	 * Resets the template set.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public void reset() throws CoreException {
 	}
 
 	/**
 	 * Resets the template set with the default templates.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public void restoreDefaults() throws CoreException {
 	}
 
 	/**
 	 * Saves the template set.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
-	public void save() throws CoreException {					
+	public void save() throws CoreException {
 	}
 
 	private static File getTemplateFile() {
 		IPath path= JavaPlugin.getDefault().getStateLocation();
 		path= path.append(TEMPLATE_FILE);
-		
+
 		return path.toFile();
 	}
 

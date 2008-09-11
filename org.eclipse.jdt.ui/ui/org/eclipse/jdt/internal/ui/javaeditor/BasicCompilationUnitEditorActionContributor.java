@@ -27,12 +27,12 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
+import org.eclipse.ui.ide.IDEActionFactory;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
-
-import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
@@ -59,7 +59,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	            fSpecificAssistActions[i].update();
 	        }
 	    }
-		
+
 		public void dispose() {
 			fMenu.removeMenuListener(this);
 		}
@@ -70,7 +70,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fQuickAssistAction;
 	protected RetargetTextEditorAction fChangeEncodingAction;
-	
+
 	/* @since 3.2 */
 	protected SpecificContentAssistAction[] fSpecificAssistActions;
 	/* @since 3.2 */
@@ -113,7 +113,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 			editMenu.add(fChangeEncodingAction);
 			IMenuManager caMenu= new MenuManager(JavaEditorMessages.BasicEditorActionContributor_specific_content_assist_menu, "specific_content_assist"); //$NON-NLS-1$
 			editMenu.insertAfter(ITextEditorActionConstants.GROUP_ASSIST, caMenu);
-			
+
 			caMenu.add(fRetargetContentAssist);
 			Collection descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
 			List specificAssistActions= new ArrayList(descriptors.size());
@@ -132,7 +132,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 			}
 			caMenu.add(new Separator("context_info")); //$NON-NLS-1$
 			caMenu.add(fContextInformation);
-			
+
 			editMenu.appendToGroup(ITextEditorActionConstants.GROUP_ASSIST, fQuickAssistAction);
 		}
 	}
@@ -150,7 +150,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
 		fQuickAssistAction.setAction(getAction(textEditor, ITextEditorActionConstants.QUICK_ASSIST));
-		
+
 		if (fSpecificAssistActions != null) {
 			for (int i= 0; i < fSpecificAssistActions.length; i++) {
 				SpecificContentAssistAction assistAction= fSpecificAssistActions[i];
@@ -166,7 +166,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 
 		actionBars.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), getAction(textEditor, IDEActionFactory.ADD_TASK.getId()));
 		actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), getAction(textEditor, IDEActionFactory.BOOKMARK.getId()));
-		
+
 		actionBars.setGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId(), getAction(textEditor, IDEActionFactory.OPEN_PROJECT.getId()));
 		actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_PROJECT.getId(), getAction(textEditor, IDEActionFactory.CLOSE_PROJECT.getId()));
 		actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_UNRELATED_PROJECTS.getId(), getAction(textEditor, IDEActionFactory.CLOSE_UNRELATED_PROJECTS.getId()));
@@ -180,11 +180,11 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 		// register actions that have a dynamic editor.
 		bars.setGlobalActionHandler(JdtActionConstants.CONTENT_ASSIST, fContentAssist);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.BasicJavaEditorActionContributor#dispose()
 	 * @since 3.1
-	 */ 
+	 */
 	public void dispose() {
 		if (fRetargetContentAssist != null) {
 			fRetargetContentAssist.dispose();

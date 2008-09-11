@@ -24,23 +24,23 @@ import org.eclipse.jdt.core.IJavaElement;
  * Filters out all non-Java elements.
  */
 public class NonJavaElementFilter extends ViewerFilter {
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IJavaElement)
 			return true;
-		
+
 		if (element instanceof IResource) {
-			IProject project= ((IResource)element).getProject(); 
+			IProject project= ((IResource)element).getProject();
 			return project == null || !project.isOpen();
 		}
 
 		// Exclude all IStorage elements which are neither Java elements nor resources
 		if (element instanceof IStorage)
 			return false;
-			
+
 		return true;
 	}
 }

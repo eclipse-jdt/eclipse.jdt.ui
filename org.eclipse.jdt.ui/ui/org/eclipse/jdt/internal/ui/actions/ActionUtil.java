@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
  */
 public class ActionUtil {
-	
+
 	private ActionUtil(){
 	}
 
@@ -52,15 +52,15 @@ public class ActionUtil {
 	public static boolean mustDisableJavaModelAction(Shell shell, Object element) {
 		if (!(element instanceof IPackageFragment) && !(element instanceof IPackageFragmentRoot))
 			return false;
-		
+
 		IResource resource= ResourceUtil.getResource(element);
 		if ((resource == null) || (! (resource instanceof IFolder)) || (! resource.isLinked()))
 			return false;
-			
-		MessageDialog.openInformation(shell, ActionMessages.ActionUtil_not_possible, ActionMessages.ActionUtil_no_linked); 
+
+		MessageDialog.openInformation(shell, ActionMessages.ActionUtil_not_possible, ActionMessages.ActionUtil_no_linked);
 		return true;
 	}
-	
+
 	public static boolean isProcessable(JavaEditor editor) {
 		if (editor == null)
 			return true;
@@ -69,26 +69,26 @@ public class ActionUtil {
 		// if a Java editor doesn't have an input of type Java element
 		// then it is for sure not on the build path
 		if (input == null) {
-			MessageDialog.openInformation(shell, 
-				ActionMessages.ActionUtil_notOnBuildPath_title,  
-				ActionMessages.ActionUtil_notOnBuildPath_message); 
+			MessageDialog.openInformation(shell,
+				ActionMessages.ActionUtil_notOnBuildPath_title,
+				ActionMessages.ActionUtil_notOnBuildPath_message);
 			return false;
 		}
 		return isProcessable(shell, input);
 	}
-	
+
 	public static boolean isProcessable(Shell shell, IJavaElement element) {
 		if (element == null)
 			return true;
 		if (isOnBuildPath(element))
 			return true;
-		MessageDialog.openInformation(shell, 
-			ActionMessages.ActionUtil_notOnBuildPath_title,  
-			ActionMessages.ActionUtil_notOnBuildPath_message); 
+		MessageDialog.openInformation(shell,
+			ActionMessages.ActionUtil_notOnBuildPath_title,
+			ActionMessages.ActionUtil_notOnBuildPath_message);
 		return false;
 	}
 
-	public static boolean isOnBuildPath(IJavaElement element) {	
+	public static boolean isOnBuildPath(IJavaElement element) {
         //fix for bug http://dev.eclipse.org/bugs/show_bug.cgi?id=20051
         if (element.getElementType() == IJavaElement.JAVA_PROJECT)
             return true;
@@ -111,21 +111,21 @@ public class ActionUtil {
 	public static boolean areProcessable(Shell shell, IJavaElement[] elements) {
 		for (int i= 0; i < elements.length; i++) {
 			if (! isOnBuildPath(elements[i])) {
-				MessageDialog.openInformation(shell, 
-						ActionMessages.ActionUtil_notOnBuildPath_title,  
+				MessageDialog.openInformation(shell,
+						ActionMessages.ActionUtil_notOnBuildPath_title,
 						Messages.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[] {BasicElementLabels.getPathLabel(elements[i].getPath(), false)}));
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Check whether <code>editor</code> and <code>element</code> are
 	 * processable and editable. If the editor edits the element, the validation
 	 * is only performed once. If necessary, ask the user whether the file(s)
 	 * should be edited.
-	 * 
+	 *
 	 * @param editor an editor, or <code>null</code> iff the action was not
 	 *        executed from an editor
 	 * @param shell a shell to serve as parent for a dialog
@@ -143,29 +143,29 @@ public class ActionUtil {
 		}
 		return isEditable(shell, element);
 	}
-	
+
 	public static boolean isEditable(JavaEditor editor) {
 		if (! isProcessable(editor))
 			return false;
-		
+
 		return editor.validateEditorInputState();
 	}
-			
+
 	public static boolean isEditable(Shell shell, IJavaElement element) {
 		if (! isProcessable(shell, element))
 			return false;
-		
+
 		IJavaElement cu= element.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null) {
 			IResource resource= cu.getResource();
 			if (resource != null && resource.isDerived()) {
-				
+
 				// see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#validateEditorInputState()
 				final String warnKey= AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WARN_IF_INPUT_DERIVED;
 				IPreferenceStore store= EditorsUI.getPreferenceStore();
 				if (!store.getBoolean(warnKey))
 					return true;
-				
+
 				MessageDialogWithToggle toggleDialog= MessageDialogWithToggle.openYesNoQuestion(
 						shell,
 						ActionMessages.ActionUtil_warning_derived_title,
@@ -174,9 +174,9 @@ public class ActionUtil {
 						false,
 						null,
 						null);
-				
+
 				EditorsUI.getPreferenceStore().setValue(warnKey, !toggleDialog.getToggleState());
-				
+
 				return toggleDialog.getReturnCode() == IDialogConstants.YES_ID;
 			}
 		}

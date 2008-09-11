@@ -11,11 +11,11 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-
-import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
@@ -23,19 +23,19 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * Measures the time to move a line within a large file.
- * 
+ *
  * @since 3.1
  */
 public abstract class MoveLineTest extends TextPerformanceTestCase {
-	
+
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
-	
+
 	private static final int WARM_UP_RUNS= 5;
 
 	private static final int MEASURED_RUNS= 5;
-	
+
 	private static final int LINE= 10;
-	
+
 	private static final int DISTANCE= 100;
 
 	private AbstractTextEditor fEditor;
@@ -47,7 +47,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
-	
+
 	protected abstract String getEditorId();
 
 	protected void tearDown() throws Exception {
@@ -57,7 +57,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to move a line within a large file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test() throws Exception {
@@ -70,7 +70,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 	private void measureMoveLine(PerformanceMeter performanceMeter, int runs) throws Exception {
 		IAction expandAll= fEditor.getAction("FoldingExpandAll");
 		int offset= EditorTestHelper.getDocument(fEditor).getLineOffset(LINE);
-		
+
 		// Use keyboard events to trigger optimization correctly
 		Event event= new Event();
 		event.keyCode= SWT.ARROW_DOWN;
@@ -85,7 +85,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 				runAction(expandAll);
 				EditorTestHelper.joinBackgroundActivities(fEditor);
 			}
-			
+
 			fEditor.selectAndReveal(offset, 0);
 			performanceMeter.start();
 			SWTEventHelper.keyCodeDown(display, SWT.MOD3, true);
@@ -99,7 +99,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 			}
 			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
 			performanceMeter.stop();
-			
+
 			/*
 			 * In some cases in Eclipse 3.0 revert under Linux
 			 * caused an NPE which we cannot yet explain. Setting
@@ -107,7 +107,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 			 */
 			fEditor.selectAndReveal(0, 0);
 			EditorTestHelper.revertEditor(fEditor, true);
-			
+
 			EditorTestHelper.joinBackgroundActivities(fEditor);
 		}
 	}

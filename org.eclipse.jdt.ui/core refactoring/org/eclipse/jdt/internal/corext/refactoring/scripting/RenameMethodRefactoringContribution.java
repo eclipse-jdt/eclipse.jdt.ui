@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Refactoring contribution for the rename method refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class RenameMethodRefactoringContribution extends JavaRefactoringContribution {
@@ -54,7 +54,7 @@ public final class RenameMethodRefactoringContribution extends JavaRefactoringCo
 			status.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoringContribution_could_not_create, new Object[] { BasicElementLabels.getResourceName(arguments.getProject()), input }));
 			return null;
 		}
-		
+
 		JavaRenameProcessor processor;
 		if (MethodChecks.isVirtual(method)) {
 			processor= new RenameVirtualMethodProcessor(method, arguments, status);

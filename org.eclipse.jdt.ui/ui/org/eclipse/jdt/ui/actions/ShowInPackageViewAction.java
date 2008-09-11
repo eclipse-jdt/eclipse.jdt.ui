@@ -29,42 +29,42 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 /**
- * This action reveals the currently selected Java element in the 
- * package explorer. 
+ * This action reveals the currently selected Java element in the
+ * package explorer.
  * <p>
  * The action is applicable to selections containing elements of type
  * <code>IJavaElement</code>.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * @since 2.0
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class ShowInPackageViewAction extends SelectionDispatchAction {
-	
+
 	private JavaEditor fEditor;
-	
+
 	/**
-	 * Creates a new <code>ShowInPackageViewAction</code>. The action requires 
-	 * that the selection provided by the site's selection provider is of type 
+	 * Creates a new <code>ShowInPackageViewAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param site the site providing context information for this action
 	 */
 	public ShowInPackageViewAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.ShowInPackageViewAction_label); 
-		setDescription(ActionMessages.ShowInPackageViewAction_description); 
-		setToolTipText(ActionMessages.ShowInPackageViewAction_tooltip); 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION);	
+		setText(ActionMessages.ShowInPackageViewAction_label);
+		setDescription(ActionMessages.ShowInPackageViewAction_description);
+		setToolTipText(ActionMessages.ShowInPackageViewAction_tooltip);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION);
 	}
-	
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ShowInPackageViewAction(JavaEditor editor) {
@@ -72,7 +72,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -85,13 +85,13 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
-	
+
 	private boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;
 		return selection.getFirstElement() instanceof IJavaElement;
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -102,11 +102,11 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 				run(element);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			String message= ActionMessages.ShowInPackageViewAction_error_message; 
+			String message= ActionMessages.ShowInPackageViewAction_error_message;
 			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
-		}	
+		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -115,21 +115,21 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 			return;
 		run((IJavaElement)selection.getFirstElement());
 	}
-	
+
 	/**
 	 * Tries to reveal the given Java element
-	 * 
+	 *
 	 * @param element the element to reveal
 	 */
 	public void run(IJavaElement element) {
 		if (element == null)
 			return;
-			
+
 		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 		view.tryToReveal(element);
 	}
 
 	private static String getDialogTitle() {
-		return ActionMessages.ShowInPackageViewAction_dialog_title; 
+		return ActionMessages.ShowInPackageViewAction_dialog_title;
 	}
 }

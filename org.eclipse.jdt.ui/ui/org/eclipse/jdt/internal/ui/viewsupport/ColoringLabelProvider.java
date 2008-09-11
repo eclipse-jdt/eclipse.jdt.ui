@@ -23,14 +23,14 @@ import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.jface.viewers.StyledString.Styler;
 
 public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider implements ILabelProvider {
-	
+
 	public static final Styler HIGHLIGHT_STYLE= StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
 	public static final Styler HIGHLIGHT_WRITE_STYLE= StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
-	
+
 	public ColoringLabelProvider(IStyledLabelProvider labelProvider) {
 		this(labelProvider, null, null);
 	}
-	
+
 	public ColoringLabelProvider(IStyledLabelProvider labelProvider, ILabelDecorator decorator, IDecorationContext decorationContext) {
 		super(labelProvider, decorator, decorationContext);
 	}
@@ -38,18 +38,18 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 	public void initialize(ColumnViewer viewer, ViewerColumn column) {
 		ColoredViewersManager.install(this);
 		setOwnerDrawEnabled(ColoredViewersManager.showColoredLabels());
-		
+
 		super.initialize(viewer, column);
 	}
-		
+
 	public void dispose() {
 		super.dispose();
 		ColoredViewersManager.uninstall(this);
 	}
-	
+
 	public void refresh() {
 		ColumnViewer viewer= getViewer();
-		
+
 		if (viewer == null) {
 			return;
 		}
@@ -61,7 +61,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 			viewer.refresh();
 		}
 	}
-	
+
 	protected StyleRange prepareStyleRange(StyleRange styleRange, boolean applyColors) {
 		if (!applyColors && styleRange.background != null) {
 			styleRange= super.prepareStyleRange(styleRange, applyColors);
@@ -70,7 +70,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		}
 		return super.prepareStyleRange(styleRange, applyColors);
 	}
-	
+
 	public String getText(Object element) {
 		return getStyledText(element).getString();
 	}

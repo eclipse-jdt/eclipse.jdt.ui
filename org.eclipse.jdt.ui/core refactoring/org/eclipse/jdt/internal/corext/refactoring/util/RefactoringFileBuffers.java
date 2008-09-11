@@ -35,7 +35,7 @@ public final class RefactoringFileBuffers {
 	 * All text file buffers acquired by a call to {@link RefactoringFileBuffers#acquire(ICompilationUnit)}
 	 * must be released using {@link RefactoringFileBuffers#release(ICompilationUnit)}.
 	 * </p>
-	 * 
+	 *
 	 * @param unit the compilation unit to acquire a text file buffer for
 	 * @return the text file buffer, or <code>null</code> if no buffer could be acquired
 	 * @throws CoreException if no buffer could be acquired
@@ -53,7 +53,7 @@ public final class RefactoringFileBuffers {
 
 	/**
 	 * Returns the text file buffer for the specified compilation unit.
-	 * 
+	 *
 	 * @param unit the compilation unit whose text file buffer to retrieve
 	 * @return the associated text file buffer, or <code>null</code> if no text file buffer is managed for the compilation unit
 	 */
@@ -67,7 +67,7 @@ public final class RefactoringFileBuffers {
 
 	/**
 	 * Releases the text file buffer associated with the compilation unit.
-	 * 
+	 *
 	 * @param unit the compilation unit whose text file buffer has to be released
 	 * @throws CoreException if the buffer could not be successfully released
 	 */

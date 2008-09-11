@@ -81,7 +81,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class GetterSetterCorrectionSubProcessor {
 
 	public static final String SELF_ENCAPSULATE_FIELD_ID= "org.eclipse.jdt.ui.correction.encapsulateField.assist"; //$NON-NLS-1$
-	
+
 	private static class ProposalParameter {
 		public final boolean useSuper;
 		public final ICompilationUnit compilationUnit;
@@ -111,11 +111,11 @@ public class GetterSetterCorrectionSubProcessor {
 			fNoDialog= false;
 			setCommandId(SELF_ENCAPSULATE_FIELD_ID);
 		}
-		
+
 		public IField getField() {
 			return fField;
 		}
-		
+
 		public void setNoDialog(boolean noDialog) {
 			fNoDialog= noDialog;
 		}
@@ -138,12 +138,12 @@ public class GetterSetterCorrectionSubProcessor {
 			}
 			return null;
 		}
-		
-		
+
+
 		private static String getDescription(IField field) {
 			return Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description, BasicElementLabels.getJavaElementName(field.getElementName()));
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 		 * @since 3.5
@@ -151,7 +151,7 @@ public class GetterSetterCorrectionSubProcessor {
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return CorrectionMessages.GetterSetterCorrectionSubProcessor_additional_info;
 		}
-		
+
 		public void apply(IDocument document) {
 			try {
 				final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(fField);
@@ -189,7 +189,7 @@ public class GetterSetterCorrectionSubProcessor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Used by quick assist
 	 * @param context the invocation context
@@ -210,11 +210,11 @@ public class GetterSetterCorrectionSubProcessor {
 		}
 		return addGetterSetterProposal(context, coveringNode, resultingCollections, 7);
 	}
-	
+
 	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocation location, Collection proposals, int relevance) {
 		addGetterSetterProposal(context, location.getCoveringNode(context.getASTRoot()), proposals, relevance);
 	}
-	
+
 	private static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, Collection proposals, int relevance) {
 		if (!(coveringNode instanceof SimpleName)) {
 			return false;
@@ -227,16 +227,16 @@ public class GetterSetterCorrectionSubProcessor {
 		IVariableBinding variableBinding= (IVariableBinding) binding;
 		if (!variableBinding.isField())
 			return false;
-			
+
 		if (proposals == null)
 			return true;
-		
+
 		ChangeCorrectionProposal proposal= getProposal(context.getCompilationUnit(), sn, variableBinding, relevance);
 		if (proposal != null)
 			proposals.add(proposal);
 		return true;
 	}
-	
+
 	private static ChangeCorrectionProposal getProposal(ICompilationUnit cu, SimpleName sn, IVariableBinding variableBinding, int relevance) {
 		Expression accessNode= sn;
 		Expression qualifier= null;

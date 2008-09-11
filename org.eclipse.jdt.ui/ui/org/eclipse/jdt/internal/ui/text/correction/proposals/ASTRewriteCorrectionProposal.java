@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
  * Either a rewriter is directly passed in the constructor or method {@link #getRewrite()}
  * is overridden to provide the AST rewriter that is evaluated to the document when the
  * proposal is applied.
- * 
+ *
  * @since 3.2
  */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
@@ -44,7 +44,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Constructs a AST rewrite correction proposal.
-	 * 
+	 *
 	 * @param name the display name of the proposal.
 	 * @param cu the compilation unit that is modified.
 	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
@@ -107,7 +107,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	/**
 	 * Returns the rewriter that has been passed in the constructor. Implementors can override this
 	 * method to create the rewriter lazy. This method will only be called once.
-	 * 
+	 *
 	 * @return returns the rewriter to be used.
 	 * @throws CoreException an exception is thrown when the rewriter could not be created.
 	 */

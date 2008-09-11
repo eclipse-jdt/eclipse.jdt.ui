@@ -36,17 +36,17 @@ import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
  * <p>
  * Clients may use but not subclass this class.
  * </p>
- * 
+ *
  * @since 3.2
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaContentAssistInvocationContext extends ContentAssistInvocationContext {
 	private final IEditorPart fEditor;
-	
+
 	private ICompilationUnit fCU= null;
 	private boolean fCUComputed= false;
-	
+
 	private CompletionProposalLabelProvider fLabelProvider;
 	private CompletionProposalCollector fCollector;
 	private RHSHistory fRHSHistory;
@@ -57,7 +57,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 
 	/**
 	 * Creates a new context.
-	 * 
+	 *
 	 * @param viewer the viewer used by the editor
 	 * @param offset the invocation offset
 	 * @param editor the editor that content assist is invoked in
@@ -67,10 +67,10 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 		Assert.isNotNull(editor);
 		fEditor= editor;
 	}
-	
+
 	/**
 	 * Creates a new context.
-	 * 
+	 *
 	 * @param unit the compilation unit in <code>document</code>
 	 */
 	public JavaContentAssistInvocationContext(ICompilationUnit unit) {
@@ -79,11 +79,11 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 		fCUComputed= true;
 		fEditor= null;
 	}
-	
+
 	/**
 	 * Returns the compilation unit that content assist is invoked in, <code>null</code> if there
 	 * is none.
-	 * 
+	 *
 	 * @return the compilation unit that content assist is invoked in, possibly <code>null</code>
 	 */
 	public ICompilationUnit getCompilationUnit() {
@@ -99,18 +99,18 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 		}
 		return fCU;
 	}
-	
+
 	/**
 	 * Returns the project of the compilation unit that content assist is invoked in,
 	 * <code>null</code> if none.
-	 * 
+	 *
 	 * @return the current java project, possibly <code>null</code>
 	 */
 	public IJavaProject getProject() {
 		ICompilationUnit unit= getCompilationUnit();
 		return unit == null ? null : unit.getJavaProject();
 	}
-	
+
 	/**
 	 * Returns the keyword proposals that are available in this context, possibly none.
 	 * <p>
@@ -118,7 +118,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
 	 * on the compilation unit.
 	 * </p>
-	 * 
+	 *
 	 * @return the available keyword proposals
 	 */
 	public IJavaCompletionProposal[] getKeywordProposals() {
@@ -131,7 +131,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 				computeKeywordsAndContext();
 			}
 		}
-		
+
 		return fKeywordProposals;
 	}
 
@@ -143,7 +143,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
 	 * on the compilation unit.
 	 * </p>
-	 * 
+	 *
 	 * @return the core completion context if available, <code>null</code> otherwise
 	 */
 	public CompletionContext getCoreContext() {
@@ -167,17 +167,17 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
 	 * on the compilation unit.
 	 * </p>
-	 * 
+	 *
 	 * @param qualifiedTypeName the type name of the type of interest
 	 * @return a relevance in [0.0,&nbsp;1.0] based on previous content assist invocations
 	 */
 	public float getHistoryRelevance(String qualifiedTypeName) {
 		return getRHSHistory().getRank(qualifiedTypeName);
 	}
-	
+
 	/**
 	 * Returns the content assist type history for the expected type.
-	 * 
+	 *
 	 * @return the content assist type history for the expected type
 	 */
 	private RHSHistory getRHSHistory() {
@@ -195,7 +195,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 		}
 		return fRHSHistory;
 	}
-	
+
 	/**
 	 * Returns the expected type if any, <code>null</code> otherwise.
 	 * <p>
@@ -203,7 +203,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * {@linkplain ICodeAssist#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor) codeComplete}
 	 * on the compilation unit.
 	 * </p>
-	 * 
+	 *
 	 * @return the expected type if any, <code>null</code> otherwise
 	 */
 	public IType getExpectedType() {
@@ -225,10 +225,10 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 		}
 		return fType;
 	}
-	
+
 	/**
 	 * Returns a label provider that can be used to compute proposal labels.
-	 * 
+	 *
 	 * @return a label provider that can be used to compute proposal labels
 	 */
 	public CompletionProposalLabelProvider getLabelProvider() {
@@ -241,7 +241,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 
 		return fLabelProvider;
 	}
-	
+
 	/**
 	 * Sets the collector, which is used to access the compilation unit, the core context and the
 	 * label provider. This is a performance optimization: {@link IJavaCompletionProposalComputer}s
@@ -250,18 +250,18 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * which in turn calls this method. This allows the invocation context to retrieve the core
 	 * context and keyword proposals from the existing collector, instead of computing theses values
 	 * itself via {@link #computeKeywordsAndContext()}.
-	 * 
+	 *
 	 * @param collector the collector
 	 */
 	void setCollector(CompletionProposalCollector collector) {
 		fCollector= collector;
 	}
-	
+
 	/**
 	 * Fallback to retrieve a core context and keyword proposals when no collector is available.
 	 * Runs code completion on the cu and collects keyword proposals. {@link #fKeywordProposals} is
 	 * non-<code>null</code> after this call.
-	 * 
+	 *
 	 * @since 3.3
 	 */
 	private void computeKeywordsAndContext() {
@@ -271,10 +271,10 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 				fKeywordProposals= new IJavaCompletionProposal[0];
 			return;
 		}
-		
+
 		CompletionProposalCollector collector= new CompletionProposalCollector(cu, true);
 		collector.setIgnored(CompletionProposal.KEYWORD, false);
-		
+
 		try {
 			cu.codeComplete(getInvocationOffset(), collector);
 			if (fCoreContext == null)
@@ -289,7 +289,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 				fKeywordProposals= new IJavaCompletionProposal[0];
 		}
 	}
-	
+
 	/*
 	 * Implementation note: There is no need to override hashCode and equals, as we only add cached
 	 * values shared across one assist invocation.

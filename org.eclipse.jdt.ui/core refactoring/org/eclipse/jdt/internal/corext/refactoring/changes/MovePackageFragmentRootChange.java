@@ -38,10 +38,10 @@ public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChang
 		getRoot().move(destinationPath, getResourceUpdateFlags(), getUpdateModelFlags(false), null, pm);
 		return null;
 	}
-	
+
 	public String getName() {
 		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
 		String destinationName= BasicElementLabels.getResourceName(getDestination());
-		return Messages.format(RefactoringCoreMessages.MovePackageFragmentRootChange_move, new String[] { rootName, destinationName }); 
+		return Messages.format(RefactoringCoreMessages.MovePackageFragmentRootChange_move, new String[] { rootName, destinationName });
 	}
 }

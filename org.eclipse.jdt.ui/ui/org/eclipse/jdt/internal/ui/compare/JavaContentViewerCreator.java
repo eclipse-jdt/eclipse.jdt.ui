@@ -23,7 +23,7 @@ import org.eclipse.compare.IViewerCreator;
  * Required when creating a JavaMergeViewer from the plugin.xml file.
  */
 public class JavaContentViewerCreator implements IViewerCreator {
-	
+
 	public Viewer createViewer(Composite parent, CompareConfiguration mp) {
 		return new JavaMergeViewer(parent, SWT.NULL, mp);
 	}

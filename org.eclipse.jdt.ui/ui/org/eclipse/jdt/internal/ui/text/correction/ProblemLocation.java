@@ -16,9 +16,10 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.ui.text.java.*;
-
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 
@@ -40,7 +41,7 @@ public class ProblemLocation implements IProblemLocation {
 		fOffset= offset;
 		fLength= length;
 		fIsError= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType());
-		
+
 		String markerType= annotation.getMarkerType();
 		fMarkerType= markerType != null ? markerType : IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER;
 	}
@@ -53,7 +54,7 @@ public class ProblemLocation implements IProblemLocation {
 		fIsError= isError;
 		fMarkerType= markerType;
 	}
-	
+
 	public ProblemLocation(IProblem problem) {
 		fId= problem.getID();
 		fArguments= problem.getArguments();
@@ -105,7 +106,7 @@ public class ProblemLocation implements IProblemLocation {
 	public String getMarkerType() {
 		return fMarkerType;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveringNode(org.eclipse.jdt.core.dom.CompilationUnit)
@@ -134,7 +135,7 @@ public class ProblemLocation implements IProblemLocation {
 		if (arg != null) {
 			for (int i= 0; i < arg.length; i++) {
 				buf.append(arg[i]);
-				buf.append('\n');				 
+				buf.append('\n');
 			}
 		}
 		return buf.toString();

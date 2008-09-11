@@ -14,11 +14,26 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -31,46 +46,31 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ILabelProvider;
-
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 /**
  * Dialog to browse for package fragments.
  */
 public class PackageSelectionDialog extends ElementListSelectionDialog {
-	
+
 	public static final int F_REMOVE_DUPLICATES= 1;
 	public static final int F_SHOW_PARENTS= 2;
 	public static final int F_HIDE_DEFAULT_PACKAGE= 4;
 	public static final int F_HIDE_EMPTY_INNER= 8;
-	
+
 
 	/** The dialog location. */
 	private Point fLocation;
 	/** The dialog size. */
 	private Point fSize;
-	
+
 	private IRunnableContext fContext;
 	private IJavaSearchScope fScope;
 	private int fFlags;
@@ -89,7 +89,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		fScope= scope;
 		fContext= context;
 	}
-	
+
 	private static ILabelProvider createLabelProvider(int dialogFlags) {
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT;
 		if ((dialogFlags & F_REMOVE_DUPLICATES) == 0) {
@@ -97,14 +97,14 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		}
 		return new JavaElementLabelProvider(flags);
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.window.Window#open()
 	 */
 	public int open() {
 		final ArrayList packageList= new ArrayList();
-		
+
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (monitor == null) {
@@ -131,7 +131,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 								}
 							}
 						}
-						
+
 						private void addParentPackages(IJavaElement enclosingElement, String name) {
 							IPackageFragmentRoot root= (IPackageFragmentRoot) enclosingElement.getParent();
 							int idx= name.lastIndexOf('.');
@@ -148,7 +148,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 							IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS,
 							SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
 					new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), fScope, requestor, new SubProgressMonitor(monitor, 1));
-					
+
 					if (monitor.isCanceled()) {
 						throw new InterruptedException();
 					}
@@ -164,7 +164,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 					monitor.done();
 				}
 			}
-			
+
 			private void removeEmptyPackages(IProgressMonitor monitor) throws JavaModelException, InterruptedException {
 				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_findEmpty, packageList.size());
 				try {
@@ -190,26 +190,26 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		try {
 			fContext.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, JavaUIMessages.PackageSelectionDialog_error_title, JavaUIMessages.PackageSelectionDialog_error3Message); 
+			ExceptionHandler.handle(e, JavaUIMessages.PackageSelectionDialog_error_title, JavaUIMessages.PackageSelectionDialog_error3Message);
 			return CANCEL;
 		} catch (InterruptedException e) {
 			// cancelled by user
 			return CANCEL;
 		}
-		
+
 		if (packageList.isEmpty()) {
-			String title= JavaUIMessages.PackageSelectionDialog_nopackages_title; 
-			String message= JavaUIMessages.PackageSelectionDialog_nopackages_message; 
+			String title= JavaUIMessages.PackageSelectionDialog_nopackages_title;
+			String message= JavaUIMessages.PackageSelectionDialog_nopackages_message;
 			MessageDialog.openInformation(getShell(), title, message);
 			return CANCEL;
 		}
-		
+
 		setElements(packageList.toArray());
 
 		return super.open();
 	}
-	
-	
+
+
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
@@ -234,7 +234,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		readSettings();
 		return control;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialSize()
 	 */
@@ -249,7 +249,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		}
 		return result;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
 	 */
@@ -261,11 +261,11 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 			Rectangle display= getShell().getDisplay().getClientArea();
 			int xe= result.x + initialSize.x;
 			if (xe > display.width) {
-				result.x-= xe - display.width; 
+				result.x-= xe - display.width;
 			}
 			int ye= result.y + initialSize.y;
 			if (ye > display.height) {
-				result.y-= ye - display.height; 
+				result.y-= ye - display.height;
 			}
 		}
 		return result;

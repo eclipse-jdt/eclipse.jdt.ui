@@ -13,19 +13,19 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -44,6 +44,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.compare.HistoryItem;
@@ -77,22 +78,22 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * and "Add from local history" actions.
  */
 abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegate*/ {
-	
+
 	private boolean fModifiesFile;
 	private ISelection fSelection;
 
 	JavaHistoryActionImpl(boolean modifiesFile) {
 		fModifiesFile= modifiesFile;
 	}
-	
+
 	ISelection getSelection() {
 		return fSelection;
 	}
-		
+
 	final IFile getFile(Object input) {
 		return JavaElementHistoryPageSource.getInstance().getFile(input);
 	}
-	
+
 	final ITypedElement[] buildEditions(ITypedElement target, IFile file) {
 
 		// setup array of editions
@@ -103,7 +104,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		} catch (CoreException ex) {
 			JavaPlugin.log(ex);
 		}
-		
+
 		int count= 1;
 		if (states != null)
 			count+= states.length;
@@ -115,13 +116,13 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 				editions[i+1]= new HistoryItem(target, states[i]);
 		return editions;
 	}
-	
+
 	final Shell getShell() {
 		if (fEditor != null)
 			return fEditor.getEditorSite().getShell();
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
-	
+
 	/**
 	 * Tries to find the given element in a working copy.
 	 */
@@ -131,7 +132,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		// is still required.
 		return input;
 	}
-	
+
 	final ASTNode getBodyContainer(CompilationUnit root, IMember parent) throws JavaModelException {
 		ISourceRange sourceRange= parent.getNameRange();
 		ASTNode parentNode= NodeFinder.perform(root, sourceRange);
@@ -142,7 +143,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		} while (parentNode != null);
 		return null;
 	}
-	
+
 	/**
 	 * Returns true if the given file is open in an editor.
 	 */
@@ -156,7 +157,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	 * Returns an IMember or null.
 	 */
 	final IMember getEditionElement(ISelection selection) {
-		
+
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection) selection;
 			if (ss.size() == 1) {
@@ -170,7 +171,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		}
 		return null;
 	}
-	
+
 	final boolean isEnabled(IFile file) {
 		if (file == null || ! file.exists())
 			return false;
@@ -182,7 +183,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		}
 		return true;
 	}
-	
+
 	boolean isEnabled(ISelection selection) {
 		IMember m= getEditionElement(selection);
 		if (m == null)
@@ -192,11 +193,11 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 			return false;
 		return true;
 	}
-	
+
 	void applyChanges(ASTRewrite rewriter, final IDocument document, final ITextFileBuffer textFileBuffer, Shell shell, boolean inEditor, Map options)
 							throws CoreException, InvocationTargetException, InterruptedException {
 
-		
+
 		MultiTextEdit edit= new MultiTextEdit();
 		try {
 			TextEdit res= rewriter.rewriteAST(document, options);
@@ -204,13 +205,13 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		} catch (IllegalArgumentException e) {
 			JavaPlugin.log(e);
 		}
-			
+
 		try {
 			new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		IRunnableWithProgress r= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
@@ -239,7 +240,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		}
 		return null;
 	}
-	
+
 	final JavaEditor getEditor(IFile file) {
 		FileEditorInput fei= new FileEditorInput(file);
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
@@ -267,7 +268,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	public abstract void run(ISelection selection);
 
 	//---- Action
-	
+
 	private JavaEditor fEditor;
 	private String fTitle;
 	private String fMessage;
@@ -277,13 +278,13 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		fTitle= title;
 		fMessage= message;
 	}
-	
+
 	final JavaEditor getEditor() {
 		return fEditor;
 	}
 
 	public final void runFromEditor(IAction uiProxy) {
-		
+
 		// this run is called from Editor
 		IJavaElement element= null;
 		try {
@@ -291,13 +292,13 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		} catch (JavaModelException e) {
 			// ignored
 		}
-		
+
 		fSelection= element != null
 						? new StructuredSelection(element)
 						: StructuredSelection.EMPTY;
 		boolean isEnabled= isEnabled(fSelection);
 		uiProxy.setEnabled(isEnabled);
-		
+
 		if (!isEnabled) {
 			MessageDialog.openInformation(getShell(), fTitle, fMessage);
 			return;
@@ -314,20 +315,20 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	public final void update(IAction uiProxy) {
 		uiProxy.setEnabled(checkEnabled());
 	}
-	
+
  	//---- IActionDelegate
-	
+
 	public final void selectionChanged(IAction uiProxy, ISelection selection) {
 		fSelection= selection;
 		uiProxy.setEnabled(isEnabled(selection));
 	}
-	
+
 	public final void run(IAction action) {
 		run(fSelection);
 	}
-	
+
 	static CompilationUnit parsePartialCompilationUnit(ICompilationUnit unit) {
-				
+
 		if (unit == null) {
 			throw new IllegalArgumentException();
 		}

@@ -10,7 +10,7 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
  * 	     o bug "Inline refactoring showed bogus error" (see bugzilla
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=42753)
- *       o Allow 'this' constructor to be inlined  
+ *       o Allow 'this' constructor to be inlined
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 
 class SourceAnalyzer  {
-	
+
 	public static class NameData {
 		private String fName;
 		private List fReferences;
@@ -97,7 +97,7 @@ class SourceAnalyzer  {
 		}
 		public boolean visit(EnumDeclaration node) {
 			return false;
-		}		
+		}
 		public boolean visit(AnnotationTypeDeclaration node) {
 			return false;
 		}
@@ -112,7 +112,7 @@ class SourceAnalyzer  {
 			if (methodBinding != null)
 				methodBinding.getMethodDeclaration();
 			if (fBinding != null && methodBinding != null && fBinding.isEqualTo(methodBinding) && !status.hasFatalError()) {
-				status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_recursive_call); 
+				status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_recursive_call);
 				return false;
 			}
 			return true;
@@ -123,7 +123,7 @@ class SourceAnalyzer  {
 				// fixes bug #42753
 				if (!ASTNodes.isLabel(node)) {
 					status.addFatalError(
-						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
+						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors,
 						JavaStatusContext.create(fTypeRoot, fDeclaration));
 					return false;
 				}
@@ -133,7 +133,7 @@ class SourceAnalyzer  {
 		public boolean visit(ThisExpression node) {
 			if (node.getQualifier() != null) {
 				status.addFatalError(
-					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_qualified_this_expressions, 
+					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_qualified_this_expressions,
 					JavaStatusContext.create(fTypeRoot, node));
 				return false;
 			}
@@ -152,7 +152,7 @@ class SourceAnalyzer  {
 			return result;
 		}
 	}
-	
+
 	private class UpdateCollector extends ASTVisitor {
 		private int fTypeCounter;
 		public boolean visit(TypeDeclaration node) {
@@ -257,7 +257,7 @@ class SourceAnalyzer  {
 					Name topName= ASTNodes.getTopMostName(node);
 					if (node == topName || node == ASTNodes.getLeftMostSimpleName(topName)) {
 						StructuralPropertyDescriptor location= node.getLocationInParent();
-						if (location != SingleVariableDeclaration.NAME_PROPERTY 
+						if (location != SingleVariableDeclaration.NAME_PROPERTY
 							&& location != VariableDeclarationFragment.NAME_PROPERTY) {
 							fImplicitReceivers.add(node);
 						}
@@ -289,7 +289,7 @@ class SourceAnalyzer  {
 			ParameterData data= (ParameterData)fParameters.get(binding);
 			if (data != null)
 				data.addReference(node);
-				
+
 			NameData name= (NameData)fNames.get(binding);
 			if (name != null)
 				name.addReference(node);
@@ -308,7 +308,7 @@ class SourceAnalyzer  {
 			return fStaticsToImport.contains(name);
 		}
 	}
-	
+
 	private class VarargAnalyzer extends ASTVisitor {
 		private IBinding fParameter;
 		public VarargAnalyzer(IBinding parameter) {
@@ -328,19 +328,19 @@ class SourceAnalyzer  {
 	private Map fParameters;
 	private Map fNames;
 	private List fImplicitReceivers;
-	
+
 	private boolean fArrayAccess;
 	private boolean fHasSuperMethodInvocation;
-	
+
 	private List/*<Name>*/ fTypesToImport;
 	private List/*<Name>*/ fStaticsToImport;
-	
+
 	private List/*<NameData>*/ fTypeParameterReferences;
 	private Map/*<ITypeBinding, NameData>*/ fTypeParameterMapping;
-	
+
 	private List/*<NameData>*/ fMethodTypeParameterReferences;
 	private Map/*<ITypeBinding, NameData>*/ fMethodTypeParameterMapping;
-	
+
 	private boolean fInterruptedExecutionFlow;
 
 	public SourceAnalyzer(ITypeRoot typeRoot, MethodDeclaration declaration) {
@@ -348,24 +348,24 @@ class SourceAnalyzer  {
 		fTypeRoot= typeRoot;
 		fDeclaration= declaration;
 	}
-	
+
 	public boolean isExecutionFlowInterrupted() {
 		return fInterruptedExecutionFlow;
 	}
-	
+
 	public RefactoringStatus checkActivation() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (!fTypeRoot.isStructureKnown()) {
-			result.addFatalError(		
-				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_syntax_errors, 
-				JavaStatusContext.create(fTypeRoot));		
+			result.addFatalError(
+				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_syntax_errors,
+				JavaStatusContext.create(fTypeRoot));
 			return result;
 		}
 		IProblem[] problems= ASTNodes.getProblems(fDeclaration, ASTNodes.NODE_ONLY, ASTNodes.ERROR);
 		if (problems.length > 0) {
-			result.addFatalError(		
-				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
-				JavaStatusContext.create(fTypeRoot, fDeclaration));		
+			result.addFatalError(
+				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors,
+				JavaStatusContext.create(fTypeRoot, fDeclaration));
 			return result;
 		}
 		final IMethodBinding declarationBinding= fDeclaration.resolveBinding();
@@ -393,7 +393,7 @@ class SourceAnalyzer  {
 				IVariableBinding binding= element.resolveBinding();
 				if (binding == null) {
 					result.addFatalError(
-						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
+						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors,
 						JavaStatusContext.create(fTypeRoot, fDeclaration));
 					return result;
 				}
@@ -401,13 +401,13 @@ class SourceAnalyzer  {
 			}
 			fNames= new HashMap();
 			fImplicitReceivers= new ArrayList(2);
-			
+
 			fTypeParameterReferences= new ArrayList(0);
 			fTypeParameterMapping= new HashMap();
 			ITypeBinding declaringType= declarationBinding.getDeclaringClass();
 			if (declaringType == null) {
 				result.addFatalError(
-					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_typedeclaration_has_errors, 
+					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_typedeclaration_has_errors,
 					JavaStatusContext.create(fTypeRoot));
 				return result;
 			}
@@ -417,7 +417,7 @@ class SourceAnalyzer  {
 				fTypeParameterReferences.add(data);
 				fTypeParameterMapping.put(typeParameters[i], data);
 			}
-			
+
 			fMethodTypeParameterReferences= new ArrayList(0);
 			fMethodTypeParameterMapping= new HashMap();
 			IMethodBinding method= declarationBinding;
@@ -427,7 +427,7 @@ class SourceAnalyzer  {
 				fMethodTypeParameterReferences.add(data);
 				fMethodTypeParameterMapping.put(typeParameters[i], data);
 			}
-			
+
 		}
 		if (fDeclaration.isVarargs()) {
 			List parameters= fDeclaration.parameters();
@@ -445,17 +445,17 @@ class SourceAnalyzer  {
 		fTypesToImport= new ArrayList();
 		fStaticsToImport= new ArrayList();
 		ImportReferencesCollector.collect(body, fTypeRoot.getJavaProject(), null, fTypesToImport, fStaticsToImport);
-		
+
 		// Now collect implicit references and name references
 		body.accept(new UpdateCollector());
-		
+
 		int numberOfLocals= LocalVariableIndex.perform(fDeclaration);
 		FlowContext context= new FlowContext(0, numberOfLocals + 1);
 		context.setConsiderAccessMode(true);
 		context.setComputeMode(FlowContext.MERGE);
 		InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(context);
 		FlowInfo info= flowAnalyzer.perform(getStatements());
-		
+
 		for (Iterator iter= fDeclaration.parameters().iterator(); iter.hasNext();) {
 			SingleVariableDeclaration element= (SingleVariableDeclaration) iter.next();
 			IVariableBinding binding= element.resolveBinding();
@@ -463,39 +463,39 @@ class SourceAnalyzer  {
 			data.setAccessMode(info.getAccessMode(context, binding));
 		}
 	}
-	
+
 	public Collection getUsedNames() {
 		return fNames.values();
 	}
-	
+
 	public List getImplicitReceivers() {
 		return fImplicitReceivers;
 	}
-	
+
 	public List getTypesToImport() {
 		return fTypesToImport;
 	}
-	
+
 	public List getStaticsToImport() {
 		return fStaticsToImport;
 	}
-	
+
 	public List getTypeParameterReferences() {
 		return fTypeParameterReferences;
 	}
-	
+
 	public List getMethodTypeParameterReferences() {
 		return fMethodTypeParameterReferences;
 	}
-	
+
 	public boolean hasArrayAccess() {
 		return fArrayAccess;
 	}
-	
+
 	public boolean hasSuperMethodInvocation() {
 		return fHasSuperMethodInvocation;
 	}
-	
+
 	private ASTNode[] getStatements() {
 		List statements= fDeclaration.getBody().statements();
 		return (ASTNode[]) statements.toArray(new ASTNode[statements.size()]);

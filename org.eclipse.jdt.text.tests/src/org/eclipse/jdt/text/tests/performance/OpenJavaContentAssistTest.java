@@ -13,6 +13,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
@@ -21,11 +22,11 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
 public class OpenJavaContentAssistTest extends OpenQuickControlTest {
-	
+
 	private static final Class THIS= OpenJavaContentAssistTest.class;
-	
+
 	private static final int LINE= 3897;
-	
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -39,7 +40,7 @@ public class OpenJavaContentAssistTest extends OpenQuickControlTest {
 	protected void tearDownMeasurement(AbstractTextEditor editor) throws Exception {
 		EditorTestHelper.closeAllPopUps(EditorTestHelper.getSourceViewer(editor));
 	}
-	
+
 	public void test1() throws Exception {
 		PerformanceMeter coldMeter= createPerformanceMeter("-cold");
 		PerformanceMeter warmMeter= createPerformanceMeter("-warm");

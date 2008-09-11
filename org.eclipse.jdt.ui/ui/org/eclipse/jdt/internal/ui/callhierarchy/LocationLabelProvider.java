@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
@@ -16,19 +16,19 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 class LocationLabelProvider extends LabelProvider implements ITableLabelProvider {
     private static final int COLUMN_ICON= 0;
     private static final int COLUMN_LINE= 1;
     private static final int COLUMN_INFO= 2;
-        
+
     LocationLabelProvider() {
         // Do nothing
     }
-            
+
     /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
      */
@@ -39,7 +39,7 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
     public Image getImage(Object element) {
         return getColumnImage(element, COLUMN_ICON);
     }
-    
+
     private String removeWhitespaceOutsideStringLiterals(CallLocation callLocation) {
         StringBuffer buf = new StringBuffer();
         boolean withinString = false;
@@ -87,7 +87,7 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
     public String getColumnText(Object element, int columnIndex) {
         if (element instanceof CallLocation) {
             CallLocation callLocation= (CallLocation) element;
-            
+
             switch (columnIndex) {
                 case COLUMN_LINE:
                     int lineNumber= callLocation.getLineNumber();
@@ -101,6 +101,6 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
             }
         }
 
-        return ""; //$NON-NLS-1$        
+        return ""; //$NON-NLS-1$
     }
 }

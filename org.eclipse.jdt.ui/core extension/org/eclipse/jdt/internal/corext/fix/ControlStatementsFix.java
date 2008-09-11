@@ -36,31 +36,31 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 
 public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
-		
+
 	private final static class ControlStatementFinder extends GenericVisitor {
-		
+
 		private final List/*<CompilationUnitRewriteOperation>*/ fResult;
 		private final boolean fFindControlStatementsWithoutBlock;
 		private final boolean fRemoveUnnecessaryBlocks;
 		private final boolean fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow;
-		
+
 		public ControlStatementFinder(boolean findControlStatementsWithoutBlock,
 				boolean removeUnnecessaryBlocks,
 				boolean removeUnnecessaryBlocksOnlyWhenReturnOrThrow,
 				List resultingCollection) {
-			
+
 			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
 			fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
 			fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow= removeUnnecessaryBlocksOnlyWhenReturnOrThrow;
 			fResult= resultingCollection;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.DoStatement)
 		 */
 		public boolean visit(DoStatement node) {
 			handle(node.getBody(), DoStatement.BODY_PROPERTY);
-			
+
 			return super.visit(node);
 		}
 
@@ -69,30 +69,30 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		 */
 		public boolean visit(ForStatement node) {
 			handle(node.getBody(), ForStatement.BODY_PROPERTY);
-			
+
 			return super.visit(node);
 		}
-	
+
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean visit(EnhancedForStatement node) {
 			handle(node.getBody(), EnhancedForStatement.BODY_PROPERTY);
-			
+
 			return super.visit(node);
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
 		 */
 		public boolean visit(IfStatement statement) {
 			handle(statement.getThenStatement(), IfStatement.THEN_STATEMENT_PROPERTY);
-			
+
 			Statement elseStatement= statement.getElseStatement();
 			if (elseStatement != null && !(elseStatement instanceof IfStatement)) {
 				handle(elseStatement, IfStatement.ELSE_STATEMENT_PROPERTY);
 			}
-			
+
 			return super.visit(statement);
 		}
 
@@ -101,7 +101,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		 */
 		public boolean visit(WhileStatement node) {
 			handle(node.getBody(), WhileStatement.BODY_PROPERTY);
-			
+
 			return super.visit(node);
 		}
 
@@ -111,7 +111,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			Statement parent= (Statement)body.getParent();
 			if ((parent.getFlags() & ASTNode.RECOVERED) != 0)
 				return;
-			
+
 			if (fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
 				if (!(body instanceof Block)) {
 					if (body.getNodeType() != ASTNode.IF_STATEMENT && body.getNodeType() != ASTNode.RETURN_STATEMENT && body.getNodeType() != ASTNode.THROW_STATEMENT) {
@@ -134,30 +134,30 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 	}
-	
+
 	private static class IfElseIterator {
-		
+
 		private IfStatement fCursor;
-		
+
 		public IfElseIterator(IfStatement item) {
 			fCursor= findStart(item);
 		}
-		
+
 		public IfStatement next() {
 			if (!hasNext())
 				return null;
-			
+
 			IfStatement result= fCursor;
-			
+
 			if (fCursor.getElseStatement() instanceof IfStatement) {
 				fCursor= (IfStatement)fCursor.getElseStatement();
 			} else {
 				fCursor= null;
 			}
-			
+
 			return result;
 		}
-		
+
 		public boolean hasNext() {
 			return fCursor != null;
 		}
@@ -169,7 +169,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
             return item;
         }
 	}
-	
+
 	private static final class AddBlockOperation extends CompilationUnitRewriteOperation {
 
 		private final ChildPropertyDescriptor fBodyProperty;
@@ -195,7 +195,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			} else {
 				label = FixMessages.CodeStyleFix_ChangeControlToBlock_description;
 			}
-			
+
 			TextEditGroup group= createTextEditGroup(label, cuRewrite);
 			ASTNode moveTarget= rewrite.createMoveTarget(fBody);
 			Block replacingBody= cuRewrite.getRoot().getAST().newBlock();
@@ -204,7 +204,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 	}
-	
+
 	static class RemoveBlockOperation extends CompilationUnitRewriteOperation {
 
 		private final Statement fStatement;
@@ -224,15 +224,15 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			Block block= (Block)fStatement.getStructuralProperty(fChild);
 			Statement statement= (Statement)block.statements().get(0);
 			Statement moveTarget= (Statement)rewrite.createMoveTarget(statement);
-			
+
 			TextEditGroup group= createTextEditGroup(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, cuRewrite);
 			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
-		
+
 		public static boolean satisfiesCleanUpPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows) {
 			return satisfiesPrecondition(controlStatement, childDescriptor, onlyReturnAndThrows, true);
 		}
-		
+
 		public static boolean satisfiesQuickAssistPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor) {
 			return satisfiesPrecondition(controlStatement, childDescriptor, false, false);
 		}
@@ -240,21 +240,21 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		//Can the block around child with childDescriptor of controlStatement be removed?
         private static boolean satisfiesPrecondition(Statement controlStatement, ChildPropertyDescriptor childDescriptor, boolean onlyReturnAndThrows, boolean cleanUpCheck) {
         	Object child= controlStatement.getStructuralProperty(childDescriptor);
-        	
+
         	if (!(child instanceof Block))
         		return false;
-        	
+
         	Block block= (Block)child;
         	List list= block.statements();
         	if (list.size() != 1)
         		return false;
-        	
+
         	ASTNode singleStatement= (ASTNode)list.get(0);
-        	
+
         	if (onlyReturnAndThrows)
         		if (!(singleStatement instanceof ReturnStatement) && !(singleStatement instanceof ThrowStatement))
         			return false;
-        	
+
         	if (controlStatement instanceof IfStatement) {
         		// if (true) {
         		//  while (true)
@@ -262,14 +262,14 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
         		//    ;
         		// } else
         		//   ;
-        		
+
         		if (((IfStatement)controlStatement).getThenStatement() != child)
         			return true;//can always remove blocks in else part
-        		
+
         		IfStatement ifStatement= (IfStatement)controlStatement;
         		if (ifStatement.getElseStatement() == null)
         			return true;//can always remove if no else part
-        		
+
         		return !hasUnblockedIf((Statement)singleStatement, onlyReturnAndThrows, cleanUpCheck);
         	} else {
         		//if (true)
@@ -281,7 +281,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
         		// ;
         		if (!hasUnblockedIf((Statement)singleStatement, onlyReturnAndThrows, cleanUpCheck))
         			return true;
-        		
+
         		ASTNode currentChild= controlStatement;
         		ASTNode parent= currentChild.getParent();
         		while (true) {
@@ -303,7 +303,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
         			}
         			if (body != currentChild)//->parents child is a block
         				return true;
-        			
+
         			currentChild= parent;
         			parent= currentChild.getParent();
         		}
@@ -335,7 +335,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 	        			} else {
 	        				if (!satisfiesPrecondition(p, childD, onlyReturnAndThrows, cleanUpCheck))
 	        					return false;
-	        				
+
 	        				p= (Statement)((Block)body).statements().get(0);
 	        			}
 	        		} else {
@@ -352,24 +352,24 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 		}
 		Statement statement= (Statement) node;
-		
+
 		if (statement instanceof Block) {
 			Block block= (Block)statement;
 			if (block.statements().size() != 1)
 				return null;
-			
+
 			ASTNode parent= block.getParent();
 			if (!(parent instanceof Statement))
 				return null;
-			
+
 			statement= (Statement)parent;
 		}
-		
+
 		if (statement instanceof IfStatement) {
 			List result= new ArrayList();
-			
+
 			List removeAllList= new ArrayList();
-			
+
 			IfElseIterator iter= new IfElseIterator((IfStatement)statement);
 			IfStatement item= null;
 			while (iter.hasNext()) {
@@ -381,19 +381,19 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 						result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op}));
             	}
 			}
-			
+
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(item, IfStatement.ELSE_STATEMENT_PROPERTY)) {
             	RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.ELSE_STATEMENT_PROPERTY);
 				removeAllList.add(op);
 				if (item == statement)
 					result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op}));
             }
-            
+
 			if (removeAllList.size() > 1) {
 				CompilationUnitRewriteOperation[] allConvert= (CompilationUnitRewriteOperation[])removeAllList.toArray(new CompilationUnitRewriteOperation[removeAllList.size()]);
 				result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert));
             }
-            
+
             return (ControlStatementsFix[])result.toArray(new ControlStatementsFix[result.size()]);
 		} else if (statement instanceof WhileStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, WhileStatement.BODY_PROPERTY)) {
@@ -416,7 +416,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -424,17 +424,17 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			boolean convertSingleStatementToBlock,
 			boolean removeUnnecessaryBlock,
 			boolean removeUnnecessaryBlockContainingReturnOrThrow) {
-		
+
 		if (!convertSingleStatementToBlock && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
 			return null;
-		
+
 		List operations= new ArrayList();
 		ControlStatementFinder finder= new ControlStatementFinder(convertSingleStatementToBlock, removeUnnecessaryBlock, removeUnnecessaryBlockContainingReturnOrThrow, operations);
 		compilationUnit.accept(finder);
-		
+
 		if (operations.isEmpty())
 			return null;
-		
+
 		CompilationUnitRewriteOperation[] ops= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new ControlStatementsFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
 	}

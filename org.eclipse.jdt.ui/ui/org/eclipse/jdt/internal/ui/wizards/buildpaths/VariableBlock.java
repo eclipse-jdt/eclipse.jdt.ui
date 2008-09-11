@@ -16,6 +16,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,13 +30,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -63,40 +63,40 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 
 public class VariableBlock {
-	
+
 	private final ListDialogField fVariablesList;
 	private Control fControl;
 	private CLabel fWarning;
 	private boolean fHasChanges;
-	
+
 	private List fSelectedElements;
 	private boolean fAskToBuild;
 	private final boolean fEditOnDoubleclick;
-	
-	
+
+
 	public VariableBlock(boolean inPreferencePage, String initSelection) {
-		
+
 		fSelectedElements= new ArrayList(0);
 		fEditOnDoubleclick= inPreferencePage;
 		fAskToBuild= true;
-		
-		String[] buttonLabels= new String[] { 
-			NewWizardMessages.VariableBlock_vars_add_button, 
-			NewWizardMessages.VariableBlock_vars_edit_button, 
+
+		String[] buttonLabels= new String[] {
+			NewWizardMessages.VariableBlock_vars_add_button,
+			NewWizardMessages.VariableBlock_vars_edit_button,
 			NewWizardMessages.VariableBlock_vars_remove_button
 		};
-				
+
 		VariablesAdapter adapter= new VariablesAdapter();
-		
+
 		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(inPreferencePage);
-		
+
 		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
-		fVariablesList.setLabelText(NewWizardMessages.VariableBlock_vars_label); 
+		fVariablesList.setLabelText(NewWizardMessages.VariableBlock_vars_label);
 		fVariablesList.setRemoveButtonIndex(2);
-		
+
 		fVariablesList.enableButton(1, false);
-		
+
 		fVariablesList.setViewerComparator(new ViewerComparator() {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {
@@ -107,67 +107,67 @@ public class VariableBlock {
 		});
 		refresh(initSelection);
 	}
-	
+
 	public boolean hasChanges() {
 		return fHasChanges;
 	}
-	
+
 	public void setChanges(boolean hasChanges) {
 		fHasChanges= hasChanges;
 	}
-	
+
 	public Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		
+
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, 0, 0);
 		LayoutUtil.setHorizontalGrabbing(fVariablesList.getListControl(null));
-		
+
 		fWarning= new CLabel(composite, SWT.NONE);
 		fWarning.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, fVariablesList.getNumberOfControls() - 1, 1));
-		
+
 		fControl= composite;
 		updateDeprecationWarning();
-		
+
 		return composite;
 	}
-	
+
 	public void addDoubleClickListener(IDoubleClickListener listener) {
 		fVariablesList.getTableViewer().addDoubleClickListener(listener);
 	}
-	
+
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		fVariablesList.getTableViewer().addSelectionChangedListener(listener);
-	}	
-		
-	
+	}
+
+
 	private Shell getShell() {
 		if (fControl != null) {
 			return fControl.getShell();
 		}
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
-	
+
 	private class VariablesAdapter implements IDialogFieldListener, IListAdapter {
-		
+
 		// -------- IListAdapter --------
-			
+
 		public void customButtonPressed(ListDialogField field, int index) {
 			switch (index) {
 			case 0: /* add */
 				editEntries(null);
 				break;
 			case 1: /* edit */
-				List selected= field.getSelectedElements();			
+				List selected= field.getSelectedElements();
 				editEntries((CPVariableElement)selected.get(0));
 				break;
 			}
 		}
-		
+
 		public void selectionChanged(ListDialogField field) {
 			doSelectionChanged(field);
 		}
-		
+
 		public void doubleClicked(ListDialogField field) {
 			if (fEditOnDoubleclick) {
 				List selected= field.getSelectedElements();
@@ -175,15 +175,15 @@ public class VariableBlock {
 					editEntries((CPVariableElement) selected.get(0));
 				}
 			}
-		}			
-			
+		}
+
 		// ---------- IDialogFieldListener --------
-	
+
 		public void dialogFieldChanged(DialogField field) {
 		}
-	
+
 	}
-	
+
 	private boolean containsReadOnly(List selected) {
 		for (int i= selected.size()-1; i >= 0; i--) {
 			if (((CPVariableElement)selected.get(i)).isReadOnly()) {
@@ -192,23 +192,23 @@ public class VariableBlock {
 		}
 		return false;
 	}
-	
+
 	private boolean canEdit(List selected, boolean containsReadOnly) {
 		return selected.size() == 1 && !containsReadOnly;
 	}
-		
+
 	/**
-	 * @param field the dialog field 
+	 * @param field the dialog field
 	 */
 	private void doSelectionChanged(DialogField field) {
 		List selected= fVariablesList.getSelectedElements();
 		boolean containsReadOnly= containsReadOnly(selected);
-		
+
 		// edit
 		fVariablesList.enableButton(1, canEdit(selected, containsReadOnly));
 		// remove button
 		fVariablesList.enableButton(2, !containsReadOnly);
-		
+
 		fSelectedElements= selected;
 		updateDeprecationWarning();
 	}
@@ -216,7 +216,7 @@ public class VariableBlock {
 	private void updateDeprecationWarning() {
 		if (fWarning == null || fWarning.isDisposed())
 			return;
-		
+
 		for (Iterator iter= fSelectedElements.iterator(); iter.hasNext();) {
 			CPVariableElement element= (CPVariableElement) iter.next();
 			String deprecationMessage= element.getDeprecationMessage();
@@ -229,7 +229,7 @@ public class VariableBlock {
 		fWarning.setText(null);
 		fWarning.setImage(null);
 	}
-	
+
 	private void editEntries(CPVariableElement entry) {
 		List existingEntries= fVariablesList.getElements();
 
@@ -253,11 +253,11 @@ public class VariableBlock {
 		}
 		fVariablesList.selectElements(new StructuredSelection(entry));
 	}
-	
+
 	public List getSelectedElements() {
 		return fSelectedElements;
 	}
-	
+
 	public boolean performOk() {
 		ArrayList removedVariables= new ArrayList();
 		ArrayList changedVariables= new ArrayList();
@@ -282,12 +282,12 @@ public class VariableBlock {
 		}
 		int steps= changedElements.size() + removedVariables.size();
 		if (steps > 0) {
-			
+
 			boolean needsBuild= false;
 			if (fAskToBuild && doesChangeRequireFullBuild(removedVariables, changedVariables)) {
-				String title= NewWizardMessages.VariableBlock_needsbuild_title; 
-				String message= NewWizardMessages.VariableBlock_needsbuild_message; 
-				
+				String title= NewWizardMessages.VariableBlock_needsbuild_title;
+				String message= NewWizardMessages.VariableBlock_needsbuild_message;
+
 				MessageDialog buildDialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
 				int res= buildDialog.open();
 				if (res != 0 && res != 1) {
@@ -295,8 +295,8 @@ public class VariableBlock {
 				}
 				needsBuild= (res == 0);
 			}
-			
-			final VariableBlockRunnable runnable= new VariableBlockRunnable(removedVariables, changedElements);			
+
+			final VariableBlockRunnable runnable= new VariableBlockRunnable(removedVariables, changedElements);
 			final ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			try {
 				dialog.run(true, true, runnable);
@@ -306,14 +306,14 @@ public class VariableBlock {
 			} catch (InterruptedException e) {
 				return false;
 			}
-			
+
 			if (needsBuild) {
 				CoreUtility.getBuildJob(null).schedule();
 			}
 		}
 		return true;
 	}
-	
+
 	private boolean doesChangeRequireFullBuild(List removed, List changed) {
 		try {
 			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
@@ -335,24 +335,24 @@ public class VariableBlock {
 		}
 		return false;
 	}
-	
+
 	private class VariableBlockRunnable implements IRunnableWithProgress {
 		private final List fToRemove;
 		private final List fToChange;
-		
+
 		public VariableBlockRunnable(List toRemove, List toChange) {
 			fToRemove= toRemove;
 			fToChange= toChange;
 		}
-		
+
 		/*
 	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 		 */
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			monitor.beginTask(NewWizardMessages.VariableBlock_operation_desc, 1); 
+			monitor.beginTask(NewWizardMessages.VariableBlock_operation_desc, 1);
 			try {
 				setVariables(monitor);
-				
+
 			} catch (CoreException e) {
 				throw new InvocationTargetException(e);
 			} catch (OperationCanceledException e) {
@@ -364,11 +364,11 @@ public class VariableBlock {
 
 		public void setVariables(IProgressMonitor monitor) throws JavaModelException, CoreException {
 			int nVariables= fToChange.size() + fToRemove.size();
-			
+
 			String[] names= new String[nVariables];
 			IPath[] paths= new IPath[nVariables];
 			int k= 0;
-			
+
 			for (int i= 0; i < fToChange.size(); i++) {
 				CPVariableElement curr= (CPVariableElement) fToChange.get(i);
 				names[k]= curr.getName();
@@ -378,12 +378,12 @@ public class VariableBlock {
 			for (int i= 0; i < fToRemove.size(); i++) {
 				names[k]= (String) fToRemove.get(i);
 				paths[k]= null;
-				k++;					
+				k++;
 			}
 			JavaCore.setClasspathVariables(names, paths, new SubProgressMonitor(monitor, 1));
 		}
 	}
-	
+
 	/**
 	 * If set to true, a dialog will ask the user to build on variable changed
 	 * @param askToBuild The askToBuild to set
@@ -397,7 +397,7 @@ public class VariableBlock {
 	 */
 	public void refresh(String initSelection) {
 		CPVariableElement initSelectedElement= null;
-		
+
 		String[] entries= JavaCore.getClasspathVariableNames();
 		ArrayList elements= new ArrayList(entries.length);
 		for (int i= 0; i < entries.length; i++) {
@@ -410,23 +410,23 @@ public class VariableBlock {
 				if (name.equals(initSelection)) {
 					initSelectedElement= elem;
 				}
-			} else {				
+			} else {
 				JavaPlugin.logErrorMessage("VariableBlock: Classpath variable with null value: " + name); //$NON-NLS-1$
 			}
 		}
-		
+
 		fVariablesList.setElements(elements);
-		
+
 		if (initSelectedElement != null) {
 			ISelection sel= new StructuredSelection(initSelectedElement);
 			fVariablesList.selectElements(sel);
 		} else {
 			fVariablesList.selectFirstElement();
 		}
-		
+
 		fHasChanges= false;
 	}
-	
+
 	public void setSelection(String elementName) {
 		for (int i= 0; i < fVariablesList.getSize(); i++) {
 			CPVariableElement elem= (CPVariableElement) fVariablesList.getElement(i);
@@ -436,6 +436,6 @@ public class VariableBlock {
 			}
 		}
 	}
-	
+
 
 }

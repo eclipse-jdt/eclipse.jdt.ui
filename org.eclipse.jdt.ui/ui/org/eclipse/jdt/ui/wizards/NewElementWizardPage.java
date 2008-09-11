@@ -21,32 +21,32 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  * Base class for wizard page responsible to create Java elements. The class
  * provides API to update the wizard's status line and OK button according to
  * the value of a <code>IStatus</code> object.
- * 
+ *
  * <p>
  * Clients may subclass.
  * </p>
- * 
+ *
  * @since 2.0
  */
 public abstract class NewElementWizardPage extends WizardPage {
 
 	private IStatus fCurrStatus;
-	
+
 	private boolean fPageVisible;
 
 	/**
 	 * Creates a <code>NewElementWizardPage</code>.
-	 * 
+	 *
 	 * @param name the wizard page's name
-	 */	
+	 */
 	public NewElementWizardPage(String name) {
 		super(name);
 		fPageVisible= false;
 		fCurrStatus=  new StatusInfo();
 	}
-		
+
 	// ---- WizardPage ----------------
-	
+
 	/*
 	 * @see WizardPage#becomesVisible
 	 */
@@ -58,13 +58,13 @@ public abstract class NewElementWizardPage extends WizardPage {
 			StatusInfo status= new StatusInfo();
 			status.setError("");  //$NON-NLS-1$
 			fCurrStatus= status;
-		} 
+		}
 		updateStatus(fCurrStatus);
-	}	
+	}
 
 	/**
 	 * Updates the status line and the OK button according to the given status
-	 * 
+	 *
 	 * @param status status to apply
 	 */
 	protected void updateStatus(IStatus status) {
@@ -74,16 +74,16 @@ public abstract class NewElementWizardPage extends WizardPage {
 			StatusUtil.applyToStatusLine(this, status);
 		}
 	}
-	
+
 	/**
 	 * Updates the status line and the OK button according to the status evaluate from
-	 * an array of status. The most severe error is taken.  In case that two status with 
+	 * an array of status. The most severe error is taken.  In case that two status with
 	 * the same severity exists, the status with lower index is taken.
-	 * 
+	 *
 	 * @param status the array of status
 	 */
 	protected void updateStatus(IStatus[] status) {
 		updateStatus(StatusUtil.getMostSevere(status));
-	}	
-			
+	}
+
 }

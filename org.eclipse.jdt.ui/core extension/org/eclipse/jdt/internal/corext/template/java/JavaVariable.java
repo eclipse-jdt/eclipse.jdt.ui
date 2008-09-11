@@ -36,13 +36,13 @@ public final class JavaVariable extends MultiVariable {
 
 	/**
 	 * Returns the type given as parameter to this variable.
-	 * 
+	 *
 	 * @return the type given as parameter to this variable
 	 */
 	public String getParamType() {
 		return fParamType;
 	}
-	
+
 	/**
 	 * @param paramType the paramType
 	 * @since 3.3

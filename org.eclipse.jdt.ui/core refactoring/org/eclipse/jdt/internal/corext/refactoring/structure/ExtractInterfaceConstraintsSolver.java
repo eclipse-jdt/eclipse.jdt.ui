@@ -30,7 +30,7 @@ public final class ExtractInterfaceConstraintsSolver extends SuperTypeConstraint
 
 	/**
 	 * Creates a new extract interface constraints solver.
-	 * 
+	 *
 	 * @param model the model to solve
 	 * @param name the name of the extracted type
 	 */

@@ -30,8 +30,8 @@ public class ReorgCopyWizard extends RefactoringWizard {
 
 	public ReorgCopyWizard(JavaCopyProcessor processor, Refactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | NO_PREVIEW_PAGE);
-		fProcessor= processor; 
-		setDefaultPageTitle(ReorgMessages.ReorgCopyWizard_1); 
+		fProcessor= processor;
+		setDefaultPageTitle(ReorgMessages.ReorgCopyWizard_1);
 	}
 
 	/* (non-Javadoc)
@@ -40,11 +40,11 @@ public class ReorgCopyWizard extends RefactoringWizard {
 	protected void addUserInputPages() {
 		addPage(new CopyInputPage(fProcessor));
 	}
-	
+
 	private static class CopyInputPage extends ReorgUserInputPage{
 
 		private static final String PAGE_NAME= "CopyInputPage"; //$NON-NLS-1$
-		
+
 		private final JavaCopyProcessor fProcessor;
 
 		public CopyInputPage(JavaCopyProcessor processor) {
@@ -71,9 +71,9 @@ public class ReorgCopyWizard extends RefactoringWizard {
 		protected IReorgDestinationValidator getDestinationValidator() {
 			return getCopyProcessor();
 		}
-		
+
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			return getCopyProcessor().setDestination(ReorgDestinationFactory.createDestination(selected));
-		}		
+		}
 	}
 }

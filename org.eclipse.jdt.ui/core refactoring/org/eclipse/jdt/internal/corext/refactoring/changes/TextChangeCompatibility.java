@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
@@ -42,7 +42,7 @@ public class TextChangeCompatibility {
 		insert(root, edit);
 		change.addTextEditGroup(new TextEditGroup(name, edit));
 	}
-	
+
 	public static void addTextEdit(TextChange change, String name, TextEdit edit, GroupCategorySet groupCategories) throws MalformedTreeException {
 		Assert.isNotNull(change);
 		Assert.isNotNull(name);
@@ -57,7 +57,7 @@ public class TextChangeCompatibility {
 			change,
 			new CategorizedTextEditGroup(name, edit, groupCategories)));
 	}
-	
+
 	public static void insert(TextEdit parent, TextEdit edit) throws MalformedTreeException {
 		if (!parent.hasChildren()) {
 			parent.addChild(edit);
@@ -84,13 +84,13 @@ public class TextChangeCompatibility {
 		}
 		parent.addChild(edit);
 	}
-	
+
 	private static boolean covers(TextEdit thisEdit, TextEdit otherEdit) {
 		if (thisEdit.getLength() == 0)	// an insertion point can't cover anything
 			return false;
-		
+
 		int thisOffset= thisEdit.getOffset();
-		int thisEnd= thisEdit.getExclusiveEnd();	
+		int thisEnd= thisEdit.getExclusiveEnd();
 		if (otherEdit.getLength() == 0) {
 			int otherOffset= otherEdit.getOffset();
 			return thisOffset < otherOffset && otherOffset < thisEnd;
@@ -99,6 +99,6 @@ public class TextChangeCompatibility {
 			int otherEnd= otherEdit.getExclusiveEnd();
 			return thisOffset <= otherOffset && otherEnd <= thisEnd;
 		}
-	}		
-	
+	}
+
 }

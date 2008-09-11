@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
  * Implementation of a Java completion proposal to be used for quick fix and quick assist
  * proposals that invoke a {@link Change}. The proposal offers a proposal information but no context
  * information.
- * 
+ *
  * @since 3.2
  */
 public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension5, ICompletionProposalExtension6 {
@@ -65,7 +65,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Constructs a change correction proposal.
-	 * 
+	 *
 	 * @param name The name that is displayed in the proposal selection dialog.
 	 * @param change The change that is executed when the proposal is applied or <code>null</code>
 	 * if the change will be created by implementors of {@link #createChange()}.
@@ -97,7 +97,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Performs the change associated with this proposal.
-	 * 
+	 *
 	 * @param activeEditor The editor currently active or <code>null</code> if no
 	 * editor is active.
 	 * @param document The document of the editor currently active or <code>null</code> if
@@ -153,7 +153,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 			}
 		}
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
@@ -161,7 +161,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		Object info= getAdditionalProposalInfo(new NullProgressMonitor());
 		return info == null ? null : info.toString();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.5
@@ -206,13 +206,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		}
 		return getName();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 */
 	public StyledString getStyledDisplayString() {
 		StyledString str= new StyledString(getName());
-		
+
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { getName(), shortCutString });
@@ -220,16 +220,16 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		}
 		return str;
 	}
-	
+
 	/**
 	 * Returns the name of the proposal.
-	 * 
+	 *
 	 * @return return the name of the proposal
 	 */
 	public String getName() {
 		return fName;
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
@@ -246,7 +246,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Sets the proposal's image or <code>null</code> if no image is desired.
-	 * 
+	 *
 	 * @param image the desired image.
 	 */
 	public void setImage(Image image) {
@@ -255,7 +255,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Returns the change that will be executed when the proposal is applied.
-	 * 
+	 *
 	 * @return returns the change for this proposal.
 	 * @throws CoreException thrown when the change could not be created
 	 */
@@ -270,17 +270,17 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * Creates the text change for this proposal.
 	 * This method is only called once and only when no text change has been passed in
  	 * {@link #ChangeCorrectionProposal(String, Change, int, Image)}.
- 	 * 
+ 	 *
 	 * @return returns the created change.
 	 * @throws CoreException thrown if the creation of the change failed.
 	 */
 	protected Change createChange() throws CoreException {
 		return new NullChange();
 	}
-	
+
 	/**
 	 * Sets the display name.
-	 * 
+	 *
 	 * @param name the name to set
 	 */
 	public void setDisplayName(String name) {
@@ -311,10 +311,10 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	public String getCommandId() {
 		return fCommandId;
 	}
-	
+
 	/**
 	 * Set the proposal id to allow assigning a shortcut to the correction proposal.
-	 * 
+	 *
 	 * @param commandId The proposal id for this proposal or <code>null</code> if no command
 	 * should be assigned to this proposal.
 	 */

@@ -21,13 +21,13 @@ class DoWhileFlowInfo extends FlowInfo {
 		fActionBranches= info.branches();
 
 		assign(info);
-				
+
 		if (fActionBranches && fReturnKind == VALUE_RETURN) {
 			fReturnKind= PARTIAL_RETURN;
 		}
-		
+
 	}
-	
+
 	public void mergeCondition(FlowInfo info, FlowContext context) {
 		if (fActionBranches || fReturnKind == VALUE_RETURN || fReturnKind == VOID_RETURN || info == null)
 			return;

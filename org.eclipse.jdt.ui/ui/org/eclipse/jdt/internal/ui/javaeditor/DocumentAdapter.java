@@ -18,8 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.UndoEdit;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -29,16 +28,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourceAttributes;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourceAttributes;
-
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
@@ -101,7 +101,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
 	/**
 	 * Run the given runnable in the UI thread.
-	 * 
+	 *
 	 * @param runnable the runnable
 	 * @since 3.3
 	 */
@@ -158,10 +158,10 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 			DocumentAdapter.run(this);
 		}
 	}
-	
+
 	/**
 	 * Executes a document replace call in the UI thread.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	protected class ApplyTextEditCommand implements Runnable {
@@ -187,7 +187,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 		}
 	}
 
-		
+
 	private static final boolean DEBUG_LINE_DELIMITERS= true;
 
 	private IOpenable fOwner;
@@ -208,7 +208,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	 * @since 3.2
 	 */
 	private IPath fPath;
-	
+
 	/*
 	 * @since 3.3
 	 */
@@ -217,24 +217,24 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
 	/**
 	 * Constructs a new document adapter.
-	 * 
+	 *
 	 * @param owner the owner of this buffer
 	 * @param path the path of the file that backs the buffer
 	 * @since 3.2
 	 */
 	public DocumentAdapter(IOpenable owner, IPath path) {
 		Assert.isLegal(path != null);
-		
+
 		fOwner= owner;
 		fPath= path;
 		fLocationKind= LocationKind.NORMALIZE;
-		
+
 		initialize();
 	}
-	
+
 	/**
 	 * Constructs a new document adapter.
-	 * 
+	 *
 	 * @param owner the owner of this buffer
 	 * @param file the <code>IFile</code> that backs the buffer
 	 */
@@ -265,7 +265,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
 	/**
 	 * Returns the status of this document adapter.
-	 * 
+	 *
 	 * @return the status
 	 */
 	public IStatus getStatus() {
@@ -423,11 +423,11 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	public boolean isReadOnly() {
 		if (fTextFileBuffer != null)
 			return !fTextFileBuffer.isCommitable();
-		
+
 		IResource resource= getUnderlyingResource();
 		if (resource == null)
 			return true;
-			
+
 		final ResourceAttributes attributes= resource.getResourceAttributes();
 		return attributes == null ? false : attributes.isReadOnly();
 	}
@@ -570,5 +570,5 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	public UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModelException {
 		return fTextEditCmd.applyTextEdit(edit);
 	}
-	
+
 }

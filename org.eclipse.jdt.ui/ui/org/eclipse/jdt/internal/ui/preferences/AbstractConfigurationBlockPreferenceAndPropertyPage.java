@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.runtime.preferences.IScopeContext;
-
-import org.eclipse.core.resources.IProject;
+import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.preferences.IScopeContext;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferencePageContainer;
@@ -27,32 +29,30 @@ import org.eclipse.ui.preferences.WorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.osgi.service.prefs.BackingStoreException;
-
 /**
  * Abstract preference and property page which is used to wrap a
  * {@link org.eclipse.jdt.internal.ui.preferences.IPreferenceAndPropertyConfigurationBlock}.
- * 
+ *
  * @since 3.3
  */
 public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extends PropertyAndPreferencePage {
-	
+
 	private IPreferenceAndPropertyConfigurationBlock fConfigurationBlock;
 	private PreferencesAccess fAccess;
-	
+
 	public AbstractConfigurationBlockPreferenceAndPropertyPage() {
 	}
-	
+
 	/**
 	 * Create a configuration block which does modify settings in <code>context</code>.
-	 * 
+	 *
 	 * @param context the context to modify
 	 * @return the preference block, not null
 	 */
 	protected abstract IPreferenceAndPropertyConfigurationBlock createConfigurationBlock(IScopeContext context);
-	
+
 	protected abstract String getHelpId();
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -60,12 +60,12 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), getHelpId());
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected Control createPreferenceContent(Composite parent) {
-		
+
 		IPreferencePageContainer container= getContainer();
 		IWorkingCopyManager manager;
 		if (container instanceof IWorkbenchPreferenceContainer) {
@@ -81,32 +81,32 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 		} else {
 			context= fAccess.getInstanceScope();
 		}
-		
+
 		fConfigurationBlock= createConfigurationBlock(context);
-		
+
 		Control content= fConfigurationBlock.createControl(parent);
-		
+
 		fConfigurationBlock.initialize();
-		
+
 		Dialog.applyDialogFont(content);
 		return content;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean performOk() {
 		fConfigurationBlock.performOk();
-		
+
 		try {
 	        fAccess.applyChanges();
         } catch (BackingStoreException e) {
 	        JavaPlugin.log(e);
         }
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -114,7 +114,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 		fConfigurationBlock.performDefaults();
 		super.performDefaults();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -122,7 +122,7 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 		fConfigurationBlock.dispose();
 		super.dispose();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

@@ -16,9 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
@@ -31,6 +28,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -99,7 +99,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
 	private Map fTypeHierarchies= new HashMap();
-	
+
 	/**
 	 * Category filter action group.
 	 * @since 3.2
@@ -162,10 +162,10 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		public boolean isShowDefiningType() {
 			return fShowDefiningType;
 		}
-		
+
 		private IType getDefiningType(Object element) throws JavaModelException {
 			int kind= ((IJavaElement) element).getElementType();
-		
+
 			if (kind != IJavaElement.METHOD && kind != IJavaElement.FIELD && kind != IJavaElement.INITIALIZER) {
 				return null;
 			}
@@ -194,7 +194,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		private OutlineTreeViewer(Tree tree) {
 			super(tree);
-			
+
 		}
 
 		/**
@@ -497,27 +497,27 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			});
 		}
 	}
-	
+
 	/**
 	 * String matcher that can match two patterns.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	private static class OrStringMatcher extends StringMatcher {
-		
+
 		private StringMatcher fMatcher1;
 		private StringMatcher fMatcher2;
-		
+
 		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase, boolean foo) {
 			super("", false, false); //$NON-NLS-1$
 			fMatcher1= new StringMatcher(pattern1, ignoreCase, false);
 			fMatcher2= new StringMatcher(pattern2, ignoreCase, false);
 		}
-		
+
 		public boolean match(String text) {
 			return fMatcher2.match(text) || fMatcher1.match(text);
 		}
-		
+
 	}
 
 
@@ -622,7 +622,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			fInput= je.getAncestor(IJavaElement.CLASS_FILE);
 
 		inputChanged(fInput, information);
-		
+
 		fCategoryFilterActionGroup.setInput(getInputForCategories());
 	}
 
@@ -669,17 +669,17 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 */
 	protected void fillViewMenu(IMenuManager viewMenu) {
 		super.fillViewMenu(viewMenu);
-		viewMenu.add(fShowOnlyMainTypeAction); 
+		viewMenu.add(fShowOnlyMainTypeAction);
 
 		viewMenu.add(new Separator("Sorters")); //$NON-NLS-1$
 		viewMenu.add(fLexicalSortingAction);
 
 		viewMenu.add(fSortByDefiningTypeAction);
-		
+
 		fCategoryFilterActionGroup.setInput(getInputForCategories());
-		fCategoryFilterActionGroup.contributeToViewMenu(viewMenu);	
+		fCategoryFilterActionGroup.contributeToViewMenu(viewMenu);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#setMatcherString(java.lang.String, boolean)
 	 * @since 3.2
@@ -690,20 +690,20 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			super.setMatcherString(pattern, update);
 			return;
 		}
-		
+
 		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
 		String pattern2= "*" + JavaElementLabels.CONCAT_STRING + pattern; //$NON-NLS-1$
 		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase, false);
 
 		if (update)
 			stringMatcherUpdated();
-		
+
 	}
 
 	private IJavaElement[] getInputForCategories() {
 		if (fInput == null)
 			return new IJavaElement[0];
-		
+
 		if (fOutlineContentProvider.isShowingInheritedMembers()) {
 			IJavaElement p= fInput;
 			if (p instanceof ITypeRoot) {
@@ -714,11 +714,11 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			}
 			if (!(p instanceof IType))
 				return new IJavaElement[] {fInput};
-			
+
 			ITypeHierarchy hierarchy= getSuperTypeHierarchy((IType)p);
 			if (hierarchy == null)
 				return new IJavaElement[] {fInput};
-			
+
 			IType[] supertypes= hierarchy.getAllSupertypes((IType)p);
 			IJavaElement[] result= new IJavaElement[supertypes.length + 1];
 			result[0]= fInput;
@@ -728,7 +728,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			return new IJavaElement[] {fInput};
 		}
 	}
-	
+
 	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
 		ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type);
 		if (th == null) {
@@ -755,5 +755,5 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		return editor.getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor();
 	}
-	
+
 }

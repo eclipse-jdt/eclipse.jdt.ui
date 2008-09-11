@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRe
 
 /**
  * Refactoring contribution for the infer typearguments refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class InferTypeArgumentsRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class InferTypeArgumentsRefactoringContribution extends JavaRefacto
 	public RefactoringDescriptor createDescriptor() {
 		return new InferTypeArgumentsDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new InferTypeArgumentsDescriptor(project, description, comment, arguments, flags);
 	}

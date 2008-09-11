@@ -23,9 +23,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 public class CPUserLibraryElement {
-	
+
 	private  class UpdatedClasspathContainer implements IClasspathContainer {
-				
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
 		 */
@@ -59,8 +59,8 @@ public class CPUserLibraryElement {
 			return CPUserLibraryElement.this.getPath();
 		}
 	}
-	
-	
+
+
 	private String fName;
 	private List fChildren;
 	private boolean fIsSystemLibrary;
@@ -83,7 +83,7 @@ public class CPUserLibraryElement {
 			fIsSystemLibrary= false;
 		}
 	}
-	
+
 	public CPUserLibraryElement(String name, boolean isSystemLibrary, CPListElement[] children) {
 		fName= name;
 		fChildren= new ArrayList();
@@ -94,7 +94,7 @@ public class CPUserLibraryElement {
 		}
 		fIsSystemLibrary= isSystemLibrary;
 	}
-	
+
 	public CPListElement[] getChildren() {
 		return (CPListElement[]) fChildren.toArray(new CPListElement[fChildren.size()]);
 	}
@@ -102,7 +102,7 @@ public class CPUserLibraryElement {
 	public String getName() {
 		return fName;
 	}
-	
+
 	public IPath getPath() {
 		return new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(fName);
 	}
@@ -110,13 +110,13 @@ public class CPUserLibraryElement {
 	public boolean isSystemLibrary() {
 		return fIsSystemLibrary;
 	}
-	
+
 	public void add(CPListElement element) {
 		if (!fChildren.contains(element)) {
 			fChildren.add(element);
 		}
 	}
-		
+
 	private List moveUp(List elements, List move) {
 		int nElements= elements.size();
 		List res= new ArrayList(nElements);
@@ -137,13 +137,13 @@ public class CPUserLibraryElement {
 		}
 		return res;
 	}
-	
+
 	public void moveUp(List toMoveUp) {
 		if (toMoveUp.size() > 0) {
 			fChildren= moveUp(fChildren, toMoveUp);
 		}
 	}
-	
+
 	public void moveDown(List toMoveDown) {
 		if (toMoveDown.size() > 0) {
 			Collections.reverse(fChildren);
@@ -151,12 +151,12 @@ public class CPUserLibraryElement {
 			Collections.reverse(fChildren);
 		}
 	}
-	
-	
+
+
 	public void remove(CPListElement element) {
 		fChildren.remove(element);
 	}
-	
+
 	public void replace(CPListElement existingElement, CPListElement element) {
 		if (element.equals(existingElement)) {
 			// same element selected again: do nothing
@@ -172,11 +172,11 @@ public class CPUserLibraryElement {
 			element.setAttributesFromExisting(existingElement);
 		}
 	}
-	
+
 	public IClasspathContainer getUpdatedContainer() {
 		return new UpdatedClasspathContainer();
 	}
-		
+
 	public boolean hasChanges(IClasspathContainer oldContainer) {
 		if (oldContainer == null || (oldContainer.getKind() == IClasspathContainer.K_SYSTEM) != fIsSystemLibrary) {
 			return true;
@@ -193,7 +193,7 @@ public class CPUserLibraryElement {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns if a entry has children that are missing
 	 * @return Returns a boolean
@@ -207,5 +207,5 @@ public class CPUserLibraryElement {
 		}
 		return false;
 	}
-	
+
 }

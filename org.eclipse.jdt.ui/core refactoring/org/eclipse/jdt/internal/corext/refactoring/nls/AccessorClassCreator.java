@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,7 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEdit;
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -30,6 +28,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
@@ -86,7 +86,7 @@ public class AccessorClassCreator {
 		String lineDelimiter= StubUtility.getLineDelimiterPreference(project);
 		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, lineDelimiter, fCu.getJavaProject());
 	}
-	
+
 	private static IFile getFileHandle(IPath filePath) {
 		if (filePath == null)
 			return null;
@@ -122,7 +122,7 @@ public class AccessorClassCreator {
 				buf.append(classContent);
 				cuContent= buf.toString();
 			}
-			
+
 			newCu.getBuffer().setContents(cuContent);
 			addImportsToAccessorCu(newCu, pm);
 			return newCu.getSource();
@@ -151,16 +151,16 @@ public class AccessorClassCreator {
 			int constructorIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX);
 			int fieldIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX);
 			int initIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.STATIC_INIT_INDEX);
-			
+
 			String constructor= createConstructor(lineDelim) + lineDelim;
 			String initializer= createStaticInitializer(lineDelim) + lineDelim;
 			String fields= createStaticFields(lineDelim) + lineDelim;
-			
+
 			StringBuffer result= new StringBuffer();
 			result.append("public class ").append(fAccessorClassName).append(" extends NLS {"); //$NON-NLS-1$ //$NON-NLS-2$
 			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME).append(" = \"").append(getResourceBundleName()).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			result.append(NLSElement.createTagText(1)).append(lineDelim);
-			
+
 			if (constructorIdx < fieldIdx) {
 				if (fieldIdx < initIdx) {
 					result.append(constructor);
@@ -182,26 +182,26 @@ public class AccessorClassCreator {
 					result.append(constructor);
 				}
 			}
-			
+
 			result.append('}').append(lineDelim);
-			
+
 			return result.toString();
 		} else {
 			MembersOrderPreferenceCache sortOrder= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
 			int constructorIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX);
 			int methodIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.METHOD_INDEX);
-			
+
 			String constructor= lineDelim	+ createConstructor(lineDelim);
 			String method= lineDelim + createGetStringMethod(lineDelim);
-			
+
 			StringBuffer result= new StringBuffer();
 			result.append("public class ").append(fAccessorClassName).append(" {"); //$NON-NLS-1$ //$NON-NLS-2$
 			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME); //$NON-NLS-1$
 			result.append(" = \"").append(getResourceBundleName()).append("\"; ").append(NLSElement.createTagText(1)).append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
-			
+
 			result.append(lineDelim).append("private static final ResourceBundle ").append(getResourceBundleConstantName()); //$NON-NLS-1$
 			result.append("= ResourceBundle.getBundle(").append(NLSRefactoring.BUNDLE_NAME).append(");").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
-			
+
 			if (constructorIdx < methodIdx) {
 				result.append(constructor);
 				result.append(method);
@@ -209,9 +209,9 @@ public class AccessorClassCreator {
 				result.append(constructor);
 				result.append(method);
 			}
-			
+
 			result.append(lineDelim).append('}').append(lineDelim);
-			
+
 			return result.toString();
 		}
 	}
@@ -219,7 +219,7 @@ public class AccessorClassCreator {
 	private String getResourceBundleConstantName() {
 		return "RESOURCE_BUNDLE";//$NON-NLS-1$
 	}
-	
+
 	private String createStaticFields(String lineDelim) {
 		HashSet added= new HashSet();
 		List subs= new ArrayList();
@@ -252,10 +252,10 @@ public class AccessorClassCreator {
 		buf.append(substitution.getKey());
 		buf.append(';');
 	}
-	
+
 	private String createGetStringMethod(String lineDelim) throws CoreException {
 		StringBuffer result= new StringBuffer();
-		
+
 		result.append("public static String "); //$NON-NLS-1$
 		int i= fSubstitutionPattern.indexOf(NLSRefactoring.KEY);
 		if (i != -1) {
@@ -267,18 +267,18 @@ public class AccessorClassCreator {
 			result.append("getString(String key)"); //$NON-NLS-1$
 		}
 		result.append('{').append(lineDelim);
-		
+
 		result.append("try {").append(lineDelim) //$NON-NLS-1$
 				.append("return ") //$NON-NLS-1$
 				.append(getResourceBundleConstantName()).append(".getString(key);").append(lineDelim) //$NON-NLS-1$
 				.append("} catch (MissingResourceException e) {").append(lineDelim) //$NON-NLS-1$
 				.append("return '!' + key + '!';").append(lineDelim) //$NON-NLS-1$
 				.append("}"); //$NON-NLS-1$
-		
+
 		result.append(lineDelim).append('}');
 		return result.toString();
 	}
-	
+
 	private String createStaticInitializer(String lineDelim) throws CoreException {
 		return "static {" //$NON-NLS-1$
 		+ lineDelim

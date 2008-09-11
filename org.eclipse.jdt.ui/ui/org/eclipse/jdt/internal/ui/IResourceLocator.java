@@ -39,7 +39,7 @@ public interface IResourceLocator {
 	 *
 	 * <p>For example, the corresponding resource for an <code>ICompilationUnit</code>
 	 * is its underlying <code>IFile</code>. The corresponding resource for
-	 * an <code>IPackageFragment</code> that is not contained in an archive 
+	 * an <code>IPackageFragment</code> that is not contained in an archive
 	 * is its underlying <code>IFolder</code>. An <code>IPackageFragment</code>
 	 * contained in an archive has no corresponding resource. Similarly, there
 	 * are no corresponding resources for <code>IMethods</code>,

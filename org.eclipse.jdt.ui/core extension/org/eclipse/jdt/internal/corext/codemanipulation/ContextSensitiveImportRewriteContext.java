@@ -34,17 +34,17 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
- * This <code>ImportRewriteContext</code> is aware of all the types visible in 
+ * This <code>ImportRewriteContext</code> is aware of all the types visible in
  * <code>compilationUnit</code> at <code>position</code>.
  */
 public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
-	
+
 	private final CompilationUnit fCompilationUnit;
 	private final int fPosition;
 	private IBinding[] fDeclarationsInScope;
 	private Name[] fImportedNames;
 	private final ImportRewrite fImportRewrite;
-	
+
 	public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position, ImportRewrite importRewrite) {
 		fCompilationUnit= compilationUnit;
 		fPosition= position;
@@ -57,7 +57,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		int defaultResult= fImportRewrite.getDefaultImportRewriteContext().findInContext(qualifier, name, kind);
 		if (defaultResult != ImportRewriteContext.RES_NAME_UNKNOWN)
 			return defaultResult;
-		
+
 		IBinding[] declarationsInScope= getDeclarationsInScope();
 		for (int i= 0; i < declarationsInScope.length; i++) {
 			if (declarationsInScope[i] instanceof ITypeBinding) {
@@ -73,8 +73,8 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 				}
 			}
 		}
-		
-		
+
+
 		Name[] names= getImportedNames();
 		for (int i= 0; i < names.length; i++) {
 			IBinding binding= names[i].resolveBinding();
@@ -85,7 +85,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 				}
 			}
 		}
-		
+
 		List list= fCompilationUnit.types();
 		for (Iterator iter= list.iterator(); iter.hasNext();) {
 			AbstractTypeDeclaration type= (AbstractTypeDeclaration)iter.next();
@@ -104,7 +104,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 				}
 			}
 		}
-		
+
 		String[] addedImports= fImportRewrite.getAddedImports();
 		String qualifiedName= JavaModelUtil.concatenateName(qualifier, name);
 		for (int i= 0; i < addedImports.length; i++) {
@@ -116,7 +116,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 					return RES_NAME_CONFLICT;
 			}
 		}
-		
+
 		if (qualifier.equals("java.lang")) { //$NON-NLS-1$
 			//No explicit import statement required
 			ITypeRoot typeRoot= fCompilationUnit.getTypeRoot();
@@ -138,7 +138,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 				}
 			}
 		}
-		
+
 		return RES_NAME_UNKNOWN;
 	}
 
@@ -155,7 +155,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		}
 		return false;
 	}
-	
+
 	private ITypeBinding containingDeclaration(ITypeBinding binding, String qualifier, String name) {
 		ITypeBinding[] declaredTypes= binding.getDeclaredTypes();
 		for (int i= 0; i < declaredTypes.length; i++) {
@@ -180,12 +180,12 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		String qualifiedName= JavaModelUtil.concatenateName(qualifier, name);
 		return binding.getQualifiedName().equals(qualifiedName);
 	}
-	
+
 	private boolean isConflictingType(ITypeBinding binding, String qualifier, String name) {
 		binding= binding.getTypeDeclaration();
 		return !isSameType(binding, qualifier, name) && isConflicting(binding, name);
 	}
-	
+
 	private IBinding[] getDeclarationsInScope() {
 		if (fDeclarationsInScope == null) {
 			ScopeAnalyzer analyzer= new ScopeAnalyzer(fCompilationUnit);
@@ -193,14 +193,14 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		}
 		return fDeclarationsInScope;
 	}
-	
+
 	private Name[] getImportedNames() {
 		if (fImportedNames == null) {
 			IJavaProject project= null;
 			IJavaElement javaElement= fCompilationUnit.getJavaElement();
 			if (javaElement != null)
 				project= javaElement.getJavaProject();
-			
+
 			List imports= new ArrayList();
 			ImportReferencesCollector.collect(fCompilationUnit, project, null, imports, null);
 			fImportedNames= (Name[])imports.toArray(new Name[imports.size()]);

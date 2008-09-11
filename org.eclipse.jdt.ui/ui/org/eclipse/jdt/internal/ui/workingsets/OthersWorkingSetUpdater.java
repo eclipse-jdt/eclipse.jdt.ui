@@ -25,6 +25,14 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.IWorkingSetUpdater;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
@@ -36,21 +44,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
-import org.eclipse.ui.IWorkingSetUpdater;
-import org.eclipse.ui.PlatformUI;
-
 public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
-	
+
 	public static final String ID= "org.eclipse.jdt.internal.ui.OthersWorkingSet";  //$NON-NLS-1$
-	
+
 	private IWorkingSet fWorkingSet;
 	private WorkingSetModel fWorkingSetModel;
-	
+
 	private class ResourceChangeListener implements IResourceChangeListener {
 		public void resourceChanged(IResourceChangeEvent event) {
 			if (fWorkingSet == null)
@@ -73,7 +73,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		}
 	}
 	private IResourceChangeListener fResourceChangeListener;
-	
+
 	private class WorkingSetListener implements IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
@@ -85,12 +85,12 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		}
 	}
 	private IPropertyChangeListener fWorkingSetListener;
-	
+
 	private class JavaElementChangeListener implements IElementChangedListener {
 		public void elementChanged(ElementChangedEvent event) {
 			if (fWorkingSet == null)
 				return; // not yet initialized
-			
+
 			processJavaDelta(new ArrayList(Arrays.asList(fWorkingSet.getElements())), event.getDelta());
 		}
 		private void processJavaDelta(List elements, IJavaElementDelta delta) {
@@ -122,7 +122,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		}
 	}
 	private IElementChangedListener fJavaElementChangeListener;
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -130,7 +130,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		Assert.isTrue(fWorkingSet == null && fWorkingSetModel != null);
 		fWorkingSet= workingSet;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -139,14 +139,14 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		fWorkingSet= null;
 		return true;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean contains(IWorkingSet workingSet) {
 		return fWorkingSet == workingSet;
 	}
-	
+
 	public void init(WorkingSetModel model) {
 		fWorkingSetModel= model;
 		fResourceChangeListener= new ResourceChangeListener();
@@ -156,7 +156,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		fJavaElementChangeListener= new JavaElementChangeListener();
 		JavaCore.addElementChangedListener(fJavaElementChangeListener, ElementChangedEvent.POST_CHANGE);
 	}
-	
+
 	public void dispose() {
 		if (fResourceChangeListener != null) {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fResourceChangeListener);
@@ -170,10 +170,10 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			JavaCore.removeElementChangedListener(fJavaElementChangeListener);
 		}
 	}
-	
+
 	public void updateElements() {
 		Assert.isTrue(fWorkingSet != null && fWorkingSetModel != null); // init and addWorkingSet have happend
-		
+
 		IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
 
 		List result= new ArrayList();

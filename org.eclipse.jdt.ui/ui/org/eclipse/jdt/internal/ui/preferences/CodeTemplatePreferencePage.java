@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 
@@ -35,17 +35,17 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeTemplatePreferencePage"; //$NON-NLS-1$
-	
+
 	public static final String DATA_SELECT_TEMPLATE= "CodeTemplatePreferencePage.select_template"; //$NON-NLS-1$
-	
+
 	private CodeTemplateBlock fCodeTemplateConfigurationBlock;
 
 	public CodeTemplatePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		//setDescription(PreferencesMessages.getString("CodeTemplatesPreferencePage.description")); //$NON-NLS-1$
-		
+
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.CodeTemplatesPreferencePage_title);		 
+		setTitle(PreferencesMessages.CodeTemplatesPreferencePage_title);
 	}
 
 	/*
@@ -54,10 +54,10 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fCodeTemplateConfigurationBlock= new CodeTemplateBlock(getNewStatusChangedListener(), getProject(), container);
-		
+
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODE_TEMPLATES_PREFERENCE_PAGE);
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#createPreferenceContent(org.eclipse.swt.widgets.Composite)
@@ -65,7 +65,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 	protected Control createPreferenceContent(Composite composite) {
 		return fCodeTemplateConfigurationBlock.createContents(composite);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
 	 */
@@ -75,7 +75,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 			fCodeTemplateConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
 		}
 	}
-	
+
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
@@ -85,7 +85,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		}
 		return true;
 	}
-	
+
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
@@ -95,7 +95,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 			fCodeTemplateConfigurationBlock.performDefaults();
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -105,13 +105,13 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		}
 		super.dispose();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
 	 */
 	public void statusChanged(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
-		StatusUtil.applyToStatusLine(this, status);		
+		StatusUtil.applyToStatusLine(this, status);
 	}
 
 	/* (non-Javadoc)
@@ -137,7 +137,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */

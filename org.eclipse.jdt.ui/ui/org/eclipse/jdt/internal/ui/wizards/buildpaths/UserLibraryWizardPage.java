@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import com.ibm.icu.text.Collator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +18,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.ibm.icu.text.Collator;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -27,9 +30,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 
@@ -62,33 +62,33 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
  *
  */
 public class UserLibraryWizardPage extends NewElementWizardPage implements IClasspathContainerPage, IClasspathContainerPageExtension, IClasspathContainerPageExtension2  {
-	
+
 	private CheckedListDialogField fLibrarySelector;
 	private CPUserLibraryElement fEditResult;
 	private Set fUsedPaths;
 	private boolean fIsEditMode;
 	private IJavaProject fProject;
 	private boolean fIsExported;
-	
+
 	public UserLibraryWizardPage() {
 		super("UserLibraryWizardPage"); //$NON-NLS-1$
-		setTitle(NewWizardMessages.UserLibraryWizardPage_title); 
+		setTitle(NewWizardMessages.UserLibraryWizardPage_title);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		updateDescription(null);
 		fUsedPaths= new HashSet();
 		fProject= createPlaceholderProject();
-		
+
 		LibraryListAdapter adapter= new LibraryListAdapter();
 		String[] buttonLabels= new String[] {
 				NewWizardMessages.UserLibraryWizardPage_list_config_button
 		};
 		fLibrarySelector= new CheckedListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrarySelector.setDialogFieldListener(adapter);
-		fLibrarySelector.setLabelText(NewWizardMessages.UserLibraryWizardPage_list_label); 
+		fLibrarySelector.setLabelText(NewWizardMessages.UserLibraryWizardPage_list_label);
 		fEditResult= null;
 		updateStatus(validateSetting(Collections.EMPTY_LIST));
 	}
-    
+
     private static IJavaProject createPlaceholderProject() {
         String name= "####internal"; //$NON-NLS-1$
         IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
@@ -98,17 +98,17 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
                 return JavaCore.create(project);
             }
             name += '1';
-        }       
+        }
     }
 
 	private void updateDescription(IClasspathEntry containerEntry) {
 		if (containerEntry == null || containerEntry.getPath().segmentCount() != 2) {
-			setDescription(NewWizardMessages.UserLibraryWizardPage_description_new); 
+			setDescription(NewWizardMessages.UserLibraryWizardPage_description_new);
 		} else {
-			setDescription(NewWizardMessages.UserLibraryWizardPage_description_edit); 
+			setDescription(NewWizardMessages.UserLibraryWizardPage_description_edit);
 		}
 	}
-	
+
 	private List updateLibraryList() {
 		HashSet oldNames= new HashSet();
 		HashSet oldCheckedNames= new HashSet();
@@ -122,7 +122,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 
 		ArrayList entriesToCheck= new ArrayList();
-		
+
 		String[] names= JavaCore.getUserLibraryNames();
 		Arrays.sort(names, Collator.getInstance());
 
@@ -151,7 +151,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		fLibrarySelector.setElements(elements);
 		return entriesToCheck;
 	}
-		
+
 	private void doDialogFieldChanged(DialogField field) {
 		if (field == fLibrarySelector) {
 			List list= fLibrarySelector.getCheckedElements();
@@ -171,23 +171,23 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			updateStatus(validateSetting(list));
 		}
 	}
-	
+
 	private IStatus validateSetting(List selected) {
 		int nSelected= selected.size();
 		if (nSelected == 0) {
-			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectentry); 
+			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectentry);
 		} else if (fIsEditMode && nSelected > 1) {
-			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectonlyone); 
+			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectonlyone);
 		}
 		for (int i= 0; i < selected.size(); i++) {
 			CPUserLibraryElement curr= (CPUserLibraryElement) selected.get(i);
 			if (fUsedPaths.contains(curr.getPath())) {
-				return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_alreadyoncp); 
+				return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_alreadyoncp);
 			}
 		}
 		return new StatusInfo();
 	}
-	
+
 	private void doButtonPressed(int index) {
 		if (index == 0) {
 			HashMap data= new HashMap(3);
@@ -196,7 +196,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			}
 			String id= UserLibraryPreferencePage.ID;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, data).open();
-	
+
 			List newEntries= updateLibraryList();
 			if (newEntries.size() > 0) {
 				if (fIsEditMode) {
@@ -209,7 +209,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			fLibrarySelector.setCheckedElements(fLibrarySelector.getSelectedElements());
 		}
 	}
-	
+
 	private void doDoubleClicked(ListDialogField field) {
 		if (field == fLibrarySelector) {
 			List list= fLibrarySelector.getSelectedElements();
@@ -222,20 +222,20 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			}
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		
+
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrarySelector }, true, SWT.DEFAULT, SWT.DEFAULT);
 		LayoutUtil.setHorizontalGrabbing(fLibrarySelector.getListControl(null));
 		Dialog.applyDialogFont(composite);
 		setControl(composite);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#finish()
 	 */
@@ -252,7 +252,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2#getNewContainers()
 	 */
@@ -271,13 +271,13 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 */
 	public void setSelection(IClasspathEntry containerEntry) {
 		fIsExported= containerEntry != null && containerEntry.isExported();
-		
+
 		updateDescription(containerEntry);
 		fIsEditMode= (containerEntry != null);
 		if (containerEntry != null) {
 			fUsedPaths.remove(containerEntry.getPath());
 		}
-		
+
 		String selected= null;
 		if (containerEntry != null && containerEntry.getPath().segmentCount() == 2) {
 			selected= containerEntry.getPath().segment(1);
@@ -296,12 +296,12 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			}
 		}
 	}
-	
+
 	private class LibraryListAdapter implements IListAdapter, IDialogFieldListener {
-		
+
 		public LibraryListAdapter() {
 		}
-		
+
 		public void dialogFieldChanged(DialogField field) {
 			doDialogFieldChanged(field);
 		}

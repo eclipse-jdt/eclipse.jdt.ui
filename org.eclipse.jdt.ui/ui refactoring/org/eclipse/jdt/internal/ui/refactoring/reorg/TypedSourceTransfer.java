@@ -16,10 +16,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.TransferData;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 
@@ -29,16 +29,16 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 	 * Singleton instance.
 	 */
 	private static final TypedSourceTransfer fgInstance = new TypedSourceTransfer();
-	
+
 	// Create a unique ID to make sure that different Eclipse
 	// applications use different "types" of <code>TypedSourceTransfer</code>
 	private static final String TYPE_NAME = "typed-source-transfer-format:" + System.currentTimeMillis() + ":" + fgInstance.hashCode();//$NON-NLS-2$//$NON-NLS-1$
-	
+
 	private static final int TYPEID = registerType(TYPE_NAME);
 
 	private TypedSourceTransfer() {
 	}
-	
+
 	/**
 	 * Returns the singleton instance.
  	*
@@ -54,7 +54,7 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 	protected int[] getTypeIds() {
 		return new int[] {TYPEID};
 	}
-	
+
 	/* (non-Javadoc)
 	 * Returns the type names.
 	 *
@@ -70,7 +70,7 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 	protected void javaToNative(Object data, TransferData transferData) {
 		if (! (data instanceof TypedSource[]))
 			return;
-		TypedSource[] sources = (TypedSource[]) data;	
+		TypedSource[] sources = (TypedSource[]) data;
 
 		/*
 		 * The serialization format is:
@@ -79,7 +79,7 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 		 *  (int) type (see <code>IJavaElement</code>)
 		 *  (String) source of the element
 		 */
-		
+
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			DataOutputStream dataOut = new DataOutputStream(out);
@@ -96,14 +96,14 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 			super.javaToNative(out.toByteArray(), transferData);
 		} catch (IOException e) {
 			//it's best to send nothing if there were problems
-		}		
+		}
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on Transfer.
 	 */
 	protected Object nativeToJava(TransferData transferData) {
-	
+
 		byte[] bytes = (byte[]) super.nativeToJava(transferData);
 		if (bytes == null)
 			return null;

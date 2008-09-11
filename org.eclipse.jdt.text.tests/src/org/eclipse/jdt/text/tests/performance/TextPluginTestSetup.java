@@ -17,14 +17,14 @@ import java.util.zip.ZipException;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 
 public class TextPluginTestSetup extends TestSetup {
 
 	public static final String PROJECT= "org.eclipse.text";
-	
+
 	private static final String PROJECT_ZIP= "/testResources/org.eclipse.text-R3_0.zip";
 
 	private String fPreviousPerspective;
@@ -34,7 +34,7 @@ public class TextPluginTestSetup extends TestSetup {
 	public TextPluginTestSetup(Test test) {
 		this(test, null);
 	}
-	
+
 	public TextPluginTestSetup(Test test, String perspective) {
 		super(test);
 		fPerspective= perspective;
@@ -45,20 +45,20 @@ public class TextPluginTestSetup extends TestSetup {
 	 */
 	protected void setUp() throws Exception {
 		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
-		
+
 		if (fPerspective != null)
 			fPreviousPerspective= EditorTestHelper.showPerspective(fPerspective);
-		
+
 		boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
 		createProjectFromZip();
 		if (wasAutobuilding) {
 			ResourceTestHelper.fullBuild();
 			ResourceTestHelper.enableAutoBuilding();
 		}
-		
+
 		EditorTestHelper.joinBackgroundActivities();
 	}
-	
+
 	public static void createProjectFromZip() throws CoreException, IOException, ZipException {
 		if (ResourceTestHelper.projectExists(PROJECT))
 			ResourceTestHelper.getProject(PROJECT).delete(true, true, null);

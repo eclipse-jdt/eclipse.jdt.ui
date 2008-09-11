@@ -15,15 +15,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IMarker;
-
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
-	
+
 	private final static IMarkerResolution[] NO_RESOLUTION = new IMarkerResolution[0];
 
 	/* (non-Javadoc)
@@ -74,7 +74,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		}
 		return false;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
 	 */
@@ -83,18 +83,18 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		if (!hasResolutions(marker) || shell == null) {
 			return NO_RESOLUTION;
 		}
-		
+
 		ArrayList resolutions= new ArrayList();
-		
+
 		final IJavaProject project= getJavaProject(marker);
-		
+
 		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 		if (id == IJavaModelStatusConstants.CP_CONTAINER_PATH_UNBOUND) {
 			String[] arguments= CorrectionEngine.getProblemArguments(marker);
 			final IPath path= new Path(arguments[0]);
-			
+
 			if (path.segment(0).equals(JavaCore.USER_LIBRARY_CONTAINER_ID)) {
-				String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label; 
+				String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				resolutions.add(new UserLibraryMarkerResolution(label, image) {
 					public void run(IMarker m) {
@@ -102,7 +102,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 					}
 				});
 				if (path.segmentCount() == 2) {
-					String label2= Messages.format(NewWizardMessages.UserLibraryMarkerResolutionGenerator_createuserlib_label, path.segment(1)); 
+					String label2= Messages.format(NewWizardMessages.UserLibraryMarkerResolutionGenerator_createuserlib_label, path.segment(1));
 					Image image2= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_LIBRARY);
 					resolutions.add(new UserLibraryMarkerResolution(label2, image2) {
 						public void run(IMarker m) {
@@ -111,7 +111,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 					});
 				}
 			}
-			String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetoother; 
+			String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetoother;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			resolutions.add(new UserLibraryMarkerResolution(label, image) {
 				public void run(IMarker m) {
@@ -119,11 +119,11 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				}
 			});
 		}
-		
+
 		if (project != null) {
 			resolutions.add(new OpenBuildPathMarkerResolution(project));
 		}
-		
+
 		return (IMarkerResolution[]) resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 	}
 
@@ -151,7 +151,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			System.arraycopy(entries, 0, newEntries, 0, idx);
 			System.arraycopy(res, 0, newEntries, idx, res.length);
 			System.arraycopy(entries, idx + 1, newEntries, idx + res.length, entries.length - idx - 1);
-			
+
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 			if (context == null) {
 				context= PlatformUI.getWorkbench().getProgressService();
@@ -166,18 +166,18 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				}
 			});
 		} catch (JavaModelException e) {
-			String title= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_title; 
-			String message= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_creationfailed_message; 
+			String title= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_title;
+			String message= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_creationfailed_message;
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InvocationTargetException e) {
-			String title= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_title; 
-			String message= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_applyingfailed_message; 
+			String title= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_title;
+			String message= NewWizardMessages.UserLibraryMarkerResolutionGenerator_error_applyingfailed_message;
 			ExceptionHandler.handle(e, shell, title, message);
 		} catch (InterruptedException e) {
 			// user cancelled
 		}
 	}
-	
+
 	private int indexOfClasspath(IClasspathEntry[] entries, IPath path) {
 		for (int i= 0; i < entries.length; i++) {
 			IClasspathEntry curr= entries[i];
@@ -187,7 +187,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		}
 		return -1;
 	}
-	
+
 	protected void createUserLibrary(final Shell shell, IPath unboundPath) {
 		String name= unboundPath.segment(1);
 		String id= UserLibraryPreferencePage.ID;
@@ -205,29 +205,29 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	 * Library quick fix base class
 	 */
 	private static abstract class UserLibraryMarkerResolution implements IMarkerResolution, IMarkerResolution2 {
-		
+
 		private final String fLabel;
 		private final Image fImage;
-		
+
 		public UserLibraryMarkerResolution(String label, Image image) {
 			fLabel= label;
 			fImage= image;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.ui.IMarkerResolution#getLabel()
 		 */
 		public String getLabel() {
 			return fLabel;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
 		 */
 		public String getDescription() {
 			return null;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.ui.IMarkerResolution2#getImage()
 		 */

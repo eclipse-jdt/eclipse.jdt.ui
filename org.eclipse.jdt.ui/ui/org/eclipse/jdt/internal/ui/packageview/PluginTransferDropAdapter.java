@@ -39,5 +39,5 @@ public class PluginTransferDropAdapter extends PluginDropAdapter implements Tran
 	public boolean isEnabled(DropTargetEvent event) {
 		return PluginTransfer.getInstance().isSupportedType(event.currentDataType);
 	}
-	
+
 }

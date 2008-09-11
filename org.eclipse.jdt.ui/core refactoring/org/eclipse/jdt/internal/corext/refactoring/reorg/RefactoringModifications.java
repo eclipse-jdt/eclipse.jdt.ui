@@ -39,17 +39,17 @@ public abstract class RefactoringModifications {
 	public RefactoringModifications() {
 		fResourceModifications= new ResourceModifications();
 	}
-	
+
 	public ResourceModifications getResourceModifications() {
 		return fResourceModifications;
 	}
-	
+
 	public abstract RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared);
 
 	public abstract void buildDelta(IResourceChangeDescriptionFactory builder);
-	
+
 	/**
-	 * Implementors add all resources that need a validate edit 
+	 * Implementors add all resources that need a validate edit
 	 * @param checker the validate edit checker
 	 */
 	public void buildValidateEdits(ValidateEditChecker checker) {
@@ -86,7 +86,7 @@ public abstract class RefactoringModifications {
 		}
 		return (IResource[]) result.toArray(new IResource[result.size()]);
 	}
-	
+
 	protected IFile getClasspathFile(IResource resource) {
 		IProject project= resource.getProject();
 		if (project == null)

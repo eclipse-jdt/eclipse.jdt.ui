@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactorin
 
 /**
  * Refactoring contribution for the inline constant refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class InlineConstantRefactoringContribution extends JavaRefactoringContribution {
@@ -43,7 +43,7 @@ public final class InlineConstantRefactoringContribution extends JavaRefactoring
 	public RefactoringDescriptor createDescriptor() {
 		return new InlineConstantDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new InlineConstantDescriptor(project, description, comment, arguments, flags);
 	}

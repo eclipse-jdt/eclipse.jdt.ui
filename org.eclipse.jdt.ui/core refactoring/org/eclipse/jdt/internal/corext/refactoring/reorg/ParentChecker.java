@@ -31,11 +31,11 @@ public class ParentChecker {
 		fResources= resources;
 		fJavaElements= javaElements;
 	}
-	
+
 	public boolean haveCommonParent() {
 		return getCommonParent() != null;
 	}
-	
+
 	public Object getCommonParent(){
 		if (fJavaElements.length == 0 && fResources.length == 0)
 			return null;
@@ -52,17 +52,17 @@ public class ParentChecker {
 		}
 		if (fResources.length == 0)
 			return getCommonJavaElementParent();
-			
+
 		IResource commonResourceParent= getCommonResourceParent();
 		IJavaElement commonJavaElementParent= getCommonJavaElementParent();
 		Assert.isNotNull(commonJavaElementParent);
 		Assert.isNotNull(commonResourceParent);
 		IJavaElement convertedToJava= JavaCore.create(commonResourceParent);
-		if (convertedToJava == null || 
-			! convertedToJava.exists() || 
+		if (convertedToJava == null ||
+			! convertedToJava.exists() ||
 			! commonJavaElementParent.equals(convertedToJava))
 			return null;
-		return commonJavaElementParent;	
+		return commonJavaElementParent;
 	}
 
 	private IJavaElement getCommonJavaElementParent() {
@@ -81,7 +81,7 @@ public class ParentChecker {
 		if (fJavaElements.length == 0)
 			return true;
 		IJavaElement firstParent= fJavaElements[0].getParent();
-		Assert.isNotNull(firstParent); //this should never happen			
+		Assert.isNotNull(firstParent); //this should never happen
 		for (int i= 1; i < fJavaElements.length; i++) {
 			if (! firstParent.equals(fJavaElements[i].getParent()))
 				return false;
@@ -100,11 +100,11 @@ public class ParentChecker {
 		}
 		return true;
 	}
-	
+
 	public IResource[] getResources(){
 		return fResources;
-	}		
-		
+	}
+
 	public IJavaElement[] getJavaElements(){
 		return fJavaElements;
 	}
@@ -117,7 +117,7 @@ public class ParentChecker {
 		removeJavaElementsDescendantsOfJavaElements();
 //		removeJavaElementsChildrenOfResources(); //this case is covered by removeUnconfirmedArchives
 	}
-				
+
 	private void removeResourcesDescendantsOfJavaElements() {
 		List subResources= new ArrayList(3);
 		for (int i= 0; i < fResources.length; i++) {
@@ -187,7 +187,7 @@ public class ParentChecker {
 	private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
 		fResources= ReorgUtils.setMinus(fResources, resourcesToNotDelete);
 	}
-	
+
 	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
 		fJavaElements= ReorgUtils.setMinus(fJavaElements, elementsToNotDelete);
 	}

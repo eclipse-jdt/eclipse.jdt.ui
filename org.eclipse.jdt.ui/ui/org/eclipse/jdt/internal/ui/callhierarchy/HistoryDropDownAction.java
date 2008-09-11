@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 75800: [call hierarchy] should allow searches for fields
@@ -33,22 +33,22 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 class HistoryDropDownAction extends Action implements IMenuCreator {
-	
+
 	private static class ClearHistoryAction extends Action {
 
 		private CallHierarchyViewPart fView;
-		
+
 		public ClearHistoryAction(CallHierarchyViewPart view) {
 			super(CallHierarchyMessages.HistoryDropDownAction_clearhistory_label);
 			fView= view;
 		}
-			
+
 		public void run() {
 			fView.setHistoryEntries(new IMember[0][]);
 			fView.setInputElements(null);
 		}
 	}
-	
+
     public static final int RESULTS_IN_DROP_DOWN = 10;
     private CallHierarchyViewPart fView;
     private Menu fMenu;
@@ -56,7 +56,7 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
     public HistoryDropDownAction(CallHierarchyViewPart view) {
         fView = view;
         fMenu = null;
-        setToolTipText(CallHierarchyMessages.HistoryDropDownAction_tooltip); 
+        setToolTipText(CallHierarchyMessages.HistoryDropDownAction_tooltip);
         JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_DROP_DOWN_ACTION);

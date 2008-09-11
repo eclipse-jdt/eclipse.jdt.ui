@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+import org.osgi.framework.Bundle;
+
+import org.eclipse.swt.custom.BusyIndicator;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,19 +33,15 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.custom.BusyIndicator;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
-import org.osgi.framework.Bundle;
-
 
 public class CoreUtility {
-	
+
 	public static void createDerivedFolder(IFolder folder, boolean force, boolean local, IProgressMonitor monitor) throws CoreException {
 		if (!folder.exists()) {
 			IContainer parent= folder.getParent();
@@ -74,7 +74,7 @@ public class CoreUtility {
 			folder.create(force, local, monitor);
 		}
 	}
-	
+
 	/**
 	 * Creates an extension.  If the extension plugin has not
 	 * been loaded a busy cursor will be activated during the duration of
@@ -109,9 +109,9 @@ public class CoreUtility {
 			else
 				return ret[0];
 		}
-	}	
+	}
 
-	
+
 	/**
 	 * Starts a build in the background.
 	 * @param project The project to build or <code>null</code> to build the workspace.
@@ -120,21 +120,21 @@ public class CoreUtility {
 		getBuildJob(project).schedule();
 	}
 
-	
+
 	private static final class BuildJob extends Job {
 		private final IProject fProject;
 		private BuildJob(String name, IProject project) {
 			super(name);
 			fProject= project;
 		}
-		
+
 		public boolean isCoveredBy(BuildJob other) {
 			if (other.fProject == null) {
 				return true;
 			}
 			return fProject != null && fProject.equals(other.fProject);
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
@@ -156,11 +156,11 @@ public class CoreUtility {
 			}
 			try {
 				if (fProject != null) {
-					monitor.beginTask(Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, BasicElementLabels.getResourceName(fProject)), 2); 
+					monitor.beginTask(Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, BasicElementLabels.getResourceName(fProject)), 2);
 					fProject.build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
 					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
 				} else {
-					monitor.beginTask(JavaUIMessages.CoreUtility_buildall_taskname, 2); 
+					monitor.beginTask(JavaUIMessages.CoreUtility_buildall_taskname, 2);
 					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
 				}
 			} catch (CoreException e) {
@@ -177,7 +177,7 @@ public class CoreUtility {
 			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
 		}
 	}
-	
+
 	/**
 	 * Returns a build job
 	 * @param project The project to build or <code>null</code> to build the workspace.
@@ -189,11 +189,11 @@ public class CoreUtility {
 		buildJob.setUser(true);
 		return buildJob;
 	}
-	
+
 	/**
      * Set the autobuild to the value of the parameter and
      * return the old one.
-     * 
+     *
      * @param state the value to be set for autobuilding.
      * @return the old value of the autobuild state
 	 * @throws CoreException thrown if the operation failed
@@ -208,5 +208,5 @@ public class CoreUtility {
         }
         return isAutoBuilding;
     }
-	
+
 }

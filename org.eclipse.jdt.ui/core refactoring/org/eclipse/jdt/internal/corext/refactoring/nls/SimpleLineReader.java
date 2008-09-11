@@ -27,22 +27,22 @@ public class SimpleLineReader {
     public SimpleLineReader(IDocument input) {
         fInput = input;
         fCurrLine= 0;
-    }    
-    
+    }
+
     public String readLine() {
     	int nLines= fInput.getNumberOfLines();
     	if (fCurrLine >= nLines) {
     		return null;
     	}
-    	
+
     	try {
 			IRegion region= fInput.getLineInformation(fCurrLine++);
 			String content= fInput.get(region.getOffset(), region.getLength());
-			
+
 			int start= region.getOffset();
-			  	
+
 			boolean continuesOnNext= content.endsWith("\\") && !isCommentOrWhiteSpace(content); //$NON-NLS-1$
-			
+
 			while (continuesOnNext && fCurrLine < nLines) {
 				region= fInput.getLineInformation(fCurrLine++);
 				content= fInput.get(region.getOffset(), region.getLength());
@@ -64,9 +64,9 @@ public class SimpleLineReader {
 		}
 		return null;
      }
-    
+
     public static boolean isCommentOrWhiteSpace(String line) {
         line = line.trim();
         return (line.length() == 0) || line.charAt(0) == '!' || line.charAt(0) == '#';
-    }   
+    }
 }

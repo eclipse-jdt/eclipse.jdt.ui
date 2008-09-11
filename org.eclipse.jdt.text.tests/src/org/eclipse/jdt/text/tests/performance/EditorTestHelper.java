@@ -96,7 +96,7 @@ import org.eclipse.jdt.internal.ui.text.JavaReconciler;
  * @since 3.1
  */
 public class EditorTestHelper {
-	
+
 	private static class ImportOverwriteQuery implements IOverwriteQuery {
 		public String queryOverwrite(String file) {
 			return ALL;
@@ -104,37 +104,37 @@ public class EditorTestHelper {
 	}
 	private static class Requestor extends TypeNameRequestor {
 	}
-	
+
 	public static final String TEXT_EDITOR_ID= "org.eclipse.ui.DefaultTextEditor";
-	
+
 	public static final String COMPILATION_UNIT_EDITOR_ID= "org.eclipse.jdt.ui.CompilationUnitEditor";
-	
+
 	public static final String RESOURCE_PERSPECTIVE_ID= "org.eclipse.ui.resourcePerspective";
-	
+
 	public static final String JAVA_PERSPECTIVE_ID= "org.eclipse.jdt.ui.JavaPerspective";
-	
+
 	public static final String OUTLINE_VIEW_ID= "org.eclipse.ui.views.ContentOutline";
-	
+
 	public static final String PACKAGE_EXPLORER_VIEW_ID= "org.eclipse.jdt.ui.PackageExplorer";
-	
+
 	public static final String NAVIGATOR_VIEW_ID= "org.eclipse.ui.views.ResourceNavigator";
-	
+
 	public static final String INTRO_VIEW_ID= "org.eclipse.ui.internal.introview";
-	
+
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file);
 		if (runEventLoop)
 			runEventQueue(part);
 		return part;
 	}
-	
+
 	public static IEditorPart openInEditor(IFile file, String editorId, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file, editorId);
 		if (runEventLoop)
 			runEventQueue(part);
 		return part;
 	}
-	
+
 	public static AbstractTextEditor[] openInEditor(IFile[] files, String editorId) throws PartInitException {
 		AbstractTextEditor editors[]= new AbstractTextEditor[files.length];
 		for (int i= 0; i < files.length; i++) {
@@ -143,26 +143,26 @@ public class EditorTestHelper {
 		}
 		return editors;
 	}
-	
+
 	public static IDocument getDocument(ITextEditor editor) {
 		IDocumentProvider provider= editor.getDocumentProvider();
 		IEditorInput input= editor.getEditorInput();
 		return provider.getDocument(input);
 	}
-	
+
 	public static void revertEditor(ITextEditor editor, boolean runEventQueue) {
 		editor.doRevertToSaved();
 		if (runEventQueue)
 			runEventQueue(editor);
 	}
-	
+
 	public static void closeEditor(IEditorPart editor) {
 		IWorkbenchPartSite site;
 		IWorkbenchPage page;
 		if (editor != null && (site= editor.getSite()) != null && (page= site.getPage()) != null)
 			page.closeEditor(editor, false);
 	}
-	
+
 	public static void closeAllEditors() {
 		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -174,7 +174,7 @@ public class EditorTestHelper {
 			}
 		}
 	}
-	
+
 	/**
 	 * Runs the event queue on the current display until it is empty.
 	 */
@@ -183,39 +183,39 @@ public class EditorTestHelper {
 		if (window != null)
 			runEventQueue(window.getShell());
 	}
-	
+
 	public static void runEventQueue(IWorkbenchPart part) {
 		runEventQueue(part.getSite().getShell());
 	}
-	
+
 	public static void runEventQueue(Shell shell) {
 		runEventQueue(shell.getDisplay());
 	}
-	
+
 	public static void runEventQueue(Display display) {
 		while (display.readAndDispatch()) {
 			// do nothing
 		}
 	}
-	
+
 	/**
 	 * Runs the event queue on the current display and lets it sleep until the
 	 * timeout elapses.
-	 * 
+	 *
 	 * @param millis the timeout in milliseconds
 	 */
 	public static void runEventQueue(long millis) {
 		runEventQueue(getActiveDisplay(), millis);
 	}
-	
+
 	public static void runEventQueue(IWorkbenchPart part, long millis) {
 		runEventQueue(part.getSite().getShell(), millis);
 	}
-	
+
 	public static void runEventQueue(Shell shell, long millis) {
 		runEventQueue(shell.getDisplay(), millis);
 	}
-	
+
 	public static void runEventQueue(Display display, long minTime) {
 		if (display != null) {
 			DisplayHelper.sleep(display, minTime);
@@ -223,11 +223,11 @@ public class EditorTestHelper {
 			sleep((int) minTime);
 		}
 	}
-	
+
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	}
-	
+
 	public static void forceFocus() {
 		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		if (window == null) {
@@ -242,26 +242,26 @@ public class EditorTestHelper {
 			shell.forceFocus();
 		}
 	}
-	
+
 	public static IWorkbenchPage getActivePage() {
 		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		return window != null ? window.getActivePage() : null;
 	}
-	
+
 	public static Display getActiveDisplay() {
 		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		return window != null ? window.getShell().getDisplay() : null;
 	}
-	
+
 	public static void joinBackgroundActivities(AbstractTextEditor editor) throws CoreException {
 		joinBackgroundActivities(getSourceViewer(editor));
 	}
-	
+
 	public static void joinBackgroundActivities(SourceViewer sourceViewer) throws CoreException {
 		joinBackgroundActivities();
 		joinReconciler(sourceViewer, 500, 0, 500);
 	}
-	
+
 	public static void joinBackgroundActivities() throws CoreException {
 		// Join Building
 		Logger.global.entering("EditorTestHelper", "joinBackgroundActivities");
@@ -291,11 +291,11 @@ public class EditorTestHelper {
 		joinJobs(0, 0, 500);
 		Logger.global.exiting("EditorTestHelper", "joinBackgroundActivities");
 	}
-	
+
 	public static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
 		Logger.global.entering("EditorTestHelper", "joinJobs");
 		runEventQueue(minTime);
-		
+
 		DisplayHelper helper= new DisplayHelper() {
 			public boolean condition() {
 				return allJobsQuiet();
@@ -305,7 +305,7 @@ public class EditorTestHelper {
 		Logger.global.exiting("EditorTestHelper", "joinJobs", new Boolean(quiet));
 		return quiet;
 	}
-	
+
 	public static void sleep(int intervalTime) {
 		try {
 			Thread.sleep(intervalTime);
@@ -313,7 +313,7 @@ public class EditorTestHelper {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static boolean allJobsQuiet() {
 		IJobManager jobManager= Job.getJobManager();
 		Job[] jobs= jobManager.find(null);
@@ -327,11 +327,11 @@ public class EditorTestHelper {
 		}
 		return true;
 	}
-	
+
 	public static boolean isViewShown(String viewId) {
 		return getActivePage().findViewReference(viewId) != null;
 	}
-	
+
 	public static boolean showView(String viewId, boolean show) throws PartInitException {
 		IWorkbenchPage activePage= getActivePage();
 		IViewReference view= activePage.findViewReference(viewId);
@@ -343,20 +343,20 @@ public class EditorTestHelper {
 				activePage.hideView(view);
 		return shown;
 	}
-	
+
 	public static void bringToTop() {
 		getActiveWorkbenchWindow().getShell().forceActive();
 	}
-	
+
 	public static void forceReconcile(SourceViewer sourceViewer) {
 		Accessor reconcilerAccessor= new Accessor(getReconciler(sourceViewer), AbstractReconciler.class);
 		reconcilerAccessor.invoke("forceReconciling", new Object[0]);
 	}
-	
+
 	public static boolean joinReconciler(SourceViewer sourceViewer, long minTime, long maxTime, long intervalTime) {
 		Logger.global.entering("EditorTestHelper", "joinReconciler");
 		runEventQueue(minTime);
-		
+
 		AbstractReconciler reconciler= getReconciler(sourceViewer);
 		if (reconciler == null)
 			return true;
@@ -366,7 +366,7 @@ public class EditorTestHelper {
 			javaReconcilerAccessor= new Accessor(reconciler, JavaReconciler.class);
 		else
 			javaReconcilerAccessor= null;
-		
+
 		DisplayHelper helper= new DisplayHelper() {
 			public boolean condition() {
 				return !isRunning(javaReconcilerAccessor, backgroundThreadAccessor);
@@ -376,37 +376,37 @@ public class EditorTestHelper {
 		Logger.global.exiting("EditorTestHelper", "joinReconciler", new Boolean(finished));
 		return finished;
 	}
-	
+
 	public static AbstractReconciler getReconciler(SourceViewer sourceViewer) {
 		return (AbstractReconciler) new Accessor(sourceViewer, SourceViewer.class).get("fReconciler");
 	}
-	
+
 	public static SourceViewer getSourceViewer(AbstractTextEditor editor) {
 		SourceViewer sourceViewer= (SourceViewer) new Accessor(editor, AbstractTextEditor.class).invoke("getSourceViewer", new Object[0]);
 		return sourceViewer;
 	}
-	
+
 	private static Accessor getBackgroundThreadAccessor(AbstractReconciler reconciler) {
 		Object backgroundThread= new Accessor(reconciler, AbstractReconciler.class).get("fThread");
 		return new Accessor(backgroundThread, backgroundThread.getClass());
 	}
-	
+
 	private static boolean isRunning(Accessor javaReconcilerAccessor, Accessor backgroundThreadAccessor) {
 		return (javaReconcilerAccessor != null ? !isInitialProcessDone(javaReconcilerAccessor) : false) || isDirty(backgroundThreadAccessor) || isActive(backgroundThreadAccessor);
 	}
-	
+
 	private static boolean isInitialProcessDone(Accessor javaReconcilerAccessor) {
 		return ((Boolean) javaReconcilerAccessor.get("fIninitalProcessDone")).booleanValue();
 	}
-	
+
 	private static boolean isDirty(Accessor backgroundThreadAccessor) {
 		return ((Boolean) backgroundThreadAccessor.invoke("isDirty", new Object[0])).booleanValue();
 	}
-	
+
 	private static boolean isActive(Accessor backgroundThreadAccessor) {
 		return ((Boolean) backgroundThreadAccessor.invoke("isActive", new Object[0])).booleanValue();
 	}
-	
+
 	public static String showPerspective(String perspective) throws WorkbenchException {
 		String shownPerspective= getActivePage().getPerspective().getId();
 		if (!perspective.equals(shownPerspective)) {
@@ -416,7 +416,7 @@ public class EditorTestHelper {
 		}
 		return shownPerspective;
 	}
-	
+
 	public static void closeAllPopUps(SourceViewer sourceViewer) {
 		IWidgetTokenKeeper tokenKeeper= new IWidgetTokenKeeper() {
 			public boolean requestWidgetToken(IWidgetTokenOwner owner) {
@@ -426,11 +426,11 @@ public class EditorTestHelper {
 		sourceViewer.requestWidgetToken(tokenKeeper, Integer.MAX_VALUE);
 		sourceViewer.releaseWidgetToken(tokenKeeper);
 	}
-	
+
 	public static void resetFolding() {
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 	}
-	
+
 	public static boolean enableFolding(boolean value) {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		boolean oldValue= preferenceStore.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
@@ -438,11 +438,11 @@ public class EditorTestHelper {
 			preferenceStore.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, value);
 		return oldValue;
 	}
-	
+
 	public static IJavaProject createJavaProject(String project, String externalSourceFolder) throws CoreException, JavaModelException {
 		return createJavaProject(project, externalSourceFolder, false);
 	}
-	
+
 	public static IJavaProject createJavaProject(String project, String externalSourceFolder, boolean linkSourceFolder) throws CoreException, JavaModelException {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject(project, "bin");
 		Assert.assertNotNull("JRE is null", JavaProjectHelper.addRTJar(javaProject));
@@ -458,13 +458,13 @@ public class EditorTestHelper {
 		JavaProjectHelper.addSourceContainer(javaProject, "src");
 		return javaProject;
 	}
-	
+
 	public static IFile[] findFiles(IResource resource) throws CoreException {
 		List files= new ArrayList();
 		findFiles(resource, files);
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
-	
+
 	private static void findFiles(IResource resource, List files) throws CoreException {
 		if (resource instanceof IFile) {
 			files.add(resource);
@@ -476,14 +476,14 @@ public class EditorTestHelper {
 				findFiles(resources[i], files);
 		}
 	}
-	
+
 	public static boolean setDialogEnabled(String id, boolean enabled) {
 		boolean wasEnabled= OptionalMessageDialog.isDialogEnabled(id);
 		if (wasEnabled != enabled)
 			OptionalMessageDialog.setDialogEnabled(id, enabled);
 		return wasEnabled;
 	}
-	
+
 	public static void importFilesFromDirectory(File rootDir, IPath destPath, IProgressMonitor monitor) throws CoreException {
 		try {
 			IImportStructureProvider structureProvider= FileSystemStructureProvider.INSTANCE;
@@ -496,7 +496,7 @@ public class EditorTestHelper {
 			throw newCoreException(x);
 		}
 	}
-	
+
 	private static CoreException newCoreException(Throwable x) {
 		return new CoreException(new Status(IStatus.ERROR, JdtTextTestPlugin.PLUGIN_ID, -1, "", x));
 	}

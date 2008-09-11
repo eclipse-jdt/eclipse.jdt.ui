@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.fix;
 /**
  * A fix which when executed can set up a linked mode model
  * and put an editor into linked mode.
- * 
+ *
  * @since 3.4
  */
 public interface ILinkedFix extends IFix {

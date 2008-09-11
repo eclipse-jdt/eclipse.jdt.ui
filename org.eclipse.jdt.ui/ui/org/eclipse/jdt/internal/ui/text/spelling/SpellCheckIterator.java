@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import com.ibm.icu.text.BreakIterator;
-
 import java.util.LinkedList;
 import java.util.Locale;
+
+import com.ibm.icu.text.BreakIterator;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -118,7 +118,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 			offset= iterator.next();
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator#setIgnoreSingleLetters(boolean)
 	 * @since 3.3
@@ -183,7 +183,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	protected final boolean isToken(final String[] tags) {
 		return isToken(fLastToken, tags);
 	}
-	
+
 	/**
 	 * Checks the given  token against the given tags?
 	 *
@@ -222,7 +222,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 
 		if (begin < fContent.length() - 1 && !Character.isWhitespace(fContent.charAt(begin + 1)))
 			return false;
-		
+
 		return true;
 	}
 
@@ -348,7 +348,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 						token= fContent.substring(fPrevious, fNext);
 				} else
 					token= fContent.substring(fPrevious, fNext);
-				
+
 				update= true;
 			} else if (!isWhitespace(fPrevious, fNext) && isAlphaNumeric(fPrevious, fNext)) {
 

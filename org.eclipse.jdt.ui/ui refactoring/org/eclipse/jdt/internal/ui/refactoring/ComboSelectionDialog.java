@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 class ComboSelectionDialog extends Dialog{
-			
+
 	private String fSelection= null;
 	private final String fShellTitle;
 	private final String fLabelText;
@@ -50,20 +50,20 @@ class ComboSelectionDialog extends Dialog{
 	String getSelectedString(){
 		return fSelection;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
 		getShell().setText(fShellTitle);
-		
+
 		Composite composite = (Composite)super.createDialogArea(parent);
 		Composite innerComposite = new Composite(composite, SWT.NONE);
 		innerComposite.setLayoutData(new GridData());
 		GridLayout gl= new GridLayout();
 		gl.numColumns= 2;
 		innerComposite.setLayout(gl);
-		
+
 		Label label= new Label(innerComposite, SWT.NONE);
 		label.setText(fLabelText);
 		label.setLayoutData(new GridData());
@@ -83,10 +83,10 @@ class ComboSelectionDialog extends Dialog{
 				fSelection= combo.getItem(combo.getSelectionIndex());
 			}
 		});
-		applyDialogFont(composite);		
+		applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	private int getMaxStringLength() {
 		int max= 0;
 		for (int i= 0; i < fAllowedStrings.length; i++) {

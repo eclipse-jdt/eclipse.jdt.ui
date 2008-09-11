@@ -44,11 +44,11 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 	public void elementsChanged(Object[] updatedElements) {
 		if (getSearchResult() == null)
 			return;
-		
+
 		int addCount= 0;
 		int removeCount= 0;
 		int addLimit= getAddLimit();
-		
+
 		TableViewer viewer= (TableViewer) getPage().getViewer();
 		Set updated= new HashSet();
 		Set added= new HashSet();
@@ -69,7 +69,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 				removeCount++;
 			}
 		}
-		
+
 		viewer.add(added.toArray());
 		viewer.update(updated.toArray(), new String[] { SearchLabelProvider.PROPERTY_MATCH_COUNT });
 		viewer.remove(removed.toArray());
@@ -87,7 +87,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 		}
 		return Integer.MAX_VALUE;
 	}
-	
+
 	public void clear() {
 		getPage().getViewer().refresh();
 	}

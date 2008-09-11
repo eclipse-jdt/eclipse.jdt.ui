@@ -17,9 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +24,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -69,17 +69,17 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class MoveCuUpdateCreator {
-	
+
 	private final String fNewPackage;
 	private ICompilationUnit[] fCus;
 	private IPackageFragment fDestination;
-	
+
 	private Map fImportRewrites; //ICompilationUnit -> ImportEdit
-	
+
 	public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack){
 		this(new ICompilationUnit[]{cu}, pack);
 	}
-	
+
 	public MoveCuUpdateCreator(ICompilationUnit[] cus, IPackageFragment pack){
 		Assert.isNotNull(cus);
 		Assert.isNotNull(pack);
@@ -88,7 +88,7 @@ public class MoveCuUpdateCreator {
 		fImportRewrites= new HashMap();
 		fNewPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
 	}
-	
+
 	public TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		pm.beginTask("", 5); //$NON-NLS-1$
 		try{
@@ -98,12 +98,12 @@ public class MoveCuUpdateCreator {
 			return changeManager;
 		} catch (JavaModelException e){
 			throw e;
-		} catch (CoreException e){	
+		} catch (CoreException e){
 			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
-		
+
 	}
 
 	private void addImportRewriteUpdates(TextChangeManager changeManager) throws CoreException {
@@ -111,7 +111,7 @@ public class MoveCuUpdateCreator {
 			ICompilationUnit cu= (ICompilationUnit) iter.next();
 			ImportRewrite importRewrite= (ImportRewrite) fImportRewrites.get(cu);
 			if (importRewrite != null && importRewrite.hasRecordedChanges()) {
-				TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.MoveCuUpdateCreator_update_imports, importRewrite.rewriteImports(null)); 
+				TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.MoveCuUpdateCreator_update_imports, importRewrite.rewriteImports(null));
 			}
 		}
 	}
@@ -121,16 +121,16 @@ public class MoveCuUpdateCreator {
 		for (int i= 0; i < fCus.length; i++){
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-		
+
 			addUpdates(changeManager, fCus[i], new SubProgressMonitor(pm, 1), status);
 		}
 	}
-	
+
 	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		try{
 			pm.beginTask("", 3);  //$NON-NLS-1$
-		  	pm.subTask(Messages.format(RefactoringCoreMessages.MoveCuUpdateCreator_searching, BasicElementLabels.getFileName(movedUnit))); 
-		  	
+		  	pm.subTask(Messages.format(RefactoringCoreMessages.MoveCuUpdateCreator_searching, BasicElementLabels.getFileName(movedUnit)));
+
 			if (isInAnotherFragmentOfSamePackage(movedUnit, fDestination)){
 				pm.worked(3);
 				return;
@@ -170,7 +170,7 @@ public class MoveCuUpdateCreator {
 					}
 				} else if (reference.isQualified()) {
 					TextChange textChange= changeManager.get(referencingCu);
-					String changeName= RefactoringCoreMessages.MoveCuUpdateCreator_update_references; 
+					String changeName= RefactoringCoreMessages.MoveCuUpdateCreator_update_references;
 					TextEdit replaceEdit= new ReplaceEdit(reference.getOffset(), reference.getSimpleNameStart() - reference.getOffset(), fNewPackage);
 					TextChangeCompatibility.addTextEdit(textChange, changeName, replaceEdit);
 				} else if (simpleReferencesNeedNewImport) {
@@ -208,7 +208,7 @@ public class MoveCuUpdateCreator {
     private String createStringForNewImport(ICompilationUnit movedUnit, IImportDeclaration importDecl) {
     	String old= importDecl.getElementName();
 		int oldPackLength= movedUnit.getParent().getElementName().length();
-		
+
 		StringBuffer result= new StringBuffer(fDestination.getElementName());
 		if (oldPackLength == 0) // move FROM default package
 			result.append('.').append(old);
@@ -218,7 +218,7 @@ public class MoveCuUpdateCreator {
 			result.append(old.substring(oldPackLength));
 		return result.toString();
     }
-	
+
 	private void removeImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws CoreException{
 		ImportRewrite importEdit= getImportRewrite(movedUnit);
 		IType[] destinationTypes= getDestinationPackageTypes();
@@ -226,7 +226,7 @@ public class MoveCuUpdateCreator {
 			importEdit.removeImport(destinationTypes[i].getFullyQualifiedName('.'));
 		}
 	}
-	
+
 	private IType[] getDestinationPackageTypes() throws JavaModelException {
 		List types= new ArrayList();
 		if (fDestination.exists()) {
@@ -237,7 +237,7 @@ public class MoveCuUpdateCreator {
 		}
 		return (IType[]) types.toArray(new IType[types.size()]);
 	}
-	
+
 	private void addImportToSourcePackageTypes(ICompilationUnit movedUnit, IProgressMonitor pm) throws CoreException{
 		List cuList= Arrays.asList(fCus);
 		IType[] allCuTypes= movedUnit.getAllTypes();
@@ -256,32 +256,32 @@ public class MoveCuUpdateCreator {
 				importEdit.addImport(iType.getFullyQualifiedName('.'));
 		}
 	}
-	
+
 	private ImportRewrite getImportRewrite(ICompilationUnit cu) throws CoreException{
-		if (fImportRewrites.containsKey(cu))	
+		if (fImportRewrites.containsKey(cu))
 			return (ImportRewrite)fImportRewrites.get(cu);
 		ImportRewrite importEdit= StubUtility.createImportRewrite(cu, true);
 		fImportRewrites.put(cu, importEdit);
-		return importEdit;	
+		return importEdit;
 	}
-	
+
 	private boolean simpleReferencesNeedNewImport(ICompilationUnit movedUnit, ICompilationUnit referencingCu, List cuList) {
-		if (referencingCu.equals(movedUnit))	
+		if (referencingCu.equals(movedUnit))
 			return false;
-		if (cuList.contains(referencingCu))	
+		if (cuList.contains(referencingCu))
 			return false;
 		if (isReferenceInAnotherFragmentOfSamePackage(referencingCu, movedUnit)) {
 			/* Destination package is different from source, since
 			 * isDestinationAnotherFragmentOfSamePackage(movedUnit) was false in addUpdates(.) */
 			return true;
 		}
-		
-		//heuristic	
+
+		//heuristic
 		if (referencingCu.getImport(movedUnit.getParent().getElementName() + ".*").exists()) //$NON-NLS-1$
 			return true; // has old star import
 		if (referencingCu.getParent().equals(movedUnit.getParent()))
 			return true; //is moved away from same package
-		return false; 
+		return false;
 	}
 
 	private boolean isReferenceInAnotherFragmentOfSamePackage(ICompilationUnit referencingCu, ICompilationUnit movedUnit) {
@@ -292,7 +292,7 @@ public class MoveCuUpdateCreator {
 		IPackageFragment pack= (IPackageFragment) referencingCu.getParent();
 		return isInAnotherFragmentOfSamePackage(movedUnit, pack);
 	}
-	
+
 	private static boolean isInAnotherFragmentOfSamePackage(ICompilationUnit cu, IPackageFragment pack) {
 		if (! (cu.getParent() instanceof IPackageFragment))
 			return false;
@@ -307,7 +307,7 @@ public class MoveCuUpdateCreator {
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 			Collector requestor= new Collector(((IPackageFragment) unit.getParent()), binaryRefs);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(unit, true, false);
-			
+
 			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(pm, 1), status);
 			binaryRefs.addErrorIfNecessary(status);
 			return result;
@@ -318,13 +318,13 @@ public class MoveCuUpdateCreator {
 	private final static class Collector extends CollectingSearchRequestor {
 		private IPackageFragment fSource;
 		private IScanner fScanner;
-		
+
 		public Collector(IPackageFragment source, ReferencesInBinaryContext binaryRefs) {
 			super(binaryRefs);
 			fSource= source;
 			fScanner= ToolFactory.createScanner(false, false, false, false);
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor#acceptSearchMatch(SearchMatch)
 		 */
@@ -364,7 +364,7 @@ public class MoveCuUpdateCreator {
 				}
 			}
 		}
-		
+
 		private int getLastSimpleNameStart(String reference) {
 			fScanner.setSource(reference.toCharArray());
 			int lastIdentifierStart= -1;
@@ -381,12 +381,12 @@ public class MoveCuUpdateCreator {
 			return lastIdentifierStart;
 		}
 	}
-	
-	
+
+
 	private final static class TypeReference extends TypeReferenceMatch {
 		private String fSimpleTypeName;
 		private int fSimpleNameStart;
-		
+
 		private TypeReference(IJavaElement enclosingElement, int accuracy, int start, int length,
 				boolean insideDocComment, IResource resource, int simpleNameStart, String simpleName) {
 			super(enclosingElement, accuracy, start, length,
@@ -394,42 +394,42 @@ public class MoveCuUpdateCreator {
 			fSimpleNameStart= simpleNameStart;
 			fSimpleTypeName= simpleName;
 		}
-		
+
 		public static TypeReference createQualifiedReference(IJavaElement enclosingElement, int accuracy, int start, int length,
 				boolean insideDocComment, IResource resource, int simpleNameStart) {
 			Assert.isTrue(start < simpleNameStart && simpleNameStart < start + length);
 			return new TypeReference(enclosingElement, accuracy, start, length, insideDocComment, resource, simpleNameStart, null);
 		}
-		
+
 		public static TypeReference createImportReference(IJavaElement enclosingElement, int accuracy, int start, int length,
 				boolean insideDocComment, IResource resource) {
 			return new TypeReference(enclosingElement, accuracy, start, length, insideDocComment, resource, -1, null);
 		}
-		
+
 		public static TypeReference createSimpleReference(IJavaElement enclosingElement, int accuracy, int start, int length,
 				boolean insideDocComment, IResource resource, String simpleName) {
 			return new TypeReference(enclosingElement, accuracy, start, length, insideDocComment, resource, -1, simpleName);
 		}
-		
+
 		public boolean isImportDeclaration() {
 			return SearchUtils.getEnclosingJavaElement(this).getAncestor(IJavaElement.IMPORT_DECLARATION) != null;
 		}
-		
+
 		public boolean isQualified() {
 			return fSimpleNameStart != -1;
 		}
-		
+
 		public boolean isSimpleReference() {
 			return fSimpleTypeName != null;
 		}
-		
+
 		/**
 		 * @return start offset of simple type name, or -1 iff ! isQualified()
 		 */
 		public int getSimpleNameStart() {
 			return fSimpleNameStart;
 		}
-		
+
 		/**
 		 * @return simple type name, or null iff ! isSimpleName()
 		 */

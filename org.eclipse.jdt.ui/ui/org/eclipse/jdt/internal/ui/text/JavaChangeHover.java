@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -43,7 +43,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	private String fPartitioning;
 	/** The last created information control. */
 	private int fLastScrollIndex= 0;
-	
+
 	/**
 	 * The orientation to be used by this hover.
 	 * Allowed values are: SWT#RIGHT_TO_LEFT or SWT#LEFT_TO_RIGHT
@@ -96,7 +96,7 @@ public class JavaChangeHover extends LineChangeHover  {
 			}
 		};
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.LineChangeHover#computeLineRange(org.eclipse.jface.text.source.ISourceViewer, int, int, int)
 	 */

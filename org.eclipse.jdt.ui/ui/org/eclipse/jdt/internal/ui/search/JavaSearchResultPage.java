@@ -88,7 +88,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage implements IAdaptable {
-	
+
 	public static class DecoratorIgnoringViewerSorter extends ViewerComparator {
 
 		private final ILabelProvider fLabelProvider;
@@ -96,14 +96,14 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		public DecoratorIgnoringViewerSorter(ILabelProvider labelProvider) {
 			fLabelProvider= labelProvider;
 		}
-		
+
 		public int category(Object element) {
 			if (element instanceof IJavaElement || element instanceof IResource)
 				return 1;
 			return 2;
 		}
-		
-		
+
+
 	    public int compare(Viewer viewer, Object e1, Object e2) {
 	        int cat1 = category(e1);
 	        int cat2 = category(e2);
@@ -121,7 +121,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	    }
 	}
 
-		
+
 	private static final int DEFAULT_ELEMENT_LIMIT = 1000;
 	private static final String FALSE = "FALSE"; //$NON-NLS-1$
 	private static final String TRUE = "TRUE"; //$NON-NLS-1$
@@ -129,45 +129,45 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
 	private static final String KEY_LIMIT_ENABLED= "org.eclipse.jdt.search.resultpage.limit_enabled"; //$NON-NLS-1$
 	private static final String KEY_LIMIT= "org.eclipse.jdt.search.resultpage.limit"; //$NON-NLS-1$
-	
+
 	private static final String GROUP_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private static final String GROUP_FILTERING = "org.eclipse.jdt.search.resultpage.filtering"; //$NON-NLS-1$
-	
+
 	private NewSearchViewActionGroup fActionGroup;
 	private JavaSearchContentProvider fContentProvider;
 	private int fCurrentSortOrder;
 	private SortAction fSortByNameAction;
 	private SortAction fSortByParentName;
 	private SortAction fSortByPathAction;
-	
+
 	private GroupAction fGroupTypeAction;
 	private GroupAction fGroupFileAction;
 	private GroupAction fGroupPackageAction;
 	private GroupAction fGroupProjectAction;
-	
+
 	private SelectionDispatchAction fCopyQualifiedNameAction;
-	
+
 	private SortingLabelProvider fSortingLabelProvider;
-	
+
 	private int fCurrentGrouping;
-	
+
 	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , IPageLayout.ID_RES_NAV };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
 		public String[] getShowInTargetIds() {
 			return SHOW_IN_TARGETS;
 		}
 	};
-	
+
 	private JavaSearchEditorOpener fEditorOpener= new JavaSearchEditorOpener();
 
 	public JavaSearchResultPage() {
 		fCopyQualifiedNameAction= null;
-		
+
 		initSortActions();
 		initGroupingActions();
 		setElementLimit(new Integer(DEFAULT_ELEMENT_LIMIT));
 	}
-		
+
 	private void initSortActions() {
 		fSortByNameAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByName, this, SortingLabelProvider.SHOW_ELEMENT_CONTAINER);
 		fSortByPathAction= new SortAction(SearchMessages.JavaSearchResultPage_sortByPath, this, SortingLabelProvider.SHOW_PATH);
@@ -189,10 +189,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		super.setViewPart(part);
 		fActionGroup= new NewSearchViewActionGroup(part);
 	}
-	
+
 	public void showMatch(Match match, int offset, int length, boolean activate) throws PartInitException {
 		IEditorPart editor= fEditorOpener.openMatch(match);
-		
+
 		if (editor != null && activate)
 			editor.getEditorSite().getPage().activate(editor);
 		Object element= match.getElement();
@@ -211,7 +211,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 				participant.showMatch(match, offset, length, activate);
 		}
 	}
-	
+
 	private void showWithMarker(IEditorPart editor, IFile file, int offset, int length) throws PartInitException {
 		try {
 			IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
@@ -225,7 +225,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			throw new PartInitException(SearchMessages.JavaSearchResultPage_error_marker, e);
 		}
 	}
-	
+
 	private SelectionDispatchAction getCopyQualifiedNameAction() {
 		if (fCopyQualifiedNameAction == null) {
 			fCopyQualifiedNameAction= new CopyQualifiedNameAction(getSite());
@@ -243,7 +243,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		fActionGroup.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroup.fillContextMenu(mgr);
 	}
-	
+
 	private void addSortActions(IMenuManager mgr) {
 		if (getLayout() != FLAG_LAYOUT_FLAT)
 			return;
@@ -251,33 +251,33 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		sortMenu.add(fSortByNameAction);
 		sortMenu.add(fSortByPathAction);
 		sortMenu.add(fSortByParentName);
-		
+
 		fSortByNameAction.setChecked(fCurrentSortOrder == fSortByNameAction.getSortOrder());
 		fSortByPathAction.setChecked(fCurrentSortOrder == fSortByPathAction.getSortOrder());
 		fSortByParentName.setChecked(fCurrentSortOrder == fSortByParentName.getSortOrder());
-		
+
 		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, sortMenu);
 	}
-	
+
 	protected void fillToolbar(IToolBarManager tbm) {
 		super.fillToolbar(tbm);
-		
+
 		IActionBars actionBars = getSite().getActionBars();
 		if (actionBars != null) {
 			actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, getCopyQualifiedNameAction());
 		}
-		
+
 		if (getLayout() != FLAG_LAYOUT_FLAT)
 			addGroupActions(tbm);
 	}
-		
+
 	private void addGroupActions(IToolBarManager mgr) {
 		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, new Separator(GROUP_GROUPING));
 		mgr.appendToGroup(GROUP_GROUPING, fGroupProjectAction);
 		mgr.appendToGroup(GROUP_GROUPING, fGroupPackageAction);
 		mgr.appendToGroup(GROUP_GROUPING, fGroupFileAction);
 		mgr.appendToGroup(GROUP_GROUPING, fGroupTypeAction);
-		
+
 		updateGroupingActions();
 	}
 
@@ -294,7 +294,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		fActionGroup.dispose();
 		super.dispose();
 	}
-	
+
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
@@ -304,11 +304,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		if (fContentProvider != null)
 			fContentProvider.clear();
 	}
-	
+
 	private void addDragAdapters(StructuredViewer viewer) {
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance() };
 		int ops= DND.DROP_COPY | DND.DROP_LINK;
-		
+
 		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(viewer);
 		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(viewer));
 		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
@@ -336,15 +336,15 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		viewer.setContentProvider(fContentProvider);
 		addDragAdapters(viewer);
 	}
-	
+
 	protected TreeViewer createTreeViewer(Composite parent) {
 		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
-	
+
 	protected TableViewer createTableViewer(Composite parent) {
 		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
-	
+
 	void setSortOrder(int order) {
 		if (fSortingLabelProvider != null) {
 			fCurrentSortOrder= order;
@@ -372,7 +372,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	/**
 	 * Precondition here: the viewer must be showing a tree with a LevelContentProvider.
-	 * 
+	 *
 	 * @param grouping the grouping which must be one of the <code>LEVEL_*</code> constants from
 	 *            {@link LevelTreeContentProvider}
 	 */
@@ -385,22 +385,22 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		getSettings().put(KEY_GROUPING, fCurrentGrouping);
 		getViewPart().updateLabel();
 	}
-	
+
 	protected StructuredViewer getViewer() {
 		// override so that it's visible in the package.
 		return super.getViewer();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#restoreState(org.eclipse.ui.IMemento)
 	 */
 	public void restoreState(IMemento memento) {
 		super.restoreState(memento);
-		
+
 		int sortOrder= SortingLabelProvider.SHOW_ELEMENT_CONTAINER;
 		int grouping= LevelTreeContentProvider.LEVEL_PACKAGE;
 		int elementLimit= DEFAULT_ELEMENT_LIMIT;
-		
+
 		try {
 			sortOrder= getSettings().getInt(KEY_SORTING);
 		} catch (NumberFormatException e) {
@@ -429,7 +429,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			if (value != null)
 				elementLimit= limitElements ? value.intValue() : -1;
 		}
-		
+
 		fCurrentGrouping= grouping;
 		fCurrentSortOrder= sortOrder;
 		setElementLimit(new Integer(elementLimit));
@@ -449,7 +449,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			memento.putString(KEY_LIMIT_ENABLED, FALSE);
 		memento.putInteger(KEY_LIMIT, limit);
 	}
-		
+
 	private boolean isQueryRunning() {
 		AbstractTextSearchResult result= getInput();
 		if (result != null) {
@@ -465,7 +465,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			if (isQueryRunning()) {
 				String message= SearchMessages.JavaSearchResultPage_filtered_message;
 				return Messages.format(message, new Object[] { label });
-			
+
 			} else {
 				int filteredOut= input.getMatchCount() - getFilteredMatchCount();
 				String message= SearchMessages.JavaSearchResultPage_filteredWithCount_message;
@@ -484,7 +484,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			return getMatchCount((TableViewer) viewer);
 		}
 	}
-	
+
 	private Object[] getRootElements(TreeViewer viewer) {
 		Tree t= viewer.getTree();
 		Item[] roots= t.getItems();
@@ -494,7 +494,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 		return elements;
 	}
-	
+
 	private Object[] getRootElements(TableViewer viewer) {
 		Table t= viewer.getTable();
 		Item[] roots= t.getItems();
@@ -515,7 +515,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 		return count;
 	}
-	
+
 	private int getMatchCount(TableViewer viewer) {
 		Object[] elements= getRootElements(viewer);
 		int count= 0;
@@ -535,7 +535,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 		return null;
 	}
-	
+
 	protected void handleOpen(OpenEvent event) {
 		Object firstElement= ((IStructuredSelection)event.getSelection()).getFirstElement();
 		if (firstElement instanceof ICompilationUnit ||

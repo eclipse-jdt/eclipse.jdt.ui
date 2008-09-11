@@ -23,21 +23,21 @@ import org.eclipse.jdt.core.formatter.IndentManipulation;
 public class JavaDocCommentReader extends SingleCharReader {
 
 	private IBuffer fBuffer;
-	
+
 	private int fCurrPos;
 	private int fStartPos;
 	private int fEndPos;
-	
+
 	private boolean fWasNewLine;
-		
+
 	public JavaDocCommentReader(IBuffer buf, int start, int end) {
 		fBuffer= buf;
 		fStartPos= start + 3;
 		fEndPos= end - 2;
-		
+
 		reset();
 	}
-		
+
 	/**
 	 * @see java.io.Reader#read()
 	 */
@@ -61,34 +61,34 @@ public class JavaDocCommentReader extends SingleCharReader {
 				ch= fBuffer.getChar(fCurrPos++);
 			}
 			fWasNewLine= IndentManipulation.isLineDelimiterChar(ch);
-			
+
 			return ch;
 		}
 		return -1;
 	}
-		
+
 	/**
 	 * @see java.io.Reader#close()
-	 */		
+	 */
 	public void close() {
 		fBuffer= null;
 	}
-	
+
 	/**
 	 * @see java.io.Reader#reset()
-	 */		
+	 */
 	public void reset() {
 		fCurrPos= fStartPos;
 		fWasNewLine= true;
 	}
-	
-	
+
+
 	/**
 	 * Returns the offset of the last read character in the passed buffer.
 	 */
 	public int getOffset() {
 		return fCurrPos;
 	}
-		
-		
+
+
 }

@@ -11,10 +11,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.core.runtime.Platform;
-
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -35,6 +35,7 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
 
 import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionContext;
@@ -57,14 +58,14 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * that represent the best guess completion for each parameter of a method.
  */
 public final class ParameterGuessingProposal extends JavaMethodCompletionProposal {
-	
+
 	/**
 	 * Creates a {@link ParameterGuessingProposal} or <code>null</code> if the core context isn't available or extended.
-	 *  
+	 *
 	 * @param proposal the original completion proposal
 	 * @param context the currrent context
 	 * @param fillBestGuess if set, the best guess will be filled in
-	 * 
+	 *
 	 * @return a proposal or <code>null</code>
 	 */
 	public static ParameterGuessingProposal createProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, boolean fillBestGuess) {
@@ -74,15 +75,15 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
  		}
  		return null;
 	}
-	
-	
-	
+
+
+
 	/** Tells whether this class is in debug mode. */
 	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
-	
+
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 	private Position[] fPositions; // initialized by guessParameters()
-	
+
 	private IRegion fSelectedRegion; // initialized by apply()
 	private IPositionUpdater fUpdater;
 
@@ -103,7 +104,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	private IJavaElement[][] getAssignableElements() {
 		char[] signature= SignatureUtil.fix83600(getProposal().getSignature());
 		char[][] types= Signature.getParameterTypes(signature);
-		
+
 		IJavaElement[][] assignableElements= new IJavaElement[types.length][];
 		for (int i= 0; i < types.length; i++) {
 			assignableElements[i]= fCoreContext.getVisibleElements(new String(types[i]));
@@ -117,19 +118,19 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			super.apply(document, trigger, offset);
-			
+
 			int baseOffset= getReplacementOffset();
 			String replacement= getReplacementString();
-			
+
 			if (fPositions != null && getTextViewer() != null) {
-				
+
 				LinkedModeModel model= new LinkedModeModel();
-				
+
 				for (int i= 0; i < fPositions.length; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
 					int positionOffset= fPositions[i].getOffset();
 					int positionLength= fPositions[i].getLength();
-				
+
 					if (fChoices[i].length < 2) {
 						group.addPosition(new LinkedPosition(document, positionOffset, positionLength, LinkedPositionGroup.NO_STOP));
 					} else {
@@ -168,22 +169,22 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			openErrorDialog(e);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal#needsLinkedMode()
 	 */
 	protected boolean needsLinkedMode() {
 		return false; // we handle it ourselves
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal#computeReplacementString()
 	 */
 	protected String computeReplacementString() {
-		
+
 		if (!hasParameters() || !hasArgumentList())
 			return super.computeReplacementString();
-		
+
 		long millis= DEBUG ? System.currentTimeMillis() : 0;
 		String replacement;
 		try {
@@ -195,36 +196,36 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			openErrorDialog(x);
 			return super.computeReplacementString();
 		}
-		if (DEBUG) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis)); //$NON-NLS-1$ 
-		
+		if (DEBUG) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis)); //$NON-NLS-1$
+
 		return replacement;
 	}
 
 	/**
 	 * Creates the completion string. Offsets and Lengths are set to the offsets and lengths
 	 * of the parameters.
-	 * 
-	 * @return the completion string 
-	 * @throws JavaModelException 
+	 *
+	 * @return the completion string
+	 * @throws JavaModelException
 	 */
 	private String computeGuessingCompletion() throws JavaModelException {
-		
+
 		StringBuffer buffer= new StringBuffer();
 		appendMethodNameReplacement(buffer);
-		
+
 		FormatterPrefs prefs= getFormatterPrefs();
-		
+
 		setCursorPosition(buffer.length());
-		
+
 		if (prefs.afterOpeningParen)
 			buffer.append(SPACE);
-		
+
 		char[][] parameterNames= fProposal.findParameterNames(null);
-		
+
 		fChoices= guessParameters(parameterNames);
 		int count= fChoices.length;
 		int replacementOffset= getReplacementOffset();
-		
+
 		for (int i= 0; i < count; i++) {
 			if (i != 0) {
 				if (prefs.beforeComma)
@@ -236,16 +237,16 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 
 			ICompletionProposal proposal= fChoices[i][0];
 			String argument= proposal.getDisplayString();
-			
+
 			Position position= fPositions[i];
 			position.setOffset(replacementOffset + buffer.length());
 			position.setLength(argument.length());
-			
+
 			if (proposal instanceof JavaCompletionProposal) // handle the "unknown" case where we only insert a proposal.
 				((JavaCompletionProposal) proposal).setReplacementOffset(replacementOffset + buffer.length());
 			buffer.append(argument);
 		}
-		
+
 		if (prefs.beforeClosingParen)
 			buffer.append(SPACE);
 
@@ -253,7 +254,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
@@ -279,7 +280,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		//
 		// The other consideration is giving preference to variables that have not previously been used in this
 		// code completion (which avoids "someOtherObject.yourMethod(param1, param1, param1)";
-		
+
 		int count= parameterNames.length;
 		fPositions= new Position[count];
 		fChoices= new ICompletionProposal[count][];
@@ -287,26 +288,26 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		String[] parameterTypes= getParameterTypes();
 		ParameterGuesser guesser= new ParameterGuesser(getEnclosingElement());
 		IJavaElement[][] assignableElements= getAssignableElements();
-		
+
 		for (int i= count - 1; i >= 0; i--) {
 			String paramName= new String(parameterNames[i]);
 			Position position= new Position(0,0);
-			
+
 			ICompletionProposal[] argumentProposals= guesser.parameterProposals(parameterTypes[i], paramName, position, assignableElements[i], fFillBestGuess);
 			if (argumentProposals.length == 0)
 				argumentProposals= new ICompletionProposal[] {new JavaCompletionProposal(paramName, 0, paramName.length(), null, paramName, 0)};
-			
+
 			fPositions[i]= position;
 			fChoices[i]= argumentProposals;
 		}
-		
+
 		return fChoices;
 	}
 
 	private String[] getParameterTypes() {
 		char[] signature= SignatureUtil.fix83600(fProposal.getSignature());
 		char[][] types= Signature.getParameterTypes(signature);
-		
+
 		String[] ret= new String[types.length];
 		for (int i= 0; i < types.length; i++) {
 			ret[i]= new String(Signature.toCharArray(types[i]));

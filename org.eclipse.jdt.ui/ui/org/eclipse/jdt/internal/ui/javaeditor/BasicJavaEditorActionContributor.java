@@ -26,6 +26,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
+
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -79,10 +80,10 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fTogglePresentation= new TogglePresentationAction();
 
 		fToggleMarkOccurrencesAction= new ToggleMarkOccurrencesAction();
-		
+
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
-		
+
 		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowOutline."); //$NON-NLS-1$
 		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 
@@ -207,7 +208,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		IStatusLineManager manager= actionBars.getStatusLineManager();
 		manager.setMessage(null);
 		manager.setErrorMessage(null);
-		
+
 		/** The global actions to be connected with editor actions */
 		IAction action= getAction(textEditor, ITextEditorActionConstants.NEXT);
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, action);

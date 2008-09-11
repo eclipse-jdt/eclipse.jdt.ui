@@ -89,7 +89,7 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 /**
  * Wizard page for pull up refactoring wizards which allows to specify the
  * actions on the members to pull up.
- * 
+ *
  * @since 3.2
  */
 public class PullUpMemberPage extends UserInputWizardPage {
@@ -263,13 +263,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private static final int ACTION_COLUMN= 1;
 
-	private static final String ACTION_PROPERTY= "action"; //$NON-NLS-1$	
+	private static final String ACTION_PROPERTY= "action"; //$NON-NLS-1$
 
 	protected static final int DECLARE_ABSTRACT_ACTION= 1;
 
 	private static final int MEMBER_COLUMN= 0;
 
-	private static final String MEMBER_PROPERTY= "member"; //$NON-NLS-1$	
+	private static final String MEMBER_PROPERTY= "member"; //$NON-NLS-1$
 
 	protected static final int PULL_UP_ACTION= 0;
 
@@ -375,7 +375,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	private void checkAdditionalRequired() {
 		try {
 			initializeRefactoring();
-			
+
 			class GetRequiredMembersRunnable implements IRunnableWithProgress {
 				public IMember[] result;
 				public void run(final IProgressMonitor pm) throws InvocationTargetException {
@@ -391,7 +391,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			GetRequiredMembersRunnable runnable= new GetRequiredMembersRunnable();
 			getContainer().run(true, false, runnable);
 			checkPullUp(runnable.result, true);
-			
+
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception);
 		} catch (InterruptedException e) {

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.Collections;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -29,13 +31,11 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.osgi.framework.Bundle;
-
 /**
  * The description of an extension to the
  * <code>org.eclipse.jdt.ui.javaCompletionProposalSorters</code> extension point. Instances are
  * immutable.
- * 
+ *
  * @since 3.2
  */
 public final class ProposalSorterHandle {
@@ -72,14 +72,14 @@ public final class ProposalSorterHandle {
 
 	/**
 	 * Creates a new descriptor.
-	 * 
+	 *
 	 * @param element the configuration element to read
 	 * @throws InvalidRegistryObjectException if the configuration element is not valid any longer
 	 * @throws CoreException if the configuration does not contain mandatory attributes
 	 */
 	ProposalSorterHandle(IConfigurationElement element) throws InvalidRegistryObjectException, CoreException {
 		Assert.isLegal(element != null);
-		
+
 		fElement= element;
 		fId= element.getAttribute(ID);
 		checkNotNull(fId, ID);
@@ -89,7 +89,7 @@ public final class ProposalSorterHandle {
 			fName= fId;
 		else
 			fName= name;
-		
+
 		String activateAttribute= element.getAttribute(ACTIVATE);
 		fActivate= Boolean.valueOf(activateAttribute).booleanValue();
 
@@ -99,7 +99,7 @@ public final class ProposalSorterHandle {
 
 	/**
 	 * Checks that the given attribute value is not <code>null</code>.
-	 * 
+	 *
 	 * @param value the value to check if not null
 	 * @param attribute the attribute
 	 * @throws InvalidRegistryObjectException if the registry element is no longer valid
@@ -125,17 +125,17 @@ public final class ProposalSorterHandle {
 
 	/**
 	 * Returns the name of the described extension.
-	 * 
+	 *
 	 * @return Returns the name
 	 */
 	public String getName() {
 		return fName;
 	}
-	
+
 	/**
 	 * Returns a cached instance of the sorter as described in the extension's xml. The sorter is
 	 * {@link #createSorter() created} the first time that this method is called and then cached.
-	 * 
+	 *
 	 * @return a new instance of the proposal sorter as described by this descriptor
 	 * @throws CoreException if the creation fails
 	 * @throws InvalidRegistryObjectException if the extension is not valid any longer (e.g. due to
@@ -161,7 +161,7 @@ public final class ProposalSorterHandle {
 	/**
 	 * Returns a new instance of the sorter as described in the
 	 * extension's xml.
-	 * 
+	 *
 	 * @return a new instance of the completion proposal computer as
 	 *         described by this descriptor
 	 * @throws CoreException if the creation fails
@@ -171,12 +171,12 @@ public final class ProposalSorterHandle {
 	private AbstractProposalSorter createSorter() throws CoreException, InvalidRegistryObjectException {
 		return (AbstractProposalSorter) fElement.createExecutableExtension(CLASS);
 	}
-	
+
 	/**
 	 * Safely computes completion proposals through the described extension. If the extension throws
 	 * an exception or otherwise does not adhere to the contract described in
 	 * {@link AbstractProposalSorter}, the list is returned as is.
-	 * 
+	 *
 	 * @param context the invocation context passed on to the extension
 	 * @param proposals the list of computed completion proposals to be sorted (element type:
 	 *        {@link org.eclipse.jface.text.contentassist.ICompletionProposal}), must be writable
@@ -185,21 +185,21 @@ public final class ProposalSorterHandle {
 		IStatus status;
 		try {
 			AbstractProposalSorter sorter= getSorter();
-			
+
 			PerformanceStats stats= startMeter(SORT, sorter);
-			
+
 			sorter.beginSorting(context);
 			Collections.sort(proposals, sorter);
 			sorter.endSorting();
-			
+
 			status= stopMeter(stats, SORT);
-			
+
 			// valid result
 			if (status == null)
 				return;
-			
+
 			status= createAPIViolationStatus(SORT);
-			
+
 		} catch (InvalidRegistryObjectException x) {
 			status= createExceptionStatus(x);
 		} catch (CoreException x) {
@@ -245,7 +245,7 @@ public final class ProposalSorterHandle {
 		String reason= JavaTextMessages.CompletionProposalComputerDescriptor_reason_instantiation;
 		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, disable + " " + reason, x); //$NON-NLS-1$
 	}
-	
+
 	private Status createExceptionStatus(RuntimeException x) {
 		// misbehaving extension - log & disable
 		String disable= createBlameMessage();
@@ -272,14 +272,14 @@ public final class ProposalSorterHandle {
 		String disable= Messages.format(JavaTextMessages.ProposalSorterHandle_blame, args);
 		return disable;
 	}
-	
+
 	/**
 	 * Returns the error message from the described extension, <code>null</code> for no error.
-	 * 
+	 *
 	 * @return the error message from the described extension, <code>null</code> for no error
 	 */
 	public String getErrorMessage() {
 		return null;
 	}
-	
+
 }

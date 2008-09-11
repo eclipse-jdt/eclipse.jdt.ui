@@ -18,14 +18,14 @@ import org.eclipse.core.runtime.Assert;
 
 
 public class CompositeOrTypeConstraint implements ITypeConstraint{
-	
+
 	private final ITypeConstraint[] fConstraints;
-	
+
 	/* package */ CompositeOrTypeConstraint(ITypeConstraint[] constraints){
 		Assert.isNotNull(constraints);
 		fConstraints= sort(getCopy(constraints));
 	}
-	
+
 	private static ITypeConstraint[] getCopy(ITypeConstraint[] constraints) {
 		List l= Arrays.asList(constraints);
 		return (ITypeConstraint[]) l.toArray(new ITypeConstraint[l.size()]);

@@ -44,17 +44,17 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 
 public class MoveModifications extends RefactoringModifications {
-	
+
 	private List fMoves;
 	private List fMoveArguments;
 	private List fParticipantDescriptorFilter;
-	
+
 	public MoveModifications() {
 		fMoves= new ArrayList();
 		fMoveArguments= new ArrayList();
 		fParticipantDescriptorFilter= new ArrayList();
 	}
-	
+
 	public void move(IResource resource, MoveArguments args) {
 		add(resource, args, null);
 	}
@@ -63,7 +63,7 @@ public class MoveModifications extends RefactoringModifications {
 		add(sourceFolder, arguments, null);
 		IResource sourceResource= sourceFolder.getResource();
 		if (sourceResource != null) {
-			getResourceModifications().addMove(sourceResource, 
+			getResourceModifications().addMove(sourceResource,
 				new MoveArguments(getResourceDestination(arguments), arguments.getUpdateReferences()));
 			IFile classpath= getClasspathFile(sourceResource);
 			if (classpath != null) {
@@ -75,7 +75,7 @@ public class MoveModifications extends RefactoringModifications {
 			}
 		}
 	}
-	
+
 	public void move(IPackageFragment pack, MoveArguments args) throws CoreException {
 		add(pack, args, null);
 		if (pack.getResource() == null)
@@ -89,7 +89,7 @@ public class MoveModifications extends RefactoringModifications {
 			IContainer resourceDestination= newPack.getResource().getParent();
 			createIncludingParents(resourceDestination);
 			getResourceModifications().addMove(
-				pack.getResource(), 
+				pack.getResource(),
 				new MoveArguments(resourceDestination, args.getUpdateReferences()));
 		} else {
 			IContainer resourceSource= (IContainer)pack.getResource();
@@ -130,7 +130,7 @@ public class MoveModifications extends RefactoringModifications {
 				parent= parent.getParent();
 			}
 
-			getResourceModifications().addMove(unit.getResource(), new MoveArguments(resourceDestination, args.getUpdateReferences()));			
+			getResourceModifications().addMove(unit.getResource(), new MoveArguments(resourceDestination, args.getUpdateReferences()));
 		}
 	}
 
@@ -143,7 +143,7 @@ public class MoveModifications extends RefactoringModifications {
 		}
 		getResourceModifications().buildDelta(builder);
 	}
-	
+
 	public void buildValidateEdits(ValidateEditChecker checker) {
 		for (Iterator iter= fMoves.iterator(); iter.hasNext();) {
 			Object element= iter.next();
@@ -160,16 +160,16 @@ public class MoveModifications extends RefactoringModifications {
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
 		List result= new ArrayList();
 		for (int i= 0; i < fMoves.size(); i++) {
-			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status, 
-				owner, fMoves.get(i), 
-				(MoveArguments) fMoveArguments.get(i), 
-				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i), 
+			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status,
+				owner, fMoves.get(i),
+				(MoveArguments) fMoveArguments.get(i),
+				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i),
 				natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
 		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
-	
+
 	private void add(Object element, RefactoringArguments args, IParticipantDescriptorFilter filter) {
 		Assert.isNotNull(element);
 		Assert.isNotNull(args);
@@ -177,7 +177,7 @@ public class MoveModifications extends RefactoringModifications {
 		fMoveArguments.add(args);
 		fParticipantDescriptorFilter.add(filter);
 	}
-	
+
 	private IResource getResourceDestination(MoveArguments args) {
 		Object genericDestination= args.getDestination();
 		IResource resourceDestination= null;
@@ -188,4 +188,4 @@ public class MoveModifications extends RefactoringModifications {
 		}
 		return resourceDestination;
 	}
-} 
+}

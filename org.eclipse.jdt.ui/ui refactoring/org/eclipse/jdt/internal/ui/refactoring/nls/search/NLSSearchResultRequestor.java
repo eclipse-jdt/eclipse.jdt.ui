@@ -22,12 +22,12 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.Position;
 
@@ -74,23 +74,23 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		loadProperties();
 		fUsedPropertyNames= new HashSet(fProperties.size());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 	 */
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		if (match.getAccuracy() == SearchMatch.A_INACCURATE)
 			return;
-		
+
 		int offset= match.getOffset();
 		int length= match.getLength();
 		if (offset == -1 || length == -1)
 			return;
-		
+
 		if (! (match.getElement() instanceof IJavaElement))
 			return;
-		IJavaElement javaElement= (IJavaElement) match.getElement();	
-		
+		IJavaElement javaElement= (IJavaElement) match.getElement();
+
 		// ignore matches in import declarations:
 		if (javaElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
 			return;
@@ -98,7 +98,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			return; //matches in import statements of class files
 		if (javaElement.getElementType() == IJavaElement.TYPE)
 			return; //classes extending the accessor class and workaround for bug 61286
-		
+
 		// heuristic: ignore matches in resource bundle name field:
 		if (javaElement.getElementType() == IJavaElement.FIELD) {
 			IField field= (IField) javaElement;
@@ -106,7 +106,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			if (source != null && fgGetClassNameMatcher.match(source))
 				return;
 		}
-		
+
 		if (javaElement instanceof ISourceReference) {
 			String source= ((ISourceReference) javaElement).getSource();
 			if (source != null) {
@@ -114,7 +114,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 					return;
 			}
 		}
-		
+
 		// found reference to NLS Wrapper - now check if the key is there:
 		Position mutableKeyPosition= new Position(offset, length);
 		//TODO: What to do if argument string not found? Currently adds a match with type name.
@@ -124,7 +124,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 
 		ICompilationUnit[] allCompilationUnits= JavaModelUtil.getAllCompilationUnits(new IJavaElement[] {javaElement});
 		Object element= javaElement;
-		if (allCompilationUnits != null && allCompilationUnits.length == 1) 
+		if (allCompilationUnits != null && allCompilationUnits.length == 1)
 			element= allCompilationUnits[0];
 
 		fResult.addMatch(new Match(element, mutableKeyPosition.getOffset(), mutableKeyPosition.getLength()));
@@ -133,10 +133,10 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	public void reportUnusedPropertyNames(IProgressMonitor pm) {
 		//Don't use endReporting() for long running operation.
 		pm.beginTask("", fProperties.size()); //$NON-NLS-1$
-		boolean hasUnused= false;		
-		pm.setTaskName(NLSSearchMessages.NLSSearchResultRequestor_searching); 
+		boolean hasUnused= false;
+		pm.setTaskName(NLSSearchMessages.NLSSearchResultRequestor_searching);
 		FileEntry groupElement= new FileEntry(fPropertiesFile, NLSSearchMessages.NLSSearchResultCollector_unusedKeys);
-		
+
 		for (Enumeration enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
 			String propertyName= (String) enumeration.nextElement();
 			if (!fUsedPropertyNames.contains(propertyName)) {
@@ -153,11 +153,11 @@ class NLSSearchResultRequestor extends SearchRequestor {
 
 
 	private void addMatch(FileEntry groupElement, String propertyName) {
-		/* 
+		/*
 		 * TODO (bug 63794): Should read in .properties file with our own reader and not
 		 * with Properties.load(InputStream) . Then, we can remember start position and
 		 * original version (not interpreting escape characters) for each property.
-		 * 
+		 *
 		 * The current workaround is to escape the key again before searching in the
 		 * .properties file. However, this can fail if the key is escaped in a different
 		 * manner than what PropertyFileDocumentModel.unwindEscapeChars(.) produces.
@@ -177,8 +177,8 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	/**
 	 * Checks if the key is defined in the property file
 	 * and adds it to the list of used properties.
-	 * 
-	 * @param key the key 
+	 *
+	 * @param key the key
 	 * @return <code>true</code> if the key is defined
 	 */
 	private boolean isKeyDefined(String key) {
@@ -191,19 +191,19 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		}
 		return false;
 	}
-	
+
 	public boolean hasPropertyKey(String key) {
 		return fProperties.containsKey(key);
 	}
-	
+
 	public boolean isUsedPropertyKey(String key) {
 		return fUsedPropertyNames.contains(key);
 	}
-	
+
 	/**
 	 * Finds the key defined by the given match. The assumption is that
 	 * the key is the first argument and it is a string i.e. quoted ("...").
-	 * 
+	 *
 	 * @param keyPositionResult reference parameter: will be filled with the position of the found key
 	 * @param enclosingElement enclosing java element
 	 * @return a string denoting the key, null if no key can be found
@@ -217,7 +217,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		String source= unit.getSource();
 		if (source == null)
 			return null;
-		
+
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 		scanner.setSource(source.toCharArray());
 		scanner.resetTo(keyPositionResult.getOffset() + keyPositionResult.getLength(), source.length());
@@ -225,14 +225,14 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		try {
 			if (scanner.getNextToken() != ITerminalSymbols.TokenNameDOT)
 				return null;
-			
+
 			if (scanner.getNextToken() != ITerminalSymbols.TokenNameIdentifier)
 				return null;
-			
+
 			String src= new String(scanner.getCurrentTokenSource());
 			int keyStart= scanner.getCurrentTokenStartPosition();
 			int keyEnd= scanner.getCurrentTokenEndPosition();
-			
+
 			if (scanner.getNextToken() == ITerminalSymbols.TokenNameLPAREN) {
 				// Old school
 				// next must be key string:
@@ -253,12 +253,12 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Finds the start position in the property file. We assume that
 	 * the key is the first match on a line.
-	 * 
-	 * @param propertyName the property name 
+	 *
+	 * @param propertyName the property name
 	 * @return	the start position of the property name in the file, -1 if not found
 	 */
 	private int findPropertyNameStartPosition(String propertyName) {
@@ -314,7 +314,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			if (eols != -17)
 				start= -1; //key not found in file. See bug 63794. This can happen if the key contains escaped characters.
 		} catch (IOException ex) {
-			JavaPlugin.log(ex);			
+			JavaPlugin.log(ex);
 			return -1;
 		} finally {
 			try {
@@ -349,7 +349,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			reportDuplicateKeys(duplicateKeys);
 		}
 	}
-	
+
 	private InputStream createInputStream(IFile propertiesFile) throws CoreException {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		if (manager != null) {
@@ -358,14 +358,14 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				return new ByteArrayInputStream(buffer.getDocument().get().getBytes());
 			}
 		}
-		
+
 		return propertiesFile.getContents();
 	}
 
 	private void reportDuplicateKeys(Set duplicateKeys) {
 		if (duplicateKeys.size() == 0)
 			return;
-		
+
 		FileEntry groupElement= new FileEntry(fPropertiesFile, NLSSearchMessages.NLSSearchResultCollector_duplicateKeys);
 		Iterator iter= duplicateKeys.iterator();
 		while (iter.hasNext()) {

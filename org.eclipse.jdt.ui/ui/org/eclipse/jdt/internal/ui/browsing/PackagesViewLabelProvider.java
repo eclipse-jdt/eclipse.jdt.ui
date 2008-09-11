@@ -11,11 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.browsing;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
@@ -115,7 +115,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		else
 			return super.getText(element);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
 	 */
@@ -124,7 +124,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 			return new StyledString(getText(element));
 		return super.getStyledText(element);
 	}
-	
+
 	private String getText(IPackageFragment fragment) {
 		if (isFlatView())
 			return getFlatText(fragment);

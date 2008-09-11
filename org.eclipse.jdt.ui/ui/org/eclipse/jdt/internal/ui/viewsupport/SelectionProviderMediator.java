@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.ListenerList;
-
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -35,18 +35,18 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	private class InternalListener implements ISelectionChangedListener, FocusListener {
 		/*
 	 	 * @see ISelectionChangedListener#selectionChanged
-	 	 */		
+	 	 */
 		public void selectionChanged(SelectionChangedEvent event) {
 			doSelectionChanged(event);
 		}
-		
+
 	    /*
 	     * @see FocusListener#focusGained
 	     */
-	    public void focusGained(FocusEvent e) {    	
+	    public void focusGained(FocusEvent e) {
 	    	doFocusChanged(e.widget);
 	    }
-	
+
 	    /*
 	     * @see FocusListener#focusLost
 	     */
@@ -55,23 +55,23 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	    	//fViewerInFocus= null;
 	    }
 	}
-	
+
 	private class InternalPostSelectionListener implements ISelectionChangedListener {
 		public void selectionChanged(SelectionChangedEvent event) {
 			doPostSelectionChanged(event);
 		}
-		
+
 	}
-	
+
 	private StructuredViewer[] fViewers;
 
 	private StructuredViewer fViewerInFocus;
 	private ListenerList fSelectionChangedListeners;
 	private ListenerList fPostSelectionChangedListeners;
-	
+
 	/**
 	 * @param viewers All viewers that can provide a selection
-	 * @param viewerInFocus the viewer currently in focus or <code>null</code> 
+	 * @param viewerInFocus the viewer currently in focus or <code>null</code>
 	 */
 	public SelectionProviderMediator(StructuredViewer[] viewers, StructuredViewer viewerInFocus) {
 		Assert.isNotNull(viewers);
@@ -79,40 +79,40 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		InternalListener listener= new InternalListener();
 		fSelectionChangedListeners= new ListenerList();
 		fPostSelectionChangedListeners= new ListenerList();
-		fViewerInFocus= viewerInFocus;	
+		fViewerInFocus= viewerInFocus;
 
 		for (int i= 0; i < fViewers.length; i++) {
 			StructuredViewer viewer= fViewers[i];
 			viewer.addSelectionChangedListener(listener);
 			viewer.addPostSelectionChangedListener(new InternalPostSelectionListener());
 			Control control= viewer.getControl();
-			control.addFocusListener(listener);	
+			control.addFocusListener(listener);
 		}
 	}
-	
+
 	private void doFocusChanged(Widget control) {
 		for (int i= 0; i < fViewers.length; i++) {
 			if (fViewers[i].getControl() == control) {
 				propagateFocusChanged(fViewers[i]);
 				return;
 			}
-		}		
+		}
 	}
-	
+
 	final void doPostSelectionChanged(SelectionChangedEvent event) {
 		ISelectionProvider provider= event.getSelectionProvider();
 		if (provider == fViewerInFocus) {
 			firePostSelectionChanged();
 		}
 	}
-	
+
 	final void doSelectionChanged(SelectionChangedEvent event) {
 		ISelectionProvider provider= event.getSelectionProvider();
 		if (provider == fViewerInFocus) {
 			fireSelectionChanged();
 		}
 	}
-	
+
 	final void propagateFocusChanged(StructuredViewer viewer) {
 		if (viewer != fViewerInFocus) { // OK to compare by identity
 			fViewerInFocus= viewer;
@@ -120,11 +120,11 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 			firePostSelectionChanged();
 		}
 	}
-	
+
 	private void fireSelectionChanged() {
 		if (fSelectionChangedListeners != null) {
 			SelectionChangedEvent event= new SelectionChangedEvent(this, getSelection());
-			
+
 			Object[] listeners= fSelectionChangedListeners.getListeners();
 			for (int i= 0; i < listeners.length; i++) {
 				ISelectionChangedListener listener= (ISelectionChangedListener) listeners[i];
@@ -132,33 +132,33 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 			}
 		}
 	}
-	
+
 	private void firePostSelectionChanged() {
 		if (fPostSelectionChangedListeners != null) {
 			SelectionChangedEvent event= new SelectionChangedEvent(this, getSelection());
-			
+
 			Object[] listeners= fPostSelectionChangedListeners.getListeners();
 			for (int i= 0; i < listeners.length; i++) {
 				ISelectionChangedListener listener= (ISelectionChangedListener) listeners[i];
 				listener.selectionChanged(event);
 			}
 		}
-	}	
-	
+	}
+
 	/*
 	 * @see ISelectionProvider#addSelectionChangedListener
 	 */
-	public void addSelectionChangedListener(ISelectionChangedListener listener) {	
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		fSelectionChangedListeners.add(listener);
 	}
-	
+
 	/*
 	 * @see ISelectionProvider#removeSelectionChangedListener
 	 */
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		fSelectionChangedListeners.remove(listener);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IPostSelectionProvider#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
@@ -173,7 +173,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
 		fPostSelectionChangedListeners.remove(listener);
 	}
-		
+
 	/*
 	 * @see ISelectionProvider#getSelection
 	 */
@@ -183,7 +183,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		}
 		return StructuredSelection.EMPTY;
 	}
-	
+
 	/*
 	 * @see ISelectionProvider#setSelection
 	 */
@@ -198,11 +198,11 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 			fViewerInFocus.setSelection(selection, reveal);
 		}
 	}
-	
+
 	/**
 	 * Returns the viewer in focus or null if no viewer has the focus
 	 * @return returns the current viewer in focus
-	 */	
+	 */
 	public StructuredViewer getViewerInFocus() {
 		return fViewerInFocus;
 	}

@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
- * 
+ *
  * @since 3.2
  */
 public class MethodParameterGuessingCompletionTest extends AbstractCompletionTest {
@@ -33,7 +33,7 @@ public class MethodParameterGuessingCompletionTest extends AbstractCompletionTes
 	public static Test suite() {
 		return new CompletionTestSetup(allTests());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
@@ -48,27 +48,27 @@ public class MethodParameterGuessingCompletionTest extends AbstractCompletionTes
 	public void testMethodWithParam1() throws Exception {
 		assertMethodBodyProposal("fList.", "add(O", "fList.add(|obj|)");
 	}
-	
+
 	public void testMethodWithParam2() throws Exception {
 		assertMethodBodyProposal("fList.", "add(int", "fList.add(|foo|, obj)");
 	}
-	
+
 	public void testInsertMethodWithParam1() throws Exception {
 		assertMethodBodyProposal("fList.|bar", "add(O", "fList.add(|obj|)bar");
 	}
-	
+
 	public void testInsertMethodWithParam2() throws Exception {
 		assertMethodBodyProposal("fList.|bar", "add(int", "fList.add(|foo|, obj)bar");
 	}
-	
+
 	public void testOverwriteMethodWithParam1() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
 		assertMethodBodyProposal("fList.|bar", "add(O", "fList.add(|obj|)");
 	}
-	
+
 	public void testOverwriteMethodWithParam2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
 		assertMethodBodyProposal("fList.|bar", "add(int", "fList.add(|foo|, obj)");
 	}
-	
+
 }

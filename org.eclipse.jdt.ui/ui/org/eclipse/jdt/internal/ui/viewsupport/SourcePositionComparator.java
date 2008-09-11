@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  *  Viewer sorter which sorts the Java elements like
  *  they appear in the source.
- * 
+ *
  * @since 3.2
  */
 public class SourcePositionComparator extends ViewerComparator {
@@ -40,13 +40,13 @@ public class SourcePositionComparator extends ViewerComparator {
 			return 0;
 		if (!(e2 instanceof ISourceReference))
 			return 0;
-		
+
 		IJavaElement parent1= ((IJavaElement)e1).getParent();
 		if (parent1 == null || !parent1.equals(((IJavaElement)e2).getParent())) {
 				IType t1= getOutermostDeclaringType(e1);
 				if (t1 == null)
 					return 0;
-				
+
 				IType t2= getOutermostDeclaringType(e2);
 				try {
 					if (!t1.equals(t2)) {
@@ -77,15 +77,15 @@ public class SourcePositionComparator extends ViewerComparator {
 					return 0;
 				}
 		}
-		
+
 		try {
 			ISourceRange sr1= ((ISourceReference)e1).getSourceRange();
 			ISourceRange sr2= ((ISourceReference)e2).getSourceRange();
 			if (sr1 == null || sr2 == null)
 				return 0;
-			
+
 			return sr1.getOffset() - sr2.getOffset();
-			
+
 		} catch (JavaModelException e) {
 			return 0;
 		}
@@ -94,7 +94,7 @@ public class SourcePositionComparator extends ViewerComparator {
 	private IType getOutermostDeclaringType(Object element) {
 		if (!(element instanceof IMember))
 			return null;
-		
+
 		IType declaringType;
 		if (element instanceof IType)
 			declaringType= (IType)element;
@@ -103,7 +103,7 @@ public class SourcePositionComparator extends ViewerComparator {
 			if (declaringType == null)
 				return null;
 		}
-		
+
 		IType declaringTypeDeclaringType= declaringType.getDeclaringType();
 		while (declaringTypeDeclaringType != null) {
 			declaringType= declaringTypeDeclaringType;

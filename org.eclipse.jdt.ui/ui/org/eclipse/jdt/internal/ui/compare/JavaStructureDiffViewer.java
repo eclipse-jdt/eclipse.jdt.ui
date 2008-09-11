@@ -13,28 +13,36 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.ToolBar;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.widgets.*;
-
-import org.eclipse.jface.action.*;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.compare.*;
-import org.eclipse.compare.structuremergeviewer.StructureDiffViewer;
-import org.eclipse.compare.structuremergeviewer.IDiffContainer;
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.CompareViewerPane;
+import org.eclipse.compare.IResourceProvider;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
-import org.eclipse.compare.structuremergeviewer.DiffNode;
+import org.eclipse.compare.structuremergeviewer.IDiffContainer;
+import org.eclipse.compare.structuremergeviewer.StructureDiffViewer;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 class JavaStructureDiffViewer extends StructureDiffViewer {
-	
+
 	/**
 	 * Toggles a boolean property of an <code>CompareConfiguration</code>.
 	 */
@@ -65,7 +73,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 			super.setChecked(state);
 			JavaCompareUtilities.initToggleAction(this, fBundle, fPrefix, state);
 		}
-		
+
 		public void setCompareConfiguration(CompareConfiguration cc) {
 			fCompareConfiguration= cc;
 			setChecked(JavaCompareUtilities.getBoolean(fCompareConfiguration, fPropertyKey, false));
@@ -83,7 +91,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 		fStructureCreator= new JavaStructureCreator();
 		setStructureCreator(fStructureCreator);
 	}
-	
+
 	/**
 	 * Overridden to find and expand the first class.
 	 */
@@ -122,11 +130,11 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 	}
 
 	protected void compareInputChanged(ICompareInput input) {
-		
+
 		fThreeWay= input != null ? input.getAncestor() != null
 							     : false;
 		setSmartButtonVisible(fThreeWay);
-		
+
 		if (input != null) {
 			Map compilerOptions= getCompilerOptions(input.getAncestor());
 			if (compilerOptions == null)
@@ -136,10 +144,10 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 			if (compilerOptions != null)
 				fStructureCreator.setDefaultCompilerOptions(compilerOptions);
 		}
-		
+
 		super.compareInputChanged(input);
 	}
-	
+
 	private Map getCompilerOptions(ITypedElement input) {
 		if (input instanceof IResourceProvider) {
 			IResource resource= ((IResourceProvider) input).getResource();
@@ -154,7 +162,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Overriden to create a "smart" button in the viewer's pane control bar.
 	 * <p>
@@ -164,15 +172,15 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 	 * @param toolBarManager the toolbar manager for which to add the buttons
 	 */
 	protected void createToolItems(ToolBarManager toolBarManager) {
-		
+
 		super.createToolItems(toolBarManager);
-		
+
 		IAction a= new ChangePropertyAction(getBundle(), getCompareConfiguration(), "action.Smart.", SMART); //$NON-NLS-1$
 		fSmartActionItem= new ActionContributionItem(a);
 		fSmartActionItem.setVisible(fThreeWay);
 		toolBarManager.appendToGroup("modes", fSmartActionItem); //$NON-NLS-1$
 	}
-	
+
 	protected void postDiffHook(Differencer differencer, IDiffContainer root, IProgressMonitor monitor) {
 		if (fStructureCreator.canRewriteTree()) {
 			boolean smart= JavaCompareUtilities.getBoolean(getCompareConfiguration(), SMART, false);
@@ -180,7 +188,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 				fStructureCreator.rewriteTree(differencer, root);
 		}
 	}
-	
+
 	/**
 	 * Tracks property changes of the configuration object.
 	 * Clients may override to track their own property changes.
@@ -192,14 +200,14 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 		else
 			super.propertyChange(event);
 	}
-	
+
 	private void setSmartButtonVisible(boolean visible) {
 		if (fSmartActionItem == null)
 			return;
 		Control c= getControl();
 		if (c == null || c.isDisposed())
 			return;
-			
+
 		fSmartActionItem.setVisible(visible);
 		ToolBarManager tbm= CompareViewerPane.getToolBarManager(c.getParent());
 		if (tbm != null) {

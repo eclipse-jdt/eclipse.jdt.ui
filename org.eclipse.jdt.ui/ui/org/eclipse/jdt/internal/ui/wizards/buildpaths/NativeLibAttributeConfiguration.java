@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 
 public class NativeLibAttributeConfiguration extends ClasspathAttributeConfiguration {
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getImageDescriptor(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */
@@ -41,7 +41,7 @@ public class NativeLibAttributeConfiguration extends ClasspathAttributeConfigura
 	public String getNameLabel(ClasspathAttributeAccess attribute) {
 		return NewWizardMessages.CPListLabelProvider_native_library_path;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getValueLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
 	 */

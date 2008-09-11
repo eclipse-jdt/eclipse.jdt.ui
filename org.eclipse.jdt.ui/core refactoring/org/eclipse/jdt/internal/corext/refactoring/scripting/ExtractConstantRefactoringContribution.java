@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactori
 
 /**
  * Refactoring contribution for the extract constant refactoring.
- * 
+ *
  * @since 3.2
  */
 public final class ExtractConstantRefactoringContribution extends JavaRefactoringContribution {
@@ -39,11 +39,11 @@ public final class ExtractConstantRefactoringContribution extends JavaRefactorin
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		return new ExtractConstantRefactoring(arguments, status);
 	}
-	
+
 	public RefactoringDescriptor createDescriptor() {
 		return new ExtractConstantDescriptor();
 	}
-	
+
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		return new ExtractConstantDescriptor(project, description, comment, arguments, flags);
 	}

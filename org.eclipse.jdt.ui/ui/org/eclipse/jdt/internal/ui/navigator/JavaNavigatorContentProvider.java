@@ -59,7 +59,7 @@ public class JavaNavigatorContentProvider extends
 		super(provideMembers);
 	}
 
-	public static final String JDT_EXTENSION_ID = "org.eclipse.jdt.ui.javaContent"; //$NON-NLS-1$ 
+	public static final String JDT_EXTENSION_ID = "org.eclipse.jdt.ui.javaContent"; //$NON-NLS-1$
 
 	private IExtensionStateModel fStateModel;
 
@@ -72,7 +72,7 @@ public class JavaNavigatorContentProvider extends
 				.getExtensionStateModel();
 		IMemento memento = commonContentExtensionSite.getMemento();
 
-		fStateModel = stateModel; 
+		fStateModel = stateModel;
 		restoreState(memento);
 		fLayoutPropertyListener = new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -93,17 +93,17 @@ public class JavaNavigatorContentProvider extends
 				.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 		setProvideMembers(showCUChildren);
 	}
-	
-	public void dispose() { 
+
+	public void dispose() {
 		super.dispose();
 		fStateModel.removePropertyChangeListener(fLayoutPropertyListener);
 	}
 
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) { 
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		fRealInput = newInput;
 		super.inputChanged(viewer, oldInput, findInputElement(newInput));
 	}
-	
+
 	public Object getParent(Object element) {
 		Object parent= super.getParent(element);
 		if (parent instanceof IJavaModel) {
@@ -127,19 +127,19 @@ public class JavaNavigatorContentProvider extends
 		}
 		return super.getElements(inputElement);
 	}
-	
+
 	public boolean hasChildren(Object element) {
 		if (element instanceof IProject) {
 			return ((IProject) element).isAccessible();
 		}
 		return super.hasChildren(element);
 	}
-	
+
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IWorkspaceRoot) {
 			IWorkspaceRoot root = (IWorkspaceRoot) parentElement;
 			return root.getProjects();
-		} 
+		}
 		if (parentElement instanceof IProject) {
 			return super.getChildren(JavaCore.create((IProject)parentElement));
 		}
@@ -161,7 +161,7 @@ public class JavaNavigatorContentProvider extends
 
 	}
 
-	public void getPipelinedChildren(Object parent, Set currentChildren) { 
+	public void getPipelinedChildren(Object parent, Set currentChildren) {
 		customize(getChildren(parent), currentChildren);
 	}
 
@@ -174,44 +174,44 @@ public class JavaNavigatorContentProvider extends
 	}
 
 	public PipelinedShapeModification interceptAdd(PipelinedShapeModification addModification) {
-		
+
 		Object parent= addModification.getParent();
-		
+
 		if (parent instanceof IJavaProject) {
 			addModification.setParent(((IJavaProject)parent).getProject());
-		} 
-		
-		if (parent instanceof IWorkspaceRoot) {		
+		}
+
+		if (parent instanceof IWorkspaceRoot) {
 			deconvertJavaProjects(addModification);
 		}
-		
+
 		convertToJavaElements(addModification);
 		return addModification;
 	}
- 
+
 	public PipelinedShapeModification interceptRemove(
 			PipelinedShapeModification removeModification) {
 		deconvertJavaProjects(removeModification);
 		convertToJavaElements(removeModification.getChildren());
 		return removeModification;
 	}
-	
+
 	private void deconvertJavaProjects(PipelinedShapeModification modification) {
 		Set convertedChildren = new LinkedHashSet();
 		for (Iterator iterator = modification.getChildren().iterator(); iterator.hasNext();) {
-			Object added = iterator.next(); 
+			Object added = iterator.next();
 			if(added instanceof IJavaProject) {
 				iterator.remove();
 				convertedChildren.add(((IJavaProject)added).getProject());
-			}			
+			}
 		}
 		modification.getChildren().addAll(convertedChildren);
 	}
 
 	/**
 	 * Converts the shape modification to use Java elements.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param modification
 	 *            the shape modification to convert
 	 * @return returns true if the conversion took place
@@ -226,7 +226,7 @@ public class JavaNavigatorContentProvider extends
 				if( !(element instanceof IJavaModel) && !(element instanceof IJavaProject))
 					modification.setParent(element);
 				return convertToJavaElements(modification.getChildren());
-				
+
 			}
 		}
 		return false;
@@ -234,8 +234,8 @@ public class JavaNavigatorContentProvider extends
 
 	/**
 	 * Converts the shape modification to use Java elements.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param currentChildren
 	 *            The set of current children that would be contributed or refreshed in the viewer.
 	 * @return returns true if the conversion took place
@@ -266,7 +266,7 @@ public class JavaNavigatorContentProvider extends
 		return false;
 
 	}
-	
+
 	/**
 	 * Adapted from the C Navigator Content Provider
 	 * @param javaElements
@@ -306,24 +306,24 @@ public class JavaNavigatorContentProvider extends
 
 
 
-	public boolean interceptRefresh(PipelinedViewerUpdate refreshSynchronization) {		
+	public boolean interceptRefresh(PipelinedViewerUpdate refreshSynchronization) {
 		return convertToJavaElements(refreshSynchronization.getRefreshTargets());
 
 	}
 
-	public boolean interceptUpdate(PipelinedViewerUpdate updateSynchronization) {		
+	public boolean interceptUpdate(PipelinedViewerUpdate updateSynchronization) {
 		return convertToJavaElements(updateSynchronization.getRefreshTargets());
 	}
 
 	protected void postAdd(final Object parent, final Object element, Collection runnables) {
 		if (parent instanceof IJavaModel)
 			super.postAdd(((IJavaModel) parent).getWorkspace().getRoot(), element, runnables);
-		else if (parent instanceof IJavaProject) 
+		else if (parent instanceof IJavaProject)
 			super.postAdd( ((IJavaProject)parent).getProject(), element, runnables);
 		else
 			super.postAdd(parent, element, runnables);
 	}
-	
+
 
 	protected void postRefresh(final List toRefresh, final boolean updateLabels, Collection runnables) {
 		for (Iterator iter = toRefresh.iterator(); iter.hasNext();) {
@@ -334,8 +334,8 @@ public class JavaNavigatorContentProvider extends
 				super.postRefresh(toRefresh, updateLabels, runnables);
 				return;
 			}
-		} 
-		super.postRefresh(toRefresh, updateLabels, runnables);		
+		}
+		super.postRefresh(toRefresh, updateLabels, runnables);
 	}
 
 }

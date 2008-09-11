@@ -17,20 +17,20 @@ import org.eclipse.core.runtime.Assert;
 
 
 class Properties extends java.util.Properties {
-	
+
 	private static final long serialVersionUID= 1L;
-	
+
 	private Set fDuplicateKeys;
 
 	public Properties() {
 	}
-	
+
 	public Properties(Set duplicateKeys) {
 		super();
 		Assert.isNotNull(duplicateKeys);
 		fDuplicateKeys= duplicateKeys;
 	}
-	
+
 	public Properties (Properties properties, Set duplicateKeys) {
 		super(properties);
 		Assert.isNotNull(duplicateKeys);

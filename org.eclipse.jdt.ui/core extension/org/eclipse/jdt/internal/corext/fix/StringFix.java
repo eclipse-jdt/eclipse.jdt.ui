@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  *
  */
 public class StringFix implements IFix, IProposableFix {
-	
+
 	private final TextEditGroup[] fEditGroups;
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
@@ -80,11 +80,11 @@ public class StringFix implements IFix, IProposableFix {
 			return null;
 		}
 	}
-	
+
 	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
-		
+
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
@@ -92,18 +92,18 @@ public class StringFix implements IFix, IProposableFix {
 		}
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, locations);
 	}
-	
+
 	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
-		
+
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, problems);
 	}
 
 	private static IFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		List result= new ArrayList();
-		
+
 		List missingNLSProblems= new ArrayList();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
@@ -133,21 +133,21 @@ public class StringFix implements IFix, IProposableFix {
 			if (edits != null) {
 				for (int j= 0; j < edits.length; j++) {
 					String label= FixMessages.StringFix_AddNonNls_description;
-					result.add(new CategorizedTextEditGroup(label, edits[j], new GroupCategorySet(new GroupCategory(label, label, label))));	
+					result.add(new CategorizedTextEditGroup(label, edits[j], new GroupCategorySet(new GroupCategory(label, label, label))));
 				}
 			}
 		}
 		if (result.isEmpty())
 			return null;
-		
+
 		return new StringFix("", compilationUnit, (TextEditGroup[])result.toArray(new TextEditGroup[result.size()])); //$NON-NLS-1$
 	}
-	
+
 	private static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
-		
+
 		String replaceString= new String();
 		boolean hasMoreInComment= false;
-		
+
 		// look after the tag
 		int next= offset + length;
 		while (next < buffer.getLength()) {
@@ -155,7 +155,7 @@ public class StringFix implements IFix, IProposableFix {
 			if (IndentManipulation.isIndentChar(ch)) {
 				next++; // remove all whitespace
 			} else if (IndentManipulation.isLineDelimiterChar(ch)) {
-				length= next - offset; 
+				length= next - offset;
 				break;
 			} else if (ch == '/') {
 				next++;
@@ -185,7 +185,7 @@ public class StringFix implements IFix, IProposableFix {
 			return null;
 		}
 	}
-	
+
 	private StringFix(String name, CompilationUnit compilationUnit, TextEditGroup[] groups) {
 		fName= name;
 		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
@@ -198,13 +198,13 @@ public class StringFix implements IFix, IProposableFix {
 	public CompilationUnitChange createChange() throws CoreException {
 		if (fEditGroups == null || fEditGroups.length == 0)
 			return null;
-		
+
 		CompilationUnitChange result= new CompilationUnitChange(getDisplayString(), fCompilationUnit);
 		for (int i= 0; i < fEditGroups.length; i++) {
 			TextEdit[] edits= fEditGroups[i].getTextEdits();
 			String groupName= fEditGroups[i].getName();
 			for (int j= 0; j < edits.length; j++) {
-				TextChangeCompatibility.addTextEdit(result, groupName, edits[j]);	
+				TextChangeCompatibility.addTextEdit(result, groupName, edits[j]);
 			}
 		}
 		return result;

@@ -22,7 +22,7 @@ public abstract class HierarchyType extends TType {
 	private HierarchyType fSuperclass;
 	private HierarchyType[] fInterfaces;
 	private IType fJavaElementType;
-	
+
 	protected HierarchyType(TypeEnvironment environment) {
 		super(environment);
 	}
@@ -42,19 +42,19 @@ public abstract class HierarchyType extends TType {
 			fInterfaces[i]= (HierarchyType)environment.create(interfaces[i]);
 		}
 	}
-	
+
 	public TType getSuperclass() {
 		return fSuperclass;
 	}
-	
+
 	public TType[] getInterfaces() {
 		return fInterfaces;
 	}
-	
+
 	public IType getJavaElementType() {
 		return fJavaElementType;
 	}
-	
+
 	public boolean isSubType(HierarchyType other) {
 		if (getEnvironment() == other.getEnvironment()) {
 			Map cache= getEnvironment().getSubTypeCache();
@@ -79,10 +79,10 @@ public abstract class HierarchyType extends TType {
 		}
 		return false;
 	}
-	
+
 	protected boolean canAssignToStandardType(StandardType target) {
 		if (target.isJavaLangObject())
 			return true;
 		return isSubType(target);
-	}	
+	}
 }

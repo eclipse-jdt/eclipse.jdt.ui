@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 75800: [call hierarchy] should allow searches for fields
@@ -26,21 +26,21 @@ import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter;
 
 class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
-	
+
 	private CallHierarchyViewPart fCallHierarchyViewPart;
 
 	public CallHierarchyTransferDropAdapter(CallHierarchyViewPart viewPart, StructuredViewer viewer) {
 		super(viewer);
 		fCallHierarchyViewPart= viewPart;
-	}	
-	
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void doInputView(Object inputElements) {
 		fCallHierarchyViewPart.setInputElements((IMember[]) inputElements);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

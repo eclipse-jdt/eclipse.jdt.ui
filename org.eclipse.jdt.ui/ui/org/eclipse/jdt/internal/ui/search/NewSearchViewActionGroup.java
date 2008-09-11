@@ -24,16 +24,16 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 
 class NewSearchViewActionGroup extends CompositeActionGroup {
-	
+
 	public NewSearchViewActionGroup(IViewPart part) {
 		Assert.isNotNull(part);
 		OpenViewActionGroup openViewActionGroup;
 		setGroups(new ActionGroup[]{
 			new OpenEditorActionGroup(part),
 			openViewActionGroup= new OpenViewActionGroup(part),
-			new GenerateActionGroup(part), 
+			new GenerateActionGroup(part),
 			new RefactorActionGroup(part),
-			new JavaSearchActionGroup(part) 
+			new JavaSearchActionGroup(part)
 		});
 		openViewActionGroup.containsShowInMenu(false);
 	}

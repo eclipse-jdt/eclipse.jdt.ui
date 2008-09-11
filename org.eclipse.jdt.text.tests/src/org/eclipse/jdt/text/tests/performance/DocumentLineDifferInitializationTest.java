@@ -47,11 +47,11 @@ public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDi
 		setUpSlow();
 		runInitializationMeasurements(createDocument(SMALL_FAUST_MANY_CHANGES_SAME_SIZE));
 	}
-	
+
 	protected void tearDown() throws Exception {
 		commitAllMeasurements();
 		assertAllPerformance();
-		
+
 		super.tearDown();
 	}
 
@@ -64,7 +64,7 @@ public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDi
 		int runs= getWarmUpRuns();
 		for (int run= 0; run < runs; run++)
 			measureInitialization(meter, document);
-		
+
 		meter= createPerformanceMeter();
 		runs= getMeasuredRuns();
 		for (int run= 0; run < runs; run++)

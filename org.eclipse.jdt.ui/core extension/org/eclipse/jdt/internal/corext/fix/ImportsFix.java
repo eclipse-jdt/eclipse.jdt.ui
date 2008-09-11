@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ImportsFix extends TextEditFix {
-	
+
 	public static IFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status) throws CoreException {
 		if (!organizeImports)
 			return null;
@@ -50,12 +50,12 @@ public class ImportsFix extends TextEditFix {
 		if (hasAmbiguity[0]) {
 			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, getLocationString(cu)));
 		}
-		
+
 		if (op.getParseError() != null) {
 			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_parse, getLocationString(cu)));
 			return null;
 		}
-		
+
 		if (edit == null || (edit instanceof MultiTextEdit && edit.getChildrenSize() == 0))
 			return null;
 

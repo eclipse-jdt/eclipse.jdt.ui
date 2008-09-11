@@ -35,29 +35,29 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  *
  */
 public class UnusedCodeCleanUp extends AbstractMultiFix {
-		
+
 	public UnusedCodeCleanUp(Map options) {
 		super(options);
 	}
-	
+
 	public UnusedCodeCleanUp() {
 		super();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
 	}
-	
+
 	private boolean requireAST() {
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
-		
+
 		return removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS) ||
 				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS) ||
 				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS) ||
-				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES) || 
+				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
 	}
@@ -65,14 +65,14 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {		
+	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
-		
+
 		return UnusedCodeFix.createCleanUp(compilationUnit,
 				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS),
 				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS),
-				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS), 
-				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES), 
+				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS),
+				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS),
 				false);
@@ -83,37 +83,37 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 	 */
 	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
-		
+
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
-				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS), 
-				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS), 
+				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS),
+				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS),
 				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS),
 				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES),
-				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES), 
+				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS),
 				false);
 	}
 
 	public Map getRequiredOptions() {
 		Map result= new Hashtable();
-		
+
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
 			result.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.WARNING);
 
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		if (removeMembers && (
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS) ||
-				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS) || 
+				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES)))
 			result.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
-		
+
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))
 			result.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
 
 		return result;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -139,7 +139,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
 		} else {
 			buf.append("import pack.Bar;\n"); //$NON-NLS-1$
@@ -169,10 +169,10 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		}
 		buf.append("    }\n"); //$NON-NLS-1$
 		buf.append("}\n"); //$NON-NLS-1$
-		
+
 		return buf.toString();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

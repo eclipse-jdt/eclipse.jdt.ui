@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -57,7 +57,7 @@ public class CompilationUnitRewrite {
 	//TODO: add RefactoringStatus fStatus;?
 	private ICompilationUnit fCu;
 	private List/*<TextEditGroup>*/ fTextEditGroups= new ArrayList();
-	
+
 	private CompilationUnit fRoot; // lazily initialized
 	private ASTRewrite fRewrite; // lazily initialized
 	private ImportRewrite fImportRewrite; // lazily initialized
@@ -68,7 +68,7 @@ public class CompilationUnitRewrite {
 	private final WorkingCopyOwner fOwner;
 	private IDocument fRememberContent= null;
 
-	
+
 	public CompilationUnitRewrite(ICompilationUnit cu) {
 		this(null, cu, null);
 	}
@@ -86,11 +86,11 @@ public class CompilationUnitRewrite {
 		fCu= cu;
 		fRoot= root;
 	}
-	
+
 	public void rememberContent() {
 		fRememberContent= new Document();
 	}
-	
+
 
 	/**
 	 * Controls whether the compiler should provide binding information for the AST
@@ -101,7 +101,7 @@ public class CompilationUnitRewrite {
 	 * <p>
 	 * Defaults to <b><code>true</code></b> (do resolve bindings).
 	 * </p>
-	 * 
+	 *
 	 * @param resolve
 	 *            <code>true</code> if bindings are wanted, and
 	 *            <code>false</code> if bindings are not of interest
@@ -112,7 +112,7 @@ public class CompilationUnitRewrite {
 	public void setResolveBindings(boolean resolve) {
 		fResolveBindings= resolve;
 	}
-	
+
 	/**
 	 * Controls whether the compiler should perform statements recovery.
 	 * To be effective, this method must be called before any
@@ -122,14 +122,14 @@ public class CompilationUnitRewrite {
 	 * <p>
 	 * Defaults to <b><code>true</code></b> (do perform statements recovery).
 	 * </p>
-	 * 
+	 *
 	 * @param statementsRecovery whether statements recovery should be performed
 	 * @see org.eclipse.jdt.core.dom.ASTParser#setStatementsRecovery(boolean)
 	 */
 	public void setStatementsRecovery(boolean statementsRecovery) {
 		fStatementsRecovery= statementsRecovery;
 	}
-	
+
 	/**
 	 * Controls whether the compiler should perform bindings recovery.
 	 * To be effective, this method must be called before any
@@ -139,14 +139,14 @@ public class CompilationUnitRewrite {
 	 * <p>
 	 * Defaults to <b><code>false</code></b> (do not perform bindings recovery).
 	 * </p>
-	 * 
+	 *
 	 * @param bindingsRecovery whether bindings recovery should be performed
 	 * @see org.eclipse.jdt.core.dom.ASTParser#setBindingsRecovery(boolean)
 	 */
 	public void setBindingRecovery(boolean bindingsRecovery) {
 		fBindingsRecovery= bindingsRecovery;
 	}
-	
+
 	public void clearASTRewrite() {
 		fRewrite= null;
 		fTextEditGroups= new ArrayList();
@@ -172,12 +172,12 @@ public class CompilationUnitRewrite {
 		fTextEditGroups.add(result);
 		return result;
 	}
-	
+
 
 	public CompilationUnitChange createChange() throws CoreException {
 		return createChange(true, null);
 	}
-	
+
 	/**
 	 * Creates a compilation unit change based on the events recorded by this compilation unit rewrite.
 	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
@@ -189,7 +189,7 @@ public class CompilationUnitRewrite {
 	public CompilationUnitChange createChange(boolean generateGroups, IProgressMonitor monitor) throws CoreException {
 		return createChange(fCu.getElementName(), generateGroups, monitor);
 	}
-	
+
 	/**
 	 * Creates a compilation unit change based on the events recorded by this compilation unit rewrite.
 	 * @param name the name of the change to create
@@ -205,14 +205,14 @@ public class CompilationUnitRewrite {
 		cuChange.setEdit(multiEdit);
 		return attachChange(cuChange, generateGroups, monitor);
 	}
-	
-	
+
+
 	/**
 	 * Attaches the changes of this compilation unit rewrite to the given CU Change. The given
 	 * change <b>must</b> either have no root edit, or a MultiTextEdit as a root edit.
 	 * The edits in the given change <b>must not</b> overlap with the changes of
 	 * this compilation unit.
-	 *  
+	 *
 	 * @param cuChange existing CompilationUnitChange with a MultiTextEdit root or no root at all.
 	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
 	 * @param monitor the progress monitor or <code>null</code>
@@ -226,13 +226,13 @@ public class CompilationUnitRewrite {
 			boolean needsImportRewrite= fImportRewrite != null && fImportRewrite.hasRecordedChanges() || needsImportRemoval;
 			if (!needsAstRewrite && !needsImportRemoval && !needsImportRewrite)
 				return null;
-						
+
 			MultiTextEdit multiEdit= (MultiTextEdit) cuChange.getEdit();
 			if (multiEdit == null) {
 				multiEdit= new MultiTextEdit();
 				cuChange.setEdit(multiEdit);
 			}
-				
+
 			if (needsAstRewrite) {
 				TextEdit rewriteEdit;
 				if (fRememberContent != null) {
@@ -257,11 +257,11 @@ public class CompilationUnitRewrite {
 				TextEdit importsEdit= fImportRewrite.rewriteImports(monitor);
 				if (!isEmptyEdit(importsEdit)) {
 					multiEdit.addChild(importsEdit);
-					String importUpdateName= RefactoringCoreMessages.ASTData_update_imports; 
+					String importUpdateName= RefactoringCoreMessages.ASTData_update_imports;
 					cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
 				}
 			} else {
-				
+
 			}
 			if (isEmptyEdit(multiEdit))
 				return null;
@@ -275,7 +275,7 @@ public class CompilationUnitRewrite {
 	private static boolean isEmptyEdit(TextEdit edit) {
 		return edit.getClass() == MultiTextEdit.class && ! edit.hasChildren();
 	}
-	
+
 	public ICompilationUnit getCu() {
 		return fCu;
 	}
@@ -285,7 +285,7 @@ public class CompilationUnitRewrite {
 			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fOwner, fResolveBindings, fStatementsRecovery, fBindingsRecovery, null);
 		return fRoot;
 	}
-	
+
 	public AST getAST() {
 		return getRoot().getAST();
 	}
@@ -319,9 +319,9 @@ public class CompilationUnitRewrite {
 			}
 		}
 		return fImportRewrite;
-		
+
 	}
-	
+
 	public ImportRemover getImportRemover() {
 		if (fImportRemover == null) {
 			fImportRemover= new ImportRemover(fCu.getJavaProject(), getRoot());

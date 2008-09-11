@@ -13,24 +13,24 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 
 public interface ITypeConstraintFactory {
-	
+
 	public ITypeConstraint[] createSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2);
 	public ITypeConstraint[] createEqualsConstraint(ConstraintVariable v1, ConstraintVariable v2);
 	public ITypeConstraint[] createDefinesConstraint(ConstraintVariable v1, ConstraintVariable v2);
 	public ITypeConstraint[] createStrictSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2);
-	
+
 	public CompositeOrTypeConstraint createCompositeOrTypeConstraint(ITypeConstraint[] constraints);
-	
+
 	/**
 	 * Allows for avoiding the creation of SimpleTypeConstraints based on properties of
-	 * their constituent ConstraintVariables and ConstraintOperators. Can be used to e.g. 
+	 * their constituent ConstraintVariables and ConstraintOperators. Can be used to e.g.
 	 * avoid creation of constraints for assignments between built-in types.
-	 * 
-	 * @param v1 
+	 *
+	 * @param v1
 	 * @param v2
 	 * @param operator
 	 * @return whether the constraint should <em>not</em> be created
 	 */
 	public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator);
-	
+
 }

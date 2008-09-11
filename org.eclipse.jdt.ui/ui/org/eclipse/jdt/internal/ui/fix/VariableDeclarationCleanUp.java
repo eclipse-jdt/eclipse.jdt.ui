@@ -27,23 +27,23 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 	public VariableDeclarationCleanUp(Map options) {
 		super(options);
 	}
-	
+
 	public VariableDeclarationCleanUp() {
 		super();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, null);
 	}
-	
+
 	private boolean requireAST() {
 		boolean addFinal= isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		if (!addFinal)
 			return false;
-		
+
 		return isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS) ||
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS) ||
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
@@ -56,11 +56,11 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
-		
+
 		boolean addFinal= isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		if (!addFinal)
 			return null;
-		
+
 		return VariableDeclarationFix.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS),
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS),
@@ -78,16 +78,16 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalParameters_description);
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES))
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalLocals_description);
-		
+
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS)) {
 			buf.append("private final int i= 0;\n"); //$NON-NLS-1$
 		} else {
@@ -107,7 +107,7 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 			buf.append("    h= 0;\n"); //$NON-NLS-1$
 		}
 		buf.append("}\n"); //$NON-NLS-1$
-		
+
 		return buf.toString();
 	}
 

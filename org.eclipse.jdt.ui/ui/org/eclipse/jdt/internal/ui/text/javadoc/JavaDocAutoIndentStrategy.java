@@ -26,6 +26,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -105,7 +106,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 						c.shiftsCaret= false;
 						c.caretOffset= c.offset + buf.length();
 						String lineDelimiter= TextUtilities.getDefaultLineDelimiter(d);
-						
+
 						int eolOffset= lineOffset + line.getLength();
 						int replacementLength= eolOffset - p;
 						String restOfLine= d.get(p, replacementLength);
@@ -244,7 +245,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		while (nonSpace < len && Character.getType(comment.charAt(nonSpace)) == Character.SPACE_SEPARATOR)
 				nonSpace++;
 		comment= comment.substring(nonSpace);
-		
+
 		return Strings.changeIndent(comment, 0, project, indentation, lineDelimiter);
 	}
 
@@ -255,7 +256,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), typeParamNames, lineDelimiter);
 		if (comment != null) {
 			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
-			if (!isFirstComment(document, command, type, javadocComment)) 
+			if (!isFirstComment(document, command, type, javadocComment))
 				return null;
 			return prepareTemplateComment(comment.trim(), indentation, type.getJavaProject(), lineDelimiter);
 		}
@@ -307,7 +308,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		int nameRelativeOffset= member.getNameRange().getOffset() - srcOffset;
 		int partitionRelativeOffset= partition.getOffset() - srcOffset;
 		String token= ignoreNonJavadoc ? "/**" :  "/*"; //$NON-NLS-1$ //$NON-NLS-2$
-		return document.get(srcOffset, srcLength).lastIndexOf(token, nameRelativeOffset) == partitionRelativeOffset; 
+		return document.get(srcOffset, srcLength).lastIndexOf(token, nameRelativeOffset) == partitionRelativeOffset;
 	}
 
 	/**

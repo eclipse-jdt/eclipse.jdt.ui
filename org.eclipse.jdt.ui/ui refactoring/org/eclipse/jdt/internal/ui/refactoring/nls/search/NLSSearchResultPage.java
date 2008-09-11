@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.IShowInTargetList;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
@@ -38,7 +39,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	public NLSSearchResultPage() {
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match,
 	 *      int, int)
@@ -52,7 +53,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 			textEditor.selectAndReveal(currentOffset, currentLength);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#elementsChanged(java.lang.Object[])
 	 */
@@ -75,7 +76,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		throw new IllegalStateException("Doesn't support tree mode."); //$NON-NLS-1$
 	}
-	
+
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
@@ -93,7 +94,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
@@ -104,5 +105,5 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 		return null;
 	}
 
-	
+
 }

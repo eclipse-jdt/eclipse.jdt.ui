@@ -28,13 +28,13 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"; //$NON-NLS-1$
-	
+
 	private NameConventionConfigurationBlock fConfigurationBlock;
 
 	public CodeStylePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		//setDescription(PreferencesMessages.getString("CodeStylePreferencePage.description")); //$NON-NLS-1$
-		
+
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.CodeStylePreferencePage_title);
 	}
@@ -45,7 +45,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
 		fConfigurationBlock= new NameConventionConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
-		
+
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
 	}
@@ -53,25 +53,25 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 	protected Control createPreferenceContent(Composite composite) {
 		return fConfigurationBlock.createContents(composite);
 	}
-	
+
 	protected boolean hasProjectSpecificOptions(IProject project) {
 		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
 	 */
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
 	 */
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
 	 */
@@ -81,7 +81,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
@@ -91,7 +91,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 		}
 		super.dispose();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
@@ -111,7 +111,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 		}
 		return super.performOk();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */
@@ -120,7 +120,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.performApply();
 		}
 	}
-	
+
 
 }
 

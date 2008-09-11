@@ -29,32 +29,32 @@ import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
-		
+
 	public UnnecessaryCodeCleanUp(Map options) {
 		super(options);
 	}
-	
+
 	public UnnecessaryCodeCleanUp() {
 		super();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS), false, getRequiredOptions());
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
-		return UnusedCodeFix.createCleanUp(compilationUnit, 
-				false, 
-				false, 
-				false, 
-				false, 
-				false, 
+		return UnusedCodeFix.createCleanUp(compilationUnit,
+				false,
+				false,
+				false,
+				false,
+				false,
 				false,
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
@@ -64,11 +64,11 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	 */
 	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
-				false, 
-				false, 
-				false, 
-				false, 
-				false, 
+				false,
+				false,
+				false,
+				false,
+				false,
 				false,
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
@@ -81,7 +81,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 
 		return result;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -91,19 +91,19 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
-		
+
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS)) {
 			buf.append("Boolean b= Boolean.TRUE;\n"); //$NON-NLS-1$
 		} else {
 			buf.append("Boolean b= (Boolean) Boolean.TRUE;\n"); //$NON-NLS-1$
 		}
-		
+
 		return buf.toString();
 	}
 
