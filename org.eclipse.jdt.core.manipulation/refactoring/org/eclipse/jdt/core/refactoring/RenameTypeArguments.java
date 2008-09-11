@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IJavaElement;
  * <p>
  * This class is not intended to be subclassed by clients.
  * </p>
- * 
+ *
  * @since 1.0
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -30,16 +30,16 @@ public class RenameTypeArguments extends RenameArguments {
 
 	private boolean updateSimilarDeclarations;
 	private IJavaElement[] similarDeclarations;
-	
+
 	/**
 	 * Creates new rename type arguments.
-	 * 
+	 *
 	 * @param newName the new name of the element to be renamed
 	 * @param updateReferences <code>true</code> if reference
 	 *  updating is requested; <code>false</code> otherwise
 	 * @param updateSimilarDeclarations <code>true</code> if similar
 	 *  declaration updating is requested; <code>false</code> otherwise
-	 * @param similarDeclarations the similar declarations that will be 
+	 * @param similarDeclarations the similar declarations that will be
 	 *  updated or <code>null</code> if similar declaration updating is
 	 *  not requested
 	 */
@@ -52,28 +52,28 @@ public class RenameTypeArguments extends RenameArguments {
 		this.updateSimilarDeclarations= updateSimilarDeclarations;
 		this.similarDeclarations= similarDeclarations;
 	}
-	
+
 	/**
 	 * Returns whether similar declaration updating is requested or not.
-	 * 
+	 *
 	 * @return returns <code>true</code> if similar declaration
 	 *  updating is requested; <code>false</code> otherwise
 	 */
 	public boolean getUpdateSimilarDeclarations() {
 		return updateSimilarDeclarations;
 	}
-	
+
 	/**
 	 * Returns the similar declarations that get updated. Returns
 	 * <code>null</code> if similar declaration updating is not
 	 * requested.
-	 * 
+	 *
 	 * @return the similar elements that get updated
 	 */
 	public IJavaElement[] getSimilarDeclarations() {
 		return similarDeclarations;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see RefactoringArguments#toString()
 	 */

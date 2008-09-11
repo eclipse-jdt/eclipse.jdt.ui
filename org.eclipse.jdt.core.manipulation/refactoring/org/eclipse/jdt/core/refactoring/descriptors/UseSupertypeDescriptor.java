@@ -36,9 +36,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -62,7 +62,7 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	public UseSupertypeDescriptor() {
 		super(IJavaRefactorings.USE_SUPER_TYPE);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 *
@@ -81,9 +81,9 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public UseSupertypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
@@ -109,7 +109,7 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 * <p>
 	 * The default is to not replace the subtype occurrence.
 	 * </p>
-	 * 
+	 *
 	 * @param replace
 	 *            <code>true</code> to replace subtype occurrences in
 	 *            'instanceof' statements, <code>false</code> otherwise
@@ -124,7 +124,7 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 * Occurrences of the subtype are replaced by the supertype set by
 	 * {@link #setSupertype(IType)} where possible.
 	 * </p>
-	 * 
+	 *
 	 * @param type
 	 *            the subtype to set
 	 */
@@ -139,7 +139,7 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 * Occurrences of the subtype set by {@link #setSubtype(IType)} are replaced
 	 * by the supertype where possible.
 	 * </p>
-	 * 
+	 *
 	 * @param type
 	 *            the supertype to set
 	 */

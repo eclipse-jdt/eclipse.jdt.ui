@@ -38,12 +38,12 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @deprecated since 1.2, use {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor} from
  * <code>org.eclipse.ltk.core.refactoring</code> instead.
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -61,7 +61,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	public RenameResourceDescriptor() {
 		super(IJavaRefactorings.RENAME_RESOURCE);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 *
@@ -80,9 +80,9 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public RenameResourceDescriptor(String project, String description, String comment, Map arguments, int flags) {
@@ -102,7 +102,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Sets the new name to rename the resource to.
-	 * 
+	 *
 	 * @param name
 	 *            the non-empty new name to set
 	 */
@@ -111,13 +111,13 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 		Assert.isLegal(!"".equals(name), "Name must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
 		fName= name;
 	}
-	
+
 	/**
 	 * Returns the new name to rename the resource to.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 *            the new name to rename the resource to
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public String getNewName() {
@@ -133,11 +133,11 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * <p>
 	 * The default is to associate the refactoring with the workspace.
 	 * </p>
-	 * 
+	 *
 	 * @param project
 	 *            the non-empty project name to set, or <code>null</code> for
 	 *            the workspace
-	 * 
+	 *
 	 * @see #getProject()
 	 */
 	public void setProject(final String project) {
@@ -150,7 +150,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * Note: If the resource to be renamed is of type {@link IResource#PROJECT},
 	 * clients are required to to set the project name to <code>null</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param resource
 	 *            the resource to be renamed
 	 */
@@ -158,14 +158,14 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 		Assert.isNotNull(resource);
 		fResourcePath= resource.getFullPath();
 	}
-	
-	
+
+
 	/**
 	 * Returns the path of the resource to rename.
-	 *  
+	 *
 	 * @return
 	 *          the path of the resource to rename
-	 *          
+	 *
 	 * @since 1.2
 	 */
 	public IPath getResourcePath() {

@@ -65,7 +65,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
  * <p>
  * Note: this interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 1.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -148,11 +148,11 @@ public interface IJavaRefactorings {
 	 * Clients may safely cast the obtained refactoring descriptor to
 	 * {@link ExtractClassDescriptor}.
 	 * </p>
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public static final String EXTRACT_CLASS= "org.eclipse.jdt.ui.extract.class"; //$NON-NLS-1$
-	
+
 	/**
 	 * Refactoring id of the 'Extract Constant' refactoring (value:
 	 * <code>org.eclipse.jdt.ui.extract.constant</code>).
@@ -282,7 +282,7 @@ public interface IJavaRefactorings {
 	 * </p>
 	 */
 	public static final String INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
-	
+
 	/**
 	 * Refactoring id of the 'Introduce Parameter Object' refactoring (value:
 	 * <code>org.eclipse.jdt.ui.introduce.parameter.object</code>).
@@ -291,9 +291,9 @@ public interface IJavaRefactorings {
 	 * {@link IntroduceParameterObjectDescriptor}.
 	 * </p>
 	 * @since 1.2
-	 */	
+	 */
 	public static final String INTRODUCE_PARAMETER_OBJECT= "org.eclipse.jdt.ui.introduce.parameter.object"; //$NON-NLS-1$
-	
+
 	/**
 	 * Refactoring id of the 'Move' refactoring (value:
 	 * <code>org.eclipse.jdt.ui.move</code>).

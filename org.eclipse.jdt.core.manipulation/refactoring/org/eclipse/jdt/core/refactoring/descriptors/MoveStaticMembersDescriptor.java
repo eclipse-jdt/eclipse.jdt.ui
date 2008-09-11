@@ -37,9 +37,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -69,7 +69,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	public MoveStaticMembersDescriptor() {
 		super(IJavaRefactorings.MOVE_STATIC_MEMBERS);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 *
@@ -88,7 +88,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public MoveStaticMembersDescriptor(String project, String description, String comment, Map arguments, int flags) {
@@ -114,7 +114,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	/**
 	 * Determines whether the delegate for a member should be declared as
 	 * deprecated.
-	 * 
+	 *
 	 * @param deprecate
 	 *            <code>true</code> to deprecate the delegate,
 	 *            <code>false</code> otherwise
@@ -125,7 +125,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 
 	/**
 	 * Sets the destination type of the move operation.
-	 * 
+	 *
 	 * @param type
 	 *            the destination type
 	 */
@@ -137,7 +137,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	/**
 	 * Determines whether the the original members should be kept as delegates
 	 * to the moved ones.
-	 * 
+	 *
 	 * @param delegate
 	 *            <code>true</code> to keep the originals, <code>false</code>
 	 *            otherwise
@@ -148,7 +148,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 
 	/**
 	 * Sets the static members to move.
-	 * 
+	 *
 	 * @param members
 	 *            the members to move
 	 */

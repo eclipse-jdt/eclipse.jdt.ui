@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.core.manipulation;
 import org.eclipse.osgi.util.NLS;
 
 public class JavaManipulationMessages extends NLS {
-	
+
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages"; //$NON-NLS-1$
 
 	private JavaManipulationMessages() {
@@ -23,6 +23,6 @@ public class JavaManipulationMessages extends NLS {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, JavaManipulationMessages.class);
 	}
-	
+
 	public static String JavaManipulationMessages_internalError;
 }

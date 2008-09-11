@@ -29,9 +29,9 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -43,7 +43,7 @@ public final class InferTypeArgumentsDescriptor extends JavaRefactoringDescripto
 	public InferTypeArgumentsDescriptor() {
 		super(IJavaRefactorings.INFER_TYPE_ARGUMENTS);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 *
@@ -62,11 +62,11 @@ public final class InferTypeArgumentsDescriptor extends JavaRefactoringDescripto
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public InferTypeArgumentsDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.INFER_TYPE_ARGUMENTS, project, description, comment, arguments, flags);
 	}
-	
+
 }

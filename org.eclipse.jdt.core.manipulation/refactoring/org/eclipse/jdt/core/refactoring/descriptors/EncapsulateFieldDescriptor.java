@@ -29,9 +29,9 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -43,10 +43,10 @@ public final class EncapsulateFieldDescriptor extends JavaRefactoringDescriptor 
 	public EncapsulateFieldDescriptor() {
 		super(IJavaRefactorings.ENCAPSULATE_FIELD);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
-	 * 
+	 *
 	 * @param project
 	 *            the non-empty name of the project associated with this
 	 *            refactoring, or <code>null</code> for a workspace
@@ -62,7 +62,7 @@ public final class EncapsulateFieldDescriptor extends JavaRefactoringDescriptor 
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public EncapsulateFieldDescriptor(String project, String description, String comment, Map arguments, int flags) {

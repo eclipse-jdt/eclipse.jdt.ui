@@ -14,13 +14,13 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 
 /**
- * A participant to participate in refactorings that change method signatures. 
+ * A participant to participate in refactorings that change method signatures.
  * <p>
  * Change method signature participants are registered via the extension point <code>
  * org.eclipse.jdt.core.manipulation.changeMethodSignatureParticipants</code>.
  * Extensions to this extension point must extend this abstract class.
  * </p>
- * 
+ *
  * @since 1.2
  */
 public abstract class ChangeMethodSignatureParticipant extends RefactoringParticipant {
@@ -33,10 +33,10 @@ public abstract class ChangeMethodSignatureParticipant extends RefactoringPartic
 	protected final void initialize(RefactoringArguments arguments) {
 		fArguments= (ChangeMethodSignatureArguments) arguments;
 	}
-	
+
 	/**
 	 * Returns the change method signature arguments.
-	 * 
+	 *
 	 * @return the change method signature arguments
 	 */
 	public ChangeMethodSignatureArguments getArguments() {

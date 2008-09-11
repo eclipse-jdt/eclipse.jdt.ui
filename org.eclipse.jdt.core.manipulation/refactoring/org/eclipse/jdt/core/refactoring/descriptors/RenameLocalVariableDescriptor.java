@@ -35,10 +35,10 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
  * @deprecated since 1.2 merged into {@link RenameJavaElementDescriptor}
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -77,7 +77,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 
 	/**
 	 * Sets the compilation unit which contains the local variable.
-	 * 
+	 *
 	 * @param unit
 	 *            the compilation unit to set
 	 */
@@ -88,7 +88,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 
 	/**
 	 * Sets the new name to rename the local variable to.
-	 * 
+	 *
 	 * @param name
 	 *            the non-empty new name to set
 	 */
@@ -101,7 +101,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	/**
 	 * Sets the selection within the compilation unit which references the local
 	 * variable to rename.
-	 * 
+	 *
 	 * @param selection
 	 *            the selection to set
 	 */
@@ -115,7 +115,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	 * <p>
 	 * The default is to not update references.
 	 * </p>
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update references, <code>false</code>
 	 *            otherwise

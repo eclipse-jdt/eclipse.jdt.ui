@@ -45,9 +45,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -137,7 +137,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	public MoveDescriptor() {
 		super(IJavaRefactorings.MOVE);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 *
@@ -156,17 +156,17 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public MoveDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.MOVE, project, description, comment, arguments, flags);
 		fMovePolicy= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_POLICY);
-		
+
 		fDestination= JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_DESTINATION, project, true);
 		if (fDestination == null)
 			fDestination= JavaRefactoringDescriptorUtil.getResourcePath(fArguments, ATTRIBUTE_TARGET, project);
-		
+
 		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
 			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
 			fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
@@ -222,7 +222,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * Note: Clients may call only one of the <code>setDestination</code>
 	 * methods.
 	 * </p>
-	 * 
+	 *
 	 * @param element
 	 *            the java element
 	 */
@@ -237,7 +237,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * Note: Clients may call only one of the <code>setDestination</code>
 	 * methods.
 	 * </p>
-	 * 
+	 *
 	 * @param resource
 	 *            the resource
 	 */
@@ -261,7 +261,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * Note: Qualified name updating is currently applicable to files, folders
 	 * and compilation units. The default is to not update qualified names.
 	 * </p>
-	 * 
+	 *
 	 * @param patterns
 	 *            the non-empty file name patterns string
 	 */
@@ -277,7 +277,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * Note: Clients must only call one of the <code>setMoveXXX</code>
 	 * methods.
 	 * </p>
-	 * 
+	 *
 	 * @param members
 	 *            the members to move
 	 */
@@ -294,7 +294,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * Note: Clients must only call one of the <code>setMoveXXX</code>
 	 * methods.
 	 * </p>
-	 * 
+	 *
 	 * @param roots
 	 *            the package fragment roots to move
 	 */
@@ -311,7 +311,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * Note: Clients must only call one of the <code>setMoveXXX</code>
 	 * methods.
 	 * </p>
-	 * 
+	 *
 	 * @param fragments
 	 *            the package fragments to move
 	 */
@@ -328,7 +328,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * Note: Clients must only call one of the <code>setMoveXXX</code>
 	 * methods.
 	 * </p>
-	 * 
+	 *
 	 * @param files
 	 *            the files to move
 	 * @param folders
@@ -366,7 +366,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 * and compilation units. The default is to use no file name patterns
 	 * (meaning that all files are processed).
 	 * </p>
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update qualified names,
 	 *            <code>false</code> otherwise
@@ -377,7 +377,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Determines whether references to the Java element should be renamed.
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update references, <code>false</code>
 	 *            otherwise

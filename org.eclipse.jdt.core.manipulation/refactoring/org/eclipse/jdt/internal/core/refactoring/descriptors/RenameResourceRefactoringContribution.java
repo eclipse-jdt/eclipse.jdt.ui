@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor;
 
 /**
  * Refactoring contribution for the rename resource refactoring.
- * 
+ *
  * @since 1.1
  * @deprecated since 1.2 moved to <code>org.eclipse.ltk.core.refactoring</code>.
  * Contribution still available for backwards compatibility of scripts
@@ -39,9 +39,9 @@ public final class RenameResourceRefactoringContribution extends JavaRefactoring
 	public Refactoring createRefactoring(JavaRefactoringDescriptor javaDescriptor, RefactoringStatus status) throws CoreException {
 		if (javaDescriptor instanceof RenameResourceDescriptor) {
 			RenameResourceDescriptor descriptor= (RenameResourceDescriptor) javaDescriptor;
-			
+
 			// use the LTK RenameResourceDescriptor to create the refactoring
-			
+
 			RefactoringContribution newContribution= RefactoringCore.getRefactoringContribution(org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor.ID);
 			if (newContribution != null) {
 				RefactoringDescriptor ltkDescriptor= newContribution.createDescriptor();

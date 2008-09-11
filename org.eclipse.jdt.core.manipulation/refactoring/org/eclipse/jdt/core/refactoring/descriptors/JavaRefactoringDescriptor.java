@@ -42,9 +42,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * Note: this class is not intended to be extended outside the refactoring
  * framework.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients outside JDT.
  */
 public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
@@ -117,7 +117,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * file or not. If this flag is set, <code>JAR_REFACTORING</code> should
 	 * be set as well.
 	 * </p>
-	 * 
+	 *
 	 * @see #JAR_REFACTORING
 	 */
 	public static final int JAR_MIGRATION= 1 << 16;
@@ -131,7 +131,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * a correctly configured source attachment to work must set the
 	 * <code>JAR_SOURCE_ATTACHMENT</code> flag as well.
 	 * </p>
-	 * 
+	 *
 	 * @see #JAR_SOURCE_ATTACHMENT
 	 */
 	public static final int JAR_REFACTORING= 1 << 19;
@@ -144,7 +144,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * performed on binary elements originating from a JAR file if and only if
 	 * it has a correctly configured source attachment.
 	 * </p>
-	 * 
+	 *
 	 * @see #JAR_REFACTORING
 	 */
 	public static final int JAR_SOURCE_ATTACHMENT= 1 << 18;
@@ -154,7 +154,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Converts the specified element to an input handle.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param element
@@ -167,7 +167,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Converts an input handle back to the corresponding java element.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle
@@ -181,7 +181,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Converts an input handle back to the corresponding java element.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle
@@ -198,7 +198,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Converts an input handle back to the corresponding java element.
-	 * 
+	 *
 	 * @param owner
 	 *            the working copy owner
 	 * @param project
@@ -218,12 +218,12 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	/**
 	 * Converts an input handle with the given prefix back to the corresponding
 	 * resource.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param handle
 	 *            the input handle
-	 * 
+	 *
 	 * @return the corresponding resource, or <code>null</code> if no such
 	 *         resource exists
 	 */
@@ -233,12 +233,12 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Converts the specified resource to an input handle.
-	 * 
+	 *
 	 * @param project
 	 *            the project, or <code>null</code> for the workspace
 	 * @param resource
 	 *            the resource
-	 * 
+	 *
 	 * @return the input handle
 	 */
 	protected static String resourceToHandle(final String project, final IResource resource) {
@@ -252,17 +252,17 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Creates a new java refactoring descriptor.
-	 * 
+	 *
 	 * @param id
 	 *            the unique id of the refactoring
 	 */
 	protected JavaRefactoringDescriptor(final String id) {
 		this(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, new HashMap(), RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 	}
-	
+
 	/**
 	 * Creates a new Java refactoring descriptor.
-	 * 
+	 *
 	 * @param id
 	 *            the unique id of the refactoring
 	 * @param project
@@ -280,7 +280,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public JavaRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
@@ -316,7 +316,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * Note: This API must not be extended or reimplemented and should not be
 	 * called from outside the refactoring framework.
 	 * </p>
-	 * 
+	 *
 	 * @return the argument map (key type: {@link String}, value type: {@link String})
 	 */
 	protected Map getArguments() {
@@ -326,7 +326,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Populates the refactoring descriptor argument map based on the specified
-	 * arguments. Subclasses should extend and add their arguments to {@link #fArguments}. 
+	 * arguments. Subclasses should extend and add their arguments to {@link #fArguments}.
 	 */
 	protected void populateArgumentMap() {
 		RefactoringStatus status= validateDescriptor();
@@ -341,11 +341,11 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * about the performed refactoring. The default is to use no details
 	 * comment.
 	 * </p>
-	 * 
+	 *
 	 * @param comment
 	 *            the details comment to set, or <code>null</code> to set no
 	 *            details comment
-	 * 
+	 *
 	 * @see #getComment()
 	 */
 	public void setComment(final String comment) {
@@ -358,10 +358,10 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * This information is used to label a refactoring in the user interface.
 	 * The default is an unspecified, but legal description.
 	 * </p>
-	 * 
+	 *
 	 * @param description
 	 *            the non-empty description of the refactoring to set
-	 * 
+	 *
 	 * @see #getDescription()
 	 */
 	public void setDescription(final String description) {
@@ -376,18 +376,18 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * unless overridden by a concrete subclass. Clients may use refactoring
 	 * flags to indicate special capabilities of Java refactorings.
 	 * </p>
-	 * 
+	 *
 	 * @param flags
 	 *            the flags to set, or <code>RefactoringDescriptor.NONE</code>
 	 *            to clear the flags
-	 * 
+	 *
 	 * @see #getFlags()
-	 * 
+	 *
 	 * @see RefactoringDescriptor#NONE
 	 * @see RefactoringDescriptor#STRUCTURAL_CHANGE
 	 * @see RefactoringDescriptor#BREAKING_CHANGE
 	 * @see RefactoringDescriptor#MULTI_CHANGE
-	 * 
+	 *
 	 * @see #JAR_MIGRATION
 	 * @see #JAR_REFACTORING
 	 * @see #JAR_SOURCE_ATTACHMENT
@@ -403,11 +403,11 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * Subclasses should call this method with the project name associated with
 	 * the refactoring's input elements, if available.
 	 * </p>
-	 * 
+	 *
 	 * @param project
 	 *            the non-empty project name to set, or <code>null</code> for
 	 *            the workspace
-	 * 
+	 *
 	 * @see #getProject()
 	 */
 	public void setProject(final String project) {
@@ -424,7 +424,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * {@link RefactoringStatus#FATAL} indicates that the refactoring descriptor
 	 * cannot be used to create a refactoring instance.
 	 * </p>
-	 * 
+	 *
 	 * @return a refactoring status describing the outcome of the validation
 	 */
 	public RefactoringStatus validateDescriptor() {

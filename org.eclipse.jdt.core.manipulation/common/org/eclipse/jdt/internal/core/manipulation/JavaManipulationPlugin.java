@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
+import org.osgi.framework.BundleContext;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
-
-import org.osgi.framework.BundleContext;
 
 /**
  * The main plug-in class to be used in the workbench.
@@ -26,7 +26,7 @@ public class JavaManipulationPlugin extends Plugin {
 
 	//The shared instance.
 	private static JavaManipulationPlugin fgDefault;
-	
+
 	/**
 	 * The constructor.
 	 */
@@ -57,7 +57,7 @@ public class JavaManipulationPlugin extends Plugin {
 	public static JavaManipulationPlugin getDefault() {
 		return fgDefault;
 	}
-	
+
 	public static String getPluginId() {
 		return JavaManipulation.ID_PLUGIN;
 	}
@@ -65,7 +65,7 @@ public class JavaManipulationPlugin extends Plugin {
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void logErrorMessage(String message) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatusConstants.INTERNAL_ERROR, message, null));
 	}
@@ -79,8 +79,8 @@ public class JavaManipulationPlugin extends Plugin {
 		multi.add(status);
 		log(multi);
 	}
-	
+
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e)); 
-	}	
+		log(new Status(IStatus.ERROR, getPluginId(), IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e));
+	}
 }

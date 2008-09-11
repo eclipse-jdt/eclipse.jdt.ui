@@ -29,9 +29,9 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -43,7 +43,7 @@ public final class MoveMethodDescriptor extends JavaRefactoringDescriptor {
 	public MoveMethodDescriptor() {
 		super(IJavaRefactorings.MOVE_METHOD);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 *
@@ -62,11 +62,11 @@ public final class MoveMethodDescriptor extends JavaRefactoringDescriptor {
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public MoveMethodDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.MOVE_METHOD, project, description, comment, arguments, flags);
 	}
-	
+
 }

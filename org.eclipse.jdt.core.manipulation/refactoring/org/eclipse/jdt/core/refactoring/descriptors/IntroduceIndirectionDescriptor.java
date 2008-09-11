@@ -29,9 +29,9 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -43,7 +43,7 @@ public final class IntroduceIndirectionDescriptor extends JavaRefactoringDescrip
 	public IntroduceIndirectionDescriptor() {
 		super(IJavaRefactorings.INTRODUCE_INDIRECTION);
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
 	 *
@@ -62,11 +62,11 @@ public final class IntroduceIndirectionDescriptor extends JavaRefactoringDescrip
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @since 1.2
 	 */
 	public IntroduceIndirectionDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.INTRODUCE_INDIRECTION, project, description, comment, arguments, flags);
 	}
-	
+
 }

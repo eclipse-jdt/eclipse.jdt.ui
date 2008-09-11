@@ -14,9 +14,9 @@ package org.eclipse.jdt.core.manipulation;
  * Central access point for the Java Manipulation plug-in (id <code>"org.eclipse.jdt.core.manipulation"</code>).
  */
 public class JavaManipulation {
-	
+
 	/**
 	 * The id of the Java Manipulation plug-in (value <code>"org.eclipse.jdt.core.manipulation"</code>).
-	 */	
+	 */
 	public static final String ID_PLUGIN= "org.eclipse.jdt.core.manipulation"; //$NON-NLS-1$
 }

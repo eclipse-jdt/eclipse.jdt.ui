@@ -18,25 +18,25 @@ import org.eclipse.jdt.core.IJavaElement;
  * An <code>IJavaElementMapper</code> provides methods to map an original
  * elements to its refactored counterparts.
  * <p>
- * An <code>IJavaElementMapper</code> can be obtained via 
- * {@link RefactoringProcessor#getAdapter(Class)}. 
+ * An <code>IJavaElementMapper</code> can be obtained via
+ * {@link RefactoringProcessor#getAdapter(Class)}.
  * </p>
- * 
+ *
  * @since 1.1
  */
 public interface IJavaElementMapper {
-	
+
 	/**
 	 * Returns the refactored Java element for the given element.
-	 * The returned Java element might not yet exist when the method 
+	 * The returned Java element might not yet exist when the method
 	 * is called.
 	 * </p>
-	 * Note that local variables <strong>cannot</strong> be mapped 
+	 * Note that local variables <strong>cannot</strong> be mapped
 	 * using this method.
 	 * <p>
-	 * 
+	 *
 	 * @param element the element to be refactored
-	 * 
+	 *
 	 * @return the refactored element for the given element
 	 */
 	IJavaElement getRefactoredJavaElement(IJavaElement element);

@@ -26,9 +26,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * Note: this class is not intended to be extended outside the refactoring
  * framework.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients outside JDT
  */
 public abstract class JavaRefactoringContribution extends RefactoringContribution {
@@ -45,7 +45,7 @@ public abstract class JavaRefactoringContribution extends RefactoringContributio
 
 	/**
 	 * Creates the a new refactoring instance.
-	 * 
+	 *
 	 * @param descriptor
 	 *            the refactoring descriptor
 	 * @param status

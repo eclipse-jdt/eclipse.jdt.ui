@@ -36,9 +36,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * {@link RefactoringCore#getRefactoringContribution(String)} with the
  * appropriate refactoring id.
  * </p>
- * 
+ *
  * @since 1.2
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -85,7 +85,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 		/**
 		 * The name of the field in the selected type
-		 * 
+		 *
 		 * @return the name of the field in the selected type
 		 */
 		public String getFieldName() {
@@ -94,7 +94,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 		/**
 		 * The name of the field in the extracted class. The default is the same as in the selected type
-		 * 
+		 *
 		 * @return the name of the field in the extracted class
 		 */
 		public String getNewFieldName() {
@@ -103,7 +103,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 		/**
 		 * Sets the name of the field in the extracted class. The default is the same as in the selected type
-		 * 
+		 *
 		 * @param newFieldName the new field name. Must not be <code>null</code>
 		 */
 		public void setNewFieldName(String newFieldName) {
@@ -141,7 +141,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 		/**
 		 * Returns whether the field will be moved to extracted class. The default is <code>true</code>
-		 * 
+		 *
 		 * @return <code>true</code> if the field will be moved
 		 */
 		public boolean isCreateField() {
@@ -150,7 +150,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 		/**
 		 * Sets whether the field will be moved to extracted class. The default is <code>true</code>
-		 * 
+		 *
 		 * @param createField if <code>true</code> the field will be moved
 		 */
 		public void setCreateField(boolean createField) {
@@ -186,7 +186,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 * @throws IllegalArgumentException if the argument map contains invalid keys/values            
+	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
 	 */
 	public ExtractClassDescriptor(String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
 		super(IJavaRefactorings.EXTRACT_CLASS, project, description, comment, arguments, flags);
@@ -205,10 +205,10 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Creates {@link Field} objects for all instance fields of the type
-	 * 
+	 *
 	 * @param type the type declaring the field that will be moved to the extracted class
 	 * @return an instance of {@link Field} for every field declared in type that is not static
-	 * @throws JavaModelException if the type does not exist or if an exception occurs while accessing its corresponding resource. 
+	 * @throws JavaModelException if the type does not exist or if an exception occurs while accessing its corresponding resource.
 	 */
 	public static Field[] getFields(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
@@ -224,12 +224,12 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	/**
 	 * Sets the fields. The order is important and should be the same as the order
 	 * returned from {@link #getFields(IType)}. Changing the order can have side effects because of different initialization order.
-	 * Only fields which return <code>true</code> for {@link Field#isCreateField()} are created in the extracted class. Can be 
+	 * Only fields which return <code>true</code> for {@link Field#isCreateField()} are created in the extracted class. Can be
 	 * <code>null</code> to indicate that all instance fields should be moved
-	 * 
+	 *
 	 * @param fields the fields to move to the extracted class. Can be <code>null</code> to indicate that all instance fields should
 	 *  be moved
-	 * @throws IllegalArgumentException if one of the fields is <code>null</code> 
+	 * @throws IllegalArgumentException if one of the fields is <code>null</code>
 	 */
 	public void setFields(Field[] fields) throws IllegalArgumentException {
 		for (int i= 0; i < fields.length; i++) {
@@ -243,7 +243,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	/**
 	 * Returns the fields. The order of the fields is the same as they will appear in the extracted class if {@link Field#isCreateField()}
 	 * returns <code>true</code>.
-	 * 
+	 *
 	 * @return the fields or <code>null</code>. If <code>null</code> all instance fields from the selected type will be moved
 	 */
 	public Field[] getFields() {
@@ -252,7 +252,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Returns the type from which the fields are moved
-	 * 
+	 *
 	 * @return the type
 	 */
 	public IType getType() {
@@ -273,7 +273,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	/**
 	 * Returns the package where the extracted class will be created in if {{@link #isCreateTopLevel()} returns <code>true</code>.
 	 * Can return <code>null</code> to indicate that the package will be the same as the type
-	 * 
+	 *
 	 * @return the package for the toplevel extracted class or <code>null</code>. If <code>null</code> the package will be the same
 	 *  as the type
 	 */
@@ -282,10 +282,10 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	}
 
 	/**
-	 * Sets the package in which the top level class will be created. Can be <code>null</code> to indicate that the 
+	 * Sets the package in which the top level class will be created. Can be <code>null</code> to indicate that the
 	 *  package will be the same as the type
-	 * 
-	 * @param packageName the package in which the top level class will be created. Can be <code>null</code> to indicate that the 
+	 *
+	 * @param packageName the package in which the top level class will be created. Can be <code>null</code> to indicate that the
 	 *  package will be the same as the type
 	 */
 	public void setPackage(String packageName) {
@@ -294,7 +294,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Returns the class name for the extracted class or <code>null</code> if the refactoring should choose a name
-	 * 
+	 *
 	 * @return the class name for the extracted class or <code>null</code> if the refactoring should choose a name
 	 */
 	public String getClassName() {
@@ -303,7 +303,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Sets the class name for the extracted class or <code>null</code> if the refactoring should choose a name
-	 * 
+	 *
 	 * @param className the class name for the extracted class or <code>null</code> if the refactoring should choose a name
 	 */
 	public void setClassName(String className) {
@@ -312,7 +312,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Returns the field name for the generated field or <code>null</code> if the refactoring should choose a name
-	 * 
+	 *
 	 * @return the field name for the generated field or <code>null</code> if the refactoring should choose a name
 	 */
 	public String getFieldName() {
@@ -321,7 +321,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Sets the field name for the generated field or <code>null</code> if the refactoring should choose a name
-	 * 
+	 *
 	 * @param fieldName the field name for the generated field or <code>null</code> if the refactoring should choose a name
 	 */
 	public void setFieldName(String fieldName) {
@@ -331,7 +331,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	/**
 	 * Returns whether the extracted class will be created as top level class or as nested class. If <code>true</code> the
 	 * extracted class will be generated as top level class. The default is <code>true</code>
-	 * 
+	 *
 	 * @return if <code>true</code> the extracted class will be generated as top level class. The default is <code>true</code>
 	 */
 	public boolean isCreateTopLevel() {
@@ -342,7 +342,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	 * Sets whether the extracted class will be created as top level class or as nested class. If <code>true</code> the
 	 * extracted class will be generated as top level class. Else the class will be created as nested class in the type.
 	 * The default is <code>true</code>
-	 * 
+	 *
 	 * @param createTopLevel <code>true</code> to generated as top level class. The default is <code>true</code>
 	 */
 	public void setCreateTopLevel(boolean createTopLevel) {
@@ -352,22 +352,22 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	/**
 	 * Sets whether getters and setters will be created for all fields.
-	 * 
+	 *
 	 * @param createGetterSetter <code>true</code> to create getters and setters. Default is <code>false</code>.
 	 */
 	public void setCreateGetterSetter(boolean createGetterSetter) {
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_GETTER_SETTER, createGetterSetter);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if getters and setters are generated for fields. Default is <code>false</code>.
-	 * 
+	 *
 	 * @return <code>true</code> if getters and setters are generated for fields. Default is <code>false</code>
 	 */
 	public boolean isCreateGetterSetter() {
 		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_GETTER_SETTER, false);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor#populateArgumentMap()
 	 */
@@ -390,7 +390,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 			JavaRefactoringDescriptorUtil.setBooleanArray(fArguments, CREATE_FIELD_COUNT, CREATE_FIELD, createField, 0);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor#validateDescriptor()
 	 */

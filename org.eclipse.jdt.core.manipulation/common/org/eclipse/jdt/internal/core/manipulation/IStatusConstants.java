@@ -11,13 +11,13 @@
 package org.eclipse.jdt.internal.core.manipulation;
 
 /**
- * Defines status codes relevant to the Java Manipulation plug-in. 
+ * Defines status codes relevant to the Java Manipulation plug-in.
   */
 public interface IStatusConstants {
 
 	// Java Manipulation status constants start at 10000 to make sure that we don't
 	// collide with resource and java model constants.
-	
+
 	public static final int INTERNAL_ERROR= 10001;
-	
+
  }

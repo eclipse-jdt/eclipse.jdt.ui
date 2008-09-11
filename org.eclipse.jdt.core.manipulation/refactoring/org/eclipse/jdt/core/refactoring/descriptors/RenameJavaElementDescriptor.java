@@ -42,9 +42,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * <p>
  * Note: this class is not intended to be instantiated by clients.
  * </p>
- * 
+ *
  * @since 1.1
- * 
+ *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -103,8 +103,8 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 
 	/** @deprecated */
 	private static final String RENAME_RESOURCE= IJavaRefactorings.RENAME_RESOURCE;
-	
-	
+
+
 	/** The delegate attribute */
 	private boolean fDelegate= false;
 
@@ -150,7 +150,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 
 	/**
 	 * Creates a new refactoring descriptor.
-	 * 
+	 *
 	 * @param id
 	 *            the unique id of the rename refactoring
 	 * @see IJavaRefactorings
@@ -159,11 +159,11 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 		super(id);
 		Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Creates a new refactoring descriptor.
-	 * 
-	 * @param id 
+	 *
+	 * @param id
 	 *            the ID of this descriptor
 	 * @param project
 	 *            the non-empty name of the project associated with this
@@ -180,9 +180,9 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
+	 *
 	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
-	 * 
+	 *
 	 * @since 1.2
 	 */
 	public RenameJavaElementDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
@@ -253,7 +253,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 
 	/**
 	 * Checks whether the refactoring id is valid.
-	 * 
+	 *
 	 * @param id
 	 *            the refactoring id
 	 * @return the outcome of the validation
@@ -356,7 +356,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * {@link IMethod} and {@link IField}. The default is to not deprecate the
 	 * delegate.
 	 * </p>
-	 * 
+	 *
 	 * @param deprecate
 	 *            <code>true</code> to deprecate the delegate,
 	 *            <code>false</code> otherwise
@@ -381,7 +381,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * {@link IPackageFragment} and {@link IType}. The default is to use no
 	 * file name patterns (meaning that all files are processed).
 	 * </p>
-	 * 
+	 *
 	 * @param patterns
 	 *            the non-empty file name patterns string
 	 */
@@ -398,7 +398,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * {@link IJavaElement#JAVA_PROJECT}, clients are required to to set the
 	 * project name to <code>null</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param element
 	 *            the Java element to be renamed
 	 */
@@ -415,7 +415,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * elements {@link IMethod} and {@link IField}. The default is to not keep
 	 * the original as delegate.
 	 * </p>
-	 * 
+	 *
 	 * @param delegate
 	 *            <code>true</code> to keep the original, <code>false</code>
 	 *            otherwise
@@ -436,7 +436,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * {@link IType}. The default is to use the {@link #STRATEGY_EXACT} match
 	 * strategy.
 	 * </p>
-	 * 
+	 *
 	 * @param strategy
 	 *            the match strategy to use
 	 */
@@ -447,7 +447,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 
 	/**
 	 * Sets the new name to rename the Java element to.
-	 * 
+	 *
 	 * @param name
 	 *            the non-empty new name to set
 	 */
@@ -467,11 +467,11 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * <p>
 	 * The default is to associate the refactoring with the workspace.
 	 * </p>
-	 * 
+	 *
 	 * @param project
 	 *            the non-empty project name to set, or <code>null</code> for
 	 *            the workspace
-	 * 
+	 *
 	 * @see #getProject()
 	 */
 	public void setProject(final String project) {
@@ -485,7 +485,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * elements which do not represent enum constants only. The default is to
 	 * not rename any getter methods.
 	 * </p>
-	 * 
+	 *
 	 * @param rename
 	 *            <code>true</code> to rename getter methods,
 	 *            <code>false</code> otherwise
@@ -501,7 +501,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * elements which do not represent enum constants only. The default is to
 	 * not rename any setter methods.
 	 * </p>
-	 * 
+	 *
 	 * @param rename
 	 *            <code>true</code> to rename setter methods,
 	 *            <code>false</code> otherwise
@@ -518,7 +518,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * type {@link IPackageFragment}. The default is to not update Java
 	 * elements hierarchically.
 	 * </p>
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update hierarchically,
 	 *            <code>false</code> otherwise
@@ -540,7 +540,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * {@link IPackageFragment} and {@link IType}. The default is to not rename
 	 * qualified names.
 	 * </p>
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update qualified names,
 	 *            <code>false</code> otherwise
@@ -555,7 +555,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * Note: Reference updating is currently applicable to all Java element types except
 	 * {@link IPackageFragmentRoot}. The default is to not update references.
 	 * </p>
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update references, <code>false</code>
 	 *            otherwise
@@ -571,7 +571,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * Note: Similar declaration updating is currently applicable to Java elements of type
 	 * {@link IType}. The default is to not update similar declarations.
 	 * </p>
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update similar declarations,
 	 *            <code>false</code> otherwise
@@ -592,7 +592,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * {@link IPackageFragment}, {@link IType} and {@link IField}. The default
 	 * is to not rename textual occurrences.
 	 * </p>
-	 * 
+	 *
 	 * @param update
 	 *            <code>true</code> to update occurrences, <code>false</code>
 	 *            otherwise

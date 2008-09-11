@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.core.manipulation;
 
 import java.util.regex.Pattern;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.expressions.PropertyTester;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * A property tester for various properties of IJavaElements.
  * Might be moved down to jdt.core. See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=127085
- * 
+ *
  * @since 1.1
  */
 public class JavaElementPropertyTester extends PropertyTester {
@@ -34,45 +34,45 @@ public class JavaElementPropertyTester extends PropertyTester {
 	 * A property indicating the file name (value <code>"name"</code>). Regular expressions are supported.
 	 */
 	public static final String NAME = "name"; //$NON-NLS-1$
-	
+
 	/**
-	 * A property indicating if the element is in a open and existing Java project (value <code>"isInJavaProject"</code>). 
+	 * A property indicating if the element is in a open and existing Java project (value <code>"isInJavaProject"</code>).
 	 */
 	public static final String IS_IN_JAVA_PROJECT = "isInJavaProject"; //$NON-NLS-1$
-	
+
 	/**
-	 * A property indicating if the element is in a open and existing Java project that also implements the given nature (value <code>"isInJavaProjectWithNature"</code>). 
+	 * A property indicating if the element is in a open and existing Java project that also implements the given nature (value <code>"isInJavaProjectWithNature"</code>).
 	 */
 	public static final String IS_IN_JAVA_PROJECT_WITH_NATURE = "isInJavaProjectWithNature"; //$NON-NLS-1$
 
 	/**
-	 * A property indicating if the element is on the classpath (value <code>"isOnClasspath"</code>). 
+	 * A property indicating if the element is on the classpath (value <code>"isOnClasspath"</code>).
 	 */
 	public static final String IS_ON_CLASSPATH = "isOnClasspath"; //$NON-NLS-1$
-	
+
 	/**
-	 * A property indicating if the a type of the given qualified name is on the classpath (value <code>"hasTypeOnClasspath"</code>). 
+	 * A property indicating if the a type of the given qualified name is on the classpath (value <code>"hasTypeOnClasspath"</code>).
 	 */
 	public static final String HAS_TYPE_ON_CLASSPATH = "hasTypeOnClasspath"; //$NON-NLS-1$
-	
+
 	/**
 	 * A property indicating if the element is a source folder or is inside a source folder. (value <code>"inSourceFolder"</code>).
 	 * <code>false</code> is returned if the element does not exist.
 	 */
 	public static final String IN_SOURCE_FOLDER = "inSourceFolder"; //$NON-NLS-1$
-	
+
 	/**
 	 * A property indicating if the element is an archive or is inside an archive. (value <code>"inArchive"</code>).
 	 * <code>false</code> is returned if the element does not exist.
 	 */
 	public static final String IN_ARCHIVE = "inArchive"; //$NON-NLS-1$
-	
+
 	/**
 	 * A property indicating if the element is an archive (value <code>"inExternalArchive"</code>).
 	 * <code>false</code> is returned if the element does not exist.
 	 */
 	public static final String IN_EXTERNAL_ARCHIVE = "inExternalArchive"; //$NON-NLS-1$
-	
+
 	/**
 	 * A property indicating a option in the Java project of the selected element
 	 * (value <code>"projectOption"</code>). If two arguments are given,
@@ -82,7 +82,7 @@ public class JavaElementPropertyTester extends PropertyTester {
 	 * avaiable in the project specific options.
 	 */
 	public static final String PROJECT_OPTION = "projectOption"; //$NON-NLS-1$
-	
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.expressions.IPropertyTester#test(java.lang.Object, java.lang.String, java.lang.Object[], java.lang.Object)
