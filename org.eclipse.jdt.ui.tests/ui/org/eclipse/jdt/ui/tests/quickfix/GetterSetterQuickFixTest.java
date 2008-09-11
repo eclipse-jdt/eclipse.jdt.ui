@@ -16,6 +16,9 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,18 +33,14 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
 public class GetterSetterQuickFixTest extends QuickFixTest {
-	
+
 	private static final Class THIS= GetterSetterQuickFixTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
@@ -53,11 +52,11 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	public static Test allTests() {
 		return setUpTest(new TestSuite(THIS));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
@@ -68,13 +67,13 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);
 
-		JavaCore.setOptions(options);			
+		JavaCore.setOptions(options);
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
-		
+
 		fJProject1= ProjectTestSetup.getProject();
-		
+
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -84,7 +83,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-	
+
 	public void testInvisibleFieldToGetterSetter() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("b112441", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -139,7 +138,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package b112441;\n");
 		buf.append("\n");
@@ -165,7 +164,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	public void testCreateFieldUsingSef() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -228,7 +227,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 

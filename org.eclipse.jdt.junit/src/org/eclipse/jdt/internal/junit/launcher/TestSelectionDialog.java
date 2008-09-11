@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
- 
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
@@ -28,31 +28,31 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 public class TestSelectionDialog extends TwoPaneElementSelector {
 
 	private final IType[] fTypes;
-	
+
 	private static class PackageRenderer extends LabelProvider {
-		
+
 		private JavaElementLabelProvider fBaseLabelProvider;
-		
+
 		public PackageRenderer() {
-			fBaseLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);	
+			fBaseLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);
 		}
 
 		public Image getImage(Object element) {
 			return fBaseLabelProvider.getImage(((IType)element).getPackageFragment());
 		}
-		
+
 		public String getText(Object element) {
 			return fBaseLabelProvider.getText(((IType)element).getPackageFragment());
 		}
-		
+
 		public void dispose() {
 			fBaseLabelProvider.dispose();
 		}
-		
+
 	}
-	
+
 	public TestSelectionDialog(Shell shell, IType[] types) {
-		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
+		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS),
 				new PackageRenderer());
 		fTypes= types;
 	}
@@ -72,5 +72,5 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 		setElements(fTypes);
 		return super.open();
 	}
-	
+
 }

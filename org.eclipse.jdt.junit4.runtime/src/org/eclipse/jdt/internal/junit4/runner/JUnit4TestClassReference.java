@@ -12,10 +12,11 @@
 
 package org.eclipse.jdt.internal.junit4.runner;
 
-import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
-import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
+
+import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
+import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 
 public class JUnit4TestClassReference extends JUnit4TestReference {
 	protected final Class<?> fClass;
@@ -52,7 +53,7 @@ public class JUnit4TestClassReference extends JUnit4TestReference {
 	public boolean equals(Object obj) {
 		if (! (obj instanceof JUnit4TestReference))
 			return false;
-		
+
 		JUnit4TestReference ref= (JUnit4TestReference) obj;
 		return (ref.getIdentifier().equals(getIdentifier()));
 	}

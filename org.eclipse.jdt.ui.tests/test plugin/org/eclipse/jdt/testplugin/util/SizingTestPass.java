@@ -11,7 +11,7 @@
 package org.eclipse.jdt.testplugin.util;
 
 
- 
+
 import java.util.ArrayList;
 
 
@@ -40,7 +40,7 @@ class SizingTestPass implements IDialogTestPass {
 	 */
 	public String label() {
 		return "&Sizing and Display";
-	}	
+	}
 	/**
 	 * @see IDialogTestPass#checkListTexts()
 	 */

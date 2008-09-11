@@ -72,8 +72,8 @@ public class MockReorgQueries implements IReorgQueries, INewNameQueries {
 			return fName;
 		}
 	}
-	
-	
+
+
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) throws OperationCanceledException {
 		return new NewNameQuery(initialSuggestedName + '1');
 	}

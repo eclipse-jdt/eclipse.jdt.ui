@@ -12,8 +12,6 @@ package org.eclipse.jdt.ui.examples;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -21,6 +19,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -41,7 +42,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
 /**
-<extension 
+<extension
 	point="org.eclipse.ui.newWizards">
   	<wizard
 		id="org.eclipse.jdt.ui.examples.MyProjectCreationWizard"
@@ -52,9 +53,9 @@ import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
 		icon="icons/full/ctool16/newjprj_wiz.gif">
 		<description>My project</description>
-    </wizard>	 
+    </wizard>
 </extension>
- */   
+ */
 
 /**
  * This example shows how to implement an own project wizard that uses the
@@ -64,7 +65,7 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 
 	private WizardNewProjectCreationPage fMainPage;
 	private JavaCapabilityConfigurationPage fJavaPage;
-	
+
 	private IConfigurationElement fConfigElement;
 
 	private IWorkbench fWorkbench;
@@ -84,21 +85,21 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		fWorkbench= workbench; 
+		fWorkbench= workbench;
 	}
 
 	/* (non-Javadoc)
 	 * @see Wizard#addPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
 		fMainPage= new WizardNewProjectCreationPage("NewProjectCreationWizard");
 		fMainPage.setTitle("New");
 		fMainPage.setDescription("Create a new XY project.");
-		
+
 		// the main page
 		addPage(fMainPage);
-		
+
 		// the Java build path configuration page
 		fJavaPage= new JavaCapabilityConfigurationPage() {
 			public void setVisible(boolean visible) {
@@ -108,10 +109,10 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 			}
 		};
 		addPage(fJavaPage);
-		
+
 		//	TODO: add your pages here
 	}
-	
+
 	private void updatePage() {
 		IJavaProject jproject= JavaCore.create(fMainPage.getProjectHandle());
 		if (!jproject.equals(fJavaPage.getJavaProject())) {
@@ -119,21 +120,21 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 				JavaCore.newSourceEntry(jproject.getPath().append("in")),
 				JavaRuntime.getDefaultJREContainerEntry()
 			};
-			IPath outputLocation= jproject.getPath().append("out");		
-			fJavaPage.init(jproject, outputLocation, buildPath, false);	
+			IPath outputLocation= jproject.getPath().append("out");
+			fJavaPage.init(jproject, outputLocation, buildPath, false);
 		}
 	}
-	
+
 	private void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		try {		
+		try {
 			monitor.beginTask("Creating XY project...", 3); // 3 steps
 
 			IProject project= fMainPage.getProjectHandle();
 			IPath locationPath= fMainPage.getLocationPath();
-		
+
 			// create the project
 			IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
 			if (!fMainPage.useDefaults()) {
@@ -141,15 +142,15 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 			}
 			project.create(desc, new SubProgressMonitor(monitor, 1));
 			project.open(new SubProgressMonitor(monitor, 1));
-			
+
 			updatePage();
 			fJavaPage.configureJavaProject(new SubProgressMonitor(monitor, 1));
 			// TODO: configure your page / nature
-	
-			// change to the perspective specified in the plugin.xml		
+
+			// change to the perspective specified in the plugin.xml
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 			BasicNewResourceWizard.selectAndReveal(project, fWorkbench.getActiveWorkbenchWindow());
-			
+
 		} finally {
 			monitor.done();
 		}
@@ -157,7 +158,7 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 
 	/* (non-Javadoc)
 	 * @see Wizard#performFinish
-	 */		
+	 */
 	public boolean performFinish() {
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
@@ -173,7 +174,7 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 		}
 		return true;
 	}
-			
+
 
 
 }

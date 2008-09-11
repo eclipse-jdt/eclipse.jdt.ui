@@ -38,10 +38,10 @@ public class MyQuickFixProcessor implements IQuickFixProcessor {
            <property name="name" value="A.java"/>
         </objectState>
    </quickFixProcessor>
-</extension> 
+</extension>
 
 */
-	
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit, int)
@@ -64,7 +64,7 @@ public class MyQuickFixProcessor implements IQuickFixProcessor {
 
 	private IJavaCompletionProposal[] getNumericValueOutOfRangeCorrection(IInvocationContext context, IProblemLocation location) {
 		ICompilationUnit cu= context.getCompilationUnit();
-		
+
 		ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal("Change to 0", cu, location.getOffset(), location.getLength(), "0", 5);
 		return new IJavaCompletionProposal[] { proposal };
 	}

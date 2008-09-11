@@ -13,6 +13,20 @@ package org.eclipse.jdt.ui.tests.model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import org.eclipse.team.core.diff.IDiff;
+import org.eclipse.team.core.diff.provider.ThreeWayDiff;
+import org.eclipse.team.core.history.IFileRevision;
+import org.eclipse.team.core.history.provider.FileRevision;
+import org.eclipse.team.core.mapping.ISynchronizationContext;
+import org.eclipse.team.core.mapping.provider.ResourceDiff;
+import org.eclipse.team.core.mapping.provider.ResourceDiffTree;
+import org.eclipse.team.core.mapping.provider.SynchronizationContext;
+import org.eclipse.team.core.mapping.provider.SynchronizationScopeManager;
+import org.eclipse.team.ui.mapping.ITeamContentProviderManager;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,9 +39,6 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.navigator.CommonViewer;
@@ -35,29 +46,17 @@ import org.eclipse.ui.navigator.INavigatorContentExtension;
 import org.eclipse.ui.navigator.INavigatorContentServiceListener;
 import org.eclipse.ui.part.ViewPart;
 
-import org.eclipse.team.core.diff.IDiff;
-import org.eclipse.team.core.diff.provider.ThreeWayDiff;
-import org.eclipse.team.core.history.IFileRevision;
-import org.eclipse.team.core.history.provider.FileRevision;
-import org.eclipse.team.core.mapping.ISynchronizationContext;
-import org.eclipse.team.core.mapping.provider.ResourceDiff;
-import org.eclipse.team.core.mapping.provider.ResourceDiffTree;
-import org.eclipse.team.core.mapping.provider.SynchronizationContext;
-import org.eclipse.team.core.mapping.provider.SynchronizationScopeManager;
-
-import org.eclipse.team.ui.mapping.ITeamContentProviderManager;
-
 import org.eclipse.jdt.core.IJavaProject;
 
 public class MockPluginView extends ViewPart implements INavigatorContentServiceListener {
 
 	private static final String VIEWER_ID = "org.eclipse.jdt.tests.ui.model.mockViewer";
 	private static final String JAVA_CONTENT_PROVIDER_ID = "org.eclipse.jdt.ui.javaModelContent";
-	
+
 	private CommonViewer fViewer;
 	private INavigatorContentExtension fExtension;
 	private ISynchronizationContext fContext;
-	
+
 	public MockPluginView() {
 		// Nothing to do
 	}
@@ -75,7 +74,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 	public void setFocus() {
 		// Nothing to do
 	}
-	
+
 	public void setInput(Object input) {
 		fViewer.setInput(input);
 	}
@@ -88,7 +87,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		this.fExtension = anExtension;
 		setContext(fContext);
 	}
-	
+
 	public void setProject(IJavaProject project) throws CoreException {
 		ISynchronizationContext context = createContext(project);
 		setContext(context);
@@ -107,19 +106,19 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		}
 		setInput(fContext);
 	}
-	
+
 	public void dispose() {
 		super.dispose();
 		if (fContext != null) {
 			fContext.dispose();
 		}
 	}
-	
+
 	private ISynchronizationContext createContext(IJavaProject project) throws CoreException {
 		ResourceDiffTree tree = new ResourceDiffTree();
-		SynchronizationScopeManager manager = new SynchronizationScopeManager("Java Model Tests", 
-				getResourceMappings(project), 
-				ResourceMappingContext.LOCAL_CONTEXT, 
+		SynchronizationScopeManager manager = new SynchronizationScopeManager("Java Model Tests",
+				getResourceMappings(project),
+				ResourceMappingContext.LOCAL_CONTEXT,
 				true);
 		manager.initialize(new NullProgressMonitor());
 		SynchronizationContext context = new SynchronizationContext(manager, ISynchronizationContext.THREE_WAY, tree) {
@@ -129,18 +128,18 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		};
 		return context;
 	}
-	
+
 	private ResourceMapping[] getResourceMappings(IJavaProject project) {
 		ResourceMapping mapping = (ResourceMapping)project.getResource().getAdapter(ResourceMapping.class);
 		return new ResourceMapping[] { mapping };
 	}
-	
+
 	private IResource getResource(IProject project, String path) {
 		if (path.endsWith("/"))
 			return project.getFolder(path);
 		return project.getFile(path);
 	}
-	
+
 	public IDiff createOutgoingDeletion(IProject project, String path) {
 		final IResource resource = getResource(project, path);
 		ResourceDiff diff = new ResourceDiff(resource, IDiff.REMOVE, 0, new FileRevision() {
@@ -184,7 +183,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		IDiff diff = createIncomingAddition(project,path);
 		add(diff);
 	}
-	
+
 	private IDiff createIncomingAddition(IProject project, String path) {
 		final IResource resource = getResource(project, path);
 		ResourceDiff diff = new ResourceDiff(resource, IDiff.ADD, 0, new FileRevision() {

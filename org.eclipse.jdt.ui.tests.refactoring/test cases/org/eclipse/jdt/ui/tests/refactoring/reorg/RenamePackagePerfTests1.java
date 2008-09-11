@@ -36,19 +36,19 @@ public class RenamePackagePerfTests1 extends AbstractRenamePackagePerfTest {
 	public RenamePackagePerfTests1(String name) {
 		super(name);
 	}
-	
+
 	public void testCold_10_10() throws Exception {
 		executeRefactoring(10, 10, false, 2);
 	}
-	
+
 	public void test_10_10() throws Exception {
 		executeRefactoring(10, 10, true, 2);
 	}
-	
+
 	public void test_100_10() throws Exception {
 		executeRefactoring(100, 10, true, 1);
 	}
-	
+
 	public void test_1000_10() throws Exception {
 		tagAsSummary("Rename package - 1000 CUs, 10 Refs", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(1000, 10, true, 1);

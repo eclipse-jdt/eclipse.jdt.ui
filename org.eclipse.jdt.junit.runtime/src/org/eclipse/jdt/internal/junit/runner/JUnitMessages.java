@@ -26,7 +26,7 @@ public class JUnitMessages {
 
 	/**
 	 * Gets a string from the resource bundle and formats it with the argument
-	 * 
+	 *
 	 * @param key the string used to get the bundle value, must not be null
 	 * @param arg the single argument
 	 * @return the formatted string
@@ -37,11 +37,11 @@ public class JUnitMessages {
 
 	/**
 	 * Gets a string from the resource bundle and formats it with arguments
-	 * 
+	 *
 	 * @param key the string used to get the bundle value, must not be null
 	 * @param args the arguments
 	 * @return the formatted string
-	 */	
+	 */
 	public static String getFormattedString(String key, Object[] args) {
 		return MessageFormat.format(getString(key), args);
 	}

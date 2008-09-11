@@ -71,7 +71,7 @@ public class WrappingUnitTest extends TestCase {
 			protected void dispatchEvents() {
 				// do nothing (avoid accessing display from non-UI thread)
 			}
-			
+
 			protected int getNumTableItems() throws PartInitException {
 				return -1; // avoid accessing getActiveWorkbenchWindow() from non-UI thread
 			}
@@ -111,12 +111,12 @@ public class WrappingUnitTest extends TestCase {
 			protected int getNumTableItems() throws PartInitException {
 				return 2;
 			}
-			
+
 			protected synchronized boolean hasNotTerminated() {
 				return false;
 			}
 		};
-		
+
 		assertTrue(test.stillWaiting(17, false));
 	}
 }

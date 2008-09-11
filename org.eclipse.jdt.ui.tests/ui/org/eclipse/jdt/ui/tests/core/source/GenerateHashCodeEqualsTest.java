@@ -17,6 +17,8 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -38,13 +40,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  * Tests generation of delegate methods
- * 
+ *
  */
 public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
@@ -73,7 +73,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 			VariableDeclarationFragment frag= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[i], unit);
 			fKeys[i]= frag.resolveBinding();
 		}
-		
+
 		fSettings.createComments= createComments;
 
 		AbstractTypeDeclaration decl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
@@ -95,16 +95,16 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		}
 		return fields;
 	}
-	
+
 	// ------------- Actual tests
-	
+
 	/**
 	 * Test non-reference types in a direct subclass of Object
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test01() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -118,10 +118,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	long aLong;\r\n" +
 				"\r\n" +
 				"}", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -182,24 +182,24 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-	
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test non-reference types in an indrect subclass of Object
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test02() throws Exception {
-		
+
 		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
 				"\r\n" +
 				"public class B {\r\n" +
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A extends B {\r\n" +
@@ -208,10 +208,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A extends B {\r\n" +
@@ -248,24 +248,24 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test reference types in a direct subclass of Object
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test03() throws Exception {
-		
+
 		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
 				"\r\n" +
 				"public class B {\r\n" +
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -275,10 +275,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -323,24 +323,24 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-	
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test reference types in an indirect subclass of Object
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test04() throws Exception {
-		
+
 		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
 				"\r\n" +
 				"public class B {\r\n" +
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A extends B {\r\n" +
@@ -350,10 +350,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A extends B {\r\n" +
@@ -398,17 +398,17 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test arrays
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test05() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -418,10 +418,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"someAs", "someInts" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"import java.util.Arrays;\r\n" +
@@ -462,17 +462,17 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test insertion in-between two methods
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test06() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -484,10 +484,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"someInt" });
 		runOperation(a.getType("A"), fields, a.getType("A").getMethod("bar", new String[0]), true, false, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -525,17 +525,17 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Some enums and generic field types...
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test07() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"import java.util.HashMap;\r\n" +
@@ -549,10 +549,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"enum E {\r\n" +
 				"}", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"intList", "intBoolHashMap", "someEnum" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"import java.util.HashMap;\r\n" +
@@ -607,27 +607,27 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"enum E {\r\n" +
 				"}";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Two double fields
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test08() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
 				"	double d1;\r\n" +
 				"	double d2;\r\n" +
 				"}", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"d1", "d2" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -666,18 +666,18 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		return true;\r\n" +
 				"	}\r\n" +
 				"}";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * "this" qualification for fields with the
 	 * same name as a newly introduced temporary
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test09() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -686,10 +686,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	String obj;\r\n" +
 				"	double someOther;\r\n" +
 				"}", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"temp", "result", "obj", "someOther" });
 		runOperation(a.getType("A"), fields, false, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -739,17 +739,17 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		return true;\r\n" +
 				"	}\r\n" +
 				"}";
-		
+
 		compareSource(expected, a.getSource());
 	}
 
 	/**
 	 * Test non-reference types in a direct subclass of Object, using 'instanceof' comparison
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test10() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -763,10 +763,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	long aLong;\r\n" +
 				"\r\n" +
 				"}", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong" });
 		runOperation(a.getType("A"), fields, true, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -827,24 +827,24 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-	
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test non-reference types in an indrect subclass of Object, using 'instanceof' comparison
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test11() throws Exception {
-		
+
 		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
 				"\r\n" +
 				"public class B {\r\n" +
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A extends B {\r\n" +
@@ -853,10 +853,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool" });
 		runOperation(a.getType("A"), fields, true, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A extends B {\r\n" +
@@ -893,24 +893,24 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test reference types in a direct subclass of Object, using 'instanceof' comparison
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test12() throws Exception {
-		
+
 		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
 				"\r\n" +
 				"public class B {\r\n" +
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -920,10 +920,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, true, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -968,25 +968,25 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-	
+
 		compareSource(expected, a.getSource());
 	}
 
 	/**
 	 * Test that multiple applications yield same result (without super calls)
 	 * (https://bugs.eclipse.org/bugs/show_bug.cgi?id=154417)
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test13() throws Exception {
-		
+
 		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
 				"\r\n" +
 				"public class B {\r\n" +
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -996,10 +996,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, true, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -1044,20 +1044,20 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-	
+
 		compareSource(expected, a.getSource());
-		
+
 		runOperation(a.getType("A"), fields, true, true);
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test member types
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testMemberType() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -1066,11 +1066,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	}\r\n" +
 				"}\r\n" +
 				"", true, null);
-				
+
 		IType type= a.getType("A").getType("Inner");
 		IField[] fields= getFields(type, new String[] {"x" });
 		runOperation(type, fields, true, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -1114,17 +1114,17 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	}\r\n" +
 				"}\r\n" +
 				"";
-		
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test non-reference types in a direct subclass of Object
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testThenWithBlocks() throws Exception {
-		
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -1133,10 +1133,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	Object obj;\r\n" +
 				"\r\n" +
 				"}", true, null);
-		
+
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "obj" });
 		runOperation(a.getType("A"), fields, null, true, false, true, false);
-		
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"public class A {\r\n" +
@@ -1184,13 +1184,13 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"}\r\n" +
 				"";
-	
+
 		compareSource(expected, a.getSource());
 	}
 
 	/**
 	 * Test reference types in an subclass
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testSubTypeAndArraysIn14() throws Exception {
@@ -1212,7 +1212,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 					"\r\n" +
 					"}\r\n" +
 					"", true, null);
-			
+
 			ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 					"\r\n" +
 					"public class A extends B {\r\n" +
@@ -1222,10 +1222,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 					"\r\n" +
 					"}\r\n" +
 					"", true, null);
-			
+
 			IField[] fields= getFields(a.getType("A"), new String[] {"anArray", "anDArray"});
 			runOperation(a.getType("A"), fields, false, false);
-			
+
 			String expected= "package p;\r\n" +
 					"\r\n" +
 					"import java.util.Arrays;\r\n" +
@@ -1295,7 +1295,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 					"\r\n" +
 					"}\r\n" +
 					"";
-			
+
 			compareSource(expected, a.getSource());
 		} finally {
 			javaProject.setOptions(oldOptions);
@@ -1325,25 +1325,25 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		buf.append("	}\n");
 		buf.append("}");
 		String originalContent= buf.toString();
-		
+
 		final int NUM_MEMBERS= 6;
-		
+
 		// try to insert the new methods after every member and at the end
 		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
-		
+
 			ICompilationUnit unit= null;
 			try {
 				unit= fPackageP.createCompilationUnit("A.java", originalContent, true, null);
-				
+
 				IType type= unit.findPrimaryType();
 				IJavaElement[] children= type.getChildren();
 				IField foo= (IField) children[0];
 				assertEquals(NUM_MEMBERS, children.length);
-				
+
 				IJavaElement insertBefore= i < NUM_MEMBERS ? children[i] : null;
-	
+
 				runOperation(type, new IField[] { foo }, insertBefore, false, false, false, false);
-				
+
 				IJavaElement[] newChildren= type.getChildren();
 				assertEquals(NUM_MEMBERS + 2, newChildren.length);
 
@@ -1355,7 +1355,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 			}
 		}
 	}
-	
-	
+
+
 
 }

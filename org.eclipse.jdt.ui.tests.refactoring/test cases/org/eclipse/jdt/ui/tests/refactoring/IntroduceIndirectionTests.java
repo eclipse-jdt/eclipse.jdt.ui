@@ -50,10 +50,10 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 	}
 
 	/**
-	 * 
+	 *
 	 * Invokes the introduce indirection ref. Some pointers:
-	 * 
-	 * @param topLevelName This is an array of fully qualified top level(!) type names with exactly one package prefix (e.g. "p.Foo"). 
+	 *
+	 * @param topLevelName This is an array of fully qualified top level(!) type names with exactly one package prefix (e.g. "p.Foo").
 	 * 					   Simple names must correspond to .java files.
 	 * 					   The first cu will be used for the invocation of the refactoring (see positioning)
 	 * @param newName name of indirection method
@@ -99,12 +99,12 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 				assertFalse("Didn't fail although expected", shouldFail);
 
 			if (!failed) {
-				
+
 				if (status.hasError())
 					assertTrue("Had errors but shouldn't: " + status.getMessageMatchingSeverity(RefactoringStatus.ERROR), shouldError);
 				else
 					assertFalse("No error although expected", shouldError);
-				
+
 				if (status.hasWarning())
 					assertTrue("Had warnings but shouldn't: " + status.getMessageMatchingSeverity(RefactoringStatus.WARNING), shouldWarn);
 				else
@@ -133,7 +133,7 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 	private void helperErr(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
 		helper(topLevelName, newName, target, startLine, startColumn, endLine, endColumn, true, true, true, false);
 	}
-	
+
 	private void helperFail(String[] topLevelName, String newName, String target, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
 		helper(topLevelName, newName, target, startLine, startColumn, endLine, endColumn, true, true, true, true);
 	}
@@ -154,7 +154,7 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 	}
 
 	public void test04() throws Exception {
-		// this qualification with outer type, method declaration is in outer type. 
+		// this qualification with outer type, method declaration is in outer type.
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 10, 17, 10, 20);
 	}
 
@@ -179,68 +179,68 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		// open hierarchy failure
 		helperFail(new String[] { "p.SeaLevel", "p.Eiger", "p.Moench" }, "bar", "p.SeaLevel", 13, 11, 13, 14);
 	}
-	
+
 	public void test09() throws Exception {
 		// create static intermediary
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 7, 17, 7, 20);
 	}
-	
+
 	public void test10() throws Exception {
 		// error, method already exists
 		helperErr(new String[] { "p.Foo", "p.Bar" }, "foo", "p.Foo", 10, 19, 10, 22);
 	}
-	
+
 	public void test11() throws Exception {
 		// test name clash with existing argument
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 12, 9, 12, 12);
 	}
-	
+
 	public void test12() throws Exception {
 		// cannot put the intermediary into an inner non-static type
 		helperFail(new String[] { "p.Foo" }, "bar", "p.Foo.Inner", 9, 10, 9, 13);
 	}
-	
+
 	public void test13() throws Exception {
 		// create intermediary inside nested static types
 		helperPass(new String[] { "p.Foo", "p.Bar" }, "bar", "p.Foo.Inner.MoreInner", 13, 10, 13, 13);
 	}
-	
+
 	public void test14() throws Exception {
 		// raise visibility of target so intermediary sees it.
 		helperWarn(new String[] { "p0.Foo", "p1.Bar" }, "bar", "p1.Bar", 8, 18, 8, 23);
 	}
-	
+
 	public void test15() throws Exception {
 		// raise visibility of intermediary type so
 		// existing references see it
 		helperWarn(new String[] { "p0.Foo", "p0.Bar", "p1.Third" }, "bar", "p0.Bar", 8, 17, 8, 20);
 	}
-	
+
 	public void test16() throws Exception {
 		// test non-reference mode with a method invocation selected
 		helper(new String[] { "p.Bar", "p.Foo" }, "bar", "p.Bar", 6, 19, 6, 22, false, false, false, false);
 	}
-	
+
 	public void test17() throws Exception {
 		// generic target method
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 16, 9, 16, 12);
 	}
-	
+
 	public void test18() throws Exception {
 		// simple test with generic type, unused
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 19, 11, 19, 14);
 	}
-	
+
 	public void test19() throws Exception {
 		// simple test with generic type, used
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 19, 11, 19, 14);
 	}
-	
+
 	public void test20() throws Exception {
 		// complex case with generic type parameters and method parameters used
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 11, 11, 11, 17);
 	}
-	
+
 	public void test21() throws Exception {
 		// no call updating if type arguments are used
 		helperWarn(new String[] { "p.Foo" }, "bar", "p.Foo", 9, 22, 9, 26);
@@ -250,17 +250,17 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		// method using type parameters from enclosing types as well
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 16, 24, 16, 27);
 	}
-	
+
 	public void test23() throws Exception {
 		// warn about incorrect qualified static calls and don't update them.
 		helperWarn(new String[] { "p.Foo" }, "bar", "p.Foo", 11, 25, 11, 28);
 	}
-	
+
 	public void test24() throws Exception {
 		// assure common super type is used even if the hierarchy branches downwards
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 11, 11, 11, 14);
 	}
-	
+
 	public void test25() throws Exception {
 		// increase visibility of overridden methods as well
 		helperWarn(new String[] { "p0.Foo", "p0.SubFoo", "p1.Bar" }, "bar", "p1.Bar", 8, 20, 8, 23);
@@ -270,30 +270,30 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		// ensure exceptions are copied
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 7, 24, 7, 27);
 	}
-	
+
 	public void test27() throws Exception {
 		// complex visibility adjustment case
 		// target method is not inside target type, and is overridden
 		// target type must be increased, and all overridden methods must be increased.
 		helperWarn(new String[] { "p0.Foo", "p0.RealFoo", "p0.NonOriginalSubFoo", "p0.VerySuperFoo", "p1.Bar" }, "bar", "p1.Bar", 7, 13, 7, 16);
 	}
-	
+
 	public void test28() throws Exception {
 		// the template for the intermediary must be the method inside the real
 		// target (for parameter names and exceptions)
 		helperWarn(new String[] { "p.Foo", "p.Bar",}, "bar", "p.Foo", 10, 9, 10, 12);
 	}
-	
+
 	public void test29() throws Exception {
 		// don't adjust visibility twice
 		helperWarn(new String[] { "p0.Test", "p1.Other" }, "bar", "p1.Other", 5, 35, 5, 44);
 	}
-	
+
 	public void test30() throws Exception {
 		// multiple generic instantiations
 		helperPass(new String[] { "p.MultiGenerics" }, "bar", "p.MultiGenerics", 7, 16, 7, 26);
 	}
-	
+
 	public void test31() throws Exception {
 		// test for bug 127665
 		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 13, 20, 13, 23);

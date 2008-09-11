@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 /**
  * Helper to test the PackageExplorerContentProvider.
- * 
+ *
  * @since 2.1
  */
 public class MockPluginView extends PackageExplorerPart {
@@ -42,10 +42,10 @@ public class MockPluginView extends PackageExplorerPart {
 
 	private boolean fRemoveHappened;
 	private boolean fAddHappened;
-	
+
 	private final List fRefreshedObjects;
 	private final List fRemovedObjects;
-	
+
 	private Object fAddedObject;
 	private Object fAddedParentObject;
 
@@ -57,26 +57,26 @@ public class MockPluginView extends PackageExplorerPart {
 		fRefreshedObjects= new ArrayList();
 		fRemovedObjects= new ArrayList();
 	}
-	
+
 	/**
 	 * Creates only the viewer and the content provider.
-	 * 
+	 *
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createPartControl(Composite parent) {
-	
+
 		//create viewer
 		fViewer= createViewer(parent);
-		
+
 		//create my contentProvider
 		contentProvider= createContentProvider();
 		contentProvider.inputChanged(fViewer, null, null);
-		
+
 		//set content provider
 		fViewer.setContentProvider(contentProvider);
-		
+
 	}
-	
+
 	private TreeViewer createViewer(Composite parent) {
 		return new TestProblemTreeViewer(parent, SWT.MULTI);
 	}
@@ -84,10 +84,10 @@ public class MockPluginView extends PackageExplorerPart {
 	public void dispose() {
 		if (fViewer != null) {
 			IContentProvider p = fViewer.getContentProvider();
-			if(p!=null)	
+			if(p!=null)
 				p.dispose();
 		}
-		
+
 		super.dispose();
 	}
 
@@ -96,11 +96,11 @@ public class MockPluginView extends PackageExplorerPart {
 	 */
 	public void setFocus() {
 	}
-	
+
 	public TreeViewer getTreeViewer(){
 		return fViewer;
 	}
-	
+
 
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		return null;
@@ -113,28 +113,28 @@ public class MockPluginView extends PackageExplorerPart {
 	protected boolean isValidInput(Object element) {
 		return false;
 	}
-	
+
 	private class TestProblemTreeViewer extends ProblemTreeViewer{
-		
+
 		public TestProblemTreeViewer(Composite parent, int flag){
 			super(parent,flag);
 		}
-		
+
 		public void refresh(Object object){
 			fRefreshHappened= true;
 			fRefreshedObjects.add(object);
 		}
-		
+
 		public void refresh(final Object element, final boolean updateLabels) {
 			fRefreshHappened= true;
 			fRefreshedObjects.add(element);
 		}
-		
+
 		public void remove(Object object) {
 			fRemoveHappened= true;
 			fRemovedObjects.add(object);
 		}
-		
+
 		public void add(Object parentObject, Object object){
 			fAddHappened= true;
 			fAddedObject= object;
@@ -149,9 +149,9 @@ public class MockPluginView extends PackageExplorerPart {
 	public boolean wasObjectRefreshed(Object c) {
 		return fRefreshedObjects.contains(c);
 	}
-	
+
 	public List getRefreshedObject(){
-		return fRefreshedObjects;	
+		return fRefreshedObjects;
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class MockPluginView extends PackageExplorerPart {
 	 */
 	public boolean hasRemoveHappened() {
 		return fRemoveHappened;
-	}	
+	}
 	/**
 	 * Returns the object removed from the viewer
 	 * @return Object
@@ -192,7 +192,7 @@ public class MockPluginView extends PackageExplorerPart {
 	public Object getAddedObject() {
 		return fAddedObject;
 	}
-	
+
 	/**
 	 * Returns true if a refresh happened
 	 * @return boolean
@@ -200,7 +200,7 @@ public class MockPluginView extends PackageExplorerPart {
 	public boolean hasRefreshHappened() {
 		return fRefreshHappened;
 	}
-	
+
 	/**
 	 * Sets the folding preference.
 	 * @param fold
@@ -210,7 +210,7 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void clear() {
 		fRefreshedObjects.clear();
@@ -219,5 +219,5 @@ public class MockPluginView extends PackageExplorerPart {
 		fRemoveHappened= false;
 		fRefreshHappened= false;
 		fAddedObject= null;
-	}		
+	}
 }

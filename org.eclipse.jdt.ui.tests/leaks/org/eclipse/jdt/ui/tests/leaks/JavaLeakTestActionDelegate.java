@@ -24,9 +24,9 @@ public class JavaLeakTestActionDelegate implements IWorkbenchWindowActionDelegat
 	public IEditorPart fEditor;
 
 	public JavaLeakTestActionDelegate() {
-		
+
 	}
-	
+
 	public void init(IWorkbenchWindow window) {
 		fWindow= window;
 	}
@@ -34,11 +34,11 @@ public class JavaLeakTestActionDelegate implements IWorkbenchWindowActionDelegat
 	public void setActiveEditor(IAction action, IEditorPart targetEditor) {
 		fEditor= targetEditor;
 	}
-	
+
 	public void run(IAction action) {
 		System.out.println("running JavaLeakTestActionDelegate");
 	}
-	
+
 	public void dispose() {
 		fWindow= null;
 		fEditor= null;

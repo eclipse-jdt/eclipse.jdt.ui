@@ -13,22 +13,22 @@ package org.eclipse.jdt.ui.examples;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filebuffers.IFileBufferListener;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
@@ -113,13 +113,13 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 		 */
 		public void stateChangeFailed(IFileBuffer buffer) {}
 	}
-	
+
 	private Color fColor;
 	private Font fBold;
 	private FileBufferListener fListener;
-	
+
 	private UIJob fNotifierJob;
-	
+
 	private Set fChangedResources;
 
 	public JavaElementLightweightDecorator() {
@@ -132,7 +132,7 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 		});
 		fListener= new FileBufferListener();
 		FileBuffers.getTextFileBufferManager().addFileBufferListener(fListener);
-		
+
 		fChangedResources= new HashSet();
 	}
 
@@ -141,7 +141,7 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 	 */
 	public void decorate(Object element, IDecoration decoration) {
 		IPath path= null;
-		
+
 		if (element instanceof IResource) {
 			path= ((IResource) element).getFullPath();
 		} else if (element instanceof IClassFile || element instanceof ICompilationUnit) {
@@ -153,7 +153,7 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 			}
 		}
 	}
-	
+
 	/**
 	 * @param location
 	 */
@@ -178,7 +178,7 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 			}
 		}
 	}
-	
+
 	private void runPendingUpdates() {
 		Object[] resourceToUpdate= null;
 		synchronized (this) {
@@ -190,7 +190,7 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 			fireLabelProviderChanged(event);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
 	 */

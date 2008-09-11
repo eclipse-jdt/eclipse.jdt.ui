@@ -19,7 +19,7 @@ public /* package */ interface IElementComparer {
 
 	/**
 	 * Compares two elements for equality
-	 * 
+	 *
 	 * @param a the first element
 	 * @param b the second element
 	 * @return whether a is equal to b
@@ -28,7 +28,7 @@ public /* package */ interface IElementComparer {
 
 	/**
 	 * Returns the hash code for the given element.
-	 * 
+	 *
 	 * @param element the element
 	 * @return the hash code for the given element
 	 */

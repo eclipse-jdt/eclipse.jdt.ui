@@ -16,6 +16,9 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -51,19 +54,16 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 public class MethodOverrideTest extends CoreTests {
 
-	
+
 	/**
 	 * See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=111093
 	 */
-	
+
 	private static final Class THIS= MethodOverrideTest.class;
 	private static final boolean DEBUG_SHOWRESULTS= false;
-	
+
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -84,7 +84,7 @@ public class MethodOverrideTest extends CoreTests {
 
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
-		
+
 		Hashtable options= TestOptions.getDefaultOptions();
 		JavaCore.setOptions(options);
 	}
@@ -112,12 +112,12 @@ public class MethodOverrideTest extends CoreTests {
 		buf.append("    @Override public void o0_foo(String t) {}\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+
 		doOverrideTests(cu, 2, 2, 1); // C and B
 		doOverrideTests(cu, 2, 2, 0); // C and A
 		doOverrideTests(cu, 2, 1, 0); // B and A
 	}
-	
+
 	public void testOverride1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -154,7 +154,7 @@ public class MethodOverrideTest extends CoreTests {
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
-	
+
 	public void testOverride2() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -177,7 +177,7 @@ public class MethodOverrideTest extends CoreTests {
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
-	
+
 	public void testOverride3() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -199,7 +199,7 @@ public class MethodOverrideTest extends CoreTests {
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
-	
+
 	public void testOverride4() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -226,7 +226,7 @@ public class MethodOverrideTest extends CoreTests {
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
-	
+
 	public void testOverrideMethodTypeParams1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -263,7 +263,7 @@ public class MethodOverrideTest extends CoreTests {
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
-	
+
 	public void testOverrideRaw1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -274,51 +274,51 @@ public class MethodOverrideTest extends CoreTests {
 		buf.append("    public A() {}\n");
 		buf.append("    public void r1_foo1(S s) {}\n");
 		buf.append("    public void r1_foo2(A<S> s) {}\n");
-//		buf.append("    public void r1_xoo1(A<S> s) {}\n"); 
+//		buf.append("    public void r1_xoo1(A<S> s) {}\n");
 		buf.append("}\n");
 		buf.append("class B extends A {\n");
 		buf.append("    public B() {}\n");
 		buf.append("    @Override public void r1_foo1(Object s) {}\n");
 		buf.append("    @Override public void r1_foo2(A s) {}\n");
-//		buf.append("    @Override public void r1_xoo1(A<Object> s) {}\n");  // bug in our implementation: extended raw type has all types raw 
+//		buf.append("    @Override public void r1_xoo1(A<Object> s) {}\n");  // bug in our implementation: extended raw type has all types raw
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
-	
-	
+
+
 	private void doOverrideTests(ICompilationUnit cu, int focusIndex, int overridingIndex, int overriddenIndex) throws JavaModelException {
 		CompilationUnit root= assertNoCompilationError(cu);
-		
+
 		IType[] types= cu.getTypes();
 		ITypeBinding[] typeBindings= new ITypeBinding[types.length];
-		
+
 		typeBindings[types.length - 1]= ((TypeDeclaration) root.types().get(types.length - 1)).resolveBinding();
 		for (int i= types.length - 2; i >= 0; i--) {
 			typeBindings[i]= typeBindings[i + 1].getSuperclass();
 		}
-		
+
 		IType overridingType= types[overridingIndex];
 		ITypeBinding overridingTypeBinding= typeBindings[overridingIndex];
 		assertSameType(overridingType, overridingTypeBinding);
-		
+
 		IType overriddenType= types[overriddenIndex];
  		ITypeBinding overriddenTypeBinding= typeBindings[overriddenIndex];
 		assertSameType(overriddenType, overriddenTypeBinding);
-				
+
 		IType focusType= types[focusIndex];
 		ITypeHierarchy hierarchy= focusType.newTypeHierarchy(null);
 		MethodOverrideTester tester= new MethodOverrideTester(focusType, hierarchy);
-		
+
 		IMethod[] overridingMethods= overridingType.getMethods();
 		IMethod[] overriddenMethods= overriddenType.getMethods();
-		
+
 		IMethodBinding[] overridingBindings= overridingTypeBinding.getDeclaredMethods();
 		IMethodBinding[] overriddenBindings= overriddenTypeBinding.getDeclaredMethods();
-		
+
 		for (int i= 0; i < overridingMethods.length; i++) {
-			
+
 			IMethod overriding= overridingMethods[i];
 			IMethodBinding overridingBinding= overridingBindings[i];
 
@@ -329,23 +329,23 @@ public class MethodOverrideTest extends CoreTests {
 			if (overrideAnnotation == null) {
 				continue; // only look at methods with the override annotation
 			}
-			
+
 			boolean overrideAnnotationResult= overrideAnnotation.booleanValue();
 			boolean testerOverrides= tester.isSubsignature(overriding, overriddenMethod);
 			boolean uiBindingsIsSubsignature= Bindings.isSubsignature(overridingBinding, overriddenBinding);
-			
+
 			if (DEBUG_SHOWRESULTS) {
 				boolean bindingOverrides= overridingBinding.getMethodDeclaration().overrides(overriddenBinding.getMethodDeclaration());
 				boolean bindingIsSubsignature= overridingBinding.isSubsignature(overriddenBinding);
 
-				if (testerOverrides != overrideAnnotationResult || testerOverrides != bindingOverrides 
+				if (testerOverrides != overrideAnnotationResult || testerOverrides != bindingOverrides
 						|| testerOverrides != bindingIsSubsignature || testerOverrides != uiBindingsIsSubsignature) {
-					
+
 					System.out.println();
 					System.out.println("====================================");
 					System.out.println(getName());
 					System.out.println("====================================");
-					
+
 					System.out.println("IMethodBinding.overrides(): " +  String.valueOf(bindingOverrides));
 					System.out.println("IMethodBinding.isSubsignature(): " +  String.valueOf(bindingIsSubsignature));
 					//System.out.println("MethodOverrideTester.isSubsignature(): " +  String.valueOf(testerOverrides));
@@ -354,7 +354,7 @@ public class MethodOverrideTest extends CoreTests {
 					System.out.println();
 					System.out.println(getCodeString(overridingBinding, overriddenBinding, root));
 					System.out.println();
-				} 
+				}
 //				else {
 //					System.out.println(getDebugString(overridingBinding, overriddenBinding));
 //					System.out.println("    " +  String.valueOf(overrideAnnotationResult));
@@ -366,7 +366,7 @@ public class MethodOverrideTest extends CoreTests {
 			/*if (overrideAnnotationResult != uiBindingsIsSubsignature) {
 				assertEquals(getDebugString(overridingBinding, overriddenBinding), overrideAnnotationResult, uiBindingsIsSubsignature);
 			}*/
-			
+
 		}
 	}
 
@@ -380,22 +380,22 @@ public class MethodOverrideTest extends CoreTests {
 		buf.append(")");
 		return buf.toString();
 	}
-	
+
 	private static String getCodeString(IMethodBinding overriding,  IMethodBinding overriddenMethod, CompilationUnit root) {
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf.append("// Overridden: ----------------------------------\n");
 		buf.append(getCode(overriddenMethod, root)).append('\n');
-		
+
 		buf.append("// Overriding: ----------------------------------\n");
 		buf.append(getCode(overriding, root)).append('\n');
 		return buf.toString();
 	}
-	
+
 	private static String getCode(IMethodBinding binding, CompilationUnit root) {
-		
+
 		final MethodDeclaration method=  (MethodDeclaration) root.findDeclaringNode(binding.getMethodDeclaration());
-		
+
 		ASTFlattener flattener= new ASTFlattener() {
 			public boolean visit(MethodDeclaration node) {
 				if (node == method) {
@@ -406,7 +406,7 @@ public class MethodOverrideTest extends CoreTests {
 		};
 		method.getParent().accept(flattener);
 		String unformatted= flattener.getResult();
-		
+
 		TextEdit edit= CodeFormatterUtil.format2(method.getParent(), unformatted, 0, "\n", null);
 		if (edit != null) {
 			Document document= new Document(unformatted);
@@ -419,12 +419,12 @@ public class MethodOverrideTest extends CoreTests {
 		}
 		return unformatted; // unknown node
 	}
-	
+
 
 	private void assertSameType(IType type, ITypeBinding binding) throws JavaModelException {
 		assertNotNull(binding);
 		assertEquals(type.getElementName(), binding.getTypeDeclaration().getName());
-		
+
 		IMethod[] methods= type.getMethods();
 		IMethodBinding[] bindings= binding.getDeclaredMethods();
 		assertEquals(methods.length, bindings.length);
@@ -463,7 +463,7 @@ public class MethodOverrideTest extends CoreTests {
 			assertTrue(buf.toString(), false);
 		}
 
-		
+
 		return root;
 	}
 
@@ -472,7 +472,7 @@ public class MethodOverrideTest extends CoreTests {
 		if (node instanceof MethodDeclaration && hasOverrideAnnotation((MethodDeclaration) node)) {
 			int start= node.getStartPosition();
 			int end= start + node.getLength();
-			
+
 			IProblem[] problems= root.getProblems();
 			for (int i= 0; i < problems.length; i++) {
 				IProblem prob= problems[i];
@@ -487,7 +487,7 @@ public class MethodOverrideTest extends CoreTests {
 		}
 		return null;
 	}
-	
+
 	private boolean hasOverrideAnnotation(MethodDeclaration declaration) {
 		List list= declaration.modifiers();
 		for (int i= 0; i < list.size(); i++) {
@@ -497,6 +497,6 @@ public class MethodOverrideTest extends CoreTests {
 		}
 		return false;
 	}
-	
+
 
 }

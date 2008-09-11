@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.junit.launcher.JUnit3TestFinder;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 public class SuiteClassesContentProvider implements IStructuredContentProvider {
-		
+
 	public Object[] getElements(Object parent) {
 		if (! (parent instanceof IPackageFragment))
 			return new Object[0];
@@ -39,10 +39,10 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 			return new Object[0];
 		}
 	}
-	
+
 	public void dispose() {
 	}
-	
+
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 }

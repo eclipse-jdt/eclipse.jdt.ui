@@ -13,12 +13,17 @@ package org.eclipse.jdt.ui.tests.performance.views;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.OrderedTestSuite;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
+import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -28,17 +33,10 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.test.performance.Dimension;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.OrderedTestSuite;
-import org.eclipse.jdt.testplugin.util.DisplayHelper;
-
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class OpenTypePerfTest extends JdtPerformanceTestCase {
 
@@ -48,24 +46,24 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 	private static class MyTestSetup extends TestSetup {
 		private SWTTestProject fTestProject;
 		private boolean fAutoBuilding;
-		
+
 		public MyTestSetup(Test test) {
 			super(test);
 		}
-		
+
 		protected void setUp() throws Exception {
 			super.setUp();
 			fAutoBuilding= JavaProjectHelper.setAutoBuilding(false);
 			fTestProject= new SWTTestProject();
 		}
-		
+
 		protected void tearDown() throws Exception {
 			fTestProject.delete();
 			JavaProjectHelper.setAutoBuilding(fAutoBuilding);
 			super.tearDown();
 		}
 	}
-	
+
 	public static Test suite() throws Exception {
 		OrderedTestSuite testSuite= new OrderedTestSuite(
 				OpenTypePerfTest.class,
@@ -83,18 +81,18 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 	public static Test setUpTest(Test someTest) {
 		return new MyTestSetup(someTest);
 	}
-	
+
 	public  OpenTypePerfTest(String name) {
 		super(name);
 	}
-	
+
 	protected void setUp() throws Exception {
 		System.out.println("starting " + OpenTypePerfTest.class.getName() + "#" + getName());
 		super.setUp();
 	}
 
 	//---
-	
+
 	public void testColdException() throws Exception {
 		//cold
 		try {
@@ -104,7 +102,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 		}
 	}
-	
+
 	public void testWarmException() throws Exception {
 		//warm
 		joinBackgroudActivities();
@@ -115,7 +113,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 		}
 	}
-	
+
 	public void testWarmException10() throws Exception {
 		//warm, repeated
 		joinBackgroudActivities();
@@ -128,7 +126,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 		}
 	}
-	
+
 	public void testWarmS10() throws Exception {
 		//warm, repeated, many matches
 		joinBackgroudActivities();
@@ -141,7 +139,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 		}
 	}
-	
+
 	public void testWarmOpenSWT() throws Exception {
 		//warm, add SWT to history
 		joinBackgroudActivities();
@@ -152,7 +150,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 		}
 	}
-	
+
 	public void testWarmOpenSWTHistory10() throws Exception {
 		//warm, repeated, open SWT from history
 		joinBackgroudActivities();
@@ -165,18 +163,18 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 		}
 	}
-	
+
 	//---
-	
+
 	private void measureOpenType(String pattern) throws Exception {
 		measureOpenType(pattern, false);
 	}
-	
+
 	private void measureOpenType(String pattern, final boolean openFirst) throws Exception {
 		fShell= JavaPlugin.getActiveWorkbenchShell();
-		
+
 		startMeasuring();
-		
+
 		fOpenTypeDialog= JavaUI.createTypeDialog(
 				fShell,
 				JavaPlugin.getActiveWorkbenchWindow(),
@@ -194,7 +192,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 						};
 					}
 				});
-		
+
 		try {
 			fOpenTypeDialog.setBlockOnOpen(false);
 			fOpenTypeDialog.open();
@@ -203,7 +201,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 					return fOpenTypeDialog == null;
 				}
 			}.waitForCondition(fShell.getDisplay(), 60 * 1000, 10 * 1000);
-			
+
 		} finally {
 			if (fOpenTypeDialog != null) {
 				finish(openFirst);
@@ -211,11 +209,11 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			}
 		}
 	}
-	
+
 	private void finish(final boolean openFirst) {
 		final SelectionDialog openTypeDialog= fOpenTypeDialog;
 		fOpenTypeDialog= null;
-		
+
 		if (! openFirst) {
 			stopMeasuring();
 			fShell.getDisplay().asyncExec(new Runnable() {
@@ -223,7 +221,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 					openTypeDialog.close();
 				}
 			});
-			
+
 		} else {
 			fShell.getDisplay().asyncExec(new Runnable() {
 				public void run() {

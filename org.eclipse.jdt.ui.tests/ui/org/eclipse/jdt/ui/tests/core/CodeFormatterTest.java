@@ -71,11 +71,11 @@ public class CodeFormatterTest extends CoreTests {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
 		JavaCore.setOptions(options);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
-	
+
 	private static String format(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
 		return format(cu, offset, length, "Format");
 	}
@@ -83,7 +83,7 @@ public class CodeFormatterTest extends CoreTests {
 	private static String formatElement(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
 		return format(cu, offset, length, "QuickFormat"); // see JavaEditor for the action ids
 	}
-	
+
 	private static String format(ICompilationUnit cu, int offset, int length, String actionId) throws PartInitException, JavaModelException {
 		JavaEditor editorPart= (JavaEditor) EditorUtility.openInEditor(cu);
 		try {
@@ -94,7 +94,7 @@ public class CodeFormatterTest extends CoreTests {
 
 			IAction formatAction= editorPart.getAction(actionId);
 			formatAction.run();
-			
+
 			return cu.getBuffer().getContents();
 		} finally {
 			editorPart.close(false);
@@ -119,7 +119,7 @@ public class CodeFormatterTest extends CoreTests {
 		buf.append("}\n");
 		String original= buf.toString();
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("    /** \n");
 		buf.append("* Bla\n");
@@ -127,7 +127,7 @@ public class CodeFormatterTest extends CoreTests {
 		String selection= buf.toString();
 
 		String formatted= format(cu, original.indexOf(selection), selection.length());
-		
+
 		buf= new StringBuffer();
 		buf.append("/**\n");
 		buf.append("*\n");
@@ -253,7 +253,7 @@ public class CodeFormatterTest extends CoreTests {
 			+ "}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
 		String formatted= formatElement(cu, original.indexOf("comment"), 0);
-		
+
 		String expected=
 			"/**\n"
 			+ " *\n"

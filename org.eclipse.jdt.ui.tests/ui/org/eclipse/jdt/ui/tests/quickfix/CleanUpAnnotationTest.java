@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
-
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class CleanUpAnnotationTest extends CleanUpTestCase {
@@ -113,10 +112,10 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		}, new String[] {
 			expected1
 		});
-		
+
 		assertTrue(status.hasWarning());
 	}
-	
+
 	public void testSortMembersBookmarks() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -151,10 +150,10 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		}, new String[] {
 			expected1
 		});
-		
+
 		assertTrue(status.hasWarning());
 	}
-	
+
 	public void testSortMembersBreakpoints() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -189,10 +188,10 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		}, new String[] {
 			expected1
 		});
-		
+
 		assertTrue(status.hasWarning());
 	}
-	
+
 	public void testSortMembersProblemMarker() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -209,10 +208,10 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
 		JavaCore.setOptions(options);
-		
+
 		CompilationUnit ast= SharedASTProvider.getAST(cu1, SharedASTProvider.WAIT_YES, null);
 		assertTrue(ast.getProblems().length > 0);
-		
+
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
@@ -232,7 +231,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		}, new String[] {
 			expected1
 		});
-		
+
 		assertTrue(status.toString(), status.isOK());
 	}
 }

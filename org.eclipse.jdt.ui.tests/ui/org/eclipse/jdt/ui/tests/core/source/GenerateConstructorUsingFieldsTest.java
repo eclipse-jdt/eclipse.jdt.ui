@@ -47,9 +47,9 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  * Tests generation of constructors using fields
- * 
+ *
  * @see org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation
- * 
+ *
  */
 public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
@@ -113,7 +113,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit(topLevelTypeName + ".java", source, true, null);
 		IType type= a.getType(topLevelTypeName);
 		IField[] fields= new IField[fieldNames.length];
-		for (int i= 0; i < fieldNames.length; i++) 
+		for (int i= 0; i < fieldNames.length; i++)
 			fields[i]= type.getField(fieldNames[i]);
 
 		runOperation(type, fields, superConstructor);
@@ -130,66 +130,66 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Tests simple constructor generation with one field
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test01() throws Exception {
 
-		runIt("A", 
-				new String[] { "field1" }, 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field1;\r\n" + 
-				"\r\n" + 
-				"}", 
+		runIt("A",
+				new String[] { "field1" },
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field1;\r\n" +
+				"\r\n" +
+				"}",
 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field1;\r\n" + 
-				"\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param field1\r\n" + 
-				"	 */\r\n" + 
-				"	public A(String field1) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.field1 = field1;\r\n" + 
-				"	}\r\n" + 
-				"\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field1;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param field1\r\n" +
+				"	 */\r\n" +
+				"	public A(String field1) {\r\n" +
+				"		super();\r\n" +
+				"		this.field1 = field1;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
 		"}");
 	}
 
 	/**
 	 * Tests adding two fields with identically named classes from different packages
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test02() throws Exception {
 
 		printTestDisabledMessage("see bug 113052 (import issue)");
 
-//		ICompilationUnit pB= fPackageP.createCompilationUnit("B.java", "package p;\r\n" + 
-//		"\r\n" + 
-//		"public class B {\r\n" + 
-//		"\r\n" + 
-//		"}\r\n" + 
+//		ICompilationUnit pB= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
+//		"\r\n" +
+//		"public class B {\r\n" +
+//		"\r\n" +
+//		"}\r\n" +
 //		"", true, null);
 
 //		IPackageFragment packageQ= fRoot.createPackageFragment("q", true, null);
-//		packageQ.createCompilationUnit("B.java", "package p;\r\n" + 
-//		"\r\n" + 
-//		"public class B {\r\n" + 
-//		"\r\n" + 
-//		"}\r\n" + 
+//		packageQ.createCompilationUnit("B.java", "package p;\r\n" +
+//		"\r\n" +
+//		"public class B {\r\n" +
+//		"\r\n" +
+//		"}\r\n" +
 //		"", true, null);
 
-//		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-//		"\r\n" + 
-//		"public class A {\r\n" + 
-//		"	q.B field1;\r\n" + 
-//		"	B field2;\r\n" + 
-//		"}\r\n" + 
+//		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+//		"\r\n" +
+//		"public class A {\r\n" +
+//		"	q.B field1;\r\n" +
+//		"	B field2;\r\n" +
+//		"}\r\n" +
 //		"", true, null);
 
 //		IField f1= a.getType("A").getField("field1");
@@ -197,80 +197,80 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 //		runOperation(a.getType("A"), new IField[] { f1, f2 }, null);
 
-//		compareSource("package p;\r\n" + 
-//		"\r\n" + 
-//		"public class A {\r\n" + 
-//		"	q.B field1;\r\n" + 
-//		"	B field2;\r\n" + 
-//		"	/**\r\n" + 
-//		"	 * @param field1\r\n" + 
-//		"	 * @param field2\r\n" + 
-//		"	 */\r\n" + 
-//		"	public A(q.B field1, B field2) {\r\n" + 
-//		"		super();\r\n" + 
-//		"		// TODO Auto-generated constructor stub\r\n" + 
-//		"		this.field1 = field1;\r\n" + 
-//		"		this.field2 = field2;\r\n" + 
-//		"	}\r\n" + 
-//		"}\r\n" + 
+//		compareSource("package p;\r\n" +
+//		"\r\n" +
+//		"public class A {\r\n" +
+//		"	q.B field1;\r\n" +
+//		"	B field2;\r\n" +
+//		"	/**\r\n" +
+//		"	 * @param field1\r\n" +
+//		"	 * @param field2\r\n" +
+//		"	 */\r\n" +
+//		"	public A(q.B field1, B field2) {\r\n" +
+//		"		super();\r\n" +
+//		"		// TODO Auto-generated constructor stub\r\n" +
+//		"		this.field1 = field1;\r\n" +
+//		"		this.field2 = field2;\r\n" +
+//		"	}\r\n" +
+//		"}\r\n" +
 //		"", a.getSource());
 	}
 
 	/**
 	 * Ensure field ordering stays constant
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test03() throws Exception {
 
 		runIt("A", new String[] { "firstField", "secondField", "beforeHandThirdField" },
-				"package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.List;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String firstField;\r\n" + 
-				"	List secondField;\r\n" + 
-				"	A beforeHandThirdField;\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"import java.util.List;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String firstField;\r\n" +
+				"	List secondField;\r\n" +
+				"	A beforeHandThirdField;\r\n" +
 				"}",
 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.List;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String firstField;\r\n" + 
-				"	List secondField;\r\n" + 
-				"	A beforeHandThirdField;\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param firstField\r\n" + 
-				"	 * @param secondField\r\n" + 
-				"	 * @param beforeHandThirdField\r\n" + 
-				"	 */\r\n" + 
-				"	public A(String firstField, List secondField, A beforeHandThirdField) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.firstField = firstField;\r\n" + 
-				"		this.secondField = secondField;\r\n" + 
-				"		this.beforeHandThirdField = beforeHandThirdField;\r\n" + 
-				"	}\r\n" + 
-				"}\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"import java.util.List;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String firstField;\r\n" +
+				"	List secondField;\r\n" +
+				"	A beforeHandThirdField;\r\n" +
+				"	/**\r\n" +
+				"	 * @param firstField\r\n" +
+				"	 * @param secondField\r\n" +
+				"	 * @param beforeHandThirdField\r\n" +
+				"	 */\r\n" +
+				"	public A(String firstField, List secondField, A beforeHandThirdField) {\r\n" +
+				"		super();\r\n" +
+				"		this.firstField = firstField;\r\n" +
+				"		this.secondField = secondField;\r\n" +
+				"		this.beforeHandThirdField = beforeHandThirdField;\r\n" +
+				"	}\r\n" +
+				"}\r\n" +
 		"");
 	}
 
 	/**
-	 * Test insertion between two methods 
-	 * 
+	 * Test insertion between two methods
+	 *
 	 * @throws Exception
 	 */
 	public void test04() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
-				"\r\n" + 
-				"	public void method1() {}\r\n" + 
-				"	public void method2() {}\r\n" + 
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
+				"\r\n" +
+				"	public void method1() {}\r\n" +
+				"	public void method2() {}\r\n" +
 				"}", true, null);
 		IType typeA= a.getType("A");
 		IField firstField= typeA.getField("field");
@@ -278,130 +278,130 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 		runOperation(typeA, new IField[] { firstField }, null, method, true, false, Modifier.PUBLIC);
 
-		compareSource("package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
-				"\r\n" + 
-				"	public void method1() {}\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param field\r\n" + 
-				"	 */\r\n" + 
-				"	public A(String field) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.field = field;\r\n" + 
-				"	}\r\n" + 
-				"	public void method2() {}\r\n" + 
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
+				"\r\n" +
+				"	public void method1() {}\r\n" +
+				"	/**\r\n" +
+				"	 * @param field\r\n" +
+				"	 */\r\n" +
+				"	public A(String field) {\r\n" +
+				"		super();\r\n" +
+				"		this.field = field;\r\n" +
+				"	}\r\n" +
+				"	public void method2() {}\r\n" +
 				"}", a.getSource());
 	}
 
 	/**
 	 * Without comments
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test05() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
 				"}", true, null);
 		IType typeA= a.getType("A");
 		IField field= typeA.getField("field");
 
 		runOperation(typeA, new IField[] { field }, null, null, false, false, Modifier.PUBLIC);
 
-		compareSource("package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
-				"\r\n" + 
-				"	public A(String field) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.field = field;\r\n" + 
-				"	}\r\n" + 
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
+				"\r\n" +
+				"	public A(String field) {\r\n" +
+				"		super();\r\n" +
+				"		this.field = field;\r\n" +
+				"	}\r\n" +
 				"}", a.getSource());
 	}
 
 	/**
 	 * With a different modifier
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test06() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
 				"}", true, null);
 		IType typeA= a.getType("A");
 		IField field= typeA.getField("field");
 
 		runOperation(typeA, new IField[] { field }, null, null, false, false, Modifier.PROTECTED);
 
-		compareSource("package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
-				"\r\n" + 
-				"	protected A(String field) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.field = field;\r\n" + 
-				"	}\r\n" + 
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
+				"\r\n" +
+				"	protected A(String field) {\r\n" +
+				"		super();\r\n" +
+				"		this.field = field;\r\n" +
+				"	}\r\n" +
 				"}", a.getSource());
 	}
 
 	/**
 	 * Omitting the super constructor
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test07() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
 				"}", true, null);
 		IType typeA= a.getType("A");
 		IField field= typeA.getField("field");
 
 		runOperation(typeA, new IField[] { field }, null, null, false, true, Modifier.PUBLIC);
 
-		compareSource("package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	String field;\r\n" + 
-				"\r\n" + 
-				"	public A(String field) {\r\n" + 
-				"		this.field = field;\r\n" + 
-				"	}\r\n" + 
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String field;\r\n" +
+				"\r\n" +
+				"	public A(String field) {\r\n" +
+				"		this.field = field;\r\n" +
+				"	}\r\n" +
 				"}", a.getSource());
 	}
 
 	/**
 	 * Type variables; generic types in fields
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test08() throws Exception {
 
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class B {\r\n" + 
-				"\r\n" + 
-				"}\r\n" + 
+		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
+				"\r\n" +
+				"public class B {\r\n" +
+				"\r\n" +
+				"}\r\n" +
 				"", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.Map;\r\n" + 
-				"\r\n" + 
-				"public class A<E> {\r\n" + 
-				"	Map<String, B> field1;\r\n" + 
-				"	E field2;\r\n" + 
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Map;\r\n" +
+				"\r\n" +
+				"public class A<E> {\r\n" +
+				"	Map<String, B> field1;\r\n" +
+				"	E field2;\r\n" +
 				"}", true, null);
 
 		IType typeA= a.getType("A");
@@ -410,218 +410,218 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 		runOperation(typeA, new IField[] { field1, field2 }, null);
 
-		compareSource("package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.Map;\r\n" + 
-				"\r\n" + 
-				"public class A<E> {\r\n" + 
-				"	Map<String, B> field1;\r\n" + 
-				"	E field2;\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param field1\r\n" + 
-				"	 * @param field2\r\n" + 
-				"	 */\r\n" + 
-				"	public A(Map<String, B> field1, E field2) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.field1 = field1;\r\n" + 
-				"		this.field2 = field2;\r\n" + 
-				"	}\r\n" + 
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"import java.util.Map;\r\n" +
+				"\r\n" +
+				"public class A<E> {\r\n" +
+				"	Map<String, B> field1;\r\n" +
+				"	E field2;\r\n" +
+				"	/**\r\n" +
+				"	 * @param field1\r\n" +
+				"	 * @param field2\r\n" +
+				"	 */\r\n" +
+				"	public A(Map<String, B> field1, E field2) {\r\n" +
+				"		super();\r\n" +
+				"		this.field1 = field1;\r\n" +
+				"		this.field2 = field2;\r\n" +
+				"	}\r\n" +
 				"}", a.getSource());
 	}
 
 	/**
 	 * Enums
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test09() throws Exception {
 
-		runIt("A", new String[] { "field1" }, 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	public enum B { C, D };\r\n" + 
-				"	B field1;\r\n" + 
+		runIt("A", new String[] { "field1" },
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	public enum B { C, D };\r\n" +
+				"	B field1;\r\n" +
 				"}",
 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	public enum B { C, D };\r\n" + 
-				"	B field1;\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param field1\r\n" + 
-				"	 */\r\n" + 
-				"	public A(B field1) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.field1 = field1;\r\n" + 
-				"	}\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	public enum B { C, D };\r\n" +
+				"	B field1;\r\n" +
+				"	/**\r\n" +
+				"	 * @param field1\r\n" +
+				"	 */\r\n" +
+				"	public A(B field1) {\r\n" +
+				"		super();\r\n" +
+				"		this.field1 = field1;\r\n" +
+				"	}\r\n" +
 		"}");
 	}
 
 	/**
 	 * Final uninitialized fields
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test10() throws Exception {
 
 		runIt("A", new String[] { "field1" },
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	final A field1;\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	final A field1;\r\n" +
 				"}",
 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	final A field1;\r\n" + 
-				"\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param field1\r\n" + 
-				"	 */\r\n" + 
-				"	public A(A field1) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.field1 = field1;\r\n" + 
-				"	}\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	final A field1;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param field1\r\n" +
+				"	 */\r\n" +
+				"	public A(A field1) {\r\n" +
+				"		super();\r\n" +
+				"		this.field1 = field1;\r\n" +
+				"	}\r\n" +
 		"}");
 	}
 
 	/**
 	 * Verify JDT code conventions are followed, see bug 111801
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test11() throws Exception {
 
 		runIt("A", new String[] { "startDate", "endDate" },
-				"package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.Date;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	private Date startDate;\r\n" + 
-				"	private Date endDate;\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"import java.util.Date;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	private Date startDate;\r\n" +
+				"	private Date endDate;\r\n" +
 				"}",
 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.Date;\r\n" + 
-				"\r\n" + 
-				"public class A {\r\n" + 
-				"	private Date startDate;\r\n" + 
-				"	private Date endDate;\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param startDate\r\n" + 
-				"	 * @param endDate\r\n" + 
-				"	 */\r\n" + 
-				"	public A(Date startDate, Date endDate) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.startDate = startDate;\r\n" + 
-				"		this.endDate = endDate;\r\n" + 
-				"	}\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"import java.util.Date;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	private Date startDate;\r\n" +
+				"	private Date endDate;\r\n" +
+				"	/**\r\n" +
+				"	 * @param startDate\r\n" +
+				"	 * @param endDate\r\n" +
+				"	 */\r\n" +
+				"	public A(Date startDate, Date endDate) {\r\n" +
+				"		super();\r\n" +
+				"		this.startDate = startDate;\r\n" +
+				"		this.endDate = endDate;\r\n" +
+				"	}\r\n" +
 		"}");
 	}
 
 
 	/**
 	 * Name clashing fun with super constructors
-	 * @throws Exception 
+	 * @throws Exception
 	 *
 	 */
 	public void test12() throws Exception {
 
-		ICompilationUnit unit= fPackageP.createCompilationUnit("SuperA.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class SuperA {\r\n" + 
-				"	\r\n" + 
-				"	public SuperA() {};\r\n" + 
-				"	public SuperA(String a, String b) {}\r\n" + 
-				"\r\n" + 
-				"}\r\n" + 
+		ICompilationUnit unit= fPackageP.createCompilationUnit("SuperA.java", "package p;\r\n" +
+				"\r\n" +
+				"public class SuperA {\r\n" +
+				"	\r\n" +
+				"	public SuperA() {};\r\n" +
+				"	public SuperA(String a, String b) {}\r\n" +
+				"\r\n" +
+				"}\r\n" +
 				"", true, null);
 
 		IMethod superConstructor= unit.getType("SuperA").getMethod("SuperA", new String[] { "QString;", "QString;" });
 
 		runIt("A", new String[] { "a", "b" }, superConstructor,
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A extends SuperA {\r\n" + 
-				"	\r\n" + 
-				"	String a;\r\n" + 
-				"	String b;\r\n" + 
-				"}\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A extends SuperA {\r\n" +
+				"	\r\n" +
+				"	String a;\r\n" +
+				"	String b;\r\n" +
+				"}\r\n" +
 				"",
 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A extends SuperA {\r\n" + 
-				"	\r\n" + 
-				"	String a;\r\n" + 
-				"	String b;\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param a\r\n" + 
-				"	 * @param b\r\n" + 
-				"	 * @param a2\r\n" + 
-				"	 * @param b2\r\n" + 
-				"	 */\r\n" + 
-				"	public A(String a, String b, String a2, String b2) {\r\n" + 
-				"		super(a, b);\r\n" + 
-				"		a = a2;\r\n" + 
-				"		b = b2;\r\n" + 
-				"	}\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A extends SuperA {\r\n" +
+				"	\r\n" +
+				"	String a;\r\n" +
+				"	String b;\r\n" +
+				"	/**\r\n" +
+				"	 * @param a\r\n" +
+				"	 * @param b\r\n" +
+				"	 * @param a2\r\n" +
+				"	 * @param b2\r\n" +
+				"	 */\r\n" +
+				"	public A(String a, String b, String a2, String b2) {\r\n" +
+				"		super(a, b);\r\n" +
+				"		a = a2;\r\n" +
+				"		b = b2;\r\n" +
+				"	}\r\n" +
 		"}");
 	}
 
 	/**
 	 * Generic types in parameters of super constructor
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test13() throws Exception {
 
-		ICompilationUnit unit= fPackageP.createCompilationUnit("SuperA.java", "package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.Map;\r\n" + 
-				"\r\n" + 
-				"public class SuperA {\r\n" + 
-				"	\r\n" + 
-				"	private Map<String, A> someMap;\r\n" + 
-				"\r\n" + 
-				"	public SuperA() {}\r\n" + 
-				"\r\n" + 
-				"	public SuperA(Map<String, A> someMap) {\r\n" + 
-				"		this.someMap = someMap;\r\n" + 
-				"	};\r\n" + 
-				"}\r\n" + 
+		ICompilationUnit unit= fPackageP.createCompilationUnit("SuperA.java", "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Map;\r\n" +
+				"\r\n" +
+				"public class SuperA {\r\n" +
+				"	\r\n" +
+				"	private Map<String, A> someMap;\r\n" +
+				"\r\n" +
+				"	public SuperA() {}\r\n" +
+				"\r\n" +
+				"	public SuperA(Map<String, A> someMap) {\r\n" +
+				"		this.someMap = someMap;\r\n" +
+				"	};\r\n" +
+				"}\r\n" +
 				"", true, null);
 
 		IMethod superConstructor= unit.getType("SuperA").getMethod("SuperA", new String[] { "QMap<QString;QA;>;" });
 
-		runIt("A", new String[] { "field" }, superConstructor, 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"public class A extends SuperA {\r\n" + 
-				"	String field;\r\n" + 
-				"}\r\n" + 
+		runIt("A", new String[] { "field" }, superConstructor,
+				"package p;\r\n" +
+				"\r\n" +
+				"public class A extends SuperA {\r\n" +
+				"	String field;\r\n" +
+				"}\r\n" +
 				"",
 
-				"package p;\r\n" + 
-				"\r\n" + 
-				"import java.util.Map;\r\n" + 
-				"\r\n" + 
-				"public class A extends SuperA {\r\n" + 
-				"	String field;\r\n" + 
-				"\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param someMap\r\n" + 
-				"	 * @param field\r\n" + 
-				"	 */\r\n" + 
-				"	public A(Map<String, A> someMap, String field) {\r\n" + 
-				"		super(someMap);\r\n" + 
-				"		this.field = field;\r\n" + 
-				"	}\r\n" + 
+				"package p;\r\n" +
+				"\r\n" +
+				"import java.util.Map;\r\n" +
+				"\r\n" +
+				"public class A extends SuperA {\r\n" +
+				"	String field;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param someMap\r\n" +
+				"	 * @param field\r\n" +
+				"	 */\r\n" +
+				"	public A(Map<String, A> someMap, String field) {\r\n" +
+				"		super(someMap);\r\n" +
+				"		this.field = field;\r\n" +
+				"	}\r\n" +
 		"}");
 	}
 
@@ -631,14 +631,14 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 */
 	public void test14() throws Exception {
 
-		ICompilationUnit unit= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class A  {\r\n" + 
-				"	\r\n" + 
-				"	class B {\r\n" + 
-				"		A b;\r\n" + 
-				"	}\r\n" + 
-				"}\r\n" + 
+		ICompilationUnit unit= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A  {\r\n" +
+				"	\r\n" +
+				"	class B {\r\n" +
+				"		A b;\r\n" +
+				"	}\r\n" +
+				"}\r\n" +
 				"", true, null);
 
 		IType innerType= unit.getType("A").getType("B");
@@ -646,33 +646,33 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 		runOperation(innerType, new IField[] { field }, null);
 
-		compareSource("package p;\r\n" + 
-				"\r\n" + 
-				"public class A  {\r\n" + 
-				"	\r\n" + 
-				"	class B {\r\n" + 
-				"		A b;\r\n" + 
-				"\r\n" + 
-				"		/**\r\n" + 
-				"		 * @param b\r\n" + 
-				"		 */\r\n" + 
-				"		public B(A b) {\r\n" + 
-				"			super();\r\n" + 
-				"			this.b = b;\r\n" + 
-				"		}\r\n" + 
-				"	}\r\n" + 
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"public class A  {\r\n" +
+				"	\r\n" +
+				"	class B {\r\n" +
+				"		A b;\r\n" +
+				"\r\n" +
+				"		/**\r\n" +
+				"		 * @param b\r\n" +
+				"		 */\r\n" +
+				"		public B(A b) {\r\n" +
+				"			super();\r\n" +
+				"			this.b = b;\r\n" +
+				"		}\r\n" +
+				"	}\r\n" +
 				"}", unit.getSource());
 	}
 
 	public void test15() throws Exception {
 
-		ICompilationUnit unit= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
-				"\r\n" + 
-				"public class A  {\r\n" + 
-				"}\r\n" + 
-				"\r\n" + 
-				"class B {\r\n" + 
-				"	A foo;\r\n" + 
+		ICompilationUnit unit= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A  {\r\n" +
+				"}\r\n" +
+				"\r\n" +
+				"class B {\r\n" +
+				"	A foo;\r\n" +
 				"}", true, null);
 
 		IType secondary= (IType)unit.getElementAt(40); // get secondary type
@@ -680,25 +680,25 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 		runOperation(secondary, new IField[] { foo }, null);
 
-		compareSource("package p;\r\n" + 
-				"\r\n" + 
-				"public class A  {\r\n" + 
-				"}\r\n" + 
-				"\r\n" + 
-				"class B {\r\n" + 
-				"	A foo;\r\n" + 
-				"\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param foo\r\n" + 
-				"	 */\r\n" + 
-				"	public B(A foo) {\r\n" + 
-				"		super();\r\n" + 
-				"		this.foo = foo;\r\n" + 
-				"	}\r\n" + 
-				"}\r\n" + 
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"public class A  {\r\n" +
+				"}\r\n" +
+				"\r\n" +
+				"class B {\r\n" +
+				"	A foo;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param foo\r\n" +
+				"	 */\r\n" +
+				"	public B(A foo) {\r\n" +
+				"		super();\r\n" +
+				"		this.foo = foo;\r\n" +
+				"	}\r\n" +
+				"}\r\n" +
 				"", unit.getSource());
 	}
-	
+
 	public void testInsertAt1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -722,31 +722,31 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 		buf.append("	}\n");
 		buf.append("}");
 		String originalContent= buf.toString();
-		
+
 		final int NUM_MEMBERS= 6;
-		
+
 		buf= new StringBuffer();
 		buf.append("public A(int x) {\n");
 		buf.append("		this.x = x;\n");
 		buf.append("	}");
 		String expectedConstructor= buf.toString();
-		
+
 		// try to insert the new constructor after every member and at the end
 		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
-		
+
 			ICompilationUnit unit= null;
 			try {
 				unit= fPackageP.createCompilationUnit("A.java", originalContent, true, null);
-				
+
 				IType type= unit.findPrimaryType();
 				IJavaElement[] children= type.getChildren();
 				IField foo= (IField) children[0];
 				assertEquals(NUM_MEMBERS, children.length);
-				
+
 				IJavaElement insertBefore= i < NUM_MEMBERS ? children[i] : null;
-	
+
 				runOperation(type, new IField[] { foo }, null, insertBefore, false, true, Flags.AccPublic);
-				
+
 				IJavaElement[] newChildren= type.getChildren();
 				assertEquals(NUM_MEMBERS + 1, newChildren.length);
 				String source= ((IMember) newChildren[i]).getSource(); // new element expected at index i

@@ -16,6 +16,8 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.StringAsserts;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -26,8 +28,6 @@ import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 
-import org.eclipse.jdt.testplugin.StringAsserts;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 /**
@@ -35,28 +35,28 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
  *
  */
 public class ChangeTypeRefactoringTests extends RefactoringTest {
-	
+
 	private static final boolean BUG_CORE_TYPE_HIERARCHY_ILLEGAL_PARAMETERIZED_INTERFACES= true;
-	
+
 	private static final Class clazz= ChangeTypeRefactoringTests.class;
 	private static final String REFACTORING_PATH= "ChangeTypeRefactoring/";
 
 	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength){
 		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength);
 	}
-	
+
 	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedType){
 		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength, selectedType);
 	}
 
 	public ChangeTypeRefactoringTests(String name) {
 		super(name);
-	} 
-	
+	}
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-	
+
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
@@ -64,13 +64,13 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test);
 	}
-	
+
 	private String getSimpleTestFileName(boolean input) {
 		String fileName= "A_" + getName() + (input ? "_in" : "_out") + ".java";
 
 		return fileName;
 	}
-	
+
 	private String getTestFileName(boolean positive, boolean input){
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 
@@ -78,11 +78,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		fileName += getSimpleTestFileName(input);
 		return fileName;
 	}
-	
+
 	private ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean positive, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(input), getFileContents(getTestFileName(positive, input)));
 	}
-	
+
 	private ICompilationUnit createAdditionalCU(String fileName, IPackageFragment pack) throws Exception {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "positive/" + fileName + ".java";
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
@@ -93,28 +93,28 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		ICompilationUnit	cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ChangeTypeRefactoring		ref= new ChangeTypeRefactoring(cu, selection.getOffset(), selection.getLength(), selectedTypeName);
-	
+
 		// TODO Set parameters on your refactoring instance from arguments...
-	
-		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
-	
-		assertTrue("activation was supposed to be successful:" + activationResult.toString(), activationResult.isOK());																
-	
+
+		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());
+
+		assertTrue("activation was supposed to be successful:" + activationResult.toString(), activationResult.isOK());
+
 		Collection validTypes= ref.computeValidTypes(new NullProgressMonitor());
 		if (validTypes.isEmpty())
 			return ref;
-		
+
 		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-	
+
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
-	
-		performChange(ref, false);	
-		
+
+		performChange(ref, false);
+
 		String newSource= cu.getSource();
-	
+
 		assertEqualLines(getName() + ": ", getFileContents(getTestFileName(true, false)), newSource);
-	
-		
+
+
 		return ref;
 	}
 
@@ -131,7 +131,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		String	canonAfterSrcName= getTestFileName(false, true);
 
 		assertEqualLines(getFileContents(canonAfterSrcName), cu.getSource());
-	}	
+	}
 
 	//--- TESTS
 	public void testLocalVarName() throws Exception {
@@ -143,18 +143,18 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testLocalVarType() throws Exception {
 		Collection types= helper1(5, 9, 5, 18, "java.util.Map").getValidTypeNames();
 		Assert.assertTrue(types.size() == 1);
-		Assert.assertTrue(types.contains("java.util.Map"));		
+		Assert.assertTrue(types.contains("java.util.Map"));
 	}
 	public void testLocalVarDecl() throws Exception {
 		Collection types= helper1(8, 9, 8, 23, "java.util.Map").getValidTypeNames();
 		Assert.assertTrue(types.size() == 1);
-		Assert.assertTrue(types.contains("java.util.Map")); 		
+		Assert.assertTrue(types.contains("java.util.Map"));
 	}
 	public void testLocalSuperTypesOfArrayList() throws Exception {
 		Collection types= helper1(5, 19, 5, 23, "java.util.List").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable", 
+				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable",
 				"java.io.Serializable", "java.util.Collection", "java.util.List",
 				"java.util.AbstractList", "java.util.AbstractCollection", "java.util.RandomAccess" };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
@@ -163,19 +163,19 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(4, 31, 4, 36, "java.util.Map").getValidTypeNames();
 		Assert.assertTrue(types.size() == 2);
 		Assert.assertTrue(types.contains("java.util.Map"));
-		Assert.assertTrue(types.contains("java.util.Dictionary"));		
+		Assert.assertTrue(types.contains("java.util.Dictionary"));
 	}
 	public void testParameterType() throws Exception {
 		Collection types= helper1(4, 21, 4, 29, "java.util.Dictionary").getValidTypeNames();
 		Assert.assertTrue(types.size() == 2);
 		Assert.assertTrue(types.contains("java.util.Map"));
-		Assert.assertTrue(types.contains("java.util.Dictionary"));				
+		Assert.assertTrue(types.contains("java.util.Dictionary"));
 	}
 	public void testParameterDecl() throws Exception {
 		Collection types= helper1(4, 21, 4, 36, "java.util.Map").getValidTypeNames();
 		Assert.assertTrue(types.size() == 2);
 		Assert.assertTrue(types.contains("java.util.Map"));
-		Assert.assertTrue(types.contains("java.util.Dictionary"));				
+		Assert.assertTrue(types.contains("java.util.Dictionary"));
 	}
 	public void testFieldName() throws Exception {
 		Collection types= helper1(10, 29, 10, 33, "java.util.AbstractList").getValidTypeNames();
@@ -205,7 +205,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(8, 12, 8, 25, "java.util.List").getValidTypeNames();
 		Assert.assertTrue(types.size() == 2);
 		Assert.assertTrue(types.contains("java.util.AbstractList"));
-		Assert.assertTrue(types.contains("java.util.List"));		
+		Assert.assertTrue(types.contains("java.util.List"));
 	}
 	public void testLocalVarUse() throws Exception {
 		Collection types= helper1(6, 22, 6, 26, "java.util.AbstractList").getValidTypeNames();
@@ -217,7 +217,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(4, 12, 4, 20, "java.util.AbstractList").getValidTypeNames();
 		Assert.assertTrue(types.size() == 2);
 		Assert.assertTrue(types.contains("java.util.AbstractList"));
-		Assert.assertTrue(types.contains("java.util.List"));		
+		Assert.assertTrue(types.contains("java.util.List"));
 	}
 	public void testParameterNameWithOverride() throws Exception {
 		Collection types= helper1(5, 38, 5, 40, "java.util.Collection").getValidTypeNames();
@@ -225,7 +225,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Assert.assertTrue(types.contains("java.util.AbstractCollection"));
 //		Assert.assertTrue(types.contains("java.util.ArrayList"));
 		Assert.assertTrue(types.contains("java.util.List"));
-		Assert.assertTrue(types.contains("java.util.Collection"));		
+		Assert.assertTrue(types.contains("java.util.Collection"));
 	}
 	public void testParameterTypeWithOverride() throws Exception {
 		Collection types= helper1(10, 25, 10, 36, "java.util.List").getValidTypeNames();
@@ -233,20 +233,20 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Assert.assertTrue(types.contains("java.util.AbstractCollection"));
 //		Assert.assertTrue(types.contains("java.util.ArrayList"));
 		Assert.assertTrue(types.contains("java.util.List"));
-		Assert.assertTrue(types.contains("java.util.Collection"));		
+		Assert.assertTrue(types.contains("java.util.Collection"));
 	}
 	public void testParameterDeclWithOverride() throws Exception {
 		Collection types= helper1(10, 25, 10, 39, "java.util.AbstractCollection").getValidTypeNames();
 		Assert.assertTrue(types.size() == 3);
 		Assert.assertTrue(types.contains("java.util.AbstractCollection"));
 		Assert.assertTrue(types.contains("java.util.List"));
-		Assert.assertTrue(types.contains("java.util.Collection"));		
+		Assert.assertTrue(types.contains("java.util.Collection"));
 	}
 	public void testLocalVarCast() throws Exception {
 		Collection types= helper1(7, 24, 7, 24, "java.util.List").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable", 
+				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable",
 				"java.io.Serializable", "java.util.Collection", "java.util.List",
 				"java.util.AbstractList", "java.util.AbstractCollection", "java.util.RandomAccess" };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
@@ -257,13 +257,13 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= { "java.lang.Object", "java.lang.Iterable", "java.util.Collection" };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
-	}	
+	}
 	public void testFieldWithAccess() throws Exception {
 		createAdditionalCU("A_testFieldWithAccess2", getPackageP());
 		Collection types= helper1(6, 12, 6, 21, "java.util.Collection").getValidTypeNames();
 		Assert.assertTrue(types.size() == 1);
 		Assert.assertTrue(types.contains("java.util.Collection"));
-	}	
+	}
 	public void testParameterTypeWithOverriding() throws Exception {
 		createAdditionalCU("A_testParameterTypeWithOverriding2", getPackageP());
 		Collection types= helper1(6, 21, 6, 24, "java.util.Collection").getValidTypeNames();
@@ -304,7 +304,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(11, 9, 11, 17, "java.util.List").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable", 
+				"java.lang.Object", "java.lang.Cloneable", "java.lang.Iterable",
 				"java.io.Serializable", "java.util.Collection", "java.util.List",
 				"java.util.AbstractList", "java.util.AbstractCollection", "java.util.RandomAccess" };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
@@ -313,8 +313,8 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(5, 22, 5, 22, "java.util.Collection<java.lang.String>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.util.Collection<java.lang.String>", 
-				"java.lang.Object", 
+				"java.util.Collection<java.lang.String>",
+				"java.lang.Object",
 				"java.lang.Iterable<java.lang.String>"  };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
@@ -322,8 +322,8 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(5, 22, 5, 22, "java.lang.Object").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.util.Collection<java.lang.String>", 
-				"java.lang.Object", 
+				"java.util.Collection<java.lang.String>",
+				"java.lang.Object",
 				"java.lang.Iterable<java.lang.String>"  };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
@@ -331,11 +331,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(5, 16, 5, 16, "java.lang.Comparable<java.lang.String>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				//"java.lang.String", 
-				"java.lang.Comparable<java.lang.String>",				
+				//"java.lang.String",
+				"java.lang.Comparable<java.lang.String>",
 				"java.lang.CharSequence",
 				"java.io.Serializable",
-				"java.lang.Object"		
+				"java.lang.Object"
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
@@ -360,7 +360,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(5, 9, 5, 36, "java.util.Map<java.lang.String,java.lang.Integer>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.util.Map<java.lang.String,java.lang.Integer>",				
+				"java.util.Map<java.lang.String,java.lang.Integer>",
 				"java.util.Dictionary<java.lang.String,java.lang.Integer>",
 				"java.lang.Object",
 				"java.lang.Cloneable",
@@ -372,7 +372,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(6, 9, 6, 44, "java.util.Dictionary<java.lang.String,java.util.Vector<java.lang.Integer>>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.util.Map<java.lang.String,java.util.Vector<java.lang.Integer>>",				
+				"java.util.Map<java.lang.String,java.util.Vector<java.lang.Integer>>",
 				"java.util.Dictionary<java.lang.String,java.util.Vector<java.lang.Integer>>",
 				"java.lang.Object",
 				"java.lang.Cloneable",
@@ -384,7 +384,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		Collection types= helper1(6, 9, 6, 36, "java.util.Dictionary<java.lang.String,java.util.Vector>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
-				"java.util.Map<java.lang.String,java.util.Vector>",				
+				"java.util.Map<java.lang.String,java.util.Vector>",
 				"java.util.Dictionary<java.lang.String,java.util.Vector>",
 				"java.lang.Object",
 				"java.lang.Cloneable",
@@ -407,7 +407,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 			printTestDisabledMessage("core bug");
 			return;
 		}
-			
+
 		Collection types= helper1(3, 40, 3, 40, "p.I<java.lang.Double,java.lang.Float>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
@@ -434,7 +434,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	public void testUnrelatedTypeParameters() throws Exception {
 		Collection types= helper1(3, 20, 3, 20, "p.E<java.lang.String>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
@@ -466,7 +466,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	public void testParametricField() throws Exception {
 		Collection types= helper1(6, 5, 6, 25, "java.lang.Iterable<java.lang.Integer>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
@@ -483,7 +483,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	public void testParametricReturnType() throws Exception {
 		Collection types= helper1(5, 12, 5, 25, "java.lang.Iterable<java.lang.String>").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
@@ -551,28 +551,28 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	public void testVarArg() throws Exception {
 		Collection types= helper1(5, 17, 5, 18, "java.lang.Object").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= {
 				"java.lang.Object",
 				"java.io.Serializable",
-				"java.lang.Comparable<java.lang.Integer>", 
+				"java.lang.Comparable<java.lang.Integer>",
 				"java.lang.Number"
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	public void testVarArg2() throws Exception {
 		Collection types= helper1(2, 21, 2, 21, "java.lang.Object").getValidTypeNames();
 		String[] actual= (String[]) types.toArray(new String[types.size()]);
 		String[] expected= { };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	// tests that are supposed to fail
-	
+
 	public void testInvalidSelection() throws Exception {
 		failHelper1(5, 23, 5, 37, 4, "java.lang.Object");
 	}
@@ -580,7 +580,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		failHelper1(6, 23, 6, 35, 4, "java.lang.Object");
 	}
 	public void testMultiDeclaration() throws Exception {
-		failHelper1(8, 22, 8, 26, 4, "java.util.List");		
+		failHelper1(8, 22, 8, 26, 4, "java.util.List");
 	}
 	public void testUpdateNotPossible() throws Exception {
 		failHelper1(5, 19, 5, 20, 4, "java.util.Hashtable");

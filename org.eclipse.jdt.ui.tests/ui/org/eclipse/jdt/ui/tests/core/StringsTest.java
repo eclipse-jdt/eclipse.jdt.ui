@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class StringsTest extends TestCase {
-	
+
 	public static Test allTests() {
 		return new TestSuite(StringsTest.class);
 	}
@@ -25,7 +25,7 @@ public class StringsTest extends TestCase {
 	public static Test suite() {
 		return allTests();
 	}
-	
+
 	public void testRemoveTrailingCharacters() {
 		assertEquals("x", Strings.removeTrailingCharacters("x", ','));
 		assertEquals("x,y", Strings.removeTrailingCharacters("x,y", ','));

@@ -35,7 +35,7 @@ import java.util.NoSuchElementException;
 			key= theKey;
 			value= theValue;
 		}
-		
+
 		public String toString() {
 			StringBuffer buffer= new StringBuffer();
 			appendToStringWithCommaNL(buffer);
@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
 			else
 				return buffer.toString();
 		}
-		
+
 		private void appendToStringWithCommaNL(StringBuffer buffer) {
 			CustomHashtable.HashMapEntry hashMapEntry= this;
 			do {
@@ -134,7 +134,7 @@ import java.util.NoSuchElementException;
 	/**
 	 * Constructs a new Hashtable using the specified capacity and the default
 	 * load factor.
-	 * 
+	 *
 	 * @param capacity the initial capacity
 	 */
 	public CustomHashtable(int capacity) {
@@ -144,7 +144,7 @@ import java.util.NoSuchElementException;
 	/**
 	 * Constructs a new hash table with the default capacity and the given
 	 * element comparer.
-	 * 
+	 *
 	 * @param comparer the element comparer to use to compare keys and obtain
 	 *        hash codes for keys, or <code>null</code> to use the normal
 	 *        <code>equals</code> and <code>hashCode</code> methods
@@ -156,7 +156,7 @@ import java.util.NoSuchElementException;
 	/**
 	 * Constructs a new hash table with the given capacity and the given element
 	 * comparer.
-	 * 
+	 *
 	 * @param capacity the maximum number of elements that can be added without
 	 *        rehashing
 	 * @param comparer the element comparer to use to compare keys and obtain
@@ -179,7 +179,7 @@ import java.util.NoSuchElementException;
 	 * Constructs a new hash table with enough capacity to hold all keys in the
 	 * given hash table, then adds all key/value pairs in the given hash table
 	 * to the new one, using the given element comparer.
-	 * 
+	 *
 	 * @param table the original hash table
 	 * @param comparer the element comparer to use to compare keys and obtain
 	 *        hash codes for keys, or <code>null</code> to use the normal
@@ -203,7 +203,7 @@ import java.util.NoSuchElementException;
 	/**
 	 * Answers if this Hashtable contains the specified object as a key of one
 	 * of the key/value pairs.
-	 * 
+	 *
 	 * @param key the object to look for as a key in this Hashtable
 	 * @return true if object is a key in this Hashtable, false otherwise
 	 */
@@ -215,7 +215,7 @@ import java.util.NoSuchElementException;
 	 * Answers an Enumeration on the values of this Hashtable. The results of
 	 * the Enumeration may be affected if the contents of this Hashtable are
 	 * modified.
-	 * 
+	 *
 	 * @return an Enumeration of the values of this Hashtable
 	 */
 	public Enumeration elements() {
@@ -226,7 +226,7 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Answers the value associated with the specified key in this Hashtable.
-	 * 
+	 *
 	 * @param key the key of the value returned
 	 * @return the value associated with the specified key, null if the
 	 *         specified key does not exist
@@ -244,7 +244,7 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Answers the stored key that is equal to the specified key.
-	 * 
+	 *
 	 * @param key the key to search
 	 * @return the stored key, or null if the specified key does not exist
 	 */
@@ -272,7 +272,7 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Answers the hash code for the given key.
-	 * 
+	 *
 	 * @param key key
 	 * @return hash code for key
 	 */
@@ -285,10 +285,10 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Compares two keys for equality.
-	 * 
+	 *
 	 * @param a first key
 	 * @param b second key
-	 * 
+	 *
 	 * @return <code>true</code> iff the keys are deemed equal
 	 */
 	private boolean keyEquals(Object a, Object b) {
@@ -302,7 +302,7 @@ import java.util.NoSuchElementException;
 	 * Answers an Enumeration on the keys of this Hashtable. The results of the
 	 * Enumeration may be affected if the contents of this Hashtable are
 	 * modified.
-	 * 
+	 *
 	 * @return an Enumeration of the keys of this Hashtable
 	 */
 	public Enumeration keys() {
@@ -315,7 +315,7 @@ import java.util.NoSuchElementException;
 	 * Associate the specified value with the specified key in this Hashtable.
 	 * If the key already exists, the old value is replaced. The key and value
 	 * cannot be null.
-	 * 
+	 *
 	 * @param key the key to add
 	 * @param value the value to add
 	 * @return the old value associated with the specified key, null if the key
@@ -381,7 +381,7 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Remove the key/value pair with the specified key from this Hashtable.
-	 * 
+	 *
 	 * @param key the key to remove
 	 * @return the value associated with the specified key, null if the
 	 *         specified key did not exist
@@ -407,7 +407,7 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Answers the number of key/value pairs in this Hashtable.
-	 * 
+	 *
 	 * @return the number of key/value pairs in this Hashtable
 	 */
 	public int size() {
@@ -416,7 +416,7 @@ import java.util.NoSuchElementException;
 
 	/**
 	 * Answers the string representation of this Hashtable.
-	 * 
+	 *
 	 * @return the string representation of this Hashtable
 	 */
 	public String toString() {

@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -36,6 +32,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -63,16 +63,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
-
-import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
@@ -86,30 +76,39 @@ import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+
 /**
- * The class <code>NewTestCaseWizardPageOne</code> contains controls and validation routines 
+ * The class <code>NewTestCaseWizardPageOne</code> contains controls and validation routines
  * for the first page of the  'New JUnit TestCase Wizard'.
  * <p>
  * Clients can use the page as-is and add it to their own wizard, or extend it to modify
  * validation or add and remove controls.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage"; //$NON-NLS-1$
 
-	
+
 	/** Field ID of the class under test field. */
 	public final static String CLASS_UNDER_TEST= PAGE_NAME + ".classundertest"; //$NON-NLS-1$
-	
+
 	/**
 	 * Field ID of the Junit4 toggle
-	 * @since 3.2 
+	 * @since 3.2
 	 */
 	public final static String JUNIT4TOGGLE= PAGE_NAME + ".junit4toggle"; //$NON-NLS-1$
-	
+
 	private static final String COMPLIANCE_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
 	private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final Object BUILD_PATH_KEY_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
@@ -128,23 +127,23 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private final static String STORE_SETUP_CLASS= PAGE_NAME + ".USE_SETUPCLASS";	//$NON-NLS-1$
 	private final static String STORE_TEARDOWN_CLASS= PAGE_NAME + ".USE_TEARDOWNCLASS"; //$NON-NLS-1$
 	private final static String STORE_CONSTRUCTOR= PAGE_NAME + ".USE_CONSTRUCTOR"; //$NON-NLS-1$
-	
+
 
 	private final static int IDX_SETUP_CLASS= 0;
 	private final static int IDX_TEARDOWN_CLASS= 1;
 	private final static int IDX_SETUP= 2;
 	private final static int IDX_TEARDOWN= 3;
 	private final static int IDX_CONSTRUCTOR= 4;
-	
+
 	private NewTestCaseWizardPageTwo fPage2;
 	private MethodStubsSelectionButtonGroup fMethodStubsButtons;
 
 	private String fClassUnderTestText; // model
 	private IType fClassUnderTest; // resolved model, can be null
-	
+
 	private Text fClassUnderTestControl; // control
 	private IStatus fClassUnderTestStatus; // status
-	
+
 	private Button fClassUnderTestButton;
 	private JavaTypeCompletionProcessor fClassToTestCompletionProcessor;
 
@@ -159,34 +158,34 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/**
 	 * Creates a new <code>NewTestCaseCreationWizardPage</code>.
 	 * @param page2 The second page
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public NewTestCaseWizardPageOne(NewTestCaseWizardPageTwo page2) {
 		super(true, PAGE_NAME);
 		fPage2= page2;
-		
-		setTitle(WizardMessages.NewTestCaseWizardPageOne_title); 
-		setDescription(WizardMessages.NewTestCaseWizardPageOne_description); 
-		
+
+		setTitle(WizardMessages.NewTestCaseWizardPageOne_title);
+		setDescription(WizardMessages.NewTestCaseWizardPageOne_description);
+
 		String[] buttonNames= new String[] {
 			/* IDX_SETUP_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUpBeforeClass,
 			/* IDX_TEARDOWN_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDownAfterClass,
-			/* IDX_SETUP */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp, 
-			/* IDX_TEARDOWN */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown, 
+			/* IDX_SETUP */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp,
+			/* IDX_TEARDOWN */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown,
 			/* IDX_CONSTRUCTOR */ WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
 		};
 		enableCommentControl(true);
-		
+
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 2);
-		fMethodStubsButtons.setLabelText(WizardMessages.NewTestCaseWizardPageOne_method_Stub_label); 
-		
-		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true); 
+		fMethodStubsButtons.setLabelText(WizardMessages.NewTestCaseWizardPageOne_method_Stub_label);
+
+		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
 
 		fClassUnderTestStatus= new JUnitStatus();
-		
+
 		fClassUnderTestText= ""; //$NON-NLS-1$
-		
+
 		fJunit4Status= new JUnitStatus();
 		fIsJunit4= false;
 	}
@@ -200,7 +199,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 		initContainerPage(element);
 		initTypePage(element);
-		// put default class to test		
+		// put default class to test
 		if (element != null) {
 			IType classToTest= null;
 			// evaluate the enclosing type
@@ -211,7 +210,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				}
 			} else {
 				ICompilationUnit cu= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
-				if (cu != null) 
+				if (cu != null)
 					classToTest= cu.findPrimaryType();
 				else {
 					if (element instanceof IClassFile) {
@@ -222,7 +221,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 						} catch(JavaModelException e) {
 							JUnitPlugin.log(e);
 						}
-					}					
+					}
 				}
 			}
 			if (classToTest != null) {
@@ -237,7 +236,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 
 		restoreWidgetValues();
-		
+
 		boolean isJunit4= false;
 		if (element != null && element.getElementType() != IJavaElement.JAVA_MODEL) {
 			IJavaProject project= element.getJavaProject();
@@ -248,21 +247,21 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 		}
 		setJUnit4(isJunit4, true);
-		
+
 		updateStatus(getStatusList());
 	}
-	
+
 	private IStatus junit4Changed() {
 		JUnitStatus status= new JUnitStatus();
 		return status;
 	}
-	
+
 	/**
 	 * Specifies if the test should be created as JUnit 4 test.
 	 * @param isJUnit4 If set, a Junit 4 test will be created
 	 * @param isEnabled if <code>true</code> the modifier fields are
 	 * editable; otherwise they are read-only
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public void setJUnit4(boolean isJUnit4, boolean isEnabled) {
@@ -273,17 +272,17 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		internalSetJUnit4(isJUnit4);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the test should be created as Junit 4 test
 	 * @return returns <code>true</code> if the test should be created as Junit 4 test
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public boolean isJUnit4() {
 		return fIsJunit4;
 	}
-	
+
 	private void internalSetJUnit4(boolean isJUnit4) {
 		fIsJunit4= isJUnit4;
 		fJunit4Status= junit4Changed();
@@ -294,7 +293,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		handleFieldChanged(JUNIT4TOGGLE);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
 	 */
@@ -306,7 +305,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				fClassUnderTestButton.setEnabled(getPackageFragmentRoot() != null);
 			}
 			fJunit4Status= junit4Changed();
-			
+
 			updateBuildPathMessage();
 		} else if (fieldName.equals(JUNIT4TOGGLE)) {
 			updateBuildPathMessage();
@@ -332,23 +331,23 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				fJunit4Status
 		};
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		
+
 		Composite composite= new Composite(parent, SWT.NONE);
-		
+
 		int nColumns= 4;
-		
+
 		GridLayout layout= new GridLayout();
-		layout.numColumns= nColumns;		
+		layout.numColumns= nColumns;
 		composite.setLayout(layout);
 		createJUnit4Controls(composite, nColumns);
-		createContainerControls(composite, nColumns);	
+		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
 		createSeparator(composite, nColumns);
 		createTypeNameControls(composite, nColumns);
@@ -358,9 +357,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		createSeparator(composite, nColumns);
 		createClassUnderTestControls(composite, nColumns);
 		createBuildPathConfigureControls(composite, nColumns);
-		
+
 		setControl(composite);
-			
+
 		//set default and focus
 		String classUnderTest= getClassUnderTestText();
 		if (classUnderTest.length() > 0) {
@@ -369,34 +368,34 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);
-		
+
 		setFocus();
 	}
 
 	/**
-	 * Creates the controls for the method stub selection buttons. Expects a <code>GridLayout</code> with 
+	 * Creates the controls for the method stub selection buttons. Expects a <code>GridLayout</code> with
 	 * at least 3 columns.
-	 * 
+	 *
 	 * @param composite the parent composite
 	 * @param nColumns number of columns to span
-	 */		
+	 */
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
 		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getLabelControl(composite), nColumns);
 		LayoutUtil.createEmptySpace(composite, 1);
-		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getSelectionButtonsGroup(composite), nColumns - 1);	
-	}	
+		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getSelectionButtonsGroup(composite), nColumns - 1);
+	}
 
 	/**
-	 * Creates the controls for the 'class under test' field. Expects a <code>GridLayout</code> with 
+	 * Creates the controls for the 'class under test' field. Expects a <code>GridLayout</code> with
 	 * at least 3 columns.
-	 * 
+	 *
 	 * @param composite the parent composite
 	 * @param nColumns number of columns to span
-	 */		
+	 */
 	protected void createClassUnderTestControls(Composite composite, int nColumns) {
 		Label classUnderTestLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
 		classUnderTestLabel.setFont(composite.getFont());
-		classUnderTestLabel.setText(WizardMessages.NewTestCaseWizardPageOne_class_to_test_label); 
+		classUnderTestLabel.setText(WizardMessages.NewTestCaseWizardPageOne_class_to_test_label);
 		classUnderTestLabel.setLayoutData(new GridData());
 
 		fClassUnderTestControl= new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -413,9 +412,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalSpan= nColumns - 2;
 		fClassUnderTestControl.setLayoutData(gd);
-		
+
 		fClassUnderTestButton= new Button(composite, SWT.PUSH);
-		fClassUnderTestButton.setText(WizardMessages.NewTestCaseWizardPageOne_class_to_test_browse); 
+		fClassUnderTestButton.setText(WizardMessages.NewTestCaseWizardPageOne_class_to_test_browse);
 		fClassUnderTestButton.setEnabled(true);
 		fClassUnderTestButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -424,24 +423,24 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				classToTestButtonPressed();
 			}
-		});	
+		});
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= 1;
-		gd.widthHint = LayoutUtil.getButtonWidthHint(fClassUnderTestButton);		
+		gd.widthHint = LayoutUtil.getButtonWidthHint(fClassUnderTestButton);
 		fClassUnderTestButton.setLayoutData(gd);
 
 		ControlContentAssistHelper.createTextContentAssistant(fClassUnderTestControl, fClassToTestCompletionProcessor);
 	}
-	
+
 	/**
-	 * Creates the controls for the JUnit 4 toggle control. Expects a <code>GridLayout</code> with 
+	 * Creates the controls for the JUnit 4 toggle control. Expects a <code>GridLayout</code> with
 	 * at least 3 columns.
-	 * 
+	 *
 	 * @param composite the parent composite
 	 * @param nColumns number of columns to span
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	protected void createJUnit4Controls(Composite composite, int nColumns) {
@@ -451,20 +450,20 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		inner.setLayout(layout);
-		
+
 		SelectionAdapter listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				boolean isSelected= ((Button) e.widget).getSelection();
 				internalSetJUnit4(isSelected);
 			}
 		};
-		
+
 		Button junti3Toggle= new Button(inner, SWT.RADIO);
 		junti3Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit3_radio_label);
 		junti3Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
 		junti3Toggle.setSelection(!fIsJunit4);
 		junti3Toggle.setEnabled(fIsJunit4Enabled);
-		
+
 		fJUnit4Toggle= new Button(inner, SWT.RADIO);
 		fJUnit4Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit4_radio_label);
 		fJUnit4Toggle.setSelection(fIsJunit4);
@@ -472,14 +471,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fJUnit4Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
 		fJUnit4Toggle.addSelectionListener(listener);
 	}
-	
+
 	/**
-	 * Creates the controls for the JUnit 4 toggle control. Expects a <code>GridLayout</code> with 
+	 * Creates the controls for the JUnit 4 toggle control. Expects a <code>GridLayout</code> with
 	 * at least 3 columns.
-	 * 
+	 *
 	 * @param composite the parent composite
 	 * @param nColumns number of columns to span
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	protected void createBuildPathConfigureControls(Composite composite, int nColumns) {
@@ -489,7 +488,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		inner.setLayout(layout);
-		
+
 		fImage= new Label(inner, SWT.NONE);
 		fImage.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
 		fImage.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1, 1));
@@ -506,14 +505,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fLink.setLayoutData(gd);
 		updateBuildPathMessage();
 	}
-	
+
 	private void performBuildpathConfiguration(Object data) {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root == null) {
 			return; // should not happen. Link shouldn't be visible
 		}
 		IJavaProject javaProject= root.getJavaProject();
-		
+
 		if ("a3".equals(data)) { // add and configure JUnit 3 //$NON-NLS-1$
 			String id= BUILD_PATH_PAGE_ID;
 			Map input= new HashMap();
@@ -541,7 +540,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			input.put(KEY_NO_LINK, Boolean.TRUE);
 			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, complianceId, new String[] { buildPath, complianceId  }, data).open();
 		}
-		
+
 		updateBuildPathMessage();
 	}
 
@@ -549,7 +548,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (fLink == null || fLink.isDisposed()) {
 			return;
 		}
-		
+
 		String message= null;
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null) {
@@ -564,12 +563,12 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		fLink.setVisible(message != null);
 		fImage.setVisible(message != null);
-		
+
 		if (message != null) {
 			fLink.setText(message);
 		}
 	}
-	
+
 
 	private void classToTestButtonPressed() {
 		IType type= chooseClassToTestType();
@@ -578,18 +577,18 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 	}
 
-	private IType chooseClassToTestType() {	
+	private IType chooseClassToTestType() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root == null) 
+		if (root == null)
 			return null;
 
 		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-		
-		try {		
+
+		try {
 			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS, false, getClassUnderTestText());
-			dialog.setTitle(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_title); 
-			dialog.setMessage(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_message); 
+			dialog.setTitle(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_title);
+			dialog.setMessage(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_message);
 			if (dialog.open() == Window.OK) {
 				Object[] resultArray= dialog.getResult();
 				if (resultArray != null && resultArray.length > 0)
@@ -609,90 +608,90 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fClassToTestCompletionProcessor.setPackageFragment(getPackageFragment());
 		return status;
 	}
-	
+
 	/**
 	 * Hook method that gets called when the class under test has changed. The method class under test
 	 * returns the status of the validation.
 	 * <p>
 	 * Subclasses may extend this method to perform their own validation.
 	 * </p>
-	 * 
+	 *
 	 * @return the status of the validation
 	 */
 	protected IStatus classUnderTestChanged() {
 		JUnitStatus status= new JUnitStatus();
-		
-		
+
+
 		fClassUnderTest= null;
-		
+
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root == null) {
 			return status;
 		}
-		
+
 		String classToTestName= getClassUnderTestText();
 		if (classToTestName.length() == 0) {
 			return status;
 		}
-		
+
 		IStatus val= JavaConventionsUtil.validateJavaTypeName(classToTestName, root);
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_valid); 
+			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_valid);
 			return status;
 		}
-		
+
 		IPackageFragment pack= getPackageFragment(); // can be null
-		try {		
+		try {
 			IType type= resolveClassNameToType(root.getJavaProject(), pack, classToTestName);
 			if (type == null) {
-				status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_exist); 
+				status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_exist);
 				return status;
 			}
 			if (type.isInterface()) {
-				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_is_interface, BasicElementLabels.getJavaElementName(classToTestName))); 
+				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_is_interface, BasicElementLabels.getJavaElementName(classToTestName)));
 			}
-			
+
 			if (pack != null && !JUnitStubUtility.isVisible(type, pack)) {
 				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_not_visible, BasicElementLabels.getJavaElementName(classToTestName)));
 			}
 			fClassUnderTest= type;
 			fPage2.setClassUnderTest(fClassUnderTest);
 		} catch (JavaModelException e) {
-			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_valid); 
-		} 
+			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_class_to_test_not_valid);
+		}
 		return status;
 	}
 
 	/**
 	 * Returns the content of the class to test text field.
-	 * 
+	 *
 	 * @return the name of the class to test
 	 */
 	public String getClassUnderTestText() {
 		return fClassUnderTestText;
 	}
-	
+
 	/**
 	 * Returns the class to be tested.
-	 * 
+	 *
 	 * 	@return the class under test or <code>null</code> if the entered values are not valid
 	 */
 	public IType getClassUnderTest() {
 		return fClassUnderTest;
 	}
-	
+
 	/**
 	 * Sets the name of the class under test.
-	 * 
+	 *
 	 * @param name The name to set
-	 */		
+	 */
 	public void setClassUnderTest(String name) {
 		if (fClassUnderTestControl != null && !fClassUnderTestControl.isDisposed()) {
 			fClassUnderTestControl.setText(name);
 		}
 		internalSetClassUnderText(name);
 	}
-	
+
 	private void internalSetClassUnderText(String name) {
 		fClassUnderTestText= name;
 		fClassUnderTestStatus= classUnderTestChanged();
@@ -702,22 +701,22 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createTypeMembers(org.eclipse.jdt.core.IType, org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {		
+	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		if (fMethodStubsButtons.isSelected(IDX_CONSTRUCTOR))
-			createConstructor(type, imports); 	
-		
+			createConstructor(type, imports);
+
 		if (fMethodStubsButtons.isSelected(IDX_SETUP_CLASS)) {
 			createSetUpClass(type, imports);
 		}
-		
+
 		if (fMethodStubsButtons.isSelected(IDX_TEARDOWN_CLASS)) {
 			createTearDownClass(type, imports);
 		}
-		
+
 		if (fMethodStubsButtons.isSelected(IDX_SETUP)) {
 			createSetUp(type, imports);
 		}
-		
+
 		if (fMethodStubsButtons.isSelected(IDX_TEARDOWN)) {
 			createTearDown(type, imports);
 		}
@@ -725,11 +724,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (fClassUnderTest != null) {
 			createTestMethodStubs(type, imports);
 		}
-		
-		if (isJUnit4()) { 
+
+		if (isJUnit4()) {
 			imports.addStaticImport("org.junit.Assert", "*", false); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 	}
 
 	private void createConstructor(IType type, ImportsManager imports) throws CoreException {
@@ -752,9 +751,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= isAddComments();
-		
+
 		if (methodTemplate != null) {
-			settings.callSuper= true;				
+			settings.callSuper= true;
 			settings.methodOverwrites= true;
 			content= JUnitStubUtility.genStub(type.getCompilationUnit(), getTypeName(), methodTemplate, settings, null, imports);
 		} else {
@@ -775,7 +774,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			buffer.append(delimiter);
 			content= buffer.toString();
 		}
-		type.createMethod(content, null, true, null);	
+		type.createMethod(content, null, true, null);
 	}
 
 	private IMethod findInHierarchy(IType type, String methodName) throws JavaModelException {
@@ -795,7 +794,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		return null;
 	}
-	
+
 	private void createSetupStubs(IType type, String methodName, boolean isStatic, String annotationType, ImportsManager imports) throws CoreException {
 		String content= null;
 		IMethod methodTemplate= findInHierarchy(type, methodName);
@@ -803,10 +802,10 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (isJUnit4()) {
 			annotation= '@' + imports.addImport(annotationType);
 		}
-		
+
 		GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= isAddComments();
-		
+
 		if (methodTemplate != null) {
 			settings.callSuper= true;
 			settings.methodOverwrites= true;
@@ -824,7 +823,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			if (annotation != null) {
 				buffer.append(annotation).append(delimiter);
 			}
-			
+
 			if (isJUnit4()) {
 				buffer.append("public "); //$NON-NLS-1$
 			} else {
@@ -843,21 +842,21 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		type.createMethod(content, null, false, null);
 	}
-	
-	
-	
+
+
+
 	private void createSetUp(IType type, ImportsManager imports) throws CoreException {
 		createSetupStubs(type, "setUp", false, "org.junit.Before", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	private void createTearDown(IType type, ImportsManager imports) throws CoreException {
 		createSetupStubs(type, "tearDown", false, "org.junit.After", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	private void createSetUpClass(IType type, ImportsManager imports) throws CoreException {
 		createSetupStubs(type, "setUpBeforeClass", true, "org.junit.BeforeClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	private void createTearDownClass(IType type, ImportsManager imports) throws CoreException {
 		createSetupStubs(type, "tearDownAfterClass", true, "org.junit.AfterClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -871,18 +870,18 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		List allMethods= new ArrayList();
 		allMethods.addAll(Arrays.asList(allMethodsArray));
 		List overloadedMethods= getOverloadedMethods(allMethods);
-			
+
 		/* used when for example both sum and Sum methods are present. Then
 		 * sum -> testSum
 		 * Sum -> testSum1
 		 */
-		List names= new ArrayList();				
+		List names= new ArrayList();
 		for (int i = 0; i < methods.length; i++) {
 			IMethod method= methods[i];
 			String elementName= method.getElementName();
 			StringBuffer name= new StringBuffer(PREFIX).append(Character.toUpperCase(elementName.charAt(0))).append(elementName.substring(1));
 			StringBuffer buffer= new StringBuffer();
-	
+
 			final boolean contains= overloadedMethods.contains(method);
 			if (contains)
 				appendParameterNamesToMethodName(name, method.getParameterTypes());
@@ -905,22 +904,22 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 			testName= name.toString();
 			names.add(testName);
-			
+
 			if (isAddComments()) {
 				appendMethodComment(buffer, method);
 			}
 			if (isJUnit4()) {
 				buffer.append('@').append(imports.addImport(JUnitPlugin.JUNIT4_ANNOTATION_NAME)).append(getLineDelimiter());
 			}
-			
-			buffer.append("public ");//$NON-NLS-1$ 
+
+			buffer.append("public ");//$NON-NLS-1$
 			if (fPage2.getCreateFinalMethodStubsButtonSelection())
 				buffer.append("final "); //$NON-NLS-1$
-			buffer.append("void ");//$NON-NLS-1$ 
+			buffer.append("void ");//$NON-NLS-1$
 			buffer.append(testName);
-			buffer.append("()");//$NON-NLS-1$ 
+			buffer.append("()");//$NON-NLS-1$
 			appendTestMethodBody(buffer, type.getCompilationUnit());
-			type.createMethod(buffer.toString(), null, false, null);	
+			type.createMethod(buffer.toString(), null, false, null);
 		}
 	}
 
@@ -941,10 +940,10 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private String getLineDelimiter() throws JavaModelException{
 		IType classToTest= getClassUnderTest();
-		
+
 		if (classToTest != null && classToTest.exists() && classToTest.getCompilationUnit() != null)
 			return classToTest.getCompilationUnit().findRecommendedLineSeparator();
-		
+
 		return getPackageFragment().findRecommendedLineSeparator();
 	}
 
@@ -960,7 +959,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		String message= WizardMessages.NewTestCaseWizardPageOne_not_yet_implemented_string;
 		buffer.append(Messages.format("fail(\"{0}\");", message)).append(todoTask).append(delimiter); //$NON-NLS-1$
-		
+
 		buffer.append('}').append(delimiter);
 	}
 
@@ -979,7 +978,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void appendMethodComment(StringBuffer buffer, IMethod method) throws JavaModelException {
 		final String delimiter= getLineDelimiter();
-		final StringBuffer buf= new StringBuffer("{@link "); //$NON-NLS-1$	
+		final StringBuffer buf= new StringBuffer("{@link "); //$NON-NLS-1$
 		JavaElementLabels.getTypeLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED, buf);
 		buf.append('#');
 		buf.append(method.getElementName());
@@ -990,11 +989,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				buf.append(", "); //$NON-NLS-1$
 			}
 			buf.append(paramTypes[i]);
-			
+
 		}
 		buf.append(')');
 		buf.append('}');
-		
+
 		buffer.append("/**");//$NON-NLS-1$
 		buffer.append(delimiter);
 		buffer.append(" * ");//$NON-NLS-1$
@@ -1003,7 +1002,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		buffer.append(" */");//$NON-NLS-1$
 		buffer.append(delimiter);
 	}
-	
+
 
 	private List getOverloadedMethods(List allMethods) {
 		List overloadedMethods= new ArrayList();
@@ -1035,14 +1034,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (!visible) {
 			saveWidgetValues();
 		}
-		
+
 		//if (visible) setFocus();
 	}
-	
+
 	/**
 	 * The method is called when the container has changed to validate if the project
 	 * is suited for the JUnit test class. Clients can override to modify or remove that validation.
-	 * 
+	 *
 	 * @return the status of the validation
 	 */
 	protected IStatus validateIfJUnitProject() {
@@ -1058,12 +1057,12 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 							return status;
 						}
 						if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
-							status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath); 
+							status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath);
 							return status;
 						}
-					} else {			
+					} else {
 						if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
-							status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath); 
+							status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath);
 							return status;
 						}
 					}
@@ -1082,26 +1081,26 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (isJUnit4()) {
 			return new JUnitStatus();
 		}
-		
+
 		String superClassName= getSuperClass();
 		JUnitStatus status= new JUnitStatus();
 		if (superClassName == null || superClassName.trim().equals("")) { //$NON-NLS-1$
-			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty); 
-			return status;	
+			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty);
+			return status;
 		}
-		if (getPackageFragmentRoot() != null) { 
+		if (getPackageFragmentRoot() != null) {
 			try {
-				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);	
+				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
 				if (type == null) {
-					status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_exist); 
-					return status;	
+					status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_exist);
+					return status;
 				}
 				if (type.isInterface()) {
-					status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_is_interface); 
+					status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_is_interface);
 					return status;
 				}
 				if (!TestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
-					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, BasicElementLabels.getJavaElementName(JUnitPlugin.TEST_INTERFACE_NAME))); 
+					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, BasicElementLabels.getJavaElementName(JUnitPlugin.TEST_INTERFACE_NAME)));
 					return status;
 				}
 			} catch (JavaModelException e) {
@@ -1110,7 +1109,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		return status;
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizardPage#canFlipToNextPage()
 	 */
@@ -1122,21 +1121,21 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		if (!jproject.exists()) {
 			return null;
 		}
-		
+
 		IType type= jproject.findType(classToTestName);
-		
+
 		// search in current package
 		if (type == null && pack != null && !pack.isDefaultPackage()) {
 			type= jproject.findType(pack.getElementName(), classToTestName);
 		}
-		
+
 		// search in java.lang
 		if (type == null) {
 			type= jproject.findType("java.lang", classToTestName); //$NON-NLS-1$
 		}
 		return type;
 	}
-	
+
 	/**
 	 *	Use the dialog store to restore widget values to the values that they held
 	 *	last time this wizard was used to completion
@@ -1156,7 +1155,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			fMethodStubsButtons.setSelection(IDX_TEARDOWN_CLASS, false); //setUpAfterClass
 			fMethodStubsButtons.setSelection(IDX_CONSTRUCTOR, false); //constructor
 		}
-	}	
+	}
 
 	/**
 	 * 	Since Finish was pressed, write widget values to the dialog store so that they

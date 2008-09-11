@@ -20,8 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -29,10 +27,12 @@ import org.eclipse.ltk.core.refactoring.participants.CreateParticipant;
 import org.eclipse.ltk.core.refactoring.participants.ISharableParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 public class TestCreateParticipantShared extends CreateParticipant implements ISharableParticipant {
-	
+
 	static TestCreateParticipantShared fgInstance;
-	
+
 	List fElements= new ArrayList(3);
 	List fHandles= new ArrayList(3);
 	List fArguments= new ArrayList(3);
@@ -56,11 +56,11 @@ public class TestCreateParticipantShared extends CreateParticipant implements IS
 		else
 			fHandles.add(((IResource)element).getFullPath().toString());
 	}
-		
+
 	public String getName() {
 		return getClass().getName();
 	}
-	
+
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
@@ -68,7 +68,7 @@ public class TestCreateParticipantShared extends CreateParticipant implements IS
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}
-	
+
 	public static void testNumberOfElements(int expected) {
 		if (expected == 0) {
 			Assert.assertTrue(fgInstance == null);
@@ -77,7 +77,7 @@ public class TestCreateParticipantShared extends CreateParticipant implements IS
 			Assert.assertEquals(expected, fgInstance.fArguments.size());
 		}
 	}
-	
+
 	public static void reset() {
 		fgInstance= null;
 	}

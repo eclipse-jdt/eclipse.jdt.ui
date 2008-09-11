@@ -38,5 +38,5 @@ public class UIInteractiveSuite extends TestSuite {
 		addTest(WizardsTest.suite());
 		addTest(DialogsTest.suite());
 	}
-	
+
 }

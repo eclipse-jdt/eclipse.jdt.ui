@@ -15,11 +15,13 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Table;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -30,7 +32,6 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
-
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationManager;
 import org.eclipse.debug.internal.ui.launchConfigurations.LaunchShortcutExtension;
@@ -46,8 +47,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.FailureTableDisplay;
 import org.eclipse.jdt.internal.junit.ui.FailureTrace;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	private boolean fLaunchHasTerminated = false;
@@ -133,7 +132,7 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 			int howManyNumbersInErrorString) throws CoreException,
 			JavaModelException {
 		// have to set up an 1.3 project to avoid requiring a 5.0 VM
-		JavaProjectHelper.addRTJar13(fProject); 
+		JavaProjectHelper.addRTJar13(fProject);
 		JavaProjectHelper.addVariableEntry(fProject, new Path(
 				"JUNIT_HOME/junit.jar"), null, null);
 
@@ -184,7 +183,7 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		long startTime = System.currentTimeMillis();
 		while (stillWaiting(numExpectedTableLines, lastItemHasImage)) {
 			if (System.currentTimeMillis() - startTime > millisecondTimeout)
-				fail("Timeout waiting for " + numExpectedTableLines 
+				fail("Timeout waiting for " + numExpectedTableLines
 						+ " lines in table. Present: " + getNumTableItems() + " items.\n"
 						+ "The 2nd vm has " + (hasNotTerminated() ? "not " : "") + "terminated.");
 			dispatchEvents();

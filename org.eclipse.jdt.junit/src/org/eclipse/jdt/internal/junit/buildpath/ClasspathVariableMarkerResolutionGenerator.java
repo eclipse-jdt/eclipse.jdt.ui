@@ -13,13 +13,13 @@ package org.eclipse.jdt.internal.junit.buildpath;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IMarker;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -36,11 +36,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
@@ -61,7 +61,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
 	 */
@@ -69,25 +69,25 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		if (!hasResolutions(marker)) {
 			return NO_RESOLUTION;
 		}
-		
+
 		String[] arguments= CorrectionEngine.getProblemArguments(marker);
 		final IPath path= new Path(arguments[0]);
 		final IJavaProject project= getJavaProject(marker);
-		
+
 		return new IMarkerResolution2[] {
 				new IMarkerResolution2() {
 					public Image getImage() {
 						return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					}
-		
+
 					public String getLabel() {
 						return JUnitMessages.ClasspathVariableMarkerResolutionGenerator_use_JUnit3;
 					}
-		
+
 					public String getDescription() {
 						return JUnitMessages.ClasspathVariableMarkerResolutionGenerator_use_JUnit3_desc;
 					}
-		
+
 					public void run(IMarker nonsenseArgument) {
 						IClasspathEntry[] entries;
 						try {
@@ -97,9 +97,9 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 								return;
 							}
 							entries[idx]= BuildPathSupport.getJUnit3ClasspathEntry();
-							
+
 							setClasspath(project, entries, new BusyIndicatorRunnableContext());
-							
+
 						} catch (JavaModelException e) {
 							JUnitPlugin.log(e);
 						}
@@ -121,7 +121,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		}
 		return -1;
 	}
-	
+
 	private static void setClasspath(final IJavaProject project, final IClasspathEntry[] entries, IRunnableContext context) {
 		/*
 		 * @see org.eclipse.jdt.internal.junit.ui.JUnitAddLibraryProposal#addToClasspath()
@@ -143,5 +143,5 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		}
 
 	}
-	
+
 }

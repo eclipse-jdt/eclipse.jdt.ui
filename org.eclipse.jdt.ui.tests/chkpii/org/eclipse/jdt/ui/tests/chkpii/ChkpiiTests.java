@@ -23,15 +23,16 @@ import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
+
 import org.eclipse.osgi.service.environment.Constants;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 
 public class ChkpiiTests extends TestCase {
-	
+
 	private String fLogDirectoryName;
-	
+
 	private class FileCategory {
 		private final String fName;
 		protected FileCategory(String name) {
@@ -46,7 +47,7 @@ public class ChkpiiTests extends TestCase {
 		protected String getExtension() {
 			return "*." + fName.toLowerCase();
 		}
-		
+
 		public String toString() {
 			return fName.toUpperCase();
 		}
@@ -54,12 +55,12 @@ public class ChkpiiTests extends TestCase {
 	private static class StreamConsumer extends Thread {
 		StringBuffer fStrBuffer;
 		BufferedReader fReader;
-		
+
 
 		public String getContents() {
 			return fStrBuffer.toString();
 		}
-		
+
 		public StreamConsumer(InputStream inputStream) {
 			super();
 			setDaemon(true);
@@ -95,7 +96,7 @@ public class ChkpiiTests extends TestCase {
 		}
 
 	}
-	
+
 	private final FileCategory HTML= new FileCategory("HTML") {
 		protected String getExtension() {
 			return "*.htm*";
@@ -103,32 +104,32 @@ public class ChkpiiTests extends TestCase {
 	};
 	private final FileCategory PROPERTIES= new FileCategory("PROPERTIES");
 	private final FileCategory XML= new FileCategory("XML");
-	
+
 	public void testHTMLFiles() {
 		assertChkpii(HTML);
 	}
-	
+
 	public void testXMLFiles() {
 		assertChkpii(XML);
 	}
-	
+
 	public void testPropertiesFiles() {
 		assertChkpii(PROPERTIES);
 	}
-	
+
 	private void assertChkpii(FileCategory type) {
-		
+
 		boolean isExecuted= executeChkpiiProcess(type);
 		assertTrue("Could not run chkpii test on " + type + " files. See console for details.", isExecuted); //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
 		boolean isValid= checkLogFile(type, buf);
 		assertTrue(buf + "See " + type.getOutputFile() + " for details.", isValid); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	private boolean executeChkpiiProcess(FileCategory type) {
 		Runtime aRuntime= Runtime.getRuntime();
 		String chkpiiString= getChkpiiString(type);
-		
+
 		StreamConsumer err= null;
 		StreamConsumer out= null;
 		try {
@@ -147,7 +148,7 @@ public class ChkpiiTests extends TestCase {
 			out.terminate();
 			err.terminate();
 		}
-		
+
  		if (err.getContents().length() > 0 || !new File(type.getOutputFile()).exists()) {
 			System.out.println(out.getContents());
 			System.out.println(err.getContents());
@@ -156,28 +157,28 @@ public class ChkpiiTests extends TestCase {
 		}
 		return true;
 	}
-	
+
 	private String getChkpiiString(FileCategory type) {
 		return getExec() + " " + type.getFilesToTest() + " -E -O " + type.getOutputFile() + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S -JSQ"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 
 	private String getPluginDirectory() {
-		
+
 		// Get some path inside a plug-in
 		String filePath= toLocation(getClass().getResource("ignoreFiles.txt"));
 
 		StringTokenizer tokenizer= new StringTokenizer(filePath, File.separator);
-		
+
 		String path= "";
 		if (filePath.charAt(0) != File.separatorChar)
 			path= tokenizer.nextToken();
-			
+
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken();
 			if (token.equals("org.eclipse.jdt.ui.tests"))
 				break;
-			
-			path= path + File.separator + token; 
+
+			path= path + File.separator + token;
 		}
 		return path + File.separator;
 	}
@@ -197,40 +198,40 @@ public class ChkpiiTests extends TestCase {
 			return localFile.getPath();
 		}
 	}
-	
+
 	/**
 	 * Method getExcludeFiles.
-	 * 
+	 *
 	 * @return String
 	 */
 	private String getExcludeFile() {
 		return toLocation(getClass().getResource("ignoreFiles.txt"));
 	}
-	
+
 	/**
 	 * Method getExec.
-	 * 
+	 *
 	 * @return String
 	 */
 	private String getExec() {
 		return new File("chkpii.exe").getPath(); //$NON-NLS-1$
 	}
-	
+
 	private String getExcludeErrors() {
-		
+
 		String fileName;
-		
+
 		if (Platform.getOS().equals(Constants.OS_WIN32))
 			fileName= "ignoreErrorsWindows.txt"; //$NON-NLS-1$
 		else
 			fileName= "ignoreErrorsUnix.txt"; //$NON-NLS-1$
-		
+
 		return toLocation(getClass().getResource(fileName));
 	}
-		
+
 	/**
 	 * Checks if the given log file is valid and states no errors.
-	 * 
+	 *
 	 * @param type the file category
 	 * @param message a string buffer to append error messages to
 	 * @return <code>true</code> if there are errors in the log file
@@ -240,7 +241,7 @@ public class ChkpiiTests extends TestCase {
 		BufferedReader aReader= null;
 		int errors= -1, warnings= -1, notProcessed= -1, endOfSummary= -1;
 		boolean hasFailed= false;
-		
+
 		try {
 			aReader= new BufferedReader(new InputStreamReader(new FileInputStream(logFilePath), Charset.forName("ISO-8859-1")));
 			String aLine= aReader.readLine();
@@ -255,10 +256,10 @@ public class ChkpiiTests extends TestCase {
 					endOfSummary= parseEndOfSummary(aLine);
 				else
 					break;
-				
+
 				aLine= aReader.readLine();
 			}
-			
+
 			if (errors > 0) {
 				message.append("" + errors + " files containing errors\n");
 				hasFailed= true;
@@ -267,7 +268,7 @@ public class ChkpiiTests extends TestCase {
 				message.append("" + errors + " files containing errors\n");
 				hasFailed= true;
 			}
-			if (notProcessed > 0) { 
+			if (notProcessed > 0) {
 				message.append("" + notProcessed + " files not found\n");
 				hasFailed= true;
 			}
@@ -275,7 +276,7 @@ public class ChkpiiTests extends TestCase {
 				message.append("Incomplete logfile\n");
 				hasFailed= true;
 			}
-			
+
 		} catch (FileNotFoundException e) {
 			message.append("Could not open log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
 			hasFailed= true;
@@ -292,15 +293,15 @@ public class ChkpiiTests extends TestCase {
 				}
 			}
 		}
-		
+
 		return !hasFailed;
 	}
-	
+
 	private int parseSummary(String aLine, String parseString) {
-		int index= aLine.indexOf(parseString); 
+		int index= aLine.indexOf(parseString);
 		if (index == -1)
 			return -1;
-		
+
 		String aString= aLine.substring(0, index).trim();
 		try {
 			return Integer.parseInt(aString);
@@ -308,12 +309,12 @@ public class ChkpiiTests extends TestCase {
 			return -1;
 		}
 	}
-	
+
 	private int parseNotProcessedSummary(String aLine) {
 		int index= aLine.indexOf("Files Could Not Be Processed"); //$NON-NLS-1$
 		if (index == -1)
 			return -1;
-		
+
 		String aString= aLine.substring(0, index).trim();
 		try {
 			return Integer.parseInt(aString);
@@ -321,21 +322,21 @@ public class ChkpiiTests extends TestCase {
 			return -1;
 		}
 	}
-	
+
 	private int parseEndOfSummary(String aLine) {
 		int index= aLine.indexOf("End of Listing"); //$NON-NLS-1$
 		if (index == -1)
 			return -1;
 		return 0;
 	}
-	
+
 	/**
 	 * Constructor for EmptyDirectoriesTest.
 	 * @param name
 	 */
 	public ChkpiiTests(String name) {
 		super(name);
-		fLogDirectoryName= getPluginDirectory() + "chkpiiResults" + File.separator; //$NON-NLS-1$ 
+		fLogDirectoryName= getPluginDirectory() + "chkpiiResults" + File.separator; //$NON-NLS-1$
 		new File(PROPERTIES.getOutputFile()).delete();
 		new File(HTML.getOutputFile()).delete();
 		new File(XML.getOutputFile()).delete();
@@ -354,6 +355,6 @@ public class ChkpiiTests extends TestCase {
 	 */
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		fLogDirectoryName= null;		
+		fLogDirectoryName= null;
 	}
 }

@@ -16,33 +16,33 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 /**
  * Utilities to manipulate virtual machine arguments to enable assertions
  * according to user preferences.
  */
 public class AssertionVMArg {
-	
+
 	private static final String LONG_VM_ARG_TEXT = "-enableassertions"; //$NON-NLS-1$
 	private static final String SHORT_VM_ARG_TEXT = "-ea"; //$NON-NLS-1$
-	
+
 	public static final int ASSERT_ARG_NOT_FOUND = -1;
-	
+
 	/**
 	 * Sets default VM args in launch configuration to enable assertions if
 	 * user preference indicates such, or blank if not.
-	 * 
+	 *
 	 * @param config the launch configuration to default
 	 */
 	public static void setArgDefault(ILaunchConfigurationWorkingCopy config) {
 		String argText= getEnableAssertionsPreference() ? SHORT_VM_ARG_TEXT : ""; //$NON-NLS-1$
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, argText);
 	}
-	
+
 	public static String enableAssertInArgString(String currentArgs) {
 		String[] argArray= DebugPlugin.parseArguments(currentArgs);
 		boolean assertAlreadyEnabled= (findAssertEnabledArg(argArray) != ASSERT_ARG_NOT_FOUND);
@@ -55,7 +55,7 @@ public class AssertionVMArg {
 
 		return result;
 	}
-	
+
 	public static int findAssertEnabledArg(String[] argArray) {
 		int assertArgIndex= ASSERT_ARG_NOT_FOUND;
 
@@ -69,16 +69,16 @@ public class AssertionVMArg {
 
 		return assertArgIndex;
 	}
-	
+
 	public static String setAssertInArgString(String currentArgs) {
-		// add argument to end (with separating space) 
-		// ..if there are VM arguments already, 
+		// add argument to end (with separating space)
+		// ..if there are VM arguments already,
 		// ..otherwise, default args to single enabling arg
 		return (currentArgs.length() == 0)
 			? SHORT_VM_ARG_TEXT
 			: currentArgs + " " + SHORT_VM_ARG_TEXT; //$NON-NLS-1$
 	}
-	
+
 	public static boolean getEnableAssertionsPreference() {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(JUnitPreferencesConstants.ENABLE_ASSERTIONS);
@@ -88,13 +88,13 @@ public class AssertionVMArg {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
 		store.setValue(JUnitPreferencesConstants.ENABLE_ASSERTIONS, preference);
 	}
-	
+
 	/* not needed unless you're manipulating already entered configurations
 	public static String removeAssertFromArgString(String currentArgs, String assertArg)
 	{
 		currentArgs.indexOf(assertArg);
-	} 
-	
+	}
+
 	public static void syncAssertionVMArgInConfigs()
 	{
 		ILaunchManager lm= DebugPlugin.getDefault().getLaunchManager();

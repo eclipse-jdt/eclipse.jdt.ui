@@ -37,36 +37,36 @@ public interface ITestSessionListener {
 	 * The VM instance performing the tests has terminated.
 	 */
 	public void sessionTerminated();
-	
+
 	/**
 	 * A test has been added to the plan.
-	 * 
+	 *
 	 * @param testElement the test
 	 */
 	public void testAdded(TestElement testElement);
-	
+
 	/**
 	 * All test have been added and running begins
 	 */
 	public void runningBegins();
-	
+
 	/**
 	 * An individual test has started.
-	 * 
+	 *
 	 * @param testCaseElement the test
 	 */
 	public void testStarted(TestCaseElement testCaseElement);
 	/**
 	 * An individual test has ended.
-	 * 
+	 *
 	 * @param testCaseElement the test
 	 */
 	public void testEnded(TestCaseElement testCaseElement);
 	/**
 	 * An individual test has failed with a stack trace.
-	 * 
+	 *
 	 * @param testElement the test
-	 * @param status the outcome of the test; one of 
+	 * @param status the outcome of the test; one of
 	 * {@link TestElement.Status#ERROR} or
 	 * {@link TestElement.Status#FAILURE}
 	 * @param trace the stack trace
@@ -76,9 +76,9 @@ public interface ITestSessionListener {
 	public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual);
 	/**
  	 * An individual test has been rerun.
-	 * 
+	 *
 	 * @param testCaseElement the test
-	 * @param status the outcome of the test that was rerun; one of 
+	 * @param status the outcome of the test that was rerun; one of
 	 * {@link TestElement.Status#OK}, {@link TestElement.Status#ERROR}, or {@link TestElement.Status#FAILURE}
 	 * @param trace the stack trace in the case of abnormal termination,
 	 * or the empty string if none
@@ -86,7 +86,7 @@ public interface ITestSessionListener {
 	 * @param actualResult actual value
 	 */
 	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult);
-	
+
 	/**
 	 * @return <code>true</code> if the test run session can be swapped to disk although
 	 * this listener is still installed

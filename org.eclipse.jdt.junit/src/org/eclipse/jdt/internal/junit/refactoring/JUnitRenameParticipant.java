@@ -108,7 +108,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 				throw new OperationCanceledException();
 		}
 		if (changes.size() > 0)
-			return new CompositeChange(getChangeName(), (Change[]) changes.toArray(new Change[changes.size()])); 
+			return new CompositeChange(getChangeName(), (Change[]) changes.toArray(new Change[changes.size()]));
 		return null;
 	}
 

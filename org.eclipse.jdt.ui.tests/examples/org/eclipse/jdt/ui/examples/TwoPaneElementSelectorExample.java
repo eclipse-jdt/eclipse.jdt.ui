@@ -44,9 +44,9 @@ public class TwoPaneElementSelectorExample {
 		d.setTitle("Title");
 		d.setMessage("this is a message");
 		d.setElements(elements);
-		
+
 		d.open();
-		
+
 		Object res= d.getResult();
 		System.out.println("res= "+res);
 	}

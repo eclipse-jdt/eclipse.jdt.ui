@@ -38,7 +38,7 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate#isCandidate()
 	 */
 	public boolean isCandidate(ILaunchConfiguration candidate) throws CoreException {
@@ -61,7 +61,7 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate#migrate(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
 	public void migrate(ILaunchConfiguration candidate) throws CoreException {
@@ -69,10 +69,10 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 		mapResources(wc);
 		wc.doSave();
 	}
-	
+
 	/**
 	 * Maps a resource for the given launch configuration.
-	 * 
+	 *
 	 * @param config working copy
 	 * @throws CoreException if an exception occurs mapping resource
 	 */
@@ -84,11 +84,11 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 			config.setMappedResources(new IResource[]{resource});
 		}
 	}
-	
+
 	/**
 	 * Returns a resource mapping for the given launch configuration, or <code>null</code>
 	 * if none.
-	 * 
+	 *
 	 * @param config working copy
 	 * @return resource or <code>null</code>
 	 * @throws CoreException if an exception occurs mapping resource
@@ -122,12 +122,12 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 		}
 		return resource;
 	}
-	
+
 	/*
 	 * Convenience method to get access to the java model.
 	 */
 	private static IJavaModel getJavaModel() {
 		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-	}	
+	}
 
 }

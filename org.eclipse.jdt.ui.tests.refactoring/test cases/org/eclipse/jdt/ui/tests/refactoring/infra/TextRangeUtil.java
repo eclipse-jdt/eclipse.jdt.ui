@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.infra;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceRange;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 
@@ -24,7 +24,7 @@ public class TextRangeUtil {
 
 	//no instances
 	private TextRangeUtil(){}
-	
+
 	public static ISourceRange getSelection(ICompilationUnit cu, int startLine, int startColumn, int endLine, int endColumn) throws Exception {
 		IDocument document= new Document(cu.getSource());
 		int offset= getOffset(document, startLine, startColumn);
@@ -36,24 +36,24 @@ public class TextRangeUtil {
 		IDocument document= new Document(cu.getSource());
 		return getOffset(document, line, column) ;
 	}
-	
+
 	public static int getOffset(String source, int line, int column) throws BadLocationException {
 		IDocument document= new Document(source);
 		return getOffset(document, line, column);
 	}
-	
+
 	private static int getOffset(IDocument document, int line, int column) throws BadLocationException {
 		int r= document.getLineInformation(line - 1).getOffset();
 		IRegion region= document.getLineInformation(line - 1);
-		int lineTabCount= calculateTabCountInLine(document.get(region.getOffset(), region.getLength()), column);		
+		int lineTabCount= calculateTabCountInLine(document.get(region.getOffset(), region.getLength()), column);
 		r += (column - 1) - (lineTabCount * getTabWidth()) + lineTabCount;
 		return r;
 	}
-	
+
 	private static final int getTabWidth(){
 		return 4;
 	}
-	
+
 	public static int calculateTabCountInLine(String lineSource, int lastCharOffset){
 		int acc= 0;
 		int charCount= 0;

@@ -12,17 +12,17 @@ package org.eclipse.jdt.internal.junit.runner;
 
 /**
  * Message identifiers for messages sent by the
- * RemoteTestRunner. 
- * 
+ * RemoteTestRunner.
+ *
  * @see RemoteTestRunner
  */
-public class MessageIds { 
+public class MessageIds {
 	/**
 	 * The header length of a message, all messages
 	 * have a fixed header length
 	 */
 	public static final int MSG_HEADER_LENGTH= 8;
-	
+
 	/**
 	 * Notification that a test trace has started.
 	 * The end of the trace is signaled by a TRACE_END
@@ -63,7 +63,7 @@ public class MessageIds {
 	 */
 	public static final String RTRACE_END=  "%RTRACEE"; //$NON-NLS-1$
 	/**
-	 * Notification that a test run has started. 
+	 * Notification that a test run has started.
 	 * MessageIds.TEST_RUN_START + testCount.toString + " " + version
 	 */
 	public static final String TEST_RUN_START=  "%TESTC  "; //$NON-NLS-1$
@@ -92,23 +92,23 @@ public class MessageIds {
 	/**
 	 * Notification that a test run has ended.
 	 * TEST_RUN_END + elapsedTime.toString().
-	 */ 	
+	 */
 	public static final String TEST_RUN_END="%RUNTIME";	 //$NON-NLS-1$
 	/**
 	 * Notification that a test run was successfully stopped.
-	 */ 
+	 */
 	public static final String TEST_STOPPED="%TSTSTP "; //$NON-NLS-1$
 	/**
 	 * Notification that a test was reran.
 	 * TEST_RERAN + testId + " " + testClass + " " + testName + STATUS.
 	 * Status = "OK" or "FAILURE".
-	 */ 
+	 */
 	public static final String TEST_RERAN=  "%TSTRERN"; //$NON-NLS-1$
 	/**
 	 * Notification about a test inside the test suite.
 	 * TEST_TREE + testId + "," + testName + "," + isSuite + "," + testcount
 	 * isSuite = "true" or "false"
-	 */ 
+	 */
 	public static final String TEST_TREE="%TSTTREE"; //$NON-NLS-1$
 	/**
 	 * Request to stop the current test run.

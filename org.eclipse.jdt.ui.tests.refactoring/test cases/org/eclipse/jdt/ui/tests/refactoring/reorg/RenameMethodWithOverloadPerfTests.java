@@ -15,6 +15,9 @@ import junit.framework.TestSuite;
 
 import org.eclipse.test.performance.Dimension;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -22,9 +25,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerformanceTestCase {
 
@@ -45,20 +45,20 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 	public RenameMethodWithOverloadPerfTests(String name) {
 		super(name);
 	}
-	
+
 	public void testCold_10_10() throws Exception {
 		executeRefactoring(10, 10, false, 10);
 	}
-	
+
 	public void test_10_10() throws Exception {
 		executeRefactoring(10, 10, true, 10);
 	}
-	
+
 	public void test_100_10() throws Exception {
 		tagAsSummary("Rename method with overloading", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(100, 10, true, 10);
 	}
-	
+
 	public void test_1000_10() throws Exception {
 		executeRefactoring(1000, 10, true, 10);
 	}
@@ -70,9 +70,9 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 		processor.setNewElementName("set");
 		executeRefactoring(new RenameRefactoring(processor), measure, RefactoringStatus.FATAL);
 	}
-	
+
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
-		IPackageFragment definition= getTestProject().getSourceFolder().createPackageFragment("def", false, null); 
+		IPackageFragment definition= getTestProject().getSourceFolder().createPackageFragment("def", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package def;\n");
 		buf.append("public class A {\n");
@@ -82,7 +82,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit result= definition.createCompilationUnit("A.java", buf.toString(), false, null);
-	
+
 		IPackageFragment references= getTestProject().getSourceFolder().createPackageFragment("ref", false, null);
 		for(int i= 0; i < numberOfCus; i++) {
 			createReferenceCu(references, i, numberOfRefs);

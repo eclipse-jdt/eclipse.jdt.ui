@@ -18,7 +18,7 @@ import org.eclipse.jdt.ui.tests.refactoring.reorg.AllReorgPerformanceTests;
 import org.eclipse.jdt.ui.tests.refactoring.type.AllTypeConstraintsPerformanceTests;
 
 public class AllRefactoringPerformanceTests extends TestCase {
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite("All Refactoring Performance Tests"); //$NON-NLS-1$
 		suite.addTest(AllReorgPerformanceTests.suite());

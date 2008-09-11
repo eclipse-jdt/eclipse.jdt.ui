@@ -16,10 +16,10 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.ltk.core.refactoring.Change;
+
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-
-import org.eclipse.ltk.core.refactoring.Change;
 
 public class LaunchConfigRenameChange extends LaunchConfigChange {
 

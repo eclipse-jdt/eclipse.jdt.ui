@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Display;
 public class MockClipboard extends Clipboard{
 
 	private Map fContents; //Transfer -> Object
-	 
+
 	public MockClipboard(Display display) {
 		super(display);
 		fContents= new HashMap();
@@ -38,7 +38,7 @@ public class MockClipboard extends Clipboard{
 	protected void checkSubclass() {
 		//do nothing
 	}
-	
+
 	public TransferData[] getAvailableTypes() {
 		Set result= new HashSet();
 		for (Iterator iter= fContents.keySet().iterator(); iter.hasNext();) {
@@ -47,11 +47,11 @@ public class MockClipboard extends Clipboard{
 		}
 		return (TransferData[]) result.toArray(new TransferData[result.size()]);
 	}
-	
+
 	public Object getContents(Transfer transfer) {
-		return fContents.get(transfer);		
+		return fContents.get(transfer);
 	}
-	
+
 	public void setContents(Object[] data, Transfer[] dataTypes) {
 		if (data == null || dataTypes == null || data.length != dataTypes.length) {
 			DND.error(SWT.ERROR_INVALID_ARGUMENT);
@@ -61,7 +61,7 @@ public class MockClipboard extends Clipboard{
 			fContents.put(dataTypes[i], data[i]);
 		}
 	}
-	
+
 	public void dispose() {
 		fContents.clear();
 		super.dispose();

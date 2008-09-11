@@ -12,11 +12,11 @@
 package org.eclipse.jdt.ui.leaktest.reftracker;
 
 public class RootReference extends ReferencedObject {
-	
+
 	public RootReference(Object object) {
 		super(object);
 	}
-	
+
 	public ReferencedObject getReferenceHolder() {
 		return null;
 	}

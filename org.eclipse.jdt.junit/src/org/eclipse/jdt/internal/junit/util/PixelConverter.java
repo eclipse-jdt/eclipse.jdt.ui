@@ -20,16 +20,16 @@ import org.eclipse.jface.dialogs.Dialog;
  * class copied from jdt ui
  */
 public class PixelConverter {
-	
+
 	private FontMetrics fFontMetrics;
-	
+
 	public PixelConverter(Control control) {
 		GC gc = new GC(control);
 		gc.setFont(control.getFont());
 		fFontMetrics= gc.getFontMetrics();
 		gc.dispose();
 	}
-	
+
 	/**
 	 * @param chars the height in chars
 	 * @return number of pixels
@@ -38,7 +38,7 @@ public class PixelConverter {
 	public int convertHeightInCharsToPixels(int chars) {
 		return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
 	}
-	
+
 	/**
 	 * @param chars the width in chars
 	 * @return number of pixels
@@ -46,6 +46,6 @@ public class PixelConverter {
 	 */
 	public int convertWidthInCharsToPixels(int chars) {
 		return Dialog.convertWidthInCharsToPixels(fFontMetrics, chars);
-	}	
+	}
 
 }

@@ -14,9 +14,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllTests {
-	
+
 	private static final Class clazz= AllTests.class;
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(AllRefactoringTests.suite());

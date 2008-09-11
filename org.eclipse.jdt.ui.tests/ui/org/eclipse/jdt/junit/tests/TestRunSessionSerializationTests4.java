@@ -18,19 +18,18 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
-
-import org.eclipse.jdt.internal.junit.model.JUnitModel;
-
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSerializationTests {
 
@@ -42,7 +41,7 @@ public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSer
 			if (JavaModelUtil.is50OrHigher(version))
 				return new JUnitWorkspaceTestSetup(test, true);
 		}
-		
+
 		return new TestCase("TestRunSessionSerializationTests4 disabled because VM < 5.0") {
 			public void run(TestResult result) {
 				result.startTest(this);
@@ -50,35 +49,35 @@ public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSer
 			}
 		};
 	}
-	
+
 	public static Test suite() {
 		return setUpTest(new TestSuite(TestRunSessionSerializationTests4.class));
 	}
-	
+
 	public void testATestCase() throws Exception {
 		String test= "ATestCase";
 		runCUTest(test);
 	}
-	
+
 	public void testATestSuite() throws Exception {
 		String test= "ATestSuite";
 		runCUTest(test);
 	}
-	
+
 	public void testFailures() throws Exception {
 		String test= "Failures";
 		runCUTest(test);
 	}
-	
+
 	public void testAllTests() throws Exception {
 		String test= "AllTests";
 		runCUTest(test);
 	}
-	
+
 	public void testImportAntSuite() throws Exception {
 		Path testsPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "ant/result/TESTS-TestSuites.xml");
 		File testsFile= JavaTestPlugin.getDefault().getFileInPlugin(testsPath);
 		JUnitModel.importTestRunSession(testsFile); // no contents check for now...
 	}
-	
+
 }

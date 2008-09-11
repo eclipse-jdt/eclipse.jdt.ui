@@ -33,16 +33,16 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	private static final String FIELD_COMMENT= "/** Comment */";
 	private static final Class clazz= MoveInnerToTopLevelTests.class;
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
-	
+
 	private static final int NOT_AVAILABLE= 1001;
 
 	private Object fCompactPref;
@@ -54,11 +54,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public static Test suite() {
 		return new Java15Setup(new TestSuite(clazz));
 	}
-	
+
 	public static Test setUpTest(Test someTest) {
 	    return new Java15Setup(someTest);
 	}
-	
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -66,26 +66,26 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, FIELD_COMMENT, null);
-		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, 
-			"${package_declaration}" + 
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID,
+			"${package_declaration}" +
 			System.getProperty("line.separator", "\n") +
 			"${type_declaration}", null);
 
 		Hashtable options= JavaCore.getOptions();
-		
+
 		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
 		fCompactPref= options.get(setting);
 		options.put(setting, DefaultCodeFormatterConstants.TRUE);
 		JavaCore.setOptions(options);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		Hashtable options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
-		JavaCore.setOptions(options);	
+		JavaCore.setOptions(options);
 	}
-	
+
 
 	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
 		return getType(createCUfromTestFile(pack, className), className);
@@ -96,7 +96,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType clas= parentClas.getType(className);
 		validatePassingTest(className, clas, cuNames, packageNames, enclosingInstanceName, makeFinal, possible, mandatory, createFieldIfPossible);
 	}
-	
+
 	private void validatePassingTest(String parentClassName, String parentClassNameInParent, String className, String packageName, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal, boolean possible, boolean mandatory, boolean createFieldIfPossible) throws Exception {
 		IType parentClas= getClassFromTestFile(getPackage(packageName), parentClassName);
 		IType parent2 = parentClas.getType(parentClassNameInParent);
@@ -109,7 +109,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(clas)) ? new MoveInnerToTopRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())) : null);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
-		
+
 		assertEquals("reference creation possible", possible, ref.isCreatingInstanceFieldPossible());
 		assertEquals("reference creation mandatory", mandatory, ref.isCreatingInstanceFieldMandatory());
 		if (ref.isCreatingInstanceFieldPossible() && ! ref.isCreatingInstanceFieldMandatory())
@@ -117,17 +117,17 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		if (enclosingInstanceName != null){
 			ref.setEnclosingInstanceName(enclosingInstanceName);
 			assertTrue("name should be ok ", ref.checkEnclosingInstanceName(enclosingInstanceName).isOK());
-		}	
+		}
 		ref.setMarkInstanceFieldAsFinal(makeFinal);
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
-			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);			
+			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);
 		}
-		
+
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
 		performChange(ref, false);
-		
+
 		for (int i= 0; i < cus.length; i++) {
 			String actual= cus[i].getSource();
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
@@ -138,8 +138,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		String actual= newCu.getSource();
 		assertEqualLines("new Cu:", expected, actual);
 	}
-	
-	
+
+
 	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean possible, boolean mandatory) throws Exception {
 		validatePassingTest(parentClassName, className, "p", cuNames, packageNames, enclosingInstanceName, false, possible, mandatory, true);
 	}
@@ -154,18 +154,18 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		assertEquals("refactoring availability not as expected", expectedSeverity == NOT_AVAILABLE, ref == null);
 
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
-		
+
 		if (enclosingInstanceName != null){
 			ref.setEnclosingInstanceName(enclosingInstanceName);
-		}	
-		ref.setMarkInstanceFieldAsFinal(false);		
+		}
+		ref.setMarkInstanceFieldAsFinal(false);
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
-			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);			
+			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);
 		}
-		
+
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		
+
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(preconditionResult);
 		result.merge(checkInputResult);
@@ -175,18 +175,18 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		if ("p".equals(name))
 			return getPackageP();
 		IPackageFragment pack= getRoot().getPackageFragment(name);
-		if (pack.exists())	
+		if (pack.exists())
 			return pack;
-		return getRoot().createPackageFragment(name, false, new NullProgressMonitor());	
+		return getRoot().createPackageFragment(name, false, new NullProgressMonitor());
 	}
 
 
-	//-- tests 
+	//-- tests
 
 	public void test0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
-	
+
 	public void test1() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
@@ -301,50 +301,50 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		printTestDisabledMessage("disabled due to missing support for statically imported methods");
 		// validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
-	
+
 	// ---- Visibility issues with the moved member itself and its parents
-	
+
 	// Move inner class; enclosing class must remain private if not  used
 	public void test32() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p1", new String[]{"A"}, new String[]{"p1"}, null, false, false, false, false);
 	}
-	
+
 	// Move inner class which has access to enclosing private class, enclosing class must be increased in visibility
 	public void test33() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, null, false, false, false, false);
 	}
-	
+
 	// --- Visibility issues with members of moved members
-	
+
 	// Move inner class which has private members, which are accessed from enclosing types.
 	public void test34() throws Exception {
 		validatePassingTest("A", "SomeClass", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
-	
+
 	// Move inner class which has private members, but they are unused (and must remain private)
 	public void test35() throws Exception {
 		validatePassingTest("A", "Inner", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
-	
+
 	// Move inner class which has access private members, and accessing private members of
 	// enclosing class (4 visibility increments)
 	public void test36() throws Exception {
 		validatePassingTest("A", "SomeInner", "Inner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
-	
+
 	// Move inner class with some private used and some private non-used members.
 	// used members go default, non-used stay private
 	// bug 97411 + 117465 (comment #1)
 	public void test37() throws Exception {
 		validatePassingTest("A", "SomeInner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
-	
+
 	public void test38() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
-	
+
 	// --- Non static
-	
+
 	public void test_nonstatic_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
@@ -398,7 +398,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test_nonstatic_16() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
-	public void test_nonstatic_17() throws Exception{ 
+	public void test_nonstatic_17() throws Exception{
 //		printTestDisabledMessage("bug 23488");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
@@ -479,22 +479,22 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 
 	public void test_nonstatic_37() throws Exception{
-//		printTestDisabledMessage("test for bug 38114");		
+//		printTestDisabledMessage("test for bug 38114");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, true);
 	}
 
 	public void test_nonstatic_38() throws Exception{
-//		printTestDisabledMessage("test for bug 37540");		
+//		printTestDisabledMessage("test for bug 37540");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
 	public void test_nonstatic_39() throws Exception{
-//		printTestDisabledMessage("test for bug 37540");		
+//		printTestDisabledMessage("test for bug 37540");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
 	public void test_nonstatic_40() throws Exception{
-//		printTestDisabledMessage("test for bug 77083");		
+//		printTestDisabledMessage("test for bug 77083");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
@@ -503,15 +503,15 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 
 	public void test_nonstatic_42() throws Exception{
-		printTestDisabledMessage("disabled due to missing support for statically imported methods");		
+		printTestDisabledMessage("disabled due to missing support for statically imported methods");
 //		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
-	
+
 	// Using member of enclosing type, non-static edition
 	public void test_nonstatic_43() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p5", new String[]{"A"}, new String[]{"p5"}, "inner", true, true, true, true);
 	}
-	
+
 	// Move inner class and create field; enclosing class must be changed to use default visibility.
 	public void test_nonstatic_44() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, "p", true, true, false, true);
@@ -526,12 +526,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void testFail_nonstatic_2() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
 	}
-	
+
 	public void testFail_nonstatic_3() throws Exception{
 		IType parentClas= getClassFromTestFile(getPackageP(), "A");
 		int offset= TextRangeUtil.getOffset(parentClas.getCompilationUnit(), 5, 25);
 		IType nestedLocal= (IType) parentClas.getCompilationUnit().codeSelect(offset, 0)[0];
-	
+
 		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(nestedLocal)) ? new MoveInnerToTopRefactoring(nestedLocal, JavaPreferencesSettings.getCodeGenerationSettings(parentClas.getJavaProject())) : null);
 		assertNull("refactoring was not supposed to be available", ref);
 	}

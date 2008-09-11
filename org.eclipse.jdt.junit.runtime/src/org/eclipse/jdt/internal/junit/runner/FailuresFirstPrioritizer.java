@@ -27,16 +27,16 @@ import junit.framework.TestSuite;
 
 public class FailuresFirstPrioritizer implements ITestPrioritizer {
 	private HashSet fPriorities;
-	
+
 	public FailuresFirstPrioritizer(String[] priorities) {
-		fPriorities= new HashSet(Arrays.asList(priorities));		
+		fPriorities= new HashSet(Arrays.asList(priorities));
 	}
-	
+
 	public Test prioritize(Test suite) {
 		doPrioritize(suite, new ArrayList());
 		return suite;
 	}
-	
+
 	private void doPrioritize(Test suite, List path) {
 		if (suite instanceof TestCase) {
 			TestCase testCase= (TestCase) suite;
@@ -61,7 +61,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 		}
 	}
 
-	
+
 	private void reorder(Test test, List path) {
 		doReorder(test, path, path.size()-1);
 	}
@@ -88,23 +88,23 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 		}
 	}
 
-	
+
 	private boolean hasPriority(TestCase testCase) {
 		return fPriorities.contains(testCase.toString());
 	}
-	
+
 	public static Object getField(Object object, String fieldName) {
 	    return getFieldInClass(object, fieldName, object.getClass());
 	}
 
 	private static Object getFieldInClass(Object object, String fieldName, Class clazz) {
 		Field field= null;
-		if (clazz == null) 
+		if (clazz == null)
 			return null;
 		try {
 			field= clazz.getDeclaredField(fieldName);
 	        field.setAccessible(true);
-	        return field.get(object);	       
+	        return field.get(object);
 	    } catch (Exception e) {
 	        // fall through
 	    }

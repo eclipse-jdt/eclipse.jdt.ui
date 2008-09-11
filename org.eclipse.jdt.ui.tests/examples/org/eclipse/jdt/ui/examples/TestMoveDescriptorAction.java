@@ -12,6 +12,8 @@ package org.eclipse.jdt.ui.examples;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -41,8 +43,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveDescriptor;
 
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 /** In plugin.xml:
          <extension
          point="org.eclipse.ui.popupMenus">
@@ -64,8 +64,8 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 public class TestMoveDescriptorAction extends Action implements IActionDelegate {
 
 	private ICompilationUnit fCU;
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
@@ -85,7 +85,7 @@ public class TestMoveDescriptorAction extends Action implements IActionDelegate 
 		} catch (Exception e) {
 			JavaTestPlugin.log(e);
 		}
-		
+
 	}
 	private void performAction(IProgressMonitor monitor) throws CoreException {
 
@@ -108,9 +108,9 @@ public class TestMoveDescriptorAction extends Action implements IActionDelegate 
 
 		op.run(monitor);
 	}
-	
-	
-	
+
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
 	 */
@@ -120,7 +120,7 @@ public class TestMoveDescriptorAction extends Action implements IActionDelegate 
 			Object object= ((IStructuredSelection) selection).getFirstElement();
 			if (object instanceof ICompilationUnit) {
 				fCU= (ICompilationUnit) object;
-				
+
 			}
 		}
 	}

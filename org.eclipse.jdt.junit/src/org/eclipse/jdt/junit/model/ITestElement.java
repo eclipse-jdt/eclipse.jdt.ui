@@ -16,18 +16,18 @@ package org.eclipse.jdt.junit.model;
 /**
  * Common protocol for test elements.
  * This set consists of {@link ITestCaseElement} , {@link ITestSuiteElement} and {@link ITestRunSession}
- * 
+ *
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
- * 
+ *
+ *
  * @since 3.3
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ITestElement {
-	
+
 	/**
 	 * Running states of a test.
 	 */
@@ -40,7 +40,7 @@ public interface ITestElement {
 		public static final ProgressState STOPPED= new ProgressState("Stopped"); //$NON-NLS-1$
 		/** state that describes that the test element has completed */
 		public static final ProgressState COMPLETED= new ProgressState("Completed"); //$NON-NLS-1$
-		
+
 		private String fName;
 		private ProgressState(String name) {
 			fName= name;
@@ -49,7 +49,7 @@ public interface ITestElement {
 			return fName;
 		}
 	}
-	
+
 	/**
 	 * Result states of a test.
 	 */
@@ -64,7 +64,7 @@ public interface ITestElement {
 		public static final Result FAILURE= new Result("Failure"); //$NON-NLS-1$
 		/** state that describes that the test result is 'Ignored' */
 		public static final Result IGNORED= new Result("Ignored"); //$NON-NLS-1$
-		
+
 		private String fName;
 		private Result(String name) {
 			fName= name;
@@ -73,10 +73,10 @@ public interface ITestElement {
 			return fName;
 		}
 	}
-	
+
 	/**
 	 * A failure trace of a test.
-	 * 
+	 *
 	 * This class is not intended to be instantiated or extended by clients.
 	 */
 	public static final class FailureTrace {
@@ -89,35 +89,35 @@ public interface ITestElement {
 			fExpected= expected;
 			fTrace= trace;
 		}
-		
+
 		/**
 		 * Returns the failure stack trace.
-		 * 
+		 *
 		 * @return the failure stack trace
 		 */
 		public String getTrace() {
 			return fTrace;
 		}
-		
+
 		/**
 		 * Returns the expected result or <code>null</code> if the trace is not a comparison failure.
-		 * 
+		 *
 		 * @return the expected result or <code>null</code> if the trace is not a comparison failure.
 		 */
 		public String getExpected() {
 			return fExpected;
 		}
-		
+
 		/**
 		 * Returns the actual result or <code>null</code> if the trace is not a comparison failure.
-		 * 
+		 *
 		 * @return the actual result or <code>null</code> if the trace is not a comparison failure.
 		 */
 		public String getActual() {
 			return fActual;
 		}
 	}
-	
+
 	/**
 	 * Returns the progress state of this test element.
 	 * <dl>
@@ -130,9 +130,9 @@ public interface ITestElement {
 	 * {@link ITestElement.ProgressState#STOPPED} or {@link ITestElement.ProgressState#COMPLETED}.
 	 */
 	public ProgressState getProgressState();
-	
+
 	/**
-	 * Returns the result of the test element. 
+	 * Returns the result of the test element.
 	 * <dl>
 	 * <li>{@link ITestElement.Result#UNDEFINED}: the result is not yet evaluated</li>
 	 * <li>{@link ITestElement.Result#OK}: the test has succeeded</li>
@@ -143,33 +143,33 @@ public interface ITestElement {
 	 * @param includeChildren if <code>true</code>, the returned result is the combined
 	 * result of the test and its children (if it has any). If <code>false</code>,
 	 * only the test's result is returned.
-	 * 
-	 * @return returns one of {@link ITestElement.Result#UNDEFINED}, {@link ITestElement.Result#OK}, {@link ITestElement.Result#ERROR}, 
+	 *
+	 * @return returns one of {@link ITestElement.Result#UNDEFINED}, {@link ITestElement.Result#OK}, {@link ITestElement.Result#ERROR},
 	 * {@link ITestElement.Result#FAILURE} or {@link ITestElement.Result#IGNORED}. Clients should also prepare for other, new values.
 	 */
 	public Result getTestResult(boolean includeChildren);
-	
+
 	/**
 	 * Returns the failure trace of this test element or <code>null</code> if the test has not resulted in an error or failure.
-	 * 
+	 *
 	 * @return the failure trace of this test or <code>null</code>.
 	 */
 	public FailureTrace getFailureTrace();
-		
+
 	/**
 	 * Returns the parent test element container or <code>null</code> if the test element is the test run session.
-	 * 
+	 *
 	 * @return the parent test suite
 	 */
 	public ITestElementContainer getParentContainer();
-	
+
 	/**
 	 * Returns the test run session.
-	 * 
+	 *
 	 * @return the parent test run session.
 	 */
 	public ITestRunSession getTestRunSession();
-	
+
 	/**
 	 * Returns the estimated total time elapsed in seconds while executing this test element.
 	 * The total time for a test suite includes the time used for all tests in that suite.
@@ -178,12 +178,12 @@ public interface ITestElement {
 	 * <strong>NOTE</strong>: The elapsed time is only valid for {@link ITestElement.ProgressState#COMPLETED}
 	 * test elements.
 	 * </p>
-	 * 
+	 *
 	 * @return total execution time for the test element in seconds, or {@link Double#NaN}</code>
 	 * if the state of the element is not {@link ITestElement.ProgressState#COMPLETED}
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public double getElapsedTimeInSeconds();
-	
+
 }

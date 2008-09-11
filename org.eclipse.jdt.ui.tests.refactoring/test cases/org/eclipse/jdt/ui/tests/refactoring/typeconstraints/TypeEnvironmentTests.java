@@ -65,7 +65,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			return fGenericPackage;
 		}
 	}
-	
+
 	private static class CreationChecker extends HierarchicalASTVisitor {
 		private TypeEnvironment fTypeEnvironment;
 		public CreationChecker() {
@@ -73,7 +73,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		}
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
-			if (!(binding instanceof ITypeBinding)) 
+			if (!(binding instanceof ITypeBinding))
 				return true;
 			checkTypeBinding(binding);
 			return true;
@@ -93,7 +93,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			return true;
 		}
 	}
-	
+
 	private static class TypeBindingCollector extends ASTVisitor {
 		private List fResult= new ArrayList();
 		private List fWildcards= new ArrayList();
@@ -126,7 +126,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			return (ITypeBinding[])fWildcards.toArray(new ITypeBinding[fWildcards.size()]);
 		}
 	}
-	
+
 	private static class CaptureTypeBindingCollector extends ASTVisitor {
 		private List fResult= new ArrayList();
 		public boolean visit(Assignment node) {
@@ -152,8 +152,8 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			return (ITypeBinding[])fResult.toArray(new ITypeBinding[fResult.size()]);
 		}
 	}
-	
-	
+
+
 	public TypeEnvironmentTests(String name) {
 		super(name);
 	}
@@ -161,23 +161,23 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 	public static Test suite() {
 		return new MyTestSetup(new TestSuite(TypeEnvironmentTests.class));
 	}
-	
+
 	public static Test setUpTest(Test someTest) {
 		return new MyTestSetup(someTest);
 	}
-	
+
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
-	
+
 	protected String getResourceLocation() {
 		return "TypeEnvironment/TestProject/";
 	}
-	
+
 	protected String adaptName(String name) {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}
-	
+
 	private ASTNode createAST(IPackageFragment pack) throws Exception {
 		IJavaProject project= pack.getJavaProject();
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
@@ -187,17 +187,17 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		parser.setSource(unit);
 		return parser.createAST(null);
 	}
-	
+
 	//---- creation ----------------------------------------------------------
-	
+
 	private void performCreationTest() throws Exception {
 		createAST(MyTestSetup.getSignaturePackage()).accept(new CreationChecker());
 	}
-	
+
 	public void testArrays() throws Exception {
 		performCreationTest();
 	}
-	
+
 	public void testStandardTypes() throws Exception {
 		performCreationTest();
 	}
@@ -205,25 +205,25 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 	public void testRawTypes() throws Exception {
 		performCreationTest();
 	}
-	
+
 	public void testGenericTypes() throws Exception {
 		performCreationTest();
 	}
-	
+
 	public void testWildcardTypes() throws Exception {
 		performCreationTest();
 	}
-	
+
 	public void testPrimitiveTypes() throws Exception {
 		performCreationTest();
 	}
-	
+
 	public void testTypeVariables() throws Exception {
 		performCreationTest();
 	}
-	
+
 	//---- generic assigment test ----------------------------------------------
-	
+
 	private void performGenericAssignmentTest() throws Exception {
 		ASTNode node= createAST(MyTestSetup.getGenericPackage());
 		TypeBindingCollector collector= new TypeBindingCollector();
@@ -244,7 +244,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			assertTrue("Not same erasure", types[i].getErasure().isEqualTo(bindings[i].getErasure()));
 			assertTrue("Not same type declaration", types[i].getTypeDeclaration().isEqualTo(bindings[i].getTypeDeclaration()));
 			assertTrue("Not same type", types[i] == environment.create(bindings[i]));
-			
+
 		}
 		for (int o= 0; o < bindings.length; o++) {
 			for (int i= 0; i < bindings.length; i++) {
@@ -268,18 +268,18 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		if (coreResult != uiResult) {
 			if (lhs.isCaptureType() || rhs.isCaptureType()) { // see bug 93082
 				System.out.println("Different assignment rule(" +
-					PrettySignatures.get(lhsBinding) + "= " + PrettySignatures.get(rhsBinding) + 
+					PrettySignatures.get(lhsBinding) + "= " + PrettySignatures.get(rhsBinding) +
 					"): Bindings<" + coreResult +
 					"> TType<" + uiResult + ">");
 				return;
 			}
 		}
-		
-		assertEquals("Different assignment rule(" + 
-			PrettySignatures.get(lhsBinding) + "= " + PrettySignatures.get(rhsBinding) + 
+
+		assertEquals("Different assignment rule(" +
+			PrettySignatures.get(lhsBinding) + "= " + PrettySignatures.get(rhsBinding) +
 			"): ", coreResult, uiResult);
 	}
-	
+
 	private void testAssignment(ITypeBinding[] bindings) {
 		TType[] types= new TType[bindings.length];
 		TypeEnvironment environment= new TypeEnvironment();
@@ -296,31 +296,31 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 				boolean uiResult= oType.canAssignTo(iType);
 				if (coreResult != uiResult && !oType.isWildcardType() && ! BUG_83616_core_wildcard_assignments) { // see bug 83616
 					System.out.println("Different assignment rule(" +
-						PrettySignatures.get(iBinding) + "= " + PrettySignatures.get(oBinding) + 
+						PrettySignatures.get(iBinding) + "= " + PrettySignatures.get(oBinding) +
 						"): Bindings<" + coreResult +
 						"> TType<" + uiResult + ">");
 				}
 			}
 		}
 	}
-	
+
 	private void testFlags(ITypeBinding binding, TType type) {
 		assertEquals("Different class flag", binding.isClass(), type.isClass());
 		assertEquals("Different enum flag", binding.isEnum(), type.isEnum());
 		assertEquals("Different interface  flag", binding.isInterface(), type.isInterface());
 		assertEquals("Different annotation flag", binding.isAnnotation(), type.isAnnotation());
-		
+
 		assertEquals("Different top level flag", binding.isTopLevel(), type.isTopLevel());
 		assertEquals("Different nested flag", binding.isNested(), type.isNested());
 		assertEquals("Different local flag", binding.isLocal(), type.isLocal());
 		assertEquals("Different member flag", binding.isMember(), type.isMember());
 		assertEquals("Different anonymous flag", binding.isAnonymous(), type.isAnonymous());
 	}
-	
+
 	public void testStandardAssignments() throws Exception {
 		performGenericAssignmentTest();
-	}	
-	
+	}
+
 	public void testWildcardAssignments() throws Exception {
 		performGenericAssignmentTest();
 	}
@@ -328,7 +328,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 	public void testTypeVariableAssignments() throws Exception {
 		performGenericAssignmentTest();
 	}
-	
+
 	public void testCaptureAssignments() throws Exception {
 		ASTNode node= createAST(MyTestSetup.getGenericPackage());
 		CaptureTypeBindingCollector collector= new CaptureTypeBindingCollector();
@@ -350,7 +350,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			": " + bindings[1].isAssignmentCompatible(bindings[0]));
 		// types[1].canAssignTo(types[0]);
 	}
-	
+
 	public void _testParameterizedToGeneric() throws Exception {
 		ASTNode node= createAST(MyTestSetup.getGenericPackage());
 		TypeBindingCollector collector= new TypeBindingCollector();

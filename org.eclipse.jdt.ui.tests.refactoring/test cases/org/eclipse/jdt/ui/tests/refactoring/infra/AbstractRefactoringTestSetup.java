@@ -23,12 +23,13 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class AbstractRefactoringTestSetup extends TestSetup {
 
 	private boolean fWasAutobuild;
-	
+
 	public AbstractRefactoringTestSetup(Test test) {
 		super(test);
 	}
@@ -47,18 +48,18 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 
 		JavaCore.setOptions(options);
 		TestOptions.initializeCodeGenerationOptions();
-		JavaPlugin.getDefault().getCodeTemplateStore().load();		
-		
+		JavaPlugin.getDefault().getCodeTemplateStore().load();
+
 		StringBuffer comment= new StringBuffer();
 		comment.append("/**\n");
 		comment.append(" * ${tags}\n");
 		comment.append(" */");
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, comment.toString(), null);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.setAutoBuilding(fWasAutobuild);
-		/* 
+		/*
 		 * ensure the workbench state gets saved when running with the Automated Testing Framework
          * TODO: remove when https://bugs.eclipse.org/bugs/show_bug.cgi?id=71362 is fixed
          */

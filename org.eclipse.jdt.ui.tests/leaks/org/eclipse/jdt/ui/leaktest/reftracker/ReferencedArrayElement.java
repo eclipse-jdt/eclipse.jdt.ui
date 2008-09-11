@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.leaktest.reftracker;
 
 
 /**
- * 
+ *
  */
 public class ReferencedArrayElement extends ReferencedObject {
 
@@ -25,11 +25,11 @@ public class ReferencedArrayElement extends ReferencedObject {
 		fPrevious= previous;
 		fIndex= index;
 	}
-	
+
 	public ReferencedObject getReferenceHolder() {
 		return fPrevious;
 	}
-		
+
 	public int getIndex() {
 		return fIndex;
 	}

@@ -16,11 +16,13 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.swt.dnd.DND;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IFolder;
-
-import org.eclipse.swt.dnd.DND;
 
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
@@ -41,14 +43,12 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.packageview.WorkingSetDropAdapter;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 public class WorkingSetDropAdapterTest extends TestCase {
 
 	private IJavaProject fProject;
 	private PackageExplorerPart fPackageExplorer;
 	private WorkingSetDropAdapter fAdapter;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("Test", "bin");
@@ -56,7 +56,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		fPackageExplorer= (PackageExplorerPart)activePage.showView(JavaUI.ID_PACKAGES);
 		fAdapter= new WorkingSetDropAdapter(fPackageExplorer);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -64,44 +64,44 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertTrue(fPackageExplorer.getTreeViewer().getTree().isDisposed());
 		super.tearDown();
 	}
-	
+
 	public void testInvalidTarget2() throws Exception {
 		List selectedElements= new ArrayList();
 		selectedElements.add(fProject);
 		ITreeSelection selection= createSelection(selectedElements, null);
-		
+
 		performDnD(DND.DROP_NONE, selection, fProject);
 	}
-	
+
 	public void testInvalidSource1() throws Exception {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
 		List selectedElements= new ArrayList();
 		selectedElements.add(root);
-		
+
 		ITreeSelection selection= createSelection(selectedElements, null);
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[] {fProject});
 		performDnD(DND.DROP_NONE, selection, target);
 	}
-	
+
 	public void testInvalidSource2() throws Exception {
 		JavaProjectHelper.addSourceContainer(fProject, "src");
 		IFolder folder= fProject.getProject().getFolder("folder");
 		folder.create(true, true, null);
 		List selectedElements= new ArrayList();
 		selectedElements.add(folder);
-		
+
 		ITreeSelection selection= createSelection(selectedElements, null);
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[] {fProject});
 		performDnD(DND.DROP_NONE, selection, target);
 	}
-	
+
 	public void testAddProject() throws Exception {
 		List selectedElements= new ArrayList();
 		selectedElements.add(fProject);
 		ITreeSelection selection= createSelection(selectedElements, null);
-		
+
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[0]);
 		performDnD(DND.DROP_COPY, selection, target);
@@ -109,7 +109,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(1, elements.length);
 		assertEquals(fProject, elements[0]);
 	}
-	
+
 	public void testMoveProject() throws Exception {
 		List selectedElements= new ArrayList();
 		selectedElements.add(fProject);
@@ -118,7 +118,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		List treePathes= new ArrayList();
 		treePathes.add(new TreePath(new Object[] {source, fProject}));
 		ITreeSelection selection= createSelection(selectedElements, treePathes);
-		
+
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[0]);
 		performDnD(DND.DROP_MOVE, selection, target);
@@ -137,7 +137,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		List treePathes= new ArrayList();
 		treePathes.add(new TreePath(new Object[] {source, fProject}));
 		ITreeSelection selection= createSelection(selectedElements, treePathes);
-		
+
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[0]);
 		target.setId(OthersWorkingSetUpdater.ID);
@@ -149,7 +149,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		elements= source.getElements();
 		assertEquals(0, elements.length);
 	}
-	
+
 	public void testRearrange1() throws Exception {
 		IWorkingSet ws1= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"ws1", new IAdaptable[0]);
@@ -214,10 +214,10 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		return new TreeSelection((TreePath[])treePathes.toArray(new TreePath[treePathes.size()]),
 			fPackageExplorer.getTreeViewer().getComparer());
 	}
-	
+
 	private void performDnD(int validateResult, ITreeSelection selection, Object target) throws Exception {
 		performDnD(validateResult, selection, target, DND.FEEDBACK_SELECT);
-		
+
 	}
 	private void performDnD(int validateResult, ITreeSelection selection, Object target, int location) throws Exception {
 		try {

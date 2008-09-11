@@ -31,45 +31,45 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 public class RenameTempTests extends RefactoringTest{
 	private static final boolean BUG_checkDeclInNestedClass= true;
 	private static final boolean BUG_checkShadowing= true;
-	
+
 	private static final Class clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";
 
-	
+
 	public RenameTempTests(String name){
 		super(name);
 	}
-	
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-	
+
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test);
 	}
-	
+
 	private String getSimpleTestFileName(boolean canRename, boolean input){
 		String fileName = "A_" + getName();
 		if (canRename)
 			fileName += input ? "_in": "_out";
-		return fileName + ".java"; 
+		return fileName + ".java";
 	}
-	
+
 	private String getTestFileName(boolean canRename, boolean input){
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 		fileName += (canRename ? "canRename/": "cannotRename/");
 		return fileName + getSimpleTestFileName(canRename, input);
 	}
-		
+
 	//------------
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canRename, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
 	}
-	
+
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception{
 		String source= cu.getSource();
 		//Warning: this *includes* the SQUARE_BRACKET_OPEN!
@@ -102,18 +102,18 @@ public class RenameTempTests extends RefactoringTest{
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEqualLines("incorrect renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
-	
+
 	private void helper1(String newName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		helper1(newName, updateReferences, getSelection(cu), cu);
-	}	
-	
+	}
+
 	private void helper1(String newName, boolean updateReferences, int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		helper1(newName, updateReferences, selection, cu);
-	}	
-	
+	}
+
 	private void helper1(String newName) throws Exception{
 		helper1(newName, true);
 	}
@@ -124,7 +124,7 @@ public class RenameTempTests extends RefactoringTest{
 		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
 		assertEquals(0, elements.length);
 	}
-	
+
 	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws Exception {
 		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
 		assertEquals(1, elements.length);
@@ -153,22 +153,22 @@ public class RenameTempTests extends RefactoringTest{
 	private void helper2(String newName) throws Exception{
 		helper2(newName, true);
 	}
-	
+
 	public void test0() throws Exception{
 		helper1("j");
 	}
-	
+
 	public void test1() throws Exception{
 		helper1("j");
 	}
-	
+
 //	public void test2() throws Exception{
 //		Map renaming= new HashMap();
 //		renaming.put("x", "j");
 //		renaming.put("y", "k");
 //		helper1(renaming, new String[0]);
 //	}
-	
+
 	public void test3() throws Exception{
 		helper1("j1");
 	}
@@ -190,7 +190,7 @@ public class RenameTempTests extends RefactoringTest{
 	}
 //
 //	//8, 9, 10 removed
-//	
+//
 //
 	public void test11() throws Exception{
 		helper1("j");
@@ -243,7 +243,7 @@ public class RenameTempTests extends RefactoringTest{
 	public void test21() throws Exception{
 		helper1("j");
 	}
-	
+
 	public void test22() throws Exception{
 		helper1("j");
 	}
@@ -296,16 +296,16 @@ public class RenameTempTests extends RefactoringTest{
 	public void test33() throws Exception{
 		helper1("b", false);
 	}
-	
+
 	public void test34() throws Exception{
 		helper1("j");
 	}
-	
+
 	public void test35() throws Exception{
 //		printTestDisabledMessage("regression test for bug#9001");
 		helper1("test2");
 	}
-	
+
 	public void test36() throws Exception{
 //		printTestDisabledMessage("regression test for bug#7630");
 		helper1("j", true, 5, 13, 5, 14);
@@ -315,22 +315,22 @@ public class RenameTempTests extends RefactoringTest{
 //		printTestDisabledMessage("regression test for bug#7630");
 		helper1("j", true, 5, 16, 5, 17);
 	}
-	
+
 	public void test38() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#11453");
 		helper1("i", true, 7, 12, 7, 13);
 	}
-	
+
 	public void test39() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#11440");
 		helper1("j", true, 7, 16, 7, 18);
 	}
-	
+
 	public void test40() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
 		helper1("j", true, 4, 16, 4, 17);
 	}
-	
+
 	public void test41() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
 		helper1("j", true, 3, 17, 3, 18);
@@ -345,12 +345,12 @@ public class RenameTempTests extends RefactoringTest{
 //		printTestDisabledMessage("regression test for Bug#10660");
 		helper1("j", true, 4, 23, 4, 24);
 	}
-	
+
 	public void test44() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#12200");
 		helper1("j", true, 6, 11, 6, 14);
 	}
-	
+
 	public void test45() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#12210");
 		helper1("j", true, 4, 14, 4, 14);
@@ -360,7 +360,7 @@ public class RenameTempTests extends RefactoringTest{
 //		printTestDisabledMessage("regression test for Bug#12210");
 		helper1("j", true, 5, 18, 5, 18);
 	}
-	
+
 	public void test47() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#17922");
 		helper1("newname", true, 7, 13, 7, 17);
@@ -375,17 +375,17 @@ public class RenameTempTests extends RefactoringTest{
 //		printTestDisabledMessage("regression test for Bug#30923 ");
 		helper1("newname", true, 4, 16, 4, 20);
 	}
-	
+
 	public void test50() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#30923 ");
 		helper1("newname", true, 4, 16, 4, 20);
 	}
-	
+
 	public void test51() throws Exception {
 //		printTestDisabledMessage("regression test for Bug#47822");
 		helper1("qwerty", true, 5, 19, 5, 20);
 	}
-	
+
 	public void test52() throws Exception{
 		helper1("j");
 	}
@@ -394,49 +394,49 @@ public class RenameTempTests extends RefactoringTest{
 //		printTestDisabledMessage("bug#19851");
 		helper1("locker");
 	}
-	
+
 	public void test54() throws Exception{
 		helper1("obj");
 	}
-	
+
 	public void test55() throws Exception{
 		helper1("t");
 	}
-	
+
 	public void test56() throws Exception{
 		helper1("param");
 	}
-	
+
 	public void test57() throws Exception{
 		helper1("param");
 	}
-	
+
 	public void test58() throws Exception{
 		helper1("param");
 	}
-	
+
 	public void test59() throws Exception{
 		helper1("thing");
 	}
-	
+
 	public void test60() throws Exception{
 		helper1("param");
 	}
-	
+
 	public void test61() throws Exception{
 		helper1("x");
 	}
-	
+
 	public void test62() throws Exception {
 //		printTestDisabledMessage("bug#47822");
 		helper1("xxx");
 	}
-	
+
 	public void test63() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=144426
 		helper1("xxx");
 	}
-	
+
 // -----
 	public void testFail0() throws Exception{
 		if (BUG_checkDeclInNestedClass) {
@@ -445,7 +445,7 @@ public class RenameTempTests extends RefactoringTest{
 		}
 		helper2("j");
 	}
-	
+
 	public void testFail1() throws Exception{
 		failHelperNoElement();
 	}
@@ -453,7 +453,7 @@ public class RenameTempTests extends RefactoringTest{
 	public void testFail2() throws Exception{
 		helper2("i");
 	}
-	
+
 	public void testFail3() throws Exception{
 		helper2("9");
 	}
@@ -485,7 +485,7 @@ public class RenameTempTests extends RefactoringTest{
 	public void testFail9() throws Exception{
 		helper2("j");
 	}
-	
+
 	public void testFail10() throws Exception{
 		failHelperNoElement();
 	}
@@ -494,45 +494,45 @@ public class RenameTempTests extends RefactoringTest{
 //	public void testFail11() throws Exception{
 //		helper2("uu");
 //	}
-	
+
 	public void testFail12() throws Exception{
 //		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
 		helper2("j");
 	}
-	
+
 	public void testFail13() throws Exception{
 		helper2("j");
 	}
 
 	public void testFail14() throws Exception{
 		helper2("j");
-	}	
+	}
 
 	public void testFail15() throws Exception{
 		helper2("j");
-	}	
+	}
 
 	public void testFail16() throws Exception{
 		helper2("j");
-	}	
-	
+	}
+
 	public void testFail17() throws Exception{
 		helper2("j");
-	}	
+	}
 
 	public void testFail18() throws Exception{
 		helper2("j");
-	}	
+	}
 
 	public void testFail19() throws Exception{
 		helper2("j");
-	}	
-	
+	}
+
 	public void testFail20() throws Exception{
 		helper2("j");
-	}	
+	}
 
-// disabled - it's allowed now	
+// disabled - it's allowed now
 //	public void testFail21() throws Exception{
 //		helper2("j");
 //	}
@@ -545,16 +545,16 @@ public class RenameTempTests extends RefactoringTest{
 //	public void testFail23() throws Exception{
 //		helper2("j");
 //	}
-	
+
 	public void testFail24() throws Exception{
 		//printTestDisabledMessage("compile errors are ok now");
 		helper2("t"); //name collision
 	}
-	
+
 	public void testFail25() throws Exception{
 		helper2("j");
 	}
-	
+
 	public void testFail26() throws Exception{
 		if (BUG_checkShadowing) {
 			printTestDisabledMessage("Test disabled until it is clear how 1.4 treats this");
@@ -562,7 +562,7 @@ public class RenameTempTests extends RefactoringTest{
 		}
 		helper2("j");
 	}
-	
+
 	public void testFail27() throws Exception{
 		helper2("j");
 	}

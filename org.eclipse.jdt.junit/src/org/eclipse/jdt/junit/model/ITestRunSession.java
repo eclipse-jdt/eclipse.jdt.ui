@@ -15,18 +15,18 @@ package org.eclipse.jdt.junit.model;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.3
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ITestRunSession extends ITestElementContainer {
-			
+
 	/**
 	 * Returns the name of the test run. The name is the name of the launch configuration use to run this test.
-	 * 
+	 *
 	 * @return returns the test run name
 	 */
 	public String getTestRunName();
-		
+
 }

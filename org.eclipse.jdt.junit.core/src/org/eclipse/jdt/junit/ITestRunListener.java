@@ -13,42 +13,42 @@ package org.eclipse.jdt.junit;
 
 import org.eclipse.jdt.internal.junit.model.ITestRunListener2;
 
-  
+
 /**
  * A listener interface for observing the execution of a test run.
  * <p>
- * Clients contributing to the 
+ * Clients contributing to the
  * <code>org.eclipse.jdt.junit.testRunListener</code>
  * extension point implement this interface.
  * </p>
  * @deprecated As of 3.3, replaced by {@link TestRunListener}
- * 
+ *
  * @since 2.1
  */
  public interface ITestRunListener {
 	/**
    	 * Status constant indicating that a test passed (constant value 0).
- 	 * 
+ 	 *
      * @see #testFailed(int, String, String, String)
  	 */
  	public static final int STATUS_OK= ITestRunListener2.STATUS_OK;
  	/**
 	 * Status constant indicating that a test had an error an unanticipated
 	 * exception (constant value 1).
- 	 * 
+ 	 *
 	 * @see #testFailed(int, String, String, String)
  	 */
  	public static final int STATUS_ERROR= ITestRunListener2.STATUS_ERROR;
  	/**
 	 * Status constant indicating that a test failed an assertion
 	 * (constant value 2).
- 	 * 
+ 	 *
  	 * @see #testFailed(int, String, String, String)
 	 */
  	public static final int STATUS_FAILURE= ITestRunListener2.STATUS_FAILURE;
  	/**
  	 * A test run has started.
- 	 * 
+ 	 *
  	 * @param testCount the number of individual tests that will be run
  	 */
 	public void testRunStarted(int testCount);
@@ -66,42 +66,42 @@ import org.eclipse.jdt.internal.junit.model.ITestRunListener2;
 	public void testRunStopped(long elapsedTime);
 	/**
 	 * An individual test has started.
-	 * 
+	 *
 	 * @param testId a unique Id identifying the test
 	 * @param testName the name of the test that started
 	 */
 	public void testStarted(String testId, String testName);
 	/**
 	 * An individual test has ended.
-	 * 
+	 *
 	 * @param testId a unique Id identifying the test
 	 * @param testName the name of the test that ended
 	 */
 	public void testEnded(String testId, String testName);
 	/**
 	 * An individual test has failed with a stack trace.
-	 * 
-	 * @param status the outcome of the test; one of 
+	 *
+	 * @param status the outcome of the test; one of
 	 * {@link #STATUS_ERROR STATUS_ERROR} or
 	 * {@link #STATUS_FAILURE STATUS_FAILURE}
 	 * @param testId a unique Id identifying the test
  	 * @param testName the name of the test that failed
 	 * @param trace the stack trace
 	 */
-	public void testFailed(int status, String testId, String testName, String trace);	
-			
+	public void testFailed(int status, String testId, String testName, String trace);
+
 	/**
 	 * The VM instance performing the tests has terminated.
 	 */
 	public void testRunTerminated();
-	
+
 	/**
  	 * An individual test has been rerun.
-	 * 
+	 *
 	 * @param testId a unique Id identifying the test
 	 * @param testClass the name of the test class that was rerun
 	 * @param testName the name of the test that was rerun
-	 * @param status the outcome of the test that was rerun; one of 
+	 * @param status the outcome of the test that was rerun; one of
 	 * {@link #STATUS_OK STATUS_OK}, {@link #STATUS_ERROR STATUS_ERROR},
 	 * or {@link #STATUS_FAILURE STATUS_FAILURE}
 	 * @param trace the stack trace in the case of abnormal termination,

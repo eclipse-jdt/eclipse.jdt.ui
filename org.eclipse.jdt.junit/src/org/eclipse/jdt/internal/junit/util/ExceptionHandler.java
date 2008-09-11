@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
  * pops up showing the exception's status information. For a <code>InvocationTargetException</code>
  * a normal message dialog pops up showing the exception's message. Additionally the exception
  * is written to the platform log.
- * 
+ *
  * TO DO: this class is duplicated from org.eclipse.jdt.ui
  */
 public class ExceptionHandler {
@@ -40,7 +40,7 @@ public class ExceptionHandler {
 	/**
 	 * Handles the given <code>CoreException</code>. The workbench shell is used as a parent
 	 * for the dialog window.
-	 * 
+	 *
 	 * @param e the <code>CoreException</code> to be handled
 	 * @param title the dialog window's window title
 	 * @param message message to be displayed by the dialog window
@@ -48,10 +48,10 @@ public class ExceptionHandler {
 	public static void handle(CoreException e, String title, String message) {
 		handle(e, JUnitPlugin.getActiveWorkbenchShell(), title, message);
 	}
-	
+
 	/**
-	 * Handles the given <code>CoreException</code>. 
-	 * 
+	 * Handles the given <code>CoreException</code>.
+	 *
 	 * @param e the <code>CoreException</code> to be handled
 	 * @param parent the dialog window's parent shell or <code>null</code>
 	 * @param title the dialog window's window title
@@ -62,8 +62,8 @@ public class ExceptionHandler {
 	}
 
 	/**
-	 * Handles the given <code>InvocationTargetException</code>. 
-	 * 
+	 * Handles the given <code>InvocationTargetException</code>.
+	 *
 	 * @param e the <code>InvocationTargetException</code> to be handled
 	 * @param parent the dialog window's parent shell or <code>null</code>
 	 * @param title the dialog window's window title
@@ -106,9 +106,9 @@ public class ExceptionHandler {
 			msg.write("\n\n"); //$NON-NLS-1$
 		}
 		if (exceptionMessage == null || exceptionMessage.length() == 0)
-			msg.write(WizardMessages.ExceptionDialog_seeErrorLogMessage); 
+			msg.write(WizardMessages.ExceptionDialog_seeErrorLogMessage);
 		else
 			msg.write(exceptionMessage);
-		MessageDialog.openError(shell, title, msg.toString());			
-	}	
+		MessageDialog.openError(shell, title, msg.toString());
+	}
 }

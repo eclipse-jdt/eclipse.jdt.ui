@@ -20,7 +20,7 @@ import junit.framework.Test;
 public interface ITestPrioritizer {
 	/**
 	 * Prioritize a test
-	 * 
+	 *
 	 * @param input tests to be prioritized
 	 * @return the prioritized test suite
 	 */

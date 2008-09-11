@@ -12,10 +12,11 @@
 
 package org.eclipse.jdt.internal.junit4.runner;
 
-import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
-import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
+
+import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
+import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 
 public class JUnit4TestMethodReference extends JUnit4TestReference {
 	private final Description fDescription;

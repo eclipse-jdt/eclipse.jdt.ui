@@ -15,13 +15,17 @@ import java.util.ArrayList;
 import junit.framework.Test;
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
+
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -40,23 +44,18 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.util.DisplayHelper;
-
-import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
-
 
 public class AbstractTestRunListenerTest extends TestCase {
-	
+
 	public static class TestRunLog {
 		private ArrayList/*<String>*/ fLog;
 		private boolean fIsDone;
-		
+
 		public TestRunLog() {
 			fLog= new ArrayList();
 			fIsDone= false;
 		}
-		
+
 		public synchronized int getMessageCount() {
 			return fLog.size();
 		}
@@ -72,12 +71,12 @@ public class AbstractTestRunListenerTest extends TestCase {
 		public void setDone() {
 			fIsDone= true;
 		}
-		
+
 		public boolean isDone() {
 			return fIsDone;
 		}
 	}
-	
+
 
 	private IJavaProject fProject;
 	private boolean fLaunchHasTerminated= false;
@@ -92,11 +91,11 @@ public class AbstractTestRunListenerTest extends TestCase {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return test;
 	}
-	
+
 	private static class TestJUnitLaunchShortcut extends JUnitLaunchShortcut {
 		public static ILaunchConfiguration createConfiguration(IJavaElement element) throws CoreException {
 			ILaunchConfigurationWorkingCopy copy= new TestJUnitLaunchShortcut().createLaunchConfiguration(element);
@@ -114,7 +113,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 
 	protected void launchJUnit(IJavaElement aTest) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
-		
+
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		lm.removeLaunches(lm.getLaunches());
 		ILaunchesListener2 launchesListener= new ILaunchesListener2() {
@@ -152,11 +151,11 @@ public class AbstractTestRunListenerTest extends TestCase {
 				if (isJUnitLaunch(launch)) {
 					buf.append(" [JUnit]");
 				}
-				System.out.println(buf);				
+				System.out.println(buf);
 			}
 		};
 		lm.addLaunchListener(launchesListener);
-		
+
 		ILaunchConfiguration configuration= TestJUnitLaunchShortcut.createConfiguration(aTest);
 		try {
 			configuration.launch(ILaunchManager.RUN_MODE, null);
@@ -173,10 +172,10 @@ public class AbstractTestRunListenerTest extends TestCase {
 		if (! fLaunchHasTerminated)
 			fail("Launch has not terminated");
 	}
-	
+
 	protected String[] launchJUnit(IJavaElement aTest, final TestRunLog log) throws CoreException {
 		launchJUnit(aTest);
-		
+
 		boolean success= new DisplayHelper(){
 			protected boolean condition() {
 				return log.isDone();
@@ -186,20 +185,20 @@ public class AbstractTestRunListenerTest extends TestCase {
 			log.add("AbstractTestRunListenerTest#launchJUnit(IJavaElement, TestRunLog) timed out");
 		return log.getLog();
 	}
-	
+
 	private boolean isJUnitLaunch(ILaunch launch) {
 		ILaunchConfiguration config= launch.getLaunchConfiguration();
 		if (config == null)
 			return false;
-		
+
 		// test whether the launch defines the JUnit attributes
 		String portStr= launch.getAttribute(JUnitLaunchConfigurationConstants.ATTR_PORT);
 		if (portStr == null)
 			return false;
-		
+
 		return true;
 	}
-	
+
 	protected void assertEqualLog(final String[] expectedSequence, String[] logMessages) {
 		StringBuffer actual= new StringBuffer();
 		for (int i= 0; i < logMessages.length; i++) {
@@ -210,7 +209,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 			expected.append(expectedSequence[i]).append('\n');
 		}
 		assertEquals(expected.toString(), actual.toString());
-	}	
+	}
 
-	
+
 }

@@ -25,7 +25,7 @@ public class RewriteMethodInvocationsTestSetup extends RefactoringTestSetup {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-				
+
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fRewrite= root.createPackageFragment("rewrite_in", true, null);
 	}

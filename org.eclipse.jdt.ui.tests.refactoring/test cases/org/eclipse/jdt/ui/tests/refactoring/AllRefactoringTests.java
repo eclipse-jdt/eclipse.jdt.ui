@@ -35,7 +35,7 @@ public class AllRefactoringTests {
 		suite.addTest(InlineConstantTests.suite());
 		suite.addTest(IntroduceParameterTests.suite());
 		suite.addTest(IntroduceFactoryTests.suite());
-		
+
 		//-- structure
 		suite.addTest(ChangeSignatureTests.suite());
 		suite.addTest(IntroduceParameterObjectTests.suite());
@@ -46,44 +46,44 @@ public class AllRefactoringTests {
 		suite.addTest(ExtractSupertypeTests.suite());
 		suite.addTest(MoveInnerToTopLevelTests.suite());
 		suite.addTest(UseSupertypeWherePossibleTests.suite());
-		
+
 		//-- generics
 		suite.addTest(InferTypeArgumentsTests.suite());
-		
+
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
 		suite.addTest(RenameMethodInInterfaceTests.suite());
-		suite.addTest(RenamePrivateMethodTests.suite());	
+		suite.addTest(RenamePrivateMethodTests.suite());
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
 		suite.addTest(MoveInstanceMethodTests.suite());
 		suite.addTest(IntroduceIndirectionTests.suite());
-		
+
 		//--types
-		suite.addTest(RenameTypeTests.suite());	
+		suite.addTest(RenameTypeTests.suite());
 		suite.addTest(RenameTypeParameterTests.suite());
 		suite.addTest(ChangeTypeRefactoringTests.suite());
-		
+
 		//--packages
 		suite.addTest(RenamePackageTests.suite());
-		
+
 		//--fields
 		suite.addTest(RenamePrivateFieldTests.suite());
 		suite.addTest(RenameNonPrivateFieldTests.suite());
-		
+
 		//--projects
 		suite.addTest(RenameJavaProjectTests.suite());
-		
+
 		//--binaries
 		suite.addTest(BinaryReferencesTests.suite());
-		
+
 		// validate edit
 		//suite.addTest(ValidateEditTests.suite()); // commented out see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=158105
-		
+
 		//--helpers
 		suite.addTest(RenamingNameSuggestorTests.suite());
 		suite.addTest(DelegateCreatorTests.suite());
 		return suite;
 	}
 }
- 
+

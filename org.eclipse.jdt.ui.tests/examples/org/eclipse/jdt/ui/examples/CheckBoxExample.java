@@ -31,33 +31,33 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class CheckBoxExample {
 	private Shell fShell;
-	
+
 	public CheckBoxExample() {
 	}
-	
+
 	public CheckBoxExample close () {
 		if ((fShell != null) && (!fShell.isDisposed ())) fShell.dispose ();
 		fShell= null;
 		return this;
 	}
-	
+
 	public CheckBoxExample open () {
 		fShell= new Shell ();
 		fShell.setText("Message Dialog Example");
 		fShell.setLayout(new GridLayout());
-		
+
 		Adapter adapter= new Adapter();
 
 
-		
-		String[] addButtons= new String[] { 
-			/* 0 */ "Add1", 
-			/* 1 */ "Check 0", 
-			/* 2 */ "Print", 
-			/* 3 */ null, 
-			/* 4 */ "Check All", 
-			/* 5 */ "Uncheck All", 
-			/* 6 */ null, 
+
+		String[] addButtons= new String[] {
+			/* 0 */ "Add1",
+			/* 1 */ "Check 0",
+			/* 2 */ "Print",
+			/* 3 */ null,
+			/* 4 */ "Check All",
+			/* 5 */ "Uncheck All",
+			/* 6 */ null,
 			/* 7 */ "Remove"
 		};
 		CheckedListDialogField list= new CheckedListDialogField(adapter, addButtons, new LabelProvider());
@@ -65,22 +65,22 @@ public class CheckBoxExample {
 		list.setUncheckAllButtonIndex(5);
 		list.setRemoveButtonIndex(7);
 		list.setLabelText("List: ");
-				
+
 		LayoutUtil.doDefaultLayout(fShell, new DialogField[] { list }, false);
-		
+
 		fShell.setSize(400,500);
 		fShell.open ();
 		return this;
 	}
-	
+
 	private static Random fgRandom= new Random();
-	
+
 	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
-		
+
 		// -------- IStringButtonAdapter
 		public void changeControlPressed(DialogField field) {
-		}		
-				
+		}
+
 		// -------- IListAdapter
 		public void customButtonPressed(ListDialogField field, int index) {
 			if (field instanceof CheckedListDialogField) {
@@ -95,12 +95,12 @@ public class CheckBoxExample {
 					}
 				} else {
 					list.setChecked(list.getElement(0), true);
-				}	
+				}
 			}
 		}
-		
+
 		public void selectionChanged(ListDialogField field) {}
-		
+
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
 		}
@@ -109,8 +109,8 @@ public class CheckBoxExample {
 		 */
 		public void doubleClicked(ListDialogField field) {
 		}
-	}	
-	
+	}
+
 	public CheckBoxExample run () {
 		Display display= fShell.getDisplay ();
 		while (!fShell.isDisposed ()) {
@@ -118,7 +118,7 @@ public class CheckBoxExample {
 		}
 		return this;
 	}
-	
+
 	public static void main(java.lang.String[] args) {
 		new CheckBoxExample().open().run().close();
 	}

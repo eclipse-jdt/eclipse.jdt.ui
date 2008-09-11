@@ -57,9 +57,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class AddUnimplementedMethodsTest extends TestCase {
-	
+
 	private static final Class THIS= AddUnimplementedMethodsTest.class;
-	
+
 	private IJavaProject fJavaProject;
 	private IPackageFragment fPackage;
 	private IType fClassA, fInterfaceB, fClassC, fClassD, fInterfaceE;
@@ -68,7 +68,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	public AddUnimplementedMethodsTest(String name) {
 		super(name);
 	}
-		
+
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -80,33 +80,33 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new AddUnimplementedMethodsTest("test1"));
 			return new ProjectTestSetup(suite);
-		}	
+		}
 	}
-	
+
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
-		
+
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
 		fJavaProject.setOptions(options);
-		
+
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "${body_statement}\n// TODO", null);
-		
+
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("ibm.util", true, null);
-		
+
 		ICompilationUnit cu= fPackage.getCompilationUnit("A.java");
 		fClassA= cu.createType("public abstract class A {\n}\n", null, true, null);
 		fClassA.createMethod("public abstract void a();\n", null, true, null);
 		fClassA.createMethod("public abstract void b(java.util.Vector v);\n", null, true, null);
-		
+
 		cu= fPackage.getCompilationUnit("B.java");
 		fInterfaceB= cu.createType("public interface B {\n}\n", null, true, null);
 		fInterfaceB.createMethod("void c(java.util.Hashtable h);\n", null, true, null);
-		
+
 		cu= fPackage.getCompilationUnit("C.java");
 		fClassC= cu.createType("public abstract class C {\n}\n", null, true, null);
 		fClassC.createMethod("public void c(java.util.Hashtable h) {\n}\n", null, true, null);
@@ -116,12 +116,12 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		cu= fPackage.getCompilationUnit("D.java");
 		fClassD= cu.createType("public abstract class D extends C {\n}\n", null, true, null);
 		fClassD.createMethod("public abstract void c(java.util.Hashtable h);\n", null, true, null);
-		
+
 		cu= fPackage.getCompilationUnit("E.java");
 		fInterfaceE= cu.createType("public interface E {\n}\n", null, true, null);
 		fInterfaceE.createMethod("void c(java.util.Hashtable h);\n", null, true, null);
 		fInterfaceE.createMethod("void e() throws java.util.NoSuchElementException;\n", null, true, null);
-		
+
 		IEclipsePreferences node= new ProjectScope(fJavaProject.getProject()).getNode(JavaUI.ID_PLUGIN);
 		node.putBoolean(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, false);
 		node.putBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
@@ -143,35 +143,35 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	/*
 	 * basic test: extend an abstract class and an interface
 	 */
-	public void test1() throws Exception {	
+	public void test1() throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType("public class Test1 extends A implements B {\n}\n", null, true, null);
-	
+
 		testHelper(testClass);
-		
+
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "a", "b", "c", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
-		
+
 		IImportDeclaration[] imports= cu.getImports();
-		checkImports(new String[] { "java.util.Hashtable", "java.util.Vector" }, imports);	
-	}	
-	
+		checkImports(new String[] { "java.util.Hashtable", "java.util.Vector" }, imports);
+	}
+
 	/*
 	 * method c() of interface B is already implemented by class C
 	 */
 	public void test2() throws Exception {
-			
+
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test2.java");
 		IType testClass= cu.createType("public class Test2 extends C implements B {\n}\n", null, true, null);
-		
+
 		testHelper(testClass);
-		
+
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "c", "d", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
-		
+
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Enumeration", "java.util.Hashtable" }, imports);
-	}	
+	}
 
 
 	/*
@@ -180,33 +180,33 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	public void test3() throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test3.java");
 		IType testClass= cu.createType("public class Test3 extends D {\n}\n", null, true, null);
-		
+
 		testHelper(testClass);
-		
+
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "c", "d", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
-		
+
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.Enumeration" }, imports);
-		
+
 	}
-	
+
 	/*
 	 * method c() defined in both interfaces B and E
 	 */
 	public void test4() throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test4.java");
 		IType testClass= cu.createType("public class Test4 implements B, E {\n}\n", null, true, null);
-		
+
 		testHelper(testClass);
-		
+
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "c", "e", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
-		
+
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
 	}
-	
+
 	public void testBug119171() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package ibm.util;\n");
@@ -215,14 +215,14 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		buf.append("    public void b(Properties p);\n");
 		buf.append("}\n");
 		fPackage.createCompilationUnit("F.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package ibm.util;\n");
 		buf.append("public class Properties {\n");
 		buf.append("    public int get() {return 0;}\n");
 		buf.append("}\n");
 		fPackage.createCompilationUnit("Properties.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("public class Test5 implements F {\n");
 		buf.append("    public void foo() {\n");
@@ -232,16 +232,16 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		buf.append("}\n");
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test5.java");
 		IType testClass= cu.createType(buf.toString(), null, true, null);
-		
+
 		testHelper(testClass);
-		
+
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "b", "foo", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
-		
+
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[0], imports);
 	}
-	
+
 	public void testInsertAt() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -257,8 +257,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		buf.append("	}\n");
 		buf.append("}");
 		fPackage.createCompilationUnit("B.java", buf.toString(), true, null);
-		
-		
+
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");
@@ -281,30 +281,30 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}");
 		String originalContent= buf.toString();
-		
+
 		final int NUM_MEMBERS= 6;
-		
+
 		buf= new StringBuffer();
 		buf.append("public void foo() {\n");
 		buf.append("        // TODO\n");
 		buf.append("    }");
 		String expectedConstructor= buf.toString();
-		
+
 		// try to insert the new constructor after every member and at the end
 		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
-		
+
 			ICompilationUnit unit= null;
 			try {
 				unit= fPackage.createCompilationUnit("A.java", originalContent, true, null);
-				
+
 				IType type= unit.findPrimaryType();
 				IJavaElement[] children= type.getChildren();
 				assertEquals(NUM_MEMBERS, children.length);
-				
+
 				int insertIndex= i < NUM_MEMBERS ? ((IMember) children[i]).getSourceRange().getOffset() : -1;
-	
+
 				testHelper(type, insertIndex, false);
-				
+
 				IJavaElement[] newChildren= type.getChildren();
 				assertEquals(NUM_MEMBERS + 1, newChildren.length);
 				String source= ((IMember) newChildren[i]).getSource(); // new element expected at index i
@@ -315,12 +315,12 @@ public class AddUnimplementedMethodsTest extends TestCase {
 				}
 			}
 		}
-	}	
-	
+	}
+
 	private void testHelper(IType testClass) throws JavaModelException, CoreException {
 		testHelper(testClass, -1, true);
 	}
-	
+
 	private void testHelper(IType testClass, int insertionPos, boolean implementAllOverridable) throws JavaModelException, CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(testClass.getCompilationUnit(), true);
@@ -328,14 +328,14 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		assertNotNull("Could not find type declaration node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		
+
 		IMethodBinding[] overridableMethods= implementAllOverridable ? StubUtility2.getOverridableMethods(unit.getAST(), binding, false) : null;
-		
+
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, insertionPos, true, true, true);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 	}
-	
+
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;
@@ -344,8 +344,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			String methName= expected[i];
 			assertTrue("method " + methName + " expected", nameContained(methName, methods));
 		}
-	}			
-	
+	}
+
 	private void checkImports(String[] expected, IImportDeclaration[] imports) {
 		int nImports= imports.length;
 		int nExpected= expected.length;
@@ -375,5 +375,5 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			}
 		}
 		return false;
-	}	
+	}
 }

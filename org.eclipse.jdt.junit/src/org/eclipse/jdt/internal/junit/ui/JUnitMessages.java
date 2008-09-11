@@ -61,7 +61,7 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitAddLibraryProposal_junit4_info;
 	public static String JUnitAddLibraryProposal_label;
-	
+
 	public static String JUnitBaseLaunchConfiguration_error_notests;
 	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
 
@@ -214,7 +214,7 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitPreferencePage_enableallbutton_label;
 	public static String JUnitPreferencePage_enableallbutton_tooltip;
 	public static String JUnitPreferencePage_filter_label;
-	
+
 	public static String JUnitPreferencePage_invalidstepfilterreturnescape;
 	public static String JUnitPreferencePage_removefilterbutton_label;
 	public static String JUnitPreferencePage_removefilterbutton_tooltip;
@@ -250,7 +250,7 @@ public final class JUnitMessages extends NLS {
 	public static String RerunAction_label_rerun;
 	public static String Resources_fileModified;
 	public static String Resources_modifiedResources;
-	
+
 	public static String Resources_outOfSync;
 	public static String Resources_outOfSyncResources;
 	public static String ScrollLockAction_action_label;
@@ -318,7 +318,7 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_hierarchical_layout;
 
 	public static String TestRunSession_unrootedTests;
-	
+
 	public static String TestSearchEngine_message_searching;
 
 	public static String TestSessionLabelProvider_testName_elapsedTimeInSeconds;

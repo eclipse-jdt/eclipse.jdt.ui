@@ -34,12 +34,12 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 public class RippleMethodFinderTests extends AbstractCUTestCase {
 
 	private final static boolean BUG_96761_core_finds_non_overriding= true;
-	
+
 	private static final Class clazz= RippleMethodFinderTests.class;
 	private static final String REFACTORING_PATH= "RippleMethodFinder/";
 	private static final String TARGET= "/*target*/";
 	private static final String RIPPLE= "/*ripple*/";
-	
+
 	public RippleMethodFinderTests(String name) {
 		super(name);
 	}
@@ -47,15 +47,15 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 	protected String getResourceLocation() {
 		return REFACTORING_PATH;
 	}
-	
+
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
-	
+
 	public static Test setUpTest(Test someTest) {
 		return new RefactoringTestSetup(someTest);
 	}
-		
+
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
@@ -66,13 +66,13 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 			IPackageFragment pack= RefactoringTestSetup.getPackageP();
 			String name= adaptName("A_" + getName());
 			cu= createCU(pack, name, getFileInputStream(getResourceLocation() + "/" + name));
-			
+
 			String contents= cu.getBuffer().getContents();
 
 			IJavaElement[] elements= cu.codeSelect(contents.indexOf(TARGET) + TARGET.length(), 0);
 			assertEquals(1, elements.length);
 			IMethod target= (IMethod) elements[0];
-			
+
 			List/*<IMethod>*/ rippleMethods= new ArrayList();
 			rippleMethods.add(target);
 			int start= 0;
@@ -86,7 +86,7 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 				rippleMethods.add(rippleMethod);
 				start++;
 			}
-			
+
 			IMethod[] result= RippleMethodFinder2.getRelatedMethods(target, new NullProgressMonitor(), null);
 			for (int i= 0; i < result.length; i++) {
 				IMethod method= result[i];
@@ -98,7 +98,7 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 				cu.delete(true, null);
 		}
 	}
-	
+
 	public void test1() throws Exception {
 		perform();
 	}

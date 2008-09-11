@@ -15,6 +15,11 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.text.NumberFormat;
 
+import org.eclipse.jdt.junit.model.ITestCaseElement;
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestRunSession;
+import org.eclipse.jdt.junit.model.ITestSuiteElement;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -22,46 +27,41 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
-
-import org.eclipse.jdt.junit.model.ITestCaseElement;
-import org.eclipse.jdt.junit.model.ITestElement;
-import org.eclipse.jdt.junit.model.ITestRunSession;
-import org.eclipse.jdt.junit.model.ITestSuiteElement;
-
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+
 public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider {
-	
+
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final int fLayoutMode;
 	private final NumberFormat timeFormat;
-	
+
 	private boolean fShowTime;
-	
+
 	public TestSessionLabelProvider(TestRunnerViewPart testRunnerPart, int layoutMode) {
 		fTestRunnerPart= testRunnerPart;
 		fLayoutMode= layoutMode;
 		fShowTime= true;
-		
+
 		timeFormat= NumberFormat.getNumberInstance();
 		timeFormat.setGroupingUsed(true);
 		timeFormat.setMinimumFractionDigits(3);
 		timeFormat.setMaximumFractionDigits(3);
 		timeFormat.setMinimumIntegerDigits(1);
 	}
-	
+
 	public StyledString getStyledText(Object element) {
 		String label= getSimpleLabel(element);
 		if (label == null) {
 			return new StyledString(element.toString());
 		}
 		StyledString text= new StyledString(label);
-		
+
 		ITestElement testElement= (ITestElement) element;
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
 			if (testElement.getParentContainer() instanceof ITestRunSession) {
@@ -71,7 +71,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 					text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledString.QUALIFIER_STYLER);
 				}
 			}
-			
+
 		} else {
 			if (element instanceof ITestCaseElement) {
 				String className= BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestClassName());
@@ -81,7 +81,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		}
 		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
 	}
-	
+
 	private StyledString addElapsedTime(StyledString styledString, double time) {
 		String string= styledString.getString();
 		String decorated= addElapsedTime(string, time);
@@ -95,7 +95,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		String formattedTime= timeFormat.format(time);
 		return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, new String[] { string, formattedTime});
 	}
-	
+
 	private String getSimpleLabel(Object element) {
 		if (element instanceof ITestCaseElement) {
 			return BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestMethodName());
@@ -132,7 +132,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			TestCaseElement testCaseElement= ((TestCaseElement) element);
 			if (testCaseElement.isIgnored())
 				return fTestRunnerPart.fTestIgnoredIcon;
-			
+
 			Status status=testCaseElement.getStatus();
 			if (status.isNotRun())
 				return fTestRunnerPart.fTestIcon;
@@ -146,7 +146,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				return fTestRunnerPart.fTestOkIcon;
 			else
 				throw new IllegalStateException(element.toString());
-			
+
 		} else if (element instanceof TestSuiteElement) {
 			Status status= ((TestSuiteElement) element).getStatus();
 			if (status.isNotRun())
@@ -161,7 +161,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				return fTestRunnerPart.fSuiteOkIcon;
 			else
 				throw new IllegalStateException(element.toString());
-		
+
 		} else {
 			throw new IllegalArgumentException(String.valueOf(element));
 		}

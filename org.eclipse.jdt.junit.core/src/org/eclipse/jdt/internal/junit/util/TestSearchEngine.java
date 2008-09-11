@@ -63,7 +63,7 @@ public class TestSearchEngine {
 		final Set result= new HashSet();
 
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {		
+			public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
 				try {
 					testKind.getFinder().findTestsInContainer(element, result, pm);
 				} catch (CoreException e) {
@@ -74,7 +74,7 @@ public class TestSearchEngine {
 		context.run(true, true, runnable);
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
-	
+
 	public static boolean isAccessibleClass(IType type) throws JavaModelException {
 		int flags= type.getFlags();
 		if (Flags.isInterface(flags)) {
@@ -92,7 +92,7 @@ public class TestSearchEngine {
 			parent= parent.getParent();
 		}
 	}
-	
+
 	public static boolean isAccessibleClass(ITypeBinding type) {
 		if (type.isInterface()) {
 			return false;
@@ -131,7 +131,7 @@ public class TestSearchEngine {
 		}
 		return false;
 	}
-	
+
 	public static boolean isTestImplementor(IType type) throws JavaModelException {
 		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
 		IType[] superInterfaces= typeHier.getAllInterfaces();
@@ -142,7 +142,7 @@ public class TestSearchEngine {
 		}
 		return false;
 	}
-	
+
 	public static boolean isTestImplementor(ITypeBinding type) {
 		ITypeBinding superType= type.getSuperclass();
 		if (superType != null && isTestImplementor(superType)) {
@@ -162,7 +162,7 @@ public class TestSearchEngine {
 		IMethod method= type.getMethod("suite", new String[0]); //$NON-NLS-1$
 		if (!method.exists())
 			return false;
-	
+
 		if (!Flags.isStatic(method.getFlags()) || !Flags.isPublic(method.getFlags())) {
 			return false;
 		}
@@ -171,7 +171,7 @@ public class TestSearchEngine {
 		}
 		return true;
 	}
-	
+
 	public static IRegion getRegion(IJavaElement element) throws JavaModelException {
 		IRegion result= JavaCore.newRegion();
 		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
@@ -200,11 +200,11 @@ public class TestSearchEngine {
 			}
 		}
 	}
-	
+
 	private static class SuiteMethodTypesCollector extends SearchRequestor {
 
 		private Collection fResult;
-		
+
 		public SuiteMethodTypesCollector(Collection result) {
 			fResult= result;
 		}
@@ -218,7 +218,7 @@ public class TestSearchEngine {
 			if (!Flags.isStatic(method.getFlags()) || !Flags.isPublic(method.getFlags())) {
 				return;
 			}
-			
+
 			IType declaringType= ((IMethod) enclosingElement).getDeclaringType();
 			if (!TestSearchEngine.isAccessibleClass(declaringType)) {
 				return;
@@ -231,12 +231,12 @@ public class TestSearchEngine {
 		// fix for bug 36449 JUnit should constrain tests to selected project
 		// [JUnit]
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, IJavaSearchScope.SOURCES);
-		
+
 		SearchRequestor requestor= new SuiteMethodTypesCollector(result);
 		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
 		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
 	}
-	
+
 }

@@ -36,18 +36,18 @@ public class MockPluginView extends PackagesView {
 	private boolean fRefreshHappened;
 	private boolean fRemoveHappened;
 	private boolean fAddHappened;
-	
+
 	private List fRemovedObject;
 	private List fAddedObject;
 	private List fAddedParentObject;
 	private List fRefreshedObject;
 
 	private boolean fRefreshLogging;
-	
+
 	// We have to make this static since it must be set
 	// before we create an instance via showView.
 	private static boolean fgListState;
-	
+
 	public MockPluginView() {
 		super();
 		fRefreshedObject= new ArrayList();
@@ -74,34 +74,34 @@ public class MockPluginView extends PackagesView {
 		getSite().setSelectionProvider(fViewer);
 
 	}
-	
+
 	/* Override so that tests can set layout state.
-	 * 
+	 *
 	 *
 	 * @see org.eclipse.jdt.internal.ui.browsing.PackagesView#isInListState()
 	 */
 	protected boolean isInListState(){
-		return fgListState;	
+		return fgListState;
 	}
-	
+
 	/**
 	 * Set the view is in flat or hierarchical state.
 	 * @param state
 	 */
 	static void setListState(boolean state){
-		fgListState= state;	
+		fgListState= state;
 	}
-	
+
 	public void clear() {
 		pushDisplay();
-		
+
 		fAddedObject.clear();
 		fRefreshedObject.clear();
 		fAddedParentObject.clear();
 		fRemovedObject.clear();
 	}
 
-	
+
 	protected StructuredViewer createViewer(Composite parent){
 		if(isInListState())
 			return new TestProblemTableViewer(parent, SWT.MULTI);
@@ -112,10 +112,10 @@ public class MockPluginView extends PackagesView {
 	public void dispose() {
 		if (fViewer != null) {
 			IContentProvider p = fViewer.getContentProvider();
-			if(p!=null)	
+			if(p!=null)
 				p.dispose();
 		}
-		
+
 		super.dispose();
 	}
 
@@ -124,11 +124,11 @@ public class MockPluginView extends PackagesView {
 	 */
 	public void setFocus() {
 	}
-	
+
 	public StructuredViewer getTreeViewer(){
 		return fViewer;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findElementToSelect(org.eclipse.jdt.core.IJavaElement)
 	 */
@@ -149,8 +149,8 @@ public class MockPluginView extends PackagesView {
 	protected boolean isValidInput(Object element) {
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Returns a list of objects refreshed in the viewer.
 	 * @return List
@@ -190,7 +190,7 @@ public class MockPluginView extends PackagesView {
 	public boolean hasRemoveHappened() {
 		return fRemoveHappened;
 	}
-	
+
 	/**
 	 * Returns the object added to the viewer
 	 * @return List
@@ -198,7 +198,7 @@ public class MockPluginView extends PackagesView {
 	public List getAddedObject() {
 		return fAddedObject;
 	}
-	
+
 	/**
 	 * Returns true if an add action happened on the viewer
 	 * @return boolean
@@ -208,7 +208,7 @@ public class MockPluginView extends PackagesView {
 	}
 
 	/**
-	 * force events from display 
+	 * force events from display
 	 */
 	public void pushDisplay() {
 		boolean moreToDispatch= true;
@@ -247,7 +247,7 @@ public class MockPluginView extends PackagesView {
 		}
 
 	}
-	
+
 	private class TestProblemTableViewer extends ProblemTableViewer {
 
 		public TestProblemTableViewer(Composite parent, int flag) {

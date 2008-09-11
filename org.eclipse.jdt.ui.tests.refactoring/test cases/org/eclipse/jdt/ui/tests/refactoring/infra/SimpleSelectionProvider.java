@@ -25,7 +25,7 @@ public class SimpleSelectionProvider implements ISelectionProvider {
 	public SimpleSelectionProvider(Collection collection) {
 		this(collection.toArray());
 	}
-	
+
 	public SimpleSelectionProvider(Object[] elements) {
 		Assert.isNotNull(elements);
 		fSelection= new StructuredSelection(elements);

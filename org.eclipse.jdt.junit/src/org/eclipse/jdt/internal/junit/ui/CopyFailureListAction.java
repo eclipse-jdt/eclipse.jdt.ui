@@ -21,21 +21,21 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.junit.model.TestElement;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Copies the names of the methods that failed and their traces to the clipboard.
  */
 public class CopyFailureListAction extends Action {
-	
+
 	private final Clipboard fClipboard;
 	private final TestRunnerViewPart fRunner;
-		
+
 	public CopyFailureListAction(TestRunnerViewPart runner, Clipboard clipboard) {
 		super(JUnitMessages.CopyFailureList_action_label);
-		fRunner= runner;  
+		fRunner= runner;
 		fClipboard= clipboard;
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
 	}
@@ -45,23 +45,23 @@ public class CopyFailureListAction extends Action {
 	 */
 	public void run() {
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
-					
+
 		try {
 			fClipboard.setContents(
-					new String[] { getAllFailureTraces() }, 
+					new String[] { getAllFailureTraces() },
 					new Transfer[] { plainTextTransfer });
 		} catch (SWTError e){
-			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;
-			if (MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), JUnitMessages.CopyFailureList_problem, JUnitMessages.CopyFailureList_clipboard_busy))  
+			if (MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), JUnitMessages.CopyFailureList_problem, JUnitMessages.CopyFailureList_clipboard_busy))
 				run();
 		}
 	}
-	
+
 	public String getAllFailureTraces() {
 		StringBuffer buf= new StringBuffer();
 		TestElement[] failures= fRunner.getAllFailures();
-		
+
 		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
 		for (int i= 0; i < failures.length; i++) {
 			TestElement failure= failures[i];

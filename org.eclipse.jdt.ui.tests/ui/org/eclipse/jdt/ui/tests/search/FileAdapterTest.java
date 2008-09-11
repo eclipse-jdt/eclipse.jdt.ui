@@ -10,15 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.search;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
-import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
-import org.eclipse.search.ui.text.IFileMatchAdapter;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.search.ui.text.IFileMatchAdapter;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 
 /**
  */
@@ -27,15 +30,15 @@ public class FileAdapterTest extends TestCase {
 	public static Test allTests() {
 		return new JUnitSourceSetup(new TestSuite(FileAdapterTest.class));
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
-	
+
 	public FileAdapterTest(String name) {
 		super(name);
 	}
-	
+
 	public void testGetFile() throws Exception {
 		JavaSearchQuery query= SearchTestHelper.runTypeRefQuery("junit.framework.Test");
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();

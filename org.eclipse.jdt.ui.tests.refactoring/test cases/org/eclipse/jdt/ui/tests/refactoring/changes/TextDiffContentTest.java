@@ -16,12 +16,12 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEditGroup;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
@@ -36,7 +36,7 @@ import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
  * have differing affected ranges and spurious changes appear.
  */
 public class TextDiffContentTest extends TestCase {
-	
+
 	private static final String MODIFIED_SOURCE_CONTENTS =
 		"// my file\n"+
 		"\n"+
@@ -54,7 +54,7 @@ public class TextDiffContentTest extends TestCase {
 	public static Test suite() {
 		return new TestSuite(TextDiffContentTest.class);
 	}
-	
+
 	private DocumentChange fDocumentChange;
 
 	private Document fDocument;
@@ -70,7 +70,7 @@ public class TextDiffContentTest extends TestCase {
 	private ReplaceEdit fEdit3;
 
 	private TextEditChangeGroup fChange3;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fDocument = new Document(MODIFIED_SOURCE_CONTENTS);
@@ -83,31 +83,31 @@ public class TextDiffContentTest extends TestCase {
 		int offset;
 		TextEditGroup group;
 		/////
-		
+
 		offset = MODIFIED_SOURCE_CONTENTS.indexOf("\t}\n");
 		fEdit1 = new ReplaceEdit(
-				offset, 0, 
+				offset, 0,
 				"\tFinalCall();\n");
-			
+
 		group = new TextEditGroup("Change 1");
 		group.addTextEdit(fEdit1);
 		fChange1 = new TextEditChangeGroup(fDocumentChange, group);
 		fDocumentChange.addTextEditChangeGroup(fChange1);
 		multiEdit.addChild(fEdit1);
-		
+
 		/////
 		offset = 0;
 		fEdit2 = new ReplaceEdit(
-				offset, 0, 
+				offset, 0,
 				"// add comment\n");
-			
+
 		group = new TextEditGroup("Change 2");
 		group.addTextEdit(fEdit2);
 		fChange2 = new TextEditChangeGroup(fDocumentChange, group);
 		fDocumentChange.addTextEditChangeGroup(fChange2);
 		multiEdit.addChild(fEdit2);
-		
-		/// 
+
+		///
 		offset = MODIFIED_SOURCE_CONTENTS.indexOf("\tDumb");
 		int endOffset = MODIFIED_SOURCE_CONTENTS.indexOf("\t// [[[ begin", offset);
 		fEdit3 = new ReplaceEdit(
@@ -120,7 +120,7 @@ public class TextDiffContentTest extends TestCase {
 		multiEdit.addChild(fEdit3);
 
 	}
-	
+
 	private String getSource(IRegion region, int context) throws CoreException {
 		return fDocumentChange.getCurrentContent(region, true, context, new NullProgressMonitor());
 	}
@@ -129,32 +129,32 @@ public class TextDiffContentTest extends TestCase {
 				new TextEditChangeGroup[] { group },
 				group.getRegion(), true, context, new NullProgressMonitor());
 	}
-	
+
 	public void testEmptySourceRangeNoContext() throws Exception {
 		String src = getSource(fEdit1.getRegion(), 0);
 		String preview = getPreview(fChange1, 0);
 		assertEquals("", src);
 		assertEquals("\tFinalCall();", preview);
-		
+
 	}
 	public void testEmptySourceRangeNoContext2() throws Exception {
 		String src = getSource(fEdit2.getRegion(), 0);
 		String preview = getPreview(fChange2, 0);
 		assertEquals("", src);
 		assertEquals("// add comment", preview);
-		
+
 	}
 	public void testEmptySourceRangeContext() throws Exception {
 		String src = getSource(fEdit1.getRegion(), 2);
 		String preview = getPreview(fChange1, 2);
-		assertEquals("\tMagicCall();\n" + 
-				"\t// ]]] end\n" + 
-				"\t}\n", 
+		assertEquals("\tMagicCall();\n" +
+				"\t// ]]] end\n" +
+				"\t}\n",
 				src);
-		assertEquals("	MagicCall();\n" + 
-				"	// ]]] end\n" + 
-				"	FinalCall();\n" + 
-				"	}\n", 
+		assertEquals("	MagicCall();\n" +
+				"	// ]]] end\n" +
+				"	FinalCall();\n" +
+				"	}\n",
 			preview);
 	}
 	public void testEmptySourceRangeContext2() throws Exception {
@@ -166,27 +166,27 @@ public class TextDiffContentTest extends TestCase {
 				"// my file\n",
 			preview);
 	}
-	
+
 	public void testEmptyTargetRangeNoContext() throws Exception {
 		String src = getSource(fEdit3.getRegion(), 0);
 		String preview = getPreview(fChange3, 0);
 		assertEquals("\tDumbCall();", src);
 		assertEquals("", preview);
-		
+
 	}
 	public void testEmptyTargetRangeContext() throws Exception {
 		String src = getSource(fEdit3.getRegion(), 2);
 		String preview = getPreview(fChange3, 2);
 		assertEquals("\t{\n"+"\tGoodCall();\n"+
-				"\tDumbCall();\n"+ 
+				"\tDumbCall();\n"+
 				"\t// [[[ begin\n"+
 				"\tMagicCall();",
 				src);
-		assertEquals("\t{\n"+"\tGoodCall();\n"+ 
+		assertEquals("\t{\n"+"\tGoodCall();\n"+
 				"\t// [[[ begin\n"+
 				"\tMagicCall();",
 				preview);
-		
+
 	}
 
 }

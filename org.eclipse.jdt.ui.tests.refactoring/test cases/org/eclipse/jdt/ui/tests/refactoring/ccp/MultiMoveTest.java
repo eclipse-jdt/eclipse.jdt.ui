@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring.ccp;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -22,26 +24,24 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
-
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 
 public class MultiMoveTest extends RefactoringTest {
@@ -65,7 +65,7 @@ public class MultiMoveTest extends RefactoringTest {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
-	
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -74,11 +74,11 @@ public class MultiMoveTest extends RefactoringTest {
 	private IPackageFragment createPackage(String name) throws Exception{
 		return getRoot().createPackageFragment(name, true, null);
 	}
-	
+
 	private ICompilationUnit createCu(IPackageFragment pack, String cuPath, String cuName) throws Exception{
 		return createCU(pack, cuName, getFileContents(getRefactoringPath() + cuPath));
 	}
-	
+
 	private void delete(IPackageFragment pack) throws Exception {
 		performDummySearch();
 		try {
@@ -89,7 +89,7 @@ public class MultiMoveTest extends RefactoringTest {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void delete(IPackageFragmentRoot root) throws Exception {
 		performDummySearch();
 		try {
@@ -99,8 +99,8 @@ public class MultiMoveTest extends RefactoringTest {
 			//ignore, we should keep going
 			e.printStackTrace();
 		}
-	}	
-	
+	}
+
 	//--------
 	public void test0() throws Exception{
 		ParticipantTesting.reset();
@@ -118,10 +118,10 @@ public class MultiMoveTest extends RefactoringTest {
 			String p2Name= "p2";
 			packP2= createPackage(p2Name);
 			ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
-			
+
 			String[] handles= ParticipantTesting.createHandles(new Object[] {
-				p1A, p1A.getTypes()[0], 
-				p1B, p1B.getTypes()[0], 
+				p1A, p1A.getTypes()[0],
+				p1B, p1B.getTypes()[0],
 				p1A.getResource(), p1B.getResource()});
 
 			IResource[] resources= {};
@@ -158,14 +158,14 @@ public class MultiMoveTest extends RefactoringTest {
 					new MoveArguments(packP2.getResource(), processor.getUpdateReferences()),
 					new MoveArguments(packP2.getResource(), processor.getUpdateReferences())
 				});
-			
+
 		} finally {
 			delete(packP1);
-			delete(packP2);		
+			delete(packP2);
 		}
 	}
 
-	
+
 	public void test1() throws Exception{
 		ParticipantTesting.reset();
 		IPackageFragment packP1= null;
@@ -184,8 +184,8 @@ public class MultiMoveTest extends RefactoringTest {
 			ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 
 			String[] handles= ParticipantTesting.createHandles(new Object[] {
-				p1A, p1A.getTypes()[0], 
-				p1B, p1B.getTypes()[0], 
+				p1A, p1A.getTypes()[0],
+				p1B, p1B.getTypes()[0],
 				p1A.getResource(), p1B.getResource()});
 
 			IResource[] resources= {};
@@ -225,9 +225,9 @@ public class MultiMoveTest extends RefactoringTest {
 		} finally {
 			delete(packP1);
 			delete(packP2);
-		}		
+		}
 	}
-	
+
 	public void test2() throws Exception{
 		ParticipantTesting.reset();
 		IPackageFragment packP1= null;
@@ -246,7 +246,7 @@ public class MultiMoveTest extends RefactoringTest {
 			ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 
 			String[] handles= ParticipantTesting.createHandles(new Object[] {
-				p1A, p1A.getTypes()[0], 
+				p1A, p1A.getTypes()[0],
 				p1A.getResource()});
 
 			IResource[] resources= {};
@@ -283,8 +283,8 @@ public class MultiMoveTest extends RefactoringTest {
 				});
 		} finally {
 			delete(packP1);
-			delete(packP2);	
-		}		
+			delete(packP2);
+		}
 	}
 
 	public void test3() throws Exception{
@@ -307,7 +307,7 @@ public class MultiMoveTest extends RefactoringTest {
 			packP2= createPackage(p2Name);
 
 			String[] handles= ParticipantTesting.createHandles(new Object[] {
-				p1A, p1A.getTypes()[0], 
+				p1A, p1A.getTypes()[0],
 				p1A.getResource()});
 
 			IResource[] resources= {};
@@ -343,10 +343,10 @@ public class MultiMoveTest extends RefactoringTest {
 		} finally {
 			delete(packP1);
 			delete(packP2);
-			delete(packP3);		
+			delete(packP3);
 		}
 	}
-	
+
 	public void testPackageMoveParticipants() throws Exception {
 		ParticipantTesting.reset();
 		IPackageFragmentRoot r1= null;
@@ -357,7 +357,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 			p1.createCompilationUnit("A.java", "public class A {}", true, null);
 			p1.createCompilationUnit("B.java", "public class B {}", true, null);
-			
+
 			String[] moveHandes= ParticipantTesting.createHandles(new Object[] {p1, p1.getResource()});
 
 			IResource[] resources= {};
@@ -368,7 +368,7 @@ public class MultiMoveTest extends RefactoringTest {
 			processor.setDestination(ReorgDestinationFactory.createDestination(r2));
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, false);
-			
+
 			//-- checks
 			assertEquals("status should be ok here", null, status);
 
@@ -383,7 +383,7 @@ public class MultiMoveTest extends RefactoringTest {
 			delete(r2);
 		}
 	}
-	
+
 	public void testPackageMoveParticipants2() throws Exception {
 		fIsPreDeltaTest= false;
 		ParticipantTesting.reset();
@@ -397,7 +397,7 @@ public class MultiMoveTest extends RefactoringTest {
 			ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);
 			IFile file= ((IContainer)p1.getResource()).getFile(new Path("Z.txt"));
 			file.create(getStream("123"), true, null);
-			
+
 			String[] moveHandles= ParticipantTesting.createHandles(new Object[] {
 				p1, c1.getResource(), file });
 
@@ -409,7 +409,7 @@ public class MultiMoveTest extends RefactoringTest {
 			processor.setDestination(ReorgDestinationFactory.createDestination(r2));
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, false);
-			
+
 			//-- checks
 			assertEquals("status should be ok here", null, status);
 
@@ -417,9 +417,9 @@ public class MultiMoveTest extends RefactoringTest {
 			path= path.append(p1.getElementName().replace('.', '/'));
 			IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
 			String[] createHandles= ParticipantTesting.createHandles(new Object[] {target});
-			
+
 			ParticipantTesting.testCreate(createHandles);
-			
+
 			ParticipantTesting.testMove(
 				moveHandles,
 				new MoveArguments[] {
@@ -432,7 +432,7 @@ public class MultiMoveTest extends RefactoringTest {
 			delete(r2);
 		}
 	}
-	
+
 	public void testPackageMoveParticipants3() throws Exception {
 		ParticipantTesting.reset();
 		IPackageFragmentRoot r1= null;
@@ -443,9 +443,9 @@ public class MultiMoveTest extends RefactoringTest {
 			IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 			r2.createPackageFragment("p1", true, null);
 			ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);
-			
+
 			String[] moveHandles= ParticipantTesting.createHandles(new Object[] {
-				p1, c1.getResource()}); 
+				p1, c1.getResource()});
 			String[] deleteHandles= ParticipantTesting.createHandles(new Object[] {p1.getResource()});
 
 			IResource[] resources= {};
@@ -456,16 +456,16 @@ public class MultiMoveTest extends RefactoringTest {
 			processor.setDestination(ReorgDestinationFactory.createDestination(r2));
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, false);
-			
+
 			//-- checks
 			assertEquals("status should be ok here", null, status);
 
 			IPath path= r2.getResource().getFullPath();
 			path= path.append(p1.getElementName().replace('.', '/'));
 			IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-			
+
 			ParticipantTesting.testDelete(deleteHandles);
-			
+
 			ParticipantTesting.testMove(
 				moveHandles,
 				new MoveArguments[] {
@@ -477,8 +477,8 @@ public class MultiMoveTest extends RefactoringTest {
 			delete(r2);
 		}
 	}
-	
+
 	private RefactoringStatus performRefactoring(JavaMoveProcessor processor, boolean providesUndo) throws Exception {
 		return performRefactoring(new MoveRefactoring(processor), providesUndo);
-	}	
+	}
 }

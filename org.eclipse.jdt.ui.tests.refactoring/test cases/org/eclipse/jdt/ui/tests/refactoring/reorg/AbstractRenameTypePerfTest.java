@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 
 public class AbstractRenameTypePerfTest extends RepeatingRefactoringPerformanceTestCase {
@@ -33,13 +34,13 @@ public class AbstractRenameTypePerfTest extends RepeatingRefactoringPerformanceT
 	}
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
-		IPackageFragment definition= fTestProject.getSourceFolder().createPackageFragment("def", false, null); 
+		IPackageFragment definition= fTestProject.getSourceFolder().createPackageFragment("def", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package def;\n");
 		buf.append("public class A {\n");
 		buf.append("}\n");
 		ICompilationUnit result= definition.createCompilationUnit("A.java", buf.toString(), false, null);
-	
+
 		IPackageFragment references= fTestProject.getSourceFolder().createPackageFragment("ref", false, null);
 		for(int i= 0; i < numberOfCus; i++) {
 			createReferenceCu(references, i, numberOfRefs);

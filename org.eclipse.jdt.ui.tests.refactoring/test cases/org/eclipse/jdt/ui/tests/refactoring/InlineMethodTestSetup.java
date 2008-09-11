@@ -16,6 +16,8 @@ import java.util.Enumeration;
 
 import junit.framework.Test;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
@@ -30,8 +32,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-
-import org.osgi.framework.Bundle;
 
 public class InlineMethodTestSetup extends RefactoringTestSetup {
 
@@ -57,11 +57,11 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-				
+
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fInvalid= root.createPackageFragment("invalid", true, null);
 		fBugs= root.createPackageFragment("bugs_in", true, null);
-		fSimple= root.createPackageFragment("simple_in", true, null);		
+		fSimple= root.createPackageFragment("simple_in", true, null);
 		fArgument= root.createPackageFragment("argument_in", true, null);
 		fNameConflict= root.createPackageFragment("nameconflict_in", true, null);
 		fCall= root.createPackageFragment("call_in", true, null);
@@ -74,19 +74,19 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 		fGeneric= root.createPackageFragment("generic_in", true, null);
 		fBinary= root.createPackageFragment("binary_in", true, null);
 		fOperator= root.createPackageFragment("operator_in", true, null);
-		
+
 		IJavaProject javaProject= getProject();
 		IProject project= javaProject.getProject();
 		copyFilesFromResources(project, "binary/classes", "*.class");
 		copyFilesFromResources(project, "binary_src/classes", "*.java");
-		
+
 		IClasspathEntry[] classpath= javaProject.getRawClasspath();
 		IClasspathEntry[] newClasspath= new IClasspathEntry[classpath.length + 1];
 		System.arraycopy(classpath, 0, newClasspath, 0, classpath.length);
 		IClasspathEntry binaryFolder= JavaCore.newLibraryEntry(javaProject.getPath().append("binary"), javaProject.getPath().append("binary_src"), null);
 		newClasspath[classpath.length]= binaryFolder;
 		javaProject.setRawClasspath(newClasspath, null);
-		
+
 		fImport.createCompilationUnit(
 			"Provider.java",
 			"package import_in;\n" +
@@ -109,10 +109,10 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 			"	}\n" +
 			"	public int useInDecl2() {\n" +
 		  	"		return new ArrayList().size();\n" +
-			"	}\n" +	
+			"	}\n" +
 			"	public Object useInDecl3() {\n" +
 		  	"		return new java.util.HashMap();\n" +
-			"	}\n" +	
+			"	}\n" +
 			"	public void useInClassLiteral() {\n" +
 			"		Class clazz= File.class;\n" +
 			"	}\n" +
@@ -134,17 +134,17 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 			"	public void useStaticImport() {\n" +
 			"		double i= PI;\n" +
 			"	}\n" +
-			"}\n", 
+			"}\n",
 			true, null);
-			
+
 			IPackageFragment importUse= root.createPackageFragment("import_use", true, null);
 			importUse.createCompilationUnit("List.java",
 			"package import_use;" +
 			"" +
 			"public class List {" +
-			"}", 
+			"}",
 			true, null);
-			
+
 	}
 
 	private static void copyFilesFromResources(IProject project, String pathInRoot, String filePattern) throws CoreException, IOException {
@@ -155,14 +155,14 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 			folder= folder.getFolder(folders[i]);
 			folder.create(true, true, null);
 		}
-		
+
 		Bundle bundle= RefactoringTestPlugin.getDefault().getBundle();
 		Enumeration/*URL*/ classUrls= bundle.findEntries("/resources/InlineMethodWorkspace/TestCases/" + pathInRoot, filePattern, false);
 		while (classUrls.hasMoreElements()) {
 			URL classUrl= (URL) classUrls.nextElement();
 			String urlFile= classUrl.getFile();
 			String fileName= urlFile.substring(urlFile.lastIndexOf('/') + 1);
-			
+
 			IFile file= folder.getFile(new Path(fileName));
 			file.create(classUrl.openStream(), true, null);
 		}
@@ -195,35 +195,35 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	public IPackageFragment getExpressionPackage() {
 		return fExpression;
 	}
-	
+
 	public IPackageFragment getControlStatementPackage() {
 		return fControlStatement;
 	}
-	
+
 	public IPackageFragment getReceiverPackage() {
 		return fReceiver;
 	}
-	
+
 	public IPackageFragment getImportPackage() {
 		return fImport;
-	}	
+	}
 
 	public IPackageFragment getCastPackage() {
 		return fCast;
 	}
-	
+
 	public IPackageFragment getEnumPackage() {
 		return fEnum;
 	}
-	
+
 	public IPackageFragment getGenericPackage() {
 		return fGeneric;
 	}
-	
+
 	public IPackageFragment getBinaryPackage() {
 		return fBinary;
 	}
-	
+
 	public IPackageFragment getOperatorPackage() {
 		return fOperator;
 	}

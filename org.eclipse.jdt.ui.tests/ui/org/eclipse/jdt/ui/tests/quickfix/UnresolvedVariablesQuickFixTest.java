@@ -16,6 +16,9 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,21 +33,17 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameNodeCorrectionProposal;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
 public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
-	
+
 	private static final Class THIS= UnresolvedVariablesQuickFixTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
@@ -55,11 +54,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	public static Test allTests() {
 		return setUpTest(new TestSuite(THIS));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
@@ -72,23 +71,23 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
-		JavaCore.setOptions(options);			
+		JavaCore.setOptions(options);
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
-		
+
 		fJProject1= ProjectTestSetup.getProject();
-		
+
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, "", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "", null);
-		
+
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-	
+
 	public void testVarInAssignment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -100,15 +99,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-	
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -121,10 +120,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -135,10 +134,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -149,10 +148,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -161,10 +160,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-	
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
+
 	public void testVarAssingmentInIfBody() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -177,15 +176,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-	
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -199,10 +198,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -215,10 +214,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -230,10 +229,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -244,10 +243,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-	
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
+
 	public void testVarAssingmentInThenBody() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -261,15 +260,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-	
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -284,10 +283,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -301,10 +300,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -317,10 +316,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -332,10 +331,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-	
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
+
 	public void testVarInAssignmentWithGenerics() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -347,7 +346,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
@@ -368,10 +367,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -382,10 +381,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -396,10 +395,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -408,10 +407,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-	
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
+
 	public void testVarAssignedByWildcard1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -423,11 +422,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -437,10 +436,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	public void testVarAssignedByWildcard2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -452,11 +451,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -466,10 +465,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	public void testVarAssignedByWildcard3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -481,11 +480,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -495,10 +494,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	public void testVarAssignedToWildcard1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -510,11 +509,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -524,10 +523,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	public void testVarAssignedToWildcard2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -539,11 +538,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -553,10 +552,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	public void testVarAssignedToWildcard3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -568,11 +567,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -582,10 +581,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	public void testVarAssingmentInIfBodyWithGenerics() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -598,7 +597,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
@@ -620,10 +619,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -636,10 +635,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -651,10 +650,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -665,10 +664,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-	
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
+
 	public void testVarAssingmentInThenBodyWithGenerics() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -682,7 +681,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
@@ -705,10 +704,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -722,10 +721,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
@@ -738,10 +737,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
@@ -753,11 +752,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-	
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
-	
+
+
 	public void testVarInVarArgs1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -824,7 +823,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	public void testVarInVarArgs2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -875,19 +874,19 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
 		buf.append("        for (i= 0;;) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -895,40 +894,40 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("    void foo() {\n");
 		buf.append("        for (i= 0;;) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
-		buf= new StringBuffer();	
+
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
 		buf.append("        for (int i = 0;;) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(int i) {\n");
 		buf.append("        for (i= 0;;) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
-	
+
 	public void testVarInForInitializer2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -940,19 +939,19 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    int foo() {\n");
 		buf.append("        for (i= new int[] { 1 };;) {\n");
 		buf.append("        }\n");
-		buf.append("        return 0;\n");		
+		buf.append("        return 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -964,15 +963,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    int foo() {\n");
 		buf.append("        for (i= new int[] { 1 };;) {\n");
 		buf.append("        }\n");
-		buf.append("        return 0;\n");	
+		buf.append("        return 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
-		buf= new StringBuffer();	
+
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
@@ -981,14 +980,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    int foo() {\n");
 		buf.append("        for (int[] i = new int[] { 1 };;) {\n");
 		buf.append("        }\n");
-		buf.append("        return 0;\n");	
+		buf.append("        return 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -999,15 +998,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    int foo(int[] i) {\n");
 		buf.append("        for (i= new int[] { 1 };;) {\n");
 		buf.append("        }\n");
-		buf.append("        return 0;\n");	
+		buf.append("        return 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });	
-	}	
-	
-	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+	}
+
+
 	public void testVarInInitializer() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1016,27 +1015,27 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private int i= k;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		
+
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int k;\n");
 		buf.append("    private int i= k;\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1044,14 +1043,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private int i= k;\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
-	
+
 	public void testVarInOtherType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
@@ -1059,8 +1058,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("         e.var2= 2;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);		
-		
+		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1072,22 +1071,22 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		
+
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    protected int var1;\n");
 		buf.append("    public int var2;\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
@@ -1097,14 +1096,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
-	
+
 	public void testVarInSuperFieldAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F extends E {\n");
@@ -1112,8 +1111,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("         super.var2= 2;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);		
-		
+		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1128,7 +1127,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F extends E {\n");
@@ -1140,7 +1139,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1149,9 +1148,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
-	
+
 	public void testVarInSuper() throws Exception {
 		StringBuffer buf= new StringBuffer();
 
@@ -1164,7 +1163,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("         this.color= baz();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);		
+		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
@@ -1172,18 +1171,18 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class E {\n");
 		buf.append("    protected Object olor;\n");
 		buf.append("    public test2.E baz() {\n");
-		buf.append("        return null;\n");		
-		buf.append("    }\n");				
+		buf.append("        return null;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		pack3.createCompilationUnit("E.java", buf.toString(), false, null);		
-		
+		pack3.createCompilationUnit("E.java", buf.toString(), false, null);
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 2);
@@ -1191,7 +1190,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import test3.E;\n");
@@ -1204,7 +1203,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import test3.E;\n");
@@ -1217,14 +1216,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
-	}	
-	
-	
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+
 	public void testVarInAnonymous() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-				
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1242,7 +1241,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
@@ -1260,7 +1259,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
@@ -1278,7 +1277,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
 
@@ -1294,7 +1293,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
 
@@ -1310,7 +1309,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(4);
 		String preview5= getPreviewContent(proposal);
 
@@ -1326,7 +1325,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected5= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(5);
 		String preview6= getPreviewContent(proposal);
 
@@ -1340,11 +1339,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected6= buf.toString();			
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });		
+		String expected6= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 	}
-	
+
 	public void testVarInAnnotation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1384,7 +1383,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	public void testVarInAnnotation2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1424,7 +1423,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	public void testVarInAnnotation3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1465,12 +1464,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-	
-	
+
+
 	public void testLongVarRef() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
@@ -1479,8 +1478,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("         e.var.hash= 2;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);		
-		
+		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1506,7 +1505,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
@@ -1518,15 +1517,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("         e.var.mash= 2;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();			
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2}, new String[] { expected1, expected2});		
-	}	
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2}, new String[] { expected1, expected2});
+	}
 
 	public void testVarAndTypeRef() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.File;\n");
@@ -1535,7 +1534,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);		
+		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
@@ -1543,7 +1542,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		int i= 0;
 		String[] expected= new String[proposals.size()];
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.File;\n");
@@ -1555,19 +1554,19 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[i++]= buf.toString();
-		
-		
+
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("public class F {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        Object Fixe;\n");					
+		buf.append("        Object Fixe;\n");
 		buf.append("        char ch= Fixe.pathSeparatorChar;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[i++]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.File;\n");
@@ -1577,7 +1576,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[i++]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.File;\n");
@@ -1589,7 +1588,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[i++]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -1597,7 +1596,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		expected[i++]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -1605,7 +1604,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		expected[i++]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -1613,7 +1612,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		expected[i++]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.File;\n");
@@ -1622,15 +1621,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("        char ch= File.pathSeparatorChar;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[i++]= buf.toString();	
-		
-		assertExpectedExistInProposals(proposals, expected);	
+		expected[i++]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	public void testVarWithGenericType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -1639,8 +1638,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("         e.var2= new ArrayList<String>();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);		
-		
+		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1652,12 +1651,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
-		
+
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -1667,10 +1666,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    public ArrayList<String> var2;\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -1681,15 +1680,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
 	}
 
 
 	public void testSimilarVariableNames1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
@@ -1699,11 +1698,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private String bla;\n");
 		buf.append("    private String cout;\n");
 		buf.append("    public int foo() {\n");
-		buf.append("        return count;\n");		
-		buf.append("    }\n");				
+		buf.append("        return count;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
@@ -1712,13 +1711,13 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				proposals.remove(i);
 			}
 		}
-		
+
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class E {\n");
@@ -1727,14 +1726,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private String bla;\n");
 		buf.append("    private String cout;\n");
 		buf.append("    public int foo() {\n");
-		buf.append("        return CON1;\n");		
-		buf.append("    }\n");				
+		buf.append("        return CON1;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class E {\n");
@@ -1743,17 +1742,17 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private String bla;\n");
 		buf.append("    private String cout;\n");
 		buf.append("    public int foo() {\n");
-		buf.append("        return cout;\n");		
-		buf.append("    }\n");				
+		buf.append("        return cout;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
-	
+
 	public void testSimilarVariableNames2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
@@ -1765,11 +1764,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private String bla;\n");
 		buf.append("    private String cout;\n");
 		buf.append("    public void foo(int x) {\n");
-		buf.append("        count= x;\n");		
-		buf.append("    }\n");				
+		buf.append("        count= x;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
@@ -1778,13 +1777,13 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				proposals.remove(i);
 			}
 		}
-		
+
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class E {\n");
@@ -1795,14 +1794,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private String bla;\n");
 		buf.append("    private String cout;\n");
 		buf.append("    public void foo(int x) {\n");
-		buf.append("        var2= x;\n");		
-		buf.append("    }\n");				
+		buf.append("        var2= x;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class E {\n");
@@ -1813,17 +1812,17 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private String bla;\n");
 		buf.append("    private String cout;\n");
 		buf.append("    public void foo(int x) {\n");
-		buf.append("        cout= x;\n");		
-		buf.append("    }\n");				
+		buf.append("        cout= x;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
-	
+
 	public void testSimilarVariableNamesMultipleOcc() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
@@ -1831,14 +1830,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    private int cout;\n");
 		buf.append("    public void setCount(int x) {\n");
 		buf.append("        count= x;\n");
-		buf.append("        count++;\n");	
+		buf.append("        count++;\n");
 		buf.append("    }\n");
 		buf.append("    public int getCount() {\n");
-		buf.append("        return count;\n");	
-		buf.append("    }\n");			
+		buf.append("        return count;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
@@ -1847,30 +1846,30 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				proposals.remove(i);
 			}
 		}
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int cout;\n");
 		buf.append("    public void setCount(int x) {\n");
 		buf.append("        cout= x;\n");
-		buf.append("        cout++;\n");	
+		buf.append("        cout++;\n");
 		buf.append("    }\n");
 		buf.append("    public int getCount() {\n");
-		buf.append("        return cout;\n");	
-		buf.append("    }\n");			
+		buf.append("        return cout;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 
 		assertEqualString( preview1, expected1);
 	}
-	
+
 	public void testVarMultipleOccurances1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1878,16 +1877,16 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
 		buf.append("        for (i= 0; i > 9; i++) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal localProposal= null;
 		for (int i = 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
@@ -1896,21 +1895,21 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			}
 		}
 		assertNotNull(localProposal);
-		
+
 		String preview= getPreviewContent(localProposal);
-		buf= new StringBuffer();	
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
 		buf.append("        for (int i = 0; i > 9; i++) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 
-		assertEqualString(preview, expected);	
-	}	
-	
+		assertEqualString(preview, expected);
+	}
+
 	public void testVarMultipleOccurances2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1919,16 +1918,16 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    void foo() {\n");
 		buf.append("        for (i= 0; i > 9;) {\n");
 		buf.append("            i++;\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal localProposal= null;
 		for (int i = 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
@@ -1937,9 +1936,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			}
 		}
 		assertNotNull(localProposal);
-		
+
 		String preview= getPreviewContent(localProposal);
-		buf= new StringBuffer();	
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -1950,9 +1949,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected= buf.toString();
 
-		assertEqualString(preview, expected);	
+		assertEqualString(preview, expected);
 	}
-	
+
 	public void testVarMultipleOccurances3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1965,12 +1964,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal localProposal= null;
 		for (int i = 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
@@ -1979,9 +1978,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			}
 		}
 		assertNotNull(localProposal);
-		
+
 		String preview= getPreviewContent(localProposal);
-		buf= new StringBuffer();	
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -1993,8 +1992,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected= buf.toString();
 
-		assertEqualString(preview, expected);	
-	}	
+		assertEqualString(preview, expected);
+	}
 
 	public void testVarInArray() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -2007,12 +2006,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
@@ -2025,10 +2024,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
-	
+
 	public void testVarInEnumSwitch() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2037,7 +2036,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    RED\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("Colors.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2048,12 +2047,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
@@ -2063,7 +2062,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    RED, BLUE\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
@@ -2077,10 +2076,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
-	
+
 	public void testVarInMethodInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2093,15 +2092,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2116,7 +2115,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2127,10 +2126,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2142,10 +2141,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2158,9 +2157,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
+
 	public void testVarInConstructurInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2173,15 +2172,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2196,7 +2195,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2207,10 +2206,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2222,10 +2221,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
-	
+
 	public void testVarInSuperConstructurInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2244,15 +2243,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends F {\n");
@@ -2266,7 +2265,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends F {\n");
@@ -2275,10 +2274,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends F {\n");
@@ -2289,10 +2288,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
-	
+
 	public void testVarInClassInstanceCreation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2311,15 +2310,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2333,7 +2332,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2342,10 +2341,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2356,10 +2355,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2369,10 +2368,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
-	
+
 	public void testVarInArrayAccess() throws Exception {
 		// bug 194913
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
@@ -2440,7 +2439,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	public void testVarWithMethodName1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2452,12 +2451,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
@@ -2470,10 +2469,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
-	
+
 	public void testVarWithMethodName2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2483,15 +2482,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("        return length;\n");
 		buf.append("    }\n");
 		buf.append("    int getLength() {\n");
-		buf.append("        return 1;\n");	
-		buf.append("    }\n");	
+		buf.append("        return 1;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2499,14 +2498,14 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("        return getLength();\n");
 		buf.append("    }\n");
 		buf.append("    int getLength() {\n");
-		buf.append("        return 1;\n");	
-		buf.append("    }\n");	
+		buf.append("        return 1;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	public void testSimilarVarsAndVisibility() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

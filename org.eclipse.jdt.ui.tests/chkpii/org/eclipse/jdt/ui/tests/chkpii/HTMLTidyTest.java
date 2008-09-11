@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -35,30 +35,30 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 /**
  * Runs the 'tidy' command (e.g. from Cygwin) on HTML files in the workspace
  * and collects HTMLTidy's errors and warnings into /chkpiiResults/tidy.txt
- * 
+ *
  * Note: Currently disabled.
  */
 public class HTMLTidyTest extends TestCase {
 
 	private static final int TIDY_TIMEOUT= 10000;
 	private static final Pattern EXCLUSION_PATTERN_TABLE_SUMMARY= Pattern.compile("line \\d+ column \\d+ - Warning: <table> lacks \"summary\" attribute");
-	
+
 	private static final Pattern EXCLUSION_PATTERN_EMPTY_TAG= Pattern.compile("line \\d+ column \\d+ - Warning: trimming empty <\\w+>");
 	private static final Pattern EXCLUSION_PATTERN_MALFORMED_URI= Pattern.compile("line \\d+ column \\d+ - Warning: <a> escaping malformed URI reference");
 	private static final Pattern eXCLUSION_PATTERN_SCRIPT_TYPE= Pattern.compile("line \\d+ column \\d+ - Warning: <script> inserting \"type\" attribute");
 	private static final Pattern eXCLUSION_PATTERN_IMG_LACKS_ALT= Pattern.compile("line \\d+ column \\d+ - Warning: <img> lacks \"alt\" attribute");
-	
+
 	private int fworkspacePathLength;
 	private StringMatcher[] fIgnores;
 	private Writer fTidyResults;
-	
+
 	/**
 	 * Main method for manual testing of a file or folder selected in the workspace.
 	 * To run, create a Java launch configuration with program argument<br>
 	 * <code>"${resource_loc}"</code><br>
 	 * (including double quotes!).
-	 * 
-	 * @param args 1 argument: Absolute path to a file or folder  
+	 *
+	 * @param args 1 argument: Absolute path to a file or folder
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
@@ -84,7 +84,7 @@ public class HTMLTidyTest extends TestCase {
 		String startTime= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 		fTidyResults.write(getClass().getName() + " started at " + startTime + "\n");
 		fIgnores= getIgnores();
-		
+
 		try {
 			boolean ok= true;
 //			ok&= checkFolder(new File(hostWorkspace, "org.eclipse.jdt.doc.user"), tidyResults);
@@ -92,9 +92,9 @@ public class HTMLTidyTest extends TestCase {
 //			ok&= checkFolder(new File(hostWorkspace, "org.eclipse.platform.doc.user"), tidyResults);
 //			ok&= checkFolder(new File(hostWorkspace, "org.eclipse.platform.doc.isv"), tidyResults);
 //			ok&= checkFolder(new File(hostWorkspace + "/org.eclipse.jdt.doc.isv/guide"));
-			
+
 			ok&= checkFolder(hostWorkspace);
-			
+
 			assertTrue("See " + tidy.getAbsolutePath(), ok);
 		} finally {
 			fTidyResults.flush();
@@ -116,7 +116,7 @@ public class HTMLTidyTest extends TestCase {
 				if (first != '/' && first != '*') { // relative matches
 					// emulate CHKPII specification:
 					// matchers.add(new StringMatcher(fWorkspacePath + "/" + line, true, false));
-					
+
 					// emulate actual CHKPII implementation:
 					matchers.add(new StringMatcher("*/" + line, true, false));
 				}
@@ -125,7 +125,7 @@ public class HTMLTidyTest extends TestCase {
 		}
 		return (StringMatcher[]) matchers.toArray(new StringMatcher[matchers.size()]);
 	}
-	
+
 	private boolean isIgnored(File file) {
 		String relativePath= file.getAbsolutePath().substring(fworkspacePathLength);
 		relativePath= relativePath.replace('\\', '/');
@@ -138,7 +138,7 @@ public class HTMLTidyTest extends TestCase {
 	}
 
 	private boolean checkFolder(File folder) throws Exception {
-		
+
 		File[] files= folder.listFiles();
 		boolean success= true;
 		for (int i= 0; i < files.length; i++) {

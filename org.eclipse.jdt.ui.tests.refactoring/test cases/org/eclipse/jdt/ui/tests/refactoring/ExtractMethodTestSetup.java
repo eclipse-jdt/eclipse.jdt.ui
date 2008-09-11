@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public class ExtractMethodTestSetup extends RefactoringTestSetup {
-	
+
 	private IPackageFragment fSelectionPackage;
 	private IPackageFragment fInvalidSelectionPackage;
 	private IPackageFragment fValidSelectionPackage;
@@ -41,16 +41,16 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fEnumsPackage;
 	private IPackageFragment fVarargsPackage;
 	private IPackageFragment fFieldInitializerPackage;
-	
+
 	public ExtractMethodTestSetup(Test test) {
 		super(test);
-	}	
-	
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
-			
+
 		RefactoringCore.getUndoManager().flush();
-		
+
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fSelectionPackage= root.createPackageFragment("selection", true, null);
 		fInvalidSelectionPackage= root.createPackageFragment("invalidSelection", true, null);
@@ -73,14 +73,14 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 		fEnumsPackage= root.createPackageFragment("enums_in", true, null);
 		fVarargsPackage= root.createPackageFragment("varargs_in", true, null);
 		fFieldInitializerPackage= root.createPackageFragment("fieldInitializer_in", true, null);
-		
+
 		ICompilationUnit cu= fExpressionPackage.createCompilationUnit(
-			"A.java", 
+			"A.java",
 			"package expression_in; import java.io.File; class A { public File getFile() { return null; } public void useFile(File file) { } }",
 			true, null);
-			
+
 		cu= fExpressionPackage.createCompilationUnit(
-			"B.java", 
+			"B.java",
 			"package expression_in; import java.util.List; public class B { public List[] foo() { return null; } }",
 			true, null);
 		cu.save(null, true);
@@ -89,35 +89,35 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	public IPackageFragment getExpressionPackage() {
 		return fExpressionPackage;
 	}
-	
+
 	public IPackageFragment getInvalidSelectionPackage() {
 		return fInvalidSelectionPackage;
 	}
-	
+
 	public IPackageFragment getLocalsPackage() {
 		return fLocalsPackage;
 	}
-	
+
 	public IPackageFragment getNestedPackage() {
 		return fNestedPackage;
 	}
-	
+
 	public IPackageFragment getReturnPackage() {
 		return fReturnPackage;
 	}
-	
+
 	public IPackageFragment getSelectionPackage() {
 		return fSelectionPackage;
 	}
-	
+
 	public IPackageFragment getSemicolonPackage() {
 		return fSemicolonPackage;
 	}
-	
+
 	public IPackageFragment getTryPackage() {
 		return fTryPackage;
 	}
-	
+
 	public IPackageFragment getValidSelectionPackage() {
 		return fValidSelectionPackage;
 	}
@@ -125,7 +125,7 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	public IPackageFragment getValidSelectionCheckedPackage() {
 		return fValidSelectionCheckedPackage;
 	}
-	
+
 	public IPackageFragment getBranchPackage() {
 		return fBranchPackage;
 	}
@@ -136,7 +136,7 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 
 	public IPackageFragment getWikiPackage() {
 		return fWikiPackage;
-	}	
+	}
 
 	public IPackageFragment getParameterNamePackage() {
 		return fParameterNamePackage;
@@ -153,21 +153,21 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	public IPackageFragment getDestinationPackage() {
 		return fDestinationPackage;
 	}
-	
+
 	public IPackageFragment getGenericsPackage() {
 		return fGenericsPackage;
-	}	
-	
+	}
+
 	public IPackageFragment getEnumsPackage() {
 		return fEnumsPackage;
-	}	
-	
+	}
+
 	public IPackageFragment getVarargsPackage() {
 		return fVarargsPackage;
-	}	
-	
+	}
+
 	public IPackageFragment getFieldInitializerPackage() {
 		return fFieldInitializerPackage;
-	}	
+	}
 }
 

@@ -28,21 +28,21 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 
 public class JavaTestPlugin extends Plugin {
-	
+
 	private static JavaTestPlugin fgDefault;
-	
+
 	public JavaTestPlugin() {
 		fgDefault= this;
 	}
-	
+
 	public static JavaTestPlugin getDefault() {
 		return fgDefault;
 	}
-	
+
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	
+
 	public static void enableAutobuild(boolean enable) throws CoreException {
 		// disable auto build
 		IWorkspace workspace= JavaTestPlugin.getWorkspace();
@@ -50,7 +50,7 @@ public class JavaTestPlugin extends Plugin {
 		desc.setAutoBuilding(enable);
 		workspace.setDescription(desc);
 	}
-	
+
 	public File getFileInPlugin(IPath path) throws CoreException {
 		try {
 			URL installURL= new URL(getBundle().getEntry("/"), path.toString());
@@ -60,7 +60,7 @@ public class JavaTestPlugin extends Plugin {
 			throw new CoreException(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getMessage(), e));
 		}
 	}
-	
+
 	public static String getPluginId() {
 		return "org.eclipse.jdt.ui.tests";
 	}
@@ -68,7 +68,7 @@ public class JavaTestPlugin extends Plugin {
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void logErrorMessage(String message) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
 	}
@@ -82,11 +82,11 @@ public class JavaTestPlugin extends Plugin {
 		multi.add(status);
 		log(multi);
 	}
-	
+
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getMessage(), e)); 
-	}	
-	
-		
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getMessage(), e));
+	}
+
+
 
 }

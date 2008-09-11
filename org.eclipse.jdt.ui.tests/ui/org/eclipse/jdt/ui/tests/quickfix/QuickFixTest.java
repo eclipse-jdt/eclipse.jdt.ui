@@ -19,6 +19,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.StringAsserts;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
@@ -44,6 +47,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -58,11 +62,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposa
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTemplateProposal;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.StringAsserts;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  */
@@ -145,11 +144,11 @@ public class QuickFixTest extends TestCase {
 		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
 	}
 
-	
+
 	public static void assertCommandIdDoesNotExists(List actualProposals, String commandId) {
 		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
 	}
-		
+
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
 		List types= astRoot.types();
 		for (int i= 0; i < types.size(); i++) {

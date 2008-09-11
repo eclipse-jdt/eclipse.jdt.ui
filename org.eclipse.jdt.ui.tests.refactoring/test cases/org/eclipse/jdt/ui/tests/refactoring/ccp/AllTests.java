@@ -14,7 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllTests {
-	
+
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All Reorg Tests");
 		suite.addTest(DeleteTest.suite());
@@ -23,7 +23,7 @@ public class AllTests {
 		suite.addTest(CopyTest.suite());
 		suite.addTest(MoveTest.suite());
 		suite.addTest(MultiMoveTest.suite());
-		
+
 		//------old reorg tests
 		suite.addTest(CopyResourcesToClipboardActionTest.suite());
 

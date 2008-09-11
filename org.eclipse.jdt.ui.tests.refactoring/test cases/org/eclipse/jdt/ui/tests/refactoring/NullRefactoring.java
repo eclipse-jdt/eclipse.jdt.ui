@@ -22,7 +22,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * useful for tests
  */
 public class NullRefactoring extends Refactoring {
-	
+
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
@@ -44,7 +44,7 @@ public class NullRefactoring extends Refactoring {
 		pm.done();
 		return new RefactoringStatus();
 	}
-	
+
 	public String getName() {
 		return "Null Refactoring";
 	}

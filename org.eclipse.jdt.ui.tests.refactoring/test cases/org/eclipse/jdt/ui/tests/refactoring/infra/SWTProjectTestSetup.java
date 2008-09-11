@@ -15,18 +15,18 @@ import junit.framework.Test;
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 
 public class SWTProjectTestSetup extends RefactoringPerformanceTestSetup {
-	
+
 	private SWTTestProject fTestProject;
-	
+
 	public SWTProjectTestSetup(Test test) {
 		super(test);
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fTestProject= new SWTTestProject();
 	}
-	
+
 	protected void tearDown() throws Exception {
 		fTestProject.delete();
 		super.tearDown();

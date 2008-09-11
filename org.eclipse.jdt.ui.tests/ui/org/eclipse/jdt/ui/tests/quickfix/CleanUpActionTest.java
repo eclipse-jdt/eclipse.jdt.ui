@@ -26,10 +26,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  * @since 3.4
@@ -58,7 +58,7 @@ public class CleanUpActionTest extends CleanUpTestCase {
 		buf.append("    private int fieldA;\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-		
+
 		IWorkbenchPartSite site= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite();
 		MultiSortMembersAction action= new MultiSortMembersAction(site) {
 			/**

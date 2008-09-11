@@ -27,7 +27,7 @@ public class LeakTestSuite extends TestSuite {
 	/**
 	 * Returns the suite.  This is required to
 	 * use the JUnit Launcher.
-	 * 
+	 *
 	 * @return the test suite.
 	 */
 	public static Test suite() {
@@ -43,6 +43,6 @@ public class LeakTestSuite extends TestSuite {
 		addTest(UndoManagerLeakTest.suite());
 		addTest(TextViewerUndoManagerLeakTest.suite());
 	}
-	
+
 }
 

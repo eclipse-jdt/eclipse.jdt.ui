@@ -13,9 +13,10 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -25,6 +26,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.part.FileEditorInput;
+
 import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -38,14 +40,14 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 
 		public TestCorrectionMarkerResolution() {
 		}
-	
+
 		/* (non-Javadoc)
 		 * @see IMarkerResolution#getLabel()
 		 */
 		public String getLabel() {
 			return "Change to Uppercase";
 		}
-	
+
 		/* (non-Javadoc)
 		 * @see IMarkerResolution#run(IMarker)
 		 */
@@ -54,7 +56,7 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 			IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(input);
 			if (model != null) {
 				// resource is open in editor
-				
+
 				Position pos= findProblemPosition(model, marker);
 				if (pos != null) {
 					IDocument doc= JavaUI.getDocumentProvider().getDocument(input);
@@ -75,7 +77,7 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 				e.printStackTrace();
 			}
 		}
-		
+
 		private Position findProblemPosition(IAnnotationModel model, IMarker marker) {
 			Iterator iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {

@@ -32,14 +32,14 @@ public class OrderedTestSuite extends TestSuite {
 	 */
 	public OrderedTestSuite(final Class testClass, String[] testMethods) throws Exception {
 		super(testClass.getName());
-		
+
 		Set existingMethods= new HashSet();
 		Method[] methods= testClass.getMethods(); // just public member methods
 		for (int i= 0; i < methods.length; i++) {
 			Method method= methods[i];
 			existingMethods.add(method.getName());
 		}
-		
+
 		for (int i= 0; i < testMethods.length; i++) {
 			final String testMethod= testMethods[i];
 			if (existingMethods.remove(testMethod)) {
@@ -50,7 +50,7 @@ public class OrderedTestSuite extends TestSuite {
 						+ "'.")));
 			}
 		}
-		
+
 		for (Iterator iter= existingMethods.iterator(); iter.hasNext();) {
 			String existingMethod= (String) iter.next();
 			if (existingMethod.startsWith("test")) {
@@ -59,7 +59,7 @@ public class OrderedTestSuite extends TestSuite {
 						+ testClass.getName() + "'.")));
 			}
 		}
-		
+
 	}
 
 	public static Test error(String testMethod, Exception exception) {

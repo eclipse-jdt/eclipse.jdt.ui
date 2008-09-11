@@ -18,6 +18,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.StringAsserts;
+
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -35,15 +39,11 @@ import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.StringAsserts;
-
 
 public class TypeInfoTest extends TestCase {
-	
+
 	private static final Class THIS= TypeInfoTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
@@ -62,31 +62,31 @@ public class TypeInfoTest extends TestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new TypeInfoTest("test1"));
 			return new ProjectTestSetup(suite);
-		}	
+		}
 	}
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject1));
-		
+
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
-		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject2));		
+		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject2));
 	}
 
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
-		JavaProjectHelper.delete(fJProject2);		
-		
+		JavaProjectHelper.delete(fJProject2);
+
 	}
 
 
 	public void test1() throws Exception {
-		
+
 		// add Junit source to project 2
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
-		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);	
+		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		// source folder
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("com.oti", true, null);
@@ -106,32 +106,32 @@ public class TypeInfoTest extends TestCase {
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
-			null, 
+			null,
 			0,
-			new char[] {'V'}, 
-			SearchPattern.R_PREFIX_MATCH, 
-			IJavaSearchConstants.TYPE, 
-			scope, 
-			requestor, 
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-			null); 
+			new char[] {'V'},
+			SearchPattern.R_PREFIX_MATCH,
+			IJavaSearchConstants.TYPE,
+			scope,
+			requestor,
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null);
 		findTypeRef(result, "com.oti.V");
 		findTypeRef(result, "com.oti.V.VInner");
-		
+
 		findTypeRef(result, "java.lang.VerifyError");
 		findTypeRef(result, "java.lang.VirtualMachineError");
 		findTypeRef(result, "java.lang.Void");
 		findTypeRef(result, "java.util.Vector");
-		
+
 		findTypeRef(result, "junit.samples.VectorTest");
 		findTypeRef(result, "junit.runner.Version");
 
-		
+
 		for (int i= 0; i < result.size(); i++) {
 			TypeNameMatch ref= (TypeNameMatch) result.get(i);
 			//System.out.println(ref.getTypeName());
 			assertResolve(ref);
-			
+
 		}
 		assertTrue("Should find 8 elements, is " + result.size(), result.size() == 8);
 
@@ -148,7 +148,7 @@ public class TypeInfoTest extends TestCase {
 		}
 		StringAsserts.assertEqualString(resolvedType.getFullyQualifiedName('.'), ref.getFullyQualifiedName());
 	}
-	
+
 	private void findTypeRef(List refs, String fullname) {
 		for (int i= 0; i <refs.size(); i++) {
 			TypeNameMatch curr= (TypeNameMatch) refs.get(i);
@@ -158,17 +158,17 @@ public class TypeInfoTest extends TestCase {
 		}
 		assertTrue("Type not found: " + fullname, false);
 	}
-		
-	
-	public void test2() throws Exception {	
+
+
+	public void test2() throws Exception {
 		ArrayList result= new ArrayList();
-		
+
 		// add Junit source to project 2
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
 		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
-		
-		
+
+
 		IJavaProject[] elements= new IJavaProject[] { fJProject2 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		TypeNameMatchRequestor requestor= new TypeNameMatchCollector(result);
@@ -177,13 +177,13 @@ public class TypeInfoTest extends TestCase {
 		engine.searchAllTypeNames(
 			null,
 			0,
-			new char[] {'T'}, 
-			SearchPattern.R_PREFIX_MATCH, 
-			IJavaSearchConstants.TYPE, 
-			scope, 
-			requestor, 
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-			null); 
+			new char[] {'T'},
+			SearchPattern.R_PREFIX_MATCH,
+			IJavaSearchConstants.TYPE,
+			scope,
+			requestor,
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null);
 
 		findTypeRef(result, "junit.extensions.TestDecorator");
 		findTypeRef(result, "junit.framework.Test");
@@ -203,9 +203,9 @@ public class TypeInfoTest extends TestCase {
 	public void test_bug44772() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 
-		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(lib.getPath()), null, null); // as internal 
+		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(lib.getPath()), null, null); // as internal
 		JavaProjectHelper.addLibrary(fJProject1, Path.fromOSString(lib.getPath())); // and as external
-		
+
 		ArrayList result= new ArrayList();
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
@@ -217,16 +217,16 @@ public class TypeInfoTest extends TestCase {
 			null,
 			0,
 			"Foo".toCharArray(),
-			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
-			IJavaSearchConstants.TYPE, 
-			scope, 
-			requestor, 
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-			null); 
+			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
+			IJavaSearchConstants.TYPE,
+			scope,
+			requestor,
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null);
 		assertEquals("result size", result.size(), 2);
 		IType type1= ((TypeNameMatch) result.get(0)).getType();
 		IType type2= ((TypeNameMatch) result.get(1)).getType();
-		
+
 		assertNotNull(type1);
 		assertNotNull(type2);
 		assertFalse(type1.equals(type2));

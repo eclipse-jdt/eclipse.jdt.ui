@@ -11,13 +11,16 @@
 
 package org.eclipse.jdt.ui.tests.performance;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.PerformanceTestCase;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -30,9 +33,6 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.PerformanceTestCase;
-
 public class JdtPerformanceTestCase extends PerformanceTestCase {
 
 	private static class Requestor extends TypeNameRequestor {
@@ -41,7 +41,7 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 	public JdtPerformanceTestCase() {
 		super();
 	}
-	
+
 	public JdtPerformanceTestCase(String name) {
 		super(name);
 	}
@@ -59,8 +59,8 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		}
 		// Join indexing
 		new SearchEngine().searchAllTypeNames(
-				null, 
-				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
+				null,
+				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent
 				SearchPattern.R_EXACT_MATCH,
 				IJavaSearchConstants.CLASS,
 				SearchEngine.createJavaSearchScope(new IJavaElement[0]),
@@ -78,7 +78,7 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		runEventQueue();
 		while (System.currentTimeMillis() < startTime)
 			runEventQueue(intervalTime);
-		
+
 		long endTime= maxTime > 0  && maxTime < Long.MAX_VALUE ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
 		boolean calm= allJobsQuiet();
 		while (!calm && System.currentTimeMillis() < endTime) {
@@ -87,14 +87,14 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		}
 		return calm;
 	}
-	
+
 	private static void sleep(int intervalTime) {
 		try {
 			Thread.sleep(intervalTime);
 		} catch (InterruptedException e) {
 		}
 	}
-	
+
 	private static boolean allJobsQuiet() {
 		IJobManager jobManager= Job.getJobManager();
 		Job[] jobs= jobManager.find(null);
@@ -106,19 +106,19 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		}
 		return true;
 	}
-	
+
 	private static void runEventQueue() {
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window != null)
 			runEventQueue(window.getShell());
 	}
-	
+
 	private static void runEventQueue(Shell shell) {
 		while (shell.getDisplay().readAndDispatch()) {
 			// do nothing
 		}
 	}
-	
+
 	private static void runEventQueue(long minTime) {
 		long nextCheck= System.currentTimeMillis() + minTime;
 		while (System.currentTimeMillis() < nextCheck) {

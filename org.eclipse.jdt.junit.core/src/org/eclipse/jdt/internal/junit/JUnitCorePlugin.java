@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.junit.model.JUnitModel;
  * The plug-in runtime class for the JUnit plug-in.
  */
 public class JUnitPlugin extends AbstractUIPlugin {
-	
+
 	/**
 	 * The single instance of this plug-in runtime class.
 	 */
@@ -68,15 +68,15 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
-	
+
 	public final static String JUNIT4_ANNOTATION_NAME= "org.junit.Test"; //$NON-NLS-1$
 	public static final String SIMPLE_TEST_INTERFACE_NAME= "Test"; //$NON-NLS-1$
-	
+
 	/**
 	 * The class path variable referring to the junit home location
 	 */
 	public final static String JUNIT_HOME= "JUNIT_HOME"; //$NON-NLS-1$
-	
+
 	/**
 	 * The class path variable referring to the junit source location
      * @since 3.2
@@ -85,15 +85,15 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	private static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
 	private static final String HISTORY_DIR_NAME= "history"; //$NON-NLS-1$
-	
+
 	private final JUnitModel fJUnitModel= new JUnitModel();
-	
+
 
 	/**
 	 * List storing the registered test run listeners
 	 */
 	private List/*<ITestRunListener>*/ fLegacyTestRunListeners;
-	
+
 	/**
 	 * List storing the registered test run listeners
 	 */
@@ -113,7 +113,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		fgPlugin= this;
 		fNewTestRunListeners= new ListenerList();
 	}
-	
+
 	public static JUnitPlugin getDefault() {
 		return fgPlugin;
 	}
@@ -127,7 +127,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the active workbench window
-	 * 
+	 *
 	 * @return the active workbench window
 	 */
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
@@ -166,11 +166,11 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	public static Image createImage(String path) {
 		return getImageDescriptor(path).createImage();
 	}
-	
+
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
 	 * are retrieved from the *lcl16 folders.
-	 * 
+	 *
 	 * @param action the action
 	 * @param iconName the icon name
 	 */
@@ -182,12 +182,12 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		ImageDescriptor id= createImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
 		if (id != null)
 			action.setDisabledImageDescriptor(id);
-	
+
 		ImageDescriptor descriptor= createImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
 		action.setHoverImageDescriptor(descriptor);
-		action.setImageDescriptor(descriptor); 
+		action.setImageDescriptor(descriptor);
 	}
-	
+
 	/*
 	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle. The path can
 	 * contain variables like $NL$.
@@ -199,13 +199,13 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		IPath path= ICONS_PATH.append(pathPrefix).append(imageName);
 		return createImageDescriptor(JUnitPlugin.getDefault().getBundle(), path, useMissingImageDescriptor);
 	}
-	
+
 	/**
 	 * Creates an image descriptor for the given path in a bundle. The path can
 	 * contain variables like $NL$. If no image could be found,
 	 * <code>useMissingImageDescriptor</code> decides if either the 'missing
 	 * image descriptor' is returned or <code>null</code>.
-	 * 
+	 *
 	 * @param bundle a bundle
 	 * @param path path in the bundle
 	 * @param useMissingImageDescriptor if <code>true</code>, returns the shared image descriptor
@@ -225,7 +225,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @see AbstractUIPlugin#start(BundleContext)
 	 */
@@ -247,7 +247,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		}
 		fBundleContext= null;
 	}
-	
+
 	public static JUnitModel getModel() {
 		return getDefault().fJUnitModel;
 	}
@@ -263,7 +263,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			return;
 		}
 		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
-		MultiStatus status= new MultiStatus(PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$ 	
+		MultiStatus status= new MultiStatus(PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$
 
 		for (int i= 0; i < configs.length; i++) {
 			try {
@@ -321,7 +321,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the bundle for a given bundle name,
 	 * regardless whether the bundle is resolved or not.
-	 * 
+	 *
 	 * @param bundleName the bundle name
 	 * @return the bundle
 	 * @since 3.2
@@ -332,10 +332,10 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			return bundles[0];
 		return null;
 	}
-	
+
 	/**
 	 * Returns the bundles for a given bundle name,
-	 * 
+	 *
 	 * @param bundleName the bundle name
 	 * @param version the version of the bundle
 	 * @return the bundles of the given name
@@ -344,7 +344,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		Bundle[] bundles= Platform.getBundles(bundleName, version);
 		if (bundles != null)
 			return bundles;
-		
+
 		// Accessing unresolved bundle
 		ServiceReference serviceRef= fBundleContext.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin admin= (PackageAdmin)fBundleContext.getService(serviceRef);
@@ -360,9 +360,9 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * @deprecated to avoid deprecation warnings
 	 */
 	public void addTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
-		if (fLegacyTestRunListeners == null) 
+		if (fLegacyTestRunListeners == null)
 			loadTestRunListeners();
-		
+
 		for (Iterator iter= fLegacyTestRunListeners.iterator(); iter.hasNext();) {
 			Object o= iter.next();
 			if (o == newListener)
@@ -377,10 +377,10 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * @deprecated to avoid deprecation warnings
 	 */
 	public void removeTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
-		if (fLegacyTestRunListeners != null) 
+		if (fLegacyTestRunListeners != null)
 			fLegacyTestRunListeners.remove(newListener);
 	}
-	
+
 	/**
 	 * @return a <code>ListenerList</code> of all <code>TestRunListener</code>s
 	 */
@@ -391,7 +391,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	public static boolean isStopped() {
 		return fIsStopped;
 	}
-	
+
 	public IDialogSettings getDialogSettingsSection(String name) {
 		IDialogSettings dialogSettings= getDialogSettings();
 		IDialogSettings section= dialogSettings.getSection(name);

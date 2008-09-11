@@ -50,7 +50,7 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
  * TODO: some methods are duplicated from org.eclipse.jdt.ui
  */
 public class JUnitStubUtility {
-	
+
 	public static GenStubSettings getCodeGenerationSettings(IJavaProject project) {
 		return new GenStubSettings(project);
 	}
@@ -59,24 +59,24 @@ public class JUnitStubUtility {
 		public boolean callSuper;
 		public boolean methodOverwrites;
 		public boolean noBody;
-		
+
 		public boolean createComments;
 		public boolean useKeywordThis;
-					
+
 		public final int tabWidth;
-		
+
 		public GenStubSettings(IJavaProject project) {
 			this.createComments= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
 			this.useKeywordThis= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
 			this.tabWidth= IndentManipulation.getTabWidth(project.getOptions(true));
 		}
-	}	
+	}
 
 	public static String formatCompilationUnit(IJavaProject project, String sourceString, String lineDelim) {
 		return codeFormat(project, sourceString, CodeFormatter.K_COMPILATION_UNIT, 0, lineDelim);
 	}
-	
-	
+
+
 	public static String codeFormat(IJavaProject project, String sourceString, int kind, int initialIndentationLevel, String lineDelim) {
 		CodeFormatter formatter= ToolFactory.createCodeFormatter(project.getOptions(true));
 		TextEdit edit= formatter.format(kind, sourceString, 0, sourceString.length(), initialIndentationLevel, lineDelim);
@@ -111,9 +111,9 @@ public class JUnitStubUtility {
 		String[] paramNames= method.getParameterNames();
 		String[] excTypes= method.getExceptionTypes();
 		String retTypeSig= method.getReturnType();
-		
-		int lastParam= paramTypes.length -1;		
-		
+
+		int lastParam= paramTypes.length -1;
+
 		String comment= null;
 		if (settings.createComments) {
 			if (method.isConstructor()) {
@@ -132,7 +132,7 @@ public class JUnitStubUtility {
 		if (extraAnnotations != null) {
 			buf.append(extraAnnotations).append('\n');
 		}
-		
+
 		int flags= method.getFlags();
 		if (Flags.isPublic(flags) || (declaringtype.isInterface() && !settings.noBody)) {
 			buf.append("public "); //$NON-NLS-1$
@@ -143,7 +143,7 @@ public class JUnitStubUtility {
 		}
 		if (Flags.isSynchronized(flags)) {
 			buf.append("synchronized "); //$NON-NLS-1$
-		}		
+		}
 		if (Flags.isVolatile(flags)) {
 			buf.append("volatile "); //$NON-NLS-1$
 		}
@@ -152,8 +152,8 @@ public class JUnitStubUtility {
 		}
 		if (Flags.isStatic(flags)) {
 			buf.append("static "); //$NON-NLS-1$
-		}		
-			
+		}
+
 		if (method.isConstructor()) {
 			buf.append(destTypeName);
 		} else {
@@ -180,7 +180,7 @@ public class JUnitStubUtility {
 			}
 		}
 		buf.append(')');
-		
+
 		int lastExc= excTypes.length - 1;
 		if (lastExc >= 0) {
 			buf.append(" throws "); //$NON-NLS-1$
@@ -220,7 +220,7 @@ public class JUnitStubUtility {
 				} else {
 					buf.append("super"); //$NON-NLS-1$
 				}
-				buf.append('(');			
+				buf.append('(');
 				for (int i= 0; i <= lastParam; i++) {
 					buf.append(paramNames[i]);
 					if (i < lastParam) {
@@ -233,7 +233,7 @@ public class JUnitStubUtility {
 		}
 		return buf.toString();
 	}
-	
+
 	private static boolean isBuiltInType(String typeName) {
 		char first= Signature.getElementType(typeName).charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
@@ -242,10 +242,10 @@ public class JUnitStubUtility {
 	private static void resolveAndAdd(String refTypeSig, IType declaringType, ImportsManager imports) throws JavaModelException {
 		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
-			imports.addImport(resolvedTypeName);		
+			imports.addImport(resolvedTypeName);
 		}
 	}
-	
+
 	public static String getTodoTaskTag(IJavaProject project) {
 		String markers= null;
 		if (project == null) {
@@ -253,7 +253,7 @@ public class JUnitStubUtility {
 		} else {
 			markers= project.getOption(JavaCore.COMPILER_TASK_TAGS, true);
 		}
-		
+
 		if (markers != null && markers.length() > 0) {
 			int idx= markers.indexOf(',');
 			if (idx == -1) {
@@ -269,36 +269,36 @@ public class JUnitStubUtility {
 	 * elements in a package.
 	 */
 	public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
-		
+
 		int type= member.getElementType();
 		if  (type == IJavaElement.INITIALIZER ||  (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
 			return false;
 		}
-		
+
 		int otherflags= member.getFlags();
 		IType declaringType= member.getDeclaringType();
 		if (Flags.isPublic(otherflags) || (declaringType != null && declaringType.isInterface())) {
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;
-		}		
-		
+		}
+
 		IPackageFragment otherpack= (IPackageFragment) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		return (pack != null && otherpack != null && pack.getElementName().equals(otherpack.getElementName()));
 	}
-	
+
 	private static boolean isVersionLessThan(String version1, String version2) {
 		return version1.compareTo(version2) < 0;
 	}
-	
+
 	public static boolean is50OrHigher(IJavaProject project) {
 		return is50OrHigher(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
 	}
-	
+
 	public static boolean is50OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
-	
+
 	public static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {
 		try {
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
@@ -318,7 +318,7 @@ public class JUnitStubUtility {
 		}
 		return paramTypeNames;
 	}
-	
+
 	private static String[] getParameterTypeNamesForSeeTag(IMethodBinding binding) {
 		ITypeBinding[] typeBindings= binding.getParameterTypes();
 		String[] result= new String[typeBindings.length];
@@ -333,5 +333,5 @@ public class JUnitStubUtility {
 		return result;
 	}
 
-	
+
 }

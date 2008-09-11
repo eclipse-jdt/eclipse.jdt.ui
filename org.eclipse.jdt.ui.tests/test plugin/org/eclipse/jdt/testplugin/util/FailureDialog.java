@@ -11,7 +11,7 @@
 package org.eclipse.jdt.testplugin.util;
 
 
- 
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -34,7 +34,7 @@ public class FailureDialog extends Dialog {
 	private String _log;
 	private int SIZING_TEXT_WIDTH = 400;
 	private int SIZING_TEXT_HEIGHT = 200;
-	
+
 	/*
 	 * Constructor for FailureDialog
 	 */
@@ -62,23 +62,23 @@ public class FailureDialog extends Dialog {
 		// page group
 		Composite composite = (Composite)super.createDialogArea(parent);
 		composite.setSize( composite.computeSize(SWT.DEFAULT, SWT.DEFAULT) );
-		
+
 		Label label = new Label(composite, SWT.WRAP);
 		label.setText("&Enter a note regarding the failure:");
-		
+
 		_text = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		_text.setFont( JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT) );
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.widthHint = SIZING_TEXT_WIDTH;
 		data.heightHint = SIZING_TEXT_HEIGHT;
 		_text.setLayoutData(data);
-		
+
 		return composite;
 	}
 	/* (non-Javadoc)
 	 * Method declared on Dialog.
 	 */
-	protected void okPressed() {		
+	protected void okPressed() {
 		_log = _text.getText();
 		super.okPressed();
 	}

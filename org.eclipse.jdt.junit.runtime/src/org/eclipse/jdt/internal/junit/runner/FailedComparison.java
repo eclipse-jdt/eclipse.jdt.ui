@@ -35,7 +35,7 @@ public class FailedComparison {
 		sender.sendMessage(MessageIds.EXPECTED_START);
 		sender.sendMessage(getExpected());
 		sender.sendMessage(MessageIds.EXPECTED_END);
-	
+
 		sender.sendMessage(MessageIds.ACTUAL_START);
 		sender.sendMessage(getActual());
 		sender.sendMessage(MessageIds.ACTUAL_END);

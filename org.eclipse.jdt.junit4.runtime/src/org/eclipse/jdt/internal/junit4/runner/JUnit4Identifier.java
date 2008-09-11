@@ -12,8 +12,9 @@
 
 package org.eclipse.jdt.internal.junit4.runner;
 
-import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.junit.runner.Description;
+
+import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 
 public class JUnit4Identifier implements ITestIdentifier {
 	private final Description fPlan;
@@ -35,7 +36,7 @@ public class JUnit4Identifier implements ITestIdentifier {
 	public boolean equals(Object obj) {
 		if (! (obj instanceof JUnit4Identifier))
 			return false;
-		
+
 		JUnit4Identifier id= (JUnit4Identifier) obj;
 		return fPlan.equals(id.fPlan);
 	}

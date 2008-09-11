@@ -15,11 +15,11 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.Document;
 
@@ -55,12 +55,12 @@ public class ASTRewriteSnippet extends TestCase {
 			IProjectDescription description = project.getDescription();
 			description.setNatureIds(new String[] { JavaCore.NATURE_ID } );
 			project.setDescription(description, null);
-			
+
 			IJavaProject javaProject= JavaCore.create(project);
-			
+
 			// build path is: project as source folder and JRE container
 			IClasspathEntry[] cpentry= new IClasspathEntry[] {
-					JavaCore.newSourceEntry(javaProject.getPath()), 
+					JavaCore.newSourceEntry(javaProject.getPath()),
 					JavaRuntime.getDefaultJREContainerEntry()
 			};
 			javaProject.setRawClasspath(cpentry, javaProject.getPath(), null);
@@ -68,7 +68,7 @@ public class ASTRewriteSnippet extends TestCase {
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 			javaProject.setOptions(options);
-			
+
 			// create a test file
 			IPackageFragmentRoot root= javaProject.getPackageFragmentRoot(project);
 			IPackageFragment pack1= root.createPackageFragment("test1", false, null);
@@ -78,52 +78,52 @@ public class ASTRewriteSnippet extends TestCase {
 			buf.append("    public void foo(int i) {\n");
 			buf.append("        while (--i > 0) {\n");
 			buf.append("            System.beep();\n");
-			buf.append("        }\n");		
+			buf.append("        }\n");
 			buf.append("    }\n");
-			buf.append("}\n");	
+			buf.append("}\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-			
+
 			// create an AST
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setSource(cu);
 			parser.setResolveBindings(false);
 			CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 			AST ast= astRoot.getAST();
-			
+
 			// create the descriptive ast rewriter
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-	
+
 			// get the block node that contains the statements in the method body
 			TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types().get(0);
 			MethodDeclaration methodDecl= typeDecl.getMethods()[0];
 			Block block= methodDecl.getBody();
-			
+
 			// create new statements to insert
 			MethodInvocation newInv1= ast.newMethodInvocation();
 			newInv1.setName(ast.newSimpleName("bar1"));
 			Statement newStatement1= ast.newExpressionStatement(newInv1);
-			
+
 			MethodInvocation newInv2= ast.newMethodInvocation();
 			newInv2.setName(ast.newSimpleName("bar2"));
 			Statement newStatement2= ast.newExpressionStatement(newInv2);
-			
+
 			// describe that the first node is inserted as first statement in block, the other one as last statement
 			// note: AST is not modified by this
 			ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 			listRewrite.insertFirst(newStatement1, null);
 			listRewrite.insertLast(newStatement2, null);
-			
+
 			// evaluate the text edits corresponding to the described changes. AST and CU still unmodified.
 			TextEdit res= rewrite.rewriteAST();
-			
+
 			// apply the text edits to the compilation unit
 			Document document= new Document(cu.getSource());
 			res.apply(document);
 			cu.getBuffer().setContents(document.get());
-	
+
 			// test result
 			String preview= cu.getSource();
-			
+
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
@@ -134,7 +134,7 @@ public class ASTRewriteSnippet extends TestCase {
 			buf.append("        }\n");
 			buf.append("        bar2();\n");
 			buf.append("    }\n");
-			buf.append("}\n");	
+			buf.append("}\n");
 			assertEquals(preview, buf.toString());
 		} finally {
 			project.delete(true, null);

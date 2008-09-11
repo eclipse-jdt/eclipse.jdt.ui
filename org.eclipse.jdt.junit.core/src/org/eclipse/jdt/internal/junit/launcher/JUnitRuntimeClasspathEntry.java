@@ -47,7 +47,7 @@ public class JUnitRuntimeClasspathEntry {
 				&& ( (fPluginRelativePath == null && other.getPluginRelativePath() == null)
 						|| fPluginRelativePath.equals(other.getPluginRelativePath()) );
 	}
-	
+
 	public int hashCode() {
 		// TODO Auto-generated method stub
 		return super.hashCode();

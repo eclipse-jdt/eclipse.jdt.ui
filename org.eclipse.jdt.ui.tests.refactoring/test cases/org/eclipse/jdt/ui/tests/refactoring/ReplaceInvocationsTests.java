@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 	private static RewriteMethodInvocationsTestSetup fgTestSetup;
-	
+
 	public ReplaceInvocationsTests(String name) {
 		super(name, true);
 	}
@@ -36,29 +36,29 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		fgTestSetup= new RewriteMethodInvocationsTestSetup(new TestSuite(ReplaceInvocationsTests.class));
 		return fgTestSetup;
 	}
-	
+
 	public static Test setUpTest(Test someTest) {
 		fgTestSetup= new RewriteMethodInvocationsTestSetup(someTest);
 		return fgTestSetup;
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
-	
+
 	protected String getResourceLocation() {
 		return "ReplaceInvocationsWorkspace/ReplaceInvocations/";
 	}
-	
+
 	protected String adaptName(String name) {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}
-	
+
 	private void performTestRewriteInvocations(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
-		
+
 		CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(unit, false);
 		Comment comment= (Comment) compilationUnit.getCommentList().get(0);
 		String commentString= unit.getBuffer().getText(comment.getStartPosition(), comment.getLength());
@@ -67,15 +67,15 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		String paramsString= matcher.group(1);
 		String[] params= paramsString.length() == 0 ? new String[0] : paramsString.split("[\\s,]+");
 		String body= matcher.group(3);
-		
+
 		ReplaceInvocationsRefactoring refactoring= new ReplaceInvocationsRefactoring(unit, selection[0], selection[1]);
 		refactoring.setBody(body, params);
-		
+
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
 				out= getProofedContent(outputFolder, id);
-				break;		
+				break;
 		}
 		performTest(unit, refactoring, mode, out, true);
 	}
@@ -85,7 +85,7 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 	private void performRewriteTest() throws Exception {
 		performTestRewriteInvocations(fgTestSetup.getRewritePackage(), getName(), COMPARE_WITH_OUTPUT, "rewrite_out");
 	}
-	
+
 	public void testSwitchParameters() throws Exception {
 		performRewriteTest();
 	}
@@ -93,9 +93,9 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 	public void testClassFile() throws Exception {
 		performRewriteTest();
 	}
-	
+
 	public void testMultiple() throws Exception {
 		performRewriteTest();
 	}
-	
+
 }

@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.junit.runner;
 
 public interface ITestReference {
 	public abstract int countTestCases();
-	
+
 	public abstract void sendTree(IVisitsTestTrees notified);
 
 	public abstract void run(TestExecution execution);

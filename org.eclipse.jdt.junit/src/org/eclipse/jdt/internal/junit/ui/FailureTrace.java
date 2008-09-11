@@ -7,12 +7,10 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids: sdavids@gmx.de bug 37333, 26653 
+ *     Sebastian Davids: sdavids@gmx.de bug 37333, 26653
  *     Johan Walles: walles@mailblocks.com bug 68737
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
@@ -23,6 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.junit.model.TestElement;
  */
 public class FailureTrace implements IMenuListener {
     private static final int MAX_LABEL_LENGTH = 256;
-    
+
     static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
 	private Table fTable;
 	private TestRunnerViewPart fTestRunner;
@@ -51,19 +51,19 @@ public class FailureTrace implements IMenuListener {
 
 	public FailureTrace(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
 		Assert.isNotNull(clipboard);
-		
+
 		// fill the failure trace viewer toolbar
 		ToolBarManager failureToolBarmanager= new ToolBarManager(toolBar);
-		failureToolBarmanager.add(new EnableStackFilterAction(this));			
+		failureToolBarmanager.add(new EnableStackFilterAction(this));
 		fCompareAction = new CompareResultsAction(this);
 		fCompareAction.setEnabled(false);
-        failureToolBarmanager.add(fCompareAction);			
+        failureToolBarmanager.add(fCompareAction);
 		failureToolBarmanager.update(true);
-		
+
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTestRunner= testRunner;
 		fClipboard= clipboard;
-		
+
 		OpenStrategy handler = new OpenStrategy(fTable);
 		handler.addOpenListener(new IOpenEventListener() {
 			public void handleOpen(SelectionEvent e) {
@@ -77,61 +77,61 @@ public class FailureTrace implements IMenuListener {
 				}
 			}
 		});
-		
+
 		initMenu();
-		
+
 		fFailureTableDisplay = new FailureTableDisplay(fTable);
 	}
-	
+
 	private void initMenu() {
 		MenuManager menuMgr= new MenuManager();
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(this);
 		Menu menu= menuMgr.createContextMenu(fTable);
-		fTable.setMenu(menu);		
+		fTable.setMenu(menu);
 	}
-	
+
 	public void menuAboutToShow(IMenuManager manager) {
 		if (fTable.getSelectionCount() > 0) {
 			Action a= createOpenEditorAction(getSelectedText());
 			if (a != null)
-				manager.add(a);		
+				manager.add(a);
 			manager.add(new JUnitCopyAction(FailureTrace.this, fClipboard));
 		}
 		// fix for bug 68058
-		if (fFailure != null && fFailure.isComparisonFailure()) 
+		if (fFailure != null && fFailure.isComparisonFailure())
 			manager.add(fCompareAction);
 	}
 
 	public String getTrace() {
 		return fInputTrace;
 	}
-	
+
 	private String getSelectedText() {
 		return fTable.getSelection()[0].getText();
-	}				
+	}
 
 	private Action createOpenEditorAction(String traceLine) {
-		try { 
+		try {
 			String testName= traceLine;
-			testName= testName.substring(testName.indexOf(FRAME_PREFIX)); 
+			testName= testName.substring(testName.indexOf(FRAME_PREFIX));
 			testName= testName.substring(FRAME_PREFIX.length(), testName.lastIndexOf('(')).trim();
 			testName= testName.substring(0, testName.lastIndexOf('.'));
 			int innerSeparatorIndex= testName.indexOf('$');
 			if (innerSeparatorIndex != -1)
 				testName= testName.substring(0, innerSeparatorIndex);
-			
+
 			String lineNumber= traceLine;
 			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.lastIndexOf(')'));
 			int line= Integer.valueOf(lineNumber).intValue();
 			return new OpenEditorAtLineAction(fTestRunner, testName, line);
 		} catch(NumberFormatException e) {
 		}
-		catch(IndexOutOfBoundsException e) {	
-		}	
+		catch(IndexOutOfBoundsException e) {
+		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the composite used to present the trace
 	 * @return The composite
@@ -139,23 +139,23 @@ public class FailureTrace implements IMenuListener {
 	Composite getComposite(){
 		return fTable;
 	}
-	
+
 	/**
 	 * Refresh the table from the trace.
 	 */
 	public void refresh() {
 		updateTable(fInputTrace);
 	}
-	
+
 	/**
 	 * Shows a TestFailure
 	 * @param test the failed test
 	 */
-	public void showFailure(TestElement test) {	
+	public void showFailure(TestElement test) {
 	    fFailure= test;
 	    String trace= ""; //$NON-NLS-1$
 	    updateEnablement(test);
-	    if (test != null) 
+	    if (test != null)
 	        trace= test.getTrace();
 		if (fInputTrace == trace)
 			return;

@@ -14,11 +14,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -26,6 +26,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,13 +49,13 @@ public abstract class OpenEditorAction extends Action {
 	protected String fClassName;
 	protected TestRunnerViewPart fTestRunner;
 	private final boolean fActivate;
-	
+
 	protected OpenEditorAction(TestRunnerViewPart testRunner, String testClassName) {
 		this(testRunner, testClassName, true);
 	}
 
 	public OpenEditorAction(TestRunnerViewPart testRunner, String className, boolean activate) {
-		super(JUnitMessages.OpenEditorAction_action_label); 
+		super(JUnitMessages.OpenEditorAction_action_label);
 		fClassName= className;
 		fTestRunner= testRunner;
 		fActivate= activate;
@@ -68,22 +69,22 @@ public abstract class OpenEditorAction extends Action {
 		try {
 			IJavaElement element= findElement(getLaunchedProject(), fClassName);
 			if (element == null) {
-				MessageDialog.openError(getShell(), 
-					JUnitMessages.OpenEditorAction_error_cannotopen_title, JUnitMessages.OpenEditorAction_error_cannotopen_message); 
+				MessageDialog.openError(getShell(),
+					JUnitMessages.OpenEditorAction_error_cannotopen_title, JUnitMessages.OpenEditorAction_error_cannotopen_message);
 				return;
-			} 
-			textEditor= (ITextEditor) JavaUI.openInEditor(element, fActivate, false);		
+			}
+			textEditor= (ITextEditor) JavaUI.openInEditor(element, fActivate, false);
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), JUnitMessages.OpenEditorAction_error_dialog_title, JUnitMessages.OpenEditorAction_error_dialog_message, e.getStatus()); 
+			ErrorDialog.openError(getShell(), JUnitMessages.OpenEditorAction_error_dialog_title, JUnitMessages.OpenEditorAction_error_dialog_message, e.getStatus());
 			return;
 		}
 		if (textEditor == null) {
-			fTestRunner.registerInfoMessage(JUnitMessages.OpenEditorAction_message_cannotopen); 
+			fTestRunner.registerInfoMessage(JUnitMessages.OpenEditorAction_message_cannotopen);
 			return;
 		}
 		reveal(textEditor);
 	}
-	
+
 	protected Shell getShell() {
 		return fTestRunner.getSite().getShell();
 	}
@@ -94,13 +95,13 @@ public abstract class OpenEditorAction extends Action {
 	protected IJavaProject getLaunchedProject() {
 		return fTestRunner.getLaunchedProject();
 	}
-	
+
 	protected String getClassName() {
 		return fClassName;
 	}
 
 	protected abstract IJavaElement findElement(IJavaProject project, String className) throws CoreException;
-	
+
 	protected abstract void reveal(ITextEditor editor);
 
 	protected final IType findType(final IJavaProject project, String className) {
@@ -170,5 +171,5 @@ public abstract class OpenEditorAction extends Action {
 			monitor.done();
 		}
 	}
-	
+
 }

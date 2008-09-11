@@ -29,25 +29,25 @@ public class NLSScannerTester extends TestCase {
 	public NLSScannerTester(String name) {
 		super(name);
 	}
-	
+
 	public static void main (String[] args) {
 		junit.textui.TestRunner.run (suite());
 	}
-	
+
 	public static Test suite() {
 		return new TestSuite(NLSScannerTester.class);
 	}
-	
+
 	private void printDisabledMessage(String msg){
 		System.out.println("\nTest " + getName() + " disabled (" + msg + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	public void test0() throws Exception{
 		String text= "fred"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals("empty", true, l.length == 0); //$NON-NLS-1$
 	}
-	
+
 	public void test1() throws Exception{
 //		String text= "fred\"x\"";
 //		List l= NLSScanner.scan(text);
@@ -55,14 +55,14 @@ public class NLSScannerTester extends TestCase {
 //		assertEquals("1 line", 1, l.size());
 		printDisabledMessage("Scanner does not handle strings in the first line"); //$NON-NLS-1$
 	}
-	
+
 	public void test1a() throws Exception{
 		String text= "fred\n\"x\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals("non empty", false, l.length == 0); //$NON-NLS-1$
 		assertEquals("1 line", 1,l.length); //$NON-NLS-1$
 	}
-	
+
 	public void test2() throws Exception{
 //		String text= "fred\"x\" \"xx\"";
 //		NLSLine[] l= NLSScanner.scan(text);
@@ -70,14 +70,14 @@ public class NLSScannerTester extends TestCase {
 //		assertEquals("2 line", 2,l.length);
 		printDisabledMessage("Scanner does not handle strings in the first line"); //$NON-NLS-1$
 	}
-	
+
 	public void test2a() throws Exception{
 		String text= "fred\n\"x\" \"xx\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals("non empty", false, l.length == 0); //$NON-NLS-1$
 		assertEquals("1 lines", 1,l.length); //$NON-NLS-1$
 	}
-	
+
 	public void test3() throws Exception{
 //		String text= "fred\"x\"\n \"xx\"";
 //		NLSLine[] l= NLSScanner.scan(text);
@@ -93,27 +93,27 @@ public class NLSScannerTester extends TestCase {
 		assertEquals("non empty", false, l.length == 0); //$NON-NLS-1$
 		assertEquals("1 line", 1,l.length); //$NON-NLS-1$
 	}
-	
+
 	public void test5() throws Exception{
 		String text= "\n \"xx\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("1 string", 1, line.size()); //$NON-NLS-1$
 	}
-	
+
 	public void test6() throws Exception{
 		String text= "\n \"xx\" \"dff\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("2 string", 2, line.size()); //$NON-NLS-1$
 	}
-	
+
 	public void test7() throws Exception{
 		String text= "\n \"xx\" \n\"dff\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("1 string A", 1, line.size()); //$NON-NLS-1$
-		
+
 		line= l[1];
 		assertEquals("1 string B", 1, line.size()); //$NON-NLS-1$
 	}
@@ -124,11 +124,11 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("1 string A", 1, line.size()); //$NON-NLS-1$
-		
+
 		line= l[1];
 		assertEquals("2 strings B", 2, line.size()); //$NON-NLS-1$
 	}
-	
+
 	public void test9() throws Exception{
 		String text= "fred\n \"xx\"" + NLSElement.createTagText(1) + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		NLSLine[] l= NLSScanner.scan(text);
@@ -145,7 +145,7 @@ public class NLSScannerTester extends TestCase {
 		NLSElement el= line.get(0);
 		assertEquals("has tag", false, el.hasTag()); //$NON-NLS-1$
 	}
-	
+
 	public void test11() throws Exception{
 		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
@@ -155,14 +155,14 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
-		
+
 		NLSElement el= line.get(0);
 		assertEquals("0 has tag", true, el.hasTag()); //$NON-NLS-1$
-		
+
 		el= line.get(1);
 		assertEquals("1 has tag", true, el.hasTag()); //$NON-NLS-1$
 	}
-	
+
 	public void test12() throws Exception{
 		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
@@ -172,14 +172,14 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
-		
+
 		NLSElement el= line.get(0);
 		assertEquals("0 has tag", true, el.hasTag()); //$NON-NLS-1$
-		
+
 		el= line.get(1);
 		assertEquals("1 has tag", true, el.hasTag()); //$NON-NLS-1$
 	}
-	
+
 	public void test13() throws Exception{
 		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
@@ -188,14 +188,14 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
-		
+
 		NLSElement el= line.get(0);
 		assertEquals("0 has tag", true, el.hasTag()); //$NON-NLS-1$
-		
+
 		el= line.get(1);
 		assertEquals("1 has no tag", false, el.hasTag()); //$NON-NLS-1$
 	}
-	
+
 	public void test14() throws Exception{
 		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
@@ -204,10 +204,10 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
-		
+
 		NLSElement el= line.get(0);
 		assertEquals("0 has no tag", false, el.hasTag()); //$NON-NLS-1$
-		
+
 		el= line.get(1);
 		assertEquals("1 has tag", true, el.hasTag()); //$NON-NLS-1$
 	}
@@ -216,7 +216,7 @@ public class NLSScannerTester extends TestCase {
 	public void test15() throws Exception {
 		String text= "\nfoo\n@Annotation(\"bar\")\n\"baz\"";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(1, l.length);
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
@@ -228,33 +228,33 @@ public class NLSScannerTester extends TestCase {
 	public void test16() throws Exception {
 		String text = "\nfoo\n@Annotation(\n{\"bar\",\n\"baz\"})\n\"baz\"";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(1, l.length);
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
 		assertEquals(5, line.getLineNumber());
 		assertEquals("\"baz\"", line.get(0).getValue());
 	}
-	
+
 	// test for bug 102132
 	public void test17() throws InvalidInputException {
 		String text= "\n@Annotation(a= @Nested(\"Hello\"), b= \"World\")\n@Annotation2(a= (1 + 2) * 3, b= \"xx\")";
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals(0, l.length);
 	}
-				
+
 	// test for bug 102132
 	public void test18() throws InvalidInputException {
 		String text= "@interface Annotation { String a= \"translate me\"; }";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(1, l.length);
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
 		assertEquals(0, line.getLineNumber());
 		assertEquals("\"translate me\"", line.get(0).getValue());
 	}
-	
+
 	// test for bug 102132
 	public void test19() throws InvalidInputException {
 		String text=
@@ -266,7 +266,7 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals(0, l.length);
 	}
-	
+
 	// test for bug 102132
 	public void test20() throws InvalidInputException {
 		String text=
@@ -281,9 +281,9 @@ public class NLSScannerTester extends TestCase {
 			"    }\r\n" +
 			"}";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(2, l.length);
-		
+
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
 		assertEquals(3, line.getLineNumber());
@@ -293,95 +293,95 @@ public class NLSScannerTester extends TestCase {
 		assertEquals(6, line.getLineNumber());
 		assertEquals("\"x\"", line.get(0).getValue());
 	}
-	
+
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
 	public void test21() throws InvalidInputException {
 		String text=
 			"class C {\r\n" +
-			"    void m() {\r\n" + 
-			"        System.out.println(new Object() {\r\n" + 
-			"            @Override\r\n" + 
-			"            public String toString() {\r\n" + 
-			"                return \"me\";\r\n" + 
-			"            };\r\n" + 
-			"        });\r\n" + 
-			"    }\r\n" + 
+			"    void m() {\r\n" +
+			"        System.out.println(new Object() {\r\n" +
+			"            @Override\r\n" +
+			"            public String toString() {\r\n" +
+			"                return \"me\";\r\n" +
+			"            };\r\n" +
+			"        });\r\n" +
+			"    }\r\n" +
 			"}";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(1, l.length);
-		
+
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
 		assertEquals(5, line.getLineNumber());
 		assertEquals("\"me\"", line.get(0).getValue());
 	}
-	
+
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
 	public void test22() throws InvalidInputException {
 		String text=
 			"class C {\r\n" +
 			"    void m() {\r\n" +
-			"        Object var= ((((new Object() {\r\n" + 
-			"            @Override\r\n" + 
-			"            public String toString() {\r\n" + 
-			"                return \"me\";\r\n" + 
-			"            };\r\n" + 
-			"        }))));\r\n" + 
-			"    }\r\n" + 
+			"        Object var= ((((new Object() {\r\n" +
+			"            @Override\r\n" +
+			"            public String toString() {\r\n" +
+			"                return \"me\";\r\n" +
+			"            };\r\n" +
+			"        }))));\r\n" +
+			"    }\r\n" +
 			"}";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(1, l.length);
-		
+
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
 		assertEquals(5, line.getLineNumber());
 		assertEquals("\"me\"", line.get(0).getValue());
 	}
-	
+
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
 	public void test23() throws InvalidInputException {
 		String text=
 			"class C {\r\n" +
-			"    Object field= (new Object() {\r\n" + 
-			"        @java.lang.Override\r\n" + 
-			"        public String toString() {\r\n" + 
-			"            return \"me\";\r\n" + 
-			"        };\r\n" + 
-			"    });\r\n" + 
+			"    Object field= (new Object() {\r\n" +
+			"        @java.lang.Override\r\n" +
+			"        public String toString() {\r\n" +
+			"            return \"me\";\r\n" +
+			"        };\r\n" +
+			"    });\r\n" +
 			"}";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(1, l.length);
-		
+
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
 		assertEquals(4, line.getLineNumber());
 		assertEquals("\"me\"", line.get(0).getValue());
 	}
-	
+
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
 	public void test24() throws InvalidInputException {
 		String text=
 			"class C {\r\n" +
-			"    @java.lang.Deprecated int field2= (\"me\").length();\r\n" + 
+			"    @java.lang.Deprecated int field2= (\"me\").length();\r\n" +
 			"}";
 		NLSLine[] l= NLSScanner.scan(text);
-		
+
 		assertEquals(1, l.length);
-		
+
 		NLSLine line= l[0];
 		assertEquals(1, line.size());
 		assertEquals(1, line.getLineNumber());
 		assertEquals("\"me\"", line.get(0).getValue());
 	}
-	
+
 	// test for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=233905
 	public void test25() throws InvalidInputException {
 		String text=
-				"@SuppressWarnings(\"unchecked\") //$NON-NLS-1$\r\n" + 
-				"public class B {}\r\n" + 
+				"@SuppressWarnings(\"unchecked\") //$NON-NLS-1$\r\n" +
+				"public class B {}\r\n" +
 				"\r\n";
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals(0, l.length);
@@ -396,7 +396,7 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("1 strings", 1, line.size()); //$NON-NLS-1$
-		
+
 		NLSElement el= line.get(0);
 		assertEquals("0 has no tag", false, el.hasTag()); //$NON-NLS-1$
 	}

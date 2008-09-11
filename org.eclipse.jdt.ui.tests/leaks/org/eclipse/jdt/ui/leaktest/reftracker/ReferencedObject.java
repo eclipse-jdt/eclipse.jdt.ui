@@ -15,13 +15,13 @@ package org.eclipse.jdt.ui.leaktest.reftracker;
  * Represents an object that is referenced by an other object.
  */
 public abstract class ReferencedObject {
-	
+
 	private final Object fReferenced;
-	
+
 	public ReferencedObject(Object object) {
 		fReferenced= object;
 	}
-	
+
 	/**
 	 * Returns the instance that keeps a reference to the current object or <code>null</code>
 	 * if the element is a root element
@@ -29,7 +29,7 @@ public abstract class ReferencedObject {
 	 * if the element is a root element
 	 */
 	public abstract ReferencedObject getReferenceHolder();
-	
+
 	/**
 	 * Returns the object
 	 * @return returns the object

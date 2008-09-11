@@ -13,10 +13,10 @@ package org.eclipse.jdt.ui.examples;
 
 import java.util.Random;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
@@ -41,22 +41,22 @@ public class MultiElementListSelectorExample {
 					status.setError("Single selection");
 					return status;
 				}
-				
+
 			}
 		};
 
 
 
 		Random random= new Random();
-		
+
 		ILabelProvider elementRenderer= new org.eclipse.jface.viewers.LabelProvider() {
 			public String getText(Object element) {
 				return element.toString();
 			}
 		};
-		
+
 		int nLists= 3;
-		
+
 		Object[][] elements= new Object[nLists][];
 		for (int i= 0; i < nLists; i++) {
 			int size= random.nextInt(15);
@@ -72,9 +72,9 @@ public class MultiElementListSelectorExample {
 		d.setMessage("this is a message");
 		d.setValidator(validator);
 		d.setElements(elements);
-		
+
 		d.open();
-		
+
 		Object[] res= d.getResult();
 		for (int i= 0; i < res.length; i++)
 			System.out.println(res[i]);

@@ -14,7 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllTypeConstraintsPerformanceTests {
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite("All Type constraint Performance Tests"); //$NON-NLS-1$
 		suite.addTest(ExtractInterfacePerfAcceptanceTests.suite());

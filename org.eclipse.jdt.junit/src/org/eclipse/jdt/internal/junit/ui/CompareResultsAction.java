@@ -25,12 +25,12 @@ public class CompareResultsAction extends Action {
 
 	private FailureTrace fView;
 	private CompareResultDialog fOpenDialog;
-	
+
 	public CompareResultsAction(FailureTrace view) {
-		super(JUnitMessages.CompareResultsAction_label);   
-		setDescription(JUnitMessages.CompareResultsAction_description);   
-		setToolTipText(JUnitMessages.CompareResultsAction_tooltip);  
-		
+		super(JUnitMessages.CompareResultsAction_label);
+		setDescription(JUnitMessages.CompareResultsAction_description);
+		setToolTipText(JUnitMessages.CompareResultsAction_tooltip);
+
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/compare.gif"));  //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$
@@ -40,13 +40,13 @@ public class CompareResultsAction extends Action {
 
 	/*
 	 * @see Action#actionPerformed
-	 */		
+	 */
 	public void run() {
 		TestElement failedTest= fView.getFailedTest();
 		if (fOpenDialog != null) {
 			fOpenDialog.setInput(failedTest);
 			fOpenDialog.getShell().setActive();
-				
+
 		} else {
 			fOpenDialog= new CompareResultDialog(fView.getShell(), failedTest);
 			fOpenDialog.create();
@@ -59,7 +59,7 @@ public class CompareResultsAction extends Action {
 			fOpenDialog.open();
 		}
 	}
-	
+
 	public void updateOpenDialog(TestElement failedTest) {
 		if (fOpenDialog != null) {
 			fOpenDialog.setInput(failedTest);

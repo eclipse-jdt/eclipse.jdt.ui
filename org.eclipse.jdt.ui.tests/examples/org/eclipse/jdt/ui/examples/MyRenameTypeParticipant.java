@@ -14,11 +14,21 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IType;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.search.core.text.TextSearchEngine;
+import org.eclipse.search.core.text.TextSearchMatchAccess;
+import org.eclipse.search.core.text.TextSearchRequestor;
+import org.eclipse.search.ui.text.FileTextSearchScope;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -26,18 +36,13 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
-import org.eclipse.search.core.text.TextSearchEngine;
-import org.eclipse.search.core.text.TextSearchMatchAccess;
-import org.eclipse.search.core.text.TextSearchRequestor;
-import org.eclipse.search.ui.text.FileTextSearchScope;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jdt.core.IType;
 
 
 /*
    A rename participant that updates type references in '*.special' files.
- 
+
 
  	<extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
 	  <renameParticipant
@@ -56,7 +61,7 @@ import org.eclipse.text.edits.TextEditGroup;
 	  	</enablement>
 	  </renameParticipant>
 	</extension>
-	
+
  */
 
 
@@ -78,7 +83,7 @@ public class MyRenameTypeParticipant extends RenameParticipant {
 	public String getName() {
 		return "My special file participant";  //$NON-NLS-1$
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#checkConditions(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
@@ -90,18 +95,18 @@ public class MyRenameTypeParticipant extends RenameParticipant {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		
+
 		final HashMap changes= new HashMap();
 		final String newName= getArguments().getNewName();
-		
+
 		// use the text search engine to find matches in my special files
 		// in a real world implementation, clients would use their own, more precise search engine
-		
+
 		IResource[] roots= { fType.getJavaProject().getProject() };  // limit to the current project
 		String[] fileNamePatterns= { "*.special" }; //$NON-NLS-1$ // all files with file suffix 'special'
 		FileTextSearchScope scope= FileTextSearchScope.newSearchScope(roots , fileNamePatterns, false);
 		Pattern pattern= Pattern.compile(fType.getElementName()); // only find the simple name of the type
-		
+
 		TextSearchRequestor collector= new TextSearchRequestor() {
 			public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
 				IFile file= matchAccess.getFile();
@@ -122,10 +127,10 @@ public class MyRenameTypeParticipant extends RenameParticipant {
 			}
 		};
 		TextSearchEngine.create().search(scope, collector, pattern, pm);
-		
+
 		if (changes.isEmpty())
 			return null;
-		
+
 		CompositeChange result= new CompositeChange("My special file updates"); //$NON-NLS-1$
 		for (Iterator iter= changes.values().iterator(); iter.hasNext();) {
 			result.add((Change) iter.next());

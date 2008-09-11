@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerformanceTestCase {
 
@@ -37,7 +38,7 @@ public class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerforman
 			buf.append("}\n");
 			pack.createCompilationUnit("A" + i + ".java", buf.toString(), false, null);
 		}
-	
+
 		IPackageFragment references= fTestProject.getSourceFolder().createPackageFragment("ref", false, null);
 		for(int i= 0; i < numberOfCus; i++) {
 			createReferenceCu(references, i, numberOfRefs);
@@ -55,5 +56,5 @@ public class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerforman
 		buf.append("}\n");
 		pack.createCompilationUnit("Ref" + index + ".java", buf.toString(), false, null);
 	}
-	
+
 }

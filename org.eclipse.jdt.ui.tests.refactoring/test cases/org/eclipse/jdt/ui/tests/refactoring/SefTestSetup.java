@@ -16,23 +16,23 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public class SefTestSetup extends RefactoringTestSetup {
-	
+
 	private IPackageFragment fBaseTypes;
 	private IPackageFragment fObjectTypes;
 	private IPackageFragment fInvalid;
 	private IPackageFragment fStatic;
 	private IPackageFragment fStaticRef;
 	private IPackageFragment fExistingMethod;
-	
+
 	public SefTestSetup(Test test) {
 		super(test);
-	}	
-	
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
-		
+
 		fBaseTypes= root.createPackageFragment("base_in", true, null);
 		fObjectTypes= root.createPackageFragment("object_in", true, null);
 		fInvalid= root.createPackageFragment("invalid", true, null);
@@ -43,24 +43,24 @@ public class SefTestSetup extends RefactoringTestSetup {
 
 	public IPackageFragment getBasePackage() {
 		return fBaseTypes;
-	}	
+	}
 
 	public IPackageFragment getObjectPackage() {
 		return fObjectTypes;
-	}	
+	}
 
 	public IPackageFragment getInvalidPackage() {
 		return fInvalid;
 	}
-	
+
 	public IPackageFragment getStaticPackage() {
 		return fStatic;
 	}
-	
+
 	public IPackageFragment getStaticRefPackage() {
 		return fStaticRef;
 	}
-	
+
 	public IPackageFragment getExistingMethodPackage(){
 		return fExistingMethod;
 	}

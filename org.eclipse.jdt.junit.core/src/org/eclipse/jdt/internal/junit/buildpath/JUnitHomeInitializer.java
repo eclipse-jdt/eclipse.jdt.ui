@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
-public class JUnitHomeInitializer extends ClasspathVariableInitializer {	
-	
+public class JUnitHomeInitializer extends ClasspathVariableInitializer {
+
 	/*
 	 * @see ClasspathVariableInitializer#initialize(String)
 	 */
@@ -44,7 +44,7 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
 		}
 	}
-	
+
 	private void initializeSource() {
 		try {
 			IPath sourceLocation= BuildPathSupport.getSourceLocation(BuildPathSupport.JUNIT3_PLUGIN);

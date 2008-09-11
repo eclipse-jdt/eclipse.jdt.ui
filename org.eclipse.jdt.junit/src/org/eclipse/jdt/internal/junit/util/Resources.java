@@ -39,7 +39,7 @@ public class Resources {
 
 	/**
 	 * Checks if the given resource is in sync with the underlying file system.
-	 * 
+	 *
 	 * @param resource the resource to be checked
 	 * @return IStatus status describing the check's result. If <code>status.
 	 * isOK()</code> returns <code>true</code> then the resource is in sync
@@ -47,11 +47,11 @@ public class Resources {
 	public static IStatus checkInSync(IResource resource) {
 		return checkInSync(new IResource[] {resource});
 	}
-	
+
 	/**
 	 * Checks if the given resources are in sync with the underlying file
 	 * system.
-	 * 
+	 *
 	 * @param resources the resources to be checked
 	 * @return IStatus status describing the check's result. If <code>status.
 	 *  isOK() </code> returns <code>true</code> then the resources are in sync
@@ -62,60 +62,60 @@ public class Resources {
 			IResource resource= resources[i];
 			if (!resource.isSynchronized(IResource.DEPTH_INFINITE)) {
 				result= addOutOfSync(result, resource);
-			}			
+			}
 		}
 		if (result != null)
 			return result;
-		return new Status(IStatus.OK, JUnitPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$		
+		return new Status(IStatus.OK, JUnitPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 	}
 
 	/**
 	 * Makes the given resource committable. Committable means that it is
 	 * writeable and that its content hasn't changed by calling
 	 * <code>validateEdit</code> for the given resource on <tt>IWorkspace</tt>.
-	 * 
+	 *
 	 * @param resource the resource to be checked
-	 * @param context the context passed to <code>validateEdit</code> 
+	 * @param context the context passed to <code>validateEdit</code>
 	 * @return IStatus status describing the method's result. If <code>status.
 	 * isOK()</code> returns <code>true</code> then the resource are committable
-	 * 
+	 *
 	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.
 	 * resources.IFile[], java.lang.Object)
 	 */
 	public static IStatus makeCommittable(IResource resource, Object context) {
 		return makeCommittable(new IResource[] { resource }, context);
 	}
-	
+
 	/**
 	 * Makes the given resources committable. Committable means that all
 	 * resources are writeable and that the content of the resources hasn't
 	 * changed by calling <code>validateEdit</code> for a given file on
 	 * <tt>IWorkspace</tt>.
-	 * 
+	 *
 	 * @param resources the resources to be checked
-	 * @param context the context passed to <code>validateEdit</code> 
+	 * @param context the context passed to <code>validateEdit</code>
 	 * @return IStatus status describing the method's result. If <code>status.
 	 * isOK()</code> returns <code>true</code> then the add resources are
 	 * committable
-	 * 
+	 *
 	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resources.IFile[], java.lang.Object)
 	 */
 	public static IStatus makeCommittable(IResource[] resources, Object context) {
 		List readOnlyFiles= new ArrayList();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
-			if (resource.getType() == IResource.FILE && resource.getResourceAttributes().isReadOnly())	
+			if (resource.getType() == IResource.FILE && resource.getResourceAttributes().isReadOnly())
 				readOnlyFiles.add(resource);
 		}
 		if (readOnlyFiles.size() == 0)
 			return new Status(IStatus.OK, JUnitPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
-			
+
 		Map oldTimeStamps= createModificationStampMap(readOnlyFiles);
 		IStatus status= ResourcesPlugin.getWorkspace().validateEdit(
 			(IFile[]) readOnlyFiles.toArray(new IFile[readOnlyFiles.size()]), context);
 		if (!status.isOK())
 			return status;
-			
+
 		IStatus modified= null;
 		Map newTimeStamps= createModificationStampMap(readOnlyFiles);
 		for (Iterator iter= oldTimeStamps.keySet().iterator(); iter.hasNext();) {
@@ -123,7 +123,7 @@ public class Resources {
 			if (!oldTimeStamps.get(file).equals(newTimeStamps.get(file)))
 				modified= addModified(modified, file);
 		}
-		if (modified != null)	
+		if (modified != null)
 			return modified;
 		return new Status(IStatus.OK, JUnitPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 	}
@@ -136,9 +136,9 @@ public class Resources {
 		}
 		return map;
 	}
-	
+
 	private static IStatus addModified(IStatus status, IFile file) {
-		IStatus entry= JUnitStatus.createError(Messages.format(JUnitMessages.Resources_fileModified, BasicElementLabels.getPathLabel(file.getFullPath(), false))); 
+		IStatus entry= JUnitStatus.createError(Messages.format(JUnitMessages.Resources_fileModified, BasicElementLabels.getPathLabel(file.getFullPath(), false)));
 		if (status == null) {
 			return entry;
 		} else if (status.isMultiStatus()) {
@@ -147,19 +147,19 @@ public class Resources {
 		} else {
 			MultiStatus result= new MultiStatus(JUnitPlugin.getPluginId(),
 				IJUnitStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT,
-			JUnitMessages.Resources_modifiedResources, null); 
+			JUnitMessages.Resources_modifiedResources, null);
 			result.add(status);
 			result.add(entry);
 			return result;
 		}
-	}	
+	}
 
 	private static IStatus addOutOfSync(IStatus status, IResource resource) {
 		IStatus entry= new Status(
 			IStatus.ERROR,
 			ResourcesPlugin.PI_RESOURCES,
 			IResourceStatus.OUT_OF_SYNC_LOCAL,
-		Messages.format(JUnitMessages.Resources_outOfSync, BasicElementLabels.getPathLabel(resource.getFullPath(), false)), 
+		Messages.format(JUnitMessages.Resources_outOfSync, BasicElementLabels.getPathLabel(resource.getFullPath(), false)),
 			null);
 		if (status == null) {
 			return entry;
@@ -170,7 +170,7 @@ public class Resources {
 			MultiStatus result= new MultiStatus(
 				ResourcesPlugin.PI_RESOURCES,
 				IResourceStatus.OUT_OF_SYNC_LOCAL,
-			JUnitMessages.Resources_outOfSyncResources, null); 
+			JUnitMessages.Resources_outOfSyncResources, null);
 			result.add(status);
 			result.add(entry);
 			return result;

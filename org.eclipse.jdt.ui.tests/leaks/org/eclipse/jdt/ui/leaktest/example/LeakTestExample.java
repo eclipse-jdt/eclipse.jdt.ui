@@ -22,71 +22,71 @@ import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
 public class LeakTestExample extends LeakTestCase {
 
 	private static final Class THIS= LeakTestExample.class;
-	
+
 	private static class MyClass {
 		char[] text= new char[1000];
 	}
-	
+
 
 	public static Test suite() {
 		return new LeakTestSetup(new TestSuite(THIS));
 	}
-	
+
 	private Object fGlobalReference;
-	
+
 	private ArrayList fGlobalList= new ArrayList();
 
 	public LeakTestExample(String name) {
 		super(name);
 	}
-			
+
 	public void testLeakGlobalReference() throws Exception {
 		fGlobalList.clear();
-		
+
 		Class cl= MyClass.class;
 
 		// get the count before creating the instance
 		int count1= getInstanceCount(cl);
-		
+
 		// create the instance
 		fGlobalReference= new MyClass();
 
 		// get the count after creating the instance
 		int count2= getInstanceCount(cl);
 		assertDifferentCount("after creation: ", count1, count2);
-		
+
 		// clear all references to the instance
 		fGlobalReference= null;
-		
+
 		// get the count after clearing the reference of the instance
 		int count3= getInstanceCount(cl);
 		assertEqualCount("after clear: ", count1, count3);
 	}
-	
+
 	public void testNoLeakGlobalReference() throws Exception {
 		fGlobalList.clear();
 		Class cl= MyClass.class;
 
 		// get the count before creating my instance
 		int count1= getInstanceCount(cl);
-		
+
 		// create the instance
 		fGlobalReference= new MyClass();
 
 		// get the count after creating the instance
 		int count2= getInstanceCount(cl);
 		assertDifferentCount("after creation: ", count1, count2);
-		
+
 		// add the instance to a list
 		fGlobalList.add(fGlobalReference);
-		
+
 		// clear the global references of the instance
 		fGlobalReference= null;
-		
+
 		// get the count after clearing the global reference of the instance
 		// instance should still be here, it is referenced in the list
 		int count3= getInstanceCount(cl);
 		assertEqualCount("after clear: ", count2, count3);
 	}
-	
+
 }

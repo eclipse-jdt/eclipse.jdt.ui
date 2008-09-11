@@ -15,14 +15,11 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-import org.eclipse.jdt.ui.tests.core.source.AddUnimplementedConstructorsTest;
-import org.eclipse.jdt.ui.tests.core.source.AddUnimplementedMethodsTest;
-import org.eclipse.jdt.ui.tests.core.source.GenerateGettersSettersTest;
 
 /**
- * 
+ *
  * Tests for the actions in the source menu
- * 
+ *
  */
 public class SourceActionTests extends TestCase {
 

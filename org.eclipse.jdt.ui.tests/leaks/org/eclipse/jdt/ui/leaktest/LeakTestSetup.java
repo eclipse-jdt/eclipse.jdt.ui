@@ -17,16 +17,16 @@ import junit.framework.Test;
  *
  */
 public class LeakTestSetup extends TestSetup {
-	
+
 	private static LeakTestSetup fgCurrentSetup= null;
-	
+
 	public LeakTestSetup(Test test) {
 		super(test);
 		if (fgCurrentSetup == null) {
 			fgCurrentSetup= this;
 		}
 	}
-	
+
 	protected void setUp() throws Exception {
 		if (fgCurrentSetup != this) {
 			return;

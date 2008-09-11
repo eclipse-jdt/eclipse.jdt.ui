@@ -13,18 +13,18 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.jface.action.Action;
 
 class ShowPreviousFailureAction extends Action {
-	
+
 	private TestRunnerViewPart fPart;
 
 	public ShowPreviousFailureAction(TestRunnerViewPart part) {
-		super(JUnitMessages.ShowPreviousFailureAction_label);  
+		super(JUnitMessages.ShowPreviousFailureAction_label);
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/select_prev.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.gif")); //$NON-NLS-1$
-		setToolTipText(JUnitMessages.ShowPreviousFailureAction_tooltip);  
+		setToolTipText(JUnitMessages.ShowPreviousFailureAction_tooltip);
 		fPart= part;
 	}
-	
+
 	public void run() {
 		fPart.selectPreviousFailure();
 	}

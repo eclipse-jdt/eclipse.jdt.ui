@@ -14,6 +14,9 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IWorkbenchPage;
@@ -21,10 +24,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
-
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class PackageExplorerWarmPerfTest extends JdtPerformanceTestCase {

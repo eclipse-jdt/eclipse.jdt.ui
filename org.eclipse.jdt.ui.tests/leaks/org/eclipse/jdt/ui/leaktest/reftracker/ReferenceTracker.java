@@ -16,11 +16,11 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /**
  * Tracks all instances reachable though reflection from a given root object. To visit all elements in a VM

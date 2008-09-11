@@ -27,7 +27,7 @@ public interface IXMLTags {
 	public static final String NODE_ACTUAL= "actual";  //$NON-NLS-1$
 	public static final String NODE_SYSTEM_OUT= "system-out"; //$NON-NLS-1$
 	public static final String NODE_SYSTEM_ERR= "system-err"; //$NON-NLS-1$
-	
+
 	/**
 	 * value: String
 	 */

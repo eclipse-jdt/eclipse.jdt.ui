@@ -27,47 +27,47 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	public TestRunListenerAdapter(TestRunSession session) {
 		fSession= session;
 	}
-	
+
 	private Object[] getListeners() {
 		return JUnitPlugin.getDefault().getNewTestRunListeners().getListeners();
 	}
-	
+
 	private void fireSessionStarted() {
 		Object[] listeners= getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			((TestRunListener) listeners[i]).sessionStarted(fSession);
 		}
 	}
-	
+
 	private void fireSessionFinished() {
 		Object[] listeners= getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			((TestRunListener) listeners[i]).sessionFinished(fSession);
 		}
 	}
-	
+
 	private void fireTestCaseStarted(ITestCaseElement testCaseElement) {
 		Object[] listeners= getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			((TestRunListener) listeners[i]).testCaseStarted(testCaseElement);
 		}
 	}
-	
+
 	private void fireTestCaseFinished(ITestCaseElement testCaseElement) {
 		Object[] listeners= getListeners();
 		for (int i= 0; i < listeners.length; i++) {
 			((TestRunListener) listeners[i]).testCaseFinished(testCaseElement);
 		}
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#sessionStarted()
 	 */
 	public void sessionStarted() {
 		// wait until all test are added
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#sessionEnded(long)
 	 */
@@ -97,14 +97,14 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	public void testAdded(TestElement testElement) {
 		// do nothing
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#runningBegins()
 	 */
 	public void runningBegins() {
 		fireSessionStarted();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#testStarted(org.eclipse.jdt.internal.junit.model.TestCaseElement)
 	 */
@@ -132,7 +132,7 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
 		// ignore
 	}
-	
+
 	public boolean acceptsSwapToDisk() {
 		return true;
 	}

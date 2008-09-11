@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final Class clazz= RenameStaticMethodTests.class;
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
-	
+
 	private static final boolean BUG_83332_SPLIT_SINGLE_IMPORT= true;
 
 	public RenameStaticMethodTests(String name) {
@@ -39,7 +39,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test);
 	}
@@ -61,13 +61,13 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		} finally{
 			performDummySearch();
 			classA.getCompilationUnit().delete(true, null);
-		}	
+		}
 	}
-	
+
 	private void helper1() throws Exception{
 		helper1_0("m", "k", new String[0]);
 	}
-	
+
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
@@ -82,18 +82,18 @@ public class RenameStaticMethodTests extends RefactoringTest {
 
 			assertEquals("was supposed to pass", null, performRefactoring(descriptor));
 			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
-			
+
 			assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 			assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
 			//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
-			
+
 			RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
-	
+
 			assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
 			assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 			//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
-			
+
 			RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
 			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		} finally{
@@ -104,15 +104,15 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		helper2_0(methodName, newMethodName, signatures, true, false);
 	}
-	
+
 	private void helper2(boolean updateReferences) throws Exception{
 		helper2_0("m", "k", new String[0], updateReferences, false);
 	}
-	
+
 	private void helper2() throws Exception{
 		helper2(true);
 	}
-	
+
 	private void helperDelegate() throws Exception{
 		helper2_0("m", "k", new String[0], true, true);
 	}
@@ -120,77 +120,77 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	public void testFail0() throws Exception {
 		helper1();
 	}
-	
+
 	public void testFail1() throws Exception{
 		helper1();
 	}
-	
+
 	public void testFail2() throws Exception{
 		helper1();
 	}
-	
+
 	//testFail3 deleted
-	
+
 	public void testFail4() throws Exception{
 		helper1();
 	}
-	
+
 	public void testFail5() throws Exception{
 		helper1();
 	}
-	
+
 	public void testFail6() throws Exception{
 		helper1();
 	}
-	
+
 	public void testFail7() throws Exception{
 		helper1();
 	}
-	
+
 	public void testFail8() throws Exception{
 		helper1();
 	}
-	
+
 	public void test0() throws Exception{
 		helper2();
 	}
-	
+
 	public void test1() throws Exception{
 		helper2();
 	}
-	
+
 	public void test2() throws Exception{
 		helper2();
 	}
-	
+
 	public void test3() throws Exception{
 		helper2();
 	}
-	
+
 	public void test4() throws Exception{
 		helper2();
 	}
-	
+
 	public void test5() throws Exception{
 		helper2();
 	}
-	
+
 	public void test6() throws Exception{
 		helper2();
 	}
-	
+
 	public void test7() throws Exception{
 		helper2_0("m", "k", new String[]{Signature.SIG_INT});
 	}
-	
+
 	public void test8() throws Exception{
 		helper2_0("m", "k", new String[]{Signature.SIG_INT});
 	}
-	
+
 	public void test9() throws Exception{
 		helper2_0("m", "k", new String[]{Signature.SIG_INT}, false, false);
 	}
-	
+
 	public void test10() throws Exception{
 //		printTestDisabledMessage("bug 40628");
 //		if (true)	return;
@@ -217,7 +217,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		try {
 			ICompilationUnit cuA= createCUfromTestFile(packageA, "A");
 			ICompilationUnit cuB= createCUfromTestFile(packageB, "B");
-	
+
 			IType classA= getType(cuA, "A");
 			IMethod method= classA.getMethod("method2", new String[0]);
 			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
@@ -233,15 +233,15 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			packageB.delete(true, new NullProgressMonitor());
 		}
 	}
-	
+
 	public void testUnicode01() throws Exception{
 		helper2_0("e", "f", new String[]{});
 	}
-	
+
 	public void testStaticImportFail0() throws Exception {
 		helper1();
 	}
-	
+
 	public void testStaticImport1() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "C");
 		helper2();
@@ -273,7 +273,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		}
 		helper2();
 	}
-	
+
 	public void testDelegate01() throws Exception  {
 		// simple static delegate
 		helperDelegate();

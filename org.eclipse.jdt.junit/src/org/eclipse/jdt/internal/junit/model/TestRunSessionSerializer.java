@@ -19,15 +19,6 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import org.eclipse.core.runtime.Assert;
-
-import org.eclipse.jdt.core.IJavaProject;
-
-import org.eclipse.jdt.junit.model.ITestElement;
-import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
-import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
-import org.eclipse.jdt.junit.model.ITestElement.Result;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.DTDHandler;
@@ -37,6 +28,15 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
+
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
+import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
+import org.eclipse.jdt.junit.model.ITestElement.Result;
+
+import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 public class TestRunSessionSerializer implements XMLReader {
 
@@ -48,9 +48,9 @@ public class TestRunSessionSerializer implements XMLReader {
 	private final TestRunSession fTestRunSession;
 	private ContentHandler fHandler;
 	private ErrorHandler fErrorHandler;
-	
+
 	private final NumberFormat timeFormat= new DecimalFormat("0.0##", new DecimalFormatSymbols(Locale.US)); //$NON-NLS-1$ // not localized, parseable by Double.parseDouble(..)
-	
+
 	/**
 	 * @param testRunSession the test run session to serialize
 	 */
@@ -80,39 +80,39 @@ public class TestRunSessionSerializer implements XMLReader {
 		addCDATA(atts, IXMLTags.ATTR_ERRORS, fTestRunSession.getErrorCount());
 		addCDATA(atts, IXMLTags.ATTR_IGNORED, fTestRunSession.getIgnoredCount());
 		startElement(IXMLTags.NODE_TESTRUN, atts);
-		
+
 		TestRoot testRoot= fTestRunSession.getTestRoot();
 		ITestElement[] topSuites= testRoot.getChildren();
 		for (int i= 0; i < topSuites.length; i++) {
 			handleTestElement(topSuites[i]);
 		}
-		
+
 		endElement(IXMLTags.NODE_TESTRUN);
 	}
 
 	private void handleTestElement(ITestElement testElement) throws SAXException {
 		if (testElement instanceof TestSuiteElement) {
 			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
-			
+
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getSuiteTypeName());
 			if (! Double.isNaN(testSuiteElement.getElapsedTimeInSeconds()))
 				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
-			
+
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
 			addFailure(testElement);
-			
+
 			ITestElement[] children= testSuiteElement.getChildren();
 			for (int i= 0; i < children.length; i++) {
 				handleTestElement(children[i]);
 			}
 			endElement(IXMLTags.NODE_TESTSUITE);
-			
+
 		} else if (testElement instanceof TestCaseElement) {
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-			
+
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());
 			addCDATA(atts, IXMLTags.ATTR_CLASSNAME, testCaseElement.getClassName());
@@ -122,16 +122,16 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testCaseElement.isIgnored())
 				addCDATA(atts, IXMLTags.ATTR_IGNORED, Boolean.TRUE.toString());
-			
+
 			startElement(IXMLTags.NODE_TESTCASE, atts);
 			addFailure(testElement);
-			
+
 			endElement(IXMLTags.NODE_TESTCASE);
-			
+
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
-		
+
 	}
 
 	private void addFailure(ITestElement testElement) throws SAXException {
@@ -171,7 +171,7 @@ public class TestRunSessionSerializer implements XMLReader {
 	private static void addCDATA(AttributesImpl atts, String name, int value) {
 		addCDATA(atts, name, Integer.toString(value));
 	}
-	
+
 	private static void addCDATA(AttributesImpl atts, String name, String value) {
 		atts.addAttribute(EMPTY, EMPTY, name, CDATA, value);
 	}
@@ -199,28 +199,28 @@ public class TestRunSessionSerializer implements XMLReader {
 
 	public void setDTDHandler(DTDHandler handler) {
 	}
-	
+
 	public DTDHandler getDTDHandler() {
 		return null;
 	}
 
 	public void setEntityResolver(EntityResolver resolver) {
 	}
-	
+
 	public EntityResolver getEntityResolver() {
 		return null;
 	}
 
 	public void setProperty(java.lang.String name, java.lang.Object value) {
 	}
-	
+
 	public Object getProperty(java.lang.String name) {
 		return null;
 	}
 
 	public void setFeature(java.lang.String name, boolean value) {
 	}
-	
+
 	public boolean getFeature(java.lang.String name) {
 		return false;
 	}

@@ -15,6 +15,9 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,24 +35,21 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 public class TypeRulesTest extends CoreTests {
-	
+
 	private static final Class THIS= TypeRulesTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
 	public TypeRulesTest(String name) {
 		super(name);
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-	
+
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -61,7 +61,7 @@ public class TypeRulesTest extends CoreTests {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new TypeRulesTest("test1"));
 			return new ProjectTestSetup(suite);
-		}	
+		}
 	}
 
 	protected void setUp() throws Exception {
@@ -71,7 +71,7 @@ public class TypeRulesTest extends CoreTests {
 		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
 		JavaCore.setOptions(options);
-		
+
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
@@ -80,8 +80,8 @@ public class TypeRulesTest extends CoreTests {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-	
-	
+
+
 	private VariableDeclarationFragment[] createVariables() throws JavaModelException {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -99,7 +99,7 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("    long l= 0;\n");
 		buf.append("    float f= 0;\n");
 		buf.append("    double d= 0;\n");
-		
+
 		buf.append("    Boolean bool_class= null;\n");
 		buf.append("    Character c_class= null;\n");
 		buf.append("    Byte b_class= null;\n");
@@ -108,7 +108,7 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("    Long l_class= null;\n");
 		buf.append("    Float f_class= null;\n");
 		buf.append("    Double d_class= null;\n");
-		
+
 		buf.append("    Object object= null;\n");
 		buf.append("    Vector vector= null;\n");
 		buf.append("    Socket socket= null;\n");
@@ -125,7 +125,7 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("    Collection[][] collection_arrarr= null;\n");
 		buf.append("    Vector[][] vector_arrarr= null;\n");
 		buf.append("    Socket[][] socket_arrarr= null;\n");
-		
+
 		buf.append("    Collection<String> collection_string= null;\n");
 		buf.append("    Collection<Object> collection_object= null;\n");
 		buf.append("    Collection<Number> collection_number= null;\n");
@@ -139,7 +139,7 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("    Vector<? super Number> vector_lower_number= null;\n");
 		buf.append("    Vector<? extends Exception> vector_upper_exception= null;\n");
 		buf.append("    Vector<? super Exception> vector_lower_exception= null;\n");
-		
+
 		buf.append("    T t= null;\n");
 		buf.append("    U u= null;\n");
 		buf.append("    Vector<T> vector_t= null;\n");
@@ -154,32 +154,32 @@ public class TypeRulesTest extends CoreTests {
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(cu1);
 		parser.setResolveBindings(true);
-		
+
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 0);
-		
+
 		TypeDeclaration type= (TypeDeclaration) astRoot.types().get(0);
 		FieldDeclaration[] fields= type.getFields();
-		
+
 		VariableDeclarationFragment[] targets= new VariableDeclarationFragment[fields.length];
 		for (int i= 0; i < fields.length; i++) {
 			targets[i]= (VariableDeclarationFragment) fields[i].fragments().get(0);
 		}
 		return targets;
 	}
-	
+
 	//TODO: only tests behavior for ITypeBindings from the same AST. See bug 80715.
 	public void testIsAssignmentCompatible() throws Exception {
 		VariableDeclarationFragment[] targets= createVariables();
-		
+
 		StringBuffer errors= new StringBuffer();
 		for (int k= 0; k < targets.length; k++) {
 			for (int n= 0; n < targets.length; n++) {
 				VariableDeclarationFragment f1= targets[k];
 				VariableDeclarationFragment f2= targets[n];
 				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
-				
+
 				StringBuffer buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
@@ -188,16 +188,16 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("    }\n");
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
-				
+
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);
 				parser.setUnitName("F.java");
-				
+
 				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
-				
+
 				ITypeBinding b1= f1.resolveBinding().getType();
 				assertNotNull(b1);
 				ITypeBinding b2= f2.resolveBinding().getType();
@@ -210,17 +210,17 @@ public class TypeRulesTest extends CoreTests {
 		}
 		assertTrue(errors.toString(), errors.length() == 0);
 	}
-	
+
 	public void testCanAssign() throws Exception {
 		VariableDeclarationFragment[] targets= createVariables();
-		
+
 		StringBuffer errors= new StringBuffer();
 		for (int k= 0; k < targets.length; k++) {
 			for (int n= 0; n < targets.length; n++) {
 				VariableDeclarationFragment f1= targets[k];
 				VariableDeclarationFragment f2= targets[n];
 				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
-				
+
 				StringBuffer buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
@@ -229,21 +229,21 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("    }\n");
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
-				
+
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);
 				parser.setUnitName("F.java");
-				
+
 				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
-				
+
 				ITypeBinding b1= f1.resolveBinding().getType();
 				assertNotNull(b1);
 				ITypeBinding b2= f2.resolveBinding().getType();
 				assertNotNull(b2);
-				
+
 				//old implementation does not support generics:
 				if (b1.isParameterizedType() || b1.isWildcardType() || b1.isTypeVariable())
 					continue;
@@ -254,7 +254,7 @@ public class TypeRulesTest extends CoreTests {
 				//old implementation does not support autoboxing:
 				if (b1.isPrimitive() != b2.isPrimitive())
 					continue;
-				
+
 				boolean res2= TypeRules.canAssign(b1, b2);
 				if (res2 != (problems.length == 0)) {
 					errors.append(line).append('\n');
@@ -263,7 +263,7 @@ public class TypeRulesTest extends CoreTests {
 		}
 		assertTrue(errors.toString(), errors.length() == 0);
 	}
-		
+
 	public void testIsCastCompatible() throws Exception {
 		StringBuffer errors= new StringBuffer();
 		VariableDeclarationFragment[] targets= createVariables();
@@ -271,10 +271,10 @@ public class TypeRulesTest extends CoreTests {
 			for (int n= 0; n < targets.length; n++) {
 				VariableDeclarationFragment f1= targets[k];
 				VariableDeclarationFragment f2= targets[n];
-				
+
 				String castType= f2.resolveBinding().getType().getQualifiedName();
 				String line= castType + " x= (" + castType + ") " + f1.getName().getIdentifier();
-				
+
 				StringBuffer buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
@@ -283,13 +283,13 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("    }\n");
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
-				
+
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);
 				parser.setUnitName("F.java");
-				
+
 				CompilationUnit astRoot= null;
 				astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
@@ -302,11 +302,11 @@ public class TypeRulesTest extends CoreTests {
 				if (res != (problems.length == 0)) {
 					errors.append(line).append('\n');
 				}
-			}	
+			}
 		}
 		assertTrue(errors.toString(), errors.length() == 0);
 	}
-	
+
 	public void testCanCast() throws Exception {
 		StringBuffer errors= new StringBuffer();
 		VariableDeclarationFragment[] targets= createVariables();
@@ -314,10 +314,10 @@ public class TypeRulesTest extends CoreTests {
 			for (int n= 0; n < targets.length; n++) {
 				VariableDeclarationFragment f1= targets[k];
 				VariableDeclarationFragment f2= targets[n];
-				
+
 				String castType= f2.resolveBinding().getType().getQualifiedName();
 				String line= castType + " x= (" + castType + ") " + f1.getName().getIdentifier();
-				
+
 				StringBuffer buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
@@ -326,18 +326,18 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("    }\n");
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
-				
+
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);
 				parser.setUnitName("F.java");
-				
+
 				ITypeBinding b1= f1.resolveBinding().getType();
 				assertNotNull(b1);
 				ITypeBinding b2= f2.resolveBinding().getType();
 				assertNotNull(b2);
-				
+
 				//old implementation does not support generics:
 				if (b1.isParameterizedType() || b1.isWildcardType() || b1.isTypeVariable())
 					continue;
@@ -357,10 +357,10 @@ public class TypeRulesTest extends CoreTests {
 				if (res != (problems.length == 0)) {
 					errors.append(line).append('\n');
 				}
-			}	
+			}
 		}
 		assertTrue(errors.toString(), errors.length() == 0);
 	}
-		
-	
+
+
 }

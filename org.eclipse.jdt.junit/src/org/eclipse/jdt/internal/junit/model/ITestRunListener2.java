@@ -31,7 +31,7 @@ public interface ITestRunListener2 {
  	public static final int STATUS_FAILURE= 2;
  	/**
  	 * A test run has started.
- 	 * 
+ 	 *
  	 * @param testCount the number of individual tests that will be run
  	 */
 	public void testRunStarted(int testCount);
@@ -49,49 +49,49 @@ public interface ITestRunListener2 {
 	public void testRunStopped(long elapsedTime);
 	/**
 	 * An individual test has started.
-	 * 
+	 *
 	 * @param testId a unique Id identifying the test
 	 * @param testName the name of the test that started
 	 */
 	public void testStarted(String testId, String testName);
 	/**
 	 * An individual test has ended.
-	 * 
+	 *
 	 * @param testId a unique Id identifying the test
 	 * @param testName the name of the test that ended
 	 */
 	public void testEnded(String testId, String testName);
 
-			
+
 	/**
 	 * The VM instance performing the tests has terminated.
 	 */
 	public void testRunTerminated();
-		
+
 	/**
 	 * Information about a member of the test suite that is about to be run. The
 	 * format of the string is:
-	 * 
+	 *
 	 * <pre>
 	 *  testId,testName,isSuite,testcount
-	 *  
+	 *
 	 *  testId: a unique id for the test
 	 *  testName: the name of the test
 	 *  isSuite: true or false depending on whether the test is a suite
-	 *  testCount: an integer indicating the number of tests 
-	 *  
+	 *  testCount: an integer indicating the number of tests
+	 *
 	 *  Example: &quot;324968,testPass(junit.tests.MyTest),false,1&quot;
 	 * </pre>
-	 * 
+	 *
 	 * @param description a string describing a tree entry
-	 * 
+	 *
 	 * @see MessageIds#TEST_TREE
 	 */
 	public void testTreeEntry(String description);
 
 	/**
 	 * An individual test has failed with a stack trace.
-	 * 
+	 *
 	 * @param status the outcome of the test; one of
 	 *        {@link #STATUS_ERROR STATUS_ERROR} or
 	 *        {@link #STATUS_FAILURE STATUS_FAILURE}
@@ -105,7 +105,7 @@ public interface ITestRunListener2 {
 
 	/**
 	 * An individual test has been rerun.
-	 * 
+	 *
 	 * @param testId a unique Id identifying the test
 	 * @param testClass the name of the test class that was rerun
 	 * @param testName the name of the test that was rerun
@@ -120,7 +120,7 @@ public interface ITestRunListener2 {
 	 *        empty string if none
 	 */
 	public void testReran(String testId, String testClass, String testName, int status, String trace, String expected, String actual);
-	
-	
-	
+
+
+
 }

@@ -21,15 +21,15 @@ public class WorkspaceReferenceTest extends TestCase {
 	public static Test allTests() {
 		return new JUnitSourceSetup(new TestSuite(WorkspaceReferenceTest.class));
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
-	
+
 	public WorkspaceReferenceTest(String name) {
 		super(name);
 	}
-	
+
 	public void testSimpleMethodRef() throws Exception {
 		assertEquals(9, SearchTestHelper.countMethodRefs("junit.framework.Test", "countTestCases", new String[0]));
 	}

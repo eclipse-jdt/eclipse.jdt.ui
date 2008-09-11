@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 public class TestSessionTreeContentProvider implements ITreeContentProvider {
 
 	private final Object[] NO_CHILDREN= new Object[0];
-	
+
 	public void dispose() {
 	}
 

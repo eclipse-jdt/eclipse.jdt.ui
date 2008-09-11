@@ -19,12 +19,12 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
-
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
  * @author jthorsley
  */
 public class PackagesViewDeltaTests extends TestCase {
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.PackagesViewDeltaTests");//$NON-NLS-1$
 		//$JUnit-BEGIN$
@@ -57,14 +57,14 @@ public class PackagesViewDeltaTests extends TestCase {
 		//$JUnit-END$
 		return suite;
 	}
-	
+
 	private IJavaProject fJProject;
-	
+
 	private IPackageFragmentRoot fRoot1;
 	private IWorkspace fWorkspace;
 	private IWorkbench fWorkbench;
 	private MockPluginView fMyPart;
-	
+
 	private ITreeContentProvider fProvider;
 
 	private IWorkbenchPage fPage;
@@ -89,13 +89,13 @@ public class PackagesViewDeltaTests extends TestCase {
 	private IPackageFragment fInternalPack6;
 	private IPackageFragment fPack102;
 	private boolean fEnableAutoBuildAfterTesting;
-	
+
 	public PackagesViewDeltaTests(String name) {
 		super(name);
 	}
-	
+
 	//-----------------Remove delta test cases------------------
-	
+
 	public void testRemoveTopLevelFragmentNotLogicalPackage() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -133,12 +133,12 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		assertTrue("No remove happened, in Logical Package", !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 	}
 
 	//This is a bogus test because this situation could never occure
-	//while fPack42 exists you cannot remove fPack32 still it tests 
+	//while fPack42 exists you cannot remove fPack32 still it tests
 	//correct delta handeling.
 	public void testRemoveFragmentInMultiFragmentLogicalPackage() throws Exception {
 
@@ -168,7 +168,7 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		//assert remove happened
 		assertTrue("Refresh happened", !fMyPart.hasRemoveHappened() && !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 
@@ -216,13 +216,13 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		//assert delta correct (no remove or refresh, only change to logicalpackage)
 		assertTrue("Refresh happened", !fMyPart.hasRefreshHappened() && !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 
 		//test life cycle of LogicalPackage
 		Object[] child= fProvider.getChildren(ParentCp5);
-		
+
 		if ((child.length != 1) || (!(child[0] instanceof LogicalPackage))) {
 			assertTrue("wrong parent found for logical package after remove", false); //$NON-NLS-1$
 		}
@@ -290,19 +290,19 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Correct package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
 	}
-	
+
 	public void testAddFragmentToLogicalPackage() throws Exception {
 
 		//create a logical package with name "pack3.pack4"
 		LogicalPackage cp4= new LogicalPackage(fPack41);
 		cp4.add(fPack42);
 		cp4.add(fInternalPack4);
-		  
-		//initialise Map  
+
+		//initialise Map
 		fProvider.getChildren(cp4);
 
 		//send delta
@@ -310,10 +310,10 @@ public class PackagesViewDeltaTests extends TestCase {
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.ADDED, pack101);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-		
+
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		//make sure no refresh happened
 		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 	}
@@ -341,12 +341,12 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
-	
+
 	public void testAddCUFromFragmentNotLogicalPackageNotVisible() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -368,12 +368,12 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(cp3)); //$NON-NLS-1$
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
-	
+
 	public void testRemoveCUFromFragmentNotLogicalPackage() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -389,8 +389,8 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//make sure parent is visible
 		fMyPart.fViewer.setInput(fJProject);
-		fMyPart.fViewer.reveal(fPack81);		
-		
+		fMyPart.fViewer.reveal(fPack81);
+
 		fMyPart.clear();
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
@@ -399,12 +399,12 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
-	
+
 	public void testRemoveCUFromFragmentNotLogicalPackageWithParentNotVisible() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -426,12 +426,12 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(cp3)); //$NON-NLS-1$
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
-	
+
 	public void testAddBottomLevelFragmentNotLogicalPackage() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -452,7 +452,7 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//force events from display
 		fMyPart.pushDisplay();
-		
+
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Corrent package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
 	}
@@ -464,7 +464,7 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
-		
+
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
@@ -562,10 +562,10 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		super.tearDown();
 	}
-		
+
 	/**
 	 * Method compareArrays. Both arrays must be of IPackageFragments or compare will fail.
-	 * @param children 
+	 * @param children
 	 * @param expectedChildren
 	 * @return boolean returns true if the arrays contain the same elements
 	 */
@@ -614,7 +614,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		}
 		return false;
 	}
-	
+
 	private boolean contains(LogicalPackage lp, Object[] expectedChildren) {
 		for (int i= 0; i < expectedChildren.length; i++) {
 			Object object= expectedChildren[i];

@@ -18,13 +18,13 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
@@ -32,7 +32,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	public IntroduceParameterTests(String name) {
 		super(name);
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test);
 	}
@@ -47,7 +47,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 			return new RefactoringTestSetup(suite);
 		}
 	}
-	
+
 	protected String getResourceLocation() {
 		return "IntroduceParameter/";
 	}
@@ -86,14 +86,14 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		ICompilationUnit cu= createCU(packageFragment, getName());
 
 		ISourceRange selection= getSelection(cu);
-		IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(cu, selection.getOffset(), selection.getLength());		
+		IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(cu, selection.getOffset(), selection.getLength());
 
 		NullProgressMonitor pm= new NullProgressMonitor();
 		RefactoringStatus status= refactoring.checkInitialConditions(pm);
 		assertEquals("wrong activation status", expectedActivationStatus, status.getSeverity());
 		if (! status.isOK())
 			return;
-		
+
 		String[] names= getNames(cu);
 		if (names == null) {
 			refactoring.setParameterName(refactoring.guessedParameterName());
@@ -106,11 +106,11 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		assertEquals("wrong input status", expectedInputStatus, status.getSeverity());
 		if (status.getSeverity() == RefactoringStatus.FATAL)
 			return;
-		
+
 		String out= getProofedContent(packageName + SLASH_OUT, getName());
 		performTest(cu, refactoring, out);
 	}
-		
+
 // ---
 
 	public void testInvalid_NotInMethod1() throws Exception {
@@ -134,11 +134,11 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	public void testInvalid_NoMethodBinding() throws Exception {
 		performInvalidSelection();
 	}
-	
+
 	public void testInvalid_NoExpression1() throws Exception {
 		performInvalidSelection();
 	}
-	
+
 	//	---
 
 	public void testSimple_Capture() throws Exception {
@@ -164,11 +164,11 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	public void testSimple_StaticGetter1() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple_Formatting1() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple_Javadoc1() throws Exception {
 		performOK();
 	}
@@ -176,19 +176,19 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	public void testSimple_Javadoc2() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple_Constructor1() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple_Vararg1() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple_Wildcard1() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple_Wildcard2() throws Exception {
 		performOK();
 	}

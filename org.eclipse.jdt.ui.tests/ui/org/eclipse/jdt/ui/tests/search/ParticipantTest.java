@@ -14,34 +14,38 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.search.IQueryParticipant;
+
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantDescriptor;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantRecord;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
-import org.eclipse.jdt.ui.search.IQueryParticipant;
 
 /**
  */
 public class ParticipantTest extends TestCase {
-	
+
 	static class TestExtensionPoint extends SearchParticipantsExtensionPoint {
 		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
 			return new SearchParticipantRecord[] { new SearchParticipantRecord(new TestParticipantRecord(), new TestParticipant()) };
 		}
 	}
-	
+
 	static class TestParticipantRecord extends SearchParticipantDescriptor {
 
 		TestParticipantRecord() {
 			super(null);
 		}
-		
+
 		protected IStatus checkSyntax() {
 			return Status.OK_STATUS;
 		}
@@ -53,7 +57,7 @@ public class ParticipantTest extends TestCase {
 		public String getID() {
 			return "TestParticipant1 ID";
 		}
-		
+
 		protected String getNature() {
 			return JavaCore.NATURE_ID;
 		}
@@ -62,20 +66,20 @@ public class ParticipantTest extends TestCase {
 	public static Test allTests() {
 		return new JUnitSourceSetup(new TestSuite(ParticipantTest.class), new TestExtensionPoint());
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
-	
+
 	public ParticipantTest(String name) {
 		super(name);
 	}
-	
+
 	public void testSimpleParticipant() throws Exception {
 		JavaSearchQuery query= SearchTestHelper.runMethodRefQuery("frufru", new String[0]);
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		assertEquals(20, result.getMatchCount());
-		
+
 		Object[] elements= result.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			assertTrue(elements[i] instanceof Integer);

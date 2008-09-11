@@ -29,70 +29,70 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class TreeListDialogFieldExample {
 	private Shell fShell;
-	
+
 	public TreeListDialogFieldExample() {
 	}
-	
+
 	public TreeListDialogFieldExample close () {
 		if ((fShell != null) && (!fShell.isDisposed ())) fShell.dispose ();
 		fShell= null;
 		return this;
 	}
-	
-	
-		
+
+
+
 	public TreeListDialogFieldExample open () {
 		fShell= new Shell ();
 		fShell.setText("Message Dialog Example");
 		fShell.setLayout(new GridLayout());
-		
+
 		Adapter adapter= new Adapter();
-		
-		
-		String[] addButtons= new String[] { 
+
+
+		String[] addButtons= new String[] {
 			/* 0 */ "Add1",
 			/* 1 */ "Add2",
 			/* 2 */ null,
 			/* 3 */ "Up",
-			/* 4 */ "Down",					
+			/* 4 */ "Down",
 			/* 5 */ null,
 			/* 6 */ "Remove"
 		};
-		
+
 		TreeListDialogField list= new TreeListDialogField(adapter, addButtons, new LabelProvider());
 		list.setUpButtonIndex(3);
 		list.setDownButtonIndex(4);
 		list.setRemoveButtonIndex(6);
 		list.setLabelText("List: ");
-		
-	
+
+
 		for (int i= 0; i < 30; i++) {
 				list.addElement(i + "firstxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 		}
-		
-		
+
+
 		LayoutUtil.doDefaultLayout(fShell, new DialogField[] { list }, false);
-		
+
 		fShell.setSize(fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		fShell.open ();
 		return this;
 	}
-	
+
 	private static Random fgRandom= new Random();
-	
+
 	private class Adapter implements ITreeListAdapter {
-		
+
 		// -------- IStringButtonAdapter
 		public void changeControlPressed(DialogField field) {
-		}		
-				
+		}
+
 		// -------- ITreeListAdapter
 		public void customButtonPressed(TreeListDialogField field, int index) {
 			field.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
 		}
-		
+
 		public void selectionChanged(TreeListDialogField field) {}
-		
+
 		public Object[] getChildren(TreeListDialogField field, Object element) {
 			if (field.getElements().contains(element)) {
 				return new String[] {
@@ -109,8 +109,8 @@ public class TreeListDialogFieldExample {
 
 		public boolean hasChildren(TreeListDialogField field, Object element) {
 			return field.getElements().contains(element);
-		}		
-		
+		}
+
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
 		}
@@ -121,8 +121,8 @@ public class TreeListDialogFieldExample {
 		public void keyPressed(TreeListDialogField field, KeyEvent event) {
 		}
 
-	}	
-	
+	}
+
 	public TreeListDialogFieldExample run () {
 		Display display= fShell.getDisplay ();
 		while (!fShell.isDisposed ()) {
@@ -130,7 +130,7 @@ public class TreeListDialogFieldExample {
 		}
 		return this;
 	}
-	
+
 	public static void main(java.lang.String[] args) {
 		new TreeListDialogFieldExample().open().run().close();
 	}

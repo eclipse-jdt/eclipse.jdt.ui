@@ -21,7 +21,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class PackageExplorerWorkspaceWarmPerfTest extends JdtPerformanceTestCase {

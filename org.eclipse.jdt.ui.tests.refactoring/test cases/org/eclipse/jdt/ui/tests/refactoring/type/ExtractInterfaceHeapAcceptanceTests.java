@@ -26,17 +26,17 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringHeapTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase {
-	
+
 	private SWTTestProject fProject;
 	private Refactoring fRefactoring;
-	
+
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
 		TestSuite suite= new TestSuite("ExtractInterfaceHeapAcceptanceTests");
@@ -51,7 +51,7 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 	public ExtractInterfaceHeapAcceptanceTests(String test) {
 		super(test);
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= new SWTTestProject();
@@ -73,12 +73,12 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 		processor.setExtractedMembers((IMember[])extractedMembers.toArray(new IMember[extractedMembers.size()]));
 		processor.setReplace(true);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		fProject.delete();
 		super.tearDown();
 	}
-	
+
 	public void testExtractControl() throws Exception {
 		executeRefactoring(fRefactoring, true);
 	}

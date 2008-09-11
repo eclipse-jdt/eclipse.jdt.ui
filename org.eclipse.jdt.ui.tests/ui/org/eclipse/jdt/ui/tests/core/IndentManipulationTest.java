@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.core;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 public class IndentManipulationTest extends TestCase {
@@ -27,7 +28,7 @@ public class IndentManipulationTest extends TestCase {
 	public static Test allTests() {
 		return new TestSuite(IndentManipulationTest.class);
 	}
-	
+
 	public void testIsIndentChar() {
 		assertTrue(IndentManipulation.isIndentChar(' '));
 		assertTrue(IndentManipulation.isIndentChar('\t'));
@@ -35,7 +36,7 @@ public class IndentManipulationTest extends TestCase {
 		assertTrue(!IndentManipulation.isIndentChar('\n'));
 		assertTrue(!IndentManipulation.isIndentChar('\r'));
 	}
-		
+
 	public void testIsLineDelimiterChar() {
 		assertTrue(!IndentManipulation.isLineDelimiterChar(' '));
 		assertTrue(!IndentManipulation.isLineDelimiterChar('\t'));

@@ -23,27 +23,27 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
  */
 
 public class ReferenceInfo {
-	
+
 	private Object fReference;
 	private BacklinkNode[] fBacklinkNodes;
 	private boolean fIsPosibleLeak;
-	
+
 	public ReferenceInfo(ReferencedObject ref) {
 		fReference= ref.getValue();
 		fBacklinkNodes= getBacklinkNodes(ref);
 	}
-	
+
 	public boolean isPosibleLeak() {
 		return fIsPosibleLeak;
 	}
-	
+
 	public void setPosibleLeak(boolean isPosibleLeak) {
 		fIsPosibleLeak= isPosibleLeak;
 	}
 
 	private BacklinkNode[] getBacklinkNodes(ReferencedObject curr) {
 		ArrayList res= new ArrayList();
-		
+
 		while (curr != null) {
 			String str;
 			if (curr instanceof ReferencedArrayElement) {
@@ -62,15 +62,15 @@ public class ReferenceInfo {
 		}
 		return (BacklinkNode[]) res.toArray(new BacklinkNode[res.size()]);
 	}
-		
+
 	public Object getReference() {
 		return fReference;
 	}
-	
+
 	public BacklinkNode[] getBacklinkNodes() {
 		return fBacklinkNodes;
 	}
-	
+
 	public String toString() {
 		StringBuffer buf= new StringBuffer();
 		buf.append(getReference().getClass().getName()).append('\n');
@@ -98,13 +98,13 @@ public class ReferenceInfo {
 		public String getBackLinkString() {
 			return fBackStrings;
 		}
-		
+
 		public Object getValue() {
 			return fValue;
 		}
 
 	}
-	
+
 }
 
 

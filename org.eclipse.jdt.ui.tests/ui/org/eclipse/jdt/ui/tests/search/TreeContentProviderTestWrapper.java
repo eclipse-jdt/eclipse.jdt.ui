@@ -19,18 +19,18 @@ import junit.framework.TestSuite;
  * This class is a wrapper for {@link org.eclipse.jdt.ui.tests.search.TreeContentProviderTest}
  * in order to prevent the loading of the Search plug-in when the VM
  * verifies some JDT UI code.
- * 
+ *
  * @since 3.1
  */
 public class TreeContentProviderTestWrapper extends TestCase {
-	
+
 	TreeContentProviderTest fTest;
-	private String fName; 
-	
+	private String fName;
+
 	public static Test allTests() {
 		return new JUnitSourceSetup(new TestSuite(TreeContentProviderTestWrapper.class));
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
@@ -39,13 +39,13 @@ public class TreeContentProviderTestWrapper extends TestCase {
 		super(name);
 		fName= name;
 	}
-	
+
 	protected void setUp() throws Exception {
 		fTest= new TreeContentProviderTest(fName);
 		fTest.setUp();
 	}
-	
-	
+
+
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
@@ -57,11 +57,11 @@ public class TreeContentProviderTestWrapper extends TestCase {
 	public void testSimpleAdd() throws Exception {
 		fTest.testSimpleAdd();
 	}
-	
+
 	public void testRemove() throws Exception {
 		fTest.testRemove();
 	}
-	
+
 	public void testRemoveParentFirst() throws Exception {
 		fTest.testRemoveParentFirst();
 	}

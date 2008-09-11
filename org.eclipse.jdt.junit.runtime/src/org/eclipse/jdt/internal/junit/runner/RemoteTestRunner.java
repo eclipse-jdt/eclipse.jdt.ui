@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids: sdavids@gmx.de bug 26754 
+ *     Sebastian Davids: sdavids@gmx.de bug 26754
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.runner;
 
@@ -38,7 +38,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		String fRerunClassName;
 		String fRerunTestName;
 		int fRerunTestId;
-		
+
 		public RerunRequest(int testId, String className, String testName) {
 			fRerunTestId= testId;
 			fRerunClassName= className;
@@ -48,11 +48,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	public static final String RERAN_FAILURE = "FAILURE"; //$NON-NLS-1$
-	
+
 	public static final String RERAN_ERROR = "ERROR"; //$NON-NLS-1$
-	
+
 	public static final String RERAN_OK = "OK"; //$NON-NLS-1$
-	
+
 	/**
 	 * The name of the test classes to be executed
 	 */
@@ -70,7 +70,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * The version expected by the client
 	 */
 	private String fVersion= ""; //$NON-NLS-1$
-	
+
 	/**
 	 * The client socket.
 	 */
@@ -94,7 +94,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	/**
 	 * Is the debug mode enabled?
 	 */
-	private boolean fDebugMode= false;	
+	private boolean fDebugMode= false;
 	/**
 	 * Keep the test run server alive after a test run has finished.
 	 * This allows to rerun tests.
@@ -114,11 +114,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	private ReaderThread fReaderThread;
 
 	private String fRerunTest;
-	
+
 	private final TestIdMap fIds = new TestIdMap();
 
 	private String[] fFailureNames;
-		
+
 	private ITestLoader fLoader;
 
 	private MessageSender fSender;
@@ -134,11 +134,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 
 		public void run(){
-			try { 
-				String message= null; 
-				while (true) { 
+			try {
+				String message= null;
+				while (true) {
 					if ((message= fReader.readLine()) != null) {
-						
+
 						if (message.startsWith(MessageIds.TEST_STOP)){
 							fStopped= true;
 							RemoteTestRunner.this.stop();
@@ -147,11 +147,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 							}
 							break;
 						}
-						
+
 						else if (message.startsWith(MessageIds.TEST_RERUN)) {
 							String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
 							//format: testId className testName
-							int c0= arg.indexOf(' '); 
+							int c0= arg.indexOf(' ');
 							int c1= arg.indexOf(' ', c0+1);
 							String s= arg.substring(0, c0);
 							int testId= Integer.parseInt(s);
@@ -163,13 +163,13 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 							}
 						}
 					}
-				} 
+				}
 			} catch (Exception e) {
 				RemoteTestRunner.this.stop();
 			}
 		}
-	}	
-	
+	}
+
 	public RemoteTestRunner() {
 		setMessageSender(this);
 	}
@@ -178,15 +178,15 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		fSender = sender;
 	}
 
-	/** 
+	/**
 	 * The main entry point.
-	 * 
+	 *
 	 * @param args Parameters:
 	 * <pre>-classnames: the name of the test suite class
 	 * -testfilename: the name of a file containing classnames of test suites
-	 * -test: the test method name (format classname testname) 
-	 * -host: the host to connect to default local host 
-	 * -port: the port to connect to, mandatory argument 
+	 * -test: the test method name (format classname testname)
+	 * -host: the host to connect to default local host
+	 * -port: the port to connect to, mandatory argument
 	 * -keepalive: keep the process alive after a test run
      * </pre>
      */
@@ -202,16 +202,16 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			System.exit(0);
 		}
 	}
-	
+
 	/**
 	 * Parse command line arguments. Hook for subclasses to process
 	 * additional arguments.
 	 * @param args the arguments
 	 */
 	protected void init(String[] args) {
-		defaultInit(args);		
-	}	
-	
+		defaultInit(args);
+	}
+
 	/**
 	 * The class loader to be used for loading tests.
 	 * Subclasses may override to use another class loader.
@@ -220,7 +220,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	protected ClassLoader getTestClassLoader() {
 		return getClass().getClassLoader();
 	}
-	
+
 	/**
 	 * Process the default arguments.
 	 * @param args arguments
@@ -235,7 +235,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 					list.add(args[j]);
 				}
 				fTestClassNames= (String[]) list.toArray(new String[list.size()]);
-			}	
+			}
 			else if(args[i].toLowerCase().equals("-test")) { //$NON-NLS-1$
 				String testName= args[i+1];
 				int p= testName.indexOf(':');
@@ -244,7 +244,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				fTestName= testName.substring(p+1);
 				fTestClassNames= new String[]{ testName.substring(0, p)  };
 				i++;
-			}			
+			}
 			else if(args[i].toLowerCase().equals("-testnamefile")) { //$NON-NLS-1$
 				String testNameFile= args[i+1];
 				try {
@@ -253,7 +253,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 					throw new IllegalArgumentException("Cannot read testname file.");		 //$NON-NLS-1$
 				}
 				i++;
-			
+
 			} else if(args[i].toLowerCase().equals("-testfailures")) { //$NON-NLS-1$
 				String testFailuresFile= args[i+1];
 				try {
@@ -262,7 +262,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 					throw new IllegalArgumentException("Cannot read testfailures file.");		 //$NON-NLS-1$
 				}
 				i++;
-			
+
 			} else if(args[i].toLowerCase().equals("-port")) { //$NON-NLS-1$
 				fPort= Integer.parseInt(args[i+1]);
 				i++;
@@ -390,11 +390,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		runTests(fExecution);
 		if (fKeepAlive)
 			waitForReruns();
-			
+
 		shutDown();
-		
+
 	}
-		
+
 	public FirstRunExecutionListener firstRunExecutionListener() {
 		return new FirstRunExecutionListener(fSender, fIds);
 	}
@@ -414,14 +414,14 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			}
 		}
 	}
-	
+
 	public void runFailed(String message, Exception exception) {
 		//TODO: remove System.err.println?
 		System.err.println(message);
 		if (exception != null)
 			exception.printStackTrace(System.err);
 	}
-			
+
 	protected Class[] loadClasses(String[] testClassNames) {
 		Vector classes= new Vector();
 		for (int i = 0; i < testClassNames.length; i++) {
@@ -433,7 +433,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 		return (Class[]) classes.toArray(new Class[classes.size()]);
 	}
-	
+
 	protected void notifyListenersOfTestEnd(TestExecution execution,
 			long testStartTime) {
 		if (execution == null || execution.shouldStop())
@@ -450,24 +450,24 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 */
 	public void runTests(String[] testClassNames, String testName, TestExecution execution) {
 		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, this);
-		
-		// count all testMethods and inform ITestRunListeners	
+
+		// count all testMethods and inform ITestRunListeners
 		int count= countTests(suites);
-		
+
 		notifyTestRunStarted(count);
-		
+
 		if (count == 0) {
 			notifyTestRunEnded(0);
 			return;
 		}
-		
+
 		sendTrees(suites);
 
 		long testStartTime= System.currentTimeMillis();
 		execution.run(suites);
 		notifyListenersOfTestEnd(execution, testStartTime);
 	}
-	
+
 	private void sendTrees(ITestReference[] suites) {
 		long startTime = System.currentTimeMillis();
 		if (fDebugMode)
@@ -478,7 +478,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		if (fDebugMode)
 			System.out.println("done send tree - time(ms): " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
 	}
-	
+
 	private int countTests(ITestReference[] tests) {
 		int count= 0;
 		for (int i= 0; i < tests.length; i++) {
@@ -488,7 +488,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Reruns a test as defined by the fully qualified class name and
 	 * the name of the test.
@@ -524,7 +524,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		StringBuffer sb= new StringBuffer(s.length()+10);
 		for (int i= 0; i < s.length(); i++) {
 			char c= s.charAt(i);
-			if (c == ',') 
+			if (c == ',')
 				sb.append("\\,"); //$NON-NLS-1$
 			else if (c == '\\')
 				sb.append("\\\\"); //$NON-NLS-1$
@@ -547,10 +547,10 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			fExecution.stop();
 		}
 	}
-	
+
 	/**
 	 * Connect to the remote test listener.
-	 * 
+	 *
 	 * @return <code>true</code> if connection successful, <code>false</code> if failed
 	 */
 	protected boolean connect() {
@@ -616,14 +616,14 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			if (fDebugMode)
 				e.printStackTrace();
 		}
-		
+
 		try {
 			if (fClientSocket != null) {
 				fClientSocket.close();
 				fClientSocket= null;
 			}
 		} catch(IOException e) {
-			if (fDebugMode)	
+			if (fDebugMode)
 				e.printStackTrace();
 		}
 	}
@@ -632,7 +632,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * @see org.eclipse.jdt.internal.junit.runner.MessageSender#sendMessage(java.lang.String)
 	 */
 	public void sendMessage(String msg) {
-		if(fWriter == null) 
+		if(fWriter == null)
 			return;
 		fWriter.println(msg);
 //		if (!fConsoleMode)
@@ -669,24 +669,24 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			fSender.flush();
 		}
 	}
-	
+
 	public void flush() {
 	    fWriter.flush();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.junit.runner.TestRunner#runTests(org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.TestExecution)
 	 */
 	public void runTests(TestExecution execution) {
 		runTests(fTestClassNames, fTestName, execution);
 		}
-			
+
 	public ITestLoader getTestLoader() {
 		return fLoader;
 	}
-	
+
 	public Class loadClass(String className, RemoteTestRunner listener) {
 		Class clazz= null;
 		try {
@@ -696,4 +696,4 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 		return clazz;
 	}
-}	
+}

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.examples;
 
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.action.Action;
@@ -20,8 +22,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IActionDelegate;
 
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
-
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /** In plugin.xml:
    <extension
@@ -44,8 +44,8 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 public class AddJavaNatureAction extends Action implements IActionDelegate {
 
 	private IProject fProject;
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
@@ -57,7 +57,7 @@ public class AddJavaNatureAction extends Action implements IActionDelegate {
 		} catch (Exception e) {
 			JavaTestPlugin.log(e);
 		}
-		
+
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
@@ -68,7 +68,7 @@ public class AddJavaNatureAction extends Action implements IActionDelegate {
 			Object object= ((IStructuredSelection) selection).getFirstElement();
 			if (object instanceof IProject) {
 				fProject= (IProject) object;
-				
+
 			}
 		}
 	}

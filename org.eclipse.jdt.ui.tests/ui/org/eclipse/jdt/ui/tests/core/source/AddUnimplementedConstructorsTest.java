@@ -112,15 +112,15 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	private AddUnimplementedConstructorsOperation createOperation(IType type) throws CoreException {
 		return createOperation(type, -1);
 	}
-		
-	private AddUnimplementedConstructorsOperation createOperation(IType type, int insertPos) throws CoreException {	
+
+	private AddUnimplementedConstructorsOperation createOperation(IType type, int insertPos) throws CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declararation node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		
+
 		return new AddUnimplementedConstructorsOperation(unit, binding, null, insertPos, true, true, true);
 	}
 
@@ -189,7 +189,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 
 		IMethod[] createdMethods= testClass.getMethods();
-		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ 
+		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
@@ -595,47 +595,47 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		checkMethods(new String[] { "Test1", "Test1", "Test1", "Test1", "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
 		StringBuffer buf= new StringBuffer();
-		buf.append("public class Test1 extends A {\n" + 
-				"\n" + 
-				"    public Test1(int a, boolean boo, String fooString) {super();}\n" + 
-				"\n" + 
-				"    /** Constructor Comment\n" + 
-				"     * \n" + 
-				"     */\n" + 
-				"    public Test1() {\n" + 
-				"        super();\n" + 
-				"        // TODO\n" + 
-				"    }\n" + 
-				"\n" + 
-				"    /** Constructor Comment\n" + 
-				"     * @param a\n" + 
-				"     */\n" + 
-				"    public Test1(int a) {\n" + 
-				"        super(a);\n" + 
-				"        // TODO\n" + 
-				"    }\n" + 
-				"\n" + 
-				"    /** Constructor Comment\n" + 
-				"     * @param a\n" + 
-				"     * @param boo\n" + 
-				"     * @param fooString\n" + 
-				"     * @param bologna\n" + 
-				"     */\n" + 
-				"    public Test1(int a, boolean boo, String fooString, int bologna) {\n" + 
-				"        super(a, boo, fooString, bologna);\n" + 
-				"        // TODO\n" + 
-				"    }\n" + 
-				"\n" + 
-				"    /** Constructor Comment\n" + 
-				"     * @param a\n" + 
-				"     * @param boo\n" + 
-				"     * @param fooString\n" + 
-				"     * @param buf\n" + 
-				"     */\n" + 
-				"    public Test1(int a, boolean boo, String fooString, StringBuffer buf) {\n" + 
-				"        super(a, boo, fooString, buf);\n" + 
-				"        // TODO\n" + 
-				"    }\n" + 
+		buf.append("public class Test1 extends A {\n" +
+				"\n" +
+				"    public Test1(int a, boolean boo, String fooString) {super();}\n" +
+				"\n" +
+				"    /** Constructor Comment\n" +
+				"     * \n" +
+				"     */\n" +
+				"    public Test1() {\n" +
+				"        super();\n" +
+				"        // TODO\n" +
+				"    }\n" +
+				"\n" +
+				"    /** Constructor Comment\n" +
+				"     * @param a\n" +
+				"     */\n" +
+				"    public Test1(int a) {\n" +
+				"        super(a);\n" +
+				"        // TODO\n" +
+				"    }\n" +
+				"\n" +
+				"    /** Constructor Comment\n" +
+				"     * @param a\n" +
+				"     * @param boo\n" +
+				"     * @param fooString\n" +
+				"     * @param bologna\n" +
+				"     */\n" +
+				"    public Test1(int a, boolean boo, String fooString, int bologna) {\n" +
+				"        super(a, boo, fooString, bologna);\n" +
+				"        // TODO\n" +
+				"    }\n" +
+				"\n" +
+				"    /** Constructor Comment\n" +
+				"     * @param a\n" +
+				"     * @param boo\n" +
+				"     * @param fooString\n" +
+				"     * @param buf\n" +
+				"     */\n" +
+				"    public Test1(int a, boolean boo, String fooString, StringBuffer buf) {\n" +
+				"        super(a, boo, fooString, buf);\n" +
+				"        // TODO\n" +
+				"    }\n" +
 				"}");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -1097,7 +1097,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		compareSource(buf.toString(), testClass.getSource());
 	}
-	
+
 	public void testInsertAt() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -1113,8 +1113,8 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("	}\n");
 		buf.append("}");
 		fPackage.createCompilationUnit("B.java", buf.toString(), true, null);
-		
-		
+
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");
@@ -1138,36 +1138,36 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("    }\n");
 		buf.append("}");
 		String originalContent= buf.toString();
-		
+
 		final int NUM_MEMBERS= 6;
-		
+
 		buf= new StringBuffer();
 		buf.append("public A(int x) {\n");
 		buf.append("        super(x);\n");
 		buf.append("        // TODO\n");
 		buf.append("    }");
 		String expectedConstructor= buf.toString();
-		
+
 		// try to insert the new constructor after every member and at the end
 		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
-		
+
 			ICompilationUnit unit= null;
 			try {
 				unit= fPackage.createCompilationUnit("A.java", originalContent, true, null);
-				
+
 				IType type= unit.findPrimaryType();
 				IJavaElement[] children= type.getChildren();
 				assertEquals(NUM_MEMBERS, children.length);
-				
+
 				int insertIndex= i < NUM_MEMBERS ? ((IMember) children[i]).getSourceRange().getOffset() : -1;
-	
+
 				AddUnimplementedConstructorsOperation op= createOperation(type, insertIndex);
 				op.setCreateComments(false);
 				op.setOmitSuper(false);
 				op.setVisibility(Modifier.PUBLIC);
 				op.run(new NullProgressMonitor());
 				JavaModelUtil.reconcile(type.getCompilationUnit());
-				
+
 				IJavaElement[] newChildren= type.getChildren();
 				assertEquals(NUM_MEMBERS + 1, newChildren.length);
 				String source= ((IMember) newChildren[i]).getSource(); // new element expected at index i
@@ -1178,5 +1178,5 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 				}
 			}
 		}
-	}	
+	}
 }

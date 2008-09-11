@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -37,7 +37,7 @@ public class OptionsConfigurationBlockTest extends TestCase {
 
 	/**
 	 * Reflective test that ensures that all options from {@link JavaCore} are used in the UI.
-	 * 
+	 *
 	 * @throws Exception should not
 	 */
 	public void testKeysForOptions() throws Exception {
@@ -57,22 +57,22 @@ public class OptionsConfigurationBlockTest extends TestCase {
 					coreFieldLookup.put(value, name);
 			}
 		}
-		
+
 		// default visible classes:
 		Class codeAssistAdvancedConfigurationBlock= Class.forName("org.eclipse.jdt.internal.ui.preferences.CodeAssistAdvancedConfigurationBlock");
 		checkConfigurationBlock(codeAssistAdvancedConfigurationBlock, coreFieldLookup);
 		Class codeAssistConfigurationBlock= Class.forName("org.eclipse.jdt.internal.ui.preferences.CodeAssistConfigurationBlock");
 		checkConfigurationBlock(codeAssistConfigurationBlock, coreFieldLookup);
-		
+
 		checkConfigurationBlock(ComplianceConfigurationBlock.class, coreFieldLookup);
 		checkConfigurationBlock(JavaBuildConfigurationBlock.class, coreFieldLookup);
 		checkConfigurationBlock(JavadocProblemsConfigurationBlock.class, coreFieldLookup);
 		checkConfigurationBlock(NameConventionConfigurationBlock.class, coreFieldLookup);
 		checkConfigurationBlock(ProblemSeveritiesConfigurationBlock.class, coreFieldLookup);
 		checkConfigurationBlock(TodoTaskConfigurationBlock.class, coreFieldLookup);
-		
+
 		removeUnusedOptions(coreFieldLookup);
-		
+
 		assertEquals("Core constants missing in the UI",
 				Collections.EMPTY_MAP.toString(),
 				coreFieldLookup.toString().replace(',', '\n'));
@@ -89,15 +89,15 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				JavaCore.COMPILER_PB_UNREACHABLE_CODE,
 				JavaCore.COMPILER_PB_UNSAFE_TYPE_OPERATION,
 				JavaCore.COMPILER_PB_BOOLEAN_METHOD_THROWING_EXCEPTION, // to be deprecated, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=245963
-				
+
 				JavaCore.CODEASSIST_VISIBILITY_CHECK, // gets set directly, based on org.eclipse.jdt.ui.PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS
-				
+
 				JavaCore.CORE_ENCODING, // useless
 				JavaCore.CORE_JAVA_BUILD_ORDER, // not relevant any more, since project references are not necessary for build path
-				
+
 				JavaCore.COMPILER_PB_OVERRIDING_METHOD_WITHOUT_SUPER_INVOCATION, // not useful without suppressWarnings for 1.4: https://bugs.eclipse.org/bugs/show_bug.cgi?id=156736
 				JavaCore.COMPILER_PB_UNUSED_TYPE_ARGUMENTS_FOR_METHOD_INVOCATION, // maybe for 1.7
-				
+
 				JavaCore.CODEASSIST_IMPLICIT_QUALIFICATION, // TODO: not used: bug?
 		}));
 	}

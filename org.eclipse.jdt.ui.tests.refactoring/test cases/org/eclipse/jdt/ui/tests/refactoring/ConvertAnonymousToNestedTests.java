@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     N.Metchev@teamphone.com - contributed fixes for
- *     - convert anonymous to nested should sometimes declare class as static [refactoring] 
+ *     - convert anonymous to nested should sometimes declare class as static [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
@@ -41,37 +41,37 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	private static final Class clazz= ConvertAnonymousToNestedTests.class;
 	private static final String REFACTORING_PATH= "ConvertAnonymousToNested/";
 
-	private Object fCompactPref; 
-		
+	private Object fCompactPref;
+
 	public ConvertAnonymousToNestedTests(String name) {
 		super(name);
-	} 
-	
+	}
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-	
+
 	public static Test suite() {
 		return new Java15Setup(new TestSuite(clazz));
 	}
-	
+
 	public static Test setUpTest(Test someTest) {
 	    return new RefactoringTestSetup(someTest);
 	}
-	
+
 	private String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();
 		if (canInline)
 			fileName += input ? "_in": "_out";
-		return fileName + ".java"; 
+		return fileName + ".java";
 	}
-	
+
 	private String getTestFileName(boolean canConvert, boolean input){
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
 		fileName += (canConvert ? "canConvert/": "cannotConvert/");
 		return fileName + getSimpleTestFileName(canConvert, input);
 	}
-	
+
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canConvert, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canConvert, input), getFileContents(getTestFileName(canConvert, input)));
 	}
@@ -79,24 +79,24 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
-		
+
 		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
 		fCompactPref= options.get(setting);
 		options.put(setting, DefaultCodeFormatterConstants.TRUE);
 		JavaCore.setOptions(options);
-		
+
 		IJavaProject project= getPackageP().getJavaProject();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "", project);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, "", project);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, "", project);
 
 	}
-	
+
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		Hashtable options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
-		JavaCore.setOptions(options);	
+		JavaCore.setOptions(options);
 	}
 
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility) throws Exception{
@@ -104,7 +104,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
 
-		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("activation was supposed to be successful", null, preconditionResult);
@@ -112,17 +112,17 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ref.setClassName(className);
 		ref.setDeclareFinal(makeFinal);
 		ref.setVisibility(visibility);
-		
+
 		if (preconditionResult == null)
 			preconditionResult= ref.checkFinalConditions(new NullProgressMonitor());
-		else	
+		else
 			preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("precondition was supposed to pass", null, preconditionResult);
-		
+
 		performChange(ref, false);
-		
+
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
@@ -135,7 +135,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
 
-		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("activation was supposed to be successful", null, preconditionResult);
@@ -144,17 +144,17 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ref.setDeclareFinal(makeFinal);
 		ref.setDeclareStatic(makeStatic);
 		ref.setVisibility(visibility);
-		
+
 		if (preconditionResult == null)
 			preconditionResult= ref.checkFinalConditions(new NullProgressMonitor());
-		else	
+		else
 			preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("precondition was supposed to pass", null, preconditionResult);
-		
+
 		performChange(ref, false);
-		
+
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
@@ -167,7 +167,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
 
-		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("activation was supposed to be successful", null, preconditionResult);
@@ -175,26 +175,26 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		ref.setClassName(className);
 		ref.setDeclareFinal(makeFinal);
 		ref.setVisibility(visibility);
-		
+
 		if (preconditionResult == null)
 			preconditionResult= ref.checkFinalConditions(new NullProgressMonitor());
-		else	
+		else
 			preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertNotNull("precondition was supposed to fail",preconditionResult);
 
 		assertEquals("incorrect severity:", expectedSeverity, preconditionResult.getSeverity());
-	}	
+	}
 
 	private void failActivationHelper(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
 	    ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 	    ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 	    ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
 
-	    RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
+	    RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 	    assertEquals("activation was supposed to fail", expectedSeverity, preconditionResult.getSeverity());
-	}	
+	}
 
 	//--- TESTS
 
@@ -210,15 +210,15 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	public void testFail2() throws Exception{
 		failHelper1(5, 17, 5, 18, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
-	
+
 	public void testFail3() throws Exception{
 	    failActivationHelper(13, 27, 13, 27, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
-	
+
 	public void testFail4() throws Exception{
 	    failHelper1(8, 31, 8, 31, true, "Inner", Modifier.PRIVATE, RefactoringStatus.ERROR);
 	}
-	
+
 	public void test0() throws Exception{
 		helper1(5, 17, 5, 17, true, "Inner", Modifier.PRIVATE);
 	}
@@ -286,7 +286,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	public void test16() throws Exception{
 		helper1(4, 10, 4, 26, true, "Inner", Modifier.PRIVATE);
 	}
-	
+
 	public void test17() throws Exception{
 		helper1(6, 14, 6, 15, true, "Inner", Modifier.PRIVATE);
 	}
@@ -304,46 +304,46 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
     public void test21() throws Exception{
-        helper1(4, 25, 4, 25, true, "Inner", Modifier.PRIVATE);   
+        helper1(4, 25, 4, 25, true, "Inner", Modifier.PRIVATE);
     }
 
     public void test22() throws Exception{
-    	helper1(9, 34, 9, 34, true, "Inner", Modifier.PRIVATE);   
+    	helper1(9, 34, 9, 34, true, "Inner", Modifier.PRIVATE);
     }
-    
+
     public void test23() throws Exception{
-    	helper1(6, 33, 6, 33, true, "Inner", Modifier.PRIVATE);   
+    	helper1(6, 33, 6, 33, true, "Inner", Modifier.PRIVATE);
     }
-    
+
     public void test24() throws Exception{
-    	helper1(3, 26, 3, 26, true, "Inner", Modifier.PRIVATE);   
+    	helper1(3, 26, 3, 26, true, "Inner", Modifier.PRIVATE);
     }
 
     public void test25() throws Exception{
-    	helper1(8, 28, 8, 28, true, "Inner", Modifier.PRIVATE);   
+    	helper1(8, 28, 8, 28, true, "Inner", Modifier.PRIVATE);
     }
 
     public void test26() throws Exception{
-    	helper1(8, 28, 8, 28, true, "Inner", Modifier.PRIVATE);   
+    	helper1(8, 28, 8, 28, true, "Inner", Modifier.PRIVATE);
     }
 
     public void test27() throws Exception{
-    	helper1(11, 39, 11, 39, true, "Inner", Modifier.PRIVATE);   
+    	helper1(11, 39, 11, 39, true, "Inner", Modifier.PRIVATE);
     }
 
     public void test28() throws Exception{
 //        printTestDisabledMessage("disabled: bug 43360");
-    	helper1(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE);   
+    	helper1(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE);
     }
-    
+
     public void test29() throws Exception{
-    		helper1(6, 14, 6, 14, true, "Inner", Modifier.PRIVATE);   
+    		helper1(6, 14, 6, 14, true, "Inner", Modifier.PRIVATE);
     }
 
     public void test30() throws Exception{ // 2 syntax errors
-    	helper1(5, 32, 5, 32, true, true, "Greeter", Modifier.PRIVATE);   
+    	helper1(5, 32, 5, 32, true, true, "Greeter", Modifier.PRIVATE);
     }
-    
+
 	public void testGenerics0() throws Exception{
 		helper1(5, 20, 5, 20, true, "Inner", Modifier.PRIVATE);
 	}
@@ -371,12 +371,12 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	public void testGenerics6() throws Exception{
 		helper1(7, 20, 7, 20, true, true, "Inner", Modifier.PRIVATE);
 	}
-	
-    public void test31() throws Exception{ // for bug 181054 
-    	helper1(10, 24, 10, 30, true, false, "Inner1Extension", Modifier.PRIVATE);   
+
+    public void test31() throws Exception{ // for bug 181054
+    	helper1(10, 24, 10, 30, true, false, "Inner1Extension", Modifier.PRIVATE);
     }
-    
-    public void test32() throws Exception{ // for bug 158028  
-    	helper1(10, 30, 10, 36, true, false, "Inner1Extension", Modifier.PRIVATE);   
+
+    public void test32() throws Exception{ // for bug 158028
+    	helper1(10, 30, 10, 36, true, false, "Inner1Extension", Modifier.PRIVATE);
     }
 }

@@ -41,7 +41,7 @@ public class AutomatedSuite extends TestSuite {
 	/**
 	 * Returns the suite.  This is required to
 	 * use the JUnit Launcher.
-	 * 
+	 *
 	 * @return the test
 	 */
 	public static Test suite() {
@@ -54,26 +54,26 @@ public class AutomatedSuite extends TestSuite {
 	public AutomatedSuite() {
 		addTest(CoreTests.suite());
 		addTest(QuickFixTest.suite());
-		
+
 		addTest(NewJavaProjectWizardTest.suite());
 		addTest(NewTypeWizardTest.suite());
 		addTest(OptionsConfigurationBlockTest.suite());
-		
+
 		addTest(PackageExplorerTests.suite());
-		
+
 		addTest(PackagesViewContentProviderTests.suite());
 		addTest(PackagesViewContentProviderTests2.suite());
 		addTest(PackagesViewDeltaTests.suite());
-		
+
 		addTest(ContentProviderTests.suite());
-		
+
 		addTest(CallHierarchyContentProviderTest.suite());
-		
-		addTest(SearchTest.suite()); 
+
+		addTest(SearchTest.suite());
 		addTest(JUnitJUnitTests.suite());
-		
+
 		addTest(BuildpathModifierActionTest.suite());
-		
+
 		addTest(JarExportTests.suite());
 	}
 }

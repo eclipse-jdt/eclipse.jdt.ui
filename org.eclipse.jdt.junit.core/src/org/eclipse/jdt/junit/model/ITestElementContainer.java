@@ -13,22 +13,22 @@ package org.eclipse.jdt.junit.model;
 /**
  * Common protocol for test elements containers.
  * This set consists of {@link ITestSuiteElement} and {@link ITestRunSession}
- * 
+ *
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @since 3.3
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ITestElementContainer extends ITestElement {
-	
+
 	/**
 	 * Returns all tests (and test suites) contained in the suite.
-	 * 
+	 *
 	 * @return returns all tests (and test suites) contained in the suite.
 	 */
 	public ITestElement[] getChildren();
-	
+
 }

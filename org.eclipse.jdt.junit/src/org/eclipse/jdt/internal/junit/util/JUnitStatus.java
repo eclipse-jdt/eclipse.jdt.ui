@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
- * An implemention of IStatus. 
+ * An implemention of IStatus.
  * TO DO: Why is it duplicated, it should leverage the Status base class???
  */
 public class JUnitStatus implements IStatus {
@@ -36,11 +36,11 @@ public class JUnitStatus implements IStatus {
 	 * @param severity The status severity: ERROR, WARNING, INFO and OK.
 	 * @param message The message of the status. Applies only for ERROR,
 	 * WARNING and INFO.
-	 */	
+	 */
 	public JUnitStatus(int severity, String message) {
 		fStatusMessage= message;
 		fSeverity= severity;
-	}		
+	}
 
 	public static IStatus createError(String message) {
 		return new JUnitStatus(IStatus.ERROR, message);
@@ -65,7 +65,7 @@ public class JUnitStatus implements IStatus {
 	/**
 	 * Returns if the status' severity is WARNING.
 	 * @return returns if the status' severity is WARNING.
-	 */	
+	 */
 	public boolean isWarning() {
 		return fSeverity == IStatus.WARNING;
 	}
@@ -73,15 +73,15 @@ public class JUnitStatus implements IStatus {
 	/**
 	 * Returns if the status' severity is INFO.
 	 * @return returns if the status' severity is INFO.
-	 */	
+	 */
 	public boolean isInfo() {
 		return fSeverity == IStatus.INFO;
-	}	
+	}
 
 	/**
 	 *  Returns if the status' severity is ERROR.
 	 * @return returns if the status' severity is ERROR.
-	 */	
+	 */
 	public boolean isError() {
 		return fSeverity == IStatus.ERROR;
 	}
@@ -96,7 +96,7 @@ public class JUnitStatus implements IStatus {
 	/**
 	 * Sets the status to ERROR.
 	 * @param errorMessage the error message (can be empty, but not null)
-	 */	
+	 */
 	public void setError(String errorMessage) {
 		Assert.isNotNull(errorMessage);
 		fStatusMessage= errorMessage;
@@ -106,7 +106,7 @@ public class JUnitStatus implements IStatus {
 	/**
 	 * Sets the status to WARNING.
 	 * @param warningMessage the warning message (can be empty, but not null)
-	 */		
+	 */
 	public void setWarning(String warningMessage) {
 		Assert.isNotNull(warningMessage);
 		fStatusMessage= warningMessage;
@@ -116,16 +116,16 @@ public class JUnitStatus implements IStatus {
 	/**
 	 * Sets the status to INFO.
 	 * @param infoMessage the info message (can be empty, but not null)
-	 */		
+	 */
 	public void setInfo(String infoMessage) {
 		Assert.isNotNull(infoMessage);
 		fStatusMessage= infoMessage;
 		fSeverity= IStatus.INFO;
-	}	
+	}
 
 	/**
 	 * Sets the status to OK.
-	 */		
+	 */
 	public void setOK() {
 		fStatusMessage= null;
 		fSeverity= IStatus.OK;
@@ -182,6 +182,6 @@ public class JUnitStatus implements IStatus {
 	 */
 	public IStatus[] getChildren() {
 		return new IStatus[0];
-	}	
+	}
 
 }

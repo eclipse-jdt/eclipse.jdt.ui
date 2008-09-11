@@ -21,21 +21,21 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 public class TestMoveParticipantSingle extends MoveParticipant {
 
 	static List fgInstances= new ArrayList();
-	
+
 	private Object fElement;
 	private String fHandle;
-	
+
 	public boolean initialize(Object element) {
 		fgInstances.add(this);
 		fElement= element;
@@ -51,7 +51,7 @@ public class TestMoveParticipantSingle extends MoveParticipant {
 	public String getName() {
 		return getClass().getName();
 	}
-	
+
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
@@ -59,11 +59,11 @@ public class TestMoveParticipantSingle extends MoveParticipant {
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}
-	
+
 	public static void testNumberOfInstances(int instances) {
 		Assert.assertEquals(instances, fgInstances.size());
 	}
-	
+
 	public static void testElements(String[] handles) {
 		testNumberOfInstances(handles.length);
 		List l1= new ArrayList(Arrays.asList(handles));
@@ -71,7 +71,7 @@ public class TestMoveParticipantSingle extends MoveParticipant {
 			Assert.assertTrue(l1.contains(getInstance(i).fHandle));
 		}
 	}
-	
+
 	public static void testArguments(MoveArguments[] args) {
 		testNumberOfInstances(args.length);
 		for (int i= 0; i < args.length; i++) {
@@ -81,11 +81,11 @@ public class TestMoveParticipantSingle extends MoveParticipant {
 			Assert.assertEquals(expected.getUpdateReferences(), actual.getUpdateReferences());
 		}
 	}
-	
+
 	public static void reset() {
 		fgInstances= new ArrayList();
 	}
-	
+
 	private static TestMoveParticipantSingle getInstance(int i) {
 		return ((TestMoveParticipantSingle)fgInstances.get(i));
 	}

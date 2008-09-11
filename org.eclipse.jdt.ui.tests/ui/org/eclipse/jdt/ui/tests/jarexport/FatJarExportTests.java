@@ -26,6 +26,14 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.xml.sax.InputSource;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -66,6 +74,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
@@ -73,15 +82,6 @@ import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarAntExporter;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 public class FatJarExportTests extends TestCase {
 
@@ -158,7 +158,7 @@ public class FatJarExportTests extends TestCase {
 		// check for successful call of Foo
 		String expected= "created mylib.Foo\n";
 		assertEquals(expected, stdout);
-		
+
 		return data;
 	}
 
@@ -189,13 +189,13 @@ public class FatJarExportTests extends TestCase {
 		assertNotNull(generatedArchive.getEntry("mylib/Foo.class"));
 		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner.class"));
 		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner$FooInnerInner.class"));
-		
+
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null);
-		
+
 		FatJarAntExporter antExporter= new FatJarAntExporter(antScriptLocation(testName), data.getAbsoluteJarLocation(), createTempLaunchConfig(project));
 		antExporter.run(status);
 		assertTrue(getProblems(status), status.getSeverity() == IStatus.OK || status.getSeverity() == IStatus.INFO);
-		
+
 		return data;
 	}
 
@@ -217,7 +217,7 @@ public class FatJarExportTests extends TestCase {
 		Object[] children= FatJarPackageWizardPage.getSelectedElementsWithoutContainedChildren(launchConfig, data, new BusyIndicatorRunnableContext(), status);
 		assertTrue(getProblems(status), status.getSeverity() == IStatus.OK || status.getSeverity() == IStatus.INFO);
 		data.setElements(children);
-		
+
 		return data;
 	}
 
@@ -234,7 +234,7 @@ public class FatJarExportTests extends TestCase {
 
 	/*
 	 *  From org.eclipse.jdt.internal.debug.ui.launcher.JavaApplicationLaunchShortcut
-	 *  
+	 *
 	 *  For internal use only (testing), clients must not call.
 	 */
 	public static ILaunchConfiguration createTempLaunchConfig(IJavaProject project) {
@@ -322,7 +322,7 @@ public class FatJarExportTests extends TestCase {
 		if (exitCode != 0) {
 			String stdout= processes[0].getStreamsProxy().getOutputStreamMonitor().getContents();
 			String errout= processes[0].getStreamsProxy().getErrorStreamMonitor().getContents();
-			
+
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), "Run failed: exitcode=" + exitCode + ", stdout=[" + stdout + "], stderr=[" + errout + "]"));
 		} else {
 			return processes[0].getStreamsProxy().getOutputStreamMonitor().getContents();
@@ -331,7 +331,7 @@ public class FatJarExportTests extends TestCase {
 
 	/**
 	 * Checks the ANT script at location data#getAntScriptLocation() for valid structure.
-	 * 
+	 *
 	 * @param data
 	 * @param antScriptLocation the location of the ANT script to check
 	 * @param filesets
@@ -340,7 +340,7 @@ public class FatJarExportTests extends TestCase {
 	 */
 	private static void assertAntScript(JarPackageData data, IPath antScriptLocation, String[] filesets, String[] zipfilesets) throws Exception {
 		String archiveName= data.getAbsoluteJarLocation().lastSegment();
-		
+
 		Element xmlProject= readXML(antScriptLocation);
 		assertEquals("project", xmlProject.getNodeName());
 		assertEquals("create_run_jar", xmlProject.getAttribute("default"));
@@ -348,17 +348,17 @@ public class FatJarExportTests extends TestCase {
 
 		Element xmlTarget= (Element)xmlProject.getElementsByTagName("target").item(0);
 		assertEquals("create_run_jar", xmlTarget.getAttribute("name"));
-		
+
 		Element xmlJar= (Element) xmlTarget.getElementsByTagName("jar").item(0);
 		assertTrue("actual: "+xmlJar.getAttribute("destfile"), xmlJar.getAttribute("destfile").endsWith(archiveName));
 		assertEquals("mergewithoutmain", xmlJar.getAttribute("filesetmanifest"));
-		
+
 		Element xmlManifest= (Element) xmlJar.getElementsByTagName("manifest").item(0);
-		
+
 		Element xmlAttribute1= (Element) xmlManifest.getElementsByTagName("attribute").item(0);
 		assertEquals("Built-By", xmlAttribute1.getAttribute("name"));
 		assertEquals("${user.name}", xmlAttribute1.getAttribute("value"));
-		
+
 		Element xmlAttribute2= (Element) xmlManifest.getElementsByTagName("attribute").item(1);
 		assertEquals("Main-Class", xmlAttribute2.getAttribute("name"));
 		assertEquals("org.eclipse.jdt.ui.test.Main", xmlAttribute2.getAttribute("value"));
@@ -368,11 +368,11 @@ public class FatJarExportTests extends TestCase {
 		assertEquals(".", xmlAttribute3.getAttribute("value"));
 
 		NodeList xmlFilesets = xmlJar.getElementsByTagName("fileset");
-		assertEquals(filesets.length, xmlFilesets.getLength());		
+		assertEquals(filesets.length, xmlFilesets.getLength());
 
 		NodeList xmlZipfilesets = xmlJar.getElementsByTagName("zipfileset");
 		assertEquals(zipfilesets.length, xmlZipfilesets.getLength());
-		
+
 		for (int i=0; i<xmlFilesets.getLength(); i++) {
 			String dir = ((Element)xmlFilesets.item(i)).getAttribute("dir");
 			boolean found = false;
@@ -384,7 +384,7 @@ public class FatJarExportTests extends TestCase {
 			}
 			assertTrue("found fileset: '"+dir+"'", found);
 		}
-		
+
 		for (int i=0; i<xmlZipfilesets.getLength(); i++) {
 			String excludes = ((Element)xmlZipfilesets.item(i)).getAttribute("excludes");
 			assertEquals("META-INF/*.SF", excludes);
@@ -402,7 +402,7 @@ public class FatJarExportTests extends TestCase {
 
 	/**
 	 * Helper class to open a xml file
-	 * 
+	 *
 	 * @param xmlFilePath path to xml file to read
 	 * @return root element of the parsed xml-document
 	 * @throws Exception if anything went wrong
@@ -414,10 +414,10 @@ public class FatJarExportTests extends TestCase {
 			DocumentBuilder parser= DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Element root= parser.parse(new InputSource(in)).getDocumentElement();
 			in.close();
-			
+
 			return root;
 		} finally {
-			if (in != null) 
+			if (in != null)
 				in.close();
 		}
 	}
@@ -429,13 +429,13 @@ public class FatJarExportTests extends TestCase {
 
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
 			assertAntScript(data, antScriptLocation(getName()),
-					new String[] { "TestSetupProject/bin" }, 
+					new String[] { "TestSetupProject/bin" },
 					new String[] { "rtstubs15.jar" });
 		} finally {
 			pack.delete(true, null);
 		}
 	}
-	
+
 
 	public void testExportSrcRootWithOutputFolder() throws Exception {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "other", new IPath[0], new IPath[0], "otherout");
@@ -461,7 +461,7 @@ public class FatJarExportTests extends TestCase {
 
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
 			assertAntScript(data, antScriptLocation(getName()),
-					new String[]{"TestSetupProject/bin"}, 
+					new String[]{"TestSetupProject/bin"},
 					new String[]{"rtstubs15.jar"});
 		} finally {
 			JavaProjectHelper.removeSourceContainer(fProject, root.getElementName());
@@ -480,8 +480,8 @@ public class FatJarExportTests extends TestCase {
 			JavaProjectHelper.addRequiredProject(fProject, otherProject);
 
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[]{"TestSetupProject/bin", "OtherProject/bin"}, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[]{"TestSetupProject/bin", "OtherProject/bin"},
 					new String[]{"rtstubs15.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, otherProject.getProject().getFullPath());
@@ -495,8 +495,8 @@ public class FatJarExportTests extends TestCase {
 
 		try {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[]{"TestSetupProject/bin"}, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[]{"TestSetupProject/bin"},
 					new String[]{"rtstubs15.jar", "TestSetupProject/mylib_stdout.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
@@ -509,8 +509,8 @@ public class FatJarExportTests extends TestCase {
 
 		try {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), false);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[]{"TestSetupProject/bin"}, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[]{"TestSetupProject/bin"},
 					new String[]{"rtstubs15.jar", "TestSetupProject/mylib_stdout.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
@@ -523,8 +523,8 @@ public class FatJarExportTests extends TestCase {
 
 		try {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[]{"TestSetupProject/bin"}, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[]{"TestSetupProject/bin"},
 					new String[]{"rtstubs15.jar", "testresources/mylib_stdout.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
@@ -537,8 +537,8 @@ public class FatJarExportTests extends TestCase {
 		IPackageFragmentRoot root= JavaProjectHelper.addClassFolderWithImport(fProject, "cf", null, null, lib);
 		try {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[]{"TestSetupProject/bin", "TestSetupProject/cf"}, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[]{"TestSetupProject/bin", "TestSetupProject/cf"},
 					new String[]{"rtstubs15.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
@@ -552,8 +552,8 @@ public class FatJarExportTests extends TestCase {
 		JavaProjectHelper.addVariableEntry(fProject, new Path("MYLIB"), null, null);
 		try {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[]{"TestSetupProject/bin"}, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[]{"TestSetupProject/bin"},
 					new String[]{"rtstubs15.jar", "testresources/mylib_stdout.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, new Path("MYLIB"));
@@ -566,14 +566,14 @@ public class FatJarExportTests extends TestCase {
 
 		try {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[]{"TestSetupProject/bin"}, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[]{"TestSetupProject/bin"},
 					new String[]{"rtstubs15.jar", "TestSetupProject/mylib_sig.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
 		}
 	}
-	
+
 	public void testExternalClassFolder() throws Exception {
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
 		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
@@ -581,8 +581,8 @@ public class FatJarExportTests extends TestCase {
 
 		try {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
-			assertAntScript(data, antScriptLocation(getName()), 
-					new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" }, 
+			assertAntScript(data, antScriptLocation(getName()),
+					new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" },
 					new String[] { "rtstubs15.jar" });
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, externalRoot.getPath());

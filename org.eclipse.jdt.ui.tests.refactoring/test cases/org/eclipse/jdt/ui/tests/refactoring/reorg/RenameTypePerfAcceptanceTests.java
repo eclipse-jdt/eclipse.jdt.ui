@@ -17,6 +17,8 @@ import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -27,12 +29,10 @@ import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.SWTProjectTestSetup;
 
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
-
 public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCase {
-	
+
 	private IJavaProject fProject;
-	
+
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
 		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests");
@@ -48,7 +48,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 	public RenameTypePerfAcceptanceTests(String test) {
 		super(test);
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= (IJavaProject)JavaCore.create(
@@ -67,7 +67,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		processor.setNewElementName("Control2");
 		executeRefactoring(new RenameRefactoring(processor), false);
 	}
-	
+
 	public void testWarm() throws Exception {
 		tagAsSummary("Rename of Control", Dimension.ELAPSED_PROCESS);
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");

@@ -16,6 +16,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.StringAsserts;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -24,15 +26,13 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
-import org.eclipse.jdt.testplugin.StringAsserts;
-
 import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
 
 
 public class CoreTests extends TestCase {
 
 	public static Test suite() {
-		
+
 		TestSuite suite= new TestSuite();
 		suite.addTest(AddImportTest.allTests());
 		suite.addTest(SourceActionTests.suite());
@@ -55,34 +55,34 @@ public class CoreTests extends TestCase {
 		suite.addTest(TemplateStoreTest.allTests());
 		suite.addTest(TypeHierarchyTest.allTests());
 		suite.addTest(TypeRulesTest.allTests());
-		suite.addTest(TypeInfoTest.allTests());	
+		suite.addTest(TypeInfoTest.allTests());
 		suite.addTest(StringsTest.allTests());
 		suite.addTest(IndentManipulationTest.allTests());
 		suite.addTest(SelectionHistoryTest.allTests());
-		
+
 		return new ProjectTestSetup(suite);
 	}
 
 	public CoreTests(String name) {
 		super(name);
 	}
-	
-	public static void assertEqualString(String actual, String expected) {	
+
+	public static void assertEqualString(String actual, String expected) {
 		StringAsserts.assertEqualString(actual, expected);
 	}
-	
+
 	public static void assertEqualStringIgnoreDelim(String actual, String expected) throws IOException {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
-	}	
-	
-	public static void assertEqualStringsIgnoreOrder(String[] actuals, String[] expecteds) {
-		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expecteds);			
 	}
-	
+
+	public static void assertEqualStringsIgnoreOrder(String[] actuals, String[] expecteds) {
+		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expecteds);
+	}
+
 	public static void assertNumberOf(String name, int is, int expected) {
 		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
 	}
-	
+
 	protected ImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int normalThreshold, int staticThreshold, boolean restoreExistingImports) throws CoreException {
 		ImportRewrite rewrite= StubUtility.createImportRewrite(cu, restoreExistingImports);
 		rewrite.setImportOrder(order);
@@ -90,7 +90,7 @@ public class CoreTests extends TestCase {
 		rewrite.setStaticOnDemandImportThreshold(staticThreshold);
 		return rewrite;
 	}
-	
+
 	protected ImportRewrite newImportsRewrite(CompilationUnit cu, String[] order, int normalThreshold, int staticThreshold, boolean restoreExistingImports) {
 		ImportRewrite rewrite= ImportRewrite.create(cu, restoreExistingImports);
 		rewrite.setImportOrder(order);

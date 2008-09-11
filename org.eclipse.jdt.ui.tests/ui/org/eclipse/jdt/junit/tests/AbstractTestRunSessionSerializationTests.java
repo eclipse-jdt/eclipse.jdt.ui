@@ -25,12 +25,22 @@ import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.junit.JUnitCore;
+import org.eclipse.jdt.junit.TestRunListener;
+import org.eclipse.jdt.junit.model.ITestCaseElement;
+import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestRunSession;
+import org.eclipse.jdt.junit.model.ITestSuiteElement;
+import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
+
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,24 +53,13 @@ import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.util.DisplayHelper;
-
-import org.eclipse.jdt.junit.JUnitCore;
-import org.eclipse.jdt.junit.TestRunListener;
-import org.eclipse.jdt.junit.model.ITestCaseElement;
-import org.eclipse.jdt.junit.model.ITestElement;
-import org.eclipse.jdt.junit.model.ITestRunSession;
-import org.eclipse.jdt.junit.model.ITestSuiteElement;
-import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
-
 public class AbstractTestRunSessionSerializationTests extends TestCase {
-	
+
 	private static class SerializationResult {
 		TestRunSession fTestRunSession;
 		String fSerialized;
 	}
-	
+
 	private SerializationResult launchTest(IJavaElement elementToLaunch) throws Exception {
 		final SerializationResult result= new SerializationResult();
 
@@ -70,8 +69,8 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 				result.fTestRunSession= (TestRunSession) session;
 			}
 		};
-		
-		JUnitCore.addTestRunListener(testRunListener); 
+
+		JUnitCore.addTestRunListener(testRunListener);
 		try {
 			new AbstractTestRunListenerTest().launchJUnit(elementToLaunch);
 			assertTrue(new DisplayHelper(){
@@ -82,10 +81,10 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		} finally {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
-		
+
 		ByteArrayOutputStream out= new ByteArrayOutputStream();
 		JUnitModel.exportTestRunSession(result.fTestRunSession, out);
-		
+
 		result.fSerialized= out.toString("UTF-8");
 		return result;
 	}
@@ -93,7 +92,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 	private void runExportImport(IJavaElement test, String expectedXML) throws Exception {
 		SerializationResult serializationResult= launchTest(test);
 		assertEqualXML(expectedXML, serializationResult.fSerialized);
-		
+
 		IFile resultFile= JUnitWorkspaceTestSetup.getJavaProject().getProject().getFile("testresult.xml");
 		try {
 			resultFile.create(new ByteArrayInputStream(serializationResult.fSerialized.getBytes()), true, null);
@@ -108,7 +107,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 				}
 		}
 	}
-	
+
 	private void assertEqualXML(String expected, String actual) {
 		/*
 		 * Avoid comparing stack traces (which are VM-dependent)
@@ -128,7 +127,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		int ibmJava6BugOffset= actual.indexOf("><");
 		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
 			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();
-		
+
 		/*
 		 * Strip all whitespace
 		 */
@@ -153,12 +152,12 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		assertEquals(expected.getErrorCount(), actual.getErrorCount());
 		assertEquals(expected.getFailureCount(), actual.getFailureCount());
 		assertEquals(expected.getIgnoredCount(), actual.getIgnoredCount());
-		
+
 //		assertEquals(expected.getLaunchedProject(), actual.getLaunchedProject()); //TODO
-		
+
 		assertEqualSuite(expected.getTestRoot(), actual.getTestRoot());
 	}
-	
+
 	private void assertEqualSuite(ITestSuiteElement expected, ITestSuiteElement actual) {
 		assertEquals(expected.getProgressState(), actual.getProgressState());
 		assertEquals(expected.getTestResult(false), actual.getTestResult(false));
@@ -201,7 +200,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 			// FailureTrace#getTrace() is VM-dependent; could only compare first line
 		}
 	}
-	
+
 	public static String getContents(InputStream in) throws IOException {
 		InputStreamReader reader= new InputStreamReader(in);
 		StringBuffer sb= new StringBuffer(8192);
@@ -215,40 +214,40 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		}
 		return sb.toString();
 	}
-	
+
 	protected void runCUTest(String test) throws CoreException, IOException, FileNotFoundException, Exception {
 		IPackageFragmentRoot root= JUnitWorkspaceTestSetup.getRoot();
 		IPackageFragment pack= root.getPackageFragment("pack");
 		ICompilationUnit cu= pack.getCompilationUnit(test + ".java");
 		IType aTestCase= cu.findPrimaryType();
-		
+
 		Path expectedPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "xml/" + test + ".xml");
 		File expectedFile= JavaTestPlugin.getDefault().getFileInPlugin(expectedPath);
 		String expected= getContents(new FileInputStream(expectedFile));
 		runExportImport(aTestCase, expected);
-		
+
 		runImportAntResult(test);
 	}
-	
+
 	private void runImportAntResult(String test) throws CoreException {
 		Path testPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "ant/result/TEST-pack." + test + ".xml");
 		File testFile= JavaTestPlugin.getDefault().getFileInPlugin(testPath);
 		JUnitModel.importTestRunSession(testFile); // no contents check for now...
 	}
-	
+
 	protected void runMethodTest(String testType, String method) throws Exception {
 		IPackageFragmentRoot root= JUnitWorkspaceTestSetup.getRoot();
 		IPackageFragment pack= root.getPackageFragment("pack");
 		ICompilationUnit cu= pack.getCompilationUnit(testType + ".java");
 		IType testCase= cu.findPrimaryType();
 		IMethod testMethod= testCase.getMethod(method, new String[0]);
-		
+
 		Path expectedPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "xml/" + testType + "_" + method + ".xml");
 		File expectedFile= JavaTestPlugin.getDefault().getFileInPlugin(expectedPath);
 		String expected= getContents(new FileInputStream(expectedFile));
 		runExportImport(testMethod, expected);
-		
+
 		//ant cannot run single test methods
 	}
-	
+
 }

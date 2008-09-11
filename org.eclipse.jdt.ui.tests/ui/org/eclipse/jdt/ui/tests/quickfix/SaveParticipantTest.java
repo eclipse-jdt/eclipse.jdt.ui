@@ -27,12 +27,11 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 
 public class SaveParticipantTest extends CleanUpTestCase {
@@ -203,7 +202,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testFormatChangesBug205308() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -239,7 +238,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testFormatChangesBug205301() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -302,7 +301,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testFormatChangesBug207965() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -344,7 +343,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testFormatChangesBug207965_2() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -381,7 +380,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testFormatChangesBug208568() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -414,7 +413,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testBug213248_1() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -447,7 +446,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testBug213248_2() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -556,7 +555,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testBug228659() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -598,7 +597,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testBug232768_1() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -686,7 +685,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-	
+
 	public void testBug232768_3() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

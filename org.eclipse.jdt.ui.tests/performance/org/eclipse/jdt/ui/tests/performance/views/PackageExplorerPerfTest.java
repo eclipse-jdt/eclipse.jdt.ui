@@ -17,6 +17,9 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -30,22 +33,18 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 
 	private static class MyTestSetup extends TestSetup {
 		public static final String SRC_CONTAINER= "src";
-		
+
 		public static IJavaProject fJProject1;
 		public static IPackageFragmentRoot fJunitSrcRoot;
-		
+
 		public MyTestSetup(Test test) {
 			super(test);
 		}
@@ -61,7 +60,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 				JavaProjectHelper.delete(fJProject1);
 		}
 	}
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite("PackageExplorerPerfTest");
 		suite.addTest(new PackageExplorerPerfTest("testOpen"));
@@ -73,11 +72,11 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	public static Test setUpTest(Test someTest) {
 		return new MyTestSetup(someTest);
 	}
-	
+
 	public PackageExplorerPerfTest(String name) {
 		super(name);
 	}
-	
+
 	public void testOpen() throws Exception {
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
@@ -88,7 +87,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		page.showView(JavaUI.ID_PACKAGES);
 		finishMeasurements();
 	}
-	
+
 	public void testSelect() throws Exception {
 		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
@@ -97,7 +96,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		viewer.setSelection(selection);
 		finishMeasurements();
 	}
-	
+
 	public void testExpand() throws Exception {
 		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
@@ -105,7 +104,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		viewer.expandToLevel(MyTestSetup.fJProject1, 1);
 		finishMeasurements();
 	}
-	
+
 	private TreeViewer getViewer() {
 		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		return ((PackageExplorerPart)page.findView(JavaUI.ID_PACKAGES)).getTreeViewer();

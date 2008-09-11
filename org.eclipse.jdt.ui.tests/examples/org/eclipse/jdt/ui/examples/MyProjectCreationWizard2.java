@@ -12,19 +12,19 @@ package org.eclipse.jdt.ui.examples;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExecutableExtension;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -47,7 +47,7 @@ import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
 
 /**
-<extension 
+<extension
 	point="org.eclipse.ui.newWizards">
   	<wizard
 		id="org.eclipse.jdt.ui.examples.MyProjectCreationWizard2"
@@ -58,9 +58,9 @@ import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
 		icon="icons/full/ctool16/newjprj_wiz.gif">
 		<description>My project 2</description>
-    </wizard>	 
+    </wizard>
 </extension>
- */   
+ */
 
 /**
  * This example shows how to implement an own project wizard that uses the
@@ -95,7 +95,7 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 
 	/* (non-Javadoc)
 	 * @see Wizard#addPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
 
@@ -145,7 +145,7 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 		fJavaPage= new NewJavaProjectWizardPageTwo(fMainPage);
 
 		addPage(fJavaPage);
-		
+
 		fExtraPage= new WizardPage("My Page") {
 
 			public void createControl(Composite parent) {
@@ -153,20 +153,20 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 
 				Button button= new Button(parent, SWT.CHECK);
 				button.setText("Make it a special project");
-				
+
 				setControl(button);
 			}
-			
+
 		};
-		
-		
+
+
 		addPage(fExtraPage);
 	}
 
 
 	/* (non-Javadoc)
 	 * @see Wizard#performFinish
-	 */		
+	 */
 	public boolean performFinish() {
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {

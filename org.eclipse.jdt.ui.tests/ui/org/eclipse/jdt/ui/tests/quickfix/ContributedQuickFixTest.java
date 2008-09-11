@@ -26,9 +26,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -36,9 +35,9 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 
 public class ContributedQuickFixTest extends QuickFixTest {
-	
+
 	private static final Class THIS= ContributedQuickFixTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
@@ -46,15 +45,15 @@ public class ContributedQuickFixTest extends QuickFixTest {
 	public ContributedQuickFixTest(String name) {
 		super(name);
 	}
-	
+
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-	
+
 	public static Test suite() {
 		if (true) {
 			return allTests();
@@ -70,8 +69,8 @@ public class ContributedQuickFixTest extends QuickFixTest {
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-		
-		JavaCore.setOptions(options);			
+
+		JavaCore.setOptions(options);
 
 		fJProject1= ProjectTestSetup.getProject();
 
@@ -82,7 +81,7 @@ public class ContributedQuickFixTest extends QuickFixTest {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-	
+
 	public void testContributedQuickAssist1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -93,11 +92,11 @@ public class ContributedQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-				
+
 		int offset= buf.toString().indexOf("hello");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List proposals= collectAssists(context, false);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -112,11 +111,11 @@ public class ContributedQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
-		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+
 	}
-	
+
 	public void testContributedQuickFix1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -127,7 +126,7 @@ public class ContributedQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-				
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
@@ -145,11 +144,11 @@ public class ContributedQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });	
-		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+
 	}
-	
+
 	public void testContributedQuickFix2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -160,7 +159,7 @@ public class ContributedQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
-				
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 

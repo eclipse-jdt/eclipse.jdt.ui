@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -31,9 +31,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
-
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
@@ -51,7 +50,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 		setNeedsProgressMonitor(true);
 		initializeDefaultPageImageDescriptor();
 	}
-	
+
 	/*
 	 * @see IWizard#performFinish()
 	 */
@@ -59,16 +58,16 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 
 	/*
 	 * Run a runnable
-	 */	
+	 */
 	protected boolean finishPage(IRunnableWithProgress runnable) {
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 		try {
-			PlatformUI.getWorkbench().getProgressService().runInUI(getContainer(), op, ResourcesPlugin.getWorkspace().getRoot()); 
-			
+			PlatformUI.getWorkbench().getProgressService().runInUI(getContainer(), op, ResourcesPlugin.getWorkspace().getRoot());
+
 		} catch (InvocationTargetException e) {
 			Shell shell= getShell();
-			String title= WizardMessages.NewJUnitWizard_op_error_title; 
-			String message= WizardMessages.NewJUnitWizard_op_error_message; 
+			String title= WizardMessages.NewJUnitWizard_op_error_title;
+			String message= WizardMessages.NewJUnitWizard_op_error_message;
 			ExceptionHandler.handle(e, shell, title, message);
 			return false;
 		} catch  (InterruptedException e) {
@@ -104,15 +103,15 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 		fWorkbench= workbench;
 		fSelection= currentSelection;
 	}
-	
+
 	public IStructuredSelection getSelection() {
 		return fSelection;
 	}
 
 	protected void selectAndReveal(IResource newResource) {
 		BasicNewResourceWizard.selectAndReveal(newResource, fWorkbench.getActiveWorkbenchWindow());
-	} 
-	
+	}
+
 	protected void initDialogSettings() {
 		IDialogSettings pluginSettings= JUnitPlugin.getDefault().getDialogSettings();
 		IDialogSettings wizardSettings= pluginSettings.getSection(DIALOG_SETTINGS_KEY);

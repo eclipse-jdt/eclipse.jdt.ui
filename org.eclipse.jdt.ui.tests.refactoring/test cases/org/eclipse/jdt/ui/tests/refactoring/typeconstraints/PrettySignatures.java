@@ -14,12 +14,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class PrettySignatures {
-	
+
 	public static String get(ITypeBinding binding) {
 		if (binding.isTypeVariable()) {
 			return getTypeVariable(binding);
 		}
-		return getPlain(binding);	
+		return getPlain(binding);
 	}
 
 	private static String getPlain(ITypeBinding binding) {
@@ -103,7 +103,7 @@ public class PrettySignatures {
 		ITypeBinding[] bounds= binding.getTypeBounds();
 		if (bounds.length == 1 && bounds[0].getQualifiedName().equals("java.lang.Object"))
 			return binding.getName();
-		
+
 		StringBuffer result= new StringBuffer(binding.getName());
 		if (bounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$

@@ -28,7 +28,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.mapping.ModelProvider;
 
 public class TestModelProvider extends ModelProvider {
-	
+
 	private static class Sorter implements Comparator {
 		public int compare(Object o1, Object o2) {
 			IResourceDelta d1= (IResourceDelta) o1;
@@ -37,34 +37,34 @@ public class TestModelProvider extends ModelProvider {
 				d2.getResource().getFullPath().toPortableString());
 		}
 	}
-	
+
 	private static final Comparator COMPARATOR= new Sorter();
-	
+
 	public static IResourceDelta LAST_DELTA;
 	public static boolean IS_COPY_TEST;
 
-	private static final int PRE_DELTA_FLAGS= IResourceDelta.CONTENT | IResourceDelta.MOVED_TO | 
-		IResourceDelta.MOVED_FROM | IResourceDelta.OPEN; 
-	
+	private static final int PRE_DELTA_FLAGS= IResourceDelta.CONTENT | IResourceDelta.MOVED_TO |
+		IResourceDelta.MOVED_FROM | IResourceDelta.OPEN;
+
 	public static void clearDelta() {
 		LAST_DELTA= null;
 	}
-	
+
 	public IStatus validateChange(IResourceDelta delta, IProgressMonitor pm) {
 		LAST_DELTA= delta;
 		return super.validateChange(delta, pm);
 	}
-	
+
 	public static void assertTrue(IResourceDelta expected) {
 		Assert.assertNotNull(LAST_DELTA);
 		boolean res= assertTrue(expected, LAST_DELTA);
 		if (!res) {
 			Assert.assertEquals(printDelta(expected), printDelta(LAST_DELTA));
 		}
-		
+
 		LAST_DELTA= null;
 	}
-	
+
 	private static boolean assertTrue(IResourceDelta expected, IResourceDelta actual) {
 		assertEqual(expected.getResource(), actual.getResource());
 		int actualKind= actual.getKind();
@@ -73,10 +73,10 @@ public class TestModelProvider extends ModelProvider {
 		if ((actualKind & (IResourceDelta.ADDED | IResourceDelta.REMOVED)) != 0) {
 			actualKind= actualKind & ~IResourceDelta.CHANGED;
 		}
-		
+
 		// The expected delta doesn't support copy from flag. So remove it
 		actualFlags= actualFlags & ~IResourceDelta.COPIED_FROM;
-		
+
 		int expectKind= expected.getKind();
 		int expectedFlags= expected.getFlags() & PRE_DELTA_FLAGS;
 		if ((expectKind & IResourceDelta.ADDED) != 0 && (expectedFlags & IResourceDelta.MOVED_FROM) != 0) {
@@ -100,13 +100,13 @@ public class TestModelProvider extends ModelProvider {
 		}
 		return true;
 	}
-	
+
 	private static String printDelta(IResourceDelta delta) {
 		StringBuffer buf= new StringBuffer();
 		appendDelta(delta, 0, buf);
 		return buf.toString();
 	}
-	
+
 	private static StringBuffer appendDelta(IResourceDelta delta, int indent, StringBuffer buf) {
 		for (int i= 0; i < indent; i++) {
 			buf.append("  ");
@@ -117,18 +117,18 @@ public class TestModelProvider extends ModelProvider {
 		if (flags != 0) {
 			buf.append("-").append(getFlagString(flags)).append('\n');
 		}
-		
+
 		IResourceDelta[] affectedChildren= delta.getAffectedChildren();
 		Arrays.sort(affectedChildren, COMPARATOR);
-		
+
 		for (int i= 0; i < affectedChildren.length; i++) {
 			appendDelta(affectedChildren[i], indent + 1, buf);
 		}
 		return buf;
 	}
-	
-	
-	
+
+
+
 	private static String getKindString(int kind) {
 		switch (kind) {
 			case IResourceDelta.CHANGED:
@@ -145,7 +145,7 @@ public class TestModelProvider extends ModelProvider {
 				return "NULL";
 		}
 	}
-	
+
 	private static String getFlagString(int flags) {
 		StringBuffer buf= new StringBuffer();
 		appendFlag(flags, IResourceDelta.CONTENT, "CONTENT", buf);
@@ -160,7 +160,7 @@ public class TestModelProvider extends ModelProvider {
 		appendFlag(flags, IResourceDelta.REPLACED, "REPLACED", buf);
 		return buf.toString();
 	}
-	
+
 	private static void appendFlag(int flags, int flag, String name, StringBuffer res) {
 		if ((flags & flag) != 0) {
 			if (res.length() > 0) {
@@ -169,8 +169,8 @@ public class TestModelProvider extends ModelProvider {
 			res.append(name);
 		}
 	}
-	
-	
+
+
 
 	private static void assertEqual(IResource expected, IResource actual) {
 		// This is a simple approach to deal with renamed resources in the deltas.
@@ -190,7 +190,7 @@ public class TestModelProvider extends ModelProvider {
 			Assert.assertEquals("Same resource", expected, actual);
 		}
 	}
-	
+
 	private static IResourceDelta[] getExpectedChildren(IResourceDelta delta) {
 		List result= new ArrayList();
 		IResourceDelta[] children= delta.getAffectedChildren();
@@ -217,7 +217,7 @@ public class TestModelProvider extends ModelProvider {
 			return false;
 		return name.startsWith(".");
 	}
-	
+
 	private static IResourceDelta[] getActualChildren(IResourceDelta delta, IResourceDelta[] expectedChildren) {
 		List result= new ArrayList();
 		if (!IS_COPY_TEST) {
@@ -254,7 +254,7 @@ public class TestModelProvider extends ModelProvider {
 		}
 		return false;
 	}
-	
+
 	private static boolean isSameResourceInCopy(IResource expected, IResource actual) {
 		IPath expectedPath= expected.getFullPath();
 		IPath actualPath= actual.getFullPath();
@@ -269,7 +269,7 @@ public class TestModelProvider extends ModelProvider {
 		}
 		return true;
 	}
-	
+
 	private static void assertCopySource(IResourceDelta delta) {
 		try {
 			delta.accept(new IResourceDeltaVisitor() {

@@ -102,7 +102,7 @@ public class TestDelta implements IJavaElementDelta {
 	public void setAffectedChildren(IJavaElementDelta[] children) {
 		fAffectedChildren= children;
 	}
-	
+
 	public static TestDelta createParentDeltas(IPackageFragment frag, TestDelta delta) {
 		IJavaElement root= frag.getParent();
 		TestDelta rootDelta= new TestDelta(IJavaElementDelta.CHANGED, root);
@@ -136,7 +136,7 @@ public class TestDelta implements IJavaElementDelta {
 		TestDelta delta= new TestDelta(action, frag);
 		return createParentDeltas(frag, delta);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.IJavaElementDelta#getCompilationUnitAST()
 	 */

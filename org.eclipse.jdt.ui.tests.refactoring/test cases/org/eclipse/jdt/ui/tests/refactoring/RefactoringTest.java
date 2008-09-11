@@ -74,14 +74,14 @@ public abstract class RefactoringTest extends TestCase {
 	/**
 	 * If <code>true</code> a descriptor is created from the change.
 	 * The new descriptor is then used to create the refactoring again
-	 * and run the refactoring. As this is very time consuming this should 
+	 * and run the refactoring. As this is very time consuming this should
 	 * be <code>false</code> by default.
 	 */
 	private static final boolean DESCRIPTOR_TEST= false;
 
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;
-	
+
 	public boolean fIsVerbose= false;
 	public boolean fIsPreDeltaTest= false;
 
@@ -90,10 +90,10 @@ public abstract class RefactoringTest extends TestCase {
 	protected static final String TEST_INPUT_INFIX= "/in/";
 	protected static final String TEST_OUTPUT_INFIX= "/out/";
 	protected static final String CONTAINER= "src";
-	
+
 	protected static final List/*<String>*/ PROJECT_RESOURCE_CHILDREN= Arrays.asList(new String[] {
 			".project", ".classpath", ".settings" });
-	
+
 	public RefactoringTest(String name) {
 		super(name);
 	}
@@ -102,32 +102,32 @@ public abstract class RefactoringTest extends TestCase {
 		fRoot= RefactoringTestSetup.getDefaultSourceFolder();
 		fPackageP= RefactoringTestSetup.getPackageP();
 		fIsPreDeltaTest= false;
-		
+
 		if (fIsVerbose){
 			System.out.println("\n---------------------------------------------");
 			System.out.println("\nTest:" + getClass() + "." + getName());
-		}	
+		}
 		RefactoringCore.getUndoManager().flush();
 	}
 
 	protected void performDummySearch() throws Exception {
 		performDummySearch(getPackageP());
-	}	
+	}
 
 	/**
 	 * Removes contents of {@link #getPackageP()}, of {@link #getRoot()} (except for p) and
 	 * of the Java project (except for src and the JRE library).
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	protected void tearDown() throws Exception {
-		refreshFromLocal();	
+		refreshFromLocal();
 		performDummySearch();
-			
-		if (getPackageP().exists()){		
+
+		if (getPackageP().exists()){
 			tryDeletingAllJavaChildren(getPackageP());
 			tryDeletingAllNonJavaChildResources(getPackageP());
-		}	
-		
+		}
+
 		if (getRoot().exists()){
 			IJavaElement[] packages= getRoot().getChildren();
 			for (int i= 0; i < packages.length; i++){
@@ -141,10 +141,10 @@ public abstract class RefactoringTest extends TestCase {
 				}	catch (JavaModelException e){
 					//try to delete'em all
 					e.printStackTrace();
-				}	
+				}
 			}
 		}
-		
+
 		restoreTestProject();
 	}
 
@@ -168,7 +168,7 @@ public abstract class RefactoringTest extends TestCase {
 				IClasspathEntry[] newCPEsArray= (IClasspathEntry[]) newCPEs.toArray(new IClasspathEntry[newCPEs.size()]);
 				javaProject.setRawClasspath(newCPEsArray, null);
 			}
-		
+
 			Object[] nonJavaResources= javaProject.getNonJavaResources();
 			for (int i= 0; i < nonJavaResources.length; i++) {
 				Object kid= nonJavaResources[i];
@@ -189,7 +189,7 @@ public abstract class RefactoringTest extends TestCase {
 
 	private void refreshFromLocal() throws CoreException {
 		if (getRoot().exists())
-			getRoot().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);	
+			getRoot().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);
 		else if (getPackageP().exists())//don't refresh package if root already refreshed
 			getPackageP().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);
 	}
@@ -220,7 +220,7 @@ public abstract class RefactoringTest extends TestCase {
 					//try to delete'em all
 					e.printStackTrace();
 				}
-			}	
+			}
 		}
 	}
 
@@ -252,7 +252,7 @@ public abstract class RefactoringTest extends TestCase {
 	protected final RefactoringStatus performRefactoring(Refactoring ref) throws Exception {
 		return performRefactoring(ref, true);
 	}
-	
+
 	protected final RefactoringStatus performRefactoring(Refactoring ref, boolean providesUndo) throws Exception {
 		performDummySearch();
 		IUndoManager undoManager= getUndoManager();
@@ -331,14 +331,14 @@ public abstract class RefactoringTest extends TestCase {
 	protected void executePerformOperation(final PerformChangeOperation perform, IWorkspace workspace) throws CoreException {
 		workspace.run(perform, new NullProgressMonitor());
 	}
-	
+
 	public RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception, CoreException {
 		RefactoringStatus status= performRefactoring(ref);
 		if (status == null)
 			return new RefactoringStatus();
 		return status;
 	}
-	
+
 	protected final Change performChange(Refactoring refactoring, boolean storeUndo) throws Exception {
 		CreateChangeOperation create= new CreateChangeOperation(refactoring);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
@@ -349,14 +349,14 @@ public abstract class RefactoringTest extends TestCase {
 		assertTrue("Change wasn't executed", perform.changeExecuted());
 		return perform.getUndoChange();
 	}
-	
+
 	protected final Change performChange(final Change change) throws Exception {
 		PerformChangeOperation perform= new PerformChangeOperation(change);
 		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
 		assertTrue("Change wasn't executed", perform.changeExecuted());
 		return perform.getUndoChange();
 	}
-	
+
 	protected IUndoManager getUndoManager() {
 		IUndoManager undoManager= RefactoringCore.getUndoManager();
 		undoManager.flush();
@@ -372,7 +372,7 @@ public abstract class RefactoringTest extends TestCase {
 				return types[i];
 		return null;
 	}
-	
+
 	/*
 	 * subclasses override to inform about the location of their test cases
 	 */
@@ -390,11 +390,11 @@ public abstract class RefactoringTest extends TestCase {
 	protected String createTestFileName(String cuName, String infix) {
 		return getTestPath() + getName() + infix + cuName + ".java";
 	}
-	
+
 	protected String getInputTestFileName(String cuName) {
 		return createTestFileName(cuName, TEST_INPUT_INFIX);
 	}
-	
+
 	/*
 	 * @param subDirName example "p/" or "org/eclipse/jdt/"
 	 */
@@ -405,46 +405,46 @@ public abstract class RefactoringTest extends TestCase {
 	protected String getOutputTestFileName(String cuName) {
 		return createTestFileName(cuName, TEST_OUTPUT_INFIX);
 	}
-	
+
 	/*
 	 * @param subDirName example "p/" or "org/eclipse/jdt/"
 	 */
 	protected String getOutputTestFileName(String cuName, String subDirName) {
 		return createTestFileName(cuName, TEST_OUTPUT_INFIX + subDirName);
 	}
-	
+
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, String cuName) throws Exception {
 		return createCUfromTestFile(pack, cuName, true);
 	}
-	
+
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, String cuName, String subDirName) throws Exception {
 		return createCUfromTestFile(pack, cuName, subDirName, true);
 	}
-	
+
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, String cuName, boolean input) throws Exception {
-		String contents= input 
+		String contents= input
 					? getFileContents(getInputTestFileName(cuName))
 					: getFileContents(getOutputTestFileName(cuName));
 		return createCU(pack, cuName + ".java", contents);
 	}
-	
+
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, String cuName, String subDirName, boolean input) throws Exception {
-		String contents= input 
+		String contents= input
 			? getFileContents(getInputTestFileName(cuName, subDirName))
 			: getFileContents(getOutputTestFileName(cuName, subDirName));
-		
+
 		return createCU(pack, cuName + ".java", contents);
 	}
-	
+
 	protected void printTestDisabledMessage(String explanation){
 		System.out.println("\n" +getClass().getName() + "::"+ getName() + " disabled (" + explanation + ")");
 	}
-	
+
 	//-----------------------
 	public static InputStream getStream(String content){
 		return new ByteArrayInputStream(content.getBytes());
 	}
-	
+
 	public static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
 		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
@@ -453,7 +453,7 @@ public abstract class RefactoringTest extends TestCase {
 		}
 		return null;
 	}
-	
+
 	public String getFileContents(String fileName) throws IOException {
 		return getContents(getFileInputStream(fileName));
 	}
@@ -461,7 +461,7 @@ public abstract class RefactoringTest extends TestCase {
 	public static String getContents(IFile file) throws IOException, CoreException {
 		return getContents(file.getContents());
 	}
-	
+
 	public static ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
 		if (pack.getCompilationUnit(name).exists())
 			return pack.getCompilationUnit(name);
@@ -472,7 +472,7 @@ public abstract class RefactoringTest extends TestCase {
 
 	public static String getContents(InputStream in) throws IOException {
 		BufferedReader br= new BufferedReader(new InputStreamReader(in));
-		
+
 		StringBuffer sb= new StringBuffer(300);
 		try {
 			int read= 0;
@@ -491,20 +491,20 @@ public abstract class RefactoringTest extends TestCase {
 	public static String removeExtension(String fileName) {
 		return fileName.substring(0, fileName.lastIndexOf('.'));
 	}
-	
+
 	public static void performDummySearch(IJavaElement element) throws Exception{
 		new SearchEngine().searchAllTypeNames(
-			null, 
-			SearchPattern.R_EXACT_MATCH, 
-			"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
-			SearchPattern.R_EXACT_MATCH, 
-			IJavaSearchConstants.CLASS, 
-			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}), 
-			new Requestor(), 
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+			null,
+			SearchPattern.R_EXACT_MATCH,
+			"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent
+			SearchPattern.R_EXACT_MATCH,
+			IJavaSearchConstants.CLASS,
+			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}),
+			new Requestor(),
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 			null);
 	}
-	
+
 	public static IMember[] merge(IMember[] a1, IMember[] a2, IMember[] a3){
 		return JavaElementUtil.merge(JavaElementUtil.merge(a1, a2), a3);
 	}
@@ -512,7 +512,7 @@ public abstract class RefactoringTest extends TestCase {
 	public static IMember[] merge(IMember[] a1, IMember[] a2){
 		return JavaElementUtil.merge(a1, a2);
 	}
-		
+
 	public static IField[] getFields(IType type, String[] names) {
 		if (names == null )
 			return new IField[0];
@@ -522,7 +522,7 @@ public abstract class RefactoringTest extends TestCase {
 			assertTrue("field " + field.getElementName() + " does not exist", field.exists());
 			fields.add(field);
 		}
-		return (IField[]) fields.toArray(new IField[fields.size()]);	
+		return (IField[]) fields.toArray(new IField[fields.size()]);
 	}
 
 	public static IType[] getMemberTypes(IType type, String[] names) {
@@ -542,9 +542,9 @@ public abstract class RefactoringTest extends TestCase {
 			assertTrue("member type " + memberType.getElementName() + " does not exist", memberType.exists());
 			memberTypes.add(memberType);
 		}
-		return (IType[]) memberTypes.toArray(new IType[memberTypes.size()]);	
+		return (IType[]) memberTypes.toArray(new IType[memberTypes.size()]);
 	}
-	
+
 	public static IMethod[] getMethods(IType type, String[] names, String[][] signatures) {
 		if (names == null || signatures == null)
 			return new IMethod[0];
@@ -555,7 +555,7 @@ public abstract class RefactoringTest extends TestCase {
 			if (!methods.contains(method))
 				methods.add(method);
 		}
-		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);	
+		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);
 	}
 
 	public static IType[] findTypes(IType[] types, String[] namesOfTypesToPullUp) {
@@ -565,12 +565,12 @@ public abstract class RefactoringTest extends TestCase {
 			for (int j= 0; j < namesOfTypesToPullUp.length; j++) {
 				String name= namesOfTypesToPullUp[j];
 				if (type.getElementName().equals(name))
-					found.add(type);					
+					found.add(type);
 			}
 		}
 		return (IType[]) found.toArray(new IType[found.size()]);
 	}
-	
+
 	public static IField[] findFields(IField[] fields, String[] namesOfFieldsToPullUp) {
 		List found= new ArrayList(fields.length);
 		for (int i= 0; i < fields.length; i++) {
@@ -578,7 +578,7 @@ public abstract class RefactoringTest extends TestCase {
 			for (int j= 0; j < namesOfFieldsToPullUp.length; j++) {
 				String name= namesOfFieldsToPullUp[j];
 				if (field.getElementName().equals(name))
-					found.add(field);					
+					found.add(field);
 			}
 		}
 		return (IField[]) found.toArray(new IField[found.size()]);
@@ -596,12 +596,12 @@ public abstract class RefactoringTest extends TestCase {
 				String[] methodSig= signaturesOfMethods[j];
 				if (! areSameSignatures(paramTypes, methodSig))
 					continue;
-				found.add(method);	
+				found.add(method);
 			}
 		}
 		return (IMethod[]) found.toArray(new IMethod[found.size()]);
 	}
-	
+
 	private static boolean areSameSignatures(String[] s1, String[] s2){
 		if (s1.length != s2.length)
 			return false;
@@ -611,7 +611,7 @@ public abstract class RefactoringTest extends TestCase {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Line-based version of junit.framework.Assert.assertEquals(String, String)
 	 * without considering line delimiters.
@@ -621,7 +621,7 @@ public abstract class RefactoringTest extends TestCase {
 	public static void assertEqualLines(String expected, String actual) {
 		assertEqualLines("", expected, actual);
 	}
-	
+
 	/**
 	 * Line-based version of junit.framework.Assert.assertEquals(String, String, String)
 	 * without considering line delimiters.
@@ -635,9 +635,9 @@ public abstract class RefactoringTest extends TestCase {
 
 		String expected2= (expectedLines == null ? null : Strings.concatenate(expectedLines, "\n"));
 		String actual2= (actualLines == null ? null : Strings.concatenate(actualLines, "\n"));
-		assertEquals(message, expected2, actual2);		
+		assertEquals(message, expected2, actual2);
 	}
-	
+
 	private static class Requestor extends TypeNameRequestor {
 	}
 }

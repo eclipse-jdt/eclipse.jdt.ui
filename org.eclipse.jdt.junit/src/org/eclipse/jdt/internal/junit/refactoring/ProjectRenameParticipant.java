@@ -20,9 +20,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 public class ProjectRenameParticipant extends JUnitRenameParticipant {
 

@@ -11,7 +11,7 @@
 package org.eclipse.jdt.testplugin.util;
 
 
- 
+
 import java.util.ArrayList;
 
 
@@ -40,7 +40,7 @@ public class FocusTestPass implements IDialogTestPass {
 	 */
 	public String label() {
 		return "&Initial Focus";
-	}	
+	}
 	/**
 	 * @see IDialogTestPass#checkListTexts()
 	 */

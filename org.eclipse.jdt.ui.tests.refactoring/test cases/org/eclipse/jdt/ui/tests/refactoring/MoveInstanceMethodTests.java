@@ -29,9 +29,9 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
 
@@ -173,7 +173,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		assertNotNull(method);
 		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
 		Refactoring ref= new MoveRefactoring(processor);
-		
+
 		assertNotNull("refactoring should be created", ref);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 
@@ -392,44 +392,44 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test32() throws Exception {
 		helper1(new String[] { "p1.A"}, "p1.A", 9, 25, 9, 26, PARAMETER, "p", true, true);
 	}
-	
+
 	// Test visibility of a target field is not affected.
 	public void test33() throws Exception {
 		helper1(new String[] { "p.Foo", "p.Bar" }, "p.Foo", 6, 18, 6, 21, FIELD, "_bar", false, false);
 	}
-	
+
 	// Test visibility of target field is changed to public
 	// in case a caller is in another package (bug 117465).
 	public void test34() throws Exception {
 		helper1(new String[] { "test1.TestTarget", "test1.Test1", "test2.Test2"}, "test1.Test1", 3, 21, 3, 33, FIELD, "target", true, true);
 	}
-	
+
 	// Test visibility of target field is changed to default
 	// in case a caller is in the same package (bug 117465).
 	public void test35() throws Exception {
 		helper1(new String[] { "test1.TestTarget", "test1.Test1", "test1.Test2"}, "test1.Test1", 3, 21, 3, 33, FIELD, "target", true, true);
 	}
-	
+
 	// Test search engine for secondary types (bug 108030).
 	public void test36() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 9, 17, 9, 27, FIELD, "fB", false, false);
 	}
-	
+
 	// Test name conflicts in the moved method between fields and parameters (bug 227876)
 	public void test37() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 17, 4, 42, FIELD, "destination", true, true);
 	}
-	
+
 	// Test problem with parameter order (bug 165697)
 	public void test38() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 17, 4, 35, FIELD, "target", true, true);
 	}
-	
+
 	// Test problem with qualified accesses (bug 149316)
 	public void test39() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 13, 4, 25, PARAMETER, "p", true, true);
 	}
-	
+
 	// Test problem with qualified accesses (bug 149316)
 	public void test40() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 13, 4, 25, PARAMETER, "p", true, true);

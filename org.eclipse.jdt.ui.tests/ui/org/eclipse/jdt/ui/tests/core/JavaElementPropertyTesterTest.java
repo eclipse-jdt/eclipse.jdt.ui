@@ -17,6 +17,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -36,13 +39,10 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementPropertyTester;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 public class JavaElementPropertyTesterTest extends TestCase {
-	
+
 	private static final Class THIS= JavaElementPropertyTesterTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IJavaProject fOtherProject,  fOtherClosedProject;
 
@@ -70,41 +70,41 @@ public class JavaElementPropertyTesterTest extends TestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new JavaElementPropertyTesterTest("testFindType"));
 			return new ProjectTestSetup(suite);
-		}	
+		}
 	}
 
 
 	protected void setUp() throws Exception {
 		fOtherProject= JavaCore.create(createSimpleProject("SimpleProject", true));
 		fOtherClosedProject= JavaCore.create(createSimpleProject("SimpleProject", false));
-		
+
 		fJProject1= JavaProjectHelper.createJavaProject("Test", "bin");
 
 		fJDK= JavaProjectHelper.addRTJar(fJProject1);
 		assertTrue("jdk not found", fJDK != null);
 		assertTrue(fJDK.exists());
-		
+
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		fPack= fSourceFolder.createPackageFragment("org.test", true, null);
 		fCU= fPack.createCompilationUnit("A.java", "package org.test; class A { }", true, null);
 
 		File file= JavaTestPlugin.getDefault().getFileInPlugin(LIB);
 		assertTrue("lib not found", file != null && file.exists());
-		
+
 		fLocalArchive= JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(file.getPath()), null, null);
-		
+
 		IFolder folder= fJProject1.getProject().getFolder("doc");
 		folder.create(true, true, null);
-		
+
 		fFolder= fJProject1.getPackageFragmentRoot(folder);
 	}
-	
+
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		fOtherProject.getProject().delete(true, null);
 		fOtherClosedProject.getProject().delete(true, null);
 	}
-	
+
 	private static IProject createSimpleProject(String projectName, boolean open) throws CoreException {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IProject project= root.getProject(projectName);
@@ -118,59 +118,59 @@ public class JavaElementPropertyTesterTest extends TestCase {
 		}
 		return project;
 	}
-	
+
 
 	public void testJavaElementPropertyTester() {
 		JavaElementPropertyTester tester= new JavaElementPropertyTester();
-		
+
 		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.NAME, new Object[0], "Test"));
 		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.NAME, new Object[0], "T.*"));
 		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.NAME, new Object[0], "Tests"));
-		
+
 
 		IJavaElement[] allElements=
 			{ fJProject1, fOtherProject, fOtherClosedProject, fJProject1.getJavaModel(), fJDK, fSourceFolder, fLocalArchive, fFolder, fPack, fCU };
-		boolean[] expectedResult= {false, false, false, false, true, true, true, false, true, true }; 
-	
+		boolean[] expectedResult= {false, false, false, false, true, true, true, false, true, true };
+
 		for (int i= 0; i < expectedResult.length; i++) {
 			boolean actual= tester.test(allElements[i], JavaElementPropertyTester.IS_ON_CLASSPATH, new Object[0], null);
 			assertEquals(allElements[i].getElementName(), expectedResult[i], actual);
 		}
-		
+
 		boolean[] expectedResult2= {false, false, false, false, false, true, false, false, true, true };
 		for (int i= 0; i < expectedResult2.length; i++) {
 			boolean actual= tester.test(allElements[i], JavaElementPropertyTester.IN_SOURCE_FOLDER, new Object[0], null);
 			assertEquals(allElements[i].getElementName(), expectedResult2[i], actual);
 		}
-		
+
 		boolean[] expectedResult3= {false, false, false, false, true, false, true, false, false, false };
 		for (int i= 0; i < expectedResult3.length; i++) {
 			boolean actual= tester.test(allElements[i], JavaElementPropertyTester.IN_ARCHIVE, new Object[0], null);
 			assertEquals(allElements[i].getElementName(), expectedResult3[i], actual);
 		}
-		
+
 		boolean[] expectedResult4= {false, false, false, false, true, false, false, false, false, false };
 		for (int i= 0; i < expectedResult4.length; i++) {
 			boolean actual= tester.test(allElements[i], JavaElementPropertyTester.IN_EXTERNAL_ARCHIVE, new Object[0], null);
 			assertEquals(allElements[i].getElementName(), expectedResult4[i], actual);
 		}
-		
+
 		Object[] args= { JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5 };
 		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.PROJECT_OPTION, args , null));
 		assertEquals(false, tester.test(fOtherProject, JavaElementPropertyTester.PROJECT_OPTION, args , null));
 		assertEquals(false, tester.test(fOtherClosedProject, JavaElementPropertyTester.PROJECT_OPTION, args , null));
-	
+
 		fJProject1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
-		
+
 		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.PROJECT_OPTION, args, null));
 
 		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "org.test.A"));
 		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "junit.framework.Test"));
 		assertEquals(false, tester.test(fOtherClosedProject, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "org.test.A"));
-		
+
 		assertEquals(true, tester.test(fSourceFolder, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "java.util.ArrayList"));
 
 	}
-	
-	
+
+
 }

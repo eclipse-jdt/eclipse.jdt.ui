@@ -32,12 +32,12 @@ public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPer
 	public AbstractMoveCompilationUnitPrefTest(String name) {
 		super(name);
 	}
-	
+
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy((new IResource[0]), (new IJavaElement[] {cunit}));
 		JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
-		IPackageFragment destination= fTestProject.getSourceFolder().createPackageFragment("destination", false, null); 
+		IPackageFragment destination= fTestProject.getSourceFolder().createPackageFragment("destination", false, null);
 		processor.setDestination(ReorgDestinationFactory.createDestination(destination));
 		processor.setReorgQueries(new MockReorgQueries());
 		processor.setUpdateReferences(true);
@@ -45,13 +45,13 @@ public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPer
 	}
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
-		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null); 
+		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package source;\n");
 		buf.append("public class A {\n");
 		buf.append("}\n");
 		ICompilationUnit result= source.createCompilationUnit("A.java", buf.toString(), false, null);
-	
+
 		IPackageFragment references= fTestProject.getSourceFolder().createPackageFragment("ref", false, null);
 		for(int i= 0; i < numberOfCus; i++) {
 			createReferenceCu(references, i, numberOfRefs);

@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -30,13 +32,11 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-
-import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
-
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * A wizard for creating test suites.
@@ -44,26 +44,26 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 public class NewTestSuiteCreationWizard extends JUnitWizard {
 
 	private NewTestSuiteWizardPage fPage;
-	
+
 	public NewTestSuiteCreationWizard() {
 		super();
-		setWindowTitle(WizardMessages.Wizard_title_new_testsuite); 
+		setWindowTitle(WizardMessages.Wizard_title_new_testsuite);
 		initDialogSettings();
 	}
 
 	/*
 	 * @see Wizard#createPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
 		fPage= new NewTestSuiteWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
-	}	
+	}
 
 	/*
 	 * @see Wizard#performFinish
-	 */		
+	 */
 	public boolean performFinish() {
 		IPackageFragment pack= fPage.getPackageFragment();
 		String filename= fPage.getTypeName() + ".java"; //$NON-NLS-1$
@@ -71,10 +71,10 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		if (cu.exists()) {
 			IEditorPart cu_ep= EditorUtility.isOpenInEditor(cu);
 			if (cu_ep != null && cu_ep.isDirty()) {
-				boolean saveUnsavedChanges= 
-					MessageDialog.openQuestion(fPage.getShell(), 
-						WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_title, 
-						Messages.format(WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_message, 
+				boolean saveUnsavedChanges=
+					MessageDialog.openQuestion(fPage.getShell(),
+						WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_title,
+						Messages.format(WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_message,
 						BasicElementLabels.getResourceName(filename)));
 				if (saveUnsavedChanges) {
 					try {
@@ -101,19 +101,19 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 				}
 			}
 		}
-		
+
 		if (finishPage(fPage.getRunnable())) {
 			if (!fPage.hasUpdatedExistingClass())
-				postCreatingType();	
+				postCreatingType();
 			return true;
 		}
 
-		return false;		
+		return false;
 	}
-	
+
 	private void cannotUpdateSuiteError() {
-		MessageDialog.openError(getShell(), WizardMessages.NewTestSuiteWizPage_cannotUpdateDialog_title, 
-			Messages.format(WizardMessages.NewTestSuiteWizPage_cannotUpdateDialog_message, new String[] { NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); 
+		MessageDialog.openError(getShell(), WizardMessages.NewTestSuiteWizPage_cannotUpdateDialog_title,
+			Messages.format(WizardMessages.NewTestSuiteWizPage_cannotUpdateDialog_message, new String[] { NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER}));
 
 	}
 
@@ -132,7 +132,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	public NewTestSuiteWizardPage getPage() {
 		return fPage;
 	}
-	
+
 	protected void initializeDefaultPageImageDescriptor() {
 		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.png")); //$NON-NLS-1$
 	}

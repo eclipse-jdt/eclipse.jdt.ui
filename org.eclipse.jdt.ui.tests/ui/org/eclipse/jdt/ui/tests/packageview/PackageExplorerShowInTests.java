@@ -15,6 +15,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IResource;
@@ -32,12 +34,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class PackageExplorerShowInTests extends TestCase {
 	private static final Class clazz= PackageExplorerShowInTests.class;
@@ -45,7 +44,7 @@ public class PackageExplorerShowInTests extends TestCase {
 	public PackageExplorerShowInTests(String name) {
 		super(name);
 	}
-	
+
 	public static Test suite() {
 		if (true) {
 			return new ProjectTestSetup(new TestSuite(clazz));
@@ -56,22 +55,22 @@ public class PackageExplorerShowInTests extends TestCase {
 			return new ProjectTestSetup(suite);
 		}
 	}
-	
+
 	public static Test setUpTest(Test someTest) {
 		return new ProjectTestSetup(someTest);
 	}
-	
+
 	private IJavaProject fJProject;
 	private PackageExplorerPart fPackageExplorer;
 	private IWorkbenchPage fPage;
-	
+
 	protected void setUp() throws Exception {
 		fJProject= ProjectTestSetup.getProject();
 		fPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		fPackageExplorer= (PackageExplorerPart) fPage.showView(JavaUI.ID_PACKAGES);
 		fPackageExplorer.selectAndReveal(new StructuredSelection());
 	}
-	
+
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
 		fPage.hideView(fPackageExplorer);
@@ -79,10 +78,10 @@ public class PackageExplorerShowInTests extends TestCase {
 		fPackageExplorer= null;
 		fJProject= null;
 	}
-	
+
 ////////////TODO: should also test non-UI part of tryToReveal(..) ///////////////////////////////
-	
-	
+
+
 	public void testCU() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack= sourceFolder.createPackageFragment("p", true, null);
@@ -92,12 +91,12 @@ public class PackageExplorerShowInTests extends TestCase {
 		assertEquals(1, selection.size());
 		assertEquals(cu, selection.getFirstElement());
 	}
-	
+
 	public void testCUAdaptedCU() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack= sourceFolder.createPackageFragment("p", true, null);
 		final ICompilationUnit cu= pack.createCompilationUnit("A.java", "package p;\nclass A {\n\n}", true, null);
-		
+
 		IAdaptable adaptable= new IAdaptable() {
 			public Object getAdapter(Class adapter) {
 				if (adapter == IJavaElement.class)
@@ -107,17 +106,17 @@ public class PackageExplorerShowInTests extends TestCase {
 			}
 		};
 		IStructuredSelection selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(adaptable));
-		
+
 		assertEquals(1, selection.size());
 		assertEquals(cu, selection.getFirstElement());
 	}
-	
-	
+
+
 	public void testCUAdaptedResource() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack= sourceFolder.createPackageFragment("p", true, null);
 		final ICompilationUnit cu= pack.createCompilationUnit("A.java", "package p;\nclass A {\n\n}", true, null);
-		
+
 		IAdaptable adaptable= new IAdaptable() {
 			public Object getAdapter(Class adapter) {
 				if (adapter == IResource.class)
@@ -127,11 +126,11 @@ public class PackageExplorerShowInTests extends TestCase {
 			}
 		};
 		IStructuredSelection selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(adaptable));
-		
+
 		assertEquals(1, selection.size());
 		assertEquals(cu, selection.getFirstElement());
 	}
-	
-	
-	
+
+
+
 }

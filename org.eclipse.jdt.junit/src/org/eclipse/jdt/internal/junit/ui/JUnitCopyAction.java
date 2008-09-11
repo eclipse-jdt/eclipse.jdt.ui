@@ -36,13 +36,13 @@ import org.eclipse.jdt.internal.junit.model.TestElement;
  */
 public class JUnitCopyAction extends SelectionListenerAction {
 	private FailureTrace fView;
-	
+
 	private final Clipboard fClipboard;
 
 	private TestElement fTestElement;
 
 	public JUnitCopyAction(FailureTrace view, Clipboard clipboard) {
-		super(JUnitMessages.CopyTrace_action_label);  
+		super(JUnitMessages.CopyTrace_action_label);
 		Assert.isNotNull(clipboard);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
 		fView= view;
@@ -62,16 +62,16 @@ public class JUnitCopyAction extends SelectionListenerAction {
 		}
 		if (source == null || source.length() == 0)
 			return;
-		
+
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 		try{
 			fClipboard.setContents(
-				new String[]{ convertLineTerminators(source) }, 
+				new String[]{ convertLineTerminators(source) },
 				new Transfer[]{ plainTextTransfer });
 		}  catch (SWTError e){
-			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;
-			if (MessageDialog.openQuestion(fView.getComposite().getShell(), JUnitMessages.CopyTraceAction_problem, JUnitMessages.CopyTraceAction_clipboard_busy))  
+			if (MessageDialog.openQuestion(fView.getComposite().getShell(), JUnitMessages.CopyTraceAction_problem, JUnitMessages.CopyTraceAction_clipboard_busy))
 				run();
 		}
 	}
@@ -80,12 +80,12 @@ public class JUnitCopyAction extends SelectionListenerAction {
 	public void handleTestSelected(TestElement test) {
 		fTestElement= test;
 	}
-	
+
 	private String convertLineTerminators(String in) {
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter printWriter= new PrintWriter(stringWriter);
 		StringReader stringReader= new StringReader(in);
-		BufferedReader bufferedReader= new BufferedReader(stringReader);		
+		BufferedReader bufferedReader= new BufferedReader(stringReader);
 		String line;
 		try {
 			while ((line= bufferedReader.readLine()) != null) {

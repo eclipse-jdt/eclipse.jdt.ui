@@ -14,14 +14,14 @@ package org.eclipse.jdt.ui.leaktest.reftracker;
 import java.util.Arrays;
 
 /**
- * 
+ *
  */
 public class IdentityHashSet {
-	
+
 	private Object[] fObjects;
 	private int fThreshold;
 	private int fSize;
-	
+
 	public IdentityHashSet(int initialSize) {
 		fObjects= new Object[initialSize];
 		fThreshold= getThreshold(initialSize);
@@ -43,7 +43,7 @@ public class IdentityHashSet {
 		insertElement(o, insertionIndex);
 		return true;
 	}
-	
+
 	private void insertElement(Object o, int index) {
 		fObjects[index]= o;
 		fSize++;
@@ -67,7 +67,7 @@ public class IdentityHashSet {
 		}
 		return -1; // already in set
 	}
-	
+
 
 	private void increaseSize() {
 		int newSize= fObjects.length * 2;
@@ -87,16 +87,16 @@ public class IdentityHashSet {
 	public boolean contains(Object o) {
 		return getInsertionIndex(o, fObjects) == -1;
 	}
-	
+
 	public int size() {
 		return fSize;
 	}
-	
+
 	public void clear() {
 		Arrays.fill(fObjects, null);
 		fSize= 0;
 	}
-	
+
     /**
      * Return index for Object x.
      * @param x the object

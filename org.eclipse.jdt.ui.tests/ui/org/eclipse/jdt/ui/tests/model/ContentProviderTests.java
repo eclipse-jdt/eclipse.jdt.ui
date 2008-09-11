@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 public class ContentProviderTests extends TestCase {
-	
+
 	private IWorkspace fWorkspace;
 	private IJavaProject fJProject1;
 	private boolean fEnableAutoBuildAfterTesting;
@@ -57,33 +57,33 @@ public class ContentProviderTests extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		
+
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(false);
-		
-		assertNotNull(fWorkspace);	
-		
+
+		assertNotNull(fWorkspace);
+
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		assertNotNull("project1 null", fJProject1);//$NON-NLS-1$
 		// Use the project root as the classpath
 		fJProject1.setRawClasspath(null, null);
-		
+
 		// Create some packages
 		IProject project = (IProject)fJProject1.getResource();
 		project.getFolder("f1").create(false, true, null);
 		fPackageFragment1 = JavaCore.create(project.getFolder("f1"));
 		project.getFolder("f2").create(false, true, null);
 		fPackageFragment2 = JavaCore.create(project.getFolder("f2"));
-		
+
 		//Create a non-Java file in one of the packges
 		fFile1 = project.getFile("f1/b");
 		fFile1.create(new ByteArrayInputStream("".getBytes()), false, null);
-		
-		
+
+
 		setUpMockView();
 	}
 
@@ -94,28 +94,28 @@ public class ContentProviderTests extends TestCase {
 		tearDownMockView();
 		super.tearDown();
 	}
-	
+
 	private void setUpMockView() throws CoreException {
 		fWorkbench= PlatformUI.getWorkbench();
 		assertNotNull(fWorkbench);
-		
+
 		fPage= fWorkbench.getActiveWorkbenchWindow().getActivePage();
 		assertNotNull(fPage);
-		
+
 		//just testing to make sure my part can be created
 		IViewPart myPart= new MockPluginView();
 		assertNotNull(myPart);
-		
+
 		myPart= fPage.showView("org.eclipse.jdt.ui.tests.model.MockPluginView");//$NON-NLS-1$
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
 			fProvider= fMyPart.getContentProvider();
 			fMyPart.setProject(fJProject1);
 		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
-	
-		assertNotNull(fProvider);	
+
+		assertNotNull(fProvider);
 	}
-	
+
 	private void tearDownMockView() {
 		fPage.hideView(fMyPart);
 	}
@@ -138,73 +138,73 @@ public class ContentProviderTests extends TestCase {
 		}
 		return false;
 	}
-	
+
 	public void testOutgoingDeletion148118() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addOutgoingDeletion(project, "f1/a");
 		fMyPart.addOutgoingDeletion(project, "f2/a");
 		fMyPart.addOutgoingDeletion(project, "f3/");
-		
+
 		// Children of project
 		Object[] expectedChildren = new Object[] { fPackageFragment1,  fPackageFragment2, project.getFolder("f3/")};
 		Object[] children = fProvider.getChildren(fJProject1);
 		assertTrue("Expected children of project does not match actual children", compareArrays(children, expectedChildren));
-		
+
 		// Children of fragment 1
 		expectedChildren = new Object[] { fFile1, ((IFolder)fPackageFragment1.getResource()).getFile("a")};
 		children = fProvider.getChildren(fPackageFragment1);
-		
+
 		// Children of fragment 2
 		expectedChildren = new Object[] { ((IFolder)fPackageFragment2.getResource()).getFile("a")};
 		children = fProvider.getChildren(fPackageFragment2);
 	}
-	
+
 	public void testIncomingAddition159884() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addIncomingAddition(project, "f1/newFolder/");
 		fMyPart.addIncomingAddition(project, "f1/newFolder/a");
-	
-	
+
+
 		// Children of project
 		IFolder f1 = project.getFolder("f1");
 		Object[] expectedChildren = new Object[] { f1 };
 		Object[] children = fProvider.getChildren(fJProject1);
 		assertTrue("Expected children of project does not match actual children", compareArrays(children, expectedChildren));
-		
+
 		IFolder addedFolder = project.getFolder("f1/newFolder");
-		
+
 		// Children of f1
 		expectedChildren = new Object[] { addedFolder};
 		children = fProvider.getChildren(f1);
 		assertTrue("Expected children of f1 does not match actual children", compareArrays(children, expectedChildren));
-		
+
 		// Children of newFolder
-	
+
 		expectedChildren = new Object[] {addedFolder.getFile("a")};
 		children = fProvider.getChildren(addedFolder);
 		assertTrue("Expected children of new folder does not match actual children", compareArrays(children, expectedChildren));
 	}
-	
+
 	public void testIncomingAddition159884Part2() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addIncomingAddition(project, "f1/newFolder/a");
-	
-	
+
+
 		// Children of project
 		IFolder f1 = project.getFolder("f1");
 		Object[] expectedChildren = new Object[] { f1 };
 		Object[] children = fProvider.getChildren(fJProject1);
 		assertTrue("Expected children of project does not match actual children", compareArrays(children, expectedChildren));
-		
+
 		IFolder addedFolder = project.getFolder("f1/newFolder");
-		
+
 		// Children of f1
 		expectedChildren = new Object[] { addedFolder};
 		children = fProvider.getChildren(f1);
 		assertTrue("Expected children of f1 does not match actual children", compareArrays(children, expectedChildren));
-		
+
 		// Children of newFolder
-	
+
 		expectedChildren = new Object[] {addedFolder.getFile("a")};
 		children = fProvider.getChildren(addedFolder);
 		assertTrue("Expected children of new folder does not match actual children", compareArrays(children, expectedChildren));

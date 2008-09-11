@@ -19,6 +19,9 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -33,14 +36,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class CleanUpStressTest extends CleanUpTestCase {
-	
+
 	private static final String SRC_CONTAINER= "src";
 
 	protected static IPackageFragmentRoot fJunitSrcRoot;
@@ -51,15 +50,15 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 	}
-	
+
 	public CleanUpStressTest(String name) {
 		super(name);
 	}
-	
+
 	public static Test suite() {
 		return new ProjectTestSetup(new TestSuite(CleanUpStressTest.class));
 	}
-	
+
 	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement element= children[i];
@@ -74,7 +73,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			}
 		}
 	}
-	
+
     private static Hashtable fExpectedChangesAllTests;
     static {
         fExpectedChangesAllTests= new Hashtable();
@@ -5215,11 +5214,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("}");
         fExpectedChangesAllTests.put("junit.samples.money.Money.java", buf.toString());
     }
-	
+
 	public void testAllCleanUps() throws Exception {
 		List cus= new ArrayList();
 		addAllCUs(fJProject1.getChildren(), cus);
-		
+
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
@@ -5233,17 +5232,17 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
-		
+
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
-		
+
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-		
+
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT);
-		
+
 		enable(CleanUpConstants.ADD_MISSING_METHODES);
 
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
@@ -5256,32 +5255,32 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
-		
+
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
-		
+
 		enable(CleanUpConstants.ORGANIZE_IMPORTS);
-		
+
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
-	
+
 		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);
 		performRefactoring(units);
-		
+
 
 //		generateTable(units);
-		
+
 		for (int i= 0; i < units.length; i++) {
 	        ICompilationUnit cu= units[i];
 			String previewContent= getNormalizedContent(new Document(cu.getBuffer().getContents()));
 	       	String compilationUnitName= getCompilationUnitName(cu);
-	       	
+
 	       	String expected= (String)fExpectedChangesAllTests.get(compilationUnitName);
-	       	
+
 	       	assertTrue("No expected value in table for " + compilationUnitName, expected != null);
 	       	assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);
         }
@@ -5292,7 +5291,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		JavaElementLabels.getCompilationUnitLabel(cu, JavaElementLabels.CU_QUALIFIED, result);
 		return result.toString();
 	}
-	
+
 	private static String getNormalizedContent(IDocument document) {
 		StringBuffer buf= new StringBuffer();
 		try {
@@ -5300,11 +5299,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			int selectionLength= document.getLength();
 			int startLine= document.getLineOfOffset(selectionOffset);
 			int endLine= document.getLineOfOffset(selectionOffset + selectionLength);
-			
+
 			for (int i= startLine; i <= endLine; i++) {
 				IRegion lineInfo= document.getLineInformation(i);
 				String lineContent= document.get(lineInfo.getOffset(), lineInfo.getLength());
-				
+
 				for (int k= 0; k < lineContent.length(); k++) {
                 	char ch= lineContent.charAt(k);
                 	if (ch == '\t') {
@@ -5313,7 +5312,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
                 		buf.append(ch);
                 	}
                 }
-				
+
 				if (i != endLine) {
 					buf.append('\n');
 				}
@@ -5323,7 +5322,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		}
 		return buf.toString();
 	}
-	
+
 //	Do not remove, used to generate the table
 //	private static final String[] CU_ORDER= new String[71];
 //	static {

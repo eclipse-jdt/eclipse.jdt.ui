@@ -35,21 +35,21 @@ import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefac
 public class SefTests extends AbstractSelectionTestCase {
 
 	private static SefTestSetup fgTestSetup;
-	
+
 	public SefTests(String name) {
 		super(name);
 	}
-	
+
 	public static Test suite() {
 		fgTestSetup= new SefTestSetup(new TestSuite(SefTests.class));
 		return fgTestSetup;
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		fgTestSetup= new SefTestSetup(test);
 		return fgTestSetup;
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
@@ -58,16 +58,16 @@ public class SefTests extends AbstractSelectionTestCase {
 	protected String getResourceLocation() {
 		return "SefWorkSpace/SefTests/";
 	}
-	
+
 	protected String adaptName(String name) {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
-	}	
-	
+	}
+
 	protected void performTest(IPackageFragment packageFragment, String id, String outputFolder, String fieldName) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
-		
+
 		initializePreferences();
 
 		SelfEncapsulateFieldRefactoring refactoring= ((Checks.checkAvailability(field).hasFatalError() || !RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) ? null : new SelfEncapsulateFieldRefactoring(field));
@@ -86,8 +86,8 @@ public class SefTests extends AbstractSelectionTestCase {
 			RefactoringStatus status= refactoring.checkAllConditions(new NullProgressMonitor());
 			assertTrue(status.hasError());
 		}
-	}	
-	
+	}
+
 	private void initializePreferences() {
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
@@ -95,7 +95,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 	}
-	
+
 	private static IField getField(ICompilationUnit unit, String fieldName) throws Exception {
 		IField result= null;
 		IType[] types= unit.getAllTypes();
@@ -111,78 +111,78 @@ public class SefTests extends AbstractSelectionTestCase {
 	private void objectTest(String fieldName) throws Exception {
 		performTest(fgTestSetup.getObjectPackage(), getName(), "object_out", fieldName);
 	}
-	
+
 	private void baseTest(String fieldName) throws Exception {
 		performTest(fgTestSetup.getBasePackage(), getName(), "base_out", fieldName);
 	}
-	
+
 	private void invalidTest(String fieldName) throws Exception {
 		performInvalidTest(fgTestSetup.getInvalidPackage(), getName(), fieldName);
 	}
-	
+
 	private void existingTest(String fieldName) throws Exception {
 		performTest(fgTestSetup.getExistingMethodPackage(), getName(), "existingmethods_out", fieldName);
 	}
 	//=====================================================================================
 	// Invalid
 	//=====================================================================================
-	
+
 	public void testPostfixExpression() throws Exception {
 		invalidTest("field");
 	}
-	
+
 	public void testInvalidOverwrite() throws Exception {
 		invalidTest("field");
 	}
-	
+
 	public void testAnnotation() throws Exception {
 		invalidTest("field");
 	}
-	
+
 	//=====================================================================================
 	// Primitiv Data Test
 	//=====================================================================================
-	
+
 	public void testPrefixInt() throws Exception {
 		baseTest("field");
 	}
-	
+
 	public void testPrefixBoolean() throws Exception {
 		baseTest("field");
 	}
-	
+
 	public void testPostfixInt() throws Exception {
 		baseTest("field");
 	}
-	
+
 	public void testThisExpression() throws Exception {
 		baseTest("field");
 	}
-	
+
 	public void testThisExpressionInner() throws Exception {
 		baseTest("field");
 	}
-	
+
 	public void testFinal() throws Exception {
 		baseTest("field");
 	}
-	
+
 	public void testTwoFragments() throws Exception {
 		baseTest("field");
 	}
-	
+
 	//=====================================================================================
 	// Basic Object Test
 	//=====================================================================================
-	
+
 	public void testSimpleRead() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testSimpleWrite() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testSimpleReadWrite() throws Exception {
 		objectTest("field");
 	}
@@ -194,52 +194,52 @@ public class SefTests extends AbstractSelectionTestCase {
 	public void testEnumReadWrite() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testNestedRead() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testArrayRead() throws Exception {
 		objectTest("field");
 	}
-	
+
     public void testCStyleArrayRead() throws Exception {
       objectTest("field");
     }
 
-	
+
 	public void testSetterInAssignment() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testSetterInExpression() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testSetterInInitialization() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testSetterAsReceiver() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testCompoundWrite() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testCompoundWrite2() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testCompoundWrite3() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testFinalField() throws Exception {
 		objectTest("field");
 	}
-	
+
 	public void testGenericRead() throws Exception {
 		objectTest("field");
 	}
@@ -251,7 +251,7 @@ public class SefTests extends AbstractSelectionTestCase {
 	public void testGenericReadWrite() throws Exception {
 		objectTest("field");
 	}
-	
+
 	//=====================================================================================
 	// static import tests
 	//=====================================================================================
@@ -259,10 +259,10 @@ public class SefTests extends AbstractSelectionTestCase {
 	private void performStaticImportTest(String referenceName) throws Exception, JavaModelException {
 		ICompilationUnit provider= createCU(fgTestSetup.getStaticPackage(), getName());
 		ICompilationUnit reference= createCU(fgTestSetup.getStaticRefPackage(), referenceName);
-		
+
 		IField field= getField(provider, "x");
 		assertNotNull(field);
-		
+
 		initializePreferences();
 
 		SelfEncapsulateFieldRefactoring refactoring= ((Checks.checkAvailability(field).hasFatalError() || !RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) ? null : new SelfEncapsulateFieldRefactoring(field));
@@ -271,35 +271,35 @@ public class SefTests extends AbstractSelectionTestCase {
 		refContentOut= refContentOut.replaceAll("import static static_out", "import static static_in");
 		compareSource(reference.getSource(), refContentOut);
 	}
-	
+
 	public void testStaticImportRead() throws Exception {
-		performStaticImportTest("StaticImportReadReference");	
+		performStaticImportTest("StaticImportReadReference");
 	}
-	
+
 	public void testStaticImportWrite() throws Exception {
-		performStaticImportTest("StaticImportWriteReference");	
+		performStaticImportTest("StaticImportWriteReference");
 	}
-	
+
 	public void testStaticImportReadWrite() throws Exception {
-		performStaticImportTest("StaticImportReadWriteReference");	
+		performStaticImportTest("StaticImportReadWriteReference");
 	}
-	
+
 	public void testStaticImportNone() throws Exception {
-		performStaticImportTest("StaticImportNoReference");	
+		performStaticImportTest("StaticImportNoReference");
 	}
 
 	//=====================================================================================
 	// existing getter/setter
 	//=====================================================================================
-	
+
 	public void testThisExpressionInnerWithSetter() throws Exception {
 		existingTest("field");
 	}
-	
+
 	public void testThisExpressionWithGetterSetter() throws Exception {
 		existingTest("field");
 	}
-	
+
 	public void testTwoFragmentsWithSetter() throws Exception {
 		existingTest("field");
 	}

@@ -12,7 +12,6 @@
 package org.eclipse.jdt.junit.tests;
 
 import org.eclipse.jdt.junit.ITestRunListener;
-
 import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 
 /**
@@ -21,7 +20,7 @@ import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 public class LegacyTestRunListener implements ITestRunListener {
 
 	private TestRunLog fLog;
-	
+
 	public LegacyTestRunListener(TestRunLog log) {
 		fLog= log;
 	}
@@ -43,7 +42,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 	public static String testRunEndedMessage() {
 		return "testRunEnded(" + ")";
 	}
-	
+
 	public void testRunStopped(long elapsedTime) {
 		if (fLog != null) {
 			fLog.add(testRunStoppedMessage());

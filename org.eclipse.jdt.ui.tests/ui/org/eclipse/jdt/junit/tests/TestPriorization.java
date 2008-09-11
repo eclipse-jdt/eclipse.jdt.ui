@@ -16,11 +16,13 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+
 import junit.extensions.TestDecorator;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
 import org.eclipse.jdt.internal.junit.runner.FailuresFirstPrioritizer;
 
 public class TestPriorization extends TestCase {
@@ -53,7 +55,7 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test prioritized= prioritize(suite, priority);
-		
+
 		List order= new ArrayList();
 		collectOrder(prioritized, order);
 		String[] expected= {
@@ -69,11 +71,11 @@ public class TestPriorization extends TestCase {
 		//			D
 		//			E
 		//			F
-		
+
 		Test suite= new TestSetup(createSuiteDEF()) {
 			protected void setUp() throws Exception {}
 		};
-			
+
 		String[] priority= {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
@@ -99,16 +101,16 @@ public class TestPriorization extends TestCase {
 		TestSuite suite= new TestSuite();
 		suite.addTest(createSuiteABC());
 		suite.addTest(createSuiteDEF());
-		
+
 		String[] priority= {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test reordered= prioritize(suite, priority);
 		List order= new ArrayList();
 		collectOrder(reordered, order);
-	
+
 		String[] expected= {
-				"testF", "testD", "testE", "testA", "testB", "testC", 
+				"testF", "testD", "testE", "testA", "testB", "testC",
 		};
 		checkOrder(expected, order);
 	}
@@ -119,7 +121,7 @@ public class TestPriorization extends TestCase {
 		//			A
 		//			B
 		//			C
-		//		decorator 
+		//		decorator
 		//			suite2
 		//				D
 		//				E
@@ -131,7 +133,7 @@ public class TestPriorization extends TestCase {
 			protected void setUp() throws Exception {
 			}
 		});
-		
+
 		String[] priority= {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
@@ -140,11 +142,11 @@ public class TestPriorization extends TestCase {
 		collectOrder(reordered, order);
 
 		String[] expected= {
-				"testF", "testD", "testE", "testA", "testB", "testC", 
+				"testF", "testD", "testE", "testA", "testB", "testC",
 		};
 		checkOrder(expected, order);
 	}
-	
+
 	public void testReorderWithPropagation2() {
 		// suite4
 		//		suite3
@@ -166,7 +168,7 @@ public class TestPriorization extends TestCase {
 		TestSuite suite4= new TestSuite();
 		suite4.addTest(createSuiteXYZ());
 		suite4.addTest(suite);
-		
+
 		String[] priority= {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
@@ -179,7 +181,7 @@ public class TestPriorization extends TestCase {
 		};
 		checkOrder(expected, order);
 	}
-	
+
 	public void testReorderWithPropagationBug() {
 		// suite4
 		//		suite3
@@ -201,7 +203,7 @@ public class TestPriorization extends TestCase {
 		TestSuite suite4= new TestSuite();
 		suite4.addTest(createSuiteXYZ());
 		suite4.addTest(suite);
-		
+
 		String[] priority= {
 				"testE(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)", "testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
@@ -237,7 +239,7 @@ public class TestPriorization extends TestCase {
 		TestSuite suite4= new TestSuite();
 		suite4.addTest(createSuiteXYZ());
 		suite4.addTest(suite);
-		
+
 		String[] priority= {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)", "testZ(org.eclipse.jdt.junit.tests.TestPriorizationSuite)"
 		};
@@ -250,7 +252,7 @@ public class TestPriorization extends TestCase {
 		};
 		checkOrder(expected, order);
 	}
-	
+
 	public void testReorder() {
 		// suite
 		//		suite1
@@ -283,7 +285,7 @@ public class TestPriorization extends TestCase {
 		List suiteTests= new ArrayList(Arrays.asList(new String[] { "testX", "testY", "testZ" }));
 		List suite1Tests= new ArrayList(Arrays.asList(new String[] { "testA", "testB", "testC" }));
 		List suite2Tests= new ArrayList(Arrays.asList(new String[] { "testD", "testE", "testF" }));
-		
+
 		assertEquals("testF", (String) order.get(0));
 		assertEquals("testZ", (String) order.get(6));
 		for (int i= 0; i < 3; i++) {
@@ -311,7 +313,7 @@ public class TestPriorization extends TestCase {
 		suite.addTest(new TestPriorizationSuite2("testF"));
 		return suite;
 	}
-	
+
 	private TestSuite createSuiteABC() {
 		// suite
 		//		A
@@ -323,7 +325,7 @@ public class TestPriorization extends TestCase {
 		suite.addTest(new TestPriorizationSuite1("testC"));
 		return suite;
 	}
-	
+
 	private TestSuite createSuiteXYZ() {
 		// suite
 		//		X
@@ -339,7 +341,7 @@ public class TestPriorization extends TestCase {
 
 	private void checkOrder(String[] expected, List order) {
 //		assertEquals(Arrays.asList(expected), order);
-		
+
 		assertEquals(enumerate(Arrays.asList(expected)), enumerate(order));
 	}
 

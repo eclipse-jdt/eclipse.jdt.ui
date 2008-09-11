@@ -30,19 +30,19 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
 	private static final Class clazz= UseSupertypeWherePossibleTests.class;
 	private static final String REFACTORING_PATH= "UseSupertypeWherePossible/";
-	
+
 	public UseSupertypeWherePossibleTests(String name) {
 		super(name);
 	}
-	
+
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test);
 	}
-	
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -93,7 +93,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	}
 
 	//---------------tests ----------------------
-	
+
 	public void testNew0() throws Exception{
 		validatePassingTest("A", new String[]{"A"}, "java.lang.Object");
 	}
@@ -126,7 +126,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	public void testNew7() throws Exception{
 		validatePassingTest("A", new String[]{"A", "Test", "B"}, "p.B");
 	}
-	
+
 	public void testNew8() throws Exception{
 		validatePassingTest("A", new String[]{"A", "Test", "B"}, "p.B");
 	}
@@ -267,10 +267,10 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		//		printTestDisabledMessage("bug 169608");
 		validatePassingTest("C", new String[]{"C"}, "p.B");
 	}
-	
+
 	/* i had to rename tests 0-15 because of cvs problems*/
-	
-	
+
+
 	public void test0_() throws Exception{
 		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
 	}

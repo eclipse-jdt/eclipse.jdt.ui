@@ -13,10 +13,10 @@ package org.eclipse.jdt.ui.tests.leaks;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.text.undo.DocumentUndoManager;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.text.undo.DocumentUndoManager;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -32,14 +32,14 @@ import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
 
 /**
  * Tests for leaks in TextViewerUndoManager.
- * 
+ *
  * @since 3.2
  */
 public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 
 	/** The maximum undo level. */
 	private static final int MAX_UNDO_LEVEL= 256;
-	
+
 	/** The shell. */
 	private Shell fShell;
 	/** The text viewer. */
@@ -50,25 +50,25 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 	public static Test suite() {
 		return new LeakTestSetup(new TestSuite(TextViewerUndoManagerLeakTest.class));
 	}
-	
+
 	/*
 	 * @see TestCase#TestCase(String)
 	 */
 	public TextViewerUndoManagerLeakTest(final String name) {
-		super(name);	
+		super(name);
 	}
-	
+
 	/*
 	 *  @see TestCase#setUp()
 	 */
 	protected void setUp() {
-		fShell= new Shell();	
+		fShell= new Shell();
 		fUndoManager= new TextViewerUndoManager(MAX_UNDO_LEVEL);
 		fTextViewer= new TextViewer(fShell, SWT.NONE);
 		fTextViewer.setUndoManager(fUndoManager);
 		fUndoManager.connect(fTextViewer);
 	}
-	
+
 	public void testTextViewerUndoManager() throws Exception{
 		// There is always a document instance around, hence a DocumentUndoManager.
 		// So count instances first.
@@ -77,32 +77,32 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		internalTestConvertLineDelimiters();
 		internalTestRandomAccess();
 		internalTestRandomAccessAsCompound();
-		
+
 		fUndoManager.disconnect();
 		fUndoManager= null;
-		
+
 		fShell.dispose();
 		fShell= null;
-		
+
 		fTextViewer= null;
-		
+
 		String[] types= {
 			TextViewer.class.getName(),
 			TextViewerUndoManager.class.getName(),
-			
+
 			getSharedUndoManagersInnerClass("TextInputListener").getName(),
 			getSharedUndoManagersInnerClass("DocumentUndoListener").getName(),
 			getSharedUndoManagersInnerClass("KeyAndMouseListener").getName(),
-			
+
 			DocumentUndoManager.class.getName(),
 			getDocumentUndoManagersInnerClass("DocumentListener").getName(),
 			getDocumentUndoManagersInnerClass("HistoryListener").getName(),
 		};
 		int expected[]= new int[] { 0, 0,    0, 0, 0,    instanceCount, 0, 0};
-		
+
 		assertInstanceCount(types, expected);
 	}
-	
+
 	private Class getSharedUndoManagersInnerClass(String className) {
 		try {
 			return Class.forName("org.eclipse.jface.text.TextViewerUndoManager$" + className, true, getClass().getClassLoader());
@@ -111,7 +111,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 			return null;
 		}
 	}
-	
+
 	private Class getDocumentUndoManagersInnerClass(String className) {
 		try {
 			return Class.forName("org.eclipse.text.undo.DocumentUndoManager$" + className, true, getClass().getClassLoader());
@@ -124,26 +124,26 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 
 	/**
 	 * Test for line delimiter conversion.
-	 */	
+	 */
 	private void internalTestConvertLineDelimiters() {
 		final String original= "a\r\nb\r\n";
-		final IDocument document= new Document(original);		
+		final IDocument document= new Document(original);
 		fTextViewer.setDocument(document);
-		
+
 		try {
 			document.replace(1, 2, "\n");
 			document.replace(3, 2, "\n");
 		} catch (BadLocationException e) {
 			assertTrue(false);
 		}
-		
+
 		assertTrue(fUndoManager.undoable());
 		fUndoManager.undo();
 		assertTrue(fUndoManager.undoable());
 		fUndoManager.undo();
 
 		final String reverted= document.get();
-		
+
 		assertEquals(original, reverted);
 	}
 
@@ -153,25 +153,25 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 	private void internalTestRandomAccess() {
 		final int RANDOM_STRING_LENGTH= 50;
 		final int RANDOM_REPLACE_COUNT= 100;
-		
+
 		assertTrue(RANDOM_REPLACE_COUNT >= 1);
 		assertTrue(RANDOM_REPLACE_COUNT <= MAX_UNDO_LEVEL);
-		
+
 		String original= createRandomString(RANDOM_STRING_LENGTH);
 		final IDocument document= new Document(original);
 		fTextViewer.setDocument(document);
-	
+
 		doChange(document, RANDOM_REPLACE_COUNT);
-		
+
 		assertTrue(fUndoManager.undoable());
 		while (fUndoManager.undoable())
 			fUndoManager.undo();
-			
+
 		final String reverted= document.get();
 
 		assertEquals(original, reverted);
 	}
-	
+
 	private void doChange(IDocument document, int count) {
 		try {
 			for (int i= 0; i < count; i++) {
@@ -183,19 +183,19 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 			assertTrue(false);
 		}
 	}
-	
+
 	private void internalTestRandomAccessAsCompound() {
 		final int RANDOM_STRING_LENGTH= 50;
 		final int RANDOM_REPLACE_COUNT= 100;
-		
+
 		assertTrue(RANDOM_REPLACE_COUNT >= 1);
 		assertTrue(RANDOM_REPLACE_COUNT <= MAX_UNDO_LEVEL);
-		
+
 		String original= createRandomString(RANDOM_STRING_LENGTH);
 		final IDocument document= new Document(original);
 		fTextViewer.setDocument(document);
 
-		fUndoManager.beginCompoundChange();		
+		fUndoManager.beginCompoundChange();
 		doChange(document, RANDOM_REPLACE_COUNT);
 		fUndoManager.endCompoundChange();
 
@@ -203,35 +203,35 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		while (fUndoManager.undoable())
 			fUndoManager.undo();
 		assertTrue(!fUndoManager.undoable());
-			
+
 		final String reverted= document.get();
 
-		assertEquals(original, reverted);		
+		assertEquals(original, reverted);
 	}
 
 	private static String createRandomString(int length) {
 		final StringBuffer buffer= new StringBuffer();
-		
+
 		for (int i= 0; i < length; i++)
 			buffer.append(getRandomCharacter());
 
 		return buffer.toString();
 	}
-	
+
 	private static final char getRandomCharacter() {
 //		return Math.random() < 0.5
 //			? '\r'
 //			: '\n';
-					
+
 		// XXX must include \r, \n, \t
 		return (char) (32 + 95 * Math.random());
 	}
-	
+
 	private static String createRandomStringPoisson() {
 		final int length= getRandomPoissonValue(2);
 		return createRandomString(length);
 	}
-	
+
 	private static Position createRandomPositionPoisson(int documentLength) {
 
 		final float random= (float) Math.random();
@@ -240,10 +240,10 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		int length= getRandomPoissonValue(2);
 		if (offset + length > documentLength)
 			length= documentLength - offset;
-			
+
 		return new Position(offset, length);
 	}
-	
+
 	private static int getRandomPoissonValue(int mean) {
 		final int MAX_VALUE= 10;
 
@@ -255,14 +255,14 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 			if (random <= probability)
 				break;
 			i++;
-		}		
+		}
 		return i;
 	}
 
 	private static float getPoissonDistribution(float lambda, int k) {
 		return (float) (Math.exp(-lambda) * Math.pow(lambda, k) / faculty(k));
 	}
-	
+
 	/**
 	 * Returns the faculty of k.
 	 * @param k value

@@ -13,18 +13,18 @@ package org.eclipse.jdt.ui.examples;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -49,13 +50,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 
-import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
-
 /**
  *
  */
 public class MyQuickAssistProcessor implements IQuickAssistProcessor {
-	
+
 	private boolean getConvertProposal(IInvocationContext context, List result) {
 		ASTNode node= context.getCoveringNode();
 		if (!(node instanceof StringLiteral)) {
@@ -64,20 +63,20 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		if (result == null) {
 			return true;
 		}
-		
+
 		StringLiteral oldLiteral= (StringLiteral) node;
-		
+
 		AST ast= node.getAST();
 		StringLiteral newLiteral= ast.newStringLiteral();
 		newLiteral.setEscapedValue(toUpperCase(oldLiteral.getEscapedValue()));
-		
+
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		rewrite.replace(oldLiteral, newLiteral, null);
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		result.add(new ASTRewriteCorrectionProposal("To uppercase", context.getCompilationUnit(), rewrite, 10, image));
 		return true;
 	}
-	
+
 	private String toUpperCase(String escapedValue) {
 		int length= escapedValue.length();
 		StringBuffer buf= new StringBuffer(length);
@@ -103,14 +102,14 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 
 		ITextFileBufferManager textFileBufferManager= FileBuffers.getTextFileBufferManager();
 		IPath path= context.getCompilationUnit().getPath();
-		
+
 		try {
 			textFileBufferManager.connect(path, LocationKind.NORMALIZE, null);
 			IDocument document= textFileBufferManager.getTextFileBuffer(path, LocationKind.NORMALIZE).getDocument();
 			int startLine= document.getLineOfOffset(selectionOffset);
 			int endLine= document.getLineOfOffset(selectionOffset + selectionLength);
-			
-			
+
+
 			if (startLine == endLine) {
 				return false;
 			}
@@ -134,7 +133,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return true;
 	}
-	
+
 	private boolean getCreateQuickFixTestProposal(final IInvocationContext context, List result) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		if (context.getSelectionOffset() != 0 || context.getSelectionLength() != cu.getSourceRange().getLength()) {
@@ -143,11 +142,11 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		if (context.getASTRoot().getProblems().length != 1) {
 			return false;
 		}
-		
+
 		if (result == null) {
 			return true;
 		}
-		
+
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		result.add(new ChangeCorrectionProposal("Create quick fix test", null, 3, image) {
 			/* (non-Javadoc)
@@ -166,14 +165,14 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 					// ignore
 				}
  				MessageDialog.openError(activeEditor.getSite().getShell(), "Create quick fix test", "Could not create quick fix test");
-				
+
 			}
 		});
 		return true;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @param context
 	 * @param document
@@ -185,7 +184,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 			int selectionLength= context.getSelectionLength();
 			int startLine= document.getLineOfOffset(selectionOffset);
 			int endLine= document.getLineOfOffset(selectionOffset + selectionLength);
-			
+
 			for (int i= startLine; i <= endLine; i++) {
 				IRegion lineInfo= document.getLineInformation(i);
 				String lineContent= document.get(lineInfo.getOffset(), lineInfo.getLength());

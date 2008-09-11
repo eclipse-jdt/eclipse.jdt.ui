@@ -15,15 +15,16 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterProcessor;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTypeParameterTests extends RefactoringTest {
 
@@ -182,9 +183,9 @@ public class RenameTypeParameterTests extends RefactoringTest {
 	public void test14() throws Exception {
 		helper2("ELEMENT", "E", "A", true);
 	}
-	
+
 // ------------------------------------------------
-	
+
 	public void testFail0() throws Exception {
 		helper1("T", "S", "A", true);
 	}

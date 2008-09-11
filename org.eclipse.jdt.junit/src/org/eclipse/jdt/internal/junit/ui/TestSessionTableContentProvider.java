@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.util.ArrayList;
 
+import org.eclipse.jdt.junit.model.ITestElement;
+
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-
-import org.eclipse.jdt.junit.model.ITestElement;
 
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestRoot;

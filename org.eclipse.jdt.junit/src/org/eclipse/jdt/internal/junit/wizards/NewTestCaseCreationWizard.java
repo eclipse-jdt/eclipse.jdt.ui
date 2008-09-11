@@ -14,13 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne;
+import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageTwo;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,6 +26,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -54,13 +57,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
-
-import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne;
-import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageTwo;
-
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * A wizard for creating test cases.
@@ -72,7 +72,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 	public NewTestCaseCreationWizard() {
 		super();
-		setWindowTitle(WizardMessages.Wizard_title_new_testcase); 
+		setWindowTitle(WizardMessages.Wizard_title_new_testcase);
 		initDialogSettings();
 	}
 
@@ -82,7 +82,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 	/*
 	 * @see Wizard#createPages
-	 */	
+	 */
 	public void addPages() {
 		super.addPages();
 		fPage2= new NewTestCaseWizardPageTwo();
@@ -90,11 +90,11 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		addPage(fPage1);
 		fPage1.init(getSelection());
 		addPage(fPage2);
-	}	
-	
+	}
+
 	/*
 	 * @see Wizard#performFinish
-	 */		
+	 */
 	public boolean performFinish() {
 		IJavaProject project= fPage1.getJavaProject();
 		IRunnableWithProgress runnable= fPage1.getRunnable();
@@ -103,7 +103,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
 					runnable= addJUnitToClasspath(project, runnable, true);
 				}
-			} else {			
+			} else {
 				if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
 					runnable= addJUnitToClasspath(project, runnable, false);
 				}
@@ -123,7 +123,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			}
 			return true;
 		}
-		return false;		
+		return false;
 	}
 
 	private IRunnableWithProgress addJUnitToClasspath(IJavaProject project, final IRunnableWithProgress runnable, boolean isJUnit4) {
@@ -134,7 +134,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		if (dialog.open() != 0) {
 			throw new OperationCanceledException();
 		}
-			
+
 		final ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
 		if (fix != null) {
 			return new IRunnableWithProgress() {
@@ -147,7 +147,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 					try {
 						Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
 						new PerformChangeOperation(change).run(new SubProgressMonitor(monitor, 1));
-						
+
 						runnable.run(new SubProgressMonitor(monitor, 2));
 					} catch (OperationCanceledException e) {
 						throw new InterruptedException();
@@ -161,11 +161,11 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		}
 		return runnable;
 	}
-	
+
 	private static class ClasspathFixSelectionDialog extends MessageDialog implements SelectionListener, IDoubleClickListener {
-		
+
 		static class ClasspathFixLabelProvider extends LabelProvider {
-			
+
 			public Image getImage(Object element) {
 				if (element instanceof ClasspathFixProposal) {
 					ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;
@@ -173,7 +173,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				}
 				return null;
 			}
-			
+
 			public String getText(Object element) {
 				if (element instanceof ClasspathFixProposal) {
 					ClasspathFixProposal classpathFixProposal= (ClasspathFixProposal) element;
@@ -182,17 +182,17 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				return null;
 			}
 		}
-		
+
 
 		private final ClasspathFixProposal[] fFixProposals;
 		private final IJavaProject fProject;
-		
+
 		private TableViewer fFixSelectionTable;
-		
+
 		private Button fNoActionRadio;
 		private Button fOpenBuildPathRadio;
 		private Button fPerformFix;
-		
+
 		private ClasspathFixProposal fSelectedFix;
 
 		public ClasspathFixSelectionDialog(Shell parent, boolean isJUnit4, IJavaProject project, ClasspathFixProposal[] fixProposals) {
@@ -201,33 +201,33 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			fFixProposals= fixProposals;
 			fSelectedFix= null;
 		}
-		
+
 		protected boolean isResizable() {
 			return true;
 		}
-		
+
 		private static String getDialogMessage(boolean isJunit4) {
 			return isJunit4 ? WizardMessages.NewTestCaseCreationWizard_fix_selection_junit4_description : WizardMessages.NewTestCaseCreationWizard_fix_selection_junit3_description;
 		}
-		
+
 		protected Control createCustomArea(Composite composite) {
 			fNoActionRadio= new Button(composite, SWT.RADIO);
 			fNoActionRadio.setLayoutData(new GridData(SWT.LEAD, SWT.TOP, false, false));
 			fNoActionRadio.setText(WizardMessages.NewTestCaseCreationWizard_fix_selection_not_now);
 			fNoActionRadio.addSelectionListener(this);
-			
+
 			fOpenBuildPathRadio= new Button(composite, SWT.RADIO);
 			fOpenBuildPathRadio.setLayoutData(new GridData(SWT.LEAD, SWT.TOP, false, false));
 			fOpenBuildPathRadio.setText(WizardMessages.NewTestCaseCreationWizard_fix_selection_open_build_path_dialog);
 			fOpenBuildPathRadio.addSelectionListener(this);
-			
+
 			if (fFixProposals.length > 0) {
-			
+
 				fPerformFix= new Button(composite, SWT.RADIO);
 				fPerformFix.setLayoutData(new GridData(SWT.LEAD, SWT.TOP, false, false));
 				fPerformFix.setText(WizardMessages.NewTestCaseCreationWizard_fix_selection_invoke_fix);
 				fPerformFix.addSelectionListener(this);
-			
+
 				fFixSelectionTable= new TableViewer(composite, SWT.SINGLE | SWT.BORDER);
 				fFixSelectionTable.setContentProvider(new ArrayContentProvider());
 				fFixSelectionTable.setLabelProvider(new ClasspathFixLabelProvider());
@@ -235,36 +235,36 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				fFixSelectionTable.addDoubleClickListener(this);
 				fFixSelectionTable.setInput(fFixProposals);
 				fFixSelectionTable.setSelection(new StructuredSelection(fFixProposals[0]));
-				
+
 				GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 				gridData.heightHint= convertHeightInCharsToPixels(4);
 				gridData.horizontalIndent= convertWidthInCharsToPixels(2);
-				
+
 				fFixSelectionTable.getControl().setLayoutData(gridData);
-				
+
 				fNoActionRadio.setSelection(false);
 				fOpenBuildPathRadio.setSelection(false);
 				fPerformFix.setSelection(true);
-				
+
 			} else {
 				fNoActionRadio.setSelection(true);
 				fOpenBuildPathRadio.setSelection(false);
 			}
 
 			updateEnableStates();
-			
+
 			return composite;
 		}
-		
+
 		private void updateEnableStates() {
 			if (fPerformFix != null) {
 				fFixSelectionTable.getTable().setEnabled(fPerformFix.getSelection());
 			}
 		}
-		
+
 		private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
 		private static final Object BUILD_PATH_BLOCK= "block_until_buildpath_applied"; //$NON-NLS-1$
-		
+
 		protected void buttonPressed(int buttonId) {
 			fSelectedFix= null;
 			if (buttonId == 0) {
@@ -287,7 +287,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			}
 			super.buttonPressed(buttonId);
 		}
-		
+
 		public ClasspathFixProposal getSelectedClasspathFix() {
 			return fSelectedFix;
 		}
@@ -302,8 +302,8 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 		public void doubleClick(DoubleClickEvent event) {
 			okPressed();
-			
+
 		}
 	}
-	
+
 }

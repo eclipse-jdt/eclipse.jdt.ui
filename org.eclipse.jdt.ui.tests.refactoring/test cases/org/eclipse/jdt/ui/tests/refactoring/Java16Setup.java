@@ -12,12 +12,12 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class Java16Setup extends RefactoringTestSetup {
 

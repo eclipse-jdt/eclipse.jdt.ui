@@ -12,7 +12,7 @@
  *******************************************************************************/
 
 /**
- * 
+ *
  */
 package org.eclipse.jdt.internal.junit.runner.junit3;
 
@@ -28,12 +28,12 @@ class JUnit3Identifier implements ITestIdentifier {
 	public String getName() {
 		return ref.getName();
 	}
-	
+
 	public boolean equals(Object obj) {
 		JUnit3Identifier id = (JUnit3Identifier) obj;
 		return ref.equals(id.ref);
 	}
-	
+
 	public int hashCode() {
 		return ref.hashCode();
 	}

@@ -38,7 +38,7 @@ public class JUnit3TestLoader implements ITestLoader {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.junit.runner.TestLoader#loadSuites(java.lang.String[],
 	 *      java.lang.String, java.lang.String[],
 	 *      org.eclipse.jdt.internal.junit.runner.RunFailureListener,
@@ -128,7 +128,7 @@ public class JUnit3TestLoader implements ITestLoader {
 	 * test returned from setUpTest will be called. The purpose of this
 	 * mechanism is to enable tests which requires a set-up to be run
 	 * individually.
-	 * 
+	 *
 	 * @param reloadedTestClass test class
 	 * @param reloadedTest test instance
 	 * @return the reloaded test, or the test wrapped with setUpTest(..) if available

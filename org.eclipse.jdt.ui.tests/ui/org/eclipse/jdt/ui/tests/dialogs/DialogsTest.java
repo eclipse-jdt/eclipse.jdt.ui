@@ -14,6 +14,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.util.DialogCheck;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
@@ -30,11 +33,8 @@ import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.util.DialogCheck;
-
 public class DialogsTest extends TestCase {
-	
+
 	private static final String PROJECT_NAME = "DummyProject";
 
 	public static Test suite() {
@@ -59,15 +59,15 @@ public class DialogsTest extends TestCase {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
 		JavaProjectHelper.addRTJar(jproject);
-		
-		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()), 
+
+		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()),
 			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
-	
-		dialog.setTitle("Open Type"); 
-		dialog.setMessage("&Choose a type (? = any character, * = any string):"); 
+
+		dialog.setTitle("Open Type");
+		dialog.setMessage("&Choose a type (? = any character, * = any string):");
 
 		DialogCheck.assertDialog(dialog);
-		
+
 		JavaProjectHelper.delete(jproject);
 	}
 	*/
@@ -79,8 +79,8 @@ public class DialogsTest extends TestCase {
 		}
 		return res;
 	}
-	
-	
+
+
 	public void testMultiElementSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
@@ -90,25 +90,25 @@ public class DialogsTest extends TestCase {
 
 		ArrayList list= new ArrayList(200);
 
-		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { jproject });		
+		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { jproject });
 		AllTypesCache.getTypes(searchScope, IJavaSearchConstants.TYPE, null, list);
-		
+
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle("Title"); //$NON-NLS-1$
 		dialog.setMessage("Description:"); //$NON-NLS-1$
-	
+
 		assertTrue(list.size() > 15);
 		TypeInfo[][] refs= new TypeInfo[][] { getRefs(list, 0, 3), getRefs(list, 4, 6), getRefs(list, 10, 5) };
 		dialog.setElements(refs);
 		dialog.setInitialSelections(new Object[refs.length]);
-		
+
 		DialogCheck.assertDialog(dialog);
-		
-		JavaProjectHelper.delete(jproject);		
-	
+
+		JavaProjectHelper.delete(jproject);
+
 	}
 	*/
-	
+
 	public void testElementTreeSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
@@ -119,21 +119,21 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.addSourceContainer(jproject2, "src2");
 
 		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
-		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
+		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setComparator(new JavaElementComparator());
-		dialog.setTitle("Title"); 
-		dialog.setMessage("Message"); 
-		
+		dialog.setTitle("Title");
+		dialog.setMessage("Message");
+
 		dialog.setInput(jproject.getJavaModel());
 		dialog.setInitialSelection(initSelection);
-		
+
 		DialogCheck.assertDialog(dialog);
-		
-		JavaProjectHelper.delete(jproject);	
+
+		JavaProjectHelper.delete(jproject);
 		JavaProjectHelper.delete(jproject2);
 	}
-	
+
 	public void testElementListSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		IPackageFragmentRoot root=  JavaProjectHelper.addRTJar(jproject);
@@ -142,24 +142,24 @@ public class DialogsTest extends TestCase {
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
-		dialog.setTitle("Title"); 
-		dialog.setMessage("Message"); 
-		dialog.setEmptyListMessage("empty list"); 		
+		dialog.setTitle("Title");
+		dialog.setMessage("Message");
+		dialog.setEmptyListMessage("empty list");
 		dialog.setElements(elements);
-		
+
 		DialogCheck.assertDialog(dialog);
-		
-		JavaProjectHelper.delete(jproject);	
+
+		JavaProjectHelper.delete(jproject);
 	}
-	
+
 
 	private static class TestLabelProvider extends LabelProvider {
 		public Image getImage(Object element) {
 			return null;
 		}
-		
+
 		public String getText(Object element) {
-			Integer i= (Integer) element;			
+			Integer i= (Integer) element;
 			return "e-" + i.toString();
 		}
 	}
@@ -171,19 +171,19 @@ public class DialogsTest extends TestCase {
 			new Integer(2),
 			new Integer(7),
 			new Integer(12),
-			new Integer(42)			
+			new Integer(42)
 		};
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TestLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle("Title"); 
-		dialog.setMessage("Message"); 
-		dialog.setEmptyListMessage("empty messgae"); 		
+		dialog.setTitle("Title");
+		dialog.setMessage("Message");
+		dialog.setEmptyListMessage("empty messgae");
 		dialog.setElements(elements);
 		dialog.setInitialSelections(new Object[] {new Integer(7)});
-		
+
 		DialogCheck.assertDialog(dialog);
-		
+
 		Object[] results= dialog.getResult();
 		assertTrue(results.length == 1);
 		assertEquals(new Integer(7), results[0]);

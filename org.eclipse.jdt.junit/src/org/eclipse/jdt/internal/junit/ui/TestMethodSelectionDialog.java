@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
- 
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -44,11 +44,11 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 /**
  * A dialog to select a test method.
@@ -59,13 +59,13 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 
 	public static class TestReferenceCollector extends SearchRequestor {
 		Set fResult= new HashSet(200);
-		
+
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			IJavaElement enclosingElement= (IJavaElement) match.getElement();
 			if (enclosingElement.getElementName().startsWith("test")) //$NON-NLS-1$
 				fResult.add(enclosingElement);
 		}
-	
+
 		public Object[] getResult() {
 			return fResult.toArray();
 		}
@@ -75,7 +75,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED));
 		fElement= element;
 	}
-	
+
 	/*
 	 * @see Windows#configureShell
 	 */
@@ -90,28 +90,28 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	public int open() {
 		Object[] elements;
 		IType testType= findTestType();
-		
-		if (testType == null) 
+
+		if (testType == null)
 			return CANCEL;
-		
+
 		try {
 			elements= searchTestMethods(fElement, testType);
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_error_title, e.getTargetException().getMessage()); 
+			MessageDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_error_title, e.getTargetException().getMessage());
 			return CANCEL;
 		}
-		
+
 		if (elements.length == 0) {
-			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_notfound_message, JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_DEFAULT)); 
-			MessageDialog.openInformation(getParentShell(), JUnitMessages.TestMethodSelectionDialog_no_tests_title, msg); 
+			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_notfound_message, JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_DEFAULT));
+			MessageDialog.openInformation(getParentShell(), JUnitMessages.TestMethodSelectionDialog_no_tests_title, msg);
 			return CANCEL;
 		}
 		setElements(elements);
 		return super.open();
 	}
-	
+
 	private IType findTestType() {
 		String qualifiedName= JUnitPlugin.TEST_INTERFACE_NAME;
 		IJavaProject[] projects;
@@ -121,48 +121,48 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 			for (int i= 0; i < projects.length; i++) {
 				IJavaProject project= projects[i];
 				IType type= project.findType(qualifiedName);
-				if (type != null) 
+				if (type != null)
 					result.add(type);
 			}
 		} catch (JavaModelException e) {
-			ErrorDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_error_notfound_title, JUnitMessages.TestMethodSelectionDialog_error_notfound_message, e.getStatus()); 
+			ErrorDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_error_notfound_title, JUnitMessages.TestMethodSelectionDialog_error_notfound_message, e.getStatus());
 			return null;
 		}
 		if (result.size() == 0) {
-			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_test_not_found, BasicElementLabels.getJavaElementName(JUnitPlugin.TEST_INTERFACE_NAME)); 
-			MessageDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_select_dialog_title, msg); 
+			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_test_not_found, BasicElementLabels.getJavaElementName(JUnitPlugin.TEST_INTERFACE_NAME));
+			MessageDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_select_dialog_title, msg);
 			return null;
 		}
 		if (result.size() == 1)
 			return (IType)result.toArray()[0];
-		
+
 		return selectTestType(result);
 	}
-	
+
 	private IType selectTestType(Set result) {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getParentShell(), labelProvider);
-		dialog.setTitle(JUnitMessages.TestMethodSelectionDialog_dialog_title);  
+		dialog.setTitle(JUnitMessages.TestMethodSelectionDialog_dialog_title);
 		String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_testproject, BasicElementLabels.getJavaElementName("junit.framework.Test")); //$NON-NLS-1$
 		dialog.setMessage(msg);
 		IJavaProject[] projects= new IJavaProject[result.size()];
 		IType[] testTypes= (IType[]) result.toArray(new IType[result.size()]);
-		for (int i= 0; i < projects.length; i++) 
+		for (int i= 0; i < projects.length; i++)
 			projects[i]= testTypes[i].getJavaProject();
 		dialog.setElements(projects);
-		if (dialog.open() == Window.CANCEL)	
+		if (dialog.open() == Window.CANCEL)
 			return null;
 		IJavaProject project= (IJavaProject) dialog.getFirstResult();
 		for (int i= 0; i < testTypes.length; i++) {
 			if (testTypes[i].getJavaProject().equals(project))
 				return testTypes[i];
 		}
-		return null;	
+		return null;
 	}
-	
+
 	public Object[] searchTestMethods(final IJavaElement element, final IType testType) throws InvocationTargetException, InterruptedException  {
 		final TestReferenceCollector[] col= new TestReferenceCollector[1];
-		
+
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {

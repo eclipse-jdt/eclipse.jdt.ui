@@ -20,7 +20,6 @@ import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
-
 import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 
 
@@ -45,7 +44,7 @@ public class TestRunListeners {
 			fLog.add("testCaseFinished-" + asString(testCaseElement, 0));
 		}
 	}
-	
+
 	public static class TreeTest extends TestRunListener {
 		private TestRunLog fLog;
 		private int fStep;
@@ -58,7 +57,7 @@ public class TestRunListeners {
 				logElement(elem.getTestRunSession(), 0);
 			}
 		}
-		
+
 		private void logElement(ITestElement elem, int indent) {
 			fLog.add(asString(elem, indent));
 			if (elem instanceof ITestElementContainer) {
@@ -68,8 +67,8 @@ public class TestRunListeners {
 				}
 			}
 		}
-		
-		
+
+
 		public void sessionStarted(ITestRunSession session) {
 			process(session);
 		}
@@ -84,7 +83,7 @@ public class TestRunListeners {
 			process(testCaseElement);
 		}
 	}
-	
+
 	public static String sessionAsString(String sessionName, ProgressState state, Result result, int indent) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(startIndent(indent));
@@ -102,7 +101,7 @@ public class TestRunListeners {
 		}
 		return buf;
 	}
-	
+
 	private static StringBuffer startIndent(int indent) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < indent; i++) {
@@ -110,7 +109,7 @@ public class TestRunListeners {
 		}
 		return buf;
 	}
-	
+
 	public static String testCaseAsString(String methodName, String className, ProgressState state, Result result, FailureTrace trace, int indent) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(startIndent(indent));
@@ -125,7 +124,7 @@ public class TestRunListeners {
 		}
 		return buf.toString();
 	}
-	
+
 	public static String suiteAsString(String suiteName, ProgressState state, Result result, FailureTrace trace, int indent) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(startIndent(indent));
@@ -139,7 +138,7 @@ public class TestRunListeners {
 		}
 		return buf.toString();
 	}
-	
+
 	private static String getExpection(String trace) {
 		if (trace == null) {
 			return "null";
@@ -152,7 +151,7 @@ public class TestRunListeners {
 		}
 		return trace;
 	}
-	
+
 	public static String asString(ITestElement elem, int indent) {
 		if (elem instanceof ITestRunSession) {
 			ITestRunSession session= (ITestRunSession) elem;

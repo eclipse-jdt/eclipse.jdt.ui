@@ -14,17 +14,18 @@ package org.eclipse.jdt.internal.junit4.runner;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunListener;
+
 import org.eclipse.jdt.internal.junit.runner.FailedComparison;
 import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
-import org.junit.runner.Description;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
 
 public class JUnit4TestListener extends RunListener {
-	
+
 	private static class IgnoredTestIdentifier extends JUnit4Identifier {
 		public IgnoredTestIdentifier(Description description) {
 			super(description);
@@ -38,7 +39,7 @@ public class JUnit4TestListener extends RunListener {
 		}
 	}
 
-	
+
 	private final IListensToTestExecutions fNotified;
 
 	public JUnit4TestListener(IListensToTestExecutions notified) {
@@ -75,7 +76,7 @@ public class JUnit4TestListener extends RunListener {
 
 	@Override
 	public void testIgnored(Description plan) throws Exception {
-		// Send message to listeners which would be stale otherwise 
+		// Send message to listeners which would be stale otherwise
 		ITestIdentifier identifier= new IgnoredTestIdentifier(plan);
 		fNotified.notifyTestStarted(identifier);
 		fNotified.notifyTestEnded(identifier);

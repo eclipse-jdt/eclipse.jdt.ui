@@ -28,10 +28,10 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase
 import org.eclipse.jdt.ui.tests.refactoring.infra.SWTProjectTestSetup;
 
 public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerformanceTestCase {
-	
+
 	private IJavaProject fProject;
 	private IntroduceIndirectionRefactoring fRefactoring;
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite("IntroduceIndirectionPerfAcceptanceTests");
 		suite.addTest(new IntroduceIndirectionPerfAcceptanceTests("testIntroduceIndirection"));
@@ -45,12 +45,12 @@ public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerforma
 	public IntroduceIndirectionPerfAcceptanceTests(String test) {
 		super(test);
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= (IJavaProject)JavaCore.create(
 			ResourcesPlugin.getWorkspace().getRoot().findMember(SWTTestProject.PROJECT));
-		
+
 		IType control= fProject.findType("org.eclipse.swt.widgets.Widget");
 		IMethod m= control.getMethod("getDisplay", new String[0]);
 		Assert.assertTrue(m != null && m.exists());

@@ -14,8 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.events.DisposeEvent;
@@ -27,6 +25,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -66,26 +66,26 @@ public class CompareResultDialog extends TrayDialog {
          private CompareResultMergeViewer(Composite parent, int style, CompareConfiguration configuration) {
              super(parent, style, configuration);
          }
-         
+
      	protected void createControls(Composite composite) {
      		super.createControls(composite);
     		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
      	}
-         
+
 //        protected void createToolItems(ToolBarManager tbm) {
 //    		ResourceBundle bundle= CompareUI.getResourceBundle();
 //    		tbm.add(new IgnoreWhiteSpaceAction(bundle, getCompareConfiguration()));
 //    		super.createToolItems(tbm);
 //        }
-        
+
         protected void configureTextViewer(TextViewer textViewer) {
             if (textViewer instanceof SourceViewer) {
                 int[] prefixSuffixOffsets= (int[]) getCompareConfiguration().getProperty(PREFIX_SUFFIX_PROPERTY);
-				((SourceViewer)textViewer).configure(new CompareResultViewerConfiguration(prefixSuffixOffsets));   
+				((SourceViewer)textViewer).configure(new CompareResultViewerConfiguration(prefixSuffixOffsets));
             }
         }
     }
-    
+
     private static class CompareResultViewerConfiguration extends SourceViewerConfiguration {
     	private static class SimpleDamagerRepairer implements IPresentationDamager, IPresentationRepairer {
             private IDocument fDocument;
@@ -111,9 +111,9 @@ public class CompareResultDialog extends TrayDialog {
                 presentation.addStyleRange(new StyleRange(prefix, fDocument.getLength()-suffix-prefix, attr.getForeground(), attr.getBackground(), attr.getStyle()));
             }
         }
-		
+
 		private final int[] fPrefixSuffixOffsets;
-        
+
 		public CompareResultViewerConfiguration(int[] prefixSuffixOffsets) {
 			fPrefixSuffixOffsets= prefixSuffixOffsets;
 		}
@@ -126,10 +126,10 @@ public class CompareResultDialog extends TrayDialog {
             return reconciler;
         }
     }
-        
+
 	private static class CompareElement implements ITypedElement, IEncodedStreamContentAccessor {
 	    private String fContent;
-	    
+
 	    public CompareElement(String content) {
 	        fContent= content;
 	    }
@@ -158,14 +158,14 @@ public class CompareResultDialog extends TrayDialog {
     private String fExpected;
     private String fActual;
     private String fTestName;
-    
+
     /**
      * Lengths of common prefix and suffix.
      * Note: this array is passed to the DamagerRepairer and
      * the lengths are updated on content change.
      */
     private final int[] fPrefixSuffix= new int[2];
-	
+
 	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
 		setShellStyle((getShellStyle() & ~SWT.APPLICATION_MODAL) | SWT.TOOL);
@@ -186,22 +186,22 @@ public class CompareResultDialog extends TrayDialog {
 		fActual= failedTest.getActual();
 		computePrefixSuffix();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
 	 */
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JUnitPlugin.getDefault().getDialogSettingsSection(getClass().getName());
 	}
-		
+
 	private void computePrefixSuffix() {
 		int end= Math.min(fExpected.length(), fActual.length());
 		int i= 0;
-		for(; i < end; i++) 
+		for(; i < end; i++)
 			if (fExpected.charAt(i) != fActual.charAt(i))
 				break;
 		fPrefixSuffix[0]= i;
-		
+
 		int j= fExpected.length()-1;
 		int k= fActual.length()-1;
 		int l= 0;
@@ -220,7 +220,7 @@ public class CompareResultDialog extends TrayDialog {
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, JUnitMessages.CompareResultDialog_labelOK, true); 
+		createButton(parent, IDialogConstants.OK_ID, JUnitMessages.CompareResultDialog_labelOK, true);
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -228,14 +228,14 @@ public class CompareResultDialog extends TrayDialog {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		composite.setLayout(layout);
-		
+
 		CompareViewerPane pane = new CompareViewerPane(composite, SWT.BORDER | SWT.FLAT);
 		pane.setText(fTestName);
 		GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		data.widthHint= convertWidthInCharsToPixels(120);
 		data.heightHint= convertHeightInCharsToPixels(13);
 		pane.setLayoutData(data);
-		
+
 		Control previewer= createPreviewer(pane);
 		pane.setContent(previewer);
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -243,12 +243,12 @@ public class CompareResultDialog extends TrayDialog {
 		applyDialogFont(parent);
 		return composite;
 	}
-	
+
 	private Control createPreviewer(Composite parent) {
 	    final CompareConfiguration compareConfiguration= new CompareConfiguration();
-	    compareConfiguration.setLeftLabel(JUnitMessages.CompareResultDialog_expectedLabel); 
+	    compareConfiguration.setLeftLabel(JUnitMessages.CompareResultDialog_expectedLabel);
 	    compareConfiguration.setLeftEditable(false);
-	    compareConfiguration.setRightLabel(JUnitMessages.CompareResultDialog_actualLabel);	 
+	    compareConfiguration.setRightLabel(JUnitMessages.CompareResultDialog_actualLabel);
 	    compareConfiguration.setRightEditable(false);
 	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
 	    compareConfiguration.setProperty(PREFIX_SUFFIX_PROPERTY, fPrefixSuffix);

@@ -16,11 +16,12 @@ import java.util.HashMap;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -32,41 +33,41 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 /**
  * Helper class for the nls-tests.
- * 
+ *
  * often used functionality is located here to get around extending testcases
  * from testcases (just for code reuse).
  */
 public class NlsRefactoringTestHelper {
 
     NullProgressMonitor fNpm;
-    
+
     private HashMap fWorkSpaceElements = new HashMap();
     private IJavaProject fJavaProject;
-        
+
     public NlsRefactoringTestHelper(IJavaProject javaProject) throws Exception {
         fJavaProject = javaProject;
         fNpm = new NullProgressMonitor();
         fWorkSpaceElements = new HashMap();
         setupTestSpace();
     }
-    
+
     private InputStream getInputStream(String input) {
         return new ByteArrayInputStream(input.getBytes());
     }
-    
+
     private void setupTestSpace() throws Exception {
         fWorkSpaceElements.put(fJavaProject.getPath().toString(), fJavaProject);
 
-        createPackageFragmentRoot(fJavaProject, "src1"); 
-        createPackageFragmentRoot(fJavaProject, "src2"); 
+        createPackageFragmentRoot(fJavaProject, "src1");
+        createPackageFragmentRoot(fJavaProject, "src2");
 
-        createPackageFragment("p", "/TestSetupProject/src1"); 
-        createPackageFragment("p", "/TestSetupProject/src2"); 
+        createPackageFragment("p", "/TestSetupProject/src1");
+        createPackageFragment("p", "/TestSetupProject/src2");
 
-        createFile("/TestSetupProject/src2/p", "test.properties", ""); 
+        createFile("/TestSetupProject/src2/p", "test.properties", "");
         createCu("/TestSetupProject/src1/p", "WithStrings.java", "package p;class WithStrings {String s1=\"test1\";String s2=\"test2\";}");
         createCu("/TestSetupProject/src1/p", "WithoutStrings.java", "package p;class WithoutStrings {}");
-        
+
 		String newFileTemplate= "${package_declaration}\n\n${type_declaration}";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, newFileTemplate, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "", null);

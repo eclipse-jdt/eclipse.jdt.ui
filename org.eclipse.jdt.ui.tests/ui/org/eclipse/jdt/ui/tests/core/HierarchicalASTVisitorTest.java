@@ -49,14 +49,14 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		 * among node classes.  Such changes necessitate, also, changes in the
 		 * HierarchicalASTVisitor itself, whose structure and behaviour this test
 		 * verifies.
-		 * 
+		 *
 		 * The changes that must be made to this file in response to such changes in
 		 * the ASTNode hierarchy are localized here and limited to maintenance of the
 		 * following set of visit(XX node), superVisit(XX node), endVisit(XX node),
 		 * and superEndVisit(XX node) implementations.
 		 * There should be one such quadruple for each non-leaf ASTNode descendant class,
 		 * including ASTNode itself.
-		 * 
+		 *
 		 * *****************************************************************************/
 
 		/* Here, for each non-leaf ASTNode descendant class, the visit(XX) method
@@ -211,7 +211,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		 * Verifies that the visit(XX) method in HierarchicalASTVisitor calls
 		 * visit(YY), where XX is the name of <code>clazz</code> and YY is the
 		 * name of the superclass of clazz.
-		 * 
+		 *
 		 * <code>clazz</code> must be a <b>proper</b> descendant of ASTNode (<code>clazz</code> is not ASTNode).
 		 */
 		private static void checkMethodCallsSuperclassMethod(Class clazz, boolean isLeaf, boolean isEndVisit) {
@@ -245,14 +245,14 @@ public class HierarchicalASTVisitorTest extends TestCase {
 
 		private void _checkMethodCallsSuperclassMethod(Class clazz, boolean isLeaf, boolean isEndVisit) {
 			/* Invoke a method which will result in the execution of
-			 * HierarchicalASTVisitor's implementation of visit(XX), where 
+			 * HierarchicalASTVisitor's implementation of visit(XX), where
 			 * XX is the name of clazz.
-			 * 
+			 *
 			 * If clazz is a leaf, we can invoke visit(XX) directly.
 			 * Otherwise, we must invoke superVisit(XX), (in this class)
 			 * which calls super.visit(XX), since visit(XX) is overridden in
 			 * this class.
-			 * 
+			 *
 			 * The parameter passed to visit(XX) or superVisit(XX)
 			 * is null.  If there ever was any requirement that the
 			 * parameter to visit(XX) methods, be non-null, we would simply have
@@ -340,11 +340,11 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	/**
 	 * For both HierarchicalASTVisitor and a subsequent part of this test to be correct,
 	 * HierarchicalASTVisitor and TestHierarchicalASTVisitor must declare certain methods,
-	 * each one corresponding to a class in the ASTNode hierarchy.  Specifically, 
+	 * each one corresponding to a class in the ASTNode hierarchy.  Specifically,
 	 * HierarchicalASTVisitor must declare a method corresponding to each class in the hierarchy,
 	 * whereas TestHierarchicalASTVisitor must declare a pair of methods for each non-leaf
 	 * class in the ASTNode hierarchy.
-	 * 
+	 *
 	 * This method verifies that these required methods exist, and suggests the updates
 	 * that are needed to properly maintain the set of methods.
 	 */
@@ -389,7 +389,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	private static String getSuperVisitName(boolean isEndVisit) {
 		return isEndVisit ? "superEndVisit" : "superVisit";
 	}
-	
+
 	private static String getSimpleName(Class clazz) {
 		String qualified= clazz.getName();
 		return qualified.substring(qualified.lastIndexOf('.') + 1);
@@ -435,7 +435,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	 * ASTNode . Since every non-leaf ASTNode descendant (incl. ASTNode)
 	 * is abstract, the set of leaf ASTNode descendants is the set of concrete
 	 * ASTNode descendants.
-	 * 
+	 *
 	 * If ASTVisitor is maintained, this set will be the set of classes for which
 	 * ASTVisitor has visit(..) methods.  We use this property to compute the set,
 	 * which means that we are as up-to-date as ASTVisitor (to be more

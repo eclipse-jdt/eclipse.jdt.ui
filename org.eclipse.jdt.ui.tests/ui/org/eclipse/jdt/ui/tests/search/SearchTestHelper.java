@@ -31,7 +31,7 @@ public class SearchTestHelper {
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		return result.getMatchCount();
 	}
-	
+
 	static int countMethodRefs(String methodName, String[] parameterTypes) throws JavaModelException {
 		JavaSearchQuery query= runMethodRefQuery(methodName, parameterTypes);
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
@@ -46,7 +46,7 @@ public class SearchTestHelper {
 		return query;
 	}
 
-	
+
 	static JavaSearchQuery runTypeRefQuery(String typeName) throws JavaModelException {
 		IType type= getType(typeName);
 		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(type, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));

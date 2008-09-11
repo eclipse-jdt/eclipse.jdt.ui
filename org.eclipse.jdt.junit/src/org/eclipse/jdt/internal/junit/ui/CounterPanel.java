@@ -32,10 +32,10 @@ public class CounterPanel extends Composite {
 	protected Text fNumberOfRuns;
 	protected int fTotal;
 	protected int fIgnoredCount;
-	
+
 	private final Image fErrorIcon= JUnitPlugin.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= JUnitPlugin.createImage("ovr16/failed_ovr.gif"); //$NON-NLS-1$
-			
+
 	public CounterPanel(Composite parent) {
 		super(parent, SWT.WRAP);
 		GridLayout gridLayout= new GridLayout();
@@ -43,7 +43,7 @@ public class CounterPanel extends Composite {
 		gridLayout.makeColumnsEqualWidth= false;
 		gridLayout.marginWidth= 0;
 		setLayout(gridLayout);
-		
+
 		fNumberOfRuns= createLabel(JUnitMessages.CounterPanel_label_runs, null, " 0/0  "); //$NON-NLS-1$
 		fNumberOfErrors= createLabel(JUnitMessages.CounterPanel_label_errors, fErrorIcon, " 0 "); //$NON-NLS-1$
 		fNumberOfFailures= createLabel(JUnitMessages.CounterPanel_label_failures, fFailureIcon, " 0 "); //$NON-NLS-1$
@@ -54,7 +54,7 @@ public class CounterPanel extends Composite {
 			}
 		});
 	}
- 
+
 	private void disposeIcons() {
 		fErrorIcon.dispose();
 		fFailureIcon.dispose();
@@ -67,15 +67,15 @@ public class CounterPanel extends Composite {
 			label.setImage(image);
 		}
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
-		
+
 		label= new Label(this, SWT.NONE);
 		label.setText(name);
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
 		//label.setFont(JFaceResources.getBannerFont());
-		
+
 		Text value= new Text(this, SWT.READ_ONLY);
 		value.setText(init);
-		// bug: 39661 Junit test counters do not repaint correctly [JUnit] 
+		// bug: 39661 Junit test counters do not repaint correctly [JUnit]
 		value.setBackground(getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		value.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING));
 		return value;
@@ -87,15 +87,15 @@ public class CounterPanel extends Composite {
 		setRunValue(0, 0);
 		fTotal= 0;
 	}
-	
+
 	public void setTotal(int value) {
 		fTotal= value;
 	}
-	
+
 	public int getTotal(){
 		return fTotal;
 	}
-	
+
 	public void setRunValue(int value, int ignoredCount) {
 		String runString;
 		if (ignoredCount == 0)
@@ -112,12 +112,12 @@ public class CounterPanel extends Composite {
 		}
 		fIgnoredCount= ignoredCount;
 	}
-	
+
 	public void setErrorValue(int value) {
 		fNumberOfErrors.setText(Integer.toString(value));
 		redraw();
 	}
-	
+
 	public void setFailureValue(int value) {
 		fNumberOfFailures.setText(Integer.toString(value));
 		redraw();

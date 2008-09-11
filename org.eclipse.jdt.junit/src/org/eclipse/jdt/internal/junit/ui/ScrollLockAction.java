@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.junit.ui;
 
 
 import org.eclipse.jface.action.Action;
+
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -22,9 +23,9 @@ public class ScrollLockAction extends Action {
 	private TestRunnerViewPart fRunnerViewPart;
 
 	public ScrollLockAction(TestRunnerViewPart viewer) {
-		super(JUnitMessages.ScrollLockAction_action_label); 
+		super(JUnitMessages.ScrollLockAction_action_label);
 		fRunnerViewPart= viewer;
-		setToolTipText(JUnitMessages.ScrollLockAction_action_tooltip); 
+		setToolTipText(JUnitMessages.ScrollLockAction_action_tooltip);
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/lock.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$

@@ -13,10 +13,6 @@ package org.eclipse.jdt.testplugin.util;
 
 import java.util.Iterator;
 
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,6 +28,10 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+
 
 /*
  * This dialog is intended to verify a dialogs in a testing
@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class VerifyDialog extends TitleAreaDialog {
 	private int SIZING_WIDTH = 400;
-	
+
 	private static int      TEST_TYPE;
 	public static final int TEST_SIZING = 0;
 	public static final int TEST_FOCUS  = 1;
@@ -50,12 +50,12 @@ public class VerifyDialog extends TitleAreaDialog {
 
 	private Dialog _testDialog; //the dialog to test
 	private Point  _testDialogSize;
-	
+
 	private Label  _queryLabel;
 	private Button _yesButton;
 	private Button _checkList[];
 	private String _failureText;
-	
+
 	/*
 	 * Create an instance of the verification dialog.
 	 */
@@ -69,7 +69,7 @@ public class VerifyDialog extends TitleAreaDialog {
 		_dialogTests[1] = new FocusTestPass();
 		_dialogTests[2] = new AccessibilityTestPass();
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on Window.
 	 */
@@ -125,7 +125,7 @@ public class VerifyDialog extends TitleAreaDialog {
 
 		_queryLabel = new Label(composite, SWT.NONE);
 		_queryLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		initializeTest();
 		return composite;
 	}
@@ -138,7 +138,7 @@ public class VerifyDialog extends TitleAreaDialog {
 		group.setLayout( new GridLayout() );
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		group.setLayoutData(data);
-		
+
 		for (int i = 0; i < _dialogTests.length; i++) {
 			Button radio = new Button(group, SWT.RADIO);
 			radio.setText( _dialogTests[i].label() );
@@ -164,7 +164,7 @@ public class VerifyDialog extends TitleAreaDialog {
 		group.setLayout( new GridLayout() );
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		group.setLayoutData(data);
-		
+
 		int checkListSize = 0;
 		for (int i = 0; i < _dialogTests.length; i++) {
 			int size = _dialogTests[i].checkListTexts().size();
@@ -184,7 +184,7 @@ public class VerifyDialog extends TitleAreaDialog {
 			data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			data.grabExcessHorizontalSpace = true;
 			_checkList[i].setLayoutData(data);
-		}		
+		}
 	}
 	/*
 	 * Disables the yes button if any of the items in the checklist
@@ -195,7 +195,7 @@ public class VerifyDialog extends TitleAreaDialog {
 		for (int i = 0; i < _checkList.length; i++) {
 			if ( !_checkList[i].getSelection() ) {
 				enable = false;
-			}			
+			}
 		}
 		_yesButton.setEnabled(enable);
 	}
@@ -227,7 +227,7 @@ public class VerifyDialog extends TitleAreaDialog {
 	 * Can't open the verification dialog without a specified
 	 * test dialog, this simply returns a failure and prevents
 	 * opening.  Should use open(Dialog) instead.
-	 * 
+	 *
 	 */
 	public int open() {
 		_failureText = "Testing dialog is required, use VerifyDialog::open(Dialog)";
@@ -248,7 +248,7 @@ public class VerifyDialog extends TitleAreaDialog {
 		}
 		_testDialogSize = _testDialog.getShell().getSize();
 		openNewTestDialog();
-		
+
 		return super.open();
 	}
 	/*
@@ -262,11 +262,11 @@ public class VerifyDialog extends TitleAreaDialog {
 		_testDialog.getShell().setLocation(getShell().getSize().x + 1, 0);
 		_testDialog.getShell().setSize(_testDialogSize);
 		_testDialog.getShell().addShellListener(new ShellAdapter() {
-			public void shellClosed(ShellEvent e) {				
+			public void shellClosed(ShellEvent e) {
 				e.doit = false;
 			}
-		
-		});		
+
+		});
 		_testDialog.open();
 	}
 	/*
@@ -282,7 +282,7 @@ public class VerifyDialog extends TitleAreaDialog {
 		     append(" failed on the ").
 		     append(SWT.getPlatform()).
 		     append(" platform:\n");
-		
+
 		String failureMessages[] = test.failureTexts();
 		for (int i = 0; i < test.checkListTexts().size(); i++) {
 			if ( !_checkList[i].getSelection() ) {

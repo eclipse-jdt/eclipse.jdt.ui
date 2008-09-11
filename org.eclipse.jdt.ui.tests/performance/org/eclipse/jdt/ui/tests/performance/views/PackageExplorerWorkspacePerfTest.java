@@ -22,7 +22,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class PackageExplorerWorkspacePerfTest extends JdtPerformanceTestCase {
@@ -61,11 +60,11 @@ public class PackageExplorerWorkspacePerfTest extends JdtPerformanceTestCase {
 	public static Test setUpTest(Test someTest) {
 		return new MyTestSetup(someTest);
 	}
-	
+
 	public PackageExplorerWorkspacePerfTest(String name) {
 		super(name);
 	}
-	
+
 	public void testOpen() throws Exception {
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();

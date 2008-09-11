@@ -16,8 +16,8 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
@@ -29,29 +29,29 @@ public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 	public GoToNextPreviousMemberActionTests(String name){
 		super(name);
 	}
-	
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-	
+
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
-	
+
 	private String getSimpleTestFileName(){
 		return "A_" + getName() + ".java";
 	}
-	
+
 	private String getTestFileName(){
 		return TEST_PATH_PREFIX + getRefactoringPath() + getSimpleTestFileName();
 	}
-	
+
 	//------------
 	protected ICompilationUnit createCUfromTestFile() throws Exception {
 		return createCU(getPackageP(), getSimpleTestFileName(), getFileContents(getTestFileName()));
 	}
-	
-	private void helper(int startLine, int startColumn, int endLine, int endColumn, 
+
+	private void helper(int startLine, int startColumn, int endLine, int endColumn,
 											int expectedStartLine, int expectedStartColumn, boolean isSelectNext) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile();
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
@@ -59,14 +59,14 @@ public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 		ISourceRange expectedNewRange= TextRangeUtil.getSelection(cu, expectedStartLine, expectedStartColumn, expectedStartLine, expectedStartColumn);
 		assertEquals("incorrect selection offset", expectedNewRange.getOffset(), actualNewRange.getOffset());
 		assertEquals("incorrect selection length", expectedNewRange.getLength(), actualNewRange.getLength());
-	}	
+	}
 
 	private void helperNext(int startLine, int startColumn, int expectedStartLine, int expectedStartColumn) throws Exception{
-		helper(startLine, startColumn, startLine, startColumn, expectedStartLine, expectedStartColumn, true);										
+		helper(startLine, startColumn, startLine, startColumn, expectedStartLine, expectedStartColumn, true);
 	}
 
 	private void helperPrevious(int startLine, int startColumn, int expectedStartLine, int expectedStartColumn) throws Exception{
-		helper(startLine, startColumn, startLine, startColumn, expectedStartLine, expectedStartColumn, false);			
+		helper(startLine, startColumn, startLine, startColumn, expectedStartLine, expectedStartColumn, false);
 	}
 
 	//----

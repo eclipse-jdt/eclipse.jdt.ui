@@ -24,7 +24,7 @@ public class TestRoot extends TestSuiteElement {
 	public TestRoot getRoot() {
 		return this;
 	}
-	
+
 	public ITestRunSession getTestRunSession() {
 		return fSession;
 	}

@@ -15,6 +15,10 @@ import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.StringAsserts;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,10 +34,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.StringAsserts;
-import org.eclipse.jdt.testplugin.TestOptions;
 
 public class SourceTestCase extends TestCase {
 
@@ -72,19 +72,19 @@ public class SourceTestCase extends TestCase {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.SETTERCOMMENT_ID, setterComment, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.GETTERSTUB_ID, getterBody, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.SETTERSTUB_ID, setterBody, null);
-		
-		
+
+
 		String methodComment= "/**\r\n" + " * ${tags}\r\n" + " */";
 		String methodBody= "// ${todo} Auto-generated method stub\r\n" + "${body_statement}";
 
 		String constructorComment= "/**\r\n" + " * ${tags}\r\n" + " */";
 		String constructorBody= "${body_statement}\r\n" + "// ${todo} Auto-generated constructor stub";
-		
+
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, methodComment, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, methodBody, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, constructorComment, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, constructorBody, null);
-		
+
 		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(null);
 		fSettings.createComments= true;
 	}

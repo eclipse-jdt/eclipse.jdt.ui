@@ -57,7 +57,7 @@ public class ZipTools {
 					String packageName = getPackageName(fileName);
 					String sourceFileName= getSourceFileName(fileName);
 					zipCus.add(packageName + "/" + sourceFileName);
-	
+
 					ByteArrayOutputStream bout = new ByteArrayOutputStream();
 					byte data[] = new byte[10000];
 					int count = -1;
@@ -65,17 +65,17 @@ public class ZipTools {
 						bout.write(data, 0, count);
 					}
 			        String zipContents= bout.toString(zipFileEncoding);
-					
+
 					IPackageFragment pack= src.getPackageFragment(packageName);
 					ICompilationUnit cu= pack.getCompilationUnit(sourceFileName);
 					String cuContents= cu.getSource();
-					
+
 					RefactoringTest.assertEqualLines(packageName + "/" + sourceFileName, zipContents, cuContents);
 				} else {
 					//TODO: compare binary files
 				}
 			}
-			
+
 			IJavaElement[] packageFragments= src.getChildren();
 			for (int i= 0; i < packageFragments.length; i++) {
 				IPackageFragment packageFragment= (IPackageFragment) packageFragments[i];
@@ -87,7 +87,7 @@ public class ZipTools {
 				}
 			}
 			Assert.assertEquals(zipCus.toString(), 0, zipCus.size());
-			
+
 		} finally {
 			zipInputStream.close();
 		}

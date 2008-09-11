@@ -21,20 +21,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.CreateParticipant;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 public class TestCreateParticipantSingle extends CreateParticipant {
-	
+
 	private static List fgInstances= new ArrayList();
-	
+
 	private Object fElement;
 	private String fHandle;
-	
+
 	public boolean initialize(Object element) {
 		fgInstances.add(this);
 		fElement= element;
@@ -46,11 +46,11 @@ public class TestCreateParticipantSingle extends CreateParticipant {
 		}
 		return true;
 	}
-	
+
 	public String getName() {
 		return getClass().getName();
 	}
-	
+
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
@@ -58,18 +58,18 @@ public class TestCreateParticipantSingle extends CreateParticipant {
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}
-	
+
 	public static void testNumberOfInstances(int instances) {
 		Assert.assertEquals(instances, fgInstances.size());
 	}
-	
+
 	public static void testElements(Class[] classes) {
 		testNumberOfInstances(classes.length);
 		for (int i= 0; i < classes.length; i++) {
 			Assert.assertTrue(classes[i].isInstance(getInstance(i).fElement));
 		}
 	}
-	
+
 	public static void testElements(String[] handles) {
 		testNumberOfInstances(handles.length);
 		List l1= new ArrayList(Arrays.asList(handles));
@@ -77,11 +77,11 @@ public class TestCreateParticipantSingle extends CreateParticipant {
 			Assert.assertTrue(l1.contains(getInstance(i).fHandle));
 		}
 	}
-	
+
 	public static void reset() {
 		fgInstances= new ArrayList();
 	}
-	
+
 	private static TestCreateParticipantSingle getInstance(int i) {
 		return ((TestCreateParticipantSingle)fgInstances.get(i));
 	}

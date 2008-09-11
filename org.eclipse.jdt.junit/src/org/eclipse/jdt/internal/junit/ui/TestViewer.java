@@ -56,15 +56,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
-
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRoot;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
+
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 
 
 public class TestViewer {
@@ -182,7 +182,7 @@ public class TestViewer {
 		TestOpenListener testOpenListener= new TestOpenListener();
 		fTreeViewer.getTree().addSelectionListener(testOpenListener);
 		fTableViewer.getTable().addSelectionListener(testOpenListener);
-		
+
 		fTestRunnerPart.getSite().setSelectionProvider(fSelectionProvider);
 
 		fViewerbook.showPage(fTreeViewer.getTree());

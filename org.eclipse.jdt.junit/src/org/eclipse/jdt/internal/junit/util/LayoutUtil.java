@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.util;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -19,13 +17,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public class LayoutUtil {
-	
+
 	/*
 	 * Sets the span of a control. Assumes that MGridData is used.
 	 */
@@ -38,14 +38,14 @@ public class LayoutUtil {
 			gd.horizontalSpan= span;
 			control.setLayoutData(gd);
 		}
-	}	
+	}
 
 	/*
 	 * Creates a spacer control with the given span.
 	 * The composite is assumed to have <code>MGridLayout</code> as
 	 * layout.
 	 * @param parent The parent composite
-	 */			
+	 */
 	public static Control createEmptySpace(Composite parent, int span) {
 		Label label= new Label(parent, SWT.LEFT);
 		GridData gd= new GridData();
@@ -58,7 +58,7 @@ public class LayoutUtil {
 		label.setLayoutData(gd);
 		return label;
 	}
-	
+
 
 	/**
 	 * Returns a width hint for a button control.
@@ -76,16 +76,16 @@ public class LayoutUtil {
 	 * Sets width and height hint for the button control.
 	 * <b>Note:</b> This is a NOP if the button's layout data is not
 	 * an instance of <code>GridData</code>.
-	 * 
+	 *
 	 * @param button	the button for which to set the dimension hint
-	 */		
+	 */
 	public static void setButtonDimensionHint(Button button) {
 		Assert.isNotNull(button);
 		Object gd= button.getLayoutData();
 		if (gd instanceof GridData) {
-			((GridData)gd).widthHint= getButtonWidthHint(button);	
-			((GridData)gd).horizontalAlignment = GridData.FILL;	 
+			((GridData)gd).widthHint= getButtonWidthHint(button);
+			((GridData)gd).horizontalAlignment = GridData.FILL;
 		}
 	}
-	
+
 }

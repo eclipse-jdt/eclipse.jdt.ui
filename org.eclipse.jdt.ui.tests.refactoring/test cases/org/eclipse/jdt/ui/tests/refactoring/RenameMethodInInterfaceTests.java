@@ -30,15 +30,15 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 public class RenameMethodInInterfaceTests extends RefactoringTest {
-	
+
 	private static final Class clazz= RenameMethodInInterfaceTests.class;
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
 	private static final String[] NO_ARGUMENTS= new String[0];
-	
+
 	public RenameMethodInInterfaceTests(String name) {
 		super(name);
 	}
-	
+
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
@@ -46,7 +46,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test);
 	}
-	
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -54,7 +54,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper1_not_available(String methodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		
+
 		RenameProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
 		assertTrue(! ref.isApplicable());
@@ -63,7 +63,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
 		IMethod method= interfaceI.getMethod(methodName, signatures);
-		
+
 		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
 		descriptor.setUpdateReferences(true);
@@ -72,16 +72,16 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		RefactoringStatus result= performRefactoring(descriptor);
 		assertNotNull("precondition was supposed to fail", result);
 	}
-	
+
 	private void helper1() throws Exception{
 		helper1_0("m", "k", NO_ARGUMENTS);
 	}
-	
+
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
 		IMethod method= interfaceI.getMethod(methodName, signatures);
-		
+
 		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
 		descriptor.setUpdateReferences(updateReferences);
@@ -95,61 +95,61 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 			return;
 		}
 		assertEqualLines("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
-		
+
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
-		
+
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
 		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
-		
+
 		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
 		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
-	
+
 	private void helper2(boolean updateReferences) throws Exception{
 		helper2_0("m", "k", NO_ARGUMENTS, true, updateReferences, false);
 	}
-	
+
 	private void helper2() throws Exception{
 		helper2(true);
 	}
-	
+
 	private void helperDelegate() throws Exception{
 		helper2_0("m", "k", NO_ARGUMENTS, true, true, true);
 	}
-	
+
 // --------------------------------------------------------------------------
-	
+
 	public void testAnnotation0() throws Exception{
 		helper2_0("name", "ident", NO_ARGUMENTS, true, true, false);
 	}
-	
+
 	public void testAnnotation1() throws Exception{
 		helper2_0("value", "number", NO_ARGUMENTS, true, true, false);
 	}
-	
+
 	public void testAnnotation2() throws Exception{
 		helper2_0("thing", "value", NO_ARGUMENTS, true, true, false);
 	}
-	
+
 	public void testAnnotation3() throws Exception{
 		helper2_0("value", "num", NO_ARGUMENTS, true, true, false);
 	}
-	
+
 	public void testAnnotation4() throws Exception{
 		// see also bug 83064
 		helper2_0("value", "num", NO_ARGUMENTS, true, true, false);
 	}
-	
+
 	public void testGenerics01() throws Exception {
 		helper2_0("getXYZ", "zYXteg", new String[] {"QList<QSet<QRunnable;>;>;"}, true, true, false);
 	}
-	
+
 	public void testFail0() throws Exception{
 		helper1();
 	}
@@ -237,64 +237,64 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public void testFail29() throws Exception{
 		helper1();
 	}
-	
+
 	public void testFail30() throws Exception{
 		helper1_not_available("toString", NO_ARGUMENTS);
 	}
-	
+
 	public void testFail31() throws Exception{
 		helper1_not_available("toString", NO_ARGUMENTS);
 	}
-	
+
 	public void testFail32() throws Exception{
 		helper1_0("m", "toString", NO_ARGUMENTS);
 	}
-	
+
 	public void testFail33() throws Exception{
 		helper1_0("m", "toString", NO_ARGUMENTS);
 	}
-	
+
 	public void testFail34() throws Exception{
 		helper1_0("m", "equals", new String[]{"QObject;"});
 	}
-	
+
 	public void testFail35() throws Exception{
 		helper1_0("m", "equals", new String[]{"Qjava.lang.Object;"});
 	}
-	
+
 	public void testFail36() throws Exception{
 		helper1_0("m", "getClass", NO_ARGUMENTS);
 	}
-	
+
 	public void testFail37() throws Exception{
 		helper1_0("m", "hashCode", NO_ARGUMENTS);
 	}
 
 	public void testFail38() throws Exception{
 		helper1_0("m", "notify", NO_ARGUMENTS);
-	}	
+	}
 
 	public void testFail39() throws Exception{
 		helper1_0("m", "notifyAll", NO_ARGUMENTS);
-	}	
-	
+	}
+
 	public void testFail40() throws Exception{
 		helper1_0("m", "wait", new String[]{Signature.SIG_LONG, Signature.SIG_INT});
-	}	
+	}
 
 	public void testFail41() throws Exception{
 		helper1_0("m", "wait", new String[]{Signature.SIG_LONG});
-	}	
-	
+	}
+
 	public void testFail42() throws Exception{
 		helper1_0("m", "wait", NO_ARGUMENTS);
-	}	
-	
+	}
+
 	public void testFail43() throws Exception{
 		helper1_0("m", "wait", NO_ARGUMENTS);
-	}	
-	
-	
+	}
+
+
 	public void test0() throws Exception{
 		helper2();
 	}
@@ -324,11 +324,11 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	public void test11() throws Exception{
 		helper2();
-	}	
+	}
 	public void test12() throws Exception{
 		helper2();
 	}
-	
+
 	//test13 became testFail45
 	//public void test13() throws Exception{
 	//	helper2();
@@ -362,12 +362,12 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public void test22() throws Exception{
 		helper2();
 	}
-	
+
 	//test23 became testFail45
 	//public void test23() throws Exception{
 	//	helper2();
 	//}
-	
+
 	public void test24() throws Exception{
 		helper2();
 	}
@@ -442,7 +442,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public void test47() throws Exception{
 		helper2();
 	}
-	
+
 	public void testDelegate01() throws Exception {
 		// simple delegate
 		helperDelegate();

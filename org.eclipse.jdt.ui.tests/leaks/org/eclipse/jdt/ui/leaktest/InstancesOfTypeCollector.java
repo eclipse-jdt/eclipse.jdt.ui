@@ -22,26 +22,26 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
  * All matches are stored as {@link ReferenceInfo}
  */
 public class InstancesOfTypeCollector extends ReferenceVisitor {
-	
+
 	private final ArrayList fResults;
 	private int fMatchCount= 0;
 	private long fInstanceCount= 0;
 	private final boolean fIncludeSubtypes;
 	private final String fRequestedTypeName;
-	
+
 	public InstancesOfTypeCollector(String requestedTypeName, boolean includeSubtypes) {
 		fIncludeSubtypes= includeSubtypes;
 		fResults= new ArrayList();
-		
+
 		fMatchCount= 0;
-		
+
 		fRequestedTypeName= requestedTypeName;
 	}
-	
+
 	public ReferenceInfo[] getResults() {
 		return (ReferenceInfo[]) fResults.toArray(new ReferenceInfo[fResults.size()]);
 	}
-	
+
 	public String getResultString() {
 		int i= 0;
 		StringBuffer buf= new StringBuffer();
@@ -52,11 +52,11 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 		}
 		return buf.toString();
 	}
-	
+
 	public int getNumberOfResults() {
 		return fResults.size();
 	}
-	
+
 	public boolean visit(ReferencedObject reference, Class clazz, boolean firstVisit) {
 		if (firstVisit) {
 			fInstanceCount++;
@@ -67,7 +67,7 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 		}
 		return true;
 	}
-	
+
 	private boolean isMatchingType(Class clazz) {
 		if (clazz.getName().equals(fRequestedTypeName)) {
 			return true;
@@ -85,6 +85,6 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 			}
 		}
 		return false;
-	}	
+	}
 
 }

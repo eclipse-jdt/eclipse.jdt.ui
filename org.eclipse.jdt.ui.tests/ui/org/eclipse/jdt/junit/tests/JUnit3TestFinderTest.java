@@ -16,6 +16,9 @@ import java.util.Iterator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.StringAsserts;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -31,32 +34,29 @@ import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.StringAsserts;
-
 public class JUnit3TestFinderTest extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
-	
+
 	public static Test setUpTest(Test test) {
 		return test;
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fProject);
 		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT3_PATH);
 		JavaProjectHelper.addToClasspath(fProject, cpe);
-		
+
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
-	
+
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		super.tearDown();
 	}
-	
+
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
@@ -68,10 +68,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("        }\n");
 		buf.append("}\n");
 		IType validTest1= p.createCompilationUnit("MyTest.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(validTest1, new String[] { "p.MyTest" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.MyTest" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
@@ -81,10 +81,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("        }\n");
 		buf.append("}\n");
 		IType validTest2= p.createCompilationUnit("MySuperTest.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(validTest2, new String[] { "p.MySuperTest" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.MySuperTest" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
@@ -94,11 +94,11 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("        }\n");
 		buf.append("}\n");
 		IType validTest3= p.createCompilationUnit("InvisibleTest.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		// accept invisible top level types
 		assertTestFound(validTest3, new String[] { "p.InvisibleTest" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleTest" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
@@ -110,10 +110,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType validTest4= p.createCompilationUnit("Outer.java", buf.toString(), false, null).getType("Outer").getType("InnerTest");
-		
+
 		assertTestFound(validTest4, new String[] { "p.Outer.InnerTest" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.Outer.InnerTest" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
@@ -137,8 +137,8 @@ public class JUnit3TestFinderTest extends TestCase {
 			assertTestFound(invalidTests[i], new String[] {});
 		}
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
-		
-		
+
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
@@ -148,10 +148,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("        }\n");
 		buf.append("}\n");
 		IType invalidTest1= p.createCompilationUnit("AbstractTest.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import java.util.Vector;\n");
@@ -161,19 +161,19 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("        }\n");
 		buf.append("}\n");
 		IType invalidTest3= p.createCompilationUnit("NoTest.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(invalidTest3, new String[] {});
 		assertTestFound(invalidTest3.getCompilationUnit(), new String[] {});
-		
+
 		String[] validTests= { "p.MyTest", "p.MySuperTest", "p.InvisibleTest", "p.Outer.InnerTest" };
-		
+
 		assertTestFound(p, validTests);
 		assertTestFound(fRoot, validTests);
 		assertTestFound(fProject, validTests);
 	}
-	
+
 	public void testSuite() throws Exception {
-		
+
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -185,10 +185,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType validTest1= p.createCompilationUnit("SuiteClass.java", buf.toString(), false, null).getType("SuiteClass");
-		
+
 		assertTestFound(validTest1, new String[] { "p.SuiteClass" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.SuiteClass" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
@@ -199,10 +199,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType validTest2= p.createCompilationUnit("AbstractSuiteClass.java", buf.toString(), false, null).getType("AbstractSuiteClass");
-		
+
 		assertTestFound(validTest2, new String[] { "p.AbstractSuiteClass" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.AbstractSuiteClass" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
@@ -213,10 +213,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType validTest3= p.createCompilationUnit("InvisibleSuiteClass.java", buf.toString(), false, null).getType("InvisibleSuiteClass");
-		
+
 		assertTestFound(validTest3, new String[] { "p.InvisibleSuiteClass" });
-		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleSuiteClass" });	
-		
+		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleSuiteClass" });
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
@@ -229,7 +229,7 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType validTest4= p.createCompilationUnit("SuiteOuter.java", buf.toString(), false, null).getType("SuiteOuter").getType("InnerSuite");
-		
+
 		assertTestFound(validTest4, new String[] { "p.SuiteOuter.InnerSuite" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.SuiteOuter.InnerSuite" });
 
@@ -257,7 +257,7 @@ public class JUnit3TestFinderTest extends TestCase {
 			assertTestFound(invalidTests[i], new String[] {});
 		}
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
@@ -268,10 +268,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType invalidTest1= p.createCompilationUnit("NonStaticSuite.java", buf.toString(), false, null).getType("NonStaticSuite");
-		
+
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
@@ -282,7 +282,7 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType invalidTest2= p.createCompilationUnit("NonVisibleSuite.java", buf.toString(), false, null).getType("NonVisibleSuite");
-		
+
 		assertTestFound(invalidTest2, new String[] {});
 		assertTestFound(invalidTest2.getCompilationUnit(), new String[] {});
 
@@ -296,19 +296,19 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType invalidTest3= p.createCompilationUnit("ParameterSuite.java", buf.toString(), false, null).getType("ParameterSuite");
-		
+
 		assertTestFound(invalidTest3, new String[] {});
 		assertTestFound(invalidTest3.getCompilationUnit(), new String[] {});
-		
+
 		String[] validTests= { "p.SuiteClass", "p.AbstractSuiteClass", "p.InvisibleSuiteClass", "p.SuiteOuter.InnerSuite" };
-		
+
 		assertTestFound(p, validTests);
 		assertTestFound(fRoot, validTests);
 		assertTestFound(fProject, validTests);
 	}
-	
+
 	public void testTestInterface() throws Exception {
-		
+
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -323,10 +323,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType validTest1= p.createCompilationUnit("MyITest.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(validTest1, new String[] { "p.MyITest" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.MyITest" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");
@@ -335,10 +335,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("        }\n");
 		buf.append("}\n");
 		IType validTest2= p.createCompilationUnit("MySuperITest.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(validTest2, new String[] { "p.MySuperITest" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.MySuperITest" });
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
@@ -346,10 +346,10 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("public interface MyITestSuperInterface extends Test {\n");
 		buf.append("}\n");
 		IType invalidTest1= p.createCompilationUnit("MyITestSuperInterface.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestResult;\n");
@@ -362,34 +362,34 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType validTest3= p.createCompilationUnit("MyITestSuperInterfaceImpl.java", buf.toString(), false, null).findPrimaryType();
-		
+
 		assertTestFound(validTest3, new String[] { "p.MyITestSuperInterfaceImpl" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.MyITestSuperInterfaceImpl" });
-		
+
 		String[] validTests= { "p.MyITest", "p.MySuperITest", "p.MyITestSuperInterfaceImpl" };
-		
+
 		assertTestFound(p, validTests);
 		assertTestFound(fRoot, validTests);
 		assertTestFound(fProject, validTests);
 	}
 
-		
-	
+
+
 	private void assertTestFound(IJavaElement container, String[] expectedValidTests) throws CoreException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(container);
 		assertEquals(TestKindRegistry.JUNIT3_TEST_KIND_ID, testKind.getId());
-		
+
 		ITestFinder finder= testKind.getFinder();
-		
+
 		if (container instanceof IType) {
 			IType type= (IType) container;
 			boolean isValidTest= expectedValidTests.length == 1 && type.getFullyQualifiedName('.').equals(expectedValidTests[0]);
 			assertEquals(type.getFullyQualifiedName('.'), isValidTest, finder.isTest(type));
 		}
-		
+
 		HashSet set= new HashSet();
 		finder.findTestsInContainer(container, set, null);
-		
+
 		HashSet namesFound= new HashSet();
 		for (Iterator iterator= set.iterator(); iterator.hasNext();) {
 			namesFound.add(((IType) iterator.next()).getFullyQualifiedName('.'));
@@ -397,6 +397,6 @@ public class JUnit3TestFinderTest extends TestCase {
 		String[] actuals= (String[]) namesFound.toArray(new String[namesFound.size()]);
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expectedValidTests);
 	}
-	
-	
+
+
 }

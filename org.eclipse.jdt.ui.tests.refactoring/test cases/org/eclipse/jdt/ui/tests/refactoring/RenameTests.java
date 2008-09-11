@@ -23,10 +23,10 @@ public class RenameTests {
 
 		suite.addTest(RefactoringScannerTests.suite());
 		suite.addTest(RenamingNameSuggestorTests.suite());
-		
+
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
 		suite.addTest(RenameMethodInInterfaceTests.suite());
-		suite.addTest(RenamePrivateMethodTests.suite());	
+		suite.addTest(RenamePrivateMethodTests.suite());
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
 		suite.addTest(RenameTypeTests.suite());
@@ -35,8 +35,8 @@ public class RenameTests {
 		suite.addTest(RenameTypeParameterTests.suite());
 		suite.addTest(RenameNonPrivateFieldTests.suite());
 		suite.addTest(RenameJavaProjectTests.suite());
-				
+
 		return suite;
 	}
 }
- 
+

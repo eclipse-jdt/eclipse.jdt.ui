@@ -36,19 +36,19 @@ public class MoveStaticMembersPerfTests2 extends AbstractMoveStaticMemberPrefTes
 	public MoveStaticMembersPerfTests2(String name) {
 		super(name);
 	}
-	
+
 	public void testCold_10_10() throws Exception {
 		executeRefactoring(10, 10, false, 3);
 	}
-	
+
 	public void test_10_10() throws Exception {
 		executeRefactoring(10, 10, true, 3);
 	}
-	
+
 	public void test_10_100() throws Exception {
 		executeRefactoring(10, 100, true, 1);
 	}
-	
+
 	public void test_10_1000() throws Exception {
 		tagAsSummary("Move static members - 10 CUs, 1000 Refs", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(10, 1000, true, 1);

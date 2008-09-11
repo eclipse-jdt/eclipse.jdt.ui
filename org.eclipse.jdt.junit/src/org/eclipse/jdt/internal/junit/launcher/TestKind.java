@@ -119,7 +119,7 @@ public class TestKind implements ITestKind {
 		}
 		return returnThis;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#toString()
 	 */

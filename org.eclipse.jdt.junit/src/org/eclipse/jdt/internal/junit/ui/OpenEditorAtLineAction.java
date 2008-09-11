@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids: sdavids@gmx.de bug 37333 Failure Trace cannot 
+ *     Sebastian Davids: sdavids@gmx.de bug 37333 Failure Trace cannot
  * 			navigate to non-public class in CU throwing Exception
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
@@ -18,6 +18,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,13 +30,13 @@ import org.eclipse.jdt.core.IJavaProject;
 public class OpenEditorAtLineAction extends OpenEditorAction {
 
 	private int fLineNumber;
-	
+
 	public OpenEditorAtLineAction(TestRunnerViewPart testRunner, String className, int line) {
 		super(testRunner, className);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.OPENEDITORATLINE_ACTION);
 		fLineNumber= line;
 	}
-		
+
 	protected void reveal(ITextEditor textEditor) {
 		if (fLineNumber >= 0) {
 			try {
@@ -46,7 +47,7 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 			}
 		}
 	}
-	
+
 	protected IJavaElement findElement(IJavaProject project, String className) throws CoreException {
 		return findType(project, className);
 	}

@@ -69,7 +69,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
 
     /**
      * Tests getChildren and hasChildren on an "ordinary" callee tree.
-     * 
+     *
      * @throws JavaModelException
      * @throws CoreException
      */
@@ -105,7 +105,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
 
     /**
      * Tests getChildren and hasChildren on an "ordinary" callers tree.
-     * 
+     *
      * @throws JavaModelException
      * @throws CoreException
      */
@@ -136,7 +136,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
 
     /**
      * Tests getChildren and hasChildren on an callers tree which exceeds the max call depth.
-     * 
+     *
      * @throws JavaModelException
      * @throws CoreException
      */
@@ -169,7 +169,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
 
     /**
      * Tests getChildren and hasChildren on an callee tree which exceeds the max call depth.
-     * 
+     *
      * @throws JavaModelException
      * @throws CoreException
      */
@@ -207,7 +207,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
 
     /**
     * Tests getChildren and hasChildren on an callers tree with recursion.
-    * 
+    *
     * @throws JavaModelException
     * @throws CoreException
     */
@@ -229,13 +229,13 @@ public class CallHierarchyContentProviderTest extends TestCase {
         helper.assertCalls(new IMember[] { helper.getRecursiveMethod1()}, thirdLevelChildren);
         assertCalleeMethodWrapperChildren(thirdLevelChildren);
 
-        // A recursion should have occurred, resulting in hasChildren = false 
+        // A recursion should have occurred, resulting in hasChildren = false
         assertEquals("third level hasChildren", false, fProvider.hasChildren(thirdLevelChildren[0]));
     }
 
     /**
      * Tests getChildren and hasChildren on an callees tree with recursion.
-     * 
+     *
      * @throws JavaModelException
      * @throws CoreException
      */
@@ -257,7 +257,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
         helper.assertCalls(new IMember[] { helper.getRecursiveMethod1()}, thirdLevelChildren);
         assertCallerMethodWrapperChildren(thirdLevelChildren);
 
-        // A recursion should have occurred, resulting in hasChildren = false 
+        // A recursion should have occurred, resulting in hasChildren = false
         assertEquals("third level hasChildren", false, fProvider.hasChildren(thirdLevelChildren[0]));
     }
 

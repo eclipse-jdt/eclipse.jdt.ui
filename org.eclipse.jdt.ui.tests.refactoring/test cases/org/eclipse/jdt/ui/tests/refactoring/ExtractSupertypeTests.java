@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * Test suite for the extract supertype tests.
- * 
+ *
  * Note: Extract Supertype heavily relies on PullUpRefactoring and its tests
  */
 public final class ExtractSupertypeTests extends RefactoringTest {
@@ -145,7 +145,7 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 	public void test4() throws Exception {
 		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
 	}
-	
+
 	public void testBug151683() throws Exception {
 		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, false);
 	}

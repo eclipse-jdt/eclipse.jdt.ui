@@ -21,12 +21,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 /**
- * 
+ *
  */
 public class MyClasspathContainerInitializer extends ClasspathContainerInitializer {
 
 	public static class MyClasspathContainer implements IClasspathContainer {
-		
+
 		private final IPath fPath;
 		private static final IPath MY_ARCHIVE= new Path("C:\\xy.jar");
 
@@ -43,9 +43,9 @@ public class MyClasspathContainerInitializer extends ClasspathContainerInitializ
 		public int getKind() { return IClasspathContainer.K_APPLICATION; }
 
 		public IPath getPath() { return fPath; }
-		
+
 	}
-	
+
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
 		IClasspathContainer[] containers= { new MyClasspathContainer(containerPath) };
 		JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project }, containers, null);

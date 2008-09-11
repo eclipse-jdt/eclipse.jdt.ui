@@ -24,6 +24,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -43,13 +46,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 
 public class PlainJarExportTests extends TestCase {
@@ -59,7 +58,7 @@ public class PlainJarExportTests extends TestCase {
 	public static Test suite() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
@@ -96,14 +95,14 @@ public class PlainJarExportTests extends TestCase {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}
-	
-	
+
+
 	public void testExportCu() throws Exception {
 		JarPackageData data= createJarPackageData();
-		
+
 		data.setElements(new Object[] { fCU });
 		data.setExportClassFiles(true);
-		
+
 		ZipFile jar= createArchive(data);
 		ArrayList entries= getSortedEntries(jar);
 		List expected= Arrays.asList(new String[] {
@@ -120,7 +119,7 @@ public class PlainJarExportTests extends TestCase {
 
 		data.setElements(new Object[] { fCU.getResource() });
 		data.setExportClassFiles(true);
-		
+
 		ZipFile jar= createArchive(data);
 		ArrayList entries= getSortedEntries(jar);
 		List expected= Arrays.asList(new String[] {
@@ -131,7 +130,7 @@ public class PlainJarExportTests extends TestCase {
 		});
 		assertEquals(expected.toString(), entries.toString());
 	}
-	
+
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=229052
 	public void testExternalClassFolder() throws Exception {
 		JarPackageData data= createJarPackageData();
@@ -139,21 +138,21 @@ public class PlainJarExportTests extends TestCase {
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
 		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
 
-		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null); 
+		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null);
 
 		data.setElements(new Object[] { fCU.getResource(), externalRoot });
 		data.setExportClassFiles(true);
 
 		ZipFile jar= createArchive(data);
 		ArrayList entries= getSortedEntries(jar);
-		List expected= Arrays.asList(new String[] { 
-				"META-INF/MANIFEST.MF\n", 
-				"org/eclipse/jdt/ui/test/Main$1.class\n", 
+		List expected= Arrays.asList(new String[] {
+				"META-INF/MANIFEST.MF\n",
+				"org/eclipse/jdt/ui/test/Main$1.class\n",
 				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
 				"org/eclipse/jdt/ui/test/Main.class\n", });
 		assertEquals(expected.toString(), entries.toString());
 	}
-	
+
 	private JarPackageData createJarPackageData() {
 		JarPackageData data= new JarPackageData();
 		data.setJarLocation(ResourcesPlugin.getWorkspace().getRoot().getLocation().append(getName() + ".jar"));
@@ -164,14 +163,14 @@ public class PlainJarExportTests extends TestCase {
 
 	private static ZipFile createArchive(JarPackageData data) throws Exception, CoreException {
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-	
+
 		IJarExportRunnable op= data.createJarExportRunnable(window.getShell());
 		window.run(false, false, op);
-	
+
 		IStatus status= op.getStatus();
 		if (status.getSeverity() == IStatus.ERROR)
 			throw new CoreException(status);
-	
+
 		return JarPackagerUtil.getArchiveFile(data.getJarLocation());
 	}
 

@@ -27,7 +27,7 @@ public class DefaultClassifier implements IClassifiesThrowables {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.junit.runner.ThrowableClassifier#getTrace(java.lang.Throwable)
 	 */
 	public String getTrace(Throwable t) {
@@ -40,7 +40,7 @@ public class DefaultClassifier implements IClassifiesThrowables {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.junit.runner.ThrowableClassifier#isComparisonFailure(java.lang.Throwable)
 	 */
 	public boolean isComparisonFailure(Throwable throwable) {

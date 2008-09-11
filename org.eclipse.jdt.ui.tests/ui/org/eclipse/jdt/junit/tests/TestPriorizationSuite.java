@@ -17,10 +17,10 @@ public class TestPriorizationSuite extends TestCase {
 	public TestPriorizationSuite(String name) {
 		super(name);
 	}
-	public void testX() {		
+	public void testX() {
 	}
-	public void testY() {		
+	public void testY() {
 	}
-	public void testZ() {		
+	public void testZ() {
 	}
 }

@@ -12,12 +12,12 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -25,17 +25,17 @@ import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
+
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
 
-import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
-
 public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 	private static class JUnitClasspathFixProposal extends ClasspathFixProposal {
-		
+
 		private final boolean fIsJunit4;
 		private final int fRelevance;
 		private final IJavaProject fProject;
@@ -47,9 +47,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 		public String getAdditionalProposalInfo() {
 			if (fIsJunit4) {
-				return JUnitMessages.JUnitAddLibraryProposal_junit4_info; 
+				return JUnitMessages.JUnitAddLibraryProposal_junit4_info;
 			}
-			return JUnitMessages.JUnitAddLibraryProposal_info; 
+			return JUnitMessages.JUnitAddLibraryProposal_info;
 		}
 
 		public Change createChange(IProgressMonitor monitor) throws CoreException {
@@ -99,7 +99,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 				if (!added) {
 					newEntries.add(entry);
 				}
-				
+
 				final IClasspathEntry[] newCPEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 				Change newClasspathChange= newClasspathChange(fProject, newCPEntries, fProject.getOutputLocation());
 				if (newClasspathChange != null) {
@@ -107,15 +107,15 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 				}
 			} finally {
 				monitor.done();
-			} 
+			}
 			return new NullChange();
 		}
 
 		public String getDisplayString() {
 			if (fIsJunit4) {
-				return JUnitMessages.JUnitAddLibraryProposa_junit4_label; 
+				return JUnitMessages.JUnitAddLibraryProposa_junit4_label;
 			}
-			return JUnitMessages.JUnitAddLibraryProposal_label; 
+			return JUnitMessages.JUnitAddLibraryProposal_label;
 		}
 
 		public Image getImage() {
@@ -130,7 +130,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 	private static final int JUNIT3= 1;
 	private static final int JUNIT4= 2;
 
-	
+
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {
 		String s= missingType;
 		int res= 0;

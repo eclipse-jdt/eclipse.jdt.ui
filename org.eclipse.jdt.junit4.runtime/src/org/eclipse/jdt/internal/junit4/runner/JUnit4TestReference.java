@@ -12,14 +12,15 @@
 
 package org.eclipse.jdt.internal.junit4.runner;
 
-import org.eclipse.jdt.internal.junit.runner.IStopListener;
-import org.eclipse.jdt.internal.junit.runner.ITestReference;
-import org.eclipse.jdt.internal.junit.runner.TestExecution;
 import org.junit.runner.Request;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
+
+import org.eclipse.jdt.internal.junit.runner.IStopListener;
+import org.eclipse.jdt.internal.junit.runner.ITestReference;
+import org.eclipse.jdt.internal.junit.runner.TestExecution;
 
 public abstract class JUnit4TestReference implements ITestReference {
 	protected Runner fRunner;

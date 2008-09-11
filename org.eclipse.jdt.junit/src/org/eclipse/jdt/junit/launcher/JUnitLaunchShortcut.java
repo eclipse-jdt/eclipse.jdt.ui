@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * The launch shortcut to launch JUnit tests.
- * 
+ *
  * <p>
  * This class may be instantiated and subclassed.
  * </p>
@@ -87,14 +87,14 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private static final String EMPTY_STRING= ""; //$NON-NLS-1$
-	
+
 	/**
 	 * Default constructor.
 	 */
 	public JUnitLaunchShortcut() {
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.ILaunchShortcut#launch(org.eclipse.ui.IEditorPart, java.lang.String)
 	 */
@@ -117,7 +117,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
 			if (selectionProvider == null)
 				return null;
-			
+
 			ISelection selection= selectionProvider.getSelection();
 			if (!(selection instanceof ITextSelection))
 				return null;
@@ -129,7 +129,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 				return null;
 
 			IMethod method= (IMethod) elementAtOffset;
-			
+
 			ISourceRange nameRange= method.getNameRange();
 			if (nameRange.getOffset() <= textSelection.getOffset()
 					&& textSelection.getOffset() + textSelection.getLength() <= nameRange.getOffset() + nameRange.getLength())
@@ -154,7 +154,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	private void launch(Object[] elements, String mode) {
 		try {
 			IJavaElement elementToLaunch= null;
-			
+
 			if (elements.length == 1) {
 				Object selected= elements[0];
 				if (!(selected instanceof IJavaElement) && selected instanceof IAdaptable) {
@@ -206,11 +206,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		}
 		return types[0];
 	}
-	
+
 	private IType[] findTypesToLaunch(ICompilationUnit cu) throws InterruptedException, InvocationTargetException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(cu);
 		return TestSearchEngine.findTests(PlatformUI.getWorkbench().getActiveWorkbenchWindow(), cu, testKind);
-	}	
+	}
 
 	private void performLaunch(IJavaElement element, String mode) throws InterruptedException, CoreException {
 		ILaunchConfigurationWorkingCopy temparary= createLaunchConfiguration(element);
@@ -250,7 +250,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * Show a selection dialog that allows the user to choose one of the
 	 * specified launch configurations. Return the chosen config, or
 	 * <code>null</code> if the user cancelled the dialog.
-	 * 
+	 *
 	 * @param configList list of {@link ILaunchConfiguration}s
 	 * @param mode launch mode
 	 * @return ILaunchConfiguration
@@ -277,28 +277,28 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	/**
 	 * Returns the launch configuration type id of the launch configuration this shortcut will create. Clients can override this method to
 	 * return the id of their launch configuration.
-	 * 
+	 *
 	 * @return the launch configuration type id of the launch configuration this shortcut will create
 	 */
 	protected String getLaunchConfigurationTypeId() {
 		return JUnitLaunchConfigurationConstants.ID_JUNIT_APPLICATION;
 	}
-	
+
 	/**
 	 * Creates a launch configuration working copy for the given element. The launch configuration type created will be of the type returned by {@link #getLaunchConfigurationTypeId}.
 	 * The element type can only be of type {@link IJavaProject}, {@link IPackageFragmentRoot}, {@link IPackageFragment}, {@link IType} or {@link IMethod}.
-	 *  
+	 *
 	 * Clients can extend this method (should call super) to configure additional attributes on the launch configuration working copy.
 	 * @param element element to launch
-	 * 
-	 * @return a launch configuration working copy for the given element 
+	 *
+	 * @return a launch configuration working copy for the given element
 	 * @throws CoreException if creation failed
 	 */
 	protected ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement element) throws CoreException {
 		final String testName;
 		final String mainTypeQualifiedName;
 		final String containerHandleId;
-		
+
 		switch (element.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
@@ -325,12 +325,12 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			default:
 				throw new IllegalArgumentException("Invalid element type to create a launch configuration: " + element.getClass().getName()); //$NON-NLS-1$
 		}
-		
+
 		String testKindId= TestKindRegistry.getContainerTestKindId(element);
-		
+
 		ILaunchConfigurationType configType= getLaunchManager().getLaunchConfigurationType(getLaunchConfigurationTypeId());
 		ILaunchConfigurationWorkingCopy wc= configType.newInstance(null, getLaunchManager().generateUniqueLaunchConfigurationNameFrom(testName));
-			
+
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainTypeQualifiedName);
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, element.getJavaProject().getElementName());
 		wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
@@ -343,11 +343,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		}
 		return wc;
 	}
-	
+
 	/**
 	 * Returns the attribute names of the attributes that are compared when looking for an existing similar launch configuration.
-	 * Clients can override and replace to customize. 
-	 * 
+	 * Clients can override and replace to customize.
+	 *
 	 * @return the attribute names of the attributes that are compared
 	 */
 	protected String[] getAttributeNamesToCompare() {
@@ -356,7 +356,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME
 		};
 	}
-	
+
 	private static boolean hasSameAttributes(ILaunchConfiguration config1, ILaunchConfiguration config2, String[] attributeToCompare) {
 		try {
 			for (int i= 0; i < attributeToCompare.length; i++) {
@@ -372,7 +372,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		}
 		return false;
 	}
-	
+
 
 	private ILaunchConfiguration findExistingLaunchConfiguration(ILaunchConfigurationWorkingCopy temporary, String mode) throws InterruptedException, CoreException {
 		List candidateConfigs= findExistingLaunchConfigurations(temporary);
@@ -400,13 +400,13 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		}
 		return null;
 	}
-	
+
 	private List findExistingLaunchConfigurations(ILaunchConfigurationWorkingCopy temporary) throws CoreException {
 		ILaunchConfigurationType configType= temporary.getType();
 
 		ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
 		String[] attributeToCompare= getAttributeNamesToCompare();
-		
+
 		ArrayList candidateConfigs= new ArrayList(configs.length);
 		for (int i= 0; i < configs.length; i++) {
 			ILaunchConfiguration config= configs[i];
@@ -415,11 +415,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			}
 		}
 		return candidateConfigs;
-	}	
+	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public ILaunchConfiguration[] getLaunchConfigurations(ISelection selection) {
@@ -434,7 +434,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public ILaunchConfiguration[] getLaunchConfigurations(final IEditorPart editor) {
@@ -461,7 +461,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		}
 		return null;
 	}
-	
+
 	private ILaunchConfiguration[] findExistingLaunchConfigurations(Object candidate) {
 		if (!(candidate instanceof IJavaElement) && candidate instanceof IAdaptable) {
 			candidate= ((IAdaptable) candidate).getAdapter(IJavaElement.class);
@@ -484,7 +484,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 					case IJavaElement.COMPILATION_UNIT:
 						elementToLaunch= ((ICompilationUnit) element).findPrimaryType();
 						break;
-				}		
+				}
 				if (elementToLaunch == null) {
 					return null;
 				}
@@ -493,13 +493,13 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 				return (ILaunchConfiguration[]) list.toArray(new ILaunchConfiguration[list.size()]);
 			} catch (CoreException e) {
 			}
-		} 
+		}
 		return null;
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public IResource getLaunchableResource(ISelection selection) {
@@ -520,7 +520,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public IResource getLaunchableResource(IEditorPart editor) {

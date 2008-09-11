@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.examples;
 
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.wizard.WizardPage;
 

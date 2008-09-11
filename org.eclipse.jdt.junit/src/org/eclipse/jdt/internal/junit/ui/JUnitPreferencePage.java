@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
@@ -66,13 +68,15 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
-import org.eclipse.osgi.util.TextProcessor;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.ISharedImages;
@@ -80,10 +84,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
-
-import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
-import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
-import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 
 /**
  * Preference page for JUnit settings. Supports to define the failure
@@ -94,7 +94,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private static final String DEFAULT_NEW_FILTER_TEXT= ""; //$NON-NLS-1$
 	private static final Image IMG_CUNIT= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
 	private static final Image IMG_PKG= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE);
-	
+
 	// enable assertions widget
 	private Button fEnableAssertionsCheckBox;
 
@@ -135,11 +135,11 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		public String getName() {
 			return fName;
 		}
-		
+
 		public void setName(String name) {
 			fName= name;
 		}
-				
+
 		public boolean isChecked() {
 			return fChecked;
 		}
@@ -307,12 +307,12 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		public Object[] getElements(Object inputElement) {
 			return fFilters.toArray();
 		}
-		
+
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
 		public void dispose() {}
 
 	}
-		
+
 	public JUnitPreferencePage() {
 		super();
 		setDescription(JUnitMessages.JUnitPreferencePage_description);
@@ -348,7 +348,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		SWTUtil.setButtonDimensionHint(fEnableAssertionsCheckBox);
 		setAssertionCheckBoxSelection(AssertionVMArg.getEnableAssertionsPreference());
 	}
-	
+
 	/**
 	 * Programatic access to enable assertions checkbox
 	 * @return boolean indicating check box selected or not
@@ -367,7 +367,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private void createStackFilterPreferences(Composite composite) {
 		fFilterViewerLabel= new Label(composite, SWT.SINGLE | SWT.LEFT);
 		fFilterViewerLabel.setText(JUnitMessages.JUnitPreferencePage_filter_label);
-		
+
 		Composite container= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -385,7 +385,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		TableLayoutComposite layouter= new TableLayoutComposite(container, SWT.NONE);
 		layouter.addColumnData(new ColumnWeightData(100));
 		layouter.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		fFilterTable= new Table(layouter, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 
 		new TableColumn(fFilterTable, SWT.NONE);
@@ -504,7 +504,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	public void init(IWorkbench workbench) {}
-	
+
 	/**
 	 * Create a new filter in the table (with the default 'new filter' value),
 	 * then open up an in-place editor on it.
@@ -724,7 +724,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fFilterViewer.setAllChecked(check);
 	}
-	
+
 	public boolean performOk() {
 		AssertionVMArg.setEnableAssertionsPreference(getAssertionCheckBoxSelection());
 		fStackFilterContentProvider.saveFilters();
@@ -743,7 +743,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	/**
 	 * Returns a list of active stack filters.
-	 * 
+	 *
 	 * @return list
 	 */
 	protected List createActiveStackFiltersList() {
@@ -752,7 +752,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	/**
 	 * Returns a list of active stack filters.
-	 * 
+	 *
 	 * @return list
 	 */
 	protected List createInactiveStackFiltersList() {

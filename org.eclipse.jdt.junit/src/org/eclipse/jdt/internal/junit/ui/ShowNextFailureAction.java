@@ -13,18 +13,18 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.jface.action.Action;
 
 class ShowNextFailureAction extends Action {
-	
+
 	private TestRunnerViewPart fPart;
 
 	public ShowNextFailureAction(TestRunnerViewPart part) {
-		super(JUnitMessages.ShowNextFailureAction_label);  
+		super(JUnitMessages.ShowNextFailureAction_label);
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/select_next.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_next.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_next.gif")); //$NON-NLS-1$
-		setToolTipText(JUnitMessages.ShowNextFailureAction_tooltip); 
+		setToolTipText(JUnitMessages.ShowNextFailureAction_tooltip);
 		fPart= part;
 	}
-	
+
 	public void run() {
 		fPart.selectNextFailure();
 	}

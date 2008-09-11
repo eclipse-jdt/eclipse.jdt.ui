@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.junit.ui;
 
 
 import org.eclipse.jface.action.Action;
+
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -19,13 +20,13 @@ import org.eclipse.ui.PlatformUI;
  */
 public class EnableStackFilterAction extends Action {
 
-	private FailureTrace fView;	
-	
+	private FailureTrace fView;
+
 	public EnableStackFilterAction(FailureTrace view) {
-		super(JUnitMessages.EnableStackFilterAction_action_label);  
-		setDescription(JUnitMessages.EnableStackFilterAction_action_description);  
-		setToolTipText(JUnitMessages.EnableStackFilterAction_action_tooltip); 
-		
+		super(JUnitMessages.EnableStackFilterAction_action_label);
+		setDescription(JUnitMessages.EnableStackFilterAction_action_description);
+		setToolTipText(JUnitMessages.EnableStackFilterAction_action_tooltip);
+
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/cfilter.gif")); //$NON-NLS-1$
 		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
@@ -37,7 +38,7 @@ public class EnableStackFilterAction extends Action {
 
 	/*
 	 * @see Action#actionPerformed
-	 */		
+	 */
 	public void run() {
 		JUnitPreferencePage.setFilterStack(isChecked());
 		fView.refresh();

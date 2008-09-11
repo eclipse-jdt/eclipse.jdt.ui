@@ -43,6 +43,6 @@ public interface ITestFinder {
 	 * @throws CoreException thrown when tests can not be found
 	 */
 	public abstract void findTestsInContainer(IJavaElement element, Set/*<IType>*/ result, IProgressMonitor pm) throws CoreException;
-	
+
 	public abstract boolean isTest(IType type) throws CoreException;
 }

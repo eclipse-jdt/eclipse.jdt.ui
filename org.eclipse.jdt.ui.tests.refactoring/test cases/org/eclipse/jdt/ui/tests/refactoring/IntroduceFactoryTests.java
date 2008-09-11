@@ -20,6 +20,8 @@ import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -35,24 +37,22 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 /**
  * @author rfuhrer@watson.ibm.com
  */
 public class IntroduceFactoryTests extends RefactoringTest {
-	
+
 	private static final Class clazz= IntroduceFactoryTests.class;
 	private static final String REFACTORING_PATH= "IntroduceFactory/";
 
 	public IntroduceFactoryTests(String name) {
 		super(name);
-	} 
-	
+	}
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-	
+
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
@@ -60,7 +60,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public static Test setUpTest(Test someTest) {
 	    return new RefactoringTestSetup(someTest);
 	}
-	
+
 	/**
 	 * Produces a test file name based on the name of this JUnit testcase.
 	 * For input files, trims off the trailing part of the test name that
@@ -74,7 +74,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 */
 	private String getSimpleTestFileName(boolean input) {
 		String	testName = getName();
-		int		usIdx=  testName.indexOf('_'); 
+		int		usIdx=  testName.indexOf('_');
 		int		endIdx= (usIdx >= 0) ? usIdx : testName.length();
 		String	fileName = (input ? (testName.substring(4, endIdx) + "_in") : testName.substring(4));
 
@@ -127,7 +127,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * @param fileName the file name
 	 * @param input true iff the requested file is an input file
 	 * @return the test file name
-	 */ 
+	 */
 	private String getBugTestFileName(IJavaProject project, IPackageFragment pack, String fileName, boolean input) {
 		String testName= getName();
 		String testNumber= testName.substring("test".length());//$NON-NLS-1$
@@ -190,9 +190,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		ref.setProtectConstructor(protectConstructor);
 
-		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
+		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
-		assertTrue("activation was supposed to be successful", activationResult.isOK());																
+		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
 		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 
@@ -264,9 +264,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
 		IntroduceFactoryRefactoring	ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
 
-		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
+		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
-		assertTrue("activation was supposed to be successful", activationResult.isOK());																
+		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
 		if (factoryMethodName != null)
 			ref.setNewMethodName(factoryMethodName);
@@ -306,7 +306,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
-		assertTrue("activation was supposed to be successful", activationResult.isOK());																
+		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
 		if (factoryClassName != null)
 			ref.setFactoryClass(factoryClassName);
@@ -333,7 +333,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	/**
 	 * Tests the IntroduceFactoryRefactoring refactoring on a set of input source files
 	 * whose names are supplied in the <code>fileBaseNames</code> argument,
-	 * and compares the transformed code to source files whose names are 
+	 * and compares the transformed code to source files whose names are
 	 * the input base names plus the options suffix (e.g. "_FFF").
 	 * Test files are assumed to be located in the resources directory.
 	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
@@ -357,7 +357,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	/**
 	 * Tests the IntroduceFactoryRefactoring refactoring on a set of input source files
 	 * whose names are supplied in the <code>fileBaseNames</code> argument,
-	 * and compares the transformed code to source files whose names are 
+	 * and compares the transformed code to source files whose names are
 	 * the input base names plus the options suffix (e.g. "_FFF").
 	 * Test files are assumed to be located in the resources directory.
 	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
@@ -403,7 +403,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			String testPath= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/";
 
 			doMultiUnitTest(CUs, testPath, inputFileBaseNames, null);
-		
+
 		} finally {
 			for (Iterator iter= proj2PkgRoot.keySet().iterator(); iter.hasNext();) {
 				IJavaProject project= (IJavaProject) iter.next();
@@ -504,7 +504,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertNotNull("precondition was supposed to fail", result);
 		assertEquals("status", expectedStatus, result.getSeverity());
-	}	
+	}
 
 	//--- TESTS
 	public void testStaticContext_FFF() throws Exception {
@@ -606,9 +606,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public void testNestedClass() throws Exception {
 		failHelper(RefactoringStatus.FATAL);
 	}
-	
-	
-	
+
+
+
     //
     // ================================================================================
     // Generics-related tests
@@ -725,7 +725,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public void test97507() throws Exception {
 		singleUnitBugHelper("CtorTypeArgBounds", true);
 	}
-	
+
 	public void testFactoryClash() throws Exception {
 		failHelper(RefactoringStatus.ERROR);
 	}

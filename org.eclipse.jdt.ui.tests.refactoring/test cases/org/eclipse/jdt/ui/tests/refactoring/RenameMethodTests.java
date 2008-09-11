@@ -20,7 +20,7 @@ public class RenameMethodTests {
 		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
 		suite.addTest(RenameMethodInInterfaceTests.suite());
-		suite.addTest(RenamePrivateMethodTests.suite());	
+		suite.addTest(RenamePrivateMethodTests.suite());
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RippleMethodFinderTests.suite());
 		return suite;

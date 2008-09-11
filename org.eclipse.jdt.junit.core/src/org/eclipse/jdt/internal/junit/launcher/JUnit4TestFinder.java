@@ -56,7 +56,7 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 
 public class JUnit4TestFinder implements ITestFinder {
-		
+
 	private static class Annotation {
 
 		private static final Annotation RUN_WITH= new Annotation("org.junit.runner.RunWith"); //$NON-NLS-1$
@@ -67,11 +67,11 @@ public class JUnit4TestFinder implements ITestFinder {
 		private Annotation(String name) {
 			fName= name;
 		}
-		
+
 		public String getName() {
 			return fName;
 		}
-		
+
 		private boolean annotates(IAnnotationBinding[] annotations) {
 			for (int i= 0; i < annotations.length; i++) {
 				ITypeBinding annotationType= annotations[i].getAnnotationType();
@@ -81,7 +81,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			}
 			return  false;
 		}
-		
+
 		public boolean annotatesTypeOrSuperTypes(ITypeBinding type) {
 			while (type != null) {
 				if (annotates(type.getAnnotations())) {
@@ -91,7 +91,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			}
 			return false;
 		}
-		
+
 		public boolean annotatesAtLeastOneMethod(ITypeBinding type) {
 			while (type != null) {
 				IMethodBinding[] declaredMethods= type.getDeclaredMethods();
@@ -111,7 +111,7 @@ public class JUnit4TestFinder implements ITestFinder {
 		if (element == null || result == null) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		if (element instanceof IType) {
 			if (internalIsTest((IType) element, pm)) {
 				result.add(element);
@@ -121,27 +121,27 @@ public class JUnit4TestFinder implements ITestFinder {
 
 		if (pm == null)
 			pm= new NullProgressMonitor();
-		
+
 		try {
 			pm.beginTask(JUnitMessages.JUnit4TestFinder_searching_description, 4);
-			
+
 			IRegion region= TestSearchEngine.getRegion(element);
 			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, new SubProgressMonitor(pm, 1));
 			IType[] allClasses= hierarchy.getAllClasses();
-			
+
 			// search for all types with references to RunWith and Test and all subclasses
 			HashSet candidates= new HashSet(allClasses.length);
 			SearchRequestor requestor= new AnnotationSearchRequestor(hierarchy, candidates);
-			
+
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(allClasses, IJavaSearchScope.SOURCES);
 			int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 			SearchPattern runWithPattern= SearchPattern.createPattern(Annotation.RUN_WITH.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE, matchRule);
 			SearchPattern testPattern= SearchPattern.createPattern(Annotation.TEST.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE, matchRule);
-			
+
 			SearchPattern annotationsPattern= SearchPattern.createOrPattern(runWithPattern, testPattern);
 			SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
-			
+
 			// find all classes in the region
 			for (Iterator iterator= candidates.iterator(); iterator.hasNext();) {
 				IType curr= (IType) iterator.next();
@@ -149,14 +149,14 @@ public class JUnit4TestFinder implements ITestFinder {
 					result.add(curr);
 				}
 			}
-			
+
 			// add all classes implementing JUnit 3.8's Test interface in the region
 			IType testInterface= element.getJavaProject().findType(JUnitPlugin.TEST_INTERFACE_NAME);
 			if (testInterface != null) {
 				TestSearchEngine.findTestImplementorClasses(hierarchy, testInterface, region, result);
 			}
-			
-			//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods: 
+
+			//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods:
 			TestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
@@ -164,7 +164,7 @@ public class JUnit4TestFinder implements ITestFinder {
 	}
 
 	private static class AnnotationSearchRequestor extends SearchRequestor {
-		
+
 		private final Collection fResult;
 		private final ITypeHierarchy fHierarchy;
 
@@ -199,7 +199,7 @@ public class JUnit4TestFinder implements ITestFinder {
 	public boolean isTest(IType type) throws JavaModelException {
 		return internalIsTest(type, null);
 	}
-	
+
 	private boolean internalIsTest(IType type, IProgressMonitor monitor) throws JavaModelException {
 		if (TestSearchEngine.isAccessibleClass(type)) {
 			if (TestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
@@ -213,7 +213,7 @@ public class JUnit4TestFinder implements ITestFinder {
 				ITypeBinding binding= (ITypeBinding) bindings[0];
 				return isTest(binding);
 			}*/
-			
+
 			if (type.getCompilationUnit() != null) {
 				parser.setSource(type.getCompilationUnit());
 			} else if (!isAvailable(type.getSourceRange())) { // class file with no source
@@ -239,18 +239,18 @@ public class JUnit4TestFinder implements ITestFinder {
 			}
 		}
 		return false;
-		
+
 	}
-	
+
     private static boolean isAvailable(ISourceRange range) {
 		return range != null && range.getOffset() != -1;
 	}
 
-	
+
 	private boolean isTest(ITypeBinding binding) {
 		if (Modifier.isAbstract(binding.getModifiers()))
 			return false;
-		
+
 		if (Annotation.RUN_WITH.annotatesTypeOrSuperTypes(binding) || Annotation.TEST.annotatesAtLeastOneMethod(binding)) {
 			return true;
 		}

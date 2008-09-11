@@ -71,7 +71,7 @@ public class CallHierarchyTestHelper {
     public void createSimpleClasses() throws CoreException, JavaModelException {
         createPackages();
 
-        
+
         ICompilationUnit cu1= fPack1.getCompilationUnit("A.java");
 
         fType1=
@@ -132,7 +132,7 @@ public class CallHierarchyTestHelper {
      */
     public void createInnerClass() throws Exception {
         createPackages();
-        
+
         ICompilationUnit cu1= fPack1.getCompilationUnit("Outer.java");
         fType1=
             cu1.createType(
@@ -145,13 +145,13 @@ public class CallHierarchyTestHelper {
                 true,
                 null);
     }
-    
+
     /**
      * Creates an anonymous inner class and sets the class attribute fType1.
      */
     public void createAnonymousInnerClass() throws Exception {
         createPackages();
-        
+
         ICompilationUnit cu1= fPack1.getCompilationUnit("AnonymousInner.java");
         fType1=
             cu1.createType(
@@ -167,7 +167,7 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
-                
+
         ICompilationUnit cu2= fPack2.getCompilationUnit("Outer.java");
         fType2=
             cu2.createType(
@@ -197,7 +197,7 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
-                
+
     }
 
     /**
@@ -205,7 +205,7 @@ public class CallHierarchyTestHelper {
      */
     public void createAnonymousInnerClassInsideMethod() throws Exception {
         createPackages();
-        
+
         ICompilationUnit cu1= fPack1.getCompilationUnit("AnonymousInnerInsideMethod.java");
         fType1=
             cu1.createType(
@@ -223,7 +223,7 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
-                
+
     }
 
     /**
@@ -231,7 +231,7 @@ public class CallHierarchyTestHelper {
      */
     public void createStaticInitializerClass() throws Exception {
         createPackages();
-        
+
         ICompilationUnit cu1= fPack1.getCompilationUnit("Initializer.java");
         fType1=
             cu1.createType(
@@ -240,7 +240,7 @@ public class CallHierarchyTestHelper {
                 true,
                 null);
     }
-    
+
     /**
      * Creates two packages (pack1 and pack2) in different projects. Sets the
      * instance fields fPack1 and fPack2.

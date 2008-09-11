@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 public class TestCopyParticipantShared extends CopyParticipant implements ISharableParticipant {
 
 	static TestCopyParticipantShared fgInstance;
-	
+
 	List fElements= new ArrayList(3);
 	List fHandles= new ArrayList(3);
 	List fArguments= new ArrayList(3);
@@ -67,11 +67,11 @@ public class TestCopyParticipantShared extends CopyParticipant implements IShara
 			fHandles.add(((JavaElementResourceMapping)element).getJavaElement().getHandleIdentifier() + "_mapping");
 		}
 	}
-	
+
 	public String getName() {
 		return getClass().getName();
 	}
-	
+
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
@@ -79,7 +79,7 @@ public class TestCopyParticipantShared extends CopyParticipant implements IShara
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}
-	
+
 	public static void testNumberOfElements(int expected) {
 		if (expected == 0) {
 			Assert.assertTrue(fgInstance == null);
@@ -88,7 +88,7 @@ public class TestCopyParticipantShared extends CopyParticipant implements IShara
 			Assert.assertEquals(expected, fgInstance.fArguments.size());
 		}
 	}
-	
+
 	public static void testArguments(CopyArguments[] args) {
 		testNumberOfElements(args.length);
 		for (int i= 0; i < args.length; i++) {
@@ -102,7 +102,7 @@ public class TestCopyParticipantShared extends CopyParticipant implements IShara
 		Assert.assertEquals("Destination: ", expected.getDestination(), actual.getDestination());
 		compareExecutionLog(expected.getExecutionLog(), actual.getExecutionLog());
 	}
-	
+
 	private static void compareExecutionLog(ReorgExecutionLog expected, ReorgExecutionLog actual) {
 		Assert.assertEquals("Canceled: ", expected.isCanceled(), actual.isCanceled());
 		Object[] expectedRenamed= expected.getRenamedElements();
@@ -118,8 +118,8 @@ public class TestCopyParticipantShared extends CopyParticipant implements IShara
 			Assert.assertEquals(expectedProcessed[j], actualProcessed[j]);
 		}
 	}
-	
+
 	public static void reset() {
 		fgInstance= null;
-	}	
+	}
 }

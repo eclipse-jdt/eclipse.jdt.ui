@@ -14,11 +14,16 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.internal.ui.refactoring.StatusContextViewerDescriptor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -29,28 +34,23 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.internal.ui.refactoring.StatusContextViewerDescriptor;
-
-
 public class ExtensionPointTests extends TestCase {
 
 	public static Test suite() {
 		return new ExtensionPointTestSetup(new TestSuite(ExtensionPointTests.class));
 	}
-	
+
 	public void testJavaStringStatusContextViewer() throws Exception {
 		JavaStringStatusContext context= new JavaStringStatusContext("test", new SourceRange(0, 0));
 		StatusContextViewerDescriptor descriptor= StatusContextViewerDescriptor.get(context);
 		assertNotNull(descriptor);
 		assertNotNull(descriptor.createViewer());
 	}
-	
+
 	public void testJavaStatusContextViewer() throws Exception {
 		IPackageFragment pack= getTestPackage();
 		ICompilationUnit unit= pack.createCompilationUnit(
-			"A.java", 
+			"A.java",
 			"package test; class A { }",
 			true, null);
 		RefactoringStatusContext context= JavaStatusContext.create(unit);
@@ -60,7 +60,7 @@ public class ExtensionPointTests extends TestCase {
 		JavaProjectHelper.performDummySearch();
 		unit.delete(true, new NullProgressMonitor());
 	}
-	
+
 	private IPackageFragment getTestPackage() {
 		IFolder folder= ResourcesPlugin.getWorkspace().getRoot().getFolder(
 			new Path("/TestProject/src/test"));

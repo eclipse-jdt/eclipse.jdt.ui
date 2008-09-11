@@ -11,9 +11,9 @@
 
 package org.eclipse.jdt.internal.junit.model;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.jdt.junit.model.ITestCaseElement;
+
+import org.eclipse.core.runtime.Assert;
 
 
 public class TestCaseElement extends TestElement implements ITestCaseElement {
@@ -24,7 +24,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		super(parent, id, testName);
 		Assert.isNotNull(parent);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see org.eclipse.jdt.junit.model.ITestCaseElement#getTestMethodName()
@@ -41,7 +41,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 			return testName.substring(0, index);
 		return testName;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see org.eclipse.jdt.junit.model.ITestCaseElement#getTestClassName()
@@ -49,15 +49,15 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	public String getTestClassName() {
 		return getClassName();
 	}
-	
+
 	public void setIgnored(boolean ignored) {
 		fIgnored= ignored;
 	}
-	
+
 	public boolean isIgnored() {
 		return fIgnored;
 	}
-	
+
 	public String toString() {
 		return "TestCase: " + getTestClassName() + "." + getTestMethodName() + " : " + super.toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

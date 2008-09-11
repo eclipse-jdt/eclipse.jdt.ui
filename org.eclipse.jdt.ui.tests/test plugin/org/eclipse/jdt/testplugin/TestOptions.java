@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TestOptions {
-	
+
 	public static Hashtable getDefaultOptions() {
 		Hashtable result= JavaCore.getDefaultOptions();
 		result.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.IGNORE);
@@ -40,7 +40,7 @@ public class TestOptions {
 		result.putAll(TestFormatterOptions.getSettings());
 		return result;
 	}
-	
+
 	public static void initializeCodeGenerationOptions() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
@@ -51,23 +51,23 @@ public class TestOptions {
 		store.setValue(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
 		store.setValue(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
 	}
-	
+
 	public static void initializeProjectOptions(IJavaProject project) {
 		Map options= new HashMap();
 		JavaProjectHelper.set15CompilerOptions(options);
 		project.setOptions(options);
 	}
-	
+
 }
 
 class TestFormatterOptions {
-	
+
 	public static Hashtable getSettings() {
 		TestFormatterOptions options = new TestFormatterOptions();
 		options.setDefaultSettings();
 		return options.getMap();
 	}
-	
+
 	public int alignment_for_arguments_in_allocation_expression;
 	public int alignment_for_arguments_in_explicit_constructor_call;
 	public int alignment_for_arguments_in_method_invocation;
@@ -84,9 +84,9 @@ class TestFormatterOptions {
 	public int alignment_for_superinterfaces_in_type_declaration;
 	public int alignment_for_throws_clause_in_constructor_declaration;
 	public int alignment_for_throws_clause_in_method_declaration;
-	
+
 	public boolean align_type_members_on_columns;
-	
+
 	public String brace_position_for_anonymous_type_declaration;
 	public String brace_position_for_array_initializer;
 	public String brace_position_for_block;
@@ -95,10 +95,10 @@ class TestFormatterOptions {
 	public String brace_position_for_method_declaration;
 	public String brace_position_for_type_declaration;
 	public String brace_position_for_switch;
-	
+
 	public int continuation_indentation;
 	public int continuation_indentation_for_array_initializer;
-	
+
 	public int blank_lines_after_imports;
 	public int blank_lines_after_package;
 	public int blank_lines_before_field;
@@ -110,14 +110,14 @@ class TestFormatterOptions {
 	public int blank_lines_before_package;
 	public int blank_lines_between_type_declarations;
 	public int blank_lines_at_beginning_of_method_body;
-	
+
 	public boolean indent_statements_compare_to_block;
 	public boolean indent_statements_compare_to_body;
 	public boolean indent_body_declarations_compare_to_type_header;
 	public boolean indent_breaks_compare_to_cases;
 	public boolean indent_switchstatements_compare_to_cases;
 	public boolean indent_switchstatements_compare_to_switch;
-	
+
 	public boolean insert_new_line_after_opening_brace_in_array_initializer;
 	public boolean insert_new_line_after_annotation_on_member;
 	public boolean insert_new_line_after_annotation_on_parameter;
@@ -256,7 +256,7 @@ class TestFormatterOptions {
 
 	public int initial_indentation_level;
 	public String line_separator;
-	
+
 	private TestFormatterOptions() {
 		// cannot be instantiated
 	}

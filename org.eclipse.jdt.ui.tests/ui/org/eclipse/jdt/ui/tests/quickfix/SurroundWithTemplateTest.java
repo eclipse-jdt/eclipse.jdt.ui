@@ -50,20 +50,20 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
 public class SurroundWithTemplateTest extends QuickFixTest {
-	
+
 	private static final Class THIS= SurroundWithTemplateTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
 	public SurroundWithTemplateTest(String name) {
 		super(name);
 	}
-	
+
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
@@ -76,21 +76,21 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-		
-		JavaCore.setOptions(options);			
+
+		JavaCore.setOptions(options);
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
-		
+
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
-		
+
 		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
-		
+
 		fJProject1= ProjectTestSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -101,14 +101,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 	}
 
 	private static List getRunnableProposal(AssistContext context) throws CoreException {
-		
+
 		StringBuffer buf= new StringBuffer();
 		buf.append("Runnable runnable = new Runnable() {\n");
 		buf.append("    public void run() {\n");
 		buf.append("        ${line_selection}\n");
 		buf.append("    }\n");
 		buf.append("};");
-		
+
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
 		TemplatePersistenceData[] templateData= templateStore.getTemplateData(false);
 		for (int i= 0; i < templateData.length; i++) {
@@ -116,14 +116,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		}
 		TemplatePersistenceData surroundWithRunnableTemplate= new TemplatePersistenceData(new Template("runnable", "surround with runnable", "java", buf.toString(), false), true);
 		templateStore.add(surroundWithRunnableTemplate);
-				
+
 		IJavaCompletionProposal[] templateProposals= (new QuickTemplateProcessor()).getAssists(context, null);
 		if (templateProposals == null || templateProposals.length != 1)
 			return Collections.EMPTY_LIST;
-			
+
 		return Arrays.asList(templateProposals);
 	}
-	
+
 	public void testSurroundWithRunnable1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -136,13 +136,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(1);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -159,10 +159,10 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("}\n");
 		expected1.append("\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
-	}   
+	}
 
 	public void testSurroundWithRunnable2() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -181,17 +181,17 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
 		selection.append("        System.out.println(j);\n");
 		selection.append("        int k = 10;\n");
 		selection.append("        k++;\n");
 		selection.append("        System.out.println(k);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -216,10 +216,10 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("}\n");
 		expected1.append("\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
-	}   
+	}
 
 	public void testSurroundWithRunnable3() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -240,17 +240,17 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        j++;\n");
 		selection.append("        System.out.println(k);\n");
 		selection.append("        System.out.println(j);\n");
 		selection.append("        System.out.println(i);\n");
 		selection.append("        System.out.println(h);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -277,10 +277,10 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("}\n");
 		expected1.append("\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
-	}   
-	
+	}
+
 	public void testSurroundWithRunnable4() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -294,14 +294,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            System.out.println(j);\n");
 		selection.append("            j--;\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -322,9 +322,9 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable5() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -336,13 +336,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        int i = 10;\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -362,9 +362,9 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable6() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -377,14 +377,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        /***/ int i = 10;\n");
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -405,9 +405,9 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable7() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -419,13 +419,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -444,9 +444,9 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable8() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -463,14 +463,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("int i = 10;\n");
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -495,9 +495,9 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable9() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -509,14 +509,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("int i = 10;\n");
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -536,9 +536,9 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable10() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -552,15 +552,15 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        int i = 10;\n");
 		selection.append("        int j;\n");
 		selection.append("        System.out.println(10);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -579,11 +579,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("    }\n");
 		expected1.append("}\n");
 		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable11() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -595,14 +595,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        int i;\n");
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -619,11 +619,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        System.out.println(i);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable12() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -634,14 +634,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
 		selection.append("        System.out.println(s);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -657,11 +657,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable13() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -674,14 +674,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
 		selection.append("        System.out.println(s);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -699,11 +699,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        s = \"\";\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable14() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -715,13 +715,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -739,11 +739,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable15() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -757,13 +757,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -783,11 +783,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable16() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -799,14 +799,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        int j, i = 10;\n");
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -824,11 +824,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable17() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -840,13 +840,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -864,11 +864,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable18() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -880,14 +880,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(i);\n");
 		selection.append("        System.out.println(j);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -904,11 +904,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable19() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -921,13 +921,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(k);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -947,11 +947,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        System.out.println(j);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable20() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -963,15 +963,15 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        int i = 10, j = 10;\n");
 		selection.append("        System.out.println(i);\n");
 		selection.append("        System.out.println(j);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -988,11 +988,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable21() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1005,13 +1005,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            int j = 10;\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1030,11 +1030,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable22() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1050,16 +1050,16 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            while (j == 10) {\n");
 		selection.append("                System.out.println(j);\n");
 		selection.append("                j--;\n");
 		selection.append("            }\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1080,11 +1080,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable23() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1096,14 +1096,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        /***/ int k = 10;\n");
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1121,11 +1121,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        };\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable24() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1140,14 +1140,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            System.out.println(v);\n");
 		selection.append("            System.out.println(k);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1167,11 +1167,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        k++;\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 	/*
 	public void testSurroundWithRunnable25() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1188,13 +1188,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            System.out.println(e4);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
-		
+
 		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
 
@@ -1217,11 +1217,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable26() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1238,14 +1238,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            int e4 = 9, e5 = 0;\n");
 		selection.append("            System.out.println(e4);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= collectAssists(context, false);
-		
+
 		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
 
@@ -1269,11 +1269,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}*/
-	
+
 	public void testSurroundWithRunnable27() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1285,13 +1285,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(s);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1309,11 +1309,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        c = \"\";\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable28() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1326,14 +1326,14 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        int i = 10, j, k, v;\n");
 		selection.append("        System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1354,11 +1354,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        System.out.println(v);\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnable29() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1371,15 +1371,15 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        @SuppressWarnings(\"nls\") String s= \"\", k = \"\";\n");
 		selection.append("        System.out.println(s);\n");
 		selection.append("        System.out.println(k);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1401,11 +1401,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        k=\"\";\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
 	public void testSurroundWithRunnable30() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -1416,13 +1416,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            System.out.println(1);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1439,11 +1439,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		expected1.append("        }\n");
 		expected1.append("    }\n");
 		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
-	
+
 	public void testSurroundWithRunnableBug133560() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1455,13 +1455,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("            System.out.println(i);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1478,11 +1478,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
-	
+
 	public void testSurroundWithRunnableBug233278() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1499,18 +1499,18 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("  }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        if (x == y)\n");
 		selection.append("          return;\n");
 		selection.append("        toString();\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1529,11 +1529,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    };\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
-	
+
 	public void testSurroundWithRunnableBug138323() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1543,13 +1543,13 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("        System.out.println(this);\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1564,11 +1564,11 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
-	
+
 	public void testSurroundWithBug162549() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1582,17 +1582,17 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		StringBuffer selection= new StringBuffer();
 		selection.append("if (true) {\n");
 		selection.append("            System.out.println(\"T\");\n");
 		selection.append("        } // else {\n");
 		selection.append("        // System.out.println(\"F\");\n");
 		selection.append("        // }\n");
-		
+
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
 		List proposals= getRunnableProposal(context);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1611,7 +1611,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
-	
+
 }

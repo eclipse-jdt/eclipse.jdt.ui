@@ -11,20 +11,27 @@
 package org.eclipse.jdt.ui.tests.search;
 
 import java.util.Random;
+
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.ui.ISharedImages;
-import org.eclipse.jdt.ui.search.IQueryParticipant;
-import org.eclipse.jdt.ui.search.ISearchRequestor;
-import org.eclipse.jdt.ui.search.IMatchPresentation;
-import org.eclipse.jdt.ui.search.QuerySpecification;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.search.ui.text.Match;
-import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.ui.PartInitException;
+
+import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.ui.ISharedImages;
+import org.eclipse.jdt.ui.search.IMatchPresentation;
+import org.eclipse.jdt.ui.search.IQueryParticipant;
+import org.eclipse.jdt.ui.search.ISearchRequestor;
+import org.eclipse.jdt.ui.search.QuerySpecification;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  */
@@ -35,7 +42,7 @@ public class TestParticipant implements IQueryParticipant {
 	public TestParticipant() {
 		fUIParticipant= new TestUIParticipant();
 	}
-	
+
 	public void search(ISearchRequestor requestor, QuerySpecification data, IProgressMonitor monitor) throws CoreException {
 		for (int i= 0; i < 20; i++) {
 			requestor.reportMatch(new Match(new Integer(fgRandom.nextInt()), -1, -1));
@@ -65,7 +72,7 @@ class TestUIParticipant implements IMatchPresentation {
 
 	public void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		MessageDialog.openInformation(null, "Showing element", "Showning an integer of value: "+((Integer)match.getElement()).intValue());
-		
+
 	}
 
 	public ILabelProvider createLabelProvider() {

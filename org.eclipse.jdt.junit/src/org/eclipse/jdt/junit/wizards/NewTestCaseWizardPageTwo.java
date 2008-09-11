@@ -44,28 +44,28 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 /**
- * The class <code>NewTestCaseWizardPageTwo</code> contains controls and validation routines 
+ * The class <code>NewTestCaseWizardPageTwo</code> contains controls and validation routines
  * for the second page of the  'New JUnit TestCase Wizard'.
  * <p>
  * Clients can use the page as-is and add it to their own wizard, or extend it to modify
  * validation or add and remove controls.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class NewTestCaseWizardPageTwo extends WizardPage {
 
 	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage2"; //$NON-NLS-1$
-	
+
 	private final static String STORE_USE_TASKMARKER= PAGE_NAME + ".USE_TASKMARKER"; //$NON-NLS-1$
 	private final static String STORE_CREATE_FINAL_METHOD_STUBS= PAGE_NAME + ".CREATE_FINAL_METHOD_STUBS"; //$NON-NLS-1$
 
@@ -80,14 +80,14 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	private Object[] fCheckedObjects;
 	private boolean fCreateFinalStubs;
 	private boolean fCreateTasks;
-	
+
 	/**
 	 * Creates a new <code>NewTestCaseWizardPageTwo</code>.
 	 */
 	public NewTestCaseWizardPageTwo() {
 		super(PAGE_NAME);
-		setTitle(WizardMessages.NewTestCaseWizardPageTwo_title); 
-		setDescription(WizardMessages.NewTestCaseWizardPageTwo_description); 
+		setTitle(WizardMessages.NewTestCaseWizardPageTwo_title);
+		setDescription(WizardMessages.NewTestCaseWizardPageTwo_description);
 	}
 
 	/* (non-Javadoc)
@@ -101,11 +101,11 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 
 		createMethodsTreeControls(container);
 		createSpacer(container);
-		createButtonChoices(container);	
+		createButtonChoices(container);
 		setControl(container);
 		restoreWidgetValues();
 		Dialog.applyDialogFont(container);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE2);	
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE2);
 	}
 
 	private void createButtonChoices(Composite container) {
@@ -116,25 +116,25 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		gd.horizontalAlignment = GridData.FILL;
 		gd.horizontalSpan = 1;
 		prefixContainer.setLayoutData(gd);
-		
+
 		layout = new GridLayout();
 		layout.numColumns = 1;
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		prefixContainer.setLayout(layout);
-		
+
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				doCheckBoxSelected(e.widget);
 			}
 		};
-		fCreateFinalMethodStubsButton= createCheckBox(prefixContainer, WizardMessages.NewTestCaseWizardPageTwo_create_final_method_stubs_text, listener); 
-		fCreateTasksButton= createCheckBox(prefixContainer, WizardMessages.NewTestCaseWizardPageTwo_create_tasks_text, listener); 
+		fCreateFinalMethodStubsButton= createCheckBox(prefixContainer, WizardMessages.NewTestCaseWizardPageTwo_create_final_method_stubs_text, listener);
+		fCreateTasksButton= createCheckBox(prefixContainer, WizardMessages.NewTestCaseWizardPageTwo_create_tasks_text, listener);
 	}
-	
+
 	private Button createCheckBox(Composite parent, String name, SelectionListener listener) {
 		Button button= new Button(parent, SWT.CHECK | SWT.LEFT);
-		button.setText(name); 
+		button.setText(name);
 		button.setEnabled(true);
 		button.setSelection(true);
 		button.addSelectionListener(listener);
@@ -142,8 +142,8 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		button.setLayoutData(gd);
 		return button;
 	}
-	
-	
+
+
 	private void doCheckBoxSelected(Widget widget) {
 		if (widget == fCreateFinalMethodStubsButton) {
 			fCreateFinalStubs= fCreateFinalMethodStubsButton.getSelection();
@@ -152,11 +152,11 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		}
 		saveWidgetValues();
 	}
-	
+
 	private void createMethodsTreeControls(Composite container) {
 		Label label= new Label(container, SWT.LEFT | SWT.WRAP);
 		label.setFont(container.getFont());
-		label.setText(WizardMessages.NewTestCaseWizardPageTwo_methods_tree_label); 
+		label.setText(WizardMessages.NewTestCaseWizardPageTwo_methods_tree_label);
 		GridData gd = new GridData();
 		gd.horizontalSpan = 2;
 		label.setLayoutData(gd);
@@ -167,11 +167,11 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		fMethodsTree.getTree().setLayoutData(gd);
 
 		fMethodsTree.setLabelProvider(new JavaElementLabelProvider());
-		fMethodsTree.setAutoExpandLevel(2);			
+		fMethodsTree.setAutoExpandLevel(2);
 		fMethodsTree.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				doCheckedStateChanged();
-			}	
+			}
 		});
 		fMethodsTree.addFilter(new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
@@ -193,7 +193,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		buttonContainer.setLayout(buttonLayout);
 
 		fSelectAllButton= new Button(buttonContainer, SWT.PUSH);
-		fSelectAllButton.setText(WizardMessages.NewTestCaseWizardPageTwo_selectAll); 
+		fSelectAllButton.setText(WizardMessages.NewTestCaseWizardPageTwo_selectAll);
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fSelectAllButton.setLayoutData(gd);
 		fSelectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -205,7 +205,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		LayoutUtil.setButtonDimensionHint(fSelectAllButton);
 
 		fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
-		fDeselectAllButton.setText(WizardMessages.NewTestCaseWizardPageTwo_deselectAll); 
+		fDeselectAllButton.setText(WizardMessages.NewTestCaseWizardPageTwo_deselectAll);
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fDeselectAllButton.setLayoutData(gd);
 		fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -223,7 +223,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 1;
 		fSelectedMethodsLabel.setLayoutData(gd);
-		
+
 		Label emptyLabel= new Label(container, SWT.LEFT);
 		gd= new GridData();
 		gd.horizontalSpan= 1;
@@ -239,16 +239,16 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		data.heightHint= 4;
 		spacer.setLayoutData(data);
 	}
-	
+
 	/**
 	 * Sets the class under test.
-	 * 
+	 *
 	 * @param classUnderTest the class under test
 	 */
 	public void setClassUnderTest(IType classUnderTest) {
 		fClassToTest= classUnderTest;
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
@@ -259,7 +259,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 			if (fClassToTest == null) {
 				return;
 			}
-			
+
 			ArrayList types= null;
 			try {
 				ITypeHierarchy hierarchy= fClassToTest.newSupertypeHierarchy(null);
@@ -282,14 +282,14 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 			fMethodsTree.setInput(types.toArray());
 			fMethodsTree.setSelection(new StructuredSelection(fClassToTest), true);
 			doCheckedStateChanged();
-			
+
 			fMethodsTree.getControl().setFocus();
 		}
 	}
 
 	/**
 	 * Returns all checked methods in the methods tree.
-	 * 
+	 *
 	 * @return the checked methods
 	 */
 	public IMethod[] getCheckedMethods() {
@@ -308,7 +308,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		}
 		return checkedMethods;
 	}
-	
+
 	private static class MethodsTreeContentProvider implements ITreeContentProvider {
 		private Object[] fTypes;
 		private IMethod[] fMethods;
@@ -347,7 +347,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 			fMethods= new IMethod[methods.size()];
 			methods.copyInto(fMethods);
 		}
-		
+
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
@@ -369,7 +369,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
 		public Object getParent(Object element) {
-			if (element instanceof IMethod) 
+			if (element instanceof IMethod)
 				return ((IMethod)element).getDeclaringType();
 			return null;
 		}
@@ -399,7 +399,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
-		
+
 		public IMethod[] getAllMethods() {
 			return fMethods;
 		}
@@ -407,7 +407,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 
 	/**
 	 * Returns true if the checkbox for creating tasks is checked.
-	 * 
+	 *
 	 * @return <code>true</code> is returned if tasks should be created
 	 */
 	public boolean isCreateTasks() {
@@ -421,11 +421,11 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	public boolean getCreateFinalMethodStubsButtonSelection() {
 		return fCreateFinalStubs;
 	}
-		
+
 	private void doCheckedStateChanged() {
 		Object[] checked= fMethodsTree.getCheckedElements();
 		fCheckedObjects= checked;
-		
+
 		int checkedMethodCount= 0;
 		for (int i= 0; i < checked.length; i++) {
 			if (checked[i] instanceof IMethod)
@@ -433,21 +433,21 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		}
 		String label= ""; //$NON-NLS-1$
 		if (checkedMethodCount == 1)
-			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_one, new Integer(checkedMethodCount)); 
+			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_one, new Integer(checkedMethodCount));
 		else
-			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_many, new Integer(checkedMethodCount)); 
+			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_many, new Integer(checkedMethodCount));
 		fSelectedMethodsLabel.setText(label);
 	}
-	
+
 	/**
 	 * Returns all the methods in the methods tree.
-	 * 
+	 *
 	 * @return all methods in the methods tree
 	 */
 	public IMethod[] getAllMethods() {
 		return ((MethodsTreeContentProvider)fMethodsTree.getContentProvider()).getAllMethods();
 	}
-		
+
 	/**
 	 *	Use the dialog store to restore widget values to the values that they held
 	 *	last time this wizard was used to completion
@@ -459,8 +459,8 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 			fCreateTasksButton.setSelection(fCreateTasks);
 			fCreateFinalStubs= settings.getBoolean(STORE_CREATE_FINAL_METHOD_STUBS);
 			fCreateFinalMethodStubsButton.setSelection(fCreateFinalStubs);
-		}		
-	}	
+		}
+	}
 
 	private void saveWidgetValues() {
 		IDialogSettings settings= getDialogSettings();

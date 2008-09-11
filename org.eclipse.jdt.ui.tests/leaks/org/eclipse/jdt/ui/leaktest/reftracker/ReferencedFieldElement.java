@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
 
 
 /**
- * 
+ *
  */
 public class ReferencedFieldElement extends ReferencedObject {
 
@@ -27,11 +27,11 @@ public class ReferencedFieldElement extends ReferencedObject {
 		fPrevious= previous;
 		fField= field;
 	}
-	
+
 	public ReferencedObject getReferenceHolder() {
 		return fPrevious;
 	}
-	
+
 	public Field getField() {
 		return fField;
 	}

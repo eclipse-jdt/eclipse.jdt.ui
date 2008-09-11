@@ -17,6 +17,9 @@ import java.util.zip.ZipFile;
 
 import junit.framework.Assert;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
@@ -28,31 +31,28 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 
 public class SWTTestProject {
-	
+
 	public static final String PROJECT= "org.eclipse.swt";
 	private static final String PROJECT_ZIP= "/testresources/org.eclipse.swt-R3_0.zip";
 
 	private IJavaProject fProject;
-	
+
 	public SWTTestProject() throws Exception {
 		setUpProject();
 	}
-	
+
 	public IJavaProject getProject() {
 		return fProject;
 	}
-	
+
 	public void delete() throws Exception {
 		if (fProject != null && fProject.exists()) {
 			JavaProjectHelper.delete(fProject);
 		}
 	}
-	
+
 	private void setUpProject() throws IOException, ZipException, CoreException {
 		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
 		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(JavaTestPlugin.getDefault(), new Path(PROJECT_ZIP))), new File(workspacePath));
@@ -74,5 +74,5 @@ public class SWTTestProject {
 		project.create(description, null);
 		project.open(null);
 		return project;
-	}	
+	}
 }

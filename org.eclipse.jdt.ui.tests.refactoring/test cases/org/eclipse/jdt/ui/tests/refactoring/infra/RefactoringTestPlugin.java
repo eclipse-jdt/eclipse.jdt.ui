@@ -25,21 +25,21 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 
 public class RefactoringTestPlugin extends Plugin {
-	
+
 	private static RefactoringTestPlugin fgDefault;
-	
+
 	public RefactoringTestPlugin() {
 		fgDefault= this;
 	}
-	
+
 	public static RefactoringTestPlugin getDefault() {
 		return fgDefault;
 	}
-	
+
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	
+
 	public static void enableAutobuild(boolean enable) throws CoreException {
 		// disable auto build
 		IWorkspace workspace= getWorkspace();
@@ -47,11 +47,11 @@ public class RefactoringTestPlugin extends Plugin {
 		desc.setAutoBuilding(enable);
 		workspace.setDescription(desc);
 	}
-	
+
 	public InputStream getTestResourceStream(String fileName) throws IOException {
 		IPath path= new Path("resources").append(fileName);
 		URL url= new URL(getBundle().getEntry("/"), path.toString());
 		return url.openStream();
 	}
-	
+
 }

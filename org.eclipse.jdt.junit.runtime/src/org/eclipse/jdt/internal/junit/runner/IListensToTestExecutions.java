@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.junit.runner;
 
 public interface IListensToTestExecutions {
 	void notifyTestFailed(TestReferenceFailure failure);
-	
+
 	void notifyTestStarted(ITestIdentifier test);
 
 	void notifyTestEnded(ITestIdentifier test);

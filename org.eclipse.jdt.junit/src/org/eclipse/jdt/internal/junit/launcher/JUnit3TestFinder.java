@@ -34,15 +34,15 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class JUnit3TestFinder implements ITestFinder {
-	
+
 	public void findTestsInContainer(IJavaElement element, Set result, IProgressMonitor pm) throws CoreException {
 		if (element == null || result == null) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		if (pm == null)
 			pm= new NullProgressMonitor();
-		
+
 		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, 10);
 		try {
 			if (element instanceof IType) {
@@ -87,7 +87,7 @@ public class JUnit3TestFinder implements ITestFinder {
 	public boolean isTest(IType type) throws JavaModelException {
 		return TestSearchEngine.isAccessibleClass(type) && (TestSearchEngine.hasSuiteMethod(type) || isTestImplementor(type));
 	}
-	
+
 	private static boolean isTestImplementor(IType type) throws JavaModelException {
 		if (!Flags.isAbstract(type.getFlags()) && TestSearchEngine.isTestImplementor(type)) {
 			return true;

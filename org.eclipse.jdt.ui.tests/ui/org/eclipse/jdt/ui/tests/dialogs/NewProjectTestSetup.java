@@ -17,6 +17,9 @@ import java.util.List;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -34,29 +37,26 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 
 public class NewProjectTestSetup extends TestSetup {
 
     public static final String WORKSPACE_PROJECT= "WorkspaceProject";
     public static final String WORKSPACE_PROJECT_SRC= "WorkspaceProjectWithSourceAndInFolder";
-    
+
     public static IJavaProject getProject(String projectName, String binFolderName) throws CoreException {
         return JavaProjectHelper.createJavaProject(projectName, binFolderName);
     }
-    
+
     public static IClasspathEntry[] getDefaultClasspath() {
         return PreferenceConstants.getDefaultJRELibrary();
     }
-    
+
     private IJavaProject fWorkspaceProject;
     private IJavaProject fWorkspaceProjectWithSrc;
     private IJavaProject fExternalProject;
 
     private boolean fAutobuilding;
-    
+
     public NewProjectTestSetup(Test test) {
         super(test);
         try {
@@ -65,7 +65,7 @@ public class NewProjectTestSetup extends TestSetup {
             JavaPlugin.log(e);
         }
     }
-    
+
     public IJavaProject getProject(IJavaProject currentProject) throws CoreException {
         String name= currentProject.getElementName();
         currentProject.getProject().delete(true, null);
@@ -75,7 +75,7 @@ public class NewProjectTestSetup extends TestSetup {
             return getWorkspaceProjectWithSrc();
         return null;
     }
-    
+
     public IJavaProject getWorkspaceProject() {
         try {
             fWorkspaceProject= getProject(WORKSPACE_PROJECT, "");
@@ -92,7 +92,7 @@ public class NewProjectTestSetup extends TestSetup {
         }
         return fWorkspaceProject;
     }
-    
+
     public IJavaProject getWorkspaceProjectWithSrc() {
         try {
             fWorkspaceProjectWithSrc= getProject(WORKSPACE_PROJECT_SRC, PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
@@ -102,7 +102,7 @@ public class NewProjectTestSetup extends TestSetup {
         }
         return fWorkspaceProjectWithSrc;
     }
-    
+
     public IJavaProject getExternalProject() {
         return fExternalProject;
     }
@@ -113,7 +113,7 @@ public class NewProjectTestSetup extends TestSetup {
         super.setUp();
         JavaCore.setOptions(TestOptions.getDefaultOptions());
         TestOptions.initializeCodeGenerationOptions();
-        JavaPlugin.getDefault().getCodeTemplateStore().load(); 
+        JavaPlugin.getDefault().getCodeTemplateStore().load();
     }
 
     protected void tearDown() throws Exception {
@@ -125,7 +125,7 @@ public class NewProjectTestSetup extends TestSetup {
             JavaProjectHelper.delete(fExternalProject);
         JavaProjectHelper.setAutoBuilding(fAutobuilding);
     }
-    
+
     private void createWithSrcAndBinFolder(IJavaProject project) {
         IPath srcPath= new Path("src");
         try {
@@ -133,15 +133,15 @@ public class NewProjectTestSetup extends TestSetup {
                 IFolder folder= project.getProject().getFolder(srcPath);
                 CoreUtility.createFolder(folder, true, true, null);
             }
-            
+
             final IPath projectPath= project.getProject().getFullPath();
-    
+
             // configure the classpath entries, including the default jre library.
             List cpEntries= new ArrayList();
             cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcPath)));
             cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
             IClasspathEntry[] entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
-            
+
             project.setRawClasspath(entries, null);
         } catch (CoreException e) {
             JavaPlugin.log(e);

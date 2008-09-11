@@ -14,14 +14,14 @@ package org.eclipse.jdt.junit.tests;
 import junit.framework.TestCase;
 
 public class TestPriorizationSuite2 extends TestCase {
-	
+
 	public TestPriorizationSuite2(String name) {
 		super(name);
 	}
-	public void testD() {		
+	public void testD() {
 	}
-	public void testE() {		
+	public void testE() {
 	}
-	public void testF() {		
+	public void testF() {
 	}
 }

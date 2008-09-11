@@ -20,6 +20,9 @@ import java.util.regex.Pattern;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
@@ -52,6 +55,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -62,18 +66,13 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
 public class CleanUpTestCase extends QuickFixTest {
 
 	protected static final String FIELD_COMMENT= "/* Test */";
-	
+
 	protected IPackageFragmentRoot fSourceFolder;
 	protected IJavaProject fJProject1;
-	
+
 	private CustomProfile fProfile;
 
 	public static Test allTests() {
@@ -178,7 +177,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		}
 
 		assertEqualStringsIgnoreOrder(previews, expected);
-		
+
 		return status;
 	}
 
@@ -203,12 +202,12 @@ public class CleanUpTestCase extends QuickFixTest {
 		}
 		return assertRefactoringResultAsExpected(cus, expected);
 	}
-	
+
 	protected final RefactoringStatus performRefactoring(ICompilationUnit[] cus) throws CoreException {
 		final CleanUpRefactoring ref= new CleanUpRefactoring();
 		ref.setUseProjectOptions(true);
 		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
-		
+
 		return performRefactoring(ref, cus, cleanUps);
 	}
 
@@ -216,7 +215,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		for (int i= 0; i < cus.length; i++) {
 			ref.addCompilationUnit(cus[i]);
 		}
-		
+
 		for (int i= 0; i < cleanUps.length; i++) {
 			ref.addCleanUp(cleanUps[i]);
 		}
@@ -225,33 +224,33 @@ public class CleanUpTestCase extends QuickFixTest {
 		final CreateChangeOperation create= new CreateChangeOperation(
 			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
 			RefactoringStatus.FATAL);
-		
+
 		final PerformChangeOperation perform= new PerformChangeOperation(create);
 		perform.setUndoManager(undoManager, ref.getName());
-		
+
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		executePerformOperation(perform, workspace);
-			
+
 		RefactoringStatus status= create.getConditionCheckingStatus();
 		if (status.hasFatalError()) {
 			throw new CoreException(new StatusInfo(status.getSeverity(), status.getMessageMatchingSeverity(status.getSeverity())));
 		}
-		
+
 		assertTrue("Change wasn't executed", perform.changeExecuted());
-		
+
 		Change undo= perform.getUndoChange();
 		assertNotNull("Undo doesn't exist", undo);
 		assertTrue("Undo manager is empty", undoManager.anythingToUndo());
-		
+
 		return status;
 	}
-	
+
 	private IUndoManager getUndoManager() {
 		IUndoManager undoManager= RefactoringCore.getUndoManager();
 		undoManager.flush();
 		return undoManager;
 	}
-	
+
 	private void executePerformOperation(final PerformChangeOperation perform, IWorkspace workspace) throws CoreException {
 		workspace.run(perform, new NullProgressMonitor());
 	}

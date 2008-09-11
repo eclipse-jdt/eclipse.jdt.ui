@@ -108,7 +108,7 @@ public class TestDelta implements IJavaElementDelta {
 
 	/**
 	 * Create the parent deltas for an IPackageFragment.
-	 * 
+	 *
 	 * @param frag
 	 * @param delta
 	 * @return TestDelta
@@ -133,7 +133,7 @@ public class TestDelta implements IJavaElementDelta {
 	/**
 	 * Create a delta for a list of ICompilationUnits, all the parent deltas
 	 * from the JavaModel down are created as well.
-	 * 
+	 *
 	 * @param cu
 	 * @param parent
 	 * @param action
@@ -153,7 +153,7 @@ public class TestDelta implements IJavaElementDelta {
 
 	/**
 	 * Creates a delta for a PackageFragment from the JavaModel down.
-	 * 
+	 *
 	 * @param frag
 	 * @param action
 	 * @return IJavaElementDelta
@@ -162,7 +162,7 @@ public class TestDelta implements IJavaElementDelta {
 		TestDelta delta= new TestDelta(action, frag);
 		return createParentDeltas(frag, delta);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.IJavaElementDelta#getCompilationUnitAST()
 	 */

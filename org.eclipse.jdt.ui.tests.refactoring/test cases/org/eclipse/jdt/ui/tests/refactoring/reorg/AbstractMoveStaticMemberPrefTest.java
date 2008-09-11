@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -20,15 +22,13 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersPr
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-
 
 public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractMoveStaticMemberPrefTest(String name) {
 		super(name);
 	}
-	
+
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IType type= cunit.findPrimaryType();
@@ -41,20 +41,20 @@ public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerfor
 		buf.append("public class Dest {\n");
 		buf.append("}\n");
 		ICompilationUnit destination= destPack.createCompilationUnit("Dest.java", buf.toString(), false, null);
-		
+
 		processor.setDestinationTypeFullyQualifiedName(destination.findPrimaryType().getFullyQualifiedName());
 		executeRefactoring(new MoveRefactoring(processor), measure);
 	}
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
-		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null); 
+		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package source;\n");
 		buf.append("public class A {\n");
 		buf.append("    public static final int VALUE= 10;\n");
 		buf.append("}\n");
 		ICompilationUnit result= source.createCompilationUnit("A.java", buf.toString(), false, null);
-	
+
 		IPackageFragment references= fTestProject.getSourceFolder().createPackageFragment("ref", false, null);
 		for(int i= 0; i < numberOfCus; i++) {
 			createReferenceCu(references, i, numberOfRefs);

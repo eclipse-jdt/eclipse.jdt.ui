@@ -23,7 +23,7 @@ public class RerunAction extends Action {
 	private String fTestName;
 	private TestRunnerViewPart fTestRunner;
 	private String fLaunchMode;
-	
+
 	/**
 	 * Constructor for RerunAction.
 	 * @param actionName the name of the action
@@ -35,7 +35,7 @@ public class RerunAction extends Action {
 	 */
 	public RerunAction(String actionName, TestRunnerViewPart runner, String testId, String className, String testName,
 			String launchMode) {
-		super(actionName); 
+		super(actionName);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
 		fTestRunner= runner;
 		fTestId= testId;

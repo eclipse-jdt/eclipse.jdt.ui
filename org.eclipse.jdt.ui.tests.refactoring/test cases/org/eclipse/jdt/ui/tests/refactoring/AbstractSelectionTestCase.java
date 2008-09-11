@@ -45,15 +45,15 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	public static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
 	public static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
 	public static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
-	
+
 	protected static final int VALID_SELECTION=     1;
 	protected static final int INVALID_SELECTION=   2;
 	protected static final int COMPARE_WITH_OUTPUT= 3;
-	
+
 	private boolean fIgnoreSelectionMarker;
 	private int[] fSelection;
 	protected boolean fIsPreDeltaTest;
-	
+
 	public AbstractSelectionTestCase(String name) {
 		this(name, false);
 	}
@@ -67,20 +67,20 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		super.setUp();
 		fIsPreDeltaTest= false;
 	}
-	
+
 	protected int[] getSelection() {
 		return fSelection;
 	}
-	
+
 	protected ITextSelection getTextSelection() {
 		int[] s= getSelection();
 		return new TextSelection(s[0], s[1]);
 	}
-	
+
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
-	
+
 	protected String getFileContents(InputStream in) throws IOException {
 		String result= super.getFileContents(in);
 		initializeSelection(result);
@@ -90,7 +90,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		}
 		return result;
 	}
-	
+
 	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, int mode, final String out, boolean doUndo) throws Exception {
 		IProgressMonitor pm= new NullProgressMonitor();
 		switch (mode) {
@@ -104,7 +104,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				IUndoManager undoManager= RefactoringCore.getUndoManager();
 				undoManager.flush();
 				String original= unit.getSource();
-				
+
 				final PerformRefactoringOperation op= new PerformRefactoringOperation(
 					refactoring, getCheckingStyle());
 				if (fIsPreDeltaTest) {
@@ -139,24 +139,24 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 					assertTrue("Undo manager is empty", undoManager.anythingToRedo());
 					compareSource(original, unit.getSource());
 				}
-				break;		
+				break;
 		}
 	}
-	
+
 	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws CoreException {
 		CheckConditionsOperation op= new CheckConditionsOperation(refactoring, getCheckingStyle());
 		op.run(new NullProgressMonitor());
 		return op.getStatus();
 	}
-	
+
 	protected int getCheckingStyle() {
 		return CheckConditionsOperation.ALL_CONDITIONS;
 	}
-	
+
 	protected void clearPreDelta() {
 		TestModelProvider.clearDelta();
 	}
-	
+
 	private void initializeSelection(String source) {
 		int start= -1;
 		int end= -1;
@@ -170,31 +170,31 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		} else if (excludingStart > includingStart && includingStart != -1) {
 			excludingStart= -1;
 		}
-		
+
 		if (includingEnd < excludingEnd) {
 			includingEnd= -1;
 		} else if (excludingEnd < includingEnd) {
 			excludingEnd= -1;
 		}
-		
+
 		if (includingStart != -1) {
 			start= includingStart;
 		} else {
 			start= excludingStart + SQUARE_BRACKET_CLOSE_LENGTH;
 		}
-		
+
 		if (excludingEnd != -1) {
 			end= excludingEnd;
 		} else {
 			end= includingEnd + SQUARE_BRACKET_CLOSE_LENGTH;
 		}
-		
+
 		assertTrue("Selection invalid", start >= 0 && end >= 0 && end >= start);
-		
-		fSelection= new int[] { 
+
+		fSelection= new int[] {
 			start - (fIgnoreSelectionMarker ? SQUARE_BRACKET_CLOSE_LENGTH : 0),
 			end - start
-		}; 
+		};
 		// System.out.println("|"+ source.substring(result[0], result[0] + result[1]) + "|");
 	}
 }

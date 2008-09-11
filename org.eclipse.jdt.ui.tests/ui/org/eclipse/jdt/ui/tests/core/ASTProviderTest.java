@@ -13,12 +13,14 @@ package org.eclipse.jdt.ui.tests.core;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
@@ -38,19 +40,16 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-
 /**
  * Tests the AST provider.
- * 
+ *
  * @since 3.3
  */
 public class ASTProviderTest extends CoreTests {
-	
-	
+
+
 	private static final class AddFieldRefactoring extends Refactoring {
-		
+
 		private final ICompilationUnit fCu;
 		private final int fFieldNumber;
 
@@ -69,11 +68,11 @@ public class ASTProviderTest extends CoreTests {
 
 		public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 			CompilationUnitChange result= new CompilationUnitChange("", fCu);
-			
+
 			String text= "  private int " + getFieldName(fFieldNumber) + "=1;\n";
 			int position= 35 + (fFieldNumber * text.length());
 			result.setEdit(new ReplaceEdit(position, 0, text));
-			
+
 			return result;
 		}
 
@@ -84,18 +83,18 @@ public class ASTProviderTest extends CoreTests {
 		private static String getFieldName(int number) {
 			return "a"+getNormalizeNumber(number);
 		}
-		
+
 	}
 
 	private static final Class THIS= ASTProviderTest.class;
-	
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
 	public ASTProviderTest(String name) {
 		super(name);
 	}
-	
+
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -103,7 +102,7 @@ public class ASTProviderTest extends CoreTests {
 	public static Test suite() {
 		return allTests();
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
@@ -118,7 +117,7 @@ public class ASTProviderTest extends CoreTests {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-	
+
 	public void testBug181257() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -126,9 +125,9 @@ public class ASTProviderTest extends CoreTests {
 		buf.append("public class E1 {\n");
 		buf.append("}\n");
 		final ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-		
+
 		JavaUI.openInEditor(cu);
-		
+
 		for (int i= 0; i < 100; i++) {
 			String expected= cu.getBuffer().getContents();
 			CompilationUnit ast= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_NO, null);
@@ -140,14 +139,14 @@ public class ASTProviderTest extends CoreTests {
 				System.out.println(expected);
 				assertEquals(expected, actual);
 			}
-			
+
 			Refactoring refactoring= new AddFieldRefactoring(cu, i);
-			
+
 			refactoring.checkAllConditions(new NullProgressMonitor());
 			PerformChangeOperation operation= new PerformChangeOperation(new CreateChangeOperation(refactoring));
 			operation.run(new NullProgressMonitor());
 		}
-		
+
 		cu.getBuffer().save(null, true);
 	}
 

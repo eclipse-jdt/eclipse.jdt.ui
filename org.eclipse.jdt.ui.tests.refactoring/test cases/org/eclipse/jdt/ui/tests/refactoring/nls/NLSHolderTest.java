@@ -20,14 +20,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class NLSHolderTest extends TestCase {
 
@@ -63,7 +62,7 @@ public class NLSHolderTest extends TestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
 		pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);
-		
+
 		CompilationUnit astRoot= ASTCreator.createAST(cu, null);
 		NLSHint hint= new NLSHint(cu, astRoot);
 		NLSSubstitution[] substitution= hint.getSubstitutions();

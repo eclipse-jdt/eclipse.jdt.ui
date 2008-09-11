@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.buildpath;
 
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -25,18 +19,17 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
-import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
@@ -44,6 +37,13 @@ import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.PixelConverter;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
+import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
+import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JUnitContainerWizardPage extends NewElementWizardPage implements IClasspathContainerPage, IClasspathContainerPageExtension {
 
@@ -58,7 +58,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		setTitle(JUnitMessages.JUnitContainerWizardPage_wizard_title);
 		setDescription(JUnitMessages.JUnitContainerWizardPage_wizard_description);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
-		
+
 		fContainerEntryResult= JavaCore.newContainerEntry(JUnitContainerInitializer.JUNIT3_PATH);
 	}
 
@@ -73,7 +73,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 			name += '1';
 		}
 	}
-	
+
 	public boolean finish() {
 		try {
 			IJavaProject[] javaProjects= new IJavaProject[] { getPlaceholderProject() };
@@ -96,28 +96,28 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 
 	public void createControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
-		
+
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		
+
 		composite.setLayout(new GridLayout(2, false));
-		
+
 		Label label= new Label(composite, SWT.NONE);
 		label.setFont(composite.getFont());
 		label.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
 		label.setText(JUnitMessages.JUnitContainerWizardPage_combo_label);
-		
+
 		fVersionCombo= new Combo(composite, SWT.READ_ONLY);
 		fVersionCombo.setItems(new String[] {
 				JUnitMessages.JUnitContainerWizardPage_option_junit3,
 				JUnitMessages.JUnitContainerWizardPage_option_junit4
 		});
 		fVersionCombo.setFont(composite.getFont());
-		
+
 		GridData data= new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(15);
 		fVersionCombo.setLayoutData(data);
-		
+
 		if (fContainerEntryResult != null && JUnitContainerInitializer.JUNIT4_PATH.equals(fContainerEntryResult.getPath())) {
 			fVersionCombo.select(1);
 		} else {
@@ -128,37 +128,37 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 				doSelectionChanged();
 			}
 		});
-		
+
 		label= new Label(composite, SWT.NONE);
 		label.setFont(composite.getFont());
 		label.setText(JUnitMessages.JUnitContainerWizardPage_resolved_label);
 		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
-		
+
 		fResolvedPath= new Label(composite, SWT.WRAP);
 		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(60);
 		fResolvedPath.setFont(composite.getFont());
 		fResolvedPath.setLayoutData(data);
-		
+
 		label= new Label(composite, SWT.NONE);
 		label.setFont(composite.getFont());
 		label.setText(JUnitMessages.JUnitContainerWizardPage_source_location_label);
 		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
-		
+
 		fResolvedSourcePath= new Label(composite, SWT.WRAP);
 		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(60);
 		fResolvedSourcePath.setFont(composite.getFont());
 		fResolvedSourcePath.setLayoutData(data);
-		
+
 		doSelectionChanged();
-		
+
 		setControl(composite);
 	}
 
 	protected void doSelectionChanged() {
 		JUnitStatus status= new JUnitStatus();
-		
+
 		IClasspathEntry libEntry;
 		IPath containerPath;
 		if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 1) {
@@ -168,7 +168,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 			containerPath= JUnitContainerInitializer.JUNIT3_PATH;
 			libEntry= BuildPathSupport.getJUnit3LibraryEntry();
 		}
-		
+
 		if (libEntry == null) {
 			status.setError(JUnitMessages.JUnitContainerWizardPage_error_version_not_available);
 		} else if (JUnitContainerInitializer.JUNIT4_PATH.equals(containerPath)) {
@@ -177,7 +177,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 			}
 		}
 		fContainerEntryResult= JavaCore.newContainerEntry(containerPath);
-		
+
 		if (fResolvedPath != null && !fResolvedPath.isDisposed()) {
 			if (libEntry != null) {
 				fResolvedPath.setText(getPathLabel(libEntry.getPath()));
@@ -192,10 +192,10 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 				fResolvedSourcePath.setText(JUnitMessages.JUnitContainerWizardPage_source_not_found);
 			}
 		}
-		
+
 		updateStatus(status);
 	}
-	
+
 	private String getPathLabel(IPath path) {
 		StringBuffer buf= new StringBuffer(BasicElementLabels.getResourceName(path.lastSegment()));
 		buf.append(JavaElementLabels.CONCAT_STRING);

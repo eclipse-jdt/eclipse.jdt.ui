@@ -29,20 +29,20 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class TestKindRegistry {
-	
+
 	public static final String JUNIT3_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit3"; //$NON-NLS-1$
 	public static final String JUNIT4_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit4"; //$NON-NLS-1$
 
 	public static TestKindRegistry getDefault() {
 		if (fgRegistry != null)
 			return fgRegistry;
-		
+
 		fgRegistry= new TestKindRegistry(Platform.getExtensionRegistry().getExtensionPoint(JUnitPlugin.ID_EXTENSION_POINT_TEST_KINDS));
 		return fgRegistry;
 	}
 
 	private static TestKindRegistry fgRegistry;
-	
+
 	private final IExtensionPoint fPoint;
 	private ArrayList/*<TestKind>*/ fTestKinds;
 
@@ -58,13 +58,13 @@ public class TestKindRegistry {
 	private void loadKinds() {
 		if (fTestKinds != null)
 			return;
-		
+
 		ArrayList items= new ArrayList();
 		for (Iterator iter= getConfigurationElements().iterator(); iter.hasNext();) {
 			IConfigurationElement element= (IConfigurationElement) iter.next();
 			items.add(new TestKind(element));
 		}
-		
+
 		Collections.sort(items, new Comparator() {
 			public int compare(Object arg0, Object arg1) {
 				TestKind kind0 = (TestKind) arg0;
@@ -104,11 +104,11 @@ public class TestKindRegistry {
 		}
 		return ITestKind.NULL;
 	}
-	
+
 	public static String getContainerTestKindId(IJavaElement element) {
 		return element != null && TestSearchEngine.hasTestAnnotation(element.getJavaProject()) ? JUNIT4_TEST_KIND_ID : JUNIT3_TEST_KIND_ID;
 	}
-	
+
 	public static ITestKind getContainerTestKind(IJavaElement element) {
 		return getDefault().getKind(getContainerTestKindId(element));
 	}

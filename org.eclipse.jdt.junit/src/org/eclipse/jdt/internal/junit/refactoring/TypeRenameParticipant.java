@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 public class TypeRenameParticipant extends JUnitRenameParticipant {
 

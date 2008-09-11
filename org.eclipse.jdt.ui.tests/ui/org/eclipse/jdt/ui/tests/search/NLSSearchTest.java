@@ -19,23 +19,23 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -51,7 +51,7 @@ public class NLSSearchTest extends TestCase {
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(NLSSearchTest.class));
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
@@ -217,7 +217,7 @@ public class NLSSearchTest extends TestCase {
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
-		
+
 		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource());
 		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource());
 	}
@@ -250,10 +250,10 @@ public class NLSSearchTest extends TestCase {
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);
-		
+
 		NLSSearchTestHelper.assertHasDuplicateKey(accessor, propertiesFile, "Client_s1", propertiesFile);
 	}
-	
+
 	public void testBug152604() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -282,7 +282,7 @@ public class NLSSearchTest extends TestCase {
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
-	
+
 	public void testBug133810() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -308,19 +308,19 @@ public class NLSSearchTest extends TestCase {
 		buf= new StringBuffer();
 		buf.append("Client_s2=s1\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
-		
+
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
 			manager.connect(propertiesFile.getFullPath(), LocationKind.IFILE, new NullProgressMonitor());
 			ITextFileBuffer buffer= manager.getTextFileBuffer(propertiesFile.getFullPath(), LocationKind.IFILE);
 			buffer.getDocument().replace(8, 1, "1");
-			
+
 			NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 		} finally {
 			manager.disconnect(propertiesFile.getFullPath(), LocationKind.IFILE, new NullProgressMonitor());
 		}
 	}
-	
+
 	public void testBug185178() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

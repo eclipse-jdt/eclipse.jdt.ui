@@ -58,7 +58,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
-	
+
 	public static Test suite() {
 		return allTests();
 	}
@@ -142,7 +142,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 				cu, "package p;\nimport p.another.Messages;\nclass Test {String hello=p.Messages.nonDefault(\"test0\");} //$NON-NLS-1$"); //$NON-NLS-1$
 		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), "test0=helloworld\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	private void createDefaultAccessor(IPackageFragment pack1) throws JavaModelException {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -154,13 +154,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 	}
-	
+
 	public void testExternalizedToIgnore() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("A.1=Hello1\n");
@@ -185,7 +185,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		substitutions[0].setState(NLSSubstitution.IGNORED);
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("A.2=Hello2\n");
 		buf.append("A.3=Hello3\n");
@@ -204,10 +204,10 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 	public void testInsertToDuplicate() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
@@ -229,12 +229,12 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		NLSSubstitution[] substitutions= nls.getSubstitutions();
 		assertEquals("number of substitutions", 3, substitutions.length);
 		NLSSubstitution sub= substitutions[2];
-		
+
 		sub.setState(NLSSubstitution.EXTERNALIZED);
 		sub.setKey("1");
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -250,13 +250,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
+
 	public void testRenameToDuplicate() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
@@ -283,7 +283,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		sub.setValue("Hello1");
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -302,10 +302,10 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 
 	public void testRenameDuplicate() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
@@ -331,7 +331,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		sub.setValue("Hello3");
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -348,13 +348,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
+
 	public void testInternalizeDuplicate() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
@@ -379,7 +379,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		sub.setState(NLSSubstitution.INTERNALIZED);
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -395,13 +395,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
+
 	public void testInternalizeAndInsert() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
@@ -424,13 +424,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		assertEquals("number of substitutions", 3, substitutions.length);
 		NLSSubstitution sub= substitutions[0];
 		sub.setState(NLSSubstitution.INTERNALIZED);
-		
+
 		NLSSubstitution sub2= substitutions[2];
 		sub2.setState(NLSSubstitution.EXTERNALIZED);
 		sub2.setKey("1");
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -446,14 +446,14 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
-	
+
+
 	public void testAddMissing1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
@@ -478,7 +478,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		sub.setValue("Hello3");
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -495,13 +495,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
+
 	public void testAddMissing2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
@@ -524,12 +524,12 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		assertEquals("number of substitutions", 3, substitutions.length);
 		NLSSubstitution sub= substitutions[1];
 		sub.setValue("Hello22");
-		
+
 		NLSSubstitution sub2= substitutions[2];
 		sub2.setValue("Hello3");
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello22\n");
@@ -546,13 +546,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
+
 	public void testNoNewLineAtEnd() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1");
@@ -576,7 +576,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		sub.setKey("2");
 
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -591,13 +591,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
+
 	public void testTwoInsertsNoNewLineAtEnd() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		
+
 		// Accessor class
 		createDefaultAccessor(pack1);
-		
+
 		// property file
 		StringBuffer buf= new StringBuffer();
 		buf.append("Test.1=Hello1");
@@ -624,9 +624,9 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		sub= substitutions[2];
 		sub.setState(NLSSubstitution.EXTERNALIZED);
 		sub.setKey("3");
-		
+
 		performChange(nls);
-		
+
 		buf= new StringBuffer();
 		buf.append("Test.1=Hello1\n");
 		buf.append("Test.2=Hello2\n");
@@ -643,7 +643,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		buf.append("}\n");
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
-	
+
 	private IFile createPropertyFile(IPackageFragment pack, String name, String content) throws UnsupportedEncodingException, CoreException {
 		ByteArrayInputStream is= new ByteArrayInputStream(content.getBytes("8859_1"));
 		IFile file= ((IFolder) pack.getResource()).getFile(name);

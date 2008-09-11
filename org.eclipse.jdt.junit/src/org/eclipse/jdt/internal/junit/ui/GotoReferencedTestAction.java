@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -38,13 +38,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
-import org.eclipse.jdt.internal.junit.Messages;
 
 /**
  * Shows a dialog with test methods that refer to the selection.
@@ -52,20 +52,20 @@ import org.eclipse.jdt.internal.junit.Messages;
 public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate {
 	ISelection fSelection;
 	IWorkbenchWindow fWorkbench;
-	
+
 	private void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
 		if (elements.length == 0) {
-			MessageDialog.openInformation(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_message); 
+			MessageDialog.openInformation(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_message);
 			return;
 		}
 		try {
 			run(elements);
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_error, e.getStatus()); 
+			ErrorDialog.openError(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_error, e.getStatus());
 		}
 	}
-			
+
 	private void runWithEditorSelection() {
 		try {
 			JavaEditor editor= getActiveEditor();
@@ -76,31 +76,31 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE) {
 		 		element= SelectionConverter.getTypeAtOffset(editor);
 		 		if (element == null) {
-					MessageDialog.openInformation(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_error_nomethod); 
+					MessageDialog.openInformation(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_error_nomethod);
 					return;
 		 		}
 			}
 			run(new IMember[] { (IMember)element });
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_error, e.getStatus()); 
+			ErrorDialog.openError(getShell(), JUnitMessages.GotoReferencedTestAction_dialog_title, JUnitMessages.GotoReferencedTestAction_dialog_error, e.getStatus());
 		}
 	}
 
 	private void run(IJavaElement[] elements) throws PartInitException, JavaModelException {
 		IJavaElement element= elements[0];
-		
-		SelectionStatusDialog dialog = new TestMethodSelectionDialog(getShell(), element); 
-		dialog.setTitle(JUnitMessages.GotoReferencedTestAction_selectdialog_title);  
-		String msg= Messages.format(JUnitMessages.GotoReferencedTestAction_dialog_select_message, JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT)); 
-		dialog.setMessage(msg); 
-		
-		if (dialog.open() == Window.CANCEL) 
+
+		SelectionStatusDialog dialog = new TestMethodSelectionDialog(getShell(), element);
+		dialog.setTitle(JUnitMessages.GotoReferencedTestAction_selectdialog_title);
+		String msg= Messages.format(JUnitMessages.GotoReferencedTestAction_dialog_select_message, JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT));
+		dialog.setMessage(msg);
+
+		if (dialog.open() == Window.CANCEL)
 			return;
-	
+
 		Object result = dialog.getFirstResult();
-		if (result == null) 
+		if (result == null)
 			return;
-				
+
 		openElement((IJavaElement)result);
 	}
 
@@ -108,15 +108,15 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		IEditorPart part= JavaUI.openInEditor(result);
 		JavaUI.revealInEditor(part, result);
 	}
-		
+
 	private IJavaElement[] getSelectedElements(IStructuredSelection selection) {
 		List elements= selection.toList();
 		int size= elements.size();
 		if (size == 0)
 			return new IJavaElement[0];
-			
+
 		ArrayList result= new ArrayList(size);
-			
+
 		for (int i= 0; i < size; i++) {
 			Object e= elements.get(i);
 			if (e instanceof ICompilationUnit) {
@@ -128,7 +128,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 				}
 				for (int j= 0; j < types.length; j++) {
 					result.add(types[j]);
-				} 
+				}
 			}
 			else if (e instanceof IMethod || e instanceof IType || e instanceof IField) {
 				result.add(e);
@@ -138,34 +138,34 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		}
 		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
 	}
-		
+
 	public void run(IAction action) {
 		if (fSelection instanceof IStructuredSelection)
 			run((IStructuredSelection)fSelection);
 		else {
 			runWithEditorSelection();
 		}
-			
+
 	}
-	
+
 	public void selectionChanged(IAction action, ISelection selection) {
 		fSelection= selection;
 		action.setEnabled(getActiveEditor() != null);
 	}
-		
+
 	private Shell getShell() {
 		if (fWorkbench != null)
 			return fWorkbench.getShell();
 		return JUnitPlugin.getActiveWorkbenchShell();
 	}
-	
+
 	public void dispose() {
 	}
-	
+
 	public void init(IWorkbenchWindow window) {
 		fWorkbench= window;
 	}
-	
+
 	private JavaEditor getActiveEditor() {
 		IEditorPart editor= fWorkbench.getActivePage().getActiveEditor();
 		if (editor instanceof JavaEditor)

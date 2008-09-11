@@ -33,41 +33,41 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class TabExample {
 	private Shell fShell;
-	
+
 	public TabExample() {
 	}
-	
+
 	public TabExample close () {
 		if ((fShell != null) && (!fShell.isDisposed ())) fShell.dispose ();
 		fShell= null;
 		return this;
 	}
-	
+
 	public TabExample open () {
 		fShell= new Shell ();
 		fShell.setText("TabTest");
 		fShell.setLayout(new GridLayout());
-		
-		TabFolder folder= new TabFolder(fShell, SWT.NONE);	
+
+		TabFolder folder= new TabFolder(fShell, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		//folder.setLayout(new PageContainerFillLayout(0, 0, 20, 20));
 		//folder.setLayout(new FillLayout());
-	
+
 		/*folder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				turnToPage(event);
 			}
-		});*/	
-				
+		});*/
+
 		TabItem item;
 		Label label;
-		
+
 		item= new TabItem(folder, SWT.NONE);
 		item.setText("Tab0");
-		
-		String[] addButtons= new String[] { 
+
+		String[] addButtons= new String[] {
 			/* 0 */ "Add1",
-			/* 1 */ "Add2",			
+			/* 1 */ "Add2",
 			/* 2 */ null,
 			/* 3 */ "Remove"
 		};
@@ -78,27 +78,27 @@ public class TabExample {
 
 		Composite c1= new Composite(folder, SWT.NONE);
 		LayoutUtil.doDefaultLayout(c1, new DialogField[] { list }, true);
-		
+
 		item.setControl(c1);
-		
+
 		item= new TabItem(folder, SWT.NONE);
 		item.setText("Tab1");
 		label= new Label(folder, SWT.LEFT);
 		label.setText("Tab1");
 		item.setControl(label);
-		
+
 		item= new TabItem(folder, SWT.NONE);
 		item.setText("Tab2");
 		label= new Label(folder, SWT.LEFT);
 		label.setText("Tab2");
 		item.setControl(label);
-		
+
 		item= new TabItem(folder, SWT.NONE);
 		item.setText("Tab3");
 		label= new Label(folder, SWT.LEFT);
 		label.setText("Tab3");
 		item.setControl(label);
-				
+
 		fShell.setSize(400,500);
 		fShell.open ();
 		return this;
@@ -106,18 +106,18 @@ public class TabExample {
 
 
 	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
-		
+
 		// -------- IStringButtonAdapter
 		public void changeControlPressed(DialogField field) {
-		}		
-				
+		}
+
 		// -------- IListAdapter
 		public void customButtonPressed(ListDialogField field, int index) {
 		}
-		
+
 		public void selectionChanged(ListDialogField field) {
 		}
-		
+
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
 		}
@@ -127,7 +127,7 @@ public class TabExample {
 		public void doubleClicked(ListDialogField field) {
 		}
 	}
-	
+
 	public TabExample run () {
 		Display display= fShell.getDisplay ();
 		while (!fShell.isDisposed ()) {
@@ -135,7 +135,7 @@ public class TabExample {
 		}
 		return this;
 	}
-	
+
 	public static void main(java.lang.String[] args) {
 		new TabExample().open().run().close();
 	}

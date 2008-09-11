@@ -12,6 +12,8 @@ package org.eclipse.jdt.ui.examples;
 
 import java.util.HashMap;
 
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IMarker;
@@ -23,6 +25,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionDelegate;
+
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,8 +34,6 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /** In plugin.xml:
     <extension
@@ -70,10 +71,10 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 public class AddTestMarkersAction extends Action implements IActionDelegate {
 
 	public static final String MARKER_TYPE= "org.eclipse.jdt.ui.tests.testmarker";
-	
+
 	private ICompilationUnit fCompilationUnit;
-	
-	
+
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
@@ -81,10 +82,10 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 	public void run(IAction action) {
 		try {
 			JavaUI.openInEditor(fCompilationUnit);
-			
+
 			IScanner scanner= ToolFactory.createScanner(true, false, false, true);
 			scanner.setSource(fCompilationUnit.getSource().toCharArray());
-			
+
 			int count= 0;
 			int tok;
 			do {
@@ -97,16 +98,16 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 					count++;
 				}
 			} while (tok != ITerminalSymbols.TokenNameEOF);
-			
+
 			MessageDialog.openInformation(null, "Test Markers", count + " markers added");
 		} catch (Exception e) {
 			JavaTestPlugin.log(e);
 		}
-		
+
 	}
 
 	public static boolean isComment(int token) {
-		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC 
+		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC
 			|| token == ITerminalSymbols.TokenNameCOMMENT_LINE;
 	}
 
@@ -119,12 +120,12 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 			Object object= ((IStructuredSelection) selection).getFirstElement();
 			if (object instanceof ICompilationUnit) {
 				fCompilationUnit= (ICompilationUnit) object;
-				
+
 			}
 		}
 	}
-	
-	
+
+
 	private void createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException {
 		HashMap map= new HashMap();
 		map.put(IMarker.LOCATION, cu.getElementName());
@@ -133,8 +134,8 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 		map.put(IMarker.LINE_NUMBER, new Integer(line));
 		map.put(IMarker.CHAR_START, new Integer(offset));
 		map.put(IMarker.CHAR_END, new Integer(offset + len));
-	
+
 		MarkerUtilities.createMarker(cu.getResource(), map, MARKER_TYPE);
-	}	
+	}
 
 }

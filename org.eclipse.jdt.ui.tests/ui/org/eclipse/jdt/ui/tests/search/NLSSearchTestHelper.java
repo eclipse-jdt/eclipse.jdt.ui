@@ -37,19 +37,19 @@ public class NLSSearchTestHelper {
 	public static void assertNumberOfProblems(ICompilationUnit accessor, IFile propertiesFile, int expected) {
 		assertNumberResults(searchProblems(accessor, propertiesFile), expected);
 	}
-	
+
 	public static void assertHasUndefinedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws IOException, CoreException {
 		assertResultHasUndefinedKey(key, file, searchProblems(accessor, propertiesFile));
 	}
-	
+
 	public static void assertHasUnusedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws IOException, CoreException {
 		assertResultHasUnusedKey(key, file, searchProblems(accessor, propertiesFile));
 	}
-	
+
 	public static void assertHasDuplicateKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws CoreException, IOException {
 		assertResultHasDuplicateKey(key, file, searchProblems(accessor, propertiesFile));
 	}
-	
+
 	private static NLSSearchResult searchProblems(ICompilationUnit accessor, IFile propertiesFile) {
 		IType type= accessor.getType("Accessor");
 		NLSSearchQuery query= new NLSSearchQuery((new IType[] {type}), (new IFile[] {propertiesFile}), SearchEngine.createWorkspaceScope(), ""); //$NON-NLS-1$
@@ -62,7 +62,7 @@ public class NLSSearchTestHelper {
 		int is= result.getElements().length;
 		Assert.assertTrue("Expected number of results is " + expected + " but was " + is, is == expected);
 	}
-	
+
 	private static void assertResultHasUndefinedKey(String key, IFile file, NLSSearchResult result) throws IOException, CoreException {
 		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
 
@@ -76,9 +76,9 @@ public class NLSSearchTestHelper {
 			}
 		}
 
-		Assert.assertTrue("No undefined key problem found for " + key + " in " + file.getName(), false);		
+		Assert.assertTrue("No undefined key problem found for " + key + " in " + file.getName(), false);
 	}
-	
+
 	private static void assertResultHasUnusedKey(String key, IFile file, NLSSearchResult result) throws IOException, CoreException {
 		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
 
@@ -98,7 +98,7 @@ public class NLSSearchTestHelper {
 			}
 		}
 
-		Assert.assertTrue("No unused key problem found for " + key + " in " + file.getName(), false);		
+		Assert.assertTrue("No unused key problem found for " + key + " in " + file.getName(), false);
 	}
 
 	private static String getContent(IFile entry) throws CoreException, IOException {

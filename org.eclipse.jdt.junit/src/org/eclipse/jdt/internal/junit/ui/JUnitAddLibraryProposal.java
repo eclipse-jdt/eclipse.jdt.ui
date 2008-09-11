@@ -13,13 +13,13 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
+
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -40,31 +42,29 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
-import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
-
 public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
-	
+
 	private final IInvocationContext fContext;
 	private final boolean fIsJunit4;
 	private final int fRelevance;
-	
+
 	public JUnitAddLibraryProposal(boolean isJunit4, IInvocationContext context, int relevance) {
 		fIsJunit4= isJunit4;
 		fContext= context;
 		fRelevance= relevance;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
 		return fRelevance;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
-	public void apply(IDocument document) {   
+	public void apply(IDocument document) {
 		IJavaProject project= fContext.getCompilationUnit().getJavaProject();
 		Shell shell= JUnitPlugin.getActiveWorkbenchShell();
 		try {
@@ -83,12 +83,12 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			String s= document.get(offset, length);
 			document.replace(offset, length, s);
 		} catch (CoreException e) {
-			ErrorDialog.openError(shell, JUnitMessages.JUnitAddLibraryProposal_title, JUnitMessages.JUnitAddLibraryProposal_cannotAdd, e.getStatus());  
+			ErrorDialog.openError(shell, JUnitMessages.JUnitAddLibraryProposal_title, JUnitMessages.JUnitAddLibraryProposal_cannotAdd, e.getStatus());
 		} catch (BadLocationException e) {
 			//ignore
 		}
 	}
-	
+
 	private static boolean addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry, IRunnableContext context) throws JavaModelException {
 		IClasspathEntry[] oldEntries= project.getRawClasspath();
 		ArrayList newEntries= new ArrayList(oldEntries.length + 1);
@@ -125,9 +125,9 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		if (!added) {
 			newEntries.add(entry);
 		}
-		
+
 		final IClasspathEntry[] newCPEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
-		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit] 
+		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit]
 		try {
 			context.run(true, false, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -141,8 +141,8 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			return true;
 		} catch (InvocationTargetException e) {
 			Throwable t = e.getTargetException();
-			if (t instanceof CoreException) {	
-				ErrorDialog.openError(shell, JUnitMessages.JUnitAddLibraryProposal_title, JUnitMessages.JUnitAddLibraryProposal_cannotAdd, ((CoreException)t).getStatus());  
+			if (t instanceof CoreException) {
+				ErrorDialog.openError(shell, JUnitMessages.JUnitAddLibraryProposal_title, JUnitMessages.JUnitAddLibraryProposal_cannotAdd, ((CoreException)t).getStatus());
 			}
 			return false;
 		} catch (InterruptedException e) {
@@ -150,41 +150,41 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		}
 
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
 	public Point getSelection(IDocument document) {
 		return new Point(fContext.getSelectionOffset(), fContext.getSelectionLength());
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
 		if (fIsJunit4) {
-			return JUnitMessages.JUnitAddLibraryProposal_junit4_info; 
+			return JUnitMessages.JUnitAddLibraryProposal_junit4_info;
 		}
-		return JUnitMessages.JUnitAddLibraryProposal_info; 
+		return JUnitMessages.JUnitAddLibraryProposal_info;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
 		if (fIsJunit4) {
-			return JUnitMessages.JUnitAddLibraryProposa_junit4_label; 
+			return JUnitMessages.JUnitAddLibraryProposa_junit4_label;
 		}
-		return JUnitMessages.JUnitAddLibraryProposal_label; 
+		return JUnitMessages.JUnitAddLibraryProposal_label;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
 		return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_LIBRARY);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
 	 */

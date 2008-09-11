@@ -12,6 +12,10 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,8 +23,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -50,10 +52,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
-
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.CheckedTableSelectionDialog;
@@ -62,11 +60,13 @@ import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.Resources;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 /**
  * An object contribution action that updates existing AllTests classes.
  */
 public class UpdateTestSuite implements IObjectActionDelegate {
-	
+
 	private Shell fShell;
 	private IPackageFragment fPack;
 	private ICompilationUnit fTestSuite;
@@ -74,7 +74,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	private static boolean fEmptySelectionAllowed= false;
 	private Object[] fSelectedTestCases;
 
-	private class UpdateAllTestsValidator implements ISelectionStatusValidator {	
+	private class UpdateAllTestsValidator implements ISelectionStatusValidator {
 		/*
 		 * @see ISelectionValidator#validate(Object[])
 		 */
@@ -88,26 +88,26 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			if (count == 0 && !fEmptySelectionAllowed) {
 				return new JUnitStatus(IStatus.ERROR, ""); //$NON-NLS-1$
 			}
-			
+
 			IStatus recursiveInclusionStatus= checkRecursiveSuiteInclusion(selection);
 			if (recursiveInclusionStatus != null && ! recursiveInclusionStatus.isOK())
 				return recursiveInclusionStatus;
-				
+
 			String message;
 			if (count == 1) {
-				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_one, new Integer(count)); 
+				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_one, new Integer(count));
 			} else {
-				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_many, new Integer(count)); 
+				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_many, new Integer(count));
 			}
 			return new JUnitStatus(IStatus.INFO, message);
 		}
-		
+
 		private IStatus checkRecursiveSuiteInclusion(Object[] selection){
 			IType suiteClass= fSuiteMethod.getDeclaringType();
 			for (int i= 0; i < selection.length; i++) {
 				if (selection[i] instanceof IType){
 					if (((IType)selection[i]).equals(suiteClass)){
-						return new JUnitStatus(IStatus.WARNING, WizardMessages.UpdateTestSuite_infinite_recursion); 
+						return new JUnitStatus(IStatus.WARNING, WizardMessages.UpdateTestSuite_infinite_recursion);
 					}
 				}
 			}
@@ -128,10 +128,10 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
-	public void run(IAction action) {		
+	public void run(IAction action) {
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		IStructuredContentProvider cprovider= new SuiteClassesContentProvider();
-	
+
 		/* find TestClasses already in Test Suite */
 		IType testSuiteType= fTestSuite.findPrimaryType();
 		fSuiteMethod= testSuiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
@@ -144,8 +144,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			if (getTestSuiteClassListRange(originalContent) != null) {
 				CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
 				dialog.setValidator(new UpdateAllTestsValidator());
-				dialog.setTitle(WizardMessages.UpdateAllTests_title); 
-				dialog.setMessage(WizardMessages.UpdateAllTests_message); 
+				dialog.setTitle(WizardMessages.UpdateAllTests_title);
+				dialog.setMessage(WizardMessages.UpdateAllTests_message);
 				dialog.setInitialSelections(cprovider.getElements(fPack));
 				dialog.setSize(60, 25);
 				dialog.setInput(fPack);
@@ -172,7 +172,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
-		fShell= JUnitPlugin.getActiveWorkbenchShell();		
+		fShell= JUnitPlugin.getActiveWorkbenchShell();
 		if (selection instanceof IStructuredSelection) {
 			Object testSuiteObj= ((IStructuredSelection) selection).getFirstElement();
 			if (testSuiteObj != null && testSuiteObj instanceof ICompilationUnit) {
@@ -184,13 +184,13 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			}
 		}
 	}
-	
+
 	private void updateTestCasesInSuite(IProgressMonitor monitor) {
 		try {
-			monitor.beginTask(WizardMessages.UpdateAllTests_beginTask, 5); 
+			monitor.beginTask(WizardMessages.UpdateAllTests_beginTask, 5);
 			if (! checkValidateEditStatus(fTestSuite, fShell))
 				return;
-				
+
 			ISourceRange range= fSuiteMethod.getSourceRange();
 			IDocument fullSource= new Document(fTestSuite.getBuffer().getContents());
 			String originalContent= fullSource.get(range.getOffset(), range.getLength());
@@ -211,14 +211,14 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				monitor.worked(1);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error); 
+			ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error);
 		} catch (BadLocationException e) {
 			Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
 		} finally{
 			monitor.done();
 		}
 	}
-	
+
 	public static TestSuiteClassListRange getTestSuiteClassListRange(String source) {
 		int start= source.indexOf(NewTestSuiteWizardPage.NON_COMMENT_START_MARKER);
 		if (start <= -1)
@@ -253,19 +253,19 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		suite.append("\n"+NewTestSuiteWizardPage.END_MARKER); //$NON-NLS-1$
 		return suite.toString();
 	}
-	
+
 	public static boolean checkValidateEditStatus(ICompilationUnit testSuiteCu, Shell shell){
 		IStatus status= validateModifiesFiles(getTestSuiteFile(testSuiteCu));
-		if (status.isOK())	
+		if (status.isOK())
 			return true;
-		ErrorDialog.openError(shell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_could_not_update, status); 
+		ErrorDialog.openError(shell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_could_not_update, status);
 		return false;
 	}
-	
+
 	private static IFile getTestSuiteFile(ICompilationUnit testSuiteCu) {
 		return (IFile) testSuiteCu.getResource();
 	}
-	
+
 	private static IStatus validateModifiesFiles(IFile fileToModify) {
 		IFile[] filesToModify= {fileToModify};
 		IStatus status= Resources.checkInSync(filesToModify);
@@ -289,12 +289,12 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 
 	private void cannotUpdateSuiteError() {
-		MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotUpdate_errorDialog_title, 
-			Messages.format(WizardMessages.UpdateAllTests_cannotUpdate_errorDialog_message, new String[] {NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER})); 
+		MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotUpdate_errorDialog_title,
+			Messages.format(WizardMessages.UpdateAllTests_cannotUpdate_errorDialog_message, new String[] {NewTestSuiteWizardPage.START_MARKER, NewTestSuiteWizardPage.END_MARKER}));
 
 	}
 
 	private void noSuiteError() {
-		MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_errorDialog_message); 
+		MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_errorDialog_message);
 	}
 }

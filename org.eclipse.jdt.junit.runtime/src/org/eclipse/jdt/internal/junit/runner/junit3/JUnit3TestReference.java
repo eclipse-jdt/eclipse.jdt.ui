@@ -39,9 +39,9 @@ import org.eclipse.jdt.internal.junit.runner.TestExecution;
 import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
 
 public class JUnit3TestReference implements ITestReference {
-	
+
 	private final Test fTest;
-	
+
 	public static Object getField(Object object, String fieldName) {
 		Class clazz= object.getClass();
 		try {
@@ -62,7 +62,7 @@ public class JUnit3TestReference implements ITestReference {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.junit.runner.TestReference#countTestCases()
 	 */
 	public int countTestCases() {
@@ -72,7 +72,7 @@ public class JUnit3TestReference implements ITestReference {
 	public boolean equals(Object obj) {
 		if (! (obj instanceof JUnit3TestReference))
 			return false;
-		
+
 		JUnit3TestReference ref= (JUnit3TestReference) obj;
 		return ref.fTest.equals(fTest);
 	}
@@ -83,7 +83,7 @@ public class JUnit3TestReference implements ITestReference {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jdt.internal.junit.runner.TestReference#getName()
 	 */
 	public String getName() {

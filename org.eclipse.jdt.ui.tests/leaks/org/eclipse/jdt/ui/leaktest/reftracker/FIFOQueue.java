@@ -15,17 +15,17 @@ import java.util.Arrays;
 
 
 public class FIFOQueue {
-	
+
 	private Object[] fStore;
 	private int fReadIndex;
 	private int fWriteIndex;
-	
+
 	public FIFOQueue(int initialSize) {
 		fStore= new Object[initialSize];
 		fReadIndex= 0;
 		fWriteIndex= 0;
 	}
-	
+
 	public void add(Object object) {
 		int pos= fWriteIndex;
 		int next= nextIndex(pos, fStore.length);
@@ -36,7 +36,7 @@ public class FIFOQueue {
 		fStore[pos]= object;
 		fWriteIndex= next;
 	}
-	
+
 	private int increaseCapacity() {
 		Object[] oldStore= fStore;
 		int oldLen= oldStore.length;
@@ -62,7 +62,7 @@ public class FIFOQueue {
 		fReadIndex= nextIndex(index, fStore.length);
 		return element;
 	}
-	
+
 	private static int nextIndex(int index, int max) {
 		int next= index + 1;
 		if (next == max) {
@@ -70,11 +70,11 @@ public class FIFOQueue {
 		}
 		return next;
 	}
-	
+
 	public boolean isEmpty() {
 		return fReadIndex == fWriteIndex;
 	}
-	
+
 	public int getSize() {
 		if (fReadIndex <= fWriteIndex) {
 			return fWriteIndex - fReadIndex;
@@ -82,7 +82,7 @@ public class FIFOQueue {
 			return fStore.length - fReadIndex + fWriteIndex;
 		}
 	}
-	
+
 	public void clear() {
 		Arrays.fill(fStore, null);
 		fReadIndex= 0;

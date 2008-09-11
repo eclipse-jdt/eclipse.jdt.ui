@@ -14,6 +14,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -24,13 +26,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 
 
 public class NameProposerTest extends TestCase {
-	
+
 	private static final Class THIS= NameProposerTest.class;
 
 	private IJavaProject fJProject1;
@@ -50,7 +50,7 @@ public class NameProposerTest extends TestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new NameProposerTest("testGetterSetterName"));
 			return suite;
-		}	
+		}
 	}
 
 	protected void setUp() throws Exception {
@@ -73,16 +73,16 @@ public class NameProposerTest extends TestCase {
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("  int fCount;\n");
-		buf.append("  static int fgSingleton;\n");		
+		buf.append("  static int fgSingleton;\n");
 		buf.append("  int foo;\n");
-		buf.append("\n");		
-		buf.append("  boolean fBlue;\n");		
+		buf.append("\n");
+		buf.append("  boolean fBlue;\n");
 		buf.append("  boolean modified;\n");
-		buf.append("  boolean isTouched;\n");		
+		buf.append("  boolean isTouched;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		IType type= cu.getType("C");
-		
+
 		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
@@ -94,25 +94,25 @@ public class NameProposerTest extends TestCase {
 		IField f4= type.getField("fBlue");
 		IField f5= type.getField("modified");
 		IField f6= type.getField("isTouched");
-		
+
 		assertEqualString("setCount", GetterSetterUtil.getSetterName(f1, excluded));
 		assertEqualString("getCount", GetterSetterUtil.getGetterName(f1, excluded));
 		assertEqualString("setSingleton", GetterSetterUtil.getSetterName(f2, excluded));
 		assertEqualString("getSingleton", GetterSetterUtil.getGetterName(f2, excluded));
 		assertEqualString("setFoo", GetterSetterUtil.getSetterName(f3, excluded));
 		assertEqualString("getFoo", GetterSetterUtil.getGetterName(f3, excluded));
-		
+
 		assertEqualString("setBlue", GetterSetterUtil.getSetterName(f4, excluded));
 		assertEqualString("isBlue", GetterSetterUtil.getGetterName(f4, excluded));
 		assertEqualString("setModified", GetterSetterUtil.getSetterName(f5, excluded));
 		assertEqualString("isModified", GetterSetterUtil.getGetterName(f5, excluded));
 		assertEqualString("setTouched", GetterSetterUtil.getSetterName(f6, excluded));
 		assertEqualString("isTouched", GetterSetterUtil.getGetterName(f6, excluded));
-				
+
 	}
-	
+
 	private void assertEqualString(String expected, String actual) {
 		assertEquals("Expected '" + expected + "', is '" + actual + "'", expected, actual);
-	}	
-	
+	}
+
 }

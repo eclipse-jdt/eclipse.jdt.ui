@@ -15,8 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,8 +25,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -57,6 +57,11 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
+import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
+
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
@@ -67,15 +72,10 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
-import org.eclipse.jdt.internal.junit.BasicElementLabels;
-import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
-
 public class JUnitQuickFixProcessor implements IQuickFixProcessor {
-		
+
 	private static final HashSet ASSERT_METHOD_NAMES= new HashSet();
-	
+
 	public JUnitQuickFixProcessor() {
 		ASSERT_METHOD_NAMES.add("fail"); //$NON-NLS-1$
 		ASSERT_METHOD_NAMES.add("assertTrue"); //$NON-NLS-1$
@@ -96,7 +96,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	public boolean hasCorrections(ICompilationUnit unit, int problemId) {
 		return problemId == IProblem.UndefinedType || problemId ==  IProblem.UndefinedMethod;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext, org.eclipse.jdt.ui.text.java.IProblemLocation[])
 	 */
@@ -116,7 +116,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		}
 		return (IJavaCompletionProposal[]) res.toArray(new IJavaCompletionProposal[res.size()]);
 	}
-		
+
 	private ArrayList getAddAssertImportProposals(IInvocationContext context, IProblemLocation problem, ArrayList proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args.length > 1) {
@@ -136,7 +136,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		try {
 			ICompilationUnit unit= context.getCompilationUnit();
 			String qualifiedName= null;
-			
+
 			String s= unit.getBuffer().getText(location.getOffset(), location.getLength());
 			if (s.equals("TestCase") || s.equals("TestSuite")) { //$NON-NLS-1$ //$NON-NLS-2$
 				qualifiedName= "junit.framework." + s; //$NON-NLS-1$
@@ -150,7 +150,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 					qualifiedName= "junit.framework.Test"; //$NON-NLS-1$
 				}
 			}
-			if (qualifiedName != null) {	
+			if (qualifiedName != null) {
 				IJavaProject javaProject= unit.getJavaProject();
 				if (javaProject.findType(qualifiedName) != null) {
 					return proposals;
@@ -173,7 +173,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
 			importRewrite.addImport(typeToImport);
 			return importRewrite;
-		}		
+		}
 		return null;
 	}
 
@@ -181,7 +181,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		if (!JUnitStubUtility.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
 			return false;
 		}
-		
+
 		ASTNode node= context.getCoveringNode();
 		while (node != null && !(node instanceof BodyDeclaration)) {
 			node= node.getParent();
@@ -199,7 +199,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		}
 		return false;
 	}
-	
+
 	private static class JUnitClasspathFixCorrectionProposal implements IJavaCompletionProposal {
 
 		private final ClasspathFixProposal fClasspathFixProposal;
@@ -211,13 +211,13 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			fClasspathFixProposal= cpfix;
 			fImportRewrite= rewrite;
 		}
-		
+
 		protected Change createChange() throws CoreException {
 			Change change= fClasspathFixProposal.createChange(null);
 			if (fImportRewrite != null) {
 				TextFileChange cuChange= new TextFileChange("Add import", (IFile) fImportRewrite.getCompilationUnit().getResource()); //$NON-NLS-1$
 				cuChange.setEdit(fImportRewrite.rewriteImports(null));
-				
+
 				CompositeChange composite= new CompositeChange(getDisplayString());
 				composite.add(change);
 				composite.add(cuChange);
@@ -225,7 +225,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			}
 			return change;
 		}
-		
+
 		public void apply(IDocument document) {
 			try {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
@@ -247,10 +247,10 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.JUnitQuickFixProcessor_apply_problem_title, JUnitMessages.JUnitQuickFixProcessor_apply_problem_description);
 			} catch (InterruptedException e) {
-				
+
 			}
 		}
-		
+
 		public String getAdditionalProposalInfo() {
 			return fClasspathFixProposal.getAdditionalProposalInfo();
 		}
@@ -275,9 +275,9 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			return null;
 		}
 	}
-	
+
 	private static class AddAssertProposal implements IJavaCompletionProposal {
-		
+
 		private final CompilationUnit fAstRoot;
 		private final String fMethodName;
 		private final int fRelevance;
@@ -287,7 +287,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			fMethodName= methodName;
 			fRelevance= relevance;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 		 */
@@ -345,5 +345,5 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			return null;
 		}
 	}
-	
+
 }

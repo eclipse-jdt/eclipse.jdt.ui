@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit;
 
+import org.eclipse.core.expressions.PropertyTester;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.core.expressions.PropertyTester;
 
 import org.eclipse.core.resources.IResource;
 
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 public class JUnitPropertyTester extends PropertyTester {
 
 	private static final String PROPERTY_IS_TEST= "isTest";	 //$NON-NLS-1$
-	
+
 	private static final String PROPERTY_CAN_LAUNCH_AS_JUNIT_TEST= "canLaunchAsJUnit"; //$NON-NLS-1$
 
 	/* (non-Javadoc)
@@ -45,7 +45,7 @@ public class JUnitPropertyTester extends PropertyTester {
 		if (!(receiver instanceof IAdaptable)) {
 			throw new IllegalArgumentException("Element must be of type 'IAdaptable', is " + receiver == null ? "null" : receiver.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 		IJavaElement element;
 		if (receiver instanceof IJavaElement) {
 			element= (IJavaElement) receiver;
@@ -64,14 +64,14 @@ public class JUnitPropertyTester extends PropertyTester {
 				}
 			}
 		}
-		if (PROPERTY_IS_TEST.equals(property)) { 
+		if (PROPERTY_IS_TEST.equals(property)) {
 			return isJUnitTest(element);
 		} else if (PROPERTY_CAN_LAUNCH_AS_JUNIT_TEST.equals(property)) {
 			return canLaunchAsJUnitTest(element);
 		}
 		throw new IllegalArgumentException("Unknown test property '" + property + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	private boolean canLaunchAsJUnitTest(IJavaElement element) {
 		try {
 			switch (element.getElementType()) {
@@ -79,7 +79,7 @@ public class JUnitPropertyTester extends PropertyTester {
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					return true; // can run, let test runner detect if there are tests
 				case IJavaElement.PACKAGE_FRAGMENT:
-					return ((IPackageFragment) element).hasChildren(); 
+					return ((IPackageFragment) element).hasChildren();
 				case IJavaElement.COMPILATION_UNIT:
 				case IJavaElement.CLASS_FILE:
 				case IJavaElement.TYPE:

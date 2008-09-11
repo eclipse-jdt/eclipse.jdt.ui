@@ -13,6 +13,8 @@ package org.eclipse.jdt.junit.tests;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.testplugin.util.DialogCheck;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.debug.core.DebugPlugin;
@@ -22,51 +24,48 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.debug.ui.ILaunchConfigurationTabGroup;
 
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-
-import org.eclipse.jdt.testplugin.util.DialogCheck;
-
-
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.launcher.JUnitTabGroup;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencePage;
 
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
 public class TestEnableAssertions extends TestCase {
 	private static final String configName = "NoOneWouldEverThinkOfUsingANameLikeThis"; //$NON-NLS-1$
-	
+
 	public void testAssertionsOffByDefault() {
 		assertFalse(AssertionVMArg.getEnableAssertionsPreference());
 	}
-	
+
 	public void testEnableAssertionsInWizard() {
 		JUnitPreferencePage page = new JUnitPreferencePage();
-		
+
 		page.createControl(DialogCheck.getShell());
-			
+
 		page.setAssertionCheckBoxSelection(true);
 		page.performOk();
 
 		assertTrue(AssertionVMArg.getEnableAssertionsPreference());
-		
+
 		page.setAssertionCheckBoxSelection(false);
 		page.performOk();
 
 		assertFalse(AssertionVMArg.getEnableAssertionsPreference());
 	}
-	
+
 	public void testJUnitTabGroupSetDefaults() {
 		JUnitTabGroup testSubject= new JUnitTabGroup();
 		tabGroupSetDefaultTester(testSubject);
 	}
-	
+
 	/* can't test this here because can't access pde classes from jdt plugin test
 	public void testAbstractPDELaunchConfigurationTabGroupSetDefaults()
 	{
-		EclipseApplicationLauncherTabGroup testSubject = 
+		EclipseApplicationLauncherTabGroup testSubject =
 			new EclipseApplicationLauncherTabGroup();
 		tabGroupSetDefaultTester(testSubject);
 	}*/
-	
+
 	protected void tabGroupSetDefaultTester(ILaunchConfigurationTabGroup testSubject) {
 		boolean originalPreference= AssertionVMArg.getEnableAssertionsPreference();
 		try {
@@ -86,7 +85,7 @@ public class TestEnableAssertions extends TestCase {
 			AssertionVMArg.setEnableAssertionsPreference(originalPreference);
 		}
 	}
-	
+
 	protected ILaunchConfigurationWorkingCopy getNewConfigWorkingCopy() throws CoreException {
 		ILaunchManager lm= DebugPlugin.getDefault().getLaunchManager();
 		ILaunchConfigurationType configType= lm.getLaunchConfigurationType("org.eclipse.jdt.junit.launchconfig"); //$NON-NLS-1$

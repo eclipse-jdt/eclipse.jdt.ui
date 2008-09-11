@@ -28,19 +28,19 @@ public interface ITestKind {
 		protected String getAttribute(String arg0) {
 			return null;
 		}
-		
+
 		public ITestFinder getFinder() {
 			return ITestFinder.NULL;
 		}
-		
+
 		public JUnitRuntimeClasspathEntry[] getClasspathEntries() {
 			return new JUnitRuntimeClasspathEntry[0];
 		}
-		
+
 	}
-	
+
 	public static final TestKind NULL = new NullTestKind();
-	
+
 	public static final String ID = "id"; //$NON-NLS-1$
 	public static final String DISPLAY_NAME = "displayName"; //$NON-NLS-1$
 	public static final String FINDER_CLASS_NAME = "finderClass"; //$NON-NLS-1$
@@ -49,7 +49,7 @@ public interface ITestKind {
 	public static final String PRECEDES = "precedesTestKind"; //$NON-NLS-1$
 
 	public static final String RUNTIME_CLASSPATH_ENTRY = "runtimeClasspathEntry"; //$NON-NLS-1$
-	
+
 	public static final String CLASSPATH_PLUGIN_ID = "pluginId"; //$NON-NLS-1$
 	public static final String CLASSPATH_PATH_TO_JAR = "pathToJar"; //$NON-NLS-1$
 
@@ -61,7 +61,7 @@ public interface ITestKind {
 	public abstract String getLoaderPluginId();
 	public abstract String getLoaderClassName();
 	public abstract String getPrecededKindId();
-	
+
 
 	public abstract boolean isNull();
 

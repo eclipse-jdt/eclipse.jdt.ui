@@ -81,14 +81,14 @@ public class ExtractClassTests extends RefactoringTest {
 		assertNotNull(cu);
 		assertTrue(cu.exists());
 	}
-	
+
 	private void createAdditionalFile(String subDir, String fileName) throws Exception {
 		IPackageFragment pack= getSubPackage(subDir);
 		ICompilationUnit cu= createCUfromTestFile(pack, fileName, true);
 		assertNotNull(cu);
 		assertTrue(cu.exists());
 	}
-	
+
 	private IPackageFragment getSubPackage(String subDir) throws Exception {
 		IPackageFragment pack= getPackageP();
 		if (subDir != null) {
@@ -296,35 +296,35 @@ public class ExtractClassTests extends RefactoringTest {
 			javaProject.setOptions(originalOptions);
 		}
 	}
-	
+
 	public void testArrayInitializer() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
 		fDescriptor.setClassName("ArrayInitializerParameter");
 		runRefactoring(false);
 	}
-	
+
 	public void testVariableDeclarationInitializer() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
 		fDescriptor.setClassName("VariableDeclarationInitializerParameter");
-		runRefactoring(false);		
+		runRefactoring(false);
 	}
-	
+
 	public void testUpdateSimpleName() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
 		fDescriptor.setClassName("UpdateSimpleNameParameter");
-		runRefactoring(false);	
+		runRefactoring(false);
 	}
-	
+
 	public void testArrayLengthAccess() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
 		fDescriptor.setClassName("ArrayLengthAccessParameter");
 		runRefactoring(false);
 	}
-	
+
 	public void testInnerDocumentedClass() throws Exception {
 		IType outer= setupType();
 		IType inner= outer.getType("InnerClass");
@@ -334,7 +334,7 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setClassName("InnerClassParameter");
 		runRefactoring(false);
 	}
-	
+
 	public void testPackageReferences() throws Exception {
 		createAdditionalFile("subPack","PackEx");
 		fDescriptor.setType(setupType());
@@ -366,28 +366,28 @@ public class ExtractClassTests extends RefactoringTest {
 			javaProject.setOptions(originalOptions);
 		}
 	}
-	
+
 	public void testLowestVisibility() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
 		fDescriptor.setClassName("LowestVisibilityParameter");
 		runRefactoring(false);
 	}
-	
+
 	public void testSwitchCaseUpdates() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
 		fDescriptor.setClassName("SwitchCaseUpdatesParameter");
 		runRefactoring(false);
 	}
-	
+
 	public void testFieldsWithJavadoc() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setFieldName("data");
 		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);
 	}
-	
+
 	public void testQualifiedIncrements() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
@@ -401,5 +401,5 @@ public class ExtractClassTests extends RefactoringTest {
 			assertEquals(true, refactoringStatusEntry.isWarning());
 		}
 	}
-	
+
 }

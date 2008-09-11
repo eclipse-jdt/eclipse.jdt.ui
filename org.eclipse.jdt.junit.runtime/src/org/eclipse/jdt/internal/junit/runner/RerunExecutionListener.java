@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.junit.runner;
 public class RerunExecutionListener extends FirstRunExecutionListener {
 	// Don't send ids here, since they don't match the ids of the original run:
 	// RemoteTestRunner#rerunTest(..) reloads Test, so ITestReferences are not equals(..).
-	
+
 	public RerunExecutionListener(MessageSender sender, TestIdMap ids) {
 		super(sender, ids);
 	}

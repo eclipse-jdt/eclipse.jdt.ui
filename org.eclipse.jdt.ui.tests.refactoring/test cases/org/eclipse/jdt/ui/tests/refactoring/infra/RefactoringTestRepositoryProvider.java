@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.eclipse.team.core.RepositoryProvider;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -27,14 +29,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.team.FileModificationValidationContext;
 import org.eclipse.core.resources.team.FileModificationValidator;
 
-import org.eclipse.team.core.RepositoryProvider;
-
 public class RefactoringTestRepositoryProvider extends RepositoryProvider {
-	
+
 	public static final String PROVIDER_ID= "org.eclipse.jdt.ui.tests.refactoring.refactoringTestRepositoryProvider";
-	
+
 	private static HashMap/*IProject, RefactoringTestFileModificationValidator*/ fgValidators= new HashMap();
-	
+
 	public static Collection getValidatedEditPaths(IProject project) {
 		RefactoringTestFileModificationValidator validator= (RefactoringTestFileModificationValidator) fgValidators.get(project);
 		if (validator != null) {
@@ -42,7 +42,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 		}
 		return null;
 	}
-	
+
 	public static Collection getValidatedSavePaths(IProject project) {
 		RefactoringTestFileModificationValidator validator= (RefactoringTestFileModificationValidator) fgValidators.get(project);
 		if (validator != null) {
@@ -50,25 +50,25 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 		}
 		return null;
 	}
-	
+
 	private static class RefactoringTestFileModificationValidator extends FileModificationValidator {
 
 		private ArrayList fValidatedEditPaths;
 		private ArrayList fValidatedSavePaths;
-		
+
 		public RefactoringTestFileModificationValidator() {
 			fValidatedEditPaths= new ArrayList();
 			fValidatedSavePaths= new ArrayList();
 		}
-		
+
 		public Collection/*IPath*/ getValidatedEditPaths() {
 			return fValidatedEditPaths;
 		}
-		
+
 		public Collection/*IPath*/ getValidatedSavePaths() {
 			return fValidatedSavePaths;
 		}
-		
+
 		public IStatus validateEdit(IFile[] files, FileModificationValidationContext context) {
 			for (int i= 0; i < files.length; i++) {
 				fValidatedEditPaths.add(files[i].getFullPath());
@@ -80,7 +80,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 			fValidatedSavePaths.add(file.getFullPath());
 			return makeWritable(new IFile[] { file });
 		}
-		
+
 		private IStatus makeWritable(final IFile[] resources) {
 			try {
 				ResourcesPlugin.getWorkspace().run(
@@ -92,7 +92,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 								if (resourceAttributes != null) {
 									resourceAttributes.setReadOnly(false);
 									resource.setResourceAttributes(resourceAttributes);
-								}	
+								}
 							}
 						}
 					},
@@ -104,21 +104,21 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 			return Status.OK_STATUS;
 		}
 	}
-	
+
 	private RefactoringTestFileModificationValidator fValidator;
-	
+
 	public RefactoringTestRepositoryProvider() {
 		fValidator= new RefactoringTestFileModificationValidator();
 	}
-	
+
 	public String getID() {
 		return PROVIDER_ID;
 	}
-	
+
 	public FileModificationValidator getFileModificationValidator2() {
 		return fValidator;
 	}
-	
+
 	public void configureProject() throws CoreException {
 		fgValidators.put(getProject(), fValidator);
 	}

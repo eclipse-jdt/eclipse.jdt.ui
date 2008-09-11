@@ -14,28 +14,28 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllReorgPerformanceTests {
-	
+
 	public static Test suite() {
 		TestSuite suite= new TestSuite("All Reorg Performance Tests"); //$NON-NLS-1$
 		suite.addTest(RenamePackagePerfTests1.suite());
 		suite.addTest(RenamePackagePerfTests2.suite());
-		
+
 		suite.addTest(RenameTypePerfAcceptanceTests.suite());
 		suite.addTest(RenameTypePerfTests1.suite());
 		suite.addTest(RenameTypePerfTests2.suite());
-		
+
 		suite.addTest(RenameMethodPerfTests1.suite());
 		suite.addTest(RenameMethodPerfTests2.suite());
 		suite.addTest(RenameMethodWithOverloadPerfTests.suite());
-		
+
 		suite.addTest(MoveCompilationUnitPerfTests1.suite());
 		suite.addTest(MoveCompilationUnitPerfTests2.suite());
-		
+
 		suite.addTest(MoveStaticMembersPerfTests1.suite());
 		suite.addTest(MoveStaticMembersPerfTests2.suite());
-		
+
 		suite.addTest(IntroduceIndirectionPerfAcceptanceTests.suite());
-		
+
 		return suite;
 	}
 }

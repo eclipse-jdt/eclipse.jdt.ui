@@ -19,28 +19,28 @@ public class JUnitJUnitTests {
 	public static Test suite() {
 		TestSuite suite= new TestSuite(JUnitJUnitTests.class.getName());
 		//$JUnit-BEGIN$
-		
+
 		// TODO disabled unreliable tests driving the event loop:
 //		suite.addTestSuite(WrappingSystemTest.class);
 //		suite.addTestSuite(WrappingUnitTest.class);
-		
+
 		suite.addTestSuite(TestEnableAssertions.class);
 		suite.addTestSuite(TestPriorization.class);
 		suite.addTestSuite(TestTestSearchEngine.class);
-		
+
 		addDeprecatedTests(suite);
-		
+
 		suite.addTestSuite(TestRunListenerTest.class);
 
 		suite.addTest(TestRunSessionSerializationTests3.suite());
 		suite.addTest(TestRunSessionSerializationTests4.suite());
-		
+
 		suite.addTestSuite(JUnit3TestFinderTest.class);
 		suite.addTestSuite(JUnit4TestFinderTest.class);
 		//$JUnit-END$
 		return suite;
 	}
-	
+
 	/**
 	 * @param suite the suite
 	 * @deprecated

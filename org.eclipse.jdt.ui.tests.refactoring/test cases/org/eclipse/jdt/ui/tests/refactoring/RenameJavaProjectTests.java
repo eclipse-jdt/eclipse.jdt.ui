@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -27,8 +29,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 public class RenameJavaProjectTests extends RefactoringTest {
 
 	private static final Class clazz= RenameJavaProjectTests.class;
@@ -40,7 +40,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
@@ -69,28 +69,28 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			ParticipantTesting.reset();
 			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
-			
+
 			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
 			descriptor.setJavaElement(p1);
 			descriptor.setUpdateReferences(true);
 			descriptor.setNewName(newProjectName);
-			
+
 			RenameRefactoring ref= (RenameRefactoring) createRefactoring(descriptor);
 			assertTrue(ref.isApplicable());
 
 			RefactoringStatus result= performRefactoring(ref);
-			
+
 			assertEquals("not expected to fail", null, result);
 			assertTrue("p1 is gone", !p1.exists());
-			
-			ParticipantTesting.testRename(handles, 
+
+			ParticipantTesting.testRename(handles,
 				new RenameArguments[] {
 					new RenameArguments(newProjectName, true),
 					new RenameArguments(newProjectName, true)});
-			
+
 			p1= referencing1.getJavaModel().getJavaProject(newProjectName);
 			assertTrue("p1 exists", p1.exists());
-			
+
 			//check entries in  referencing1
 			IClasspathEntry[] entries= referencing1.getRawClasspath();
 			assertEquals("expected entries", 3, entries.length);
@@ -115,7 +115,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 		} finally {
 			performDummySearch();
-			
+
 			if (referencing1 != null && referencing1.exists())
 				JavaProjectHelper.removeSourceContainer(referencing1, "src");
 			if (referencing2 != null && referencing2.exists())
@@ -129,7 +129,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 				JavaProjectHelper.delete(referencing2);
 		}
 	}
-	
+
 	public void test1() throws Exception {
 		IJavaProject p1= null;
 		IJavaProject referencing1= null;
@@ -151,7 +151,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 					JavaCore.newAccessRule(new Path("accessible"), IAccessRule.K_ACCESSIBLE)
 			};
 			IClasspathAttribute[] extraAttributes2= new IClasspathAttribute[] {
-				JavaCore.newClasspathAttribute("myTestAttribute", "val")	
+				JavaCore.newClasspathAttribute("myTestAttribute", "val")
 			};
 			IClasspathEntry cpe2= JavaCore.newProjectEntry(p1.getProject().getFullPath(), accessRules2, true, extraAttributes2, false);
 			JavaProjectHelper.addToClasspath(referencing2, cpe2);
@@ -161,28 +161,28 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			ParticipantTesting.reset();
 			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
-			
+
 			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
 			descriptor.setJavaElement(p1);
 			descriptor.setUpdateReferences(true);
 			descriptor.setNewName(newProjectName);
-			
+
 			RenameRefactoring ref= (RenameRefactoring) createRefactoring(descriptor);
 			assertTrue(ref.isApplicable());
 
 			RefactoringStatus result= performRefactoring(ref);
-			
+
 			assertEquals("not expected to fail", null, result);
 			assertTrue("p1 is gone", !p1.exists());
-			
-			ParticipantTesting.testRename(handles, 
+
+			ParticipantTesting.testRename(handles,
 				new RenameArguments[] {
 					new RenameArguments(newProjectName, true),
 					new RenameArguments(newProjectName, true)});
-			
+
 			p1= referencing1.getJavaModel().getJavaProject(newProjectName);
 			assertTrue("p1 exists", p1.exists());
-			
+
 			//check entries in  referencing1
 			IClasspathEntry[] entries= referencing1.getRawClasspath();
 			assertEquals("expected entries", 3, entries.length);
@@ -207,7 +207,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 		} finally {
 			performDummySearch();
-			
+
 			if (p1 != null && p1.exists())
 				JavaProjectHelper.delete(p1);
 			if (referencing1 != null && referencing1.exists())

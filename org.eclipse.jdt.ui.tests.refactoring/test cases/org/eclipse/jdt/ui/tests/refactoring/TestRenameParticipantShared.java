@@ -22,13 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
-import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -36,6 +29,13 @@ import org.eclipse.ltk.core.refactoring.participants.ISharableParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
+
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
+import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 
 public class TestRenameParticipantShared extends RenameParticipant implements ISharableParticipant {
 
@@ -54,7 +54,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 			fHandles.add(((IJavaElement)element).getHandleIdentifier());
 		else
 			fHandles.add(((IResource)element).getFullPath().toString());
-		
+
 		IJavaElementMapper updating= (IJavaElementMapper)getProcessor().getAdapter(IJavaElementMapper.class);
 		if ((updating != null) && getArguments() instanceof RenameTypeArguments) {
 			RenameTypeArguments arguments= (RenameTypeArguments)getArguments();
@@ -69,7 +69,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -91,11 +91,11 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 		else
 			fHandles.add(((IResource)element).getFullPath().toString());
 	}
-		
+
 	public String getName() {
 		return getClass().getName();
 	}
-	
+
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
@@ -103,7 +103,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}
-	
+
 	public static void testNumberOfElements(int expected) {
 		if (expected == 0) {
 			Assert.assertTrue(fgInstance == null);
@@ -112,7 +112,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 			Assert.assertEquals(expected, fgInstance.fArguments.size());
 		}
 	}
-	
+
 	public static void testArguments(RenameArguments[] args) {
 		testNumberOfElements(args.length);
 		for (int i= 0; i < args.length; i++) {
@@ -122,7 +122,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 			Assert.assertEquals(expected.getUpdateReferences(), actual.getUpdateReferences());
 		}
 	}
-	
+
 	public static void reset() {
 		fgInstance= null;
 	}
