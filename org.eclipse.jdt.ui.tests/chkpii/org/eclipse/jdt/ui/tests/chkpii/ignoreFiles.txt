@@ -15,12 +15,14 @@ buildnotes*.html
 */doc_zip/*
 */scripts/*
 */icons/*
+
 com.oti.zrh.contextids/*
 com.oti.zrh.eclipse.tools/*
 com.oti.zrh.eclipse.doc.tools-feature/*
 com.oti.zrh.eclipse.tools-updateSite/*
+
 javax.servlet/*
-org.eclipse.jdt.launching.j9/*
+
 org.eclipse.jdt.ui.tests.refactoring/resources/*
 org.eclipse.jdt.ui/core*extension\org/eclipse/jdt/internal/corext/template/default-codetemplates.xml
 org.eclipse.pde.doc.isv/buildDoc.xml
@@ -72,6 +74,7 @@ org.eclipse.help.ui/*
 org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
 org.eclipse.jdt.launching/*
+org.eclipse.jdt.launching.j9/*
 org.eclipse.jface/*
 org.eclipse.osgi/*
 org.eclipse.pde/*
@@ -90,7 +93,7 @@ org.eclipse.ui.forms/*
 org.eclipse.ui.intro/*
 org.eclipse.ui.navigator/*
 org.eclipse.ui.navigator.resources/*
-ORG.ECLIPSE.ui.tests/*
+org.eclipse.ui.tests/*
 org.eclipse.ui.views/*
 org.eclipse.ui.views.properties.tabbed/*
 org.eclipse.ui.workbench/*
@@ -107,6 +110,7 @@ org.apache.commons.el/*
 org.apache.jasper/*
 org.apache.lucene/*
 org.apache.lucene.analysis/*
+org.junit4/*
 org.objectweb.asm/*
 
 www*eclipse.org-development/*
