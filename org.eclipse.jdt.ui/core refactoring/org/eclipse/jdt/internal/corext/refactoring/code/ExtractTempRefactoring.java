@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -349,8 +350,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	/**
 	 * Creates a new extract temp refactoring
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart start of selection
+	 * @param selectionLength length of selection
 	 */
 	public ExtractTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -692,14 +693,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		TextEditGroup groupDescription= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable);
 
 		ASTNode parent= target.getParent();
-		while (!(parent instanceof Block) && !(parent instanceof SwitchStatement)) {
-			StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
+		StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
+		while (locationInParent != Block.STATEMENTS_PROPERTY && locationInParent != SwitchStatement.STATEMENTS_PROPERTY) {
 			if (locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
 					|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
 					|| locationInParent == ForStatement.BODY_PROPERTY
 					|| locationInParent == EnhancedForStatement.BODY_PROPERTY
 					|| locationInParent == DoStatement.BODY_PROPERTY
 					|| locationInParent == WhileStatement.BODY_PROPERTY) {
+				// create intermediate block if target was the body property of a control statement:
 				Block replacement= rewrite.getAST().newBlock();
 				ListRewrite replacementRewrite= rewrite.getListRewrite(replacement, Block.STATEMENTS_PROPERTY);
 				replacementRewrite.insertFirst(declaration, null);
@@ -709,14 +711,11 @@ public class ExtractTempRefactoring extends Refactoring {
 			}
 			target= parent;
 			parent= parent.getParent();
+			locationInParent= target.getLocationInParent();
 		}
-		if (parent instanceof Block) {
-			ListRewrite listRewrite= rewrite.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
-			listRewrite.insertBefore(declaration, target, groupDescription);
-		} else if (parent instanceof SwitchStatement) {
-			ListRewrite listRewrite= rewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
-			listRewrite.insertBefore(declaration, target, groupDescription);
-		}
+		// assert (locationInParent == Block.STATEMENTS_PROPERTY || locationInParent == SwitchStatement.STATEMENTS_PROPERTY);
+		ListRewrite listRewrite= rewrite.getListRewrite(parent, (ChildListPropertyDescriptor)locationInParent);
+		listRewrite.insertBefore(declaration, target, groupDescription);
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
