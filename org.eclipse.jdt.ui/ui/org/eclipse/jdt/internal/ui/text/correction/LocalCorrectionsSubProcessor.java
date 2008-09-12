@@ -1015,12 +1015,13 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addFallThroughProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode instanceof SwitchCase && selectedNode.getParent() instanceof SwitchStatement) {
+		if (selectedNode instanceof SwitchCase && selectedNode.getLocationInParent() == SwitchStatement.STATEMENTS_PROPERTY) {
 			AST ast= selectedNode.getAST();
+			ASTNode parent= selectedNode.getParent();
 
 			// insert break:
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			ListRewrite listRewrite= rewrite.getListRewrite(selectedNode.getParent(), SwitchStatement.STATEMENTS_PROPERTY);
+			ListRewrite listRewrite= rewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
 			listRewrite.insertBefore(ast.newBreakStatement(), selectedNode, null);
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_insert_break_statement;
@@ -1031,8 +1032,9 @@ public class LocalCorrectionsSubProcessor {
 			// insert //$FALL-THROUGH$:
 			rewrite= ASTRewrite.create(ast);
 			rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
-			listRewrite= rewrite.getListRewrite(selectedNode.getParent(), SwitchStatement.STATEMENTS_PROPERTY);
-			listRewrite.insertBefore(rewrite.createStringPlaceholder("//$FALL-THROUGH$", ASTNode.EMPTY_STATEMENT), selectedNode, null); //$NON-NLS-1$
+			listRewrite= rewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+			ASTNode fallThroughComment= rewrite.createStringPlaceholder("//$FALL-THROUGH$", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+			listRewrite.insertBefore(fallThroughComment, selectedNode, null);
 
 			label= CorrectionMessages.LocalCorrectionsSubProcessor_insert_fall_through;
 			image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
