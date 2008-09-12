@@ -21,6 +21,8 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -94,23 +96,30 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	}
 
 	public void testOrganizeImport() throws Exception {
-
-		List cusList= new ArrayList();
-		addAllCUs(MyTestSetup.fJProject1.getChildren(), cusList);
-		ICompilationUnit[] cus= (ICompilationUnit[])cusList.toArray(new ICompilationUnit[cusList.size()]);
-		CompilationUnit[] roots= createASTs(cus);
-
+		measure(Performance.getDefault().getNullPerformanceMeter(), 10);
+		measure(fPerformanceMeter, 10);
 		tagAsSummary("Organize Imports", Dimension.ELAPSED_PROCESS);
+		commitMeasurements();
+		Performance.getDefault().assertPerformance(fPerformanceMeter);
+	}
 
-		joinBackgroudActivities();
-		startMeasuring();
+	private void measure(PerformanceMeter performanceMeter, int runs) throws Exception {
+		for (int j= 0; j < runs; j++) {
+			List cusList= new ArrayList();
+			addAllCUs(MyTestSetup.fJProject1.getChildren(), cusList);
+			ICompilationUnit[] cus= (ICompilationUnit[])cusList.toArray(new ICompilationUnit[cusList.size()]);
+			CompilationUnit[] roots= createASTs(cus);
 
-		for (int i= 0; i < roots.length; i++) {
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, true, true, null);
-			op.run(new NullProgressMonitor());
+			joinBackgroudActivities();
+			
+			performanceMeter.start();
+			for (int i= 0; i < roots.length; i++) {
+				OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, true, true, null);
+				op.run(new NullProgressMonitor());
+			}
+			performanceMeter.stop();
 		}
-
-		finishMeasurements();
+		
 	}
 
 }
