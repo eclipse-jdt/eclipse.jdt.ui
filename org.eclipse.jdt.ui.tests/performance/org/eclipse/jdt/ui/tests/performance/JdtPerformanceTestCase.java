@@ -60,6 +60,7 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 		// Join indexing
 		new SearchEngine().searchAllTypeNames(
 				null,
+				SearchPattern.R_EXACT_MATCH,
 				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent
 				SearchPattern.R_EXACT_MATCH,
 				IJavaSearchConstants.CLASS,
