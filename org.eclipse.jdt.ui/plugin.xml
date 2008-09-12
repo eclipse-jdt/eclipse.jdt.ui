@@ -911,13 +911,12 @@
             /> 
       </editor>
       <editor
-            name="%jarDescEditorName"
             default="true"
-            icon="$nl$/icons/full/obj16/jar_desc_obj.gif"
             extensions="jardesc"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            class="org.eclipse.ui.editors.text.TextEditor"
-            id="org.eclipse.jdt.ui.JARDescEditor">
+            icon="$nl$/icons/full/obj16/jar_desc_obj.gif"
+            id="org.eclipse.jdt.ui.JARDescEditor"
+            launcher="org.eclipse.jdt.internal.ui.jarpackager.OpenJarExportWizardEditorLauncher"
+            name="%jarDescEditorName">
       </editor>
    </extension>
    
@@ -1982,19 +1981,6 @@
                menubarPath="additions"
                enablesFor="+"
                id="CreateJar">
-         </action>
-      </objectContribution>
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IResource"
-            nameFilter="*.jardesc"
-            id="org.eclipse.jdt.internal.ui.jarpackager.RunJarPackager">
-         <action
-               label="%openJarPackager.label"
-               tooltip="%openJarPackager.tooltip"
-               class="org.eclipse.jdt.internal.ui.jarpackager.OpenJarPackageWizardActionDelegate"
-               menubarPath="additions"
-               enablesFor="1"
-               id="OpenJarPackageWizard">
          </action>
       </objectContribution>
    </extension>

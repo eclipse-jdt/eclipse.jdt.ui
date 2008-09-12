@@ -333,13 +333,13 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarWriter_writeProblemWithMessage;
 
-	public static String OpenJarPackageWizardDelegate_badXmlFormat;
-
 	public static String OpenJarPackageWizardDelegate_error_openJarPackager_message;
 
 	public static String OpenJarPackageWizardDelegate_error_openJarPackager_title;
 
 	public static String OpenJarPackageWizardDelegate_jarDescriptionReaderWarnings_title;
+
+	public static String OpenJarPackageWizardDelegate_onlyJardesc;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JarPackagerMessages.class);
