@@ -122,7 +122,7 @@ public class JavadocContentAccess2 {
 		 *         cancelled immediately. The returned value is the result of
 		 *         {@link #visitInheritDoc(IType, ITypeHierarchy)}</li>
 		 *         </ul>
-		 * @throws JavaModelException
+		 * @throws JavaModelException unexpected problem
 		 * @see #visitInheritDoc(IType, ITypeHierarchy)
 		 */
 		public abstract Object visit(IType currType) throws JavaModelException;
@@ -134,7 +134,7 @@ public class JavadocContentAccess2 {
 		 * @param typeHierarchy a super type hierarchy that contains <code>currentType</code>
 		 * @return the result from a call to {@link #visit(IType)}, or <code>null</code> if none of
 		 *         the calls returned a result
-		 * @throws JavaModelException
+		 * @throws JavaModelException unexpected problem
 		 */
 		public Object visitInheritDoc(IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
 			ArrayList visited= new ArrayList();
@@ -169,11 +169,13 @@ public class JavadocContentAccess2 {
 		}
 
 		/**
-		 * @param visited
-		 * @param currentType
-		 * @param typeHierarchy
-		 * @return the result, or {@link #CONTINUE} to continue
-		 * @throws JavaModelException
+		 * Visits the super interfaces of the given type in the given hierarchy, thereby skipping already visited types.
+		 * 
+		 * @param visited set of visited types
+		 * @param currentType type whose super interfaces should be visited
+		 * @param typeHierarchy type hierarchy (must include <code>currentType</code>)
+		 * @return the result, or {@link #CONTINUE} if no result has been found
+		 * @throws JavaModelException unexpected problem
 		 */
 		private Object visitInheritDocInterfaces(ArrayList visited, IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
 			ArrayList toVisitChildren= new ArrayList();
@@ -220,9 +222,11 @@ public class JavadocContentAccess2 {
 
 		private static interface DescriptionGetter {
 			/**
+			 * Returns a Javadoc tag description or <code>null</code>.
+			 * 
 			 * @param contentAccess the content access
 			 * @return the description, or <code>null</code> if none
-			 * @throws JavaModelException
+			 * @throws JavaModelException unexpected problem
 			 */
 			CharSequence getDescription(JavadocContentAccess2 contentAccess) throws JavaModelException;
 		}
@@ -338,10 +342,10 @@ public class JavadocContentAccess2 {
 		}
 
 		/**
-		 * @param method
+		 * @param method the method
 		 * @return the Javadoc content access for the given method, or
 		 * 		<code>null</code> if no Javadoc could be found in source
-		 * @throws JavaModelException
+		 * @throws JavaModelException unexpected problem
 		 */
 		private JavadocContentAccess2 getJavadocContentAccess(IMethod method) throws JavaModelException {
 			Object cached= fContentAccesses.get(method);
@@ -656,7 +660,7 @@ public class JavadocContentAccess2 {
 	 *
 	 * @param method the method
 	 * @return the inherited Javadoc from the Javadoc attachment, or <code>null</code> if none
-	 * @throws JavaModelException
+	 * @throws JavaModelException unexpected problem
 	 */
 	private static String findAttachedDocInHierarchy(final IMethod method) throws JavaModelException {
 		IType type= method.getDeclaringType();
