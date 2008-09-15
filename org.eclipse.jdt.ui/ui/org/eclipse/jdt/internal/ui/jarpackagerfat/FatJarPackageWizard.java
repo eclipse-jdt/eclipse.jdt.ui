@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 
 /**
  * Wizard for exporting resources from the workspace to a Fat Java Archive (JAR) file.
@@ -167,6 +169,7 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		fSelection= getSelectedJavaProjects();
 		fJarPackage= new JarPackageData();
+		fJarPackage.setIncludeDirectoryEntries(true);
 		setInitializeFromJarPackage(false);
 		setWindowTitle(FatJarPackagerMessages.JarPackageWizard_windowTitle);
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_FAT_JAR_PACKAGER);

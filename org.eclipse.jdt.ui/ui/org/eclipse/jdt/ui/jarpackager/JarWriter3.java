@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
  *******************************************************************************/
 package org.eclipse.jdt.ui.jarpackager;
 
@@ -61,6 +62,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 /**
  * Creates a JAR file for the given JAR package data.
@@ -117,19 +119,28 @@ public class JarWriter3 {
 			throw JarPackagerUtil.createCoreException(exception.getLocalizedMessage(), exception);
 		}
 	}
-
+	
 	/**
-	 * Creates the directory entries for the given path and writes it to the
-	 * current archive.
-	 *
-	 * @param destinationPath
-	 *            the path to add
-	 *
-	 * @throws IOException
-	 *             if an I/O error has occurred
+	 * Creates the directory entries for the given path and writes it to the current archive.
+	 * 
+	 * @param destinationPath the path to add
+	 * 
+	 * @throws IOException if an I/O error has occurred
 	 */
 	protected void addDirectories(IPath destinationPath) throws IOException {
-		String path= destinationPath.toString().replace(File.separatorChar, '/');
+		addDirectories(destinationPath.toString());
+	}
+
+	/**
+	 * Creates the directory entries for the given path and writes it to the current archive.
+	 * 
+	 * @param destPath the path to add
+	 * 
+	 * @throws IOException if an I/O error has occurred
+	 * @since 3.5
+	 */
+	protected void addDirectories(String destPath) throws IOException {
+		String path= destPath.replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
 		List directories= new ArrayList(2);
 		while (lastSlash != -1) {

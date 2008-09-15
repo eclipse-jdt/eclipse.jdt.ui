@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 220257 [jar application] ANT build file does not create Class-Path Entry in Manifest
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -21,7 +22,6 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.jarpackager.JarWriter3;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 /**
  * @since 3.4
@@ -48,6 +49,9 @@ public class JarWriter4 extends JarWriter3 {
 	}
 
 	public void addZipEntry(ZipEntry zipEntry, ZipFile zipFile, String path) throws IOException {
+		if (fJarPackage.areDirectoryEntriesIncluded())
+			addDirectories(path);
+
 		JarEntry newEntry= new JarEntry(path.replace(File.separatorChar, '/'));
 
 		if (fJarPackage.isCompressed())
@@ -69,8 +73,6 @@ public class JarWriter4 extends JarWriter3 {
 
 	public void write(File file, IPath destinationPath) throws CoreException {
 		try {
-			Assert.isLegal(!fJarPackage.areDirectoryEntriesIncluded());//Fat JAR writer does not include directory entries
-
 			addFile(file, destinationPath);
 		} catch (IOException ex) {
 			// Ensure full path is visible
@@ -86,6 +88,9 @@ public class JarWriter4 extends JarWriter3 {
 	}
 
 	private void addFile(File file, IPath path) throws IOException {
+		if (fJarPackage.areDirectoryEntriesIncluded())
+			addDirectories(path);
+
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
 
 		if (fJarPackage.isCompressed())

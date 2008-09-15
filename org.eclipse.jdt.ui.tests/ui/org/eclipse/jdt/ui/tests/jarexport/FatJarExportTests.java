@@ -10,6 +10,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 220257 [jar application] ANT build file does not create Class-Path Entry in Manifest
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.jarexport;
 
@@ -82,6 +83,7 @@ import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarAntExporter;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+
 
 public class FatJarExportTests extends TestCase {
 
@@ -207,6 +209,7 @@ public class FatJarExportTests extends TestCase {
 		JarPackageData data= new JarPackageData();
 		data.setJarBuilder(new FatJarBuilder());
 		data.setOverwrite(true);
+		data.setIncludeDirectoryEntries(true);
 
 		IPath destination= ResourcesPlugin.getWorkspace().getRoot().getLocation().append(testName + ".jar");
 		data.setJarLocation(destination);
