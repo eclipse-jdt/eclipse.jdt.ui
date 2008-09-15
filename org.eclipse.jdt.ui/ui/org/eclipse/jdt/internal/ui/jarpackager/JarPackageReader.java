@@ -77,7 +77,8 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	/**
 	 * Reads a Jar Package from the underlying stream.
 	 * It is the client's responsibility to close the stream.
-	 * @param inputStream
+	 * 
+	 * @param inputStream the input stream
 	 */
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
@@ -102,7 +103,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
      * Closes this stream.
 	 * It is the clients responsibility to close the stream.
 	 *
-	 * @exception CoreException
+	 * @exception CoreException if closing the stream fails
      */
     public void close() throws CoreException {
     	if (fInputStream != null)
