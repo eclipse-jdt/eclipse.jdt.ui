@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
-import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.PartitionDoubleClickSelector;
 
 
 /**
@@ -193,7 +193,11 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 */
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
 		if (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
-			return new JavaStringDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer));
+			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, 1);
+		if (IPropertiesFilePartitions.COMMENT.equals(contentType))
+			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
+		if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(contentType))
+			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, -1);
 
 		return super.getDoubleClickStrategy(sourceViewer, contentType);
 	}

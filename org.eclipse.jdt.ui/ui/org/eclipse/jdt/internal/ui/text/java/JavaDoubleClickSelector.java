@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,9 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextDoubleClickStrategy;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -23,10 +22,11 @@ import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 
+
 /**
  * Double click strategy aware of Java identifier syntax rules.
  */
-public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourceVersionDependent {
+public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy implements ISourceVersionDependent {
 
 	/**
 	 * Detects java words depending on the source level. In 1.4 mode, detects
@@ -82,6 +82,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 			fState= UNKNOWN;
 			fAnchorState= UNKNOWN;
 			fDirection= UNKNOWN;
+
 			fStart= anchor;
 			fEnd= anchor - 1;
 		}
@@ -313,33 +314,8 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 	protected final AtJavaIdentifierDetector fWordDetector= new AtJavaIdentifierDetector();
 
 
-	public JavaDoubleClickSelector() {
-		super();
-	}
 
-	/**
-	 * @param textViewer the text viewer
-	 * @see ITextDoubleClickStrategy#doubleClicked
-	 */
-	public void doubleClicked(ITextViewer textViewer) {
-
-		int offset= textViewer.getSelectedRange().x;
-
-		if (offset < 0)
-			return;
-
-		IDocument document= textViewer.getDocument();
-
-		IRegion region= fPairMatcher.match(document, offset);
-		if (region != null && region.getLength() >= 2) {
-			textViewer.setSelectedRange(region.getOffset() + 1, region.getLength() - 2);
-		} else {
-			region= selectWord(document, offset);
-			textViewer.setSelectedRange(region.getOffset(), region.getLength());
-		}
-	}
-
-	protected IRegion selectWord(IDocument document, int anchor) {
+	protected IRegion findWord(IDocument document, int anchor) {
 		return fWordDetector.getWordSelection(document, anchor);
 	}
 
@@ -350,4 +326,12 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 		fPairMatcher.setSourceVersion(version);
 		fWordDetector.setSourceVersion(version);
 	}
+
+	protected IRegion findExtendedDoubleClickSelection(IDocument document, int offset) {
+		IRegion match= fPairMatcher.match(document, offset);
+		if (match != null && match.getLength() >= 2)
+			return new Region(match.getOffset() + 1, match.getLength() - 2);
+		return findWord(document, offset);
+	}
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,8 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 
 	private static class PublicSelector extends JavaDoubleClickSelector {
 
-		public IRegion selectWord(IDocument document, int anchor) {
-			return super.selectWord(document, anchor);
+		public IRegion findWord(IDocument document, int anchor) {
+			return super.findWord(document, anchor);
 		}
 	}
 
@@ -44,7 +44,7 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 		IDocument document= new Document(content);
 		PublicSelector selector= new PublicSelector();
 		selector.setSourceVersion(JavaCore.VERSION_1_4);
-		IRegion selection= selector.selectWord(document, offset);
+		IRegion selection= selector.findWord(document, offset);
 		assertEquals(new Region(selOffset, selLength), selection);
 	}
 
@@ -52,7 +52,7 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 		IDocument document= new Document(content);
 		PublicSelector selector= new PublicSelector();
 		selector.setSourceVersion(JavaCore.VERSION_1_5);
-		IRegion selection= selector.selectWord(document, offset);
+		IRegion selection= selector.findWord(document, offset);
 		assertEquals(new Region(selOffset, selLength), selection);
 	}
 

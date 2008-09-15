@@ -24,7 +24,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.DefaultInformationControl;
-import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -93,8 +92,8 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavadocDoubleClickStrategy;
+import org.eclipse.jdt.internal.ui.text.java.PartitionDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
@@ -470,13 +469,13 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
 		if (IJavaPartitions.JAVA_DOC.equals(contentType))
-			return new JavadocDoubleClickStrategy();
-		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
-				IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
-			return new DefaultTextDoubleClickStrategy();
-		else if (IJavaPartitions.JAVA_STRING.equals(contentType) ||
-				IJavaPartitions.JAVA_CHARACTER.equals(contentType))
-			return new JavaStringDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer));
+			return new JavadocDoubleClickStrategy(getConfiguredDocumentPartitioning(sourceViewer));
+		if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
+			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
+		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
+			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
+		else if (IJavaPartitions.JAVA_STRING.equals(contentType) || IJavaPartitions.JAVA_CHARACTER.equals(contentType))
+			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, 1);
 		if (fJavaDoubleClickSelector == null) {
 			fJavaDoubleClickSelector= new JavaDoubleClickSelector();
 			fJavaDoubleClickSelector.setSourceVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
