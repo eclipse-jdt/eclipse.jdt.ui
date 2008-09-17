@@ -7,8 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Eicher <eclipse@tom.eicher.name> - [content assist] prefix complete casted method proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=247547
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java;
 
 
@@ -274,7 +274,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getCompletionOffset()
 	 */
-	public final int getPrefixCompletionStart(IDocument document, int completionOffset) {
+	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		return getReplacementOffset();
 	}
 

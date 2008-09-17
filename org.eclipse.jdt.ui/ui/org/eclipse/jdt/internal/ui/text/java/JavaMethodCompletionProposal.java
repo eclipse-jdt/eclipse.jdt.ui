@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Eicher <eclipse@tom.eicher.name> - [content assist] prefix complete casted method proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=247547
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -58,6 +59,13 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return hasArgumentList() && hasParameters();
 	}
 
+	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
+		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER) {
+			return fProposal.getTokenStart();
+		}
+		return super.getPrefixCompletionStart(document, completionOffset);
+	}
+	
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		if (hasArgumentList()) {
 			String completion= String.valueOf(fProposal.getName());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Eicher <eclipse@tom.eicher.name> - [content assist] prefix complete casted method proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=247547
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
@@ -14,6 +15,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 
 /**
  *
@@ -71,6 +75,20 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 		addMembers("private String qqqString;");
 		addLocalVariables("String qqqString;");
 		assertMethodBodyProposal("q|", "this.qqqString", "this.qqqString|");
+	}
+
+	public void testCastMethod() throws Exception {
+		// bug 208540
+		addLocalVariables("Object o;");
+		assertMethodBodyProposal("if (o instanceof Integer) o.get|", "getInteger", "if (o instanceof Integer) ((Integer) o).getInteger(|)");
+	}
+
+	public void testCastMethodIncremental() throws Exception {
+		// bug 208540
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		addLocalVariables("Object o;");
+		assertMethodBodyIncrementalCompletion("if (o instanceof Integer) o.g|", "if (o instanceof Integer) o.get|");
 	}
 
 	/* camel case */
