@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,14 +16,12 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
+
 /**
- *
- * @since 3.2
+ * @since 3.5
  */
-public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposalComputer {
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#createCollector(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
-	 */
+public class JavaAllCompletionProposalComputer extends JavaTypeCompletionProposalComputer {
+
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
@@ -40,10 +38,20 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 		collector.setIgnored(CompletionProposal.PACKAGE_REF, false);
 		collector.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, false);
 		collector.setIgnored(CompletionProposal.VARIABLE_DECLARATION, false);
+		collector.setIgnored(CompletionProposal.TYPE_REF, false);
 		return collector;
 	}
 
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
-		return guessMethodContextInformationPosition(context);
+		int invocationOffset= context.getInvocationOffset();
+		int typeContext= super.guessContextInformationPosition(context);
+		int methodContext= guessMethodContextInformationPosition(context);
+		if (typeContext != invocationOffset && typeContext > methodContext)
+			return typeContext;
+		else if (methodContext != invocationOffset)
+			return methodContext;
+		else
+			return invocationOffset;
 	}
+
 }

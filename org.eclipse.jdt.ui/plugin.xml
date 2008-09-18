@@ -200,6 +200,13 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="javaNoTypeProposalCategory"
+		name="%OtherJavaProposalCategory">
+		<proposalCategory
+			icon="$nl$/icons/full/elcl16/javaassist_co.gif"/>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="javaAllProposalCategory"
 		name="%JavaProposalCategory">
 		<proposalCategory
 			icon="$nl$/icons/full/elcl16/javaassist_co.gif"/>
@@ -253,10 +260,20 @@
 			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="JavaAllCompletionProposalComputer">
+		<javaCompletionProposalComputer 
+			class="org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
+			<partition type="__dftl_partition_content_type"/>
+			<partition type="__java_string"/>
+		</javaCompletionProposalComputer>
+	</extension>
 	<!-- javadoc completions -->   
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="LegacyJavadocCompletionProposalComputer">
+		id="LegacyJavadocCompletionProposalComputer_no">
 		<javaCompletionProposalComputer 
 			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
@@ -265,7 +282,7 @@
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="JavadocCompletionProposalComputer">
+		id="JavadocCompletionProposalComputer_no">
 		<javaCompletionProposalComputer 
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
@@ -274,10 +291,37 @@
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="JavadocHTMLCompletionProposalComputer">
+		id="JavadocHTMLCompletionProposalComputer_no">
 		<javaCompletionProposalComputer 
 			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="LegacyJavadocCompletionProposalComputer_all">
+		<javaCompletionProposalComputer 
+			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="JavadocCompletionProposalComputer_all">
+		<javaCompletionProposalComputer 
+			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="JavadocHTMLCompletionProposalComputer_all">
+		<javaCompletionProposalComputer 
+			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>

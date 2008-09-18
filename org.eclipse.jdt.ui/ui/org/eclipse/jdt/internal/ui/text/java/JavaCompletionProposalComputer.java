@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -40,6 +41,9 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.Symbols;
 
 /**
  * Computes Java completion proposals and context infos.
@@ -107,6 +111,30 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		return context.getInvocationOffset();
+	}
+
+	protected final int guessMethodContextInformationPosition(ContentAssistInvocationContext context) {
+		final int contextPosition= context.getInvocationOffset();
+
+		IDocument document= context.getDocument();
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+		int bound= Math.max(-1, contextPosition - 200);
+
+		// try the innermost scope of parentheses that looks like a method call
+		int pos= contextPosition - 1;
+		do {
+			int paren= scanner.findOpeningPeer(pos, bound, '(', ')');
+			if (paren == JavaHeuristicScanner.NOT_FOUND)
+				break;
+			int token= scanner.previousToken(paren - 1, bound);
+			// next token must be a method name (identifier) or the closing angle of a
+			// constructor call of a parameterized type.
+			if (token == Symbols.TokenIDENT || token == Symbols.TokenGREATERTHAN)
+				return paren + 1;
+			pos= paren - 1;
+		} while (true);
+
+		return contextPosition;
 	}
 
 	private List addContextInformations(JavaContentAssistInvocationContext context, int offset) {
@@ -197,7 +225,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		}
 
 		ICompletionProposal[] javaProposals= collector.getJavaCompletionProposals();
-		int contextInformationOffset= guessContextInformationPosition(context);
+		int contextInformationOffset= guessMethodContextInformationPosition(context);
 		if (contextInformationOffset != offset) {
 			for (int i= 0; i < javaProposals.length; i++) {
 				if (javaProposals[i] instanceof JavaMethodCompletionProposal) {

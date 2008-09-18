@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -131,7 +131,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not
 	 */
-	private final boolean shouldProposeGenerics(IJavaProject project) {
+	protected final boolean shouldProposeGenerics(IJavaProject project) {
 		String sourceVersion;
 		if (project != null)
 			sourceVersion= project.getOption(JavaCore.COMPILER_SOURCE, true);
