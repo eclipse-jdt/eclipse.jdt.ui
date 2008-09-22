@@ -305,7 +305,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 				// copy old content of line behind insertion point to new line
 				// unless we think we are inserting an anonymous type definition
-				if (c.offset == 0 || !(computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) != -1)) {
+				if (c.offset == 0 || computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) == -1) {
 					if (lineEnd - contentStart > 0) {
 						c.length=  lineEnd - c.offset;
 						buf.append(d.get(contentStart, lineEnd - contentStart).toCharArray());
@@ -373,14 +373,18 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			scanTo= length;
 
 		int closingParen= findClosingParenToLeft(scanner, pos) - 1;
-
+		int openingParen= -1;
 		while (true) {
 			int startScan= closingParen + 1;
 			closingParen= scanner.scanForward(startScan, scanTo, ')');
-			if (closingParen == -1)
-				break;
+			if (closingParen == -1) {
+				if (openingParen == -1)
+					break;
+				return openingParen + 1;
+			}
 
-			int openingParen= scanner.findOpeningPeer(closingParen - 1, '(', ')');
+
+			openingParen= scanner.findOpeningPeer(closingParen - 1, '(', ')');
 
 			// no way an expression at the beginning of the document can mean anything
 			if (openingParen < 1)
@@ -1287,13 +1291,13 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	}
 
 	/**
-	 * Returns the block balance, i.e. zero if the blocks are balanced at
-	 * <code>offset</code>, a negative number if there are more closing than opening
-	 * braces, and a positive number if there are more opening than closing braces.
-	 *
-	 * @param document
-	 * @param offset
-	 * @param partitioning
+	 * Returns the block balance, i.e. zero if the blocks are balanced at <code>offset</code>, a
+	 * negative number if there are more closing than opening braces, and a positive number if there
+	 * are more opening than closing braces.
+	 * 
+	 * @param document the document
+	 * @param offset the offset
+	 * @param partitioning the partitioning
 	 * @return the block balance
 	 */
 	private static int getBlockBalance(IDocument document, int offset, String partitioning) {
