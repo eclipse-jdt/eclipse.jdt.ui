@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -667,15 +667,15 @@ public class EditorUtility {
 	}
 
 	/**
-	 * Return the regions of all lines which have changed in the given buffer since the
-	 * last save occurred. Each region in the result spans over the size of at least one line.
-	 * If successive lines have changed a region spans over the size of all successive lines.
-	 * The regions include line delimiters.
-	 *
+	 * Return the regions of all lines which have changed in the given buffer since the last save
+	 * occurred. Each region in the result spans over the size of at least one line. If successive
+	 * lines have changed a region spans over the size of all successive lines. The regions include
+	 * line delimiters.
+	 * 
 	 * @param buffer the buffer to compare contents from
 	 * @param monitor to report progress to
 	 * @return the regions of the changed lines
-	 * @throws CoreException
+	 * @throws CoreException if something goes wrong
 	 * @since 3.4
 	 */
 	public static IRegion[] calculateChangedLineRegions(final ITextFileBuffer buffer, final IProgressMonitor monitor) throws CoreException {
@@ -716,13 +716,14 @@ public class EditorUtility {
 				}
 
 				/**
-				 * Return regions of all lines which differ comparing <code>oldDocument</code>s content
-				 * with <code>currentDocument</code>s content. Successive lines are merged into one region.
-				 *
+				 * Return regions of all lines which differ comparing <code>oldDocument</code>s
+				 * content with <code>currentDocument</code>s content. Successive lines are merged
+				 * into one region.
+				 * 
 				 * @param oldDocument a document containing the old content
 				 * @param currentDocument a document containing the current content
 				 * @return the changed regions
-				 * @throws BadLocationException
+				 * @throws BadLocationException if fetching the line information fails
 				 */
 				private IRegion[] getChangedLineRegions(IDocument oldDocument, IDocument currentDocument) throws BadLocationException {
 					/*

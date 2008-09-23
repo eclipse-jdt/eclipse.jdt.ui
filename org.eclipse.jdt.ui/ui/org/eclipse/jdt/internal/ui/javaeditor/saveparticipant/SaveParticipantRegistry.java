@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,12 +177,12 @@ public final class SaveParticipantRegistry {
 	}
 
 	/**
-	 * Tells whether one of the active post save listeners needs to
-	 * be informed about the changed region in this save cycle.
-	 *
+	 * Tells whether one of the active post save listeners needs to be informed about the changed
+	 * region in this save cycle.
+	 * 
 	 * @param unit the unit which is about to be saved
 	 * @return true if the change regions need do be determined
-	 * @throws CoreException
+	 * @throws CoreException if something went wrong
 	 * @since 3.4
 	 */
 	public static boolean isChangedRegionsRequired(final ICompilationUnit unit) throws CoreException {
