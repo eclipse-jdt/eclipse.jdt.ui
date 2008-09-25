@@ -669,6 +669,10 @@ public abstract class OptionsConfigurationBlock {
 		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
 	
+	protected final void setDefaultValue(Key key, String value) {
+		key.setStoredValue(fLookupOrder[fLookupOrder.length - 1], value, fManager);
+	}
+
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.

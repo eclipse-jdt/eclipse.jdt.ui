@@ -118,6 +118,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	public ComplianceConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
+		setDefaultCompilerComplianceValues();
 
 		fBlockEnableState= null;
 		fComplianceControls= new ArrayList();
@@ -638,4 +639,18 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		return new String[] { title, message };
 	}
 			
+	private void setDefaultCompilerComplianceValues() {
+		IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
+		if(defaultVMInstall instanceof IVMInstall2){
+			String complianceLevel= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVMInstall, JavaCore.VERSION_1_4);
+			Map complianceOptions= new HashMap();
+			JavaModelUtil.setCompilanceOptions(complianceOptions, complianceLevel);
+			setDefaultValue(PREF_COMPLIANCE, (String)complianceOptions.get(PREF_COMPLIANCE.getName()));
+			setDefaultValue(PREF_PB_ASSERT_AS_IDENTIFIER, (String)complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));
+			setDefaultValue(PREF_PB_ENUM_AS_IDENTIFIER, (String)complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));
+			setDefaultValue(PREF_SOURCE_COMPATIBILITY, (String)complianceOptions.get(PREF_SOURCE_COMPATIBILITY.getName()));
+			setDefaultValue(PREF_CODEGEN_TARGET_PLATFORM, (String)complianceOptions.get(PREF_CODEGEN_TARGET_PLATFORM.getName()));
+		}
+	}
+
 }
