@@ -50,27 +50,29 @@ public class Strings {
 
 	/**
 	 * Adds special marks so that that the given styled string is readable in a BIDI environment.
-	 * <p>
-	 * XXX: Styles are currently erased by this method, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=227559
-	 * </p>
 	 *
 	 * @param styledString the styled string
 	 * @return the processed styled string
 	 * @since 3.4
 	 */
 	public static StyledString markLTR(StyledString styledString) {
+		
+		/*
+		 * NOTE: For performance reasons we do not call  markLTR(styledString, null)
+		 */
+		
 		if (!USE_TEXT_PROCESSOR)
 			return styledString;
 
-		String string= TextProcessor.process(styledString.getString());
-		return new StyledString(string);
+		String inputString= styledString.getString();
+		String string= TextProcessor.process(inputString);
+		if (string != inputString)
+			insertMarks(styledString, inputString, string);
+		return styledString;
 	}
 
 	/**
 	 * Adds special marks so that that the given styled string is readable in a BIDI environment.
-	 * <p>
-	 * XXX: Styles are currently erased by this method, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=227559
-	 * </p>
 	 *
 	 * @param styledString the styled string
 	 * @param additionalDelimiters the additional delimiters
@@ -81,8 +83,32 @@ public class Strings {
 		if (!USE_TEXT_PROCESSOR)
 			return styledString;
 
-		String string= TextProcessor.process(styledString.getString(), TextProcessor.getDefaultDelimiters() + additionalDelimiters);
-		return new StyledString(string);
+		String inputString= styledString.getString();
+		String string= TextProcessor.process(inputString, TextProcessor.getDefaultDelimiters() + additionalDelimiters);
+		if (string != inputString)
+			insertMarks(styledString, inputString, string);
+		return styledString;
+	}
+
+	/**
+	 * Inserts the marks into the given styled string.
+	 * 
+	 * @param styledString the styled string
+	 * @param originalString the original string
+	 * @param processedString the processed string
+	 * @since 3.5
+	 */
+	private static void insertMarks(StyledString styledString, String originalString, String processedString) {
+		int i= 0;
+		char orig= originalString.charAt(0);
+		int processedStringLength= originalString.length();
+		for (int processedIndex= 0; processedIndex < processedStringLength; processedIndex++) {
+			char processed= processedString.charAt(processedIndex);
+			if (orig == processed)
+				orig= originalString.charAt(++i);
+			else
+				styledString.insert(processed, processedIndex);
+		}
 	}
 
 	/**
