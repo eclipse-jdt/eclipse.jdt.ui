@@ -37,7 +37,7 @@ public class Strings {
 	/**
 	 * Tells whether we have to use the {@link TextProcessor}
 	 * <p>
-	 * XXX: This is a performance optimization needed due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=227713
+	 * This is used for performance optimization.
 	 * </p>
 	 * @since 3.4
 	 */
