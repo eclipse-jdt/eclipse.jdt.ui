@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
@@ -782,7 +784,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				assertEquals("Insert before " + insertBefore, expectedMethod, source);
 			} finally {
 				if (unit != null) {
-					unit.delete(true, null);
+					JavaProjectHelper.delete(unit);
 				}
 			}
 		}
@@ -847,7 +849,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				assertEquals("Insert before " + insertBefore, expectedMethod, source);
 			} finally {
 				if (unit != null) {
-					unit.delete(true, null);
+					JavaProjectHelper.delete(unit);
 				}
 			}
 		}
