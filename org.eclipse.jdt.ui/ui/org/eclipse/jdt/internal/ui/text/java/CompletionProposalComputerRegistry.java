@@ -344,6 +344,10 @@ public final class CompletionProposalComputerRegistry {
 			ordered.put(id, new Integer(rank));
 		}
 
+		CompletionProposalCategory allProposals= null;
+		CompletionProposalCategory typeProposals= null;
+		CompletionProposalCategory allButTypeProposals= null;
+		
 		List categories= new ArrayList();
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			IConfigurationElement element= (IConfigurationElement) iter.next();
@@ -361,6 +365,14 @@ public final class CompletionProposalComputerRegistry {
 						category.setSeparateCommand(separate);
 						category.setSortOrder(r);
 					}
+					
+					String id= category.getId();
+					if ("org.eclipse.jdt.ui.javaAllProposalCategory".equals(id)) //$NON-NLS-1$
+						allProposals= category;
+					else if ("org.eclipse.jdt.ui.javaTypeProposalCategory".equals(id)) //$NON-NLS-1$
+						typeProposals= category;
+					else if ("org.eclipse.jdt.ui.javaNoTypeProposalCategory".equals(id)) //$NON-NLS-1$
+						allButTypeProposals= category;
 				}
 			} catch (InvalidRegistryObjectException x) {
 				/*
@@ -376,7 +388,39 @@ public final class CompletionProposalComputerRegistry {
 				informUser(x.getStatus());
 			}
 		}
+		preventDuplicateCategories(store, disabled, allProposals, typeProposals, allButTypeProposals);
 		return categories;
+	}
+
+	private void preventDuplicateCategories(IPreferenceStore store, Set disabled, CompletionProposalCategory allProposals, CompletionProposalCategory typeProposals,
+			CompletionProposalCategory allButTypeProposals) {
+		boolean adjusted= false;
+		if (allButTypeProposals != null && allButTypeProposals.isIncluded() && allProposals != null) {
+			if (typeProposals != null && typeProposals.isIncluded()) {
+				typeProposals.setIncluded(false);
+				allButTypeProposals.setIncluded(false);
+				disabled.add(allButTypeProposals.getId());
+				disabled.add(typeProposals.getId());
+			} else {
+				allProposals.setIncluded(false);
+				disabled.add(allProposals.getId());
+			}
+			adjusted= true;
+		}
+		if (typeProposals != null && typeProposals.isIncluded() && allProposals != null) {
+			allProposals.setIncluded(false);
+			disabled.add(allProposals.getId());
+			adjusted= true;
+		}
+		if (adjusted) {
+			StringBuffer buf= new StringBuffer(50 * disabled.size());
+			Iterator iter= disabled.iterator();
+			while (iter.hasNext()) {
+				buf.append(iter.next());
+				buf.append('\0');
+			}
+			store.putValue(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, buf.toString());
+		}
 	}
 
 	/**
