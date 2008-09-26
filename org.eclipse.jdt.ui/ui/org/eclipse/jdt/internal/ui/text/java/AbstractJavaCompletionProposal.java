@@ -551,9 +551,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
 			URL url= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 			if (url != null) {
+				BufferedReader reader= null;
 				try {
 					url= FileLocator.toFileURL(url);
-					BufferedReader reader= new BufferedReader(new InputStreamReader(url.openStream()));
+					reader= new BufferedReader(new InputStreamReader(url.openStream()));
 					StringBuffer buffer= new StringBuffer(200);
 					String line= reader.readLine();
 					while (line != null) {
@@ -564,7 +565,14 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					fgCSSStyles= buffer.toString();
 				} catch (IOException ex) {
 					JavaPlugin.log(ex);
+				} finally {
+					try {
+						if (reader != null)
+							reader.close();
+					} catch (IOException e) {
+					}
 				}
+
 			}
 		}
 		String css= fgCSSStyles;
