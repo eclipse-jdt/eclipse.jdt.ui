@@ -78,7 +78,9 @@ public final class JavaHeuristicScanner implements Symbols {
 		/**
 		 * Asks the condition to return the next position to query. The default
 		 * is to return the next/previous position.
-		 *
+		 * 
+		 * @param position the position 
+		 * @param forward <code>true</code> if next position should be returned
 		 * @return the next position to scan
 		 */
 		public int nextPosition(int position, boolean forward) {
