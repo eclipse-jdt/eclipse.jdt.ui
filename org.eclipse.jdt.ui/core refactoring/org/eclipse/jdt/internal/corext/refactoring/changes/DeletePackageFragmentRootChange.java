@@ -167,6 +167,11 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 			return (int) reader.skip(Integer.MAX_VALUE);
 		} catch (IOException e) {
 			throw new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), e.getMessage(), e));
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+			}
 		}
 	}
 
