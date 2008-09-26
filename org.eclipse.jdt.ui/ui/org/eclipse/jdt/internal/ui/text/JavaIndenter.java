@@ -1151,8 +1151,8 @@ public final class JavaIndenter {
 				case Symbols.TokenOTHER: // dots for qualified constants
 					continue;
 				case Symbols.TokenCASE:
+				case Symbols.TokenDEFAULT:
 					return false;
-
 				default:
 					return true;
 			}
