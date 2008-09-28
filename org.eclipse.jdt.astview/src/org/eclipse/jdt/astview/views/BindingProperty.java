@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,9 @@
 package org.eclipse.jdt.astview.views;
 
 
-import org.eclipse.jdt.core.dom.IBinding;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.core.dom.IBinding;
 
 /**
  *
@@ -25,14 +25,18 @@ public class BindingProperty extends ASTAttribute {
 	private final Binding[] fValues;
 	private final boolean fIsRelevant;
 
-	public BindingProperty(Binding parent, String name, String value, boolean isRelevant) {
+	public BindingProperty(Binding parent, String name, Object value, boolean isRelevant) {
 		fParent= parent;
-		if (value == null) {
-			fName= name + ": null"; //$NON-NLS-1$
-		} else if (value.length() > 0) {
-			fName= name + ": '" + value + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+		if (value instanceof String) {
+			if (((String) value).length() == 0) {
+				fName= name + ": (empty string)"; //$NON-NLS-1$
+			} else {
+				fName= name + ": " + Binding.getEscapedStringLiteral((String) value); //$NON-NLS-1$
+			}
+		} else if (value instanceof Character) {
+			fName= name + ": " + Binding.getEscapedCharLiteral(((Character) value).charValue()); //$NON-NLS-1$
 		} else {
-			fName= name + ": (empty string)"; //$NON-NLS-1$
+			fName= name + ": " + String.valueOf(value); //$NON-NLS-1$
 		}
 		fValues= null;
 		fIsRelevant= isRelevant;
@@ -59,7 +63,7 @@ public class BindingProperty extends ASTAttribute {
 			fValues= null;
 		} else {
 			fValues= createBindings(bindings, isRelevant);
-			fName= name + " (" + String.valueOf(fValues.length) + ')'; //$NON-NLS-1$
+			fName= name + " (" + fValues.length + ')'; //$NON-NLS-1$
 		}
 		fIsRelevant= isRelevant;
 	}

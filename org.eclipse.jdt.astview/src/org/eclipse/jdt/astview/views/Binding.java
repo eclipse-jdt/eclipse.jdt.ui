@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,8 @@ import org.eclipse.jdt.astview.ASTViewPlugin;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
@@ -26,6 +28,7 @@ import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.StringLiteral;
 
 /**
  *
@@ -93,8 +96,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "VARIABLE DECLARATION", variableBinding.getVariableDeclaration(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
-					Object constVal= variableBinding.getConstantValue();
-					res.add(new BindingProperty(this, "CONSTANT VALUE", constVal == null ? "null" : constVal.toString(), true)); //$NON-NLS-1$ //$NON-NLS-2$
+					res.add(new BindingProperty(this, "CONSTANT VALUE", variableBinding.getConstantValue(), true)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 					
 				case IBinding.PACKAGE:
@@ -433,7 +435,7 @@ public class Binding extends ASTAttribute {
 			res= new Binding(parent, name + ": " + getBindingLabel(binding), binding, true);
 			
 		} else if (value instanceof String) {
-			res= new GeneralAttribute(parent, name, "\"" + (String) value + "\"");
+			res= new GeneralAttribute(parent, name, getEscapedStringLiteral((String) value));
 			
 		} else if (value instanceof Object[]) {
 			res= new GeneralAttribute(parent, name, (Object[]) value);
@@ -445,5 +447,17 @@ public class Binding extends ASTAttribute {
 			res= new GeneralAttribute(parent, name, value);
 		}
 		return res;
+	}
+	
+	public static String getEscapedStringLiteral(String stringValue) {
+		StringLiteral stringLiteral= AST.newAST(AST.JLS3).newStringLiteral();
+		stringLiteral.setLiteralValue(stringValue);
+		return stringLiteral.getEscapedValue();
+	}
+	
+	public static String getEscapedCharLiteral(char charValue) {
+		CharacterLiteral charLiteral= AST.newAST(AST.JLS3).newCharacterLiteral();
+		charLiteral.setCharValue(charValue);
+		return charLiteral.getEscapedValue();
 	}
 }
