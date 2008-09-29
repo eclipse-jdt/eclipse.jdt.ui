@@ -143,8 +143,8 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Gets the name of the manifest's main class
-	 *
-	 * @param jarPackage
+	 * 
+	 * @param jarPackage the Jar package data
 	 * @return a string with the name
 	 */
 	static String getMainClassName(JarPackageData jarPackage) {
@@ -184,9 +184,9 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Tells whether the specified manifest main class is valid.
-	 *
-	 * @param data
-	 * @param context
+	 * 
+	 * @param data the Jar package data
+	 * @param context the runnable context
 	 * @return <code>true</code> if a main class is specified and valid
 	 */
 	public static boolean isMainClassValid(JarPackageData data, IRunnableContext context) {
