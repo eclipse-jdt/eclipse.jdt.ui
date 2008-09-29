@@ -138,13 +138,15 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the java element associated with the project.
-	 *
-	 * @param project
-	 *            the project
-	 * @return the associated java element, or <code>null</code> if the
-	 *         project is not a java project
+	 * 
+	 * @param project the project, can be <code>null</code>
+	 * @return the associated java element, or <code>null</code> if the project is not a Java
+	 *         project
 	 */
 	private IJavaProject asJavaProject(final IProject project) {
+		if (project == null)
+			return null;
+
 		try {
 			if (project.getDescription().hasNature(JavaCore.NATURE_ID))
 				return JavaCore.create(project);
