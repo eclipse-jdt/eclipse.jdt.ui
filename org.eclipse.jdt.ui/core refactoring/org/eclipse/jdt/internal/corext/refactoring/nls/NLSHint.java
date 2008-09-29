@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,19 +157,15 @@ public class NLSHint {
 				                name.getLength(), nlsLine.size() - 1, true);
 						nlsLine.add(element);
 						String bundleName;
-						try {
-							ICompilationUnit bundleCU= (ICompilationUnit)type.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT);
-							if (fCache_CU == null || !fCache_CU.equals(bundleCU) || fCache_AST == null) {
-								fCache_CU= bundleCU;
-								if (fCache_CU != null)
-									fCache_AST=	SharedASTProvider.getAST(fCache_CU, SharedASTProvider.WAIT_YES, null);
-								else
-									fCache_AST= null;
-							}
-							bundleName = NLSHintHelper.getResourceBundleName(fCache_AST);
-						} catch (JavaModelException e) {
-							return true; // ignore this accessor and continue
+						ICompilationUnit bundleCU= (ICompilationUnit)type.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT);
+						if (fCache_CU == null || !fCache_CU.equals(bundleCU) || fCache_AST == null) {
+							fCache_CU= bundleCU;
+							if (fCache_CU != null)
+								fCache_AST= SharedASTProvider.getAST(fCache_CU, SharedASTProvider.WAIT_YES, null);
+							else
+								fCache_AST= null;
 						}
+						bundleName= NLSHintHelper.getResourceBundleName(fCache_AST);
 						element.setAccessorClassReference(new AccessorClassReference(type, bundleName, new Region(node.getStartPosition(), node.getLength())));
 
 						if (firstAccessor[0] == null)

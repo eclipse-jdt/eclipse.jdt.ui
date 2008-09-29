@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -159,11 +159,7 @@ public class NLSHintHelper {
 			return null;
 
 		String resourceBundleName;
-		try {
-			resourceBundleName= getResourceBundleName(accessorBinding);
-		} catch (JavaModelException e) {
-			return null;
-		}
+		resourceBundleName= getResourceBundleName(accessorBinding);
 
 		if (resourceBundleName != null)
 			return new AccessorClassReference(accessorBinding, resourceBundleName, new Region(parent.getStartPosition(), parent.getLength()));
@@ -181,7 +177,7 @@ public class NLSHintHelper {
 		return null;
 	}
 
-	public static String getResourceBundleName(ITypeBinding accessorClassBinding) throws JavaModelException {
+	public static String getResourceBundleName(ITypeBinding accessorClassBinding) {
 		IJavaElement je= accessorClassBinding.getJavaElement();
 		if (!(je instanceof IType))
 			return null;
@@ -191,11 +187,11 @@ public class NLSHintHelper {
 		return getResourceBundleName(astRoot);
 	}
 
-	public static String getResourceBundleName(ITypeRoot input) throws JavaModelException {
+	public static String getResourceBundleName(ITypeRoot input) {
 		return getResourceBundleName(SharedASTProvider.getAST(input, SharedASTProvider.WAIT_YES, null));
 	}
 
-	public static String getResourceBundleName(CompilationUnit astRoot) throws JavaModelException {
+	public static String getResourceBundleName(CompilationUnit astRoot) {
 
 		if (astRoot == null)
 			return null;
