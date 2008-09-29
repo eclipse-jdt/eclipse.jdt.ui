@@ -478,6 +478,8 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (container.getType() == IResource.FOLDER && isOutputFolder((IFolder)container))
 			return;
 
+
+
 		IResource[] children= null;
 		try {
 			children= container.members();
@@ -486,9 +488,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, BasicElementLabels.getPathLabel(container.getFullPath(), false)), exception);
 		}
 		if (children != null) {
+			IJavaProject javaProject= JavaCore.create(container.getProject());
+			boolean isOnCP= javaProject.isOnClasspath(container);
 			for (int i= 0; i < children.length; i++) {
 				IResource child= children[i];
-				if (!JavaCore.create(container.getProject()).isOnClasspath(child))
+				if (isOnCP || !javaProject.isOnClasspath(child))
 					exportElement(child, progressMonitor);
 			}
 		}
