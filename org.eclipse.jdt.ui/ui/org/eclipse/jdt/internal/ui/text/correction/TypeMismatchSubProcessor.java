@@ -431,16 +431,18 @@ public class TypeMismatchSubProcessor {
 			}
 			expectedBinding= typeArguments[0];
 		}
+		AST ast= astRoot.getAST();
+		expectedBinding= Bindings.normalizeForDeclarationUse(expectedBinding, ast);
 
 		SingleVariableDeclaration parameter= forStatement.getParameter();
 
 		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { BasicElementLabels.getJavaElementName(parameter.getName().getIdentifier()), BindingLabelProvider.getBindingLabel(expectedBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS) });
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 
 		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
-		Type newType= importRewrite.addImport(expectedBinding, astRoot.getAST());
+		Type newType= importRewrite.addImport(expectedBinding, ast);
 		rewrite.replace(parameter.getType(), newType, null);
 
 		proposals.add(proposal);
