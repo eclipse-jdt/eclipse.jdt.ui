@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -268,9 +268,10 @@ public class JavaNavigatorContentProvider extends
 	}
 
 	/**
-	 * Adapted from the C Navigator Content Provider
-	 * @param javaElements
-	 * @param proposedChildren
+	 * Adapted from the Common Navigator Content Provider
+	 * 
+	 * @param javaElements the java elements
+	 * @param proposedChildren the proposed children
 	 */
 	private void customize(Object[] javaElements, Set proposedChildren) {
 		List elementList= Arrays.asList(javaElements);
