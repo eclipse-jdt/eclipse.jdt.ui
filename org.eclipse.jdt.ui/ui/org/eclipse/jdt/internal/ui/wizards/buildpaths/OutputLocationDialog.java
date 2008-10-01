@@ -44,6 +44,8 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -99,8 +101,9 @@ public class OutputLocationDialog extends StatusDialog {
 
 		fUseSpecific.attachDialogField(fContainerDialogField);
 
-		fCurrProject= entryToEdit.getJavaProject().getProject();
-		fCPJavaProject= new CPJavaProject(classPathList, defaultOutputFolder);
+		IJavaProject javaProject= entryToEdit.getJavaProject();
+		fCurrProject= javaProject.getProject();
+		fCPJavaProject= new CPJavaProject(javaProject, classPathList, defaultOutputFolder);
 
 		IPath outputLocation= (IPath) entryToEdit.getAttribute(CPListElement.OUTPUT);
 		if (outputLocation == null) {

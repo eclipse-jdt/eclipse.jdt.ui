@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,13 +26,15 @@ public class CPJavaProject {
 
 	public static CPJavaProject createFromExisting(IJavaProject javaProject) throws CoreException {
 		List classpathEntries= ClasspathModifier.getExistingEntries(javaProject);
-		return new CPJavaProject(classpathEntries, javaProject.getOutputLocation());
+		return new CPJavaProject(javaProject, classpathEntries, javaProject.getOutputLocation());
     }
 
+	private final IJavaProject fJavaProject;
     private final List fCPListElements;
 	private IPath fDefaultOutputLocation;
 
-	public CPJavaProject(List cpListElements, IPath defaultOutputLocation) {
+	public CPJavaProject(IJavaProject javaProject, List cpListElements, IPath defaultOutputLocation) {
+		fJavaProject= javaProject;
 		fCPListElements= cpListElements;
 		fDefaultOutputLocation= defaultOutputLocation;
     }
@@ -43,7 +45,7 @@ public class CPJavaProject {
 	        CPListElement element= (CPListElement)iterator.next();
 	        newList.add(element.copy());
         }
-	    return new CPJavaProject(newList, fDefaultOutputLocation);
+		return new CPJavaProject(fJavaProject, newList, fDefaultOutputLocation);
     }
 
     public CPListElement get(int index) {
@@ -74,7 +76,7 @@ public class CPJavaProject {
     }
 
     public IJavaProject getJavaProject() {
-	    return ((CPListElement)fCPListElements.get(0)).getJavaProject();
+		return fJavaProject;
     }
 
     public int indexOf(CPListElement element) {
