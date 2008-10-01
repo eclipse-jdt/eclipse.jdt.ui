@@ -34,7 +34,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -95,7 +97,8 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			ImportRewrite imports= createImportRewrite(newRoot);
 
-			Type type= imports.addImport(fNewType, ast);
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(newRoot, declNode.getStartPosition(), imports);
+			Type type= imports.addImport(fNewType, ast, context);
 
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
