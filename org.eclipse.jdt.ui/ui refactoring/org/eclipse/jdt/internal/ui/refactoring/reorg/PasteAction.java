@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,14 +35,18 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IEncodedStorage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -70,6 +77,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.actions.CopyProjectOperation;
 import org.eclipse.ui.part.ResourceTransfer;
+
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.patch.ApplyPatchOperation;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -145,7 +155,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -459,6 +471,8 @@ public class PasteAction extends SelectionDispatchAction{
 				return fKind;
 			}
 		}
+		
+		private IStorage fPatchStorage;
 
 		private IPackageFragmentRoot fDestination;
 		/**
@@ -483,6 +497,43 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 
 		public boolean canPasteOn(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets) throws JavaModelException {
+			final String text= getClipboardText(fAvailableTypes);
+			
+			IStorage storage= new IEncodedStorage() {
+				public Object getAdapter(Class adapter) {
+					return null;
+				}
+				public boolean isReadOnly() {
+					return false;
+				}
+				public String getName() {
+					return null;
+				}
+				public IPath getFullPath() {
+					return null;
+				}
+				public InputStream getContents() throws CoreException {
+					try {
+						return new ByteArrayInputStream(text.getBytes(getCharset()));
+					} catch (UnsupportedEncodingException e) {
+						throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+			                    IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.JavaPlugin_internal_error, e));
+					}
+				}
+				public String getCharset() throws CoreException {
+					return "UTF-8"; //$NON-NLS-1$
+				}
+			};
+			try {
+				if (ApplyPatchOperation.isPatch(storage)) {
+					fPatchStorage= storage;
+					return true;
+				}
+			} catch (CoreException e) {
+				// continue
+			}
+			
+			
 			if (selectedWorkingSets.length != 0)
 				return false;
 			if (resources.length != 0)
@@ -490,7 +541,6 @@ public class PasteAction extends SelectionDispatchAction{
 			if (javaElements.length > 1)
 				return false;
 
-			String text= getClipboardText(fAvailableTypes);
 			IJavaProject javaProject= null;
 			IJavaElement destination= null;
 			if (javaElements.length == 1) {
@@ -595,6 +645,17 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 
 		public void paste(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException{
+			if (fPatchStorage != null) {
+				IResource resource= null;
+				if (resources.length > 0) {
+					resource= resources[0];
+				} else if (javaElements.length > 0) {
+					resource= javaElements[0].getResource();
+				}
+				new ApplyPatchOperation(null, fPatchStorage, resource, new CompareConfiguration()).openWizard();
+				return;
+			}
+			
 			final IEditorPart[] editorPart= new IEditorPart[1];
 
 			IRunnableWithProgress op= new IRunnableWithProgress() {
