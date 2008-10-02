@@ -789,7 +789,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				return (CPListElement[]) res.toArray(new CPListElement[res.size()]);
 			}
 		} else {
-			IPath configured= BuildPathDialogAccess.configureExternalJAREntry(getShell(), existing.getPath());
+			IPath path;
+			IPackageFragmentRoot[] roots= existing.getJavaProject().findPackageFragmentRoots(existing.getClasspathEntry());
+			if (roots.length == 1)
+				path= roots[0].getPath();
+			else
+				path= existing.getPath();
+			IPath configured= BuildPathDialogAccess.configureExternalJAREntry(getShell(), path);
 			if (configured != null) {
 				return new CPListElement[] { new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, configured, null) };
 			}

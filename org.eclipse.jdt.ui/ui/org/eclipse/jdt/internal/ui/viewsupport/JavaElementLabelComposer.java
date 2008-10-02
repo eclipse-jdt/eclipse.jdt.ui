@@ -1115,7 +1115,16 @@ public class JavaElementLabelComposer {
 	}
 
 	private void appendExternalArchiveLabel(IPackageFragmentRoot root, long flags) {
-		IPath path= root.getPath();
+		IPath path;
+		try {
+			IClasspathEntry rawClasspathEntry= root.getRawClasspathEntry();
+			if (rawClasspathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
+				path= root.getPath();
+			else
+				path= rawClasspathEntry.getPath();
+		} catch (JavaModelException e) {
+			path= root.getPath();
+		}
 		if (getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED)) {
 			int segements= path.segmentCount();
 			if (segements > 0) {

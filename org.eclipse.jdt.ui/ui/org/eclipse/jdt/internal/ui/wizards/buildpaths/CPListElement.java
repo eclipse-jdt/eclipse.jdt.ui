@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -573,7 +574,12 @@ public class CPListElement {
 							res= root.getFolder(path);
 						}
 					}
-					isMissing= !path.toFile().exists(); // look for external JARs and folders
+
+					IPath rawPath= path;
+					IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(curr);
+					if (roots.length == 1)
+						rawPath= roots[0].getPath();
+					isMissing= !rawPath.toFile().exists(); // look for external JARs and folders
 				} else if (res.isLinked()) {
 					linkTarget= res.getLocation();
 				}
