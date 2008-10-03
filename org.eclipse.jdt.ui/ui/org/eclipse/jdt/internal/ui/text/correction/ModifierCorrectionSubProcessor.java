@@ -580,10 +580,10 @@ public class ModifierCorrectionSubProcessor {
 			return;
 		}
 		MethodDeclaration decl=  (MethodDeclaration) selectedNode;
+		Modifier modifierNode= ASTNodes.findModifierNode(Modifier.ABSTRACT, decl.modifiers());
 		{
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
-			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.ABSTRACT, decl.modifiers());
 			if (modifierNode != null) {
 				rewrite.remove(modifierNode, null);
 			}
@@ -608,7 +608,8 @@ public class ModifierCorrectionSubProcessor {
 
 			proposals.add(proposal);
 		}
-		{
+
+		if (modifierNode == null) {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
