@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,6 +128,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	
 	private Action fFocusAction;
 	private Action fFindTypeAction;
+	private Action fResolveTypeAction;
 	private Action fCreateFromBindingKeyAction;
 	private Action fResetAction;
 	private Action fCodeSelectAction;
@@ -316,7 +317,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
 		
-		addProjectActionsOrNot(manager);
+		addElementActionsOrNot(manager);
 		manager.add(new Separator());
 		
 		manager.add(fCopyAction);
@@ -345,7 +346,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		}
 	}
 	
-	private void addProjectActionsOrNot(IMenuManager manager) {
+	private void addElementActionsOrNot(IMenuManager manager) {
 		if (fViewer.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
 			if (structuredSelection.size() == 1) {
@@ -355,6 +356,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					if (javaElement instanceof IJavaProject) {
 						manager.add(fFindTypeAction);
 						manager.add(fCreateFromBindingKeyAction);
+					}
+					if (javaElement instanceof IType) {
+						manager.add(fResolveTypeAction);
 					}
 				}
 			}
@@ -515,6 +519,37 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fFindTypeAction.setText("findType(..)...");
+		
+		fResolveTypeAction= new Action() {
+			@Override public void run() {
+				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
+				final IType type= (IType) ((JavaElement) selected).getJavaElement();
+				
+				InputDialog dialog= new InputDialog(getSite().getShell(), "IType#resolveType(String typeName)", "typeName:", "", null);
+				if (dialog.open() != Window.OK)
+					return;
+				final String typeName= dialog.getValue();
+				
+				JavaElementChildrenProperty element= new JavaElementChildrenProperty(fInput, "'" + type.getFullyQualifiedName() + "'.resolveType(\"" + typeName +"\")") {
+					@Override protected JEAttribute[] computeChildren() throws Exception {
+						String[][] resolvedTypes= type.resolveType(typeName);
+						if (resolvedTypes == null) {
+							return new JEAttribute[] { new Null(this, "result") };
+						}
+						JEAttribute[] resolvedJEAttributes= new JEAttribute[resolvedTypes.length];
+						for (int i= 0; i < resolvedTypes.length; i++) {
+							String[] resolvedType= resolvedTypes[i];
+							resolvedJEAttributes[i]= new JavaElementProperty(this, null, resolvedType[0] + ", " + resolvedType[1]);
+						}
+						return resolvedJEAttributes;
+					}
+				};
+				fViewer.add(fInput, element);
+				fViewer.setSelection(new StructuredSelection(element));
+				fViewer.setExpandedState(element, true);
+			}
+		};
+		fResolveTypeAction.setText("resolveType(String)...");
 		
 		fCreateFromBindingKeyAction= new Action("Create From &Binding Key...") {
 			@Override public void run() {
