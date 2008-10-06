@@ -738,9 +738,12 @@ public class Bindings {
 	}
 
 	/**
-	 * @param method
-	 * @param methodName
-	 * @param parameters
+	 * Checks whether a method with the given name and parameter types
+	 * is a subsignature of the given method binding.
+	 * 
+	 * @param method a method
+	 * @param methodName method name to match
+	 * @param parameters the parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 * @return <code>true</code> iff the method
 	 * 		m1 (with name <code>methodName</code> and method parameters <code>parameters</code>)
 	 * 		is a subsignature of the method <code>m2</code>. Accessibility and return types are not taken into account.
@@ -950,11 +953,14 @@ public class Bindings {
 	}
 
 	/**
-	 * Normalizes a type binding received from an expression to a type binding that can be used in a declaration signature.
-	 * Anonymous types are normalized, to the super class or interface. For null or void bindings
-	 * <code>null</code> is returned.
+	 * Normalizes a type binding received from an expression to a type binding that can be used in a
+	 * declaration signature. Anonymous types are normalized to the super class or interface. For
+	 * null or void bindings, <code>null</code> is returned.
+	 * 
 	 * @param binding the binding to normalize
-	 * @return the normalized binding
+	 * @return the normalized binding, can be <code>null</code>
+	 * 
+	 * @see #normalizeForDeclarationUse(ITypeBinding, AST)
 	 */
 	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
 		if (binding != null && !binding.isNullType() && !isVoidType(binding)) {
@@ -978,16 +984,15 @@ public class Bindings {
 	}
 
 	/**
-	 * Normalizes the binding so that it can be used as a type inside a declaration
-	 * (e.g. variable declaration, method return type, parameter type, ...). For
-	 * null bindings Object is returned.
+	 * Normalizes the binding so that it can be used as a type inside a declaration (e.g. variable
+	 * declaration, method return type, parameter type, ...). For null bindings, Object is returned.
+	 * 
 	 * @param binding binding to normalize
-	 * @param ast current ast
-	 *
+	 * @param ast current AST
 	 * @return the normalized type to be used in declarations
 	 */
 	public static ITypeBinding normalizeForDeclarationUse(ITypeBinding binding, AST ast) {
-		if (binding.isNullType())
+		if (binding.isNullType() || isVoidType(binding))
 			return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 		if (binding.isPrimitive())
 			return binding;
@@ -1002,9 +1007,10 @@ public class Bindings {
 	}
 
 	/**
-	 * Returns the type binding of the node's parent type declaration.
-	 * @param node
-	 * @return the type binding of the node's parent type declaration
+	 * Returns the type binding of the node's enclosing type declaration.
+	 * 
+	 * @param node an AST node
+	 * @return the type binding of the node's parent type declaration, or <code>null</code>
 	 */
 	public static ITypeBinding getBindingOfParentType(ASTNode node) {
 		while (node != null) {
@@ -1019,10 +1025,11 @@ public class Bindings {
 	}
 
 	/**
-	 * Returns the type binding of the node's type context or null if the node is an annotation, type parameter or super type declaration of a tope level type.
+	 * Returns the type binding of the node's type context or null if the node is an annotation, type parameter or super type declaration of a top level type.
 	 * The result of this method is equal to the result of {@link #getBindingOfParentType(ASTNode)} for nodes in the type's body.
-	 * @param node
-	 * @return the type binding of the node's parent type context
+	 * 
+	 * @param node an AST node
+	 * @return the type binding of the node's parent type context, or <code>null</code>
 	 */
 	public static ITypeBinding getBindingOfParentTypeContext(ASTNode node) {
 		StructuralPropertyDescriptor lastLocation= null;
