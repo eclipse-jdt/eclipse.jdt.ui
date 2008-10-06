@@ -382,6 +382,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_forbidden_reference_label;
 	public static String JavaBuildConfigurationBlock_pb_max_per_unit_label;
 	public static String JavaBuildConfigurationBlock_pb_check_prereq_binary_level_label;
+	public static String JavaBuildConfigurationBlock_pb_strictly_compatible_jre_not_available_label;
 	public static String JavaBuildConfigurationBlock_empty_input;
 	public static String JavaBuildConfigurationBlock_invalid_input;
 	public static String JavaBuildConfigurationBlock_filter_invalidsegment_error;

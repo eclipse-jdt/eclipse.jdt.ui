@@ -58,6 +58,8 @@ import org.eclipse.ui.preferences.WorkingCopyManager;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -268,6 +270,10 @@ public abstract class OptionsConfigurationBlock {
 
 	protected static Key getKey(String plugin, String key) {
 		return new Key(plugin, key);
+	}
+
+	protected final static Key getJDTLaunchingKey(String key) {
+		return getKey(JavaRuntime.ID_PLUGIN, key);
 	}
 
 	protected final static Key getJDTCoreKey(String key) {
