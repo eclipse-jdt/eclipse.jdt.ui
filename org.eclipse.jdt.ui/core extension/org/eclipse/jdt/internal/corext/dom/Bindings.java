@@ -953,9 +953,12 @@ public class Bindings {
 	}
 
 	/**
-	 * Normalizes a type binding received from an expression to a type binding that can be used in a
-	 * declaration signature. Anonymous types are normalized to the super class or interface. For
+	 * Normalizes a type binding received from an expression to a type binding that can be used inside a
+	 * declaration signature, but <em>not</em> as type of a declaration (use {@link #normalizeForDeclarationUse(ITypeBinding, AST)} for that).
+	 * <p>
+	 * Anonymous types are normalized to the super class or interface. For
 	 * null or void bindings, <code>null</code> is returned.
+	 * </p>
 	 * 
 	 * @param binding the binding to normalize
 	 * @return the normalized binding, can be <code>null</code>
@@ -985,14 +988,16 @@ public class Bindings {
 
 	/**
 	 * Normalizes the binding so that it can be used as a type inside a declaration (e.g. variable
-	 * declaration, method return type, parameter type, ...). For null bindings, Object is returned.
+	 * declaration, method return type, parameter type, ...).
+	 * For null bindings, java.lang.Object is returned.
+	 * For void bindings, <code>null</code> is returned.
 	 * 
 	 * @param binding binding to normalize
 	 * @param ast current AST
-	 * @return the normalized type to be used in declarations
+	 * @return the normalized type to be used in declarations, or <code>null</code>
 	 */
 	public static ITypeBinding normalizeForDeclarationUse(ITypeBinding binding, AST ast) {
-		if (binding.isNullType() || isVoidType(binding))
+		if (binding.isNullType())
 			return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 		if (binding.isPrimitive())
 			return binding;
