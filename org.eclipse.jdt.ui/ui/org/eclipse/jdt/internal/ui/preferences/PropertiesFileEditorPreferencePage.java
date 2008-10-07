@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -358,6 +359,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	private IColorManager fColorManager;
 
 
+
 	/**
 	 * Creates a new preference page.
 	 */
@@ -365,6 +367,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
+
 	}
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
@@ -645,6 +648,13 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);
 		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
+
+		// Make sure we propagate the colors to the shared color manager
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		PropertiesFileSourceViewerConfiguration sharedPropertiesFileSourceViewerConfiguration= new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
+		new SourcePreviewerUpdater(fPreviewViewer, sharedPropertiesFileSourceViewerConfiguration, store);
+
 	}
 
 	private void initializeFields() {
