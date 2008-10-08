@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,14 +15,12 @@ import java.util.Iterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -33,7 +31,6 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -51,7 +48,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -65,31 +61,20 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private IPropertyChangeListener fPreferenceChangeListener;
 	private IPreferenceStore fPreferenceStore;
-	private boolean fUseSystemColors;
 	private JavaSourceViewerConfiguration fSourceViewerConfiguration;
 	private ArrayList fSourceViewer;
 
 
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
 		super(parent, styles | SWT.LEFT_TO_RIGHT, mp);
-
-		getPreferenceStore();
-
-		fUseSystemColors= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT);
-		if (! fUseSystemColors) {
-			RGB bg= createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
-			setBackgroundColor(bg);
-			RGB fg= createColor(fPreferenceStore, IJavaColorConstants.JAVA_DEFAULT);
-			setForegroundColor(fg);
-		}
 	}
-
+	
 	private IPreferenceStore getPreferenceStore() {
 		if (fPreferenceStore == null)
 			setPreferenceStore(createChainedPreferenceStore(null));
 		return fPreferenceStore;
 	}
-
+	
 	protected void handleDispose(DisposeEvent event) {
 		setPreferenceStore(null);
 		fSourceViewer= null;
@@ -157,55 +142,10 @@ public class JavaMergeViewer extends TextMergeViewer {
     }
 
 	private void handlePropertyChange(PropertyChangeEvent event) {
-
-		String key= event.getProperty();
-
-		if (key.equals(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND)) {
-
-			if (!fUseSystemColors) {
-				RGB bg= createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
-				setBackgroundColor(bg);
-			}
-
-		} else if (key.equals(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)) {
-
-			fUseSystemColors= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT);
-			if (fUseSystemColors) {
-				setBackgroundColor(null);
-				setForegroundColor(null);
-			} else {
-				RGB bg= createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
-				setBackgroundColor(bg);
-				RGB fg= createColor(fPreferenceStore, IJavaColorConstants.JAVA_DEFAULT);
-				setForegroundColor(fg);
-			}
-		} else if (key.equals(IJavaColorConstants.JAVA_DEFAULT)) {
-
-			if (!fUseSystemColors) {
-				RGB fg= createColor(fPreferenceStore, IJavaColorConstants.JAVA_DEFAULT);
-				setForegroundColor(fg);
-			}
-		}
-
 		if (fSourceViewerConfiguration != null && fSourceViewerConfiguration.affectsTextPresentation(event)) {
 			fSourceViewerConfiguration.handlePropertyChangeEvent(event);
 			invalidateTextPresentation();
 		}
-	}
-
-	/**
-	 * Creates a color from the information stored in the given preference store.
-	 * Returns <code>null</code> if there is no such information available.
-	 * @param store preference store
-	 * @param key preference key
-	 * @return the color or <code>null</code>
-	 */
-	private static RGB createColor(IPreferenceStore store, String key) {
-		if (!store.contains(key))
-			return null;
-		if (store.isDefault(key))
-			return PreferenceConverter.getDefaultColor(store, key);
-		return PreferenceConverter.getColor(store, key);
 	}
 
 	public String getTitle() {
