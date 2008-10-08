@@ -65,8 +65,12 @@ class CallerMethodWrapper extends MethodWrapper {
 	 */
 	public boolean canHaveChildren() {
 		IMember member= getMember();
-		if (member instanceof IField)
-			return getLevel() == 1;
+		if (member instanceof IField) {
+			if (getLevel() == 1)
+				return true;
+			int mode= getFieldSearchMode();
+			return mode == IJavaSearchConstants.REFERENCES || mode == IJavaSearchConstants.READ_ACCESSES;
+		}
 		return member instanceof IMethod || member instanceof IType;
 	}
 

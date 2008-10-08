@@ -26,6 +26,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperWorkbenchAdapter;
 
@@ -46,6 +47,10 @@ public abstract class MethodWrapper extends PlatformObject {
     private final MethodCall fMethodCall;
     private final MethodWrapper fParent;
     private int fLevel;
+	/**
+	 * One of {@link IJavaSearchConstants#REFERENCES}, {@link IJavaSearchConstants#READ_ACCESSES},
+	 * or {@link IJavaSearchConstants#WRITE_ACCESSES}, or 0 if not set. Only used for root wrappers.
+	 */
     private int fFieldSearchMode;
 
     public MethodWrapper(MethodWrapper parent, MethodCall methodCall) {
@@ -114,7 +119,16 @@ public abstract class MethodWrapper extends PlatformObject {
     }
 
     public int getFieldSearchMode() {
-		return fFieldSearchMode;
+    	if (fFieldSearchMode != 0)
+    		return fFieldSearchMode;
+    	MethodWrapper parent= getParent();
+    	while (parent != null) {
+			if (parent.fFieldSearchMode != 0)
+				return parent.fFieldSearchMode;
+			else
+				parent= parent.getParent();
+		}
+    	return IJavaSearchConstants.REFERENCES;
 	}
 
     public void setFieldSearchMode(int fieldSearchMode) {
@@ -311,7 +325,7 @@ public abstract class MethodWrapper extends PlatformObject {
      * Allows a visitor to traverse the call hierarchy. The visiting is stopped when
      * a recursive node is reached.
      *
-     * @param visitor
+     * @param visitor the visitor
      * @param progressMonitor the progress monitor
      */
     public void accept(CallHierarchyVisitor visitor, IProgressMonitor progressMonitor) {
