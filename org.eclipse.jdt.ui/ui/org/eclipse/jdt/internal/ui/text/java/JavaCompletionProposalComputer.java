@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -104,9 +105,14 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		}
 	}
 
+	private static final long JAVA_CODE_ASSIST_TIMEOUT= 500; // ms
+
 	private String fErrorMessage;
 
+	private IProgressMonitor fTimeoutProgressMonitor;
+
 	public JavaCompletionProposalComputer() {
+		fTimeoutProgressMonitor= createTimeoutProgressMonitor(JAVA_CODE_ASSIST_TIMEOUT);
 	}
 
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
@@ -214,8 +220,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 			Point selection= viewer.getSelectedRange();
 			if (selection.y > 0)
 				collector.setReplacementLength(selection.y);
-
-				unit.codeComplete(offset, collector);
+			unit.codeComplete(offset, collector, fTimeoutProgressMonitor);
+		} catch (OperationCanceledException x) {
+			fErrorMessage= JavaTextMessages.CompletionProcessor_error_javaCompletion_took_too_long_message;
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			if (x.isDoesNotExist() && !unit.getJavaProject().isOnClasspath(unit))
@@ -245,8 +252,41 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	}
 
 	/**
+	 * Returns a new progress monitor that get cancelled after the given timeout.
+	 * 
+	 * @param timeout the timeout in ms
+	 * @return the progress monitor
+	 * @since 3.5
+	 */
+	private IProgressMonitor createTimeoutProgressMonitor(final long timeout) {
+		return new IProgressMonitor() {
+
+			private long fEndTime;
+			
+			public void beginTask(String name, int totalWork) {
+				fEndTime= System.currentTimeMillis() + timeout;
+			}
+			public boolean isCanceled() {
+				return fEndTime <= System.currentTimeMillis();
+			}
+			public void done() {
+			}
+			public void internalWorked(double work) {
+			}
+			public void setCanceled(boolean value) {
+			}
+			public void setTaskName(String name) {
+			}
+			public void subTask(String name) {
+			}
+			public void worked(int work) {
+			}
+		};
+	}
+
+	/**
 	 * Returns the array with favorite static members.
-	 *
+	 * 
 	 * @return the <code>String</code> array with with favorite static members
 	 * @see CompletionRequestor#setFavoriteReferences(String[])
 	 * @since 3.3
