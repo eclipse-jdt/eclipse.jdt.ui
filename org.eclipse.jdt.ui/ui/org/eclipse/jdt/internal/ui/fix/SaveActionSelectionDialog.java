@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescrip
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 
 public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 
@@ -40,7 +40,7 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 
 		for (int i= 0; i < descriptors.length; i++) {
 			String name= descriptors[i].getName();
-			ICleanUpTabPage page= descriptors[i].createTabPage();
+			CleanUpTabPage page= descriptors[i].createTabPage();
 
 			page.setOptionsKind(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS);
 			page.setModifyListener(this);

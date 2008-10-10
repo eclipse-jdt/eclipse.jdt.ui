@@ -69,7 +69,7 @@ public interface ICleanUp {
 		 * @param requiresFreshAST true if a fresh AST is required
 		 * @param compilerOptions map of compiler options or <b>null</b> if no requirements
 		 */
-		protected CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, Map compilerOptions) {
+		public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, Map compilerOptions) {
 			fRequiresAST= requiresAST;
 			fRequiresFreshAST= requiresFreshAST;
 			fCompilerOptions= compilerOptions;
@@ -126,7 +126,7 @@ public interface ICleanUp {
 
 		private final boolean fRequiresChangedRegions;
 
-		protected SaveActionRequirements(boolean requiresAST, boolean requiresFreshAST, Map compilerOptions, boolean requiresChangedRegions) {
+		public SaveActionRequirements(boolean requiresAST, boolean requiresFreshAST, Map compilerOptions, boolean requiresChangedRegions) {
 			super(requiresAST, requiresFreshAST, compilerOptions);
 			fRequiresChangedRegions= requiresChangedRegions;
 		}

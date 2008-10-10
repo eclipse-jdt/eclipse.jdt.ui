@@ -30,8 +30,10 @@ import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.ContributedCleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage;
@@ -76,7 +78,7 @@ public class CleanUpRegistry {
 		/**
 		 * @return new instance of a tab page
 		 */
-		public abstract ICleanUpTabPage createTabPage();
+		public abstract CleanUpTabPage createTabPage();
 	}
 
 	private ICleanUp[] fCleanUps;
@@ -151,31 +153,31 @@ public class CleanUpRegistry {
 		ArrayList result= new ArrayList();
 
 		result.add(new CleanUpTabPageDescriptor(CodeStyleTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle) {
-			public ICleanUpTabPage createTabPage() {
+			public CleanUpTabPage createTabPage() {
 				return new CodeStyleTabPage();
 			}
 		});
 
 		result.add(new CleanUpTabPageDescriptor(MemberAccessesTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses) {
-			public ICleanUpTabPage createTabPage() {
+			public CleanUpTabPage createTabPage() {
 				return new MemberAccessesTabPage();
 			}
 		});
 
 		result.add(new CleanUpTabPageDescriptor(UnnecessaryCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode) {
-			public ICleanUpTabPage createTabPage() {
+			public CleanUpTabPage createTabPage() {
 				return new UnnecessaryCodeTabPage();
 			}
 		});
 
 		result.add(new CleanUpTabPageDescriptor(MissingCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode) {
-			public ICleanUpTabPage createTabPage() {
+			public CleanUpTabPage createTabPage() {
 				return new MissingCodeTabPage();
 			}
 		});
 
 		result.add(new CleanUpTabPageDescriptor(CodeFormatingTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating) {
-			public ICleanUpTabPage createTabPage() {
+			public CleanUpTabPage createTabPage() {
 				return new CodeFormatingTabPage();
 			}
 		});
@@ -196,15 +198,21 @@ public class CleanUpRegistry {
 	}
 
 	/**
-	 * @param descriptor the descriptor of the page to register
+	 * @param page the page to register
+	 * @param id the id of the page
+	 * @param name the name of the page
 	 */
-	public synchronized void registerTabPage(CleanUpTabPageDescriptor descriptor) {
+	public synchronized void registerTabPage(final ICleanUpTabPage page, String id, String name) {
 		ensurePagesRegistered();
 		CleanUpTabPageDescriptor[] oldDescriptorps= fPageDescriptors;
 		int oldLength= oldDescriptorps.length;
 		fPageDescriptors= new CleanUpTabPageDescriptor[oldLength + 1];
 		System.arraycopy(oldDescriptorps, 0, fPageDescriptors, 0, oldLength);
-		fPageDescriptors[oldLength]= descriptor;
+		fPageDescriptors[oldLength]= new CleanUpTabPageDescriptor(id, name) {
+			public CleanUpTabPage createTabPage() {
+				return new ContributedCleanUpTabPage(page);
+			}
+		};
 	}
 
 }

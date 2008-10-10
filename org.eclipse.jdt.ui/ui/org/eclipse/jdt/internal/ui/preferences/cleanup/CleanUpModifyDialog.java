@@ -63,7 +63,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 
 		for (int i= 0; i < descriptors.length; i++) {
 			String name= descriptors[i].getName();
-			ICleanUpTabPage page= descriptors[i].createTabPage();
+			CleanUpTabPage page= descriptors[i].createTabPage();
 
 			page.setOptionsKind(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
 			page.setModifyListener(this);

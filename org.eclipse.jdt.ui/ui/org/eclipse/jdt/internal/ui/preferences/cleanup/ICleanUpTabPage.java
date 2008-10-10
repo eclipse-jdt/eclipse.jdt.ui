@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
-import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
+import org.eclipse.swt.widgets.Composite;
 
-public interface ICleanUpTabPage extends IModifyDialogTabPage {
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+
+/**
+ * @since 3.4
+ */
+public interface ICleanUpTabPage {
 
 	/**
 	 * The kind of clean up options this page will
@@ -25,6 +30,21 @@ public interface ICleanUpTabPage extends IModifyDialogTabPage {
 	 * @see ICleanUp#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
 	public void setOptionsKind(int kind);
+
+	/**
+	 * The options to modify on this page.
+	 * 
+	 * @param options the options to modify
+	 */
+	public void setOptions(CleanUpOptions options);
+
+	/**
+	 * Create the contents of this tab page.
+	 * 
+	 * @param parent the parent composite
+	 * @return created content control
+	 */
+	public Composite createContents(Composite parent);
 
 	/**
 	 * @return the maximum number of clean ups the user can select on this page

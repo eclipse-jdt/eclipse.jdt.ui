@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
@@ -184,7 +184,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 				for (int i= 0; i < descriptors.length; i++) {
 					String name= descriptors[i].getName();
-					ICleanUpTabPage page= descriptors[i].createTabPage();
+					CleanUpTabPage page= descriptors[i].createTabPage();
 
 					page.setOptionsKind(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
 					page.setModifyListener(this);

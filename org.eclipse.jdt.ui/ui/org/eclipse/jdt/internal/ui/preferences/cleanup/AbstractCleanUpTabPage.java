@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 
 public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 
@@ -31,6 +33,13 @@ public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 	public void setWorkingValues(Map workingValues) {
 		super.setWorkingValues(workingValues);
 		fValues= workingValues;
+		setOptions(new MapCleanUpOptions(workingValues));
+	}
+
+	/* 
+	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#setOptions(org.eclipse.jdt.internal.ui.fix.CleanUpOptions)
+	 */
+	public void setOptions(CleanUpOptions options) {
 	}
 
 	/* 

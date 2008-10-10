@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 
 public abstract class CleanUpSelectionDialog extends StatusDialog implements IModifyDialogTabPage.IModificationListener {
@@ -45,14 +45,14 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 	protected final class NamedCleanUpTabPage {
 
 		private final String fName;
-		private final ICleanUpTabPage fPage;
+		private final CleanUpTabPage fPage;
 
-		public NamedCleanUpTabPage(String name, ICleanUpTabPage page) {
+		public NamedCleanUpTabPage(String name, CleanUpTabPage page) {
 			fName= name;
 			fPage= page;
 		}
 
-		public ICleanUpTabPage getPage() {
+		public CleanUpTabPage getPage() {
 			return fPage;
 		}
 
@@ -72,7 +72,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 	private final List fTabPages;
 	private final IDialogSettings fDialogSettings;
 	private TabFolder fTabFolder;
-	private ICleanUpTabPage[] fPages;
+	private CleanUpTabPage[] fPages;
 	private Label fCountLabel;
 
 	public CleanUpSelectionDialog(Shell parent, Map settings, String title) {
@@ -141,7 +141,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 
 		NamedCleanUpTabPage[] pages= createTabPages(fWorkingValues);
 
-		fPages= new ICleanUpTabPage[pages.length];
+		fPages= new CleanUpTabPage[pages.length];
 
 		for (int i= 0; i < pages.length; i++) {
 			fPages[i]= pages[i].getPage();
