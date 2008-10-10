@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
@@ -38,17 +37,14 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 
 public class CleanUpPreview extends JavaPreview {
 
-	private ICleanUp[] fPreviewCleanUps;
+	private ICleanUpTabPage fPage;
 	private boolean fFormat;
 	private boolean fCorrectIndentation;
-	public CleanUpPreview(Composite parent, ICleanUp[] cleanUps) {
-		super(JavaCore.getDefaultOptions(), parent);
-		fPreviewCleanUps= cleanUps;
-		fFormat= false;
-	}
 
-	public void setCleanUps(ICleanUp[] fCleanUps) {
-		fPreviewCleanUps= fCleanUps;
+	public CleanUpPreview(Composite parent, ICleanUpTabPage page) {
+		super(JavaCore.getDefaultOptions(), parent);
+		fPage= page;
+		fFormat= false;
 	}
 
 	public void setFormat(boolean enable) {
@@ -63,13 +59,7 @@ public class CleanUpPreview extends JavaPreview {
 	 * {@inheritDoc}
 	 */
 	protected void doFormatPreview() {
-
-		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < fPreviewCleanUps.length; i++) {
-			buf.append(fPreviewCleanUps[i].getPreview());
-			buf.append("\n"); //$NON-NLS-1$
-		}
-		format(buf.toString());
+		format(fPage.getPreview());
 	}
 
 	private void format(String text) {

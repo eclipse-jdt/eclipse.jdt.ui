@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,12 +17,12 @@ import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 
-public final class UnnecessaryCodeTabPage extends CleanUpTabPage {
+public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.unnecessary_code"; //$NON-NLS-1$
 
@@ -30,8 +30,8 @@ public final class UnnecessaryCodeTabPage extends CleanUpTabPage {
     	super();
     }
 
-    protected ICleanUp[] createPreviewCleanUps(Map values) {
-    	return new ICleanUp[] {
+	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+		return new AbstractCleanUp[] {
         		new UnusedCodeCleanUp(values),
         		new UnnecessaryCodeCleanUp(values),
         		new StringCleanUp(values)

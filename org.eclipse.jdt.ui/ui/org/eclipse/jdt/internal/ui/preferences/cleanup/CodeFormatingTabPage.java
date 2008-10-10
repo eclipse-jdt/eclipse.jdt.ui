@@ -26,14 +26,14 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 
-public final class CodeFormatingTabPage extends CleanUpTabPage {
+public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.code_formatting"; //$NON-NLS-1$
 
@@ -52,8 +52,8 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 		fValues= workingValues;
 	}
 
-	protected ICleanUp[] createPreviewCleanUps(Map values) {
-		return new ICleanUp[] {
+	protected AbstractCleanUp[] createPreviewCleanUps(Map values) {
+		return new AbstractCleanUp[] {
 				new ImportsCleanUp(values),
 				new CodeFormatCleanUp(values),
 				new SortMembersCleanUp(values)

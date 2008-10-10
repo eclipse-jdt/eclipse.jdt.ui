@@ -224,13 +224,6 @@ public interface ICleanUp {
 	public String[] getDescriptions();
 
 	/**
-	 * A code snippet which complies to the current settings.
-	 *
-	 * @return A code snippet
-	 */
-	public abstract String getPreview();
-
-	/**
 	 * @return the requirements used for {@link #createFix(ICleanUp.CleanUpContext)} to work
 	 */
 	public CleanUpRequirements getRequirements();
