@@ -27,6 +27,7 @@ final class JavaTextMessages extends NLS {
 	public static String CompletionProcessor_error_accessing_message;
 	public static String CompletionProcessor_error_notOnBuildPath_title;
 	public static String CompletionProcessor_error_notOnBuildPath_message;
+	public static String CompletionProcessor_error_javaCompletion_took_too_long_message;
 	public static String CompletionProposalComputerRegistry_messageAvoidanceHint;
 	public static String CompletionProposalComputerRegistry_messageAvoidanceHintWithWarning;
 	public static String ContentAssistProcessor_all_disabled_message;
