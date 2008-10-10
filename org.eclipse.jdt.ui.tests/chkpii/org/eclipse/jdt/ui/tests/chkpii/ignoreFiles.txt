@@ -67,6 +67,7 @@ org.eclipse.equinox.common/*
 org.eclipse.equinox.preferences/*
 org.eclipse.equinox.registry/*
 org.eclipse.equinox.p2.metadata.generator/*
+org.eclipse.equinox.p2.engine/*
 org.eclipse.help/*
 org.eclipse.help.appserver/*
 org.eclipse.help.base/*
