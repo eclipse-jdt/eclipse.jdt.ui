@@ -660,4 +660,12 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		}
 		return null;
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.TextViewer#getEmptySelectionChangedEventDelay()
+	 * @since 3.5
+	 */
+	protected int getEmptySelectionChangedEventDelay() {
+		return super.getEmptySelectionChangedEventDelay();
+	}
 }

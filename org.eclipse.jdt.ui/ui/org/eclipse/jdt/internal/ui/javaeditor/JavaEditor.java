@@ -1685,7 +1685,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private SelectionProvider fSelectionProvider= new JdtSelectionProvider();
 
+	/**
+	 * Time when last error message got set.
+	 * 
+	 * @since 3.5
+	 */
+	private long fErrorMessageTime;
 
+	/**
+	 * Timeout for the error message.
+	 * 
+	 * @since 3.5
+	 */
+	private long fErrorMessageTimeout;
 
 
 	/**
@@ -1780,23 +1792,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		editorComposite.setLayout(fillLayout);
 
 		IPreferenceStore store= getPreferenceStore();
-		ISourceViewer viewer= createJavaSourceViewer(editorComposite, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
+		JavaSourceViewer javaSourceViewer= createJavaSourceViewer(editorComposite, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 
-		JavaUIHelp.setHelp(this, viewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
-
-		JavaSourceViewer javaSourceViewer= null;
-		if (viewer instanceof JavaSourceViewer)
-			javaSourceViewer= (JavaSourceViewer)viewer;
+		fErrorMessageTimeout= javaSourceViewer.getEmptySelectionChangedEventDelay() + 100;
+		JavaUIHelp.setHelp(this, javaSourceViewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
 
 		/*
 		 * This is a performance optimization to reduce the computation of
 		 * the text presentation triggered by {@link #setVisibleDocument(IDocument)}
 		 */
-		if (javaSourceViewer != null && isFoldingEnabled() && (store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
+		if (isFoldingEnabled() && (store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
 			javaSourceViewer.prepareDelayedProjection();
 
-		ProjectionViewer projectionViewer= (ProjectionViewer)viewer;
-		fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
+		fProjectionSupport= new ProjectionSupport(javaSourceViewer, getAnnotationAccess(), getSharedColors());
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
@@ -1813,12 +1821,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
 		if (fProjectionModelUpdater != null)
-			fProjectionModelUpdater.install(this, projectionViewer);
+			fProjectionModelUpdater.install(this, javaSourceViewer);
 
 		// ensure source viewer decoration support has been created and configured
-		getSourceViewerDecorationSupport(viewer);
+		getSourceViewerDecorationSupport(javaSourceViewer);
 
-		return viewer;
+		return javaSourceViewer;
 	}
 
 	/**
@@ -1935,7 +1943,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 * @return the source viewer
 	 */
-	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
+	protected JavaSourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
 		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 	}
 
@@ -3512,6 +3520,27 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem() || isProblemMarkerAnnotation(annotation))
 				setStatusLineMessage(annotation.getText());
 		}
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setStatusLineErrorMessage(java.lang.String)
+	 * @since 3.5
+	 */
+	protected void setStatusLineErrorMessage(String message) {
+		long now= System.currentTimeMillis();
+		if (message != null || now - fErrorMessageTime > fErrorMessageTimeout)
+			super.setStatusLineErrorMessage(message);
+		fErrorMessageTime= now;
+
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setStatusLineMessage(java.lang.String)
+	 * @since 3.5
+	 */
+	protected void setStatusLineMessage(String message) {
+		if (System.currentTimeMillis() - fErrorMessageTime > fErrorMessageTimeout)
+			super.setStatusLineMessage(message);
 	}
 
 	/**
