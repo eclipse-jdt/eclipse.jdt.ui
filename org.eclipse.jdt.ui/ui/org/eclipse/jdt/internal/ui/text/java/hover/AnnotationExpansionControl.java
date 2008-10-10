@@ -112,7 +112,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 		public void selected() {
 			Display disp= fShell.getDisplay();
-			canvas.setCursor(fHandCursor);
+			canvas.setCursor(getHandCursor(disp));
 			// TODO: shade - for now: set grey background
 			canvas.setBackground(getSelectionColor(disp));
 
@@ -427,8 +427,6 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	private Shell fShell;
 	/** The composite combining all the items. */
 	protected Composite fComposite;
-	/** The hand cursor. */
-	private Cursor fHandCursor;
 	/** The currently selected item, or <code>null</code> if none is selected. */
 	private Item fSelection;
 	/** The hover manager for the per-item hovers. */
@@ -450,9 +448,9 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/**
 	 * Creates a new control.
 	 *
-	 * @param parent
-	 * @param shellStyle
-	 * @param access
+	 * @param parent parent shell
+	 * @param shellStyle additional style flags 
+	 * @param access the annotation access
 	 */
 	public AnnotationExpansionControl(Shell parent, int shellStyle, IAnnotationAccess access) {
 		fPaintListener= new MyPaintListener();
@@ -519,9 +517,9 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 //
 //		});
 
-		fHandCursor= new Cursor(display, SWT.CURSOR_HAND);
-		fShell.setCursor(fHandCursor);
-		fComposite.setCursor(fHandCursor);
+		Cursor handCursor= getHandCursor(display);
+		fShell.setCursor(handCursor);
+		fComposite.setCursor(handCursor);
 
 		setInfoSystemColor();
 	}
@@ -648,9 +646,6 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 				fShell.dispose();
 			fShell= null;
 			fComposite= null;
-			if (fHandCursor != null)
-				fHandCursor.dispose();
-			fHandCursor= null;
 			if (fHoverManager != null)
 				fHoverManager.dispose();
 			fHoverManager= null;
@@ -845,6 +840,10 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 	private Color getSelectionColor(Display disp) {
 		return disp.getSystemColor(SWT.COLOR_GRAY);
+	}
+
+	private Cursor getHandCursor(Display disp) {
+		return disp.getSystemCursor(SWT.CURSOR_HAND);
 	}
 
 	/*
