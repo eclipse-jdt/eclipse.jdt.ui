@@ -388,10 +388,10 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		if (fNumberOfComputedResults > 0)
-			return null;
 		if (fErrorMessage != null)
 			return fErrorMessage;
+		if (fNumberOfComputedResults > 0)
+			return null;
 		return JavaUIMessages.JavaEditor_codeassist_noCompletions;
 	}
 
