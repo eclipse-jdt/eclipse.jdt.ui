@@ -52,6 +52,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
@@ -477,8 +478,10 @@ public class AbstractCompletionTest extends TestCase {
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
 		IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, getContentType());
-
 		ICompletionProposal[] proposals= javaProcessor.computeCompletionProposals(fEditor.getViewer(), selection.getOffset());
+		final String errorMessage= javaProcessor.getErrorMessage();
+		if (errorMessage != null && !JavaUIMessages.JavaEditor_codeassist_noCompletions.equals(errorMessage))
+			fail(errorMessage);
 		return proposals;
 	}
 
@@ -492,8 +495,10 @@ public class AbstractCompletionTest extends TestCase {
 		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
 		IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, getContentType());
 		assistant.setContentAssistProcessor(javaProcessor, getContentType());
-
 		assistant.completePrefix();
+		final String errorMessage= javaProcessor.getErrorMessage();
+		if (errorMessage != null && !JavaUIMessages.JavaEditor_codeassist_noCompletions.equals(errorMessage))
+			fail(errorMessage);
 		assistant.uninstall();
 	}
 
