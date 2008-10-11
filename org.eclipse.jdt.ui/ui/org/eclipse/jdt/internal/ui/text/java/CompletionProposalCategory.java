@@ -262,7 +262,7 @@ public final class CompletionProposalCategory {
 			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
 			if (desc.getCategory() == this)
 				result.addAll(desc.computeCompletionProposals(context, monitor));
-			if (fLastError == null)
+			if (fLastError == null && desc.getErrorMessage() != null)
 				fLastError= desc.getErrorMessage();
 		}
 		return result;
