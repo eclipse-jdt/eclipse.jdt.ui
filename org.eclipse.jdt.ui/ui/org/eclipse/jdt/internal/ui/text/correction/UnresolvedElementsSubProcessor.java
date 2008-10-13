@@ -369,7 +369,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		IBinding[] varsAndMethodsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, kind);
-		if (varsAndMethodsInScope.length > 0 && varsAndMethodsInScope.length <= 50) {
+		if (varsAndMethodsInScope.length > 0) {
 			// avoid corrections like int i= i;
 			String otherNameInAssign= null;
 
@@ -411,8 +411,9 @@ public class UnresolvedElementsSubProcessor {
 			ITypeBinding objectBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			String identifier= node.getIdentifier();
 			boolean isInStaticContext= ASTResolving.isInStaticContext(node);
+			ArrayList newProposals= new ArrayList(51);
 
-			loop: for (int i= 0; i < varsAndMethodsInScope.length; i++) {
+			loop: for (int i= 0; i < varsAndMethodsInScope.length && newProposals.size() <= 50; i++) {
 				IBinding varOrMeth= varsAndMethodsInScope[i];
 				if (varOrMeth instanceof IVariableBinding) {
 					IVariableBinding curr= (IVariableBinding) varOrMeth;
@@ -454,7 +455,7 @@ public class UnresolvedElementsSubProcessor {
 
 					if (relevance > 0) {
 						String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changevariable_description, BasicElementLabels.getJavaElementName(currName));
-						proposals.add(new RenameNodeCorrectionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
+						newProposals.add(new RenameNodeCorrectionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
 					}
 				} else if (varOrMeth instanceof IMethodBinding) {
 					IMethodBinding curr= (IMethodBinding) varOrMeth;
@@ -465,7 +466,7 @@ public class UnresolvedElementsSubProcessor {
 							String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetomethod_description, ASTResolving.getMethodSignature(curr, false));
 							Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 							LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 8, image);
-							proposals.add(proposal);
+							newProposals.add(proposal);
 
 							MethodInvocation newInv= ast.newMethodInvocation();
 							newInv.setName(ast.newSimpleName(curr.getName()));
@@ -480,6 +481,8 @@ public class UnresolvedElementsSubProcessor {
 					}
 				}
 			}
+			if (newProposals.size() <= 50)
+				proposals.addAll(newProposals);
 		}
 		if (binding != null && binding.isArray()) {
 			String idLength= "length"; //$NON-NLS-1$
