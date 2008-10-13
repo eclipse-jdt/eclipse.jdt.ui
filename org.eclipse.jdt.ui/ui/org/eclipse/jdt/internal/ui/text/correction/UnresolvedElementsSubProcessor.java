@@ -369,7 +369,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		IBinding[] varsAndMethodsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, kind);
-		if (varsAndMethodsInScope.length > 0) {
+		if (varsAndMethodsInScope.length > 0 && varsAndMethodsInScope.length <= 50) {
 			// avoid corrections like int i= i;
 			String otherNameInAssign= null;
 
