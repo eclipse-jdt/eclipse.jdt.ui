@@ -22,6 +22,8 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.tests.Accessor;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
@@ -55,6 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
 public class AbstractCompletionTest extends TestCase {
@@ -477,7 +480,13 @@ public class AbstractCompletionTest extends TestCase {
 		waitBeforeCoreCompletion();
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
-		IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, getContentType());
+		JavaCompletionProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, getContentType());
+
+		// Must ensure same setup of the processor as when using via UI
+		Accessor accessor= new Accessor(javaProcessor, ContentAssistProcessor.class);
+		accessor.invoke("setCategoryIteration", new Object[0]);
+		accessor.set("fRepetition", 0);
+
 		ICompletionProposal[] proposals= javaProcessor.computeCompletionProposals(fEditor.getViewer(), selection.getOffset());
 		final String errorMessage= javaProcessor.getErrorMessage();
 		if (errorMessage != null && !JavaUIMessages.JavaEditor_codeassist_noCompletions.equals(errorMessage))
