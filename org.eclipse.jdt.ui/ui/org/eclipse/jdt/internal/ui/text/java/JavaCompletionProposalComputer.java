@@ -105,7 +105,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		}
 	}
 
-	private static final long JAVA_CODE_ASSIST_TIMEOUT= 2000; // ms
+	private static final long JAVA_CODE_ASSIST_TIMEOUT= 500; // ms
 
 	private String fErrorMessage;
 
