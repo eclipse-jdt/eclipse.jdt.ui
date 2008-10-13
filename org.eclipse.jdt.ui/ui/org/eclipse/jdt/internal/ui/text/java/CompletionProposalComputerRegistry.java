@@ -395,23 +395,20 @@ public final class CompletionProposalComputerRegistry {
 	private void preventDuplicateCategories(IPreferenceStore store, Set disabled, CompletionProposalCategory allProposals, CompletionProposalCategory typeProposals,
 			CompletionProposalCategory allButTypeProposals) {
 		boolean adjusted= false;
-		if (allButTypeProposals != null && allButTypeProposals.isIncluded() && allProposals != null) {
-			if (typeProposals != null && typeProposals.isIncluded()) {
-				typeProposals.setIncluded(false);
-				allButTypeProposals.setIncluded(false);
-				disabled.add(allButTypeProposals.getId());
-				disabled.add(typeProposals.getId());
-			} else {
-				allProposals.setIncluded(false);
-				disabled.add(allProposals.getId());
-			}
+		if (allProposals == null || !allProposals.isIncluded())
+			return;
+
+		if (allButTypeProposals != null && allButTypeProposals.isIncluded()) {
+			allButTypeProposals.setIncluded(false);
+			disabled.add(allButTypeProposals.getId());
 			adjusted= true;
 		}
-		if (typeProposals != null && typeProposals.isIncluded() && allProposals != null) {
-			allProposals.setIncluded(false);
-			disabled.add(allProposals.getId());
+		if (typeProposals != null && typeProposals.isIncluded()) {
+			typeProposals.setIncluded(false);
+			disabled.add(typeProposals.getId());
 			adjusted= true;
 		}
+
 		if (adjusted) {
 			StringBuffer buf= new StringBuffer(50 * disabled.size());
 			Iterator iter= disabled.iterator();
