@@ -1192,7 +1192,8 @@ public class LocalCorrectionsSubProcessor {
 		
 		//Generate hashCode() and equals()... proposal
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, null, 3, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, null, 3, image) {
 			public void apply(IDocument document) {
 				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
 				IWorkbenchPage p= JavaPlugin.getActivePage();
@@ -1222,9 +1223,9 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		label= CorrectionMessages.LocalCorrectionsSubProcessor_override_hashCode_description;
+		image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+		
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-
 		LinkedCorrectionProposal proposal2= new LinkedCorrectionProposal(label, cu, rewrite, 5, image);
 		ImportRewrite importRewrite= proposal2.createImportRewrite(astRoot);
 		
