@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.ui.tests.performance;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceTestCase;
 
@@ -25,18 +26,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.TypeNameRequestor;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JdtPerformanceTestCase extends PerformanceTestCase {
-
-	private static class Requestor extends TypeNameRequestor {
-	}
 
 	public JdtPerformanceTestCase() {
 		super();
@@ -58,16 +50,7 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 			}
 		}
 		// Join indexing
-		new SearchEngine().searchAllTypeNames(
-				null,
-				SearchPattern.R_EXACT_MATCH,
-				"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent
-				SearchPattern.R_EXACT_MATCH,
-				IJavaSearchConstants.CLASS,
-				SearchEngine.createJavaSearchScope(new IJavaElement[0]),
-				new Requestor(),
-				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-				null);
+		JavaProjectHelper.performDummySearch();
 		// Join jobs. Maximal wait 1 minute before all jobs have completed
 		if(!joinJobs(0, 1 * 60 * 1000, 500)) {
 			JavaPlugin.logErrorMessage("Performance test " + getName() + " started with running background activity");
