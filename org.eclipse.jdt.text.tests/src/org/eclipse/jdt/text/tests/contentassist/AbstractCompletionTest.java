@@ -515,10 +515,17 @@ public class AbstractCompletionTest extends TestCase {
 	 * Invokes {@link Thread#sleep(long)} if {@link #waitBeforeCompleting(boolean)} was set to
 	 * <code>true</code> or camel case completions are enabled. For some reasons, inner types and
 	 * camel case matches don't show up otherwise.
-	 *
+	 * 
 	 * @since 3.2
 	 */
 	private void waitBeforeCoreCompletion() {
+		// Make sure indexer is up to date
+		try {
+			JavaProjectHelper.performDummySearch();
+		} catch (JavaModelException e) {
+			fail("could not synchronize with indexer");
+		}
+
 	    if (fWaitBeforeCompleting || JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH))) {
 			try {
 				Thread.sleep(2000);
