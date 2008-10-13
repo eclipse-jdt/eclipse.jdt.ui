@@ -106,8 +106,8 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			fIterationGesture= getIterationGesture();
 			KeySequence binding= getIterationBinding();
 
-			// this may show the warning dialog if all categories are disabled
-			fCategoryIteration= getCategoryIteration();
+			// This may show the warning dialog if all categories are disabled
+			setCategoryIteration();
 			for (Iterator it= fCategories.iterator(); it.hasNext();) {
 				CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
 				cat.sessionStarted();
@@ -439,6 +439,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 //		fAssistant.setShowMessage(fRepetition % 2 != 0);
 
 		return (List) fCategoryIteration.get(iteration);
+	}
+
+	// This may show the warning dialog if all categories are disabled
+	private void setCategoryIteration() {
+		fCategoryIteration= getCategoryIteration();
 	}
 
 	private List getCategoryIteration() {
