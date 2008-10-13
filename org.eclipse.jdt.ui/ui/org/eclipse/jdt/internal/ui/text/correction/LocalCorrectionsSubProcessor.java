@@ -42,16 +42,19 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -82,11 +85,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
@@ -102,6 +110,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComp
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.actions.GenerateHashCodeEqualsAction;
 import org.eclipse.jdt.ui.actions.InferTypeArgumentsAction;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -116,6 +125,7 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
@@ -1155,6 +1165,85 @@ public class LocalCorrectionsSubProcessor {
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		return new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 10, image);
+	}
+
+	public static void addMissingHashCodeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		final ICompilationUnit cu= context.getCompilationUnit();
+		
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (!(selectedNode instanceof Name)) {
+			return;
+		}
+		
+		AbstractTypeDeclaration typeDeclaration= null;
+		StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
+		if (locationInParent != TypeDeclaration.NAME_PROPERTY && locationInParent != EnumDeclaration.NAME_PROPERTY) {
+			return;
+		}
+		
+		typeDeclaration= (AbstractTypeDeclaration) selectedNode.getParent();
+
+		ITypeBinding binding= typeDeclaration.resolveBinding();
+		if (binding == null || binding.getSuperclass() == null) {
+			return;
+		}
+		final IType type= (IType) binding.getJavaElement();
+		
+		//Generate hashCode() and equals()... proposal
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, null, 3, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			public void apply(IDocument document) {
+				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+				IWorkbenchPage p= JavaPlugin.getActivePage();
+				if (p == null)
+					return;
+
+				IEditorPart part= p.findEditor(input);
+				if (!(part instanceof JavaEditor))
+					return;
+
+				IEditorSite site= ((JavaEditor)part).getEditorSite();
+				GenerateHashCodeEqualsAction action= new GenerateHashCodeEqualsAction(site);
+				action.run(new StructuredSelection(type));
+			}
+
+			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+				return CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_additional_info;
+			}
+		};
+		proposals.add(proposal);
+		
+		
+		//Override hashCode() proposal
+		IMethodBinding superHashCode= Bindings.findMethodInHierarchy(binding, "hashCode", new ITypeBinding[0]); //$NON-NLS-1$
+		if (superHashCode == null) {
+			return;
+		}
+		
+		label= CorrectionMessages.LocalCorrectionsSubProcessor_override_hashCode_description;
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+
+		LinkedCorrectionProposal proposal2= new LinkedCorrectionProposal(label, cu, rewrite, 5, image);
+		ImportRewrite importRewrite= proposal2.createImportRewrite(astRoot);
+		
+		String typeQualifiedName= type.getTypeQualifiedName('.');
+		final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+		
+		try {
+			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(astRoot, problem.getOffset(), importRewrite);
+			MethodDeclaration hashCode= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importContext, superHashCode, typeQualifiedName, settings, false);
+			BodyDeclarationRewrite.create(rewrite, typeDeclaration).insert(hashCode, null);
+			
+			proposal2.setEndPosition(rewrite.track(hashCode));
+			
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+		
+		
+		proposals.add(proposal2);
 	}
 
 }

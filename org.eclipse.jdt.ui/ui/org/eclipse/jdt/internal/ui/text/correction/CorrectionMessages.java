@@ -319,6 +319,8 @@ public final class CorrectionMessages extends NLS {
 	public static String ModifierCorrectionSubProcessor_addoverrideannotation;
 	public static String ModifierCorrectionSubProcessor_adddeprecatedannotation;
 	public static String LocalCorrectionsSubProcessor_externalizestrings_additional_info;
+	public static String LocalCorrectionsSubProcessor_generate_hashCode_equals_additional_info;
+	public static String LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
 	public static String AssignToVariableAssistProposal_assigntoexistingfield_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_operation;
 	public static String ReorgCorrectionsSubProcessor_no_50jre_title;
@@ -364,6 +366,7 @@ public final class CorrectionMessages extends NLS {
 	public static String CorrectionMarkerResolutionGenerator_multiFixErrorDialog_description;
 	public static String LocalCorrectionsSubProcessor_insert_break_statement;
 	public static String LocalCorrectionsSubProcessor_insert_fall_through;
+	public static String LocalCorrectionsSubProcessor_override_hashCode_description;
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
 	public static String SuppressWarningsSubProcessor_remove_annotation_label;
 }

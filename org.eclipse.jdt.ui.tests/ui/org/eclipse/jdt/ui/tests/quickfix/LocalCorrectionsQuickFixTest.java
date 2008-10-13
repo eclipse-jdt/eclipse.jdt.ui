@@ -76,6 +76,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
 		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
+		options.put(JavaCore.COMPILER_PB_MISSING_HASHCODE_METHOD, JavaCore.WARNING);
 
 		JavaCore.setOptions(options);
 
@@ -6932,6 +6933,59 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testMissingHashCode1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean equals(Object o) {\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+	
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+	
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean equals(Object o) {\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public int hashCode() {\n");
+		buf.append("        return super.hashCode();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
+	}
 
-
+	public void testMissingHashCode2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E extends java.io.File{\n");
+		buf.append("    private static final long serialVersionUID= 1L;\n");
+		buf.append("    public E() { super(\"x\"); }\n");
+		buf.append("    public boolean equals(Object o) {\n");
+		buf.append("        return o instanceof E && super.equals(o);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		assertEquals(0, astRoot.getProblems().length); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38751#c7
+	}
+	
 }
