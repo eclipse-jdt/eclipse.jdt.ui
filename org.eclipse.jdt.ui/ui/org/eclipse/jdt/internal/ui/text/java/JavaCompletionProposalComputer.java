@@ -105,11 +105,11 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		}
 	}
 
-	private static final long JAVA_CODE_ASSIST_TIMEOUT= 1000; // ms
+	private static final long JAVA_CODE_ASSIST_TIMEOUT= 2000; // ms
 
 	private String fErrorMessage;
 
-	private IProgressMonitor fTimeoutProgressMonitor;
+	private final IProgressMonitor fTimeoutProgressMonitor;
 
 	public JavaCompletionProposalComputer() {
 		fTimeoutProgressMonitor= createTimeoutProgressMonitor(JAVA_CODE_ASSIST_TIMEOUT);
