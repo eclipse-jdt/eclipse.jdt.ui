@@ -999,6 +999,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					null));
 
 		if (node instanceof ClassInstanceCreation) {
+			if (((ClassInstanceCreation)node).getAnonymousClassDeclaration() != null) {
+				// Cannot replace anonymous inner class, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=250660
+				fConstructorVisibility= Modifier.PROTECTED;
+				return null;
+			}
 			return node;
 		} else if (node instanceof VariableDeclaration) {
 			Expression	init= ((VariableDeclaration) node).getInitializer();

@@ -726,6 +726,10 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		singleUnitBugHelper("CtorTypeArgBounds", true);
 	}
 
+	public void test250660() throws Exception {
+		singleUnitBugHelper("HasAnonymous", true);
+	}
+	
 	public void testFactoryClash() throws Exception {
 		failHelper(RefactoringStatus.ERROR);
 	}
