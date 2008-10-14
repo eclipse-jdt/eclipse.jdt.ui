@@ -95,7 +95,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.jdt.junit",
 			"org.eclipse.jdt.junit.runtime",
 			"org.eclipse.jdt.junit4.runtime",
-			"org.eclipse.jdt.launching",
 			"org.eclipse.jdt.ui.examples.javafamily",
 			"org.eclipse.jdt.ui.examples.projects",
 			"org.eclipse.jdt.ui.tests.refactoring",
