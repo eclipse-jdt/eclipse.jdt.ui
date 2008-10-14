@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,8 +110,10 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	}
 
 	private static final String SETTINGS_INSTANCEOF= "InstanceOf"; //$NON-NLS-1$
+	private static final String SETTINGS_BLOCKS= "Blocks"; //$NON-NLS-1$
 
 	private boolean fUseInstanceOf;
+	private boolean fUseBlocks;
 
 	public GenerateHashCodeEqualsDialog(Shell shell, CompilationUnitEditor editor, IType type, IVariableBinding[] allFields, IVariableBinding[] selectedFields) throws JavaModelException {
 		super(shell, new BindingLabelProvider(), new GenerateHashCodeEqualsContentProvider(allFields), editor, type, false);
@@ -126,6 +128,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		setInput(new Object());
 
 		fUseInstanceOf= asBoolean(getDialogSettings().get(SETTINGS_INSTANCEOF), false);
+		fUseBlocks= asBoolean(getDialogSettings().get(SETTINGS_BLOCKS), false);
 	}
 
 	/**
@@ -133,6 +136,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	 */
 	public boolean close() {
 		getDialogSettings().put(SETTINGS_INSTANCEOF, fUseInstanceOf);
+		getDialogSettings().put(SETTINGS_BLOCKS, fUseBlocks);
 		return super.close();
 	}
 
@@ -161,6 +165,20 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		data.horizontalSpan= 2;
 		button.setLayoutData(data);
 
+		button= new Button(composite, SWT.CHECK);
+		button.setText(JavaUIMessages.GenerateHashCodeEqualsDialog_blocks_button);
+		
+		button.addSelectionListener(new SelectionAdapter() {
+			
+			public void widgetSelected(SelectionEvent event) {
+				setUseBlocks((((Button) event.widget).getSelection()));
+			}
+		});
+		button.setSelection(isUseBlocks());
+		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		data.horizontalSpan= 2;
+		button.setLayoutData(data);
+		
 		return composite;
 	}
 
@@ -170,5 +188,13 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 	public void setUseInstanceOf(boolean use) {
 		fUseInstanceOf= use;
+	}
+
+	public boolean isUseBlocks() {
+		return fUseBlocks;
+	}
+
+	public void setUseBlocks(boolean useBlocks) {
+		fUseBlocks= useBlocks;
 	}
 }
