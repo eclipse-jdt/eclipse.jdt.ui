@@ -324,6 +324,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	                newFilters.add(item.id);
 			}
 		}
+		if (fUserDefinedPatternsEnabled && isSelected(parent, element, contentProvider, fPatternFilter))
+			newFilters.add(fPatternFilter.getClass().getName());
+
 	    return (String[])newFilters.toArray(new String[newFilters.size()]);
 	}
 
@@ -373,6 +376,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	private void setEnabledFilterIds(String[] enabledIds) {
 		// set all to false
+		fUserDefinedPatternsEnabled= false;
 		for (Iterator iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
 			FilterItem item= (FilterItem) iterator.next();
 			item.enabled= false;
@@ -383,6 +387,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			if (item != null) {
 				item.enabled= true;
 			}
+			if (fPatternFilter.getClass().getName().equals(enabledIds[i]))
+				fUserDefinedPatternsEnabled= true;
 		}
 	}
 
