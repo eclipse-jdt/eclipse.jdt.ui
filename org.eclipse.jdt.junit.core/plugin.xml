@@ -373,13 +373,6 @@
          id="org.eclipse.jdt.junit.gotoTest">
       </command>
       <command
-            name="%ViewCommand.junitView.name"
-            description="%ViewCommand.junitView.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.junit.ResultView">
-      </command>
-      
-      <command
             name="%JUnitShortcut.description.run"
             description="%JUnitShortcut.description.run"
             categoryId="org.eclipse.debug.ui.category.run"

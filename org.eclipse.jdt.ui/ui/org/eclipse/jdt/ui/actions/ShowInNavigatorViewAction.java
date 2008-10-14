@@ -41,16 +41,16 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Reveals the selected element in the resource navigator view.
  * <p>
- * Action is applicable to structured selections containing Java element
- * or resources.
- *
+ * Action is applicable to structured selections containing Java element or resources.
+ * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *
+ * 
  * @since 2.0
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
+ * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
  */
 public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 

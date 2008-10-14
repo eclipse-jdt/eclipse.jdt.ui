@@ -27,15 +27,16 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 /**
- * Action group that adds the show actions to a context menu and
- * the action bar's navigate menu.
- *
+ * Action group that adds the show actions to a context menu and the action bar's navigate menu.
+ * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * 
  * @since 2.0
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
+ * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
  */
 public class ShowActionGroup extends ActionGroup {
 

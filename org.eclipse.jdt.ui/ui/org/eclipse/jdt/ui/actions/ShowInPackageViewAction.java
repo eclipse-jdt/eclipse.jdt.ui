@@ -29,18 +29,18 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 /**
- * This action reveals the currently selected Java element in the
- * package explorer.
+ * This action reveals the currently selected Java element in the package explorer.
  * <p>
- * The action is applicable to selections containing elements of type
- * <code>IJavaElement</code>.
- *
+ * The action is applicable to selections containing elements of type <code>IJavaElement</code>.
+ * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * 
  * @since 2.0
- *
+ * 
  * @noextend This class is not intended to be subclassed by clients.
+ * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
  */
 public class ShowInPackageViewAction extends SelectionDispatchAction {
 

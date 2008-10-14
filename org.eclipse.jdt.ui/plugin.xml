@@ -3244,12 +3244,6 @@
             id="org.eclipse.jdt.ui.edit.text.java.select.last">
       </command>
       <command
-            name="%ActionDefinition.showInPackageView.name"
-            description="%ActionDefinition.showInPackageView.description"
-            categoryId="org.eclipse.ui.category.navigate"
-            id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view">
-      </command>
-      <command
             name="%ActionDefinition.foldingCollapseMembers.name"
             description="%ActionDefinition.foldingCollapseMembers.description"
             categoryId="org.eclipse.ui.category.textEditor"

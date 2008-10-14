@@ -192,7 +192,6 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -2701,10 +2700,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
 		setAction("AnnotationAction", action); //$NON-NLS-1$
 
-		action= new ShowInPackageViewAction(this);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
-		setAction("ShowInPackageView", action); //$NON-NLS-1$
-
+		createDeprecatedShowInPackageExplorerAction();
 
 		// replace cut/copy paste actions with a version that implement 'add imports on paste'
 
@@ -2724,13 +2720,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
+	 * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
+	 */
+	private void createDeprecatedShowInPackageExplorerAction() {
+		IAction action= new org.eclipse.jdt.ui.actions.ShowInPackageViewAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
+		setAction("ShowInPackageView", action); //$NON-NLS-1$
+	}
+
+	/**
 	 * Sets this editor's actions into activated (default) or deactived state.
 	 * <p>
-	 * XXX: Currently this is done by using a private method from {@link AbstractTextEditor}
-	 * as we don't want to make this risky method API at this point, since Java editor breadcrumb
-	 * might become a Platform UI feature during 3.5 and hence we can then delete this workaround.
+	 * XXX: Currently this is done by using a private method from {@link AbstractTextEditor} as we
+	 * don't want to make this risky method API at this point, since Java editor breadcrumb might
+	 * become a Platform UI feature during 3.5 and hence we can then delete this workaround.
 	 * </p>
-	 *
+	 * 
 	 * @param state <code>true</code> if activated
 	 * @since 3.4
 	 */

@@ -497,8 +497,9 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
     public static final String OPEN_CALL_HIERARCHY= "org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the navigate -> show in package explorer action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.in.package.view"</code>).
+	 * Action definition ID of the navigate -> show in package explorer action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.show.in.package.view"</code>).
+	 * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
 	 */
 	public static final String SHOW_IN_PACKAGE_VIEW= "org.eclipse.jdt.ui.edit.text.java.show.in.package.view"; //$NON-NLS-1$
 
