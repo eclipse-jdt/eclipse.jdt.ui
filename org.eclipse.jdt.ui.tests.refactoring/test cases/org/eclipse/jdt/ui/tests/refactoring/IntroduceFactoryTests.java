@@ -54,11 +54,11 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
+		return new Java16Setup(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
-	    return new RefactoringTestSetup(someTest);
+	    return new Java16Setup(someTest);
 	}
 
 	/**
@@ -728,6 +728,10 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	public void test250660() throws Exception {
 		singleUnitBugHelper("HasAnonymous", true);
+	}
+	
+	public void test74759() throws Exception {
+		singleUnitBugHelper("Test", true);
 	}
 	
 	public void testFactoryClash() throws Exception {

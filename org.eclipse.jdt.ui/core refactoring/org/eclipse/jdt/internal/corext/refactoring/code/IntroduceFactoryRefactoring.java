@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +46,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -67,6 +70,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceFactoryDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -800,8 +804,18 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		AST ast= unitRewriter.getAST();
 		MethodInvocation factoryMethodCall= ast.newMethodInvocation();
 
-		List actualFactoryArgs= factoryMethodCall.arguments();
-		List actualCtorArgs= ctorCall.arguments();
+		ASTNode ctorCallParent= ctorCall.getParent();
+		StructuralPropertyDescriptor ctorCallLocation= ctorCall.getLocationInParent();
+		if (ctorCallLocation instanceof ChildListPropertyDescriptor) {
+			ListRewrite ctorCallParentListRewrite= unitRewriter.getListRewrite(ctorCallParent, (ChildListPropertyDescriptor)ctorCallLocation);
+			int index= ctorCallParentListRewrite.getOriginalList().indexOf(ctorCall);
+			ctorCall= (ClassInstanceCreation)ctorCallParentListRewrite.getRewrittenList().get(index);
+		} else {
+			ctorCall= (ClassInstanceCreation)unitRewriter.get(ctorCallParent, ctorCallLocation);
+		}
+		
+		ListRewrite actualFactoryArgs= unitRewriter.getListRewrite(factoryMethodCall, MethodInvocation.ARGUMENTS_PROPERTY);
+		ListRewrite actualCtorArgs= unitRewriter.getListRewrite(ctorCall, ClassInstanceCreation.ARGUMENTS_PROPERTY);
 
 		// Need to use a qualified name for the factory method if we're not
 		// in the context of the class holding the factory.
@@ -815,10 +829,18 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		factoryMethodCall.setName(ast.newSimpleName(fNewMethodName));
 
-		for (int i=0; i < actualCtorArgs.size(); i++) {
-			Expression	actualCtorArg= (Expression) actualCtorArgs.get(i);
-			ASTNode movedArg= unitRewriter.createMoveTarget(actualCtorArg);
-			actualFactoryArgs.add(movedArg);
+		for (int i=0; i < actualCtorArgs.getRewrittenList().size(); i++) {
+			Expression actualCtorArg= (Expression) actualCtorArgs.getRewrittenList().get(i);
+			
+			ASTNode movedArg;
+			if (ASTNodes.isExistingNode(actualCtorArg)) {
+				movedArg= unitRewriter.createMoveTarget(actualCtorArg);
+			} else {
+				unitRewriter.remove(actualCtorArg, null);
+				movedArg= actualCtorArg;
+			}
+				
+			actualFactoryArgs.insertLast(movedArg, gd);
 		}
 
 		unitRewriter.replace(ctorCall, factoryMethodCall, gd);
@@ -949,6 +971,19 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit, ASTRewrite unitRewriter, CompilationUnitChange unitChange) throws CoreException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchMatch[] hits= rg.getSearchResults();
+		Arrays.sort(hits, new Comparator() {
+			/**
+			 * Sort by descending offset, such that nested constructor calls are processed first.
+			 * This is necessary, since they can only be moved into the factory method invocation
+			 * after they have been rewritten.
+			 */
+			public int compare(Object o1, Object o2) {
+				SearchMatch m1= (SearchMatch)o1;
+				SearchMatch m2= (SearchMatch)o2;
+				return m2.getOffset() - m1.getOffset();
+			}
+		});
+		
 		boolean someCallPatched= false;
 
 		for (int i=0; i < hits.length; i++) {
