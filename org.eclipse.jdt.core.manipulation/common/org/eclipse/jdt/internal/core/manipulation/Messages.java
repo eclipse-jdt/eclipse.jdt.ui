@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,20 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
-import org.eclipse.osgi.util.NLS;
+import com.ibm.icu.text.MessageFormat;
 
-public class JavaManipulationMessages extends NLS {
+/**
+ * Helper class to format message strings.
+ *
+ * @since 1.3
+ */
+public class Messages {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages"; //$NON-NLS-1$
-
-	private JavaManipulationMessages() {
+	public static String format(String message, Object object) {
+		return MessageFormat.format(message, new Object[] { object});
 	}
 
-	static {
-		// initialize resource bundle
-		NLS.initializeMessages(BUNDLE_NAME, JavaManipulationMessages.class);
+	public static String format(String message, Object[] objects) {
+		return MessageFormat.format(message, objects);
 	}
 
-	public static String JavaManipulationMessages_internalError;
-	public static String UndoCompilationUnitChange_no_file;
+	private Messages() {
+		// Not for instantiation
+	}
 }

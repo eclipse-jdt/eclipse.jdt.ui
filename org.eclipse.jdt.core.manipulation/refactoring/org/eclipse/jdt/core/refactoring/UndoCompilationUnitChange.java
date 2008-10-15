@@ -8,7 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.changes;
+package org.eclipse.jdt.core.refactoring;
+
+import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,11 +28,9 @@ import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.core.manipulation.Messages;
 
 /* package */ class UndoCompilationUnitChange extends UndoTextFileChange {
 
@@ -43,8 +43,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
 		IFile file= (IFile)cunit.getResource();
-		if (file == null)
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), Messages.format(	RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, BasicElementLabels.getFileName(cunit))));
+		if (file == null) {
+			String message= Messages.format(JavaManipulationMessages.UndoCompilationUnitChange_no_file, TextProcessor.process(cunit.getElementName()));
+			throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), message));
+		}
 		return file;
 	}
 
