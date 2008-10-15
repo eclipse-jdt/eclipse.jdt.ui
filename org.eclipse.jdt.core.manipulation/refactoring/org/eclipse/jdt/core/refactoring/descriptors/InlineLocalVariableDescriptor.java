@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * @since 1.1
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class InlineLocalVariableDescriptor extends JavaRefactoringDescriptor {
 
