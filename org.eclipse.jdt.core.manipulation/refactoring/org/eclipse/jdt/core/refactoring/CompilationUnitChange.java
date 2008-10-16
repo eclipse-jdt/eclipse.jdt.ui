@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
  * A {@link TextFileChange} that operates on an {@link ICompilationUnit} in the workspace.
  * 
  * @since 1.3
- * @noextend This class is not intended to be subclassed by clients.
  */
 public class CompilationUnitChange extends TextFileChange {
 
