@@ -3535,8 +3535,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		long now= System.currentTimeMillis();
 		if (message != null || now - fErrorMessageTime > fErrorMessageTimeout)
 			super.setStatusLineErrorMessage(message);
-		fErrorMessageTime= now;
-
+		fErrorMessageTime= message != null ? now : 0;
 	}
 
 	/*
