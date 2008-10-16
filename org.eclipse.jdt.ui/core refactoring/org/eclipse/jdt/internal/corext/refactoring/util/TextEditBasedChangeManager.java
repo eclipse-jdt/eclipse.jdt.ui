@@ -19,8 +19,8 @@ import java.util.Set;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
 /**
  * A <code>TextChangeManager</code> manages associations between <code>ICompilationUnit</code>

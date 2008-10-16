@@ -109,7 +109,7 @@
 		
 		<factory 
             class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory" 
-            adaptableType="org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange">
+            adaptableType="org.eclipse.jdt.core.refactoring.CompilationUnitChange">
             
             <adapter type="org.eclipse.ltk.ui.refactoring.TextEditChangeNode"/>
 		</factory>
