@@ -219,7 +219,7 @@ public class CodeFormatFix implements ICleanUpFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
+	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		return fChange;
 	}
 }

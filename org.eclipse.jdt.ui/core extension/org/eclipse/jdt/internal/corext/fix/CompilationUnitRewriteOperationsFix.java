@@ -91,7 +91,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
+	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite((ICompilationUnit)fCompilationUnit.getJavaElement(), fCompilationUnit);
 
 		fLinkedProposalModel.clear();

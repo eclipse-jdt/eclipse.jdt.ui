@@ -129,7 +129,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
 		} else {
 			return new IProposableFix() {
-				public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
+				public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 					CompilationUnitChange change= new CompilationUnitChange(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, (ICompilationUnit) root.getJavaElement()) {
 						public Change perform(IProgressMonitor pm) throws CoreException {
 							Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();

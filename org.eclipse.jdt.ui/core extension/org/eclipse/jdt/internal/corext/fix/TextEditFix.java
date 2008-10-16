@@ -40,7 +40,7 @@ public class TextEditFix implements ICleanUpFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
+	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		String label= fChangeDescription;
 		CompilationUnitChange result= new CompilationUnitChange(label, fUnit);
 		result.setEdit(fEdit);

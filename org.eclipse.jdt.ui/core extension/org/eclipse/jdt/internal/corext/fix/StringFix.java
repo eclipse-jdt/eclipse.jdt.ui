@@ -197,7 +197,7 @@ public class StringFix implements ICleanUpFix, IProposableFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
+	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		if (fEditGroups == null || fEditGroups.length == 0)
 			return null;
 
