@@ -112,7 +112,7 @@ with a public 0-argument constructor.
          <meta.section type="since"/>
       </appinfo>
       <documentation>
-         since 3.4
+         3.4
       </documentation>
    </annotation>
 
@@ -154,7 +154,6 @@ with a public 0-argument constructor.
          The contributed class must extend &lt;code&gt;org.eclipse.jdt.ui.text.java.ClasspathFixProcessor&lt;/code&gt;
       </documentation>
    </annotation>
-
 
 
    <annotation>
