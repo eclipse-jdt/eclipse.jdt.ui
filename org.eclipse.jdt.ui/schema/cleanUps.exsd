@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.jdt.ui" id="cleanUps" name="Clean Ups"/>
       </appinfo>
       <documentation>
-         This extension point allows add clean ups that can solve problems in a compilation unit.
+         This extension point allows to add clean ups that can solve problems in a compilation unit.
       </documentation>
    </annotation>
 
@@ -190,7 +190,7 @@
    &lt;extension
          point=&quot;org.eclipse.jdt.ui.cleanUps&quot;&gt;
       &lt;cleanUp
-      		id=&quot;org.eclipse.jdt.copyrightsaveaction.copyright_clean_up&quot;
+            id=&quot;org.eclipse.jdt.copyrightsaveaction.copyright_clean_up&quot;
             class=&quot;org.eclipse.jdt.ui.internal.copyrightupdater.CopyrightUpdaterCleanUp&quot;&gt;
       &lt;/cleanUp&gt;
       
