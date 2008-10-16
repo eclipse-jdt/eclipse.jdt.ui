@@ -24,7 +24,7 @@ public class PerformanceTestSuite extends TestSuite {
 	}
 
 	public PerformanceTestSuite() {
-//		addTest(ActivateJavaEditorTest.suite()); disabled, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=233955
+		addTest(ActivateJavaEditorTest.suite());
 		addTest(RevertTextEditorTest.suite());
 		addTest(RevertJavaEditorTest.suite());
 		addTest(ToggleCommentTest.suite());
