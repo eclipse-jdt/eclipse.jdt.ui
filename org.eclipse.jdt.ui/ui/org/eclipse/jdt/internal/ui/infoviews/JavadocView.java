@@ -910,11 +910,13 @@ public class JavadocView extends AbstractInfoView {
 		fBackAction.update();
 	}
 
-	/*
-	 * @see AbstractInfoView#setInput(Object)
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @param input a String containing the HTML to be showin in the view
 	 */
 	protected void doSetInput(Object input) {
-		String javadocHtml= (String)input; // FIXME: undocumented hard cast
+		String javadocHtml= (String)input;
 		fOriginalInput= javadocHtml;
 
 		if (fInputSelectionProvider != null) {
