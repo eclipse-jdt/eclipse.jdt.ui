@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -289,9 +290,6 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 	/**
 	 * Opens a dialog which allows to select a key reference.
-	 * <p>
-	 * FIXME: The lower pane is currently not sorted due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=84220
-	 * </p>
 	 *
 	 * @param keyReferences the array of key references
 	 * @return the selected key reference or <code>null</code> if canceled by the user
@@ -323,6 +321,11 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
 		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details);
+		dialog.setLowerListComparator(new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return 0; // don't sort
+			}
+		});
 		dialog.setMultipleSelection(false);
 		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title);
 		dialog.setMessage(PropertiesFileEditorMessages.OpenAction_SelectionDialog_message);
