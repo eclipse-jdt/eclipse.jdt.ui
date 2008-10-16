@@ -576,9 +576,11 @@ public class CPListElement {
 					}
 
 					IPath rawPath= path;
-					IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(curr);
-					if (roots.length == 1)
-						rawPath= roots[0].getPath();
+					if (project != null) {
+						IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(curr);
+						if (roots.length == 1)
+							rawPath= roots[0].getPath();
+					}
 					isMissing= !rawPath.toFile().exists(); // look for external JARs and folders
 				} else if (res.isLinked()) {
 					linkTarget= res.getLocation();
