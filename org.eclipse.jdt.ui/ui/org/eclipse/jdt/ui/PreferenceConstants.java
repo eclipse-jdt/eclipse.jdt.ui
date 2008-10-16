@@ -935,7 +935,6 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 2.1
-	 * @deprecated
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
 	public final static String EDITOR_UNKNOWN_INDICATION_COLOR= "othersIndicationColor"; //$NON-NLS-1$
@@ -2892,7 +2891,6 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated As of 3.4, replaced by {@link JFacePreferences#CONTENT_ASSIST_BACKGROUND_COLOR},
-	 * 				FIXME: need to write backwards compatibility code that maps this pref to the new value.
 	 */
 	public final static String CODEASSIST_PROPOSALS_BACKGROUND= "content_assist_proposals_background"; //$NON-NLS-1$
 
@@ -2906,7 +2904,6 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated As of 3.4, replaced by {@link JFacePreferences#CONTENT_ASSIST_FOREGROUND_COLOR},
-	 * 				FIXME: need to write backwards compatibility code that maps this pref to the new value.
 	 */
 	public final static String CODEASSIST_PROPOSALS_FOREGROUND= "content_assist_proposals_foreground"; //$NON-NLS-1$
 
