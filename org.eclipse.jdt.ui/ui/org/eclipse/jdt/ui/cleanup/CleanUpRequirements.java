@@ -43,9 +43,7 @@ public final class CleanUpRequirements {
 	 */
 	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map compilerOptions) {
 		Assert.isLegal(!requiresFreshAST || requiresAST, "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
-
-		// FIXME
-//		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
+		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
 		fRequiresAST= requiresAST;
 		fRequiresFreshAST= requiresFreshAST;
 		fCompilerOptions= compilerOptions;
