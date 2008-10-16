@@ -15,6 +15,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+
 /**
  * A clean up capable of fixing only a subset of lines
  * in a compilation unit

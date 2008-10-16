@@ -49,6 +49,8 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSaveParticipantPreferenceConfiguration;
@@ -263,7 +265,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		if (ProjectScope.SCOPE.equals(fContext.getName())) {
 			fSettings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
 		} else {
-			fSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getMap();
+			fSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getMap();
 		}
 		settingsChanged();
 
@@ -297,7 +299,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 
 		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
 
-		Set keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
+		Set keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 			String key= (String)iterator.next();
 			node.remove(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + key);
@@ -370,7 +372,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
 		for (int i= 0; i < cleanUps.length; i++) {
 			cleanUps[i].setOptions(options);
-			String[] descriptions= cleanUps[i].getDescriptions();
+			String[] descriptions= cleanUps[i].getStepDescriptions();
 			if (descriptions != null) {
 				for (int j= 0; j < descriptions.length; j++) {
 					if (buf.length() > 0) {

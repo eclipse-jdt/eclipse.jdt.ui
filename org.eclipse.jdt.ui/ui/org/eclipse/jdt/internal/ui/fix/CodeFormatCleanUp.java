@@ -21,7 +21,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeFormatFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 
@@ -40,13 +43,13 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	 */
 	public CleanUpRequirements getRequirements() {
 		boolean requiresChangedRegions= isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE) && isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
-		return new SaveActionRequirements(false, false, null, requiresChangedRegions);
+		return new CleanUpRequirements(false, false, requiresChangedRegions, null);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		ICompilationUnit compilationUnit= context.getCompilationUnit();
 		if (compilationUnit == null)
 			return null;
@@ -70,7 +73,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		ArrayList result= new ArrayList();
 		if (isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
 			result.add(MultiFixMessages.CodeFormatCleanUp_description);

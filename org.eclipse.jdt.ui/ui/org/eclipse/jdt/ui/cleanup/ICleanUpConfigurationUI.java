@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,38 +8,31 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.preferences.cleanup;
+package org.eclipse.jdt.ui.cleanup;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
 /**
- * @since 3.4
+ * Provides the UI to configure a clean up.
+ * 
+ * @since 3.5
  */
-public interface ICleanUpTabPage {
+public interface ICleanUpConfigurationUI {
 
 	/**
-	 * The kind of clean up options this page will
-	 * modify.
-	 *
-	 * @param kind the kind
-	 *
-	 * @see ICleanUp#DEFAULT_CLEAN_UP_OPTIONS
-	 * @see ICleanUp#DEFAULT_SAVE_ACTION_OPTIONS
-	 */
-	public void setOptionsKind(int kind);
-
-	/**
-	 * The options to modify on this page.
+	 * The options to modify in this section.
+	 * <p>
+	 * <strong>Note:</strong> If an option gets changed in the UI then this must immediately update
+	 * the corresponding option in the here given clean up options.
+	 * </p>
 	 * 
 	 * @param options the options to modify
 	 */
 	public void setOptions(CleanUpOptions options);
 
 	/**
-	 * Create the contents of this tab page.
+	 * Creates the contents for this clean up configuration UI.
 	 * 
 	 * @param parent the parent composite
 	 * @return created content control
@@ -47,11 +40,15 @@ public interface ICleanUpTabPage {
 	public Composite createContents(Composite parent);
 
 	/**
-	 * @return the maximum number of clean ups the user can select on this page
+	 * Returns the number of clean ups that can be configured.
+	 * 
+	 * @return the number of clean ups that can be configured
 	 */
 	public int getCleanUpCount();
 
 	/**
+	 * Returns the number of selected clean up.
+	 * 
 	 * @return the number of selected clean ups at the moment
 	 */
 	public int getSelectedCleanUpCount();
@@ -59,7 +56,7 @@ public interface ICleanUpTabPage {
 	/**
 	 * A code snippet which complies to the current settings.
 	 * 
-	 * @return A code snippet
+	 * @return a code snippet
 	 */
 	public String getPreview();
 }

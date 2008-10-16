@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -61,10 +62,10 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.dom.ASTBatchParser;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -72,13 +73,14 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
@@ -294,7 +296,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			List/*<ICleanUp>*/result= new ArrayList();
 			CleanUpChange solution;
 			try {
-				solution= calculateChange(context, cleanUps, result);
+				solution= calculateChange(context, cleanUps, result, null);
 			} catch (CoreException e) {
 				throw new FixCalculationException(e);
 			}
@@ -499,6 +501,12 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	}
 
 	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 1, 0, 0);
+
+	/**
+	 * A clean up is considered slow if its execution lasts longer then the value of
+	 * SLOW_CLEAN_UP_THRESHOLD in ms.
+	 */
+	private static final int SLOW_CLEAN_UP_THRESHOLD= 500;
 
 	private final List/*<ICleanUp>*/fCleanUps;
 	private final Hashtable/*<IJavaProject, List<CleanUpTarget>*/fProjects;
@@ -771,7 +779,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		return buf.toString();
 	}
 
-	public static CleanUpChange calculateChange(CleanUpContext context, ICleanUp[] cleanUps, List undoneCleanUps) throws CoreException {
+	public static CleanUpChange calculateChange(CleanUpContext context, ICleanUp[] cleanUps, List undoneCleanUps, HashSet slowCleanUps) throws CoreException {
 		if (cleanUps.length == 0)
 			return null;
 
@@ -779,9 +787,17 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		int i= 0;
 		do {
 			ICleanUp cleanUp= cleanUps[i];
-			IFix fix= cleanUp.createFix(context);
+			ICleanUpFix fix;
+			if (slowCleanUps != null) {
+				long timeBefore= System.currentTimeMillis();
+				fix= cleanUp.createFix(context);
+				if (System.currentTimeMillis() - timeBefore > SLOW_CLEAN_UP_THRESHOLD)
+					slowCleanUps.add(cleanUp);
+			} else {
+				fix= cleanUp.createFix(context);
+			}
 			if (fix != null) {
-				CompilationUnitChange current= fix.createChange();
+				CompilationUnitChange current= fix.createChange(null);
 				TextEdit currentEdit= current.getEdit();
 
 				if (solution != null) {

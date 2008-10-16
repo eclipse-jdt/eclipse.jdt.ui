@@ -111,6 +111,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -118,10 +120,8 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
@@ -1781,8 +1781,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		/**
 		 * Can be overridden by clients to perform expensive initializations of the refactoring
+		 * 
 		 * @param refactoring the refactoring
-		 * @throws CoreException
+		 * @throws CoreException if something goes wrong during init
 		 */
 		protected void init(Refactoring refactoring) throws CoreException {
 		}

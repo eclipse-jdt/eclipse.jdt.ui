@@ -23,9 +23,10 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
@@ -47,7 +48,9 @@ public class Java50CleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
+		boolean requireAST= requireAST();
+		Map requiredOptions= requireAST ? getRequiredOptions() : null;
+		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	private boolean requireAST() {
@@ -61,7 +64,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		return Java50Fix.createCleanUp(compilationUnit,
 				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE),
@@ -72,7 +75,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -99,7 +102,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE))
 			result.add(MultiFixMessages.Java50MultiFix_AddMissingOverride_description);

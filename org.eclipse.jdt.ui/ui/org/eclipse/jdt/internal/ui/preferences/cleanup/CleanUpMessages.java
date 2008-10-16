@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,13 +20,6 @@ public class CleanUpMessages extends NLS {
 	public static String CleanUpConfigurationBlock_ShowCleanUpWizard_checkBoxLabel;
 
 	public static String CleanUpModifyDialog_SelectOne_Error;
-
-	public static String CleanUpModifyDialog_TabPageName_CodeFormating;
-	public static String CleanUpModifyDialog_TabPageName_CodeStyle;
-	public static String CleanUpModifyDialog_TabPageName_MemberAccesses;
-	public static String CleanUpModifyDialog_TabPageName_MissingCode;
-	public static String CleanUpModifyDialog_TabPageName_UnnecessaryCode;
-
 	public static String CleanUpModifyDialog_XofYSelected_Label;
 
 	public static String CleanUpProfileManager_ProfileName_EclipseBuildIn;
@@ -69,6 +62,8 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_RadioName_NeverUseBlocks;
 	public static String CodeStyleTabPage_RadioName_NeverUseParantheses;
 	public static String CodeStyleTabPage_RadioName_UseBlocksSpecial;
+
+	public static String ContributedCleanUpTabPage_ErrorPage_message;
 
 	public static String MemberAccessesTabPage_CheckboxName_ChangeAccessesThroughInstances;
 	public static String MemberAccessesTabPage_CheckboxName_ChangeAccessesThroughSubtypes;

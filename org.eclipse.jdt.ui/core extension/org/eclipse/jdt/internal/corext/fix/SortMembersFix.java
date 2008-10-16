@@ -25,9 +25,11 @@ import org.eclipse.jdt.core.util.CompilationUnitSorter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation.DefaultJavaElementComparator;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
 public class SortMembersFix extends TextEditFix {
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean sortMembers, boolean sortFields) throws CoreException {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean sortMembers, boolean sortFields) throws CoreException {
 		if (!sortMembers && !sortFields)
 			return null;
 

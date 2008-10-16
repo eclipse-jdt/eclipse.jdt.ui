@@ -23,8 +23,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.ImportsFix;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -46,13 +49,13 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	 */
 	public CleanUpRequirements getRequirements() {
 		boolean isOrganizeImports= isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
-		return new CleanUpRequirements(isOrganizeImports, isOrganizeImports, null);
+		return new CleanUpRequirements(isOrganizeImports, isOrganizeImports, false, null);
 	}
 
 	/**
      * {@inheritDoc}
      */
-    public IFix createFix(CleanUpContext context) throws CoreException {
+    public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
     	CompilationUnit compilationUnit= context.getAST();
     	if (compilationUnit == null)
     		return null;
@@ -93,7 +96,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	/**
      * {@inheritDoc}
      */
-    public String[] getDescriptions() {
+    public String[] getStepDescriptions() {
     	if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
     		return new String[] {MultiFixMessages.ImportsCleanUp_OrganizeImports_Description};
 

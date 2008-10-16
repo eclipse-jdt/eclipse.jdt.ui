@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -31,11 +32,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -47,7 +49,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * 		Remove unnecessary $NON-NLS$ tag
  *
  */
-public class StringFix implements IFix, IProposableFix {
+public class StringFix implements ICleanUpFix, IProposableFix {
 
 	private final TextEditGroup[] fEditGroups;
 	private final String fName;
@@ -81,7 +83,7 @@ public class StringFix implements IFix, IProposableFix {
 		}
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
@@ -93,14 +95,14 @@ public class StringFix implements IFix, IProposableFix {
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, locations);
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, problems);
 	}
 
-	private static IFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
+	private static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		List result= new ArrayList();
 
@@ -195,7 +197,7 @@ public class StringFix implements IFix, IProposableFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public CompilationUnitChange createChange() throws CoreException {
+	public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		if (fEditGroups == null || fEditGroups.length == 0)
 			return null;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
@@ -22,7 +21,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public abstract class AbstractCleanUp implements ICleanUp {
 
@@ -33,14 +36,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 
 	protected AbstractCleanUp(Map settings) {
 		if (settings != null)
-			setOptions(new CleanUpOptions(settings));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public CleanUpOptions getDefaultOptions(int kind) {
-		return new CleanUpOptions(new Hashtable());
+			setOptions(new MapCleanUpOptions(settings));
 	}
 
 	/**
@@ -53,12 +49,12 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		return new String[0];
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return code snipped complying to current options
 	 */
 	public String getPreview() {
 		return ""; //$NON-NLS-1$
@@ -68,7 +64,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(false, false, null);
+		return new CleanUpRequirements(false, false, false, null);
 	}
 
 	/**
@@ -81,7 +77,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		return null;
 	}
 

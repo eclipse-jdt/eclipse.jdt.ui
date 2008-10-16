@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -239,7 +240,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		/**
 		 * {@inheritDoc}
 		 */
-		protected boolean addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) throws CoreException {
+		protected boolean addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) {
 			ITypeBinding typeBinding= getTypeBinding(declarationNode);
 			if (typeBinding == null)
 				return false;
@@ -329,7 +330,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 	    return new RefactoringStatus();
     }
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean addSerialVersionIds) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addSerialVersionIds) {
 
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
@@ -339,7 +340,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		return createCleanUp(compilationUnit, locations, addSerialVersionIds);
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addSerialVersionIds) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addSerialVersionIds) {
 		if (addSerialVersionIds) {
 
 			final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();

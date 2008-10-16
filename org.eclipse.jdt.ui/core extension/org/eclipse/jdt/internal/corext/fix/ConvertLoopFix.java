@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
 public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 
 	private final static class ControlStatementFinder extends GenericVisitor {
@@ -107,7 +109,7 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops, boolean makeFinal) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops, boolean makeFinal) {
 		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
 

@@ -48,6 +48,8 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix {
@@ -474,7 +476,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		return new VariableDeclarationFix(label, compilationUnit, result);
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean addFinalFields, boolean addFinalParameters, boolean addFinalLocals) {
 
 		if (!addFinalFields && !addFinalParameters && !addFinalLocals)

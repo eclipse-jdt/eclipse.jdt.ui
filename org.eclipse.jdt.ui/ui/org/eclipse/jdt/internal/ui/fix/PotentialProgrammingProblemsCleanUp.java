@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,9 +27,10 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
@@ -46,7 +47,9 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
+		boolean requireAST= requireAST();
+		Map requiredOptions= requireAST ? getRequiredOptions() : null;
+		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	private boolean requireAST() {
@@ -61,7 +64,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		if (!addSUID)
@@ -75,7 +78,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -95,7 +98,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)))

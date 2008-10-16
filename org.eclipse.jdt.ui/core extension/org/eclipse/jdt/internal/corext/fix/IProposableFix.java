@@ -12,15 +12,17 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
 /**
- * A <code>IFix</code> which can be used in a
+ * A <code>ICleanUpFix</code> which can be used in a
  * correction proposal environment. A proposal
  * will be shown to the user and if chosen the
  * fix is executed.
  *
  * @since 3.4
  */
-public interface IProposableFix extends IFix {
+public interface IProposableFix extends ICleanUpFix {
 
 	/**
 	 * Returns the string to be displayed in the list of completion proposals.

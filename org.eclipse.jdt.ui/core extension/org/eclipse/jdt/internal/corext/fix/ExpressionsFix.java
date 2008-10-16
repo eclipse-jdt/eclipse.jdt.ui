@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
 public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static final class MissingParenthesisVisitor extends ASTVisitor {
@@ -362,7 +364,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean addParanoicParentesis,
 			boolean removeUnnecessaryParenthesis) {
 

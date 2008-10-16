@@ -20,7 +20,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class ExpressionsCleanUp extends AbstractCleanUp {
 
@@ -36,7 +39,7 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(requireAST(), false, null);
+		return new CleanUpRequirements(requireAST(), false, false, null);
 	}
 
 	private boolean requireAST() {
@@ -51,7 +54,7 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
@@ -68,7 +71,7 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 		if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS))
 			result.add(MultiFixMessages.ExpressionsCleanUp_addParanoiac_description);

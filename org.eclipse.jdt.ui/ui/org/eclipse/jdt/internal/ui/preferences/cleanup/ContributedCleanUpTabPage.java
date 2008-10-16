@@ -16,27 +16,25 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.SafeRunner;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * @since 3.5
  */
 public class ContributedCleanUpTabPage extends CleanUpTabPage {
 
-	private final ICleanUpTabPage fContribution;
+	private final ICleanUpConfigurationUI fContribution;
 
-	public ContributedCleanUpTabPage(ICleanUpTabPage contribution) {
+	public ContributedCleanUpTabPage(ICleanUpConfigurationUI contribution) {
 		fContribution= contribution;
-	}
-
-	/* 
-	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#setOptionsKind(int)
-	 */
-	public void setOptionsKind(int kind) {
-		super.setOptionsKind(kind);
-
-		fContribution.setOptionsKind(kind);
 	}
 
 	/* 
@@ -45,7 +43,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	public void setWorkingValues(Map workingValues) {
 		super.setWorkingValues(workingValues);
 
-		fContribution.setOptions(new CleanUpOptions(workingValues) {
+		final CleanUpOptions options= new CleanUpOptions(workingValues) {
 			/* 
 			 * @see org.eclipse.jdt.internal.ui.fix.CleanUpOptions#setOption(java.lang.String, java.lang.String)
 			 */
@@ -54,6 +52,15 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 
 				doUpdatePreview();
 				notifyValuesModified();
+			}
+		};
+		SafeRunner.run(new ISafeRunnable() {
+			public void handleException(Throwable exception) {
+				ContributedCleanUpTabPage.this.handleException(exception);
+			}
+
+			public void run() throws Exception {
+				fContribution.setOptions(options);
 			}
 		});
 	}
@@ -68,34 +75,80 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	 * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreatePreferences(org.eclipse.swt.widgets.Composite, int)
 	 */
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-		Composite parent= new Composite(composite, SWT.NONE);
+		final Composite parent= new Composite(composite, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		layoutData.horizontalSpan= numColumns;
 		parent.setLayoutData(layoutData);
 		parent.setLayout(new GridLayout(1, false));
 
-		fContribution.createContents(parent);
+		SafeRunner.run(new ISafeRunnable() {
+			public void handleException(Throwable exception) {
+				ContributedCleanUpTabPage.this.handleException(exception);
+
+				Label label= new Label(parent, SWT.NONE);
+				label.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+				label.setText(CleanUpMessages.ContributedCleanUpTabPage_ErrorPage_message);
+			}
+
+			public void run() throws Exception {
+				fContribution.createContents(parent);
+			}
+		});
 	}
 
 	/* 
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#getPreview()
 	 */
 	public String getPreview() {
-		return fContribution.getPreview();
+		final String[] result= new String[] { "" }; //$NON-NLS-1$
+		SafeRunner.run(new ISafeRunnable() {
+			public void handleException(Throwable exception) {
+				ContributedCleanUpTabPage.this.handleException(exception);
+			}
+
+			public void run() throws Exception {
+				result[0]= fContribution.getPreview();
+			}
+		});
+		return result[0];
 	}
 
 	/* 
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#getSelectedCleanUpCount()
 	 */
 	public int getSelectedCleanUpCount() {
-		return fContribution.getSelectedCleanUpCount();
+		final int[] result= new int[] { 0 };
+		SafeRunner.run(new ISafeRunnable() {
+			public void handleException(Throwable exception) {
+				ContributedCleanUpTabPage.this.handleException(exception);
+			}
+
+			public void run() throws Exception {
+				result[0]= fContribution.getSelectedCleanUpCount();
+			}
+		});
+		return result[0];
 	}
 
 	/* 
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#getCleanUpCount()
 	 */
 	public int getCleanUpCount() {
-		return fContribution.getCleanUpCount();
+		final int[] result= new int[] { 0 };
+		SafeRunner.run(new ISafeRunnable() {
+			public void handleException(Throwable exception) {
+				ContributedCleanUpTabPage.this.handleException(exception);
+			}
+
+			public void run() throws Exception {
+				result[0]= fContribution.getCleanUpCount();
+			}
+		});
+		return result[0];
+	}
+
+	private void handleException(Throwable exception) {
+		JavaPlugin.log(exception);
 	}
 
 }

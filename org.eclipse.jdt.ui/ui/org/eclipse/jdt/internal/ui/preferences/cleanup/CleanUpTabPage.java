@@ -19,11 +19,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
+
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 
-public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICleanUpTabPage {
+public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICleanUpConfigurationUI {
 
 	private Map fValues;
 	private JavaPreview fCleanUpPreview;
@@ -39,10 +42,13 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @param kind the kind of clean up to configure
+	 * 
+	 * @see CleanUpConstants#DEFAULT_CLEAN_UP_OPTIONS
+	 * @see CleanUpConstants#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
 	public void setOptionsKind(int kind) {
-		fIsSaveAction= kind == ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS;
+		fIsSaveAction= kind == CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS;
 	}
 
 	/**

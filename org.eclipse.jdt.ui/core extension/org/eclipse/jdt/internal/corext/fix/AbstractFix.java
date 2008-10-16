@@ -12,8 +12,10 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public abstract class AbstractFix implements IFix, IProposableFix, ILinkedFix {
+
+public abstract class AbstractFix implements ICleanUpFix, IProposableFix, ILinkedFix {
 
 	private final String fDisplayString;
 

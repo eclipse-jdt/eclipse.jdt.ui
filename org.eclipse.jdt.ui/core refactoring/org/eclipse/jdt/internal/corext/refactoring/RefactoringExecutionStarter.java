@@ -95,11 +95,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcess
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;

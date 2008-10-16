@@ -26,12 +26,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,7 +52,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		if (isEnabled(CleanUpConstants.ADD_MISSING_METHODES))
 			return new String[] { MultiFixMessages.UnimplementedCodeCleanUp_AddUnimplementedMethods_description };
 
@@ -94,13 +95,13 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		if (!isEnabled(CleanUpConstants.ADD_MISSING_METHODES) && !isEnabled(MAKE_TYPE_ABSTRACT))
 			return super.getRequirements();
 
-		return new CleanUpRequirements(true, false, null);
+		return new CleanUpRequirements(true, false, false, null);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit unit) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
 		IProblemLocation[] problemLocations= convertProblems(unit.getProblems());
 		problemLocations= filter(problemLocations, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 
@@ -110,7 +111,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		IProblemLocation[] problemLocations= filter(problems, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 		return UnimplementedCodeFix.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemLocations);
 	}

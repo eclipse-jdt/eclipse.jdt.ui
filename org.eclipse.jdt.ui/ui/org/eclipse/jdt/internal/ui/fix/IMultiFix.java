@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.fix;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public interface IMultiFix extends ICleanUp {

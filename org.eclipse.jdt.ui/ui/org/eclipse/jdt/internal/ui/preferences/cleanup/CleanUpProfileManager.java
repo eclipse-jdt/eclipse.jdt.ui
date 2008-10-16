@@ -21,7 +21,6 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
@@ -29,7 +28,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 public class CleanUpProfileManager extends ProfileManager {
 
 	public static KeySet[] KEY_SETS= {
-		new KeySet(JavaUI.ID_PLUGIN, new ArrayList(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))
+		new KeySet(JavaUI.ID_PLUGIN, new ArrayList(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))
 	};
 
 	private final PreferencesAccess fPreferencesAccess;

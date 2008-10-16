@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescriptor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -34,7 +35,7 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 	}
 
 	protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {
-		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors();
+		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS);
 
 		NamedCleanUpTabPage[] result= new NamedCleanUpTabPage[descriptors.length];
 
@@ -42,7 +43,7 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 			String name= descriptors[i].getName();
 			CleanUpTabPage page= descriptors[i].createTabPage();
 
-			page.setOptionsKind(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS);
+			page.setOptionsKind(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS);
 			page.setModifyListener(this);
 			page.setWorkingValues(workingValues);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,8 +24,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
@@ -45,17 +46,10 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public CleanUpOptions getDefaultOptions(int kind) {
-		//Hint: We cheat a little here.
-		//This allows us to have all jdt/ui clean up settings in one place, the CleanUpConstants
-		return CleanUpConstants.getDefaultOptions(kind);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
+		boolean requireAST= requireAST();
+		Map requiredOptions= requireAST ? getRequiredOptions() : null;
+		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	private boolean requireAST() {
@@ -76,7 +70,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -100,7 +94,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return CodeStyleFix.createCleanUp(compilationUnit, problems,
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS),
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS),
@@ -119,7 +113,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);

@@ -33,8 +33,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.SortMembersFix;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -53,13 +56,13 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
 
 		boolean sortMembers= isEnabled(CleanUpConstants.SORT_MEMBERS);
-		IFix fix= SortMembersFix.createCleanUp(compilationUnit, sortMembers, sortMembers && isEnabled(CleanUpConstants.SORT_MEMBERS_ALL));
+		ICleanUpFix fix= SortMembersFix.createCleanUp(compilationUnit, sortMembers, sortMembers && isEnabled(CleanUpConstants.SORT_MEMBERS_ALL));
 		if (fix != null) {
 			if (fTouchedFiles == null) {
 				fTouchedFiles= new HashSet();
@@ -106,7 +109,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		if (isEnabled(CleanUpConstants.SORT_MEMBERS)) {
 			if (isEnabled(CleanUpConstants.SORT_MEMBERS_ALL)) {
 				return new String[] {MultiFixMessages.SortMembersCleanUp_AllMembers_description};
@@ -150,7 +153,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
      * {@inheritDoc}
      */
     public CleanUpRequirements getRequirements() {
-    	return new CleanUpRequirements(isEnabled(CleanUpConstants.SORT_MEMBERS), false, null);
+    	return new CleanUpRequirements(isEnabled(CleanUpConstants.SORT_MEMBERS), false, false, null);
     }
 
 	private static boolean containsRelevantMarkers(IFile file) throws CoreException {

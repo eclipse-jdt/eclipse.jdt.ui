@@ -19,9 +19,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
 /**
  * @since 3.4

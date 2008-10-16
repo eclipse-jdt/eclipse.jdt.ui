@@ -12,10 +12,21 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
@@ -43,6 +54,8 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -55,6 +68,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -78,15 +92,17 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpRequirements;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp.SaveActionRequirements;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
+import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
+import org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage;
 
 public class CleanUpPostSaveListener implements IPostSaveListener {
 
@@ -171,10 +187,66 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 	}
 
+	private static final class SlowCleanUpWarningDialog extends OptionalMessageDialog {
+
+		private static final String ID= "SaveActions.slowWarningDialog"; //$NON-NLS-1$
+
+		private final String fCleanUpNames;
+
+		protected SlowCleanUpWarningDialog(Shell parent, String title, String cleanUpNames) {
+			super(ID, parent, title, null, null, MessageDialog.WARNING, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
+			fCleanUpNames= cleanUpNames;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
+		 */
+		protected Control createMessageArea(Composite parent) {
+			initializeDialogUnits(parent);
+
+			Composite messageComposite= new Composite(parent, SWT.NONE);
+			messageComposite.setFont(parent.getFont());
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 1;
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+			messageComposite.setLayout(layout);
+			messageComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+			Label explain= new Label(messageComposite, SWT.WRAP);
+			explain.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+			explain.setText(FixMessages.CleanUpPostSaveListener_SlowCleanUpWarningDialog_explain);
+
+			final BulletListBlock cleanUpListBlock= new BulletListBlock(messageComposite, SWT.NONE);
+			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+			cleanUpListBlock.setLayoutData(gridData);
+			cleanUpListBlock.setText(fCleanUpNames);
+
+			Link link= new Link(messageComposite, SWT.NONE);
+			link.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+			link.setText(FixMessages.CleanUpPostSaveListener_SlowCleanUpDialog_link);
+
+			link.addSelectionListener(new SelectionAdapter() {
+				/*
+				 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+				 */
+				public void widgetSelected(SelectionEvent e) {
+					PreferencesUtil.createPreferenceDialogOn(getShell(), SaveParticipantPreferencePage.PREFERENCE_PAGE_ID, null, null).open();
+				}
+			});
+
+			return messageComposite;
+		}
+	}
+
 	public static final String POSTSAVELISTENER_ID= "org.eclipse.jdt.ui.postsavelistener.cleanup"; //$NON-NLS-1$
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
 	private static final String CHANGED_REGION_POSITION_CATEGORY= "changed_region_position_category"; //$NON-NLS-1$
+	private static boolean FIRST_CALL= false;
+	private static boolean FIRST_CALL_DONE= false;
 
 	/**
 	 * {@inheritDoc}
@@ -224,6 +296,18 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
 			LinkedList undoEdits= new LinkedList();
 
+			if (FIRST_CALL && !FIRST_CALL_DONE) {
+				FIRST_CALL= false;
+				FIRST_CALL_DONE= true;
+			} else {
+				FIRST_CALL= true;
+			}
+			HashSet slowCleanUps;
+			if (FIRST_CALL_DONE) {
+				slowCleanUps= new HashSet();
+			} else {
+				slowCleanUps= null;
+			}
 			IUndoManager manager= RefactoringCore.getUndoManager();
 
 			boolean success= false;
@@ -260,7 +344,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				}
 
     				ArrayList undoneCleanUps= new ArrayList();
-					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps);
+					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps, slowCleanUps);
 
     				RefactoringStatus postCondition= new RefactoringStatus();
     				for (int i= 0; i < cleanUps.length; i++) {
@@ -301,6 +385,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     			undo.initializeValidationData(new NullProgressMonitor());
     			manager.addUndo(result.getName(), undo);
 			}
+
+			if (slowCleanUps != null && slowCleanUps.size() > 0)
+				showSlowCleanUpsWarning(slowCleanUps);
 		} finally {
 			monitor.done();
 		}
@@ -433,7 +520,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private boolean requiresChangedRegions(ICleanUp[] cleanUps) {
 		for (int i= 0; i < cleanUps.length; i++) {
 			CleanUpRequirements requirements= cleanUps[i].getRequirements();
-			if (requirements instanceof SaveActionRequirements && ((SaveActionRequirements)requirements).requiresChangedRegions())
+			if (requirements.requiresChangedRegions())
 				return true;
 		}
 
@@ -515,4 +602,39 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			message= "BadPositionCategoryException"; //$NON-NLS-1$
 		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, message, e));
 	}
+
+	private void showSlowCleanUpsWarning(HashSet slowCleanUps) {
+
+		final StringBuffer cleanUpNames= new StringBuffer();
+		for (Iterator iterator= slowCleanUps.iterator(); iterator.hasNext();) {
+			ICleanUp cleanUp= (ICleanUp)iterator.next();
+			String[] descriptions= cleanUp.getStepDescriptions();
+			if (descriptions != null) {
+				for (int i= 0; i < descriptions.length; i++) {
+					if (cleanUpNames.length() > 0)
+						cleanUpNames.append('\n');
+
+					cleanUpNames.append(descriptions[i]);
+				}
+			}
+		}
+
+		if (Display.getCurrent() != null) {
+			showSlowCleanUpDialog(cleanUpNames);
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					showSlowCleanUpDialog(cleanUpNames);
+				}
+			});
+		}
+	}
+
+	private void showSlowCleanUpDialog(final StringBuffer cleanUpNames) {
+		if (OptionalMessageDialog.isDialogEnabled(SlowCleanUpWarningDialog.ID)) {
+			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			new SlowCleanUpWarningDialog(shell, FixMessages.CleanUpPostSaveListener_SlowCleanUpDialog_title, cleanUpNames.toString()).open();
+		}
+	}
+
 }

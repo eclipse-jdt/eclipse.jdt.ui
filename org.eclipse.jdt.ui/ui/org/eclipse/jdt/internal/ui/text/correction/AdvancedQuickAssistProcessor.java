@@ -87,13 +87,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
@@ -1205,15 +1205,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	/**
+	/*
 	 * Breaks an infix operation with possible extended operators at the given operator and returns the new left and right operands.
 	 * a & b & c   ->  [[a' & b' ] & c' ]   (c' == copy of c)
-	 * @param rewrite
-	 * @param expression
-	 * @param operator
-	 * @param operatorOffset
-	 * @param removeParenthesis
-	 * @param res
 	 */
 	private static void breakInfixOperationAtOperation(ASTRewrite rewrite, Expression expression, Operator operator, int operatorOffset, boolean removeParenthesis, Expression[] res) {
 		if (expression.getStartPosition() + expression.getLength() <= operatorOffset) {

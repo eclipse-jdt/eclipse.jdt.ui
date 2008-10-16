@@ -12,8 +12,9 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 
 public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {

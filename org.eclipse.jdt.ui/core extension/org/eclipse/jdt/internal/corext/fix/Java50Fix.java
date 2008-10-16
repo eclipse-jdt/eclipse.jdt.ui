@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -210,7 +211,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean addOverrideAnnotation,
 			boolean addDeprecatedAnnotation,
 			boolean rawTypeReference) {
@@ -253,7 +254,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return new Java50Fix(fixName, compilationUnit, operationsArray);
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean addOverrideAnnotation,
 			boolean addDeprecatedAnnotation,
 			boolean rawTypeReferences) {

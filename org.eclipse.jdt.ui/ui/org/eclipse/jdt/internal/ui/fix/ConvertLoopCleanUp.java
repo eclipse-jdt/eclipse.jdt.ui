@@ -20,7 +20,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class ConvertLoopCleanUp extends AbstractCleanUp {
 
@@ -36,13 +39,13 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED), false, null);
+		return new CleanUpRequirements(isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED), false, false, null);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
@@ -57,7 +60,7 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 
 		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))

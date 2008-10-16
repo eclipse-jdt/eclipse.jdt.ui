@@ -15,9 +15,9 @@ import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
@@ -56,7 +56,7 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 	}
 
 	private Map updateAndComplete(Map oldSettings, int version) {
-		final Map newSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+		final Map newSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 
 		switch (version) {
 			case VERSION_1:
@@ -86,7 +86,7 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
     }
 
 	private static void updateFrom1To2(Map settings) {
-		CleanUpOptions defaultSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
+		CleanUpOptions defaultSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, defaultSettings.getValue(CleanUpConstants.ORGANIZE_IMPORTS));
     }
 

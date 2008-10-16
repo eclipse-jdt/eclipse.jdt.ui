@@ -49,17 +49,18 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
@@ -122,7 +123,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	private static Map getNullSettings() {
 		Map result= new HashMap();
 
-		Collection keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getKeys();
+		Collection keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys();
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 			String key= (String)iterator.next();
 			result.put(key, CleanUpOptions.FALSE);
@@ -147,17 +148,12 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		cleanUpRefactoring.addCleanUp(new AbstractCleanUp() {
-			class ASTRequirement extends CleanUpRequirements {
-				public ASTRequirement() {
-					super(true, false, null);
-				}
-			}
 
 			/*
 			 * @see org.eclipse.jdt.internal.ui.fix.AbstractCleanUp#getRequirements()
 			 */
 			public CleanUpRequirements getRequirements() {
-				return new ASTRequirement();
+				return new CleanUpRequirements(true, false, false, null);
 			}
 		});
 

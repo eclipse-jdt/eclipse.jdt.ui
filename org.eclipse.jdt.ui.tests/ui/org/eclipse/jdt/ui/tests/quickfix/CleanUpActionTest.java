@@ -26,10 +26,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 
 /**
  * @since 3.4

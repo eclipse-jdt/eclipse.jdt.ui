@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,20 +8,20 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.fix;
+package org.eclipse.jdt.ui.cleanup;
 
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
- * A fix which when executed can set up a linked mode model
- * and put an editor into linked mode.
- *
- * @since 3.4
+ * Initializes the default options for a clean up kind.
+ * 
+ * @since 3.5
  */
-public interface ILinkedFix extends ICleanUpFix {
+public interface ICleanUpOptionsInitializer {
 
 	/**
-	 * @return the linked proposal model to use to set up linked positions or <b>null</b>
+	 * Sets the default options of this initializer
+	 * 
+	 * @param options the clean up options
 	 */
-	public LinkedProposalModel getLinkedPositions();
+	public void setDefaultOptions(CleanUpOptions options);
 }

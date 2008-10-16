@@ -22,15 +22,16 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescriptor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
@@ -47,7 +48,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	};
 
 	private Label fCountLabel;
-	private ICleanUpTabPage[] fPages;
+	private ICleanUpConfigurationUI[] fPages;
 
 	public CleanUpModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile, String dialogPreferencesKey, String lastSavePathKey) {
 	    super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
@@ -57,15 +58,15 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	 * {@inheritDoc}
 	 */
 	protected void addPages(final Map values) {
-		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors();
+		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 
-		fPages= new ICleanUpTabPage[descriptors.length];
+		fPages= new ICleanUpConfigurationUI[descriptors.length];
 
 		for (int i= 0; i < descriptors.length; i++) {
 			String name= descriptors[i].getName();
 			CleanUpTabPage page= descriptors[i].createTabPage();
 
-			page.setOptionsKind(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
+			page.setOptionsKind(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 			page.setModifyListener(this);
 			page.setWorkingValues(values);
 

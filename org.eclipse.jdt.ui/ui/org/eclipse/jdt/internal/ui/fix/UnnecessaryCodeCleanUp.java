@@ -23,9 +23,10 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
@@ -42,13 +43,13 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS), false, getRequiredOptions());
+		return new CleanUpRequirements(isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS), false, false, getRequiredOptions());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit,
 				false,
 				false,
@@ -62,7 +63,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
 				false,
 				false,
@@ -85,7 +86,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);

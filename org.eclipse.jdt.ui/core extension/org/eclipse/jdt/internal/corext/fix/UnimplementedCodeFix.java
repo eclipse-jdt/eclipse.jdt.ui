@@ -41,12 +41,13 @@ import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -78,7 +79,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	public static IFix createCleanUp(CompilationUnit root, boolean addMissingMethod, boolean makeTypeAbstract, IProblemLocation[] problems) {
+	public static ICleanUpFix createCleanUp(CompilationUnit root, boolean addMissingMethod, boolean makeTypeAbstract, IProblemLocation[] problems) {
 		Assert.isLegal(!addMissingMethod || !makeTypeAbstract);
 		if (!addMissingMethod && !makeTypeAbstract)
 			return null;
@@ -128,7 +129,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
 		} else {
 			return new IProposableFix() {
-				public CompilationUnitChange createChange() throws CoreException {
+				public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 					CompilationUnitChange change= new CompilationUnitChange(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, (ICompilationUnit) root.getJavaElement()) {
 						public Change perform(IProgressMonitor pm) throws CoreException {
 							Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();

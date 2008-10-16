@@ -15,6 +15,7 @@
    <extension-point id="javaCompletionProposalSorters" name="%javaCompletionProposalSorters" schema="schema/javaCompletionProposalSorters.exsd"/>
    <extension-point id="classpathAttributeConfiguration" name="%classpathAttributeConfiguration" schema="schema/classpathAttributeConfiguration.exsd"/>
    <extension-point id="javadocExportWizardPage" name="%javadocExportWizardPageExtensionPoint" schema="schema/javadocExportWizardPage.exsd"/>
+   <extension-point id="cleanUps" name="%cleanUpExtensionPoint" schema="schema/cleanUps.exsd"/>
 
 <extension
 	point="org.eclipse.ui.decorators">
@@ -6338,6 +6339,140 @@
             value="COLOR_LIST_FOREGROUND">
          </colorOverride>
       </theme>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.cleanUps">
+         
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage"
+            name="%CleanUpTabPage.CodeStyle.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage"
+            name="%CleanUpTabPage.MemberAccesses.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage"
+            name="%CleanUpTabPage.UnnecessaryCode.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage"
+            name="%CleanUpTabPage.MissingCode.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage"
+            name="%CleanUpTabPage.CodeOrganizing.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage"
+            name="%CleanUpTabPage.CodeStyle.name"
+            cleanUpKind="saveAction">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage"
+            name="%CleanUpTabPage.MemberAccesses.name"
+            cleanUpKind="saveAction">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage"
+            name="%CleanUpTabPage.UnnecessaryCode.name"
+            cleanUpKind="saveAction">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage"
+            name="%CleanUpTabPage.MissingCode.name"
+            cleanUpKind="saveAction">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage"
+            name="%CleanUpTabPage.CodeOrganizing.name"
+            cleanUpKind="saveAction">
+      </cleanUpConfigurationUI>
+
+      <cleanUpOptionsInitializer
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.DefaultCleanUpOptionsInitializer"
+            cleanUpKind="cleanUp">
+      </cleanUpOptionsInitializer>      
+      <cleanUpOptionsInitializer
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.SaveActionCleanUpOptionsInitializer"
+            cleanUpKind="saveAction">
+      </cleanUpOptionsInitializer>
+      
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.code_style">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.control_statements"
+            runAfter="org.eclipse.jdt.ui.cleanup.code_style">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.loop"
+            runAfter="org.eclipse.jdt.ui.cleanup.control_statements">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.variables"
+            runAfter="org.eclipse.jdt.ui.cleanup.loop">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.expressions"
+            runAfter="org.eclipse.jdt.ui.cleanup.variables">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unused_code"
+            runAfter="org.eclipse.jdt.ui.cleanup.expressions">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.Java50CleanUp"
+            id="org.eclipse.jdt.ui.cleanup.java50"
+            runAfter="org.eclipse.jdt.ui.cleanup.unused_code">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.potential_programming_problems"
+            runAfter="org.eclipse.jdt.ui.cleanup.java50">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unnecessary_code"
+            runAfter="org.eclipse.jdt.ui.cleanup.potential_programming_problems">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.strings"
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_code">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unimplemented_code"
+            runAfter="org.eclipse.jdt.ui.cleanup.strings">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.sort_members"
+            runAfter="org.eclipse.jdt.ui.cleanup.unimplemented_code">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ImportsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.imports"
+            runAfter="org.eclipse.jdt.ui.cleanup.sort_members">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.format"
+            runAfter="org.eclipse.jdt.ui.cleanup.imports">
+      </cleanUp>
    </extension>
 
 </plugin>

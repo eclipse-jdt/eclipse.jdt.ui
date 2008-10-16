@@ -27,12 +27,14 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ImportsFix extends TextEditFix {
 
-	public static IFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status) throws CoreException {
+	public static ICleanUpFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status) throws CoreException {
 		if (!organizeImports)
 			return null;
 

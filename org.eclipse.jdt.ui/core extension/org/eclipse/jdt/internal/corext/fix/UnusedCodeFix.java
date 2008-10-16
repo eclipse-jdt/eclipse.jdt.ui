@@ -67,9 +67,10 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -524,7 +525,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new CompilationUnitRewriteOperation[] {new RemoveCastOperation((CastExpression)curr, selectedNode)});
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean removeUnusedPrivateMethods,
 			boolean removeUnusedPrivateConstructors,
 			boolean removeUnusedPrivateFields,
@@ -549,7 +550,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				removeUnusedCast);
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean removeUnusedPrivateMethods,
 			boolean removeUnusedPrivateConstructors,
 			boolean removeUnusedPrivateFields,

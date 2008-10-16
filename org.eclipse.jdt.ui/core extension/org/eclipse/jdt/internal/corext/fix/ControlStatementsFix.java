@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
 
 public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 
@@ -420,7 +422,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		return null;
 	}
 
-	public static IFix createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean convertSingleStatementToBlock,
 			boolean removeUnnecessaryBlock,
 			boolean removeUnnecessaryBlockContainingReturnOrThrow) {

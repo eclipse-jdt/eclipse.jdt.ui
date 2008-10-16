@@ -68,6 +68,8 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescrip
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -178,7 +180,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 
 			protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {
-				CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors();
+				CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 
 				NamedCleanUpTabPage[] result= new NamedCleanUpTabPage[descriptors.length];
 
@@ -186,7 +188,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 					String name= descriptors[i].getName();
 					CleanUpTabPage page= descriptors[i].createTabPage();
 
-					page.setOptionsKind(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
+					page.setOptionsKind(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 					page.setModifyListener(this);
 					page.setWorkingValues(workingValues);
 
@@ -336,13 +338,13 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 			String settings= getDialogSettings().get(CUSTOM_PROFILE_KEY);
 			if (settings == null) {
-				fCustomSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+				fCustomSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 			} else {
 				try {
 	                fCustomSettings= decodeSettings(settings);
                 } catch (CoreException e) {
 	                JavaPlugin.log(e);
-	                fCustomSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+	                fCustomSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
                 }
 			}
 
@@ -422,7 +424,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			CleanUpOptions options= new MapCleanUpOptions(fCustomSettings);
 	    	for (int i= 0; i < cleanUps.length; i++) {
 	    		cleanUps[i].setOptions(options);
-		        String[] descriptions= cleanUps[i].getDescriptions();
+		        String[] descriptions= cleanUps[i].getStepDescriptions();
 		        if (descriptions != null) {
 	    	        for (int j= 0; j < descriptions.length; j++) {
 	    	        	if (buf.length() > 0) {
@@ -504,7 +506,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			try {
 				List res= ProfileStore.readProfilesFromStream(new InputSource(is));
 				if (res == null || res.size() == 0)
-					return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+					return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 
 				CustomProfile profile= (CustomProfile)res.get(0);
 				new CleanUpProfileVersioner().update(profile);

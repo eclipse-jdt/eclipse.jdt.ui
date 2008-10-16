@@ -20,7 +20,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class ControlStatementsCleanUp extends AbstractCleanUp {
 
@@ -36,7 +39,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(requireAST(), false, null);
+		return new CleanUpRequirements(requireAST(), false, false, null);
 	}
 
 	private boolean requireAST() {
@@ -53,7 +56,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
@@ -71,7 +74,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getDescriptions() {
+	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);

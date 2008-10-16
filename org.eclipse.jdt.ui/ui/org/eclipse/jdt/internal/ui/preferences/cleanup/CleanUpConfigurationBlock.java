@@ -36,10 +36,10 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
@@ -140,7 +140,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 
     	boolean first= true;
     	for (int i= 0; i < cleanUps.length; i++) {
-	        String[] descriptions= cleanUps[i].getDescriptions();
+	        String[] descriptions= cleanUps[i].getStepDescriptions();
 	        if (descriptions != null) {
     	        for (int j= 0; j < descriptions.length; j++) {
     	        	if (first) {

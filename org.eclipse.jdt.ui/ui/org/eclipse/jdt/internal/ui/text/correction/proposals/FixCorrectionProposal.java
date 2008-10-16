@@ -39,21 +39,21 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.ILinkedFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.text.correction.IStatusLineProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
- * A correction proposal which uses an {@link IFix} to
+ * A correction proposal which uses an {@link ICleanUpFix} to
  * fix a problem. A fix correction proposal may have an {@link ICleanUp}
  * attached which can be executed instead of the provided IFix.
  */
@@ -148,7 +148,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createTextChange()
 	 */
 	protected TextChange createTextChange() throws CoreException {
-		CompilationUnitChange createChange= fFix.createChange();
+		CompilationUnitChange createChange= fFix.createChange(null);
 		createChange.setSaveMode(TextFileChange.LEAVE_DIRTY);
 
 		if (fFix instanceof ILinkedFix) {
@@ -191,7 +191,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 			return;
 
 		String changeName;
-		String[] descriptions= fCleanUp.getDescriptions();
+		String[] descriptions= fCleanUp.getStepDescriptions();
 		if (descriptions.length == 1) {
 			changeName= descriptions[0];
 		} else {

@@ -44,10 +44,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -87,16 +87,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	 */
 	protected abstract ICleanUp[] createCleanUps(ICompilationUnit[] units);
 
-	/**
-	 * @param units
-	 *            to clean up
-	 * @param cleanUps
-	 *            clean ups to execute on units
-	 *
-	 * @throws JavaModelException
-	 * @throws InvocationTargetException
-	 */
-	protected void performRefactoring(ICompilationUnit[] units, ICleanUp[] cleanUps) throws JavaModelException, InvocationTargetException {
+	protected void performRefactoring(ICompilationUnit[] units, ICleanUp[] cleanUps) throws InvocationTargetException {
 		RefactoringExecutionStarter.startCleanupRefactoring(units, cleanUps, getShell(), false, getActionName());
 	}
 
@@ -185,8 +176,6 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 			JavaPlugin.log(e);
 			if (e.getCause() instanceof CoreException)
 				showUnexpectedError((CoreException)e.getCause());
-		} catch (JavaModelException e) {
-			showUnexpectedError(e);
 		}
 	}
 
@@ -216,8 +205,6 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 			JavaPlugin.log(e);
 			if (e.getCause() instanceof CoreException)
 				showUnexpectedError((CoreException)e.getCause());
-		} catch (JavaModelException e) {
-			showUnexpectedError(e);
 		}
 	}
 

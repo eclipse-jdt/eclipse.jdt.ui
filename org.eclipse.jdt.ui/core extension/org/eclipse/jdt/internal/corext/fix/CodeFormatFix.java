@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -25,6 +26,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
@@ -34,20 +36,21 @@ import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
-public class CodeFormatFix implements IFix {
+public class CodeFormatFix implements ICleanUpFix {
 
-	public static IFix createCleanUp(ICompilationUnit cu, IRegion[] regions, boolean format, boolean removeTrailingWhitespacesAll, boolean removeTrailingWhitespacesIgnorEmpty, boolean correctIndentation) throws CoreException {
+	public static ICleanUpFix createCleanUp(ICompilationUnit cu, IRegion[] regions, boolean format, boolean removeTrailingWhitespacesAll, boolean removeTrailingWhitespacesIgnorEmpty, boolean correctIndentation) throws CoreException {
 		if (!format && !removeTrailingWhitespacesAll && !removeTrailingWhitespacesIgnorEmpty && !correctIndentation)
 			return null;
 
@@ -189,18 +192,17 @@ public class CodeFormatFix implements IFix {
 	}
 
 	/**
-	 * Returns the index in document of a none whitespace character
-	 * between start (inclusive) and end (inclusive) such that if
-	 * more then one such character the index returned is the largest
+	 * Returns the index in document of a none whitespace character between start (inclusive) and
+	 * end (inclusive) such that if more then one such character the index returned is the largest
 	 * possible (closest to end). Returns start - 1 if no such character.
-	 *
-	 * @param start
-	 * @param end
-	 * @param document
+	 * 
+	 * @param start the start
+	 * @param end the end
+	 * @param document the document
 	 * @return the position or start - 1
-	 * @throws BadLocationException
+	 * @exception BadLocationException if the offset is invalid in this document
 	 */
-	private static int getIndexOfRightMostNoneWhitspaceCharacter(int start, int end, Document document) throws BadLocationException {
+	private static int getIndexOfRightMostNoneWhitspaceCharacter(int start, int end, IDocument document) throws BadLocationException {
 		int position= end;
 		while (position >= start && Character.isWhitespace(document.getChar(position)))
 			position--;
@@ -217,7 +219,7 @@ public class CodeFormatFix implements IFix {
 	/**
 	 * {@inheritDoc}
 	 */
-	public CompilationUnitChange createChange() throws CoreException {
+	public org.eclipse.jdt.core.refactoring.CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		return fChange;
 	}
 }

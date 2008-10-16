@@ -18,8 +18,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.fix.IFix;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -35,7 +36,7 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 		super(settings);
 	}
 
-	public final IFix createFix(CleanUpContext context) throws CoreException {
+	public final ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit unit= context.getAST();
 		if (unit == null)
 			return null;
@@ -47,9 +48,9 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 		}
 	}
 
-	protected abstract IFix createFix(CompilationUnit unit) throws CoreException;
+	protected abstract ICleanUpFix createFix(CompilationUnit unit) throws CoreException;
 
-	protected abstract IFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException;
+	protected abstract ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException;
 
 	/**
 	 * {@inheritDoc}

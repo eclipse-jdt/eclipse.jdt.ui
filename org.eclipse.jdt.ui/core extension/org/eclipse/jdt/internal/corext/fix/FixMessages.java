@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,9 @@ public final class FixMessages extends NLS {
 	public static String CleanUpPostSaveListener_exception_error;
 	public static String CleanUpPostSaveListener_name;
 	public static String CleanUpPostSaveListener_SaveAction_ChangeName;
+	public static String CleanUpPostSaveListener_SlowCleanUpDialog_link;
+	public static String CleanUpPostSaveListener_SlowCleanUpDialog_title;
+	public static String CleanUpPostSaveListener_SlowCleanUpWarningDialog_explain;
 	public static String CleanUpPostSaveListener_unknown_profile_error_message;
 
 	public static String CleanUpRefactoring_checkingPostConditions_message;
@@ -30,6 +33,12 @@ public final class FixMessages extends NLS {
 	public static String CleanUpRefactoring_Refactoring_name;
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
 	public static String CleanUpRefactoring_Initialize_message;
+
+	public static String CleanUpRegistry_ErrorTabPage_description;
+	public static String CleanUpRegistry_ErrorTabPage_preview;
+	public static String CleanUpRegistry_UnknownInitializerKind_errorMessage;
+	public static String CleanUpRegistry_WrongKindForConfigurationUI_error;
+
 	public static String CompilationUnitRewriteOperationsFix_nullChangeError;
 	public static String CodeStyleFix_change_name;
 	public static String ControlStatementsFix_change_name;

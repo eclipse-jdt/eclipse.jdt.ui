@@ -27,6 +27,8 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
@@ -37,11 +39,11 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 
 public class CleanUpPreview extends JavaPreview {
 
-	private ICleanUpTabPage fPage;
+	private ICleanUpConfigurationUI fPage;
 	private boolean fFormat;
 	private boolean fCorrectIndentation;
 
-	public CleanUpPreview(Composite parent, ICleanUpTabPage page) {
+	public CleanUpPreview(Composite parent, ICleanUpConfigurationUI page) {
 		super(JavaCore.getDefaultOptions(), parent);
 		fPage= page;
 		fFormat= false;
