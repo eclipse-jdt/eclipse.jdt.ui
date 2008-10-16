@@ -18,6 +18,12 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,39 +37,33 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
-
-import org.eclipse.test.performance.Dimension;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
-	
+
 	private static class MyTestSetup extends TestSetup {
 		public static final String SRC_CONTAINER= "src";
-		
+
 		public static IJavaProject fJProject1;
 		public static IPackageFragmentRoot fJunitSrcRoot;
-		
+
 		public MyTestSetup(Test test) {
 			super(test);
 		}
-		
+
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
-	
+
 		protected void tearDown() throws Exception {
 			if (fJProject1 != null && fJProject1.exists())
 				JavaProjectHelper.delete(fJProject1);
 		}
 	}
-	
+
 	public static Test suite() {
 		return new MyTestSetup(new TestSuite(OrganizeImportsPerfTest.class));
 	}
@@ -71,7 +71,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	public static Test setUpTest(Test someTest) {
 		return new MyTestSetup(someTest);
 	}
-	
+
 	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement element= children[i];
@@ -86,7 +86,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 			}
 		}
 	}
-	
+
 	private CompilationUnit[] createASTs(ICompilationUnit[] cus) {
 		CompilationUnit[] result= new CompilationUnit[cus.length];
 		for (int i= 0; i < cus.length; i++) {
@@ -94,25 +94,32 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 		}
 		return result;
 	}
-	
+
 	public void testOrganizeImport() throws Exception {
-		
-		List cusList= new ArrayList();
-		addAllCUs(MyTestSetup.fJProject1.getChildren(), cusList);
-		ICompilationUnit[] cus= (ICompilationUnit[])cusList.toArray(new ICompilationUnit[cusList.size()]);
-		CompilationUnit[] roots= createASTs(cus);
-		
+		measure(Performance.getDefault().getNullPerformanceMeter(), 10);
+		measure(fPerformanceMeter, 10);
 		tagAsSummary("Organize Imports", Dimension.ELAPSED_PROCESS);
-		
-		joinBackgroudActivities();
-		startMeasuring();
-		
-		for (int i= 0; i < roots.length; i++) {
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, true, true, null);
-			op.run(new NullProgressMonitor());
+		commitMeasurements();
+		Performance.getDefault().assertPerformance(fPerformanceMeter);
+	}
+
+	private void measure(PerformanceMeter performanceMeter, int runs) throws Exception {
+		for (int j= 0; j < runs; j++) {
+			List cusList= new ArrayList();
+			addAllCUs(MyTestSetup.fJProject1.getChildren(), cusList);
+			ICompilationUnit[] cus= (ICompilationUnit[])cusList.toArray(new ICompilationUnit[cusList.size()]);
+			CompilationUnit[] roots= createASTs(cus);
+
+			joinBackgroudActivities();
+			
+			performanceMeter.start();
+			for (int i= 0; i < roots.length; i++) {
+				OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, true, true, null);
+				op.run(new NullProgressMonitor());
+			}
+			performanceMeter.stop();
 		}
 		
-		finishMeasurements();
 	}
 
 }
