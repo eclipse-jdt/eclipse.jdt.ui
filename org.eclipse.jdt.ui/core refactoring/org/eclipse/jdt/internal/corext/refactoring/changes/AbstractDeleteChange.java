@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,8 +24,6 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-
 abstract class AbstractDeleteChange extends ResourceChange {
 
 	protected abstract Change doDelete(IProgressMonitor pm) throws CoreException;
@@ -35,7 +33,6 @@ abstract class AbstractDeleteChange extends ResourceChange {
 	 */
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.AbstractDeleteChange_deleting, 1);
 			Change undo= doDelete(pm);
 			return undo;
 		} finally {
@@ -49,12 +46,8 @@ abstract class AbstractDeleteChange extends ResourceChange {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			buffer.commit(new SubProgressMonitor(pm, 1), false);
 			file.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(pm, 1));
-			pm.done();
-		} else {
-			pm.beginTask("", 1); //$NON-NLS-1$
-			pm.worked(1);
-			pm.done();
 		}
+		pm.done();
 	}
 }
 
