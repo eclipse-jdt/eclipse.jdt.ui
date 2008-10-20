@@ -17,6 +17,8 @@ import java.net.URL;
 
 import org.osgi.framework.Bundle;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -728,7 +730,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		 * for performance reasons, as computing the
 		 * replacement string can be expensive.
 		 */
-		return isPrefix(prefix, getDisplayString());
+		return isPrefix(prefix, TextProcessor.deprocess(getDisplayString()));
 	}
 
 	/**

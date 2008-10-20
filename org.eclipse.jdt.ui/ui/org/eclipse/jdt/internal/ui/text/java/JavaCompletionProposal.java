@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
@@ -105,7 +107,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
 	protected boolean isValidPrefix(String prefix) {
-		String word= getDisplayString();
+		String word= TextProcessor.deprocess(getDisplayString());
 		if (isInJavadoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx==0) {

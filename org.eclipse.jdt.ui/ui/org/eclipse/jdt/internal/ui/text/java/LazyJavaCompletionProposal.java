@@ -12,6 +12,8 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
@@ -354,7 +356,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			StringBuffer buf= new StringBuffer();
 			buf.append(Signature.toCharArray(fProposal.getDeclarationSignature()));
 			buf.append('.');
-			buf.append(getDisplayString());
+			buf.append(TextProcessor.deprocess(getDisplayString()));
 			return isPrefix(prefix, buf.toString());
 		}
 
