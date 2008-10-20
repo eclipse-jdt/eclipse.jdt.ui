@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
@@ -783,8 +785,13 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		Image image= getImage(fLabelProvider.createLocalImageDescriptor(proposal));
 		StyledString label= fLabelProvider.createSimpleLabelWithType(proposal);
 		int relevance= computeRelevance(proposal);
-
-		final JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
+		final JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance) {
+			protected boolean isValidPrefix(String prefix) {
+				String word= getDisplayString();
+				word= TextProcessor.deprocess(word);
+				return isPrefix(prefix, word);
+			}
+		};
 		javaProposal.setTriggerCharacters(VAR_TRIGGER);
 		return javaProposal;
 	}
