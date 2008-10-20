@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -220,8 +220,9 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 				if (jElement instanceof IJavaProject) {
 					remove= !jElement.exists();
 				} else {
-					IProject project= jElement.getJavaProject().getProject();
-					remove= project.isOpen() && !jElement.exists();
+					final IJavaProject javaProject= jElement.getJavaProject();
+					final boolean isProjectOpen= javaProject != null ? javaProject.getProject().isOpen() : true;
+					remove= isProjectOpen && !jElement.exists();
 				}
 			} else if (element instanceof IResource) {
 				IResource resource= (IResource)element;
