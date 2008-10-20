@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,21 +13,8 @@ package org.eclipse.jsp.launching;
  
 import java.io.File;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.variables.VariablesPlugin;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jsp.JspPluginImages;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,8 +29,30 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.variables.VariablesPlugin;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+
+import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 /**
  * Specifies the install location of Tomcat.
@@ -73,7 +82,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		
 		Font font = parent.getFont();
 				
-		Composite composite = new Composite(parent, SWT.NONE);		
+		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout workingDirLayout = new GridLayout();
 		workingDirLayout.numColumns = 3;
 		workingDirLayout.marginHeight = 0;
@@ -87,7 +96,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		createVerticalSpacer(composite, 3);
 				
 		Label label = new Label(composite, SWT.NONE);
-		label.setText(LaunchingMessages.TomcatTab_3); 
+		label.setText(LaunchingMessages.TomcatTab_3);
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 3;
 		label.setLayoutData(gd);
@@ -104,7 +113,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 			}
 		});
 		
-		fBrowseButton = createPushButton(composite, LaunchingMessages.TomcatTab_21, null); 
+		fBrowseButton = createPushButton(composite, LaunchingMessages.TomcatTab_21, null);
 		fBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleTomcatBrowseButtonSelected();
@@ -114,7 +123,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		createVerticalSpacer(composite, 3);
 		
 		label = new Label(composite, SWT.NONE);
-		label.setText(LaunchingMessages.TomcatTab_22); 
+		label.setText(LaunchingMessages.TomcatTab_22);
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 3;
 		label.setLayoutData(gd);
@@ -131,25 +140,25 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 			}
 		});
 		
-		fProjectButton = createPushButton(composite, LaunchingMessages.TomcatTab_23, null); 
+		fProjectButton = createPushButton(composite, LaunchingMessages.TomcatTab_23, null);
 		fProjectButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleProjectBrowseButtonSelected();
 			}
-		});		
+		});
 	}
 		
 	/**
 	 * Show a dialog that lets the user select a project
 	 * from the workspace
 	 */
-	protected void handleProjectBrowseButtonSelected() {		
+	protected void handleProjectBrowseButtonSelected() {
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), lp);
 		dialog.setElements(ResourcesPlugin.getWorkspace().getRoot().getProjects());
 		dialog.setMultipleSelection(false);
-		dialog.setTitle(LaunchingMessages.TomcatTab_28); 
-		dialog.setMessage(LaunchingMessages.TomcatTab_29); 
+		dialog.setTitle(LaunchingMessages.TomcatTab_28);
+		dialog.setMessage(LaunchingMessages.TomcatTab_29);
 		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();
 			if (elements != null && elements.length == 1) {
@@ -164,19 +173,19 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 */
 	protected void handleTomcatBrowseButtonSelected() {
 		DirectoryDialog dialog = new DirectoryDialog(getShell());
-		dialog.setMessage(LaunchingMessages.TomcatTab_4); 
+		dialog.setMessage(LaunchingMessages.TomcatTab_4);
 		String currentWorkingDir = fTomcatDir.getText();
 		if (!currentWorkingDir.trim().equals("")) { //$NON-NLS-1$
 			File path = new File(currentWorkingDir);
 			if (path.exists()) {
 				dialog.setFilterPath(currentWorkingDir);
-			}			
+			}
 		}
 		
 		String selectedDirectory = dialog.open();
 		if (selectedDirectory != null) {
 			fTomcatDir.setText(selectedDirectory);
-		}		
+		}
 	}
 					
 	/**
@@ -205,23 +214,23 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		if (workingDirPath.length() > 0) {
 			File dir = new File(expansion);
 			if (!dir.exists()) {
-				setErrorMessage(LaunchingMessages.TomcatTab_5); 
+				setErrorMessage(LaunchingMessages.TomcatTab_5);
 				return false;
 			}
 			if (!dir.isDirectory()) {
-				setErrorMessage(LaunchingMessages.TomcatTab_6); 
+				setErrorMessage(LaunchingMessages.TomcatTab_6);
 				return false;
 			}
-		}	
+		}
 		
 		String projectName = fProjectText.getText().trim();
 		if (projectName.length() > 0) {
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 			if (!project.exists()) {
-				setErrorMessage(LaunchingMessages.TomcatTab_30); 
+				setErrorMessage(LaunchingMessages.TomcatTab_30);
 				return false;
 			}
-		}	
+		}
 					
 		return true;
 	}
@@ -280,8 +289,9 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	}
 
 	/**
-	 * Retuns the string in the text widget, or <code>null</code> if empty.
+	 * Returns the string in the text widget, or <code>null</code> if empty.
 	 * 
+	 * @param text the text field
 	 * @return text or <code>null</code>
 	 */
 	protected String getAttributeValueFrom(Text text) {
@@ -296,15 +306,15 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
 	public String getName() {
-		return LaunchingMessages.TomcatTab_7; 
-	}	
+		return LaunchingMessages.TomcatTab_7;
+	}
 		
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getImage()
 	 */
 	public Image getImage() {
 		return JspPluginImages.getImage(JspPluginImages.IMG_OBJ_TOMCAT);
-	}	
+	}
 
 }
 

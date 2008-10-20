@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,24 +10,30 @@
  *******************************************************************************/
 package org.eclipse.jsp.launching;
 
+import org.eclipse.jdt.debug.core.IJavaStratumLineBreakpoint;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.action.Action;
+
+import org.eclipse.jface.text.source.IVerticalRulerInfo;
+
+import org.eclipse.ui.IEditorInput;
+
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.model.IBreakpoint;
-import org.eclipse.jdt.debug.core.IJavaStratumLineBreakpoint;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.text.source.IVerticalRulerInfo;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * ToggleJspBreakpointAction
  */
-public class ToggleJspBreakpointAction extends Action implements IAction {
+public class ToggleJspBreakpointAction extends Action {
 	
 	private ITextEditor fEditor;
 	private IVerticalRulerInfo fRulerInfo;
@@ -54,7 +60,7 @@ public class ToggleJspBreakpointAction extends Action implements IAction {
 					} catch (CoreException e) {
 						e.printStackTrace();
 					}
-				} 
+				}
 			}
 		}
 		createBreakpoint();
@@ -64,20 +70,16 @@ public class ToggleJspBreakpointAction extends Action implements IAction {
 		IResource resource = getResource();
 		int lineNumber = fRulerInfo.getLineOfLastMouseButtonActivity() + 1;
 		try {
-			JDIDebugModel.createStratumBreakpoint(resource, null, resource.getName(), null, null, lineNumber, -1, -1, 0, true, null); // 
+			JDIDebugModel.createStratumBreakpoint(resource, null, resource.getName(), null, null, lineNumber, -1, -1, 0, true, null); //
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 	}
 
-	/**
-	 * @param editor
-	 * @param rulerInfo
-	 */
 	public ToggleJspBreakpointAction(ITextEditor editor, IVerticalRulerInfo rulerInfo) {
-		super(LaunchingMessages.ToggleJspBreakpointAction_2); 
+		super(LaunchingMessages.ToggleJspBreakpointAction_2);
 		fEditor = editor;
-		fRulerInfo = rulerInfo; 
+		fRulerInfo = rulerInfo;
 	}
 
 	protected IResource getResource() {
