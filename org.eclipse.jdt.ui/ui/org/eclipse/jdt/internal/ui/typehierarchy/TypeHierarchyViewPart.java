@@ -730,7 +730,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 
 			protected void linkToEditor(ISelection selection) {
-				// do nothing: this is handled in more detailed by the part itself
+				// do nothing: this is handled in more detail by the part itself
 			}
 
 			protected void open(ISelection selection, boolean activate) {
