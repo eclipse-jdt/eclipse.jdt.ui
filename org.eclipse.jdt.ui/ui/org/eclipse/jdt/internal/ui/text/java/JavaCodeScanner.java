@@ -10,9 +10,7 @@
  *     Philippe Ombredanne <pombredanne@nexb.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150989
  *     Anton Leherbauer (Wind River Systems) - [misc] Allow custom token for WhitespaceRule - https://bugs.eclipse.org/bugs/show_bug.cgi?id=251224
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -436,9 +434,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		rules.add(new SingleLineRule("'", "'", token, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 
 
+		Token defaultToken= getToken(IJavaColorConstants.JAVA_DEFAULT);
+		
 		// Add generic whitespace rule.
-		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		rules.add(new WhitespaceRule(new JavaWhitespaceDetector(), token));
+		rules.add(new WhitespaceRule(new JavaWhitespaceDetector(), defaultToken));
 
 		String version= getPreferenceStore().getString(SOURCE_VERSION);
 
@@ -448,13 +447,11 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		rules.add(atInterfaceRule);
 		fVersionDependentRules.add(atInterfaceRule);
 
-		// Add word rule for new keywords, 4077
+		// Add word rule for new keywords, see bug 4077
 		JavaWordDetector wordDetector= new JavaWordDetector();
-		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		CombinedWordRule combinedWordRule= new CombinedWordRule(wordDetector, token);
+		CombinedWordRule combinedWordRule= new CombinedWordRule(wordDetector, defaultToken);
 
-		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(token, JavaCore.VERSION_1_4, version);
+		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_4, version);
 
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgJava14Keywords.length; i++)
@@ -463,8 +460,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		combinedWordRule.addWordMatcher(j14Matcher);
 		fVersionDependentRules.add(j14Matcher);
 
-		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		VersionedWordMatcher j15Matcher= new VersionedWordMatcher(token, JavaCore.VERSION_1_5, version);
+		VersionedWordMatcher j15Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_5, version);
+		
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgJava15Keywords.length; i++)
 			j15Matcher.addWord(fgJava15Keywords[i], token);
@@ -500,7 +497,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		rules.add(combinedWordRule);
 
-		setDefaultReturnToken(getToken(IJavaColorConstants.JAVA_DEFAULT));
+		setDefaultReturnToken(defaultToken);
 		return rules;
 	}
 
