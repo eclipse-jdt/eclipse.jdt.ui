@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Anton Leherbauer (Wind River Systems) - [misc] Allow custom token for WhitespaceRule - https://bugs.eclipse.org/bugs/show_bug.cgi?id=251224
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
@@ -173,7 +174,8 @@ public final class JavaDocScanner extends JavaCommentScanner {
 
 
 		// Add generic whitespace rule.
-		list.add(new WhitespaceRule(new JavaWhitespaceDetector()));
+		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
+		list.add(new WhitespaceRule(new JavaWhitespaceDetector(), token));
 
 
 		list.addAll(super.createRules());
