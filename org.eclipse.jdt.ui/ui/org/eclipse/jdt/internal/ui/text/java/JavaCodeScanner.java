@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Philippe Ombredanne <pombredanne@nexb.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150989
+ *     Anton Leherbauer (Wind River Systems) - [misc] Allow custom token for WhitespaceRule - https://bugs.eclipse.org/bugs/show_bug.cgi?id=251224
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.java;
@@ -436,7 +437,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 
 		// Add generic whitespace rule.
-		rules.add(new WhitespaceRule(new JavaWhitespaceDetector()));
+		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
+		rules.add(new WhitespaceRule(new JavaWhitespaceDetector(), token));
 
 		String version= getPreferenceStore().getString(SOURCE_VERSION);
 
