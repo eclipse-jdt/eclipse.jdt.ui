@@ -25,7 +25,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
@@ -70,7 +69,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		assertEquals(expected.getLength(), selection[1]);
 	}
 
-	private IPackageFragment getSelectionPackage() throws JavaModelException {
+	private IPackageFragment getSelectionPackage() {
 		return fgTestSetup.getSelectionPackage();
  	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -187,7 +187,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		assertEquals("incorrect severity:", expectedSeverity, preconditionResult.getSeverity());
 	}
 
-	private void failActivationHelper(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
+	private void failActivationHelper(int startLine, int startColumn, int endLine, int endColumn, int expectedSeverity) throws Exception {
 	    ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 	    ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 	    ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
@@ -212,7 +212,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
 	public void testFail3() throws Exception{
-	    failActivationHelper(13, 27, 13, 27, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+		failActivationHelper(13, 27, 13, 27, RefactoringStatus.FATAL);
 	}
 
 	public void testFail4() throws Exception{
