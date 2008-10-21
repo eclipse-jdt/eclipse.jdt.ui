@@ -45,7 +45,6 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * <code>org.eclipse.ltk.core.refactoring</code> instead.
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 

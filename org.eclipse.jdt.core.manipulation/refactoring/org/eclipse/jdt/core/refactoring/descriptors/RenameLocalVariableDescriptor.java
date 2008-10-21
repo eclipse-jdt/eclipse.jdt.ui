@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * @deprecated since 1.2 merged into {@link RenameJavaElementDescriptor}
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class RenameLocalVariableDescriptor extends JavaRefactoringDescriptor {
 

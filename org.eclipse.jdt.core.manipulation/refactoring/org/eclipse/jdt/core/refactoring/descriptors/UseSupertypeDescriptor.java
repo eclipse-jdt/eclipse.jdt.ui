@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * @since 1.1
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 

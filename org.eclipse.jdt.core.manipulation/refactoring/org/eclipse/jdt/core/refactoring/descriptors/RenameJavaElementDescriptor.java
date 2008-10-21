@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * @since 1.1
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor {
 
@@ -101,7 +100,9 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	public static final int STRATEGY_SUFFIX= 3;
 
-	/** @deprecated */
+	/**
+	 * @deprecated Replaced by {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor#ID}
+	 */
 	private static final String RENAME_RESOURCE= IJavaRefactorings.RENAME_RESOURCE;
 
 
