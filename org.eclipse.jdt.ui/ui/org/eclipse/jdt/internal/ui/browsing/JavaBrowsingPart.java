@@ -74,11 +74,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.part.AbstractMultiEditor;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
-
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.ISearchResultViewPart;
 
@@ -713,13 +712,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (!needsToProcessSelectionChanged(part))
 			return;
 
-		if (fToggleLinkingAction.isChecked() && (part instanceof ITextEditor)) {
+		if (fToggleLinkingAction.isChecked() && (part instanceof IEditorPart)) {
 			setSelectionFromEditor(part, selection);
 			return;
 		}
-
-		if (!(selection instanceof IStructuredSelection))
-			return;
 
 		// Set selection
 		Object selectedElement= getSingleElementFromSelection(selection);
@@ -1172,7 +1168,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				if (obj instanceof IJavaElement)
 					element= (IJavaElement)obj;
 			}
-			IEditorInput ei= ((IEditorPart)part).getEditorInput();
+			IEditorInput ei;
+			if (part instanceof AbstractMultiEditor)
+				ei= ((AbstractMultiEditor)part).getActiveEditor().getEditorInput();
+			else
+				ei= ((IEditorPart)part).getEditorInput();
 			if (selection instanceof ITextSelection) {
 				int offset= ((ITextSelection)selection).getOffset();
 				element= getElementAt(ei, offset);
