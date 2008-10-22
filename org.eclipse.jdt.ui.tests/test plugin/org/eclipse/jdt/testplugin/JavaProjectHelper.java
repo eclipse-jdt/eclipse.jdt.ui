@@ -255,25 +255,29 @@ public class JavaProjectHelper {
 					IJavaProject jproject= (IJavaProject) elem;
 					jproject.setRawClasspath(new IClasspathEntry[0], jproject.getProject().getFullPath(), null);
 				}
-				for (int i= 0; i < MAX_RETRY; i++) {
-					try {
-						elem.getResource().delete(true, null);
-						i= MAX_RETRY;
-					} catch (CoreException e) {
-						if (i == MAX_RETRY - 1) {
-							JavaPlugin.log(e);
-							throw e;
-						}
-						try {
-							Thread.sleep(1000); // sleep a second
-						} catch (InterruptedException e1) {
-						} 
-					}
-				}
+				delete(elem.getResource());
 			}
 		};
 		ResourcesPlugin.getWorkspace().run(runnable, null);	
 		emptyDisplayLoop();
+	}
+
+	private static void delete(IResource resource) throws CoreException {
+		for (int i= 0; i < MAX_RETRY; i++) {
+			try {
+				resource.delete(true, null);
+				i= MAX_RETRY;
+			} catch (CoreException e) {
+				if (i == MAX_RETRY - 1) {
+					JavaPlugin.log(e);
+					throw e;
+				}
+				try {
+					Thread.sleep(1000); // sleep a second
+				} catch (InterruptedException e1) {
+				} 
+			}
+		}
 	}
 
 	/**
@@ -291,7 +295,7 @@ public class JavaProjectHelper {
 				IResource[] resources= jproject.getProject().members();
 				for (int i= 0; i < resources.length; i++) {
 					if (!resources[i].getName().startsWith(".")) {
-						resources[i].delete(true, null);
+						delete(resources[i]);
 					}
 				}
 			}
