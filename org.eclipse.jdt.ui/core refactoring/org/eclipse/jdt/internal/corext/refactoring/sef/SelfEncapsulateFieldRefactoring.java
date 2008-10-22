@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -666,10 +667,19 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		MethodDeclaration result= ast.newMethodDeclaration();
 		result.setName(ast.newSimpleName(fGetterName));
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
-		Type returnType= (Type)rewriter.createCopyTarget(type);
+		Type returnType;
 		if (fFieldDeclaration.getExtraDimensions() > 0) {
-			returnType= ast.newArrayType(returnType, fFieldDeclaration.getExtraDimensions());
-		}
+			if (type instanceof ArrayType) {
+				ArrayType arrayType= (ArrayType)type;
+				returnType= (Type)rewriter.createCopyTarget(arrayType.getElementType());
+				returnType= ast.newArrayType(returnType, fFieldDeclaration.getExtraDimensions() + arrayType.getDimensions());
+
+			} else {
+				returnType= (Type)rewriter.createCopyTarget(type);
+				returnType= ast.newArrayType(returnType, fFieldDeclaration.getExtraDimensions());
+			}
+		} else
+			returnType= (Type)rewriter.createCopyTarget(type);
 		result.setReturnType2(returnType);
 
 		Block block= ast.newBlock();
