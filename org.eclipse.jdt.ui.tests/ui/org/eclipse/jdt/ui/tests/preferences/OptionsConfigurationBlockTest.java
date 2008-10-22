@@ -99,6 +99,9 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				JavaCore.COMPILER_PB_UNUSED_TYPE_ARGUMENTS_FOR_METHOD_INVOCATION, // maybe for 1.7
 
 				JavaCore.CODEASSIST_IMPLICIT_QUALIFICATION, // TODO: not used: bug?
+				
+				JavaCore.CODEASSIST_STATIC_FINAL_FIELD_PREFIXES, // FIXME: remove this line once this option will be used, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=251670
+				JavaCore.CODEASSIST_STATIC_FINAL_FIELD_SUFFIXES, // FIXME: remove this line once this option will be used, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=251670
 		}));
 	}
 
