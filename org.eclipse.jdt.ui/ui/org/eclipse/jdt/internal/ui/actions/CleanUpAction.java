@@ -85,7 +85,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	 * @return the clean ups to be performed or <b>null</b> if none to be
 	 *         performed
 	 */
-	protected abstract ICleanUp[] createCleanUps(ICompilationUnit[] units);
+	protected abstract ICleanUp[] getCleanUps(ICompilationUnit[] units);
 
 	protected void performRefactoring(ICompilationUnit[] units, ICleanUp[] cleanUps) throws InvocationTargetException {
 		RefactoringExecutionStarter.startCleanupRefactoring(units, cleanUps, getShell(), false, getActionName());
@@ -159,7 +159,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		if (!ActionUtil.isEditable(fEditor, getShell(), cu))
 			return;
 
-		ICleanUp[] cleanUps= createCleanUps(new ICompilationUnit[] {
+		ICleanUp[] cleanUps= getCleanUps(new ICompilationUnit[] {
 			cu
 		});
 		if (cleanUps == null)
@@ -180,7 +180,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	}
 
 	private void runOnMultiple(final ICompilationUnit[] cus) {
-		ICleanUp[] cleanUps= createCleanUps(cus);
+		ICleanUp[] cleanUps= getCleanUps(cus);
 		if (cleanUps == null)
 			return;
 

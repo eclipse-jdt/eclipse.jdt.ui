@@ -211,7 +211,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 
 		storeSettings(node);
 
-		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
 		for (int i= 0; i < cleanUps.length; i++) {
 			cleanUpRefactoring.addCleanUp(cleanUps[i]);
 		}

@@ -861,20 +861,6 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
-	public static ICleanUp[] createCleanUps() {
-		return JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
-	}
-
-	public static ICleanUp[] createCleanUps(Map settings) {
-		ICleanUp[] result= createCleanUps();
-
-		for (int i= 0; i < result.length; i++) {
-			result[i].setOptions(new MapCleanUpOptions(settings));
-		}
-
-		return result;
-	}
-
 	public static ASTParser createCleanUpASTParser() {
 		ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 

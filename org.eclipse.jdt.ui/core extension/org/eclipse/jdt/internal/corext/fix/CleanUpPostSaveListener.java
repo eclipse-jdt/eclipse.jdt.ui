@@ -98,8 +98,10 @@ import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
@@ -290,12 +292,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 			ICleanUp[] cleanUps;
 			if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
-				cleanUps= CleanUpRefactoring.createCleanUps(settings);
+				cleanUps= getCleanUps(settings);
 			} else {
 				HashMap filteredSettins= new HashMap();
 				filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE));
 				filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
-				cleanUps= CleanUpRefactoring.createCleanUps(filteredSettins);
+				cleanUps= getCleanUps(filteredSettins);
 			}
 
 			long oldFileValue= unit.getResource().getModificationStamp();
@@ -401,7 +403,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 	}
 
-	private ICleanUp[] getCleanUps(IProject project) throws CoreException {
+	private static ICleanUp[] getCleanUps(IProject project) throws CoreException {
 		ICleanUp[] cleanUps;
 		Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new ProjectScope(project));
 		if (settings == null) {
@@ -414,17 +416,28 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 
 		if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
-			cleanUps= CleanUpRefactoring.createCleanUps(settings);
+			cleanUps= getCleanUps(settings);
 		} else {
 			HashMap filteredSettins= new HashMap();
 			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE));
 			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY));
 			filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
-			cleanUps= CleanUpRefactoring.createCleanUps(filteredSettins);
+			cleanUps= getCleanUps(filteredSettins);
 		}
 
 		return cleanUps;
 	}
+
+	private static ICleanUp[] getCleanUps(Map settings) {
+		ICleanUp[] result= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+
+		for (int i= 0; i < result.length; i++) {
+			result[i].setOptions(new MapCleanUpOptions(settings));
+		}
+
+		return result;
+	}
+
 
 	private int showStatus(RefactoringStatus status) {
 		if (!status.hasError())

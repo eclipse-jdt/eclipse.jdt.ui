@@ -61,7 +61,7 @@ public class MultiSortMembersAction extends CleanUpAction {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected ICleanUp[] createCleanUps(ICompilationUnit[] units) {
+	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
 		try {
 	        if (!hasMembersToSort(units)) {
 				MessageDialog.openInformation(getShell(), ActionMessages.MultiSortMembersAction_noElementsToSortDialog_title, ActionMessages.MultiSortMembersAction_noElementsToSortDialog_message);

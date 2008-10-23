@@ -49,7 +49,7 @@ public class MultiOrganizeImportAction extends CleanUpAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);
 	}
 
-	protected ICleanUp[] createCleanUps(ICompilationUnit[] units) {
+	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
 		Map settings= new Hashtable();
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.TRUE);
 		ImportsCleanUp importsCleanUp= new ImportsCleanUp(settings);

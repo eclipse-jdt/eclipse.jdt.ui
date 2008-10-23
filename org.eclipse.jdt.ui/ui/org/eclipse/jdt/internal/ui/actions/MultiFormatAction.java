@@ -36,7 +36,7 @@ public class MultiFormatAction extends CleanUpAction {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CleanUpAction#createCleanUps(org.eclipse.jdt.core.ICompilationUnit[])
 	 */
-	protected ICleanUp[] createCleanUps(ICompilationUnit[] units) {
+	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
 		Map settings= new Hashtable();
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
 

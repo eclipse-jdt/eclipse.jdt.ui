@@ -24,12 +24,12 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class AllCleanUpsAction extends CleanUpAction {
@@ -57,8 +57,8 @@ public class AllCleanUpsAction extends CleanUpAction {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected ICleanUp[] createCleanUps(ICompilationUnit[] units) {
-		return CleanUpRefactoring.createCleanUps();
+	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
+		return JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
 	}
 
 	/**

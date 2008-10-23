@@ -235,6 +235,12 @@ public class CleanUpRegistry {
 	private CleanUpInitializerDescriptor[] fCleanUpInitializerDescriptors;
 
 	/**
+	 * Returns the registered clean up.
+	 * <p>
+	 * <strong>Note:</strong> Callers must ensure to set their options by calling
+	 * {@link ICleanUp#setOptions(CleanUpOptions)}.
+	 * </p>
+	 * 
 	 * @return a set of registered clean ups.
 	 */
 	public synchronized ICleanUp[] getCleanUps() {
@@ -286,8 +292,8 @@ public class CleanUpRegistry {
 	}
 
 	private synchronized void ensureCleanUpRegistered() {
-//		if (fCleanUps != null)
-//			return;
+		if (fCleanUps != null)
+			return;
 
 		ArrayList descriptors= new ArrayList();
 

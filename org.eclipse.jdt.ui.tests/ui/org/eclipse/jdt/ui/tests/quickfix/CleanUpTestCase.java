@@ -206,7 +206,7 @@ public class CleanUpTestCase extends QuickFixTest {
 	protected final RefactoringStatus performRefactoring(ICompilationUnit[] cus) throws CoreException {
 		final CleanUpRefactoring ref= new CleanUpRefactoring();
 		ref.setUseProjectOptions(true);
-		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
 
 		return performRefactoring(ref, cus, cleanUps);
 	}

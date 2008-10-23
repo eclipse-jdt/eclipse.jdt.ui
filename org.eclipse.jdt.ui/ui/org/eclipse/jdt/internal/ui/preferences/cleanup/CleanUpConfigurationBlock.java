@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,6 @@ import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -101,7 +100,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		final Map sharedSettings= new Hashtable();
 		fill(settings, sharedSettings);
 
-		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
 		CleanUpOptions options= new MapCleanUpOptions(sharedSettings);
 		for (int i= 0; i < cleanUps.length; i++) {
 			cleanUps[i].setOptions(options);
