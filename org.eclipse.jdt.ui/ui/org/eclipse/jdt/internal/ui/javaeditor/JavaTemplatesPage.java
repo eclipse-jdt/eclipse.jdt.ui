@@ -190,7 +190,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		JavaSourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, store);
+		JavaSourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
 		SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(tools.getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		viewer.configure(configuration);
 		viewer.setEditable(false);
