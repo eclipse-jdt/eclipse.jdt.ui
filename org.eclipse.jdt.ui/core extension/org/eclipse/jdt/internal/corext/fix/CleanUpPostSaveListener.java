@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -223,6 +224,13 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 			cleanUpListBlock.setLayoutData(gridData);
 			cleanUpListBlock.setText(fCleanUpNames);
+
+			TextLayout textLayout= new TextLayout(messageComposite.getDisplay());
+			textLayout.setText(fCleanUpNames);
+			int lineCount= textLayout.getLineCount();
+			if (lineCount < 5)
+				gridData.heightHint= textLayout.getLineBounds(0).height * 6;
+			textLayout.dispose();
 
 			Link link= new Link(messageComposite, SWT.NONE);
 			link.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
