@@ -227,6 +227,7 @@ public final class RefactoringExecutionStarter {
 		}
 
 		if (!showWizard) {
+			refactoring.setUseProjectOptions(true);
 			for (int i= 0; i < cleanUps.length; i++) {
 				refactoring.addCleanUp(cleanUps[i]);
 			}
