@@ -506,7 +506,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	 * A clean up is considered slow if its execution lasts longer then the value of
 	 * SLOW_CLEAN_UP_THRESHOLD in ms.
 	 */
-	private static final int SLOW_CLEAN_UP_THRESHOLD= 500;
+	private static final int SLOW_CLEAN_UP_THRESHOLD= 2000;
 
 	private final List/*<ICleanUp>*/fCleanUps;
 	private final Hashtable/*<IJavaProject, List<CleanUpTarget>*/fProjects;
