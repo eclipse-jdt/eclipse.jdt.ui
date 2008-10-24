@@ -36,7 +36,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 public class CodeStyleCleanUp extends AbstractMultiFix {
 
 	public CodeStyleCleanUp() {
-		this(null);
 	}
 
 	public CodeStyleCleanUp(Map options) {

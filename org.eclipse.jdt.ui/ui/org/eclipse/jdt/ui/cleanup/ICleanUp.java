@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.cleanup;
 
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -46,21 +45,21 @@ public interface ICleanUp {
 	 * 
 	 * @param options the options to use
 	 */
-	public void setOptions(CleanUpOptions options);
+	void setOptions(CleanUpOptions options);
 
 	/**
 	 * Human readable description for each step this clean up will execute.
 	 * 
 	 * @return descriptions an array of {@linkplain String strings} or <code>null</code>
 	 */
-	public String[] getStepDescriptions();
+	String[] getStepDescriptions();
 
 	/**
 	 * The requirements of this clean up.
 	 * 
 	 * @return the requirements used for {@link #createFix(CleanUpContext)} to work
 	 */
-	public CleanUpRequirements getRequirements();
+	CleanUpRequirements getRequirements();
 
 	/**
 	 * After call to checkPreConditions clients will start creating fixes for
@@ -73,7 +72,7 @@ public interface ICleanUp {
 	 * @return the result of the precondition check, not null
 	 * @throws CoreException if an unexpected error occurred
 	 */
-	public abstract RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException;
+	RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Create an <code>ICleanUpFix</code> which fixes all problems in <code>context</code> or
@@ -83,7 +82,7 @@ public interface ICleanUp {
 	 * @return the fix for the problems or <code>null</code> if nothing to fix
 	 * @throws CoreException if an unexpected error occurred
 	 */
-	public abstract ICleanUpFix createFix(CleanUpContext context) throws CoreException;
+	ICleanUpFix createFix(CleanUpContext context) throws CoreException;
 
 	/**
 	 * Called when done cleaning up.
@@ -92,6 +91,6 @@ public interface ICleanUp {
 	 * @return the result of the postcondition check, not null
 	 * @throws CoreException if an unexpected error occurred
 	 */
-	public abstract RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException;
+	RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException;
 
 }
