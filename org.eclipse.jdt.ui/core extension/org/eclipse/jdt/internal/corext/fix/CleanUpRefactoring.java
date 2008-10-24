@@ -513,7 +513,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	private Change fChange;
 	private boolean fLeaveFilesDirty;
 	private final String fName;
-	private boolean fUseProjectOptions;
+
+	private boolean fUseOptionsFromProfile;
 
 	public CleanUpRefactoring() {
 		this(FixMessages.CleanUpRefactoring_Refactoring_name);
@@ -523,11 +524,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		fName= name;
 		fCleanUps= new ArrayList();
 		fProjects= new Hashtable();
-		fUseProjectOptions= false;
+		fUseOptionsFromProfile= false;
 	}
 
-	public void setUseProjectOptions(boolean enabled) {
-		fUseProjectOptions= enabled;
+	public void setUseOptionsFromProfile(boolean enabled) {
+		fUseOptionsFromProfile= enabled;
 	}
 
 	public void addCompilationUnit(ICompilationUnit unit) {
@@ -649,8 +650,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				List targetsList= (List) entry.getValue();
 				CleanUpTarget[] targets= (CleanUpTarget[])targetsList.toArray(new CleanUpTarget[targetsList.size()]);
 
-				if (fUseProjectOptions) {
-					result.merge(setProjectOptions(project, cleanUps));
+				if (fUseOptionsFromProfile) {
+					result.merge(setOptionsFromProfile(project, cleanUps));
 					if (result.hasFatalError())
 						return result;
 				}
@@ -713,16 +714,14 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 
-	private RefactoringStatus setProjectOptions(IJavaProject javaProject, ICleanUp[] cleanUps) {
+	private RefactoringStatus setOptionsFromProfile(IJavaProject javaProject, ICleanUp[] cleanUps) {
 		Map options= CleanUpPreferenceUtil.loadOptions(new ProjectScope(javaProject.getProject()));
-		if (options == null) {
+		if (options == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(FixMessages.CleanUpRefactoring_could_not_retrive_profile, BasicElementLabels.getResourceName(javaProject.getProject())));
-		}
 
 		CleanUpOptions cleanUpOptions= new MapCleanUpOptions(options);
-		for (int j= 0; j < cleanUps.length; j++) {
-			cleanUps[j].setOptions(cleanUpOptions);
-		}
+		for (int i= 0; i < cleanUps.length; i++)
+			cleanUps[i].setOptions(cleanUpOptions);
 
 		return new RefactoringStatus();
 	}

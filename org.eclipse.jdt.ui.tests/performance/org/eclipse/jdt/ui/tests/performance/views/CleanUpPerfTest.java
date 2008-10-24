@@ -211,7 +211,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 
 		storeSettings(node);
 
-		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 		for (int i= 0; i < cleanUps.length; i++) {
 			cleanUpRefactoring.addCleanUp(cleanUps[i]);
 		}
@@ -427,7 +427,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	}
 
 	private void doCleanUp(CleanUpRefactoring refactoring) throws CoreException {
-		refactoring.setUseProjectOptions(true);
+		refactoring.setUseOptionsFromProfile(true);
 
 		performRefactoring(refactoring, false, IStatus.WARNING, true);
 		performRefactoring(refactoring, false, IStatus.WARNING, true);

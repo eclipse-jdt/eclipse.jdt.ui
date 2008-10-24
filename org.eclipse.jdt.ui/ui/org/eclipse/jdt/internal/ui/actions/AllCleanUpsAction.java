@@ -58,7 +58,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 	 * {@inheritDoc}
 	 */
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
-		return JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+		return JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 	 * {@inheritDoc}
 	 */
 	protected void performRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps) throws InvocationTargetException {
-		RefactoringExecutionStarter.startCleanupRefactoring(cus, cleanUps, getShell(), showWizard(), getActionName());
+		RefactoringExecutionStarter.startCleanupRefactoring(cus, cleanUps, !showWizard(), getShell(), showWizard(), getActionName());
 	}
 
 	private boolean showWizard() {

@@ -420,7 +420,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
         private void showCustomSettings(BulletListBlock bulletListBlock) {
 			StringBuffer buf= new StringBuffer();
 
-			final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+			final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 			CleanUpOptions options= new MapCleanUpOptions(fCustomSettings);
 	    	for (int i= 0; i < cleanUps.length; i++) {
 	    		cleanUps[i].setOptions(options);
@@ -465,11 +465,11 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			if (fUseCustomField.isSelected()) {
 				options= new MapCleanUpOptions(fCustomSettings);
 			} else {
-				refactoring.setUseProjectOptions(true);
+				refactoring.setUseOptionsFromProfile(true);
 			}
 
 			refactoring.clearCleanUps();
-			ICleanUp[] cleanups= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+			ICleanUp[] cleanups= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 			for (int i= 0; i < cleanups.length; i++) {
 				if (options != null)
 					cleanups[i].setOptions(options);

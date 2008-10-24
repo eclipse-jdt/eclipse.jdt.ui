@@ -229,23 +229,25 @@ public class CleanUpRegistry {
 	private static final String ATTRIBUTE_KIND_TYPE_SAVE_ACTION= "saveAction"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_KIND_TYPE_CLEAN_UP= "cleanUp"; //$NON-NLS-1$
 
-	private ICleanUp[] fCleanUps;
+	private CleanUpDescriptor[] fCleanUpDescriptors;
 	private CleanUpTabPageDescriptor[] fPageDescriptors;
 
 	private CleanUpInitializerDescriptor[] fCleanUpInitializerDescriptors;
 
 	/**
-	 * Returns the registered clean up.
-	 * <p>
-	 * <strong>Note:</strong> Callers must ensure to set their options by calling
-	 * {@link ICleanUp#setOptions(CleanUpOptions)}.
-	 * </p>
+	 * Creates and returns the registered clean ups that don't fail upon creation.
 	 * 
-	 * @return a set of registered clean ups.
+	 * @return an array of clean ups
 	 */
-	public synchronized ICleanUp[] getCleanUps() {
-		ensureCleanUpRegistered();
-		return fCleanUps;
+	public synchronized ICleanUp[] createCleanUps() {
+		ensureCleanUpsRegistered();
+		ArrayList result= new ArrayList(fCleanUpDescriptors.length);
+		for (int i= 0; i < fCleanUpDescriptors.length; i++) {
+			ICleanUp cleanUp= fCleanUpDescriptors[i].createCleanUp();
+			if (cleanUp != null)
+				result.add(cleanUp);
+		}
+		return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
 	}
 
 	/**
@@ -291,8 +293,8 @@ public class CleanUpRegistry {
 		return mapCleanUpOptions;
 	}
 
-	private synchronized void ensureCleanUpRegistered() {
-		if (fCleanUps != null)
+	private synchronized void ensureCleanUpsRegistered() {
+		if (fCleanUpDescriptors != null)
 			return;
 
 		ArrayList descriptors= new ArrayList();
@@ -307,16 +309,16 @@ public class CleanUpRegistry {
 			}
 		}
 
-		CleanUpDescriptor[] cleanUpDescriptors= (CleanUpDescriptor[])descriptors.toArray(new CleanUpDescriptor[descriptors.size()]);
-		sort(cleanUpDescriptors);
 
-		ArrayList result= new ArrayList(cleanUpDescriptors.length);
-		for (int i= 0; i < cleanUpDescriptors.length; i++) {
-			ICleanUp cleanUp= cleanUpDescriptors[i].createCleanUp();
-			if (cleanUp != null)
-				result.add(cleanUp);
+		// Make sure we filter those who fail
+		for (int i= 0; i < descriptors.size(); i++) {
+			ICleanUp cleanUp= ((CleanUpDescriptor)descriptors.get(i)).createCleanUp();
+			if (cleanUp == null)
+				descriptors.remove(i--);
 		}
-		fCleanUps= (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
+
+		fCleanUpDescriptors= (CleanUpDescriptor[])descriptors.toArray(new CleanUpDescriptor[descriptors.size()]);
+		sort(fCleanUpDescriptors);
 	}
 
 	private static void sort(CleanUpDescriptor[] data) {

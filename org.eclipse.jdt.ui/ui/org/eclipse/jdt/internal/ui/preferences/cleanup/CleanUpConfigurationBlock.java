@@ -100,7 +100,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		final Map sharedSettings= new Hashtable();
 		fill(settings, sharedSettings);
 
-		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 		CleanUpOptions options= new MapCleanUpOptions(sharedSettings);
 		for (int i= 0; i < cleanUps.length; i++) {
 			cleanUps[i].setOptions(options);

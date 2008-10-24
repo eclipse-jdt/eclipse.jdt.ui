@@ -88,7 +88,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	protected abstract ICleanUp[] getCleanUps(ICompilationUnit[] units);
 
 	protected void performRefactoring(ICompilationUnit[] units, ICleanUp[] cleanUps) throws InvocationTargetException {
-		RefactoringExecutionStarter.startCleanupRefactoring(units, cleanUps, getShell(), false, getActionName());
+		RefactoringExecutionStarter.startCleanupRefactoring(units, cleanUps, false, getShell(), false, getActionName());
 	}
 
 	public void run(ITextSelection selection) {

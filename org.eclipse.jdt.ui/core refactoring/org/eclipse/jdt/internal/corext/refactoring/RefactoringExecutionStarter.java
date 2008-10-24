@@ -220,14 +220,14 @@ public final class RefactoringExecutionStarter {
 		new RefactoringStarter().activate(new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 
-	public static void startCleanupRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps, Shell shell, boolean showWizard, String actionName) throws InvocationTargetException {
+	public static void startCleanupRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps, boolean useOptionsFromProfile, Shell shell, boolean showWizard, String actionName) throws InvocationTargetException {
 		final CleanUpRefactoring refactoring= new CleanUpRefactoring(actionName);
 		for (int i= 0; i < cus.length; i++) {
 			refactoring.addCompilationUnit(cus[i]);
 		}
 
 		if (!showWizard) {
-			refactoring.setUseProjectOptions(true);
+			refactoring.setUseOptionsFromProfile(useOptionsFromProfile);
 			for (int i= 0; i < cleanUps.length; i++) {
 				refactoring.addCleanUp(cleanUps[i]);
 			}

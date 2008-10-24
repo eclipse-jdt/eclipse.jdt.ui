@@ -429,7 +429,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	}
 
 	private static ICleanUp[] getCleanUps(Map settings) {
-		ICleanUp[] result= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+		ICleanUp[] result= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 
 		for (int i= 0; i < result.length; i++) {
 			result[i].setOptions(new MapCleanUpOptions(settings));

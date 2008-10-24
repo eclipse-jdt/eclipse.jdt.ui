@@ -35,54 +35,62 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	}
 
 	protected AbstractCleanUp(Map settings) {
-		if (settings != null)
-			setOptions(new MapCleanUpOptions(settings));
+		setOptions(new MapCleanUpOptions(settings));
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jdt.ui.cleanup.ICleanUp#setOptions(org.eclipse.jdt.ui.cleanup.CleanUpOptions)
+	 * @since 3.5
 	 */
 	public void setOptions(CleanUpOptions options) {
+		Assert.isLegal(options != null);
+		Assert.isTrue(fOptions == null);
 		fOptions= options;
 	}
 
-	/**
-	 * {@inheritDoc}
+
+	/*
+	 * @see org.eclipse.jdt.ui.cleanup.ICleanUp#getStepDescriptions()
+	 * @since 3.5
 	 */
 	public String[] getStepDescriptions() {
 		return new String[0];
 	}
 
 	/**
-	 * @return code snipped complying to current options
+	 * @return code snippet complying to current options
 	 */
 	public String getPreview() {
 		return ""; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jdt.ui.cleanup.ICleanUp#getRequirements()
+	 * @since 3.5
 	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(false, false, false, null);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jdt.ui.cleanup.ICleanUp#checkPreConditions(org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.ICompilationUnit[], org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.5
 	 */
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		return new RefactoringStatus();
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jdt.ui.cleanup.ICleanUp#createFix(org.eclipse.jdt.ui.cleanup.CleanUpContext)
+	 * @since 3.5
 	 */
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jdt.ui.cleanup.ICleanUp#checkPostConditions(org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.5
 	 */
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
 		return new RefactoringStatus();
@@ -90,12 +98,11 @@ public abstract class AbstractCleanUp implements ICleanUp {
 
 	/**
 	 * @param key the name of the option
-	 * @return true if option with <code>key</code> is enabled
+	 * @return <code>true</code> if option with <code>key</code> is enabled
 	 */
 	protected boolean isEnabled(String key) {
 		Assert.isNotNull(fOptions);
-		Assert.isNotNull(key);
-
+		Assert.isLegal(key != null);
 		return fOptions.isEnabled(key);
 	}
 

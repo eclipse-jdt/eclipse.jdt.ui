@@ -369,7 +369,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private String getSelectedCleanUpsText(CleanUpOptions options) {
 		StringBuffer buf= new StringBuffer();
 
-		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 		for (int i= 0; i < cleanUps.length; i++) {
 			cleanUps[i].setOptions(options);
 			String[] descriptions= cleanUps[i].getStepDescriptions();
