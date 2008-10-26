@@ -78,7 +78,7 @@ public class AllRefactoringTests {
 		suite.addTest(BinaryReferencesTests.suite());
 
 		// validate edit
-		suite.addTest(ValidateEditTests.suite());
+//		suite.addTest(ValidateEditTests.suite());
 
 		//--helpers
 		suite.addTest(RenamingNameSuggestorTests.suite());
