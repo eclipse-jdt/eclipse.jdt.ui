@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,9 +35,12 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
@@ -46,6 +49,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.DeprecatedMemberHighlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 
 
@@ -109,6 +113,42 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				}
 			}
 			fToken.clear();
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
+		 * @since 3.5
+		 */
+		public boolean visit(ConstructorInvocation node) {
+			// XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
+			if (fJobDeprecatedMemberHighlighting != null) {
+				IMethodBinding constructorBinding= node.resolveConstructorBinding();
+				if (constructorBinding != null && constructorBinding.isDeprecated()) {
+					int offset= node.getStartPosition();
+					int length= 4;
+					if (offset > -1 && length > 0)
+						addPosition(offset, length, fJobDeprecatedMemberHighlighting);
+				}
+			}
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
+		 * @since 3.5
+		 */
+		public boolean visit(SuperConstructorInvocation node) {
+			// XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
+			if (fJobDeprecatedMemberHighlighting != null) {
+				IMethodBinding constructorBinding= node.resolveConstructorBinding();
+				if (constructorBinding != null && constructorBinding.isDeprecated()) {
+					int offset= node.getStartPosition();
+					int length= 5;
+					if (offset > -1 && length > 0)
+						addPosition(offset, length, fJobDeprecatedMemberHighlighting);
+				}
+			}
 			return false;
 		}
 
@@ -219,6 +259,12 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	/** Highlightings - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
 	private Highlighting[] fJobHighlightings;
 
+	/**
+	 * XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
+	 * @since 3.5
+	 */
+	private Highlighting fJobDeprecatedMemberHighlighting;
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
@@ -256,8 +302,17 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 			startReconcilingPositions();
 
-			if (!fJobPresenter.isCanceled())
+			if (!fJobPresenter.isCanceled()) {
+				fJobDeprecatedMemberHighlighting= null;
+				for (int i= 0, n= fJobSemanticHighlightings.length; i < n; i++) {
+					SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+					if (fJobHighlightings[i].isEnabled() && semanticHighlighting instanceof DeprecatedMemberHighlighting) {
+						fJobDeprecatedMemberHighlighting= fJobHighlightings[i];
+						break;
+					}
+				}
 				reconcilePositions(subtrees);
+			}
 
 			TextPresentation textPresentation= null;
 			if (!fJobPresenter.isCanceled())
@@ -271,6 +326,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			fJobPresenter= null;
 			fJobSemanticHighlightings= null;
 			fJobHighlightings= null;
+			fJobDeprecatedMemberHighlighting= null;
 			synchronized (fReconcileLock) {
 				fIsReconciling= false;
 			}
@@ -301,6 +357,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 */
 	private void reconcilePositions(ASTNode[] subtrees) {
 		// FIXME: remove positions not covered by subtrees
+
+
+
 		for (int i= 0, n= subtrees.length; i < n; i++)
 			subtrees[i].accept(fCollector);
 		List oldPositions= fRemovedPositions;

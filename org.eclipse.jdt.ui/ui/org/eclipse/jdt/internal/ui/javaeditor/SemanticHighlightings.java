@@ -1059,7 +1059,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for deprecated members.
 	 */
-	private static final class DeprecatedMemberHighlighting extends SemanticHighlighting {
+	static final class DeprecatedMemberHighlighting extends SemanticHighlighting {
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
