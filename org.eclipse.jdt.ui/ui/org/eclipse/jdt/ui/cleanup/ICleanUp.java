@@ -66,10 +66,10 @@ public interface ICleanUp {
 	 * <code>compilationUnits</code> in <code>project</code> unless the result of checkPreConditions
 	 * contains a fatal error
 	 * 
-	 * @param project The project to clean up
-	 * @param compilationUnits The compilation Units to clean up, all member of project
+	 * @param project the project to clean up
+	 * @param compilationUnits an array of compilation units to clean up, all member of <code>project</code>
 	 * @param monitor the monitor to show progress
-	 * @return the result of the precondition check, not null
+	 * @return the result of the precondition check
 	 * @throws CoreException if an unexpected error occurred
 	 */
 	RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException;
