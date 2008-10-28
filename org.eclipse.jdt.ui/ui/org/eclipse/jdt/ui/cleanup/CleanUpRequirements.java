@@ -84,7 +84,7 @@ public final class CleanUpRequirements {
 	}
 
 	/**
-	 * Does this clean up required to be informed about changed regions? The changed regions are the
+	 * Tells whether this clean up requires to be informed about changed regions. The changed regions are the
 	 * regions which have been changed between the last save state of the compilation unit and its
 	 * current state.
 	 * <p>
