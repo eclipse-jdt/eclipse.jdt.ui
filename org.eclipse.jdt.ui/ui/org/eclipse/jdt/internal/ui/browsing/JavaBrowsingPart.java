@@ -189,9 +189,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			if (ref != null && ref.getId() == getSite().getId()){
 				fProcessSelectionEvents= true;
 				IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();
-				if (page != null)
-					selectionChanged(page.getActivePart(), page.getSelection());
-		}
+				if (page != null) {
+					ISelection selection= page.getSelection();
+					if (selection != null)
+						selectionChanged(page.getActivePart(), selection);
+				}
+			}
 		}
 		public void partHidden(IWorkbenchPartReference ref) {
 			if (ref != null && ref.getId() == getSite().getId())
