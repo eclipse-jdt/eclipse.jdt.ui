@@ -19,6 +19,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
@@ -31,13 +33,14 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	private Map fValues;
 	private JavaPreview fCleanUpPreview;
 	private boolean fIsSaveAction;
-	int fCount;
-	int fSelectedCount;
+
+	private int fCount;
+	private int fSelectedCount;
 
 	public CleanUpTabPage() {
 		super();
 		fCount= 0;
-		fSelectedCount= 0;
+		setSelectedCleanUpCount(0);
 		fIsSaveAction= false;
 	}
 
@@ -74,6 +77,11 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		return fSelectedCount;
 	}
 
+	private void setSelectedCleanUpCount(int selectedCount) {
+		Assert.isLegal(selectedCount >= 0 && selectedCount <= fCount);
+		fSelectedCount= selectedCount;
+	}
+
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
 		fCleanUpPreview= new CleanUpPreview(parent, this);
     	return fCleanUpPreview;
@@ -93,14 +101,14 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		preference.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
 				if (preference.getChecked()) {
-					fSelectedCount++;
+					setSelectedCleanUpCount(fSelectedCount + 1);
 				} else {
-					fSelectedCount--;
+					setSelectedCleanUpCount(fSelectedCount - 1);
 				}
 			}
 		});
 		if (preference.getChecked()) {
-			fSelectedCount++;
+			setSelectedCleanUpCount(fSelectedCount + 1);
 		}
 	}
 
@@ -118,13 +126,13 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				if (master.getChecked()) {
 					for (int i= 0; i < slaves.length; i++) {
 						if (slaves[i].getChecked()) {
-							fSelectedCount++;
+							setSelectedCleanUpCount(fSelectedCount + 1);
 						}
 					}
 				} else {
 					for (int i= 0; i < slaves.length; i++) {
 						if (slaves[i].getChecked()) {
-							fSelectedCount--;
+							setSelectedCleanUpCount(fSelectedCount - 1);
 						}
 					}
 				}
@@ -136,9 +144,9 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 			slave.addObserver(new Observer() {
 				public void update(Observable o, Object arg) {
 					if (slave.getChecked()) {
-						fSelectedCount++;
+						setSelectedCleanUpCount(fSelectedCount + 1);
 					} else {
-						fSelectedCount--;
+						setSelectedCleanUpCount(fSelectedCount - 1);
 					}
 				}
 			});
@@ -147,7 +155,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		if (master.getChecked()) {
 			for (int i= 0; i < slaves.length; i++) {
 				if (slaves[i].getChecked()) {
-					fSelectedCount++;
+					setSelectedCleanUpCount(fSelectedCount + 1);
 				}
 			}
 		}

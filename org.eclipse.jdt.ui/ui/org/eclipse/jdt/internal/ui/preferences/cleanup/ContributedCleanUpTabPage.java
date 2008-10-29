@@ -18,6 +18,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.SafeRunner;
 
@@ -37,14 +38,14 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 		fContribution= contribution;
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#setWorkingValues(java.util.Map)
 	 */
 	public void setWorkingValues(Map workingValues) {
 		super.setWorkingValues(workingValues);
 
 		final CleanUpOptions options= new CleanUpOptions(workingValues) {
-			/* 
+			/*
 			 * @see org.eclipse.jdt.internal.ui.fix.CleanUpOptions#setOption(java.lang.String, java.lang.String)
 			 */
 			public void setOption(String key, String value) {
@@ -65,13 +66,13 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 		});
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#setOptions(org.eclipse.jdt.internal.ui.fix.CleanUpOptions)
 	 */
 	public void setOptions(CleanUpOptions options) {
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreatePreferences(org.eclipse.swt.widgets.Composite, int)
 	 */
 	protected void doCreatePreferences(Composite composite, int numColumns) {
@@ -96,7 +97,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 		});
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#getPreview()
 	 */
 	public String getPreview() {
@@ -113,7 +114,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 		return result[0];
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#getSelectedCleanUpCount()
 	 */
 	public int getSelectedCleanUpCount() {
@@ -124,13 +125,15 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 			}
 
 			public void run() throws Exception {
-				result[0]= fContribution.getSelectedCleanUpCount();
+				int count= fContribution.getSelectedCleanUpCount();
+				Assert.isTrue(count >= 0 && count <= getCleanUpCount());
+				result[0]= count;
 			}
 		});
 		return result[0];
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#getCleanUpCount()
 	 */
 	public int getCleanUpCount() {
