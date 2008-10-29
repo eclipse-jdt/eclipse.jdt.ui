@@ -114,7 +114,7 @@
                   The kind of clean up this configuration UI configures. Currently only the following are supported:
 &lt;ul&gt;
 	&lt;li&gt;cleanUp: a normal clean up&lt;/li&gt;
-	&lt;li&gt;saveAction: a clean up executed on save&lt;/li&gt;
+	&lt;li&gt;saveAction: a clean up executed on save in the Java editor&lt;/li&gt;
 &lt;/ul&gt;
                </documentation>
             </annotation>
@@ -143,7 +143,7 @@
                   The kind of clean up this initializer initializes. Currently only the following are supported:&lt;br&gt;
 &lt;ul&gt;
 	&lt;li&gt;cleanUp: a normal clean up&lt;/li&gt;
-	&lt;li&gt;saveAction: a clean up executed on save&lt;/li&gt;
+	&lt;li&gt;saveAction: a clean up executed on save in the Java editor&lt;/li&gt;
 &lt;/ul&gt;
                </documentation>
             </annotation>
