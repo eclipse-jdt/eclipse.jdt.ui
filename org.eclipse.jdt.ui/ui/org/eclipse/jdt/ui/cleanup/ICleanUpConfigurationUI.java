@@ -47,7 +47,7 @@ public interface ICleanUpConfigurationUI {
 	public int getCleanUpCount();
 
 	/**
-	 * Returns the number of selected clean up.
+	 * Returns the number of selected clean ups.
 	 * 
 	 * @return the number of selected clean ups at the moment
 	 */
