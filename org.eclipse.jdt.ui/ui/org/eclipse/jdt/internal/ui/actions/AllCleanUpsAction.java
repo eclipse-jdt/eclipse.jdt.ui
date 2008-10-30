@@ -73,7 +73,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 	 * {@inheritDoc}
 	 */
 	protected void performRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps) throws JavaModelException, InvocationTargetException {
-		RefactoringExecutionStarter.startCleanupRefactoring(cus, cleanUps, getShell(), showWizard(), getActionName());
+		RefactoringExecutionStarter.startCleanupRefactoring(cus, cleanUps, !showWizard(), getShell(), showWizard(), getActionName());
 	}
 
 	private boolean showWizard() {
