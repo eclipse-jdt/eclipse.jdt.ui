@@ -1118,10 +1118,11 @@ public class JavaElementLabelComposer {
 		IPath path;
 		try {
 			IClasspathEntry rawClasspathEntry= root.getRawClasspathEntry();
-			if (rawClasspathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
-				path= root.getPath();
+			IPath rawPath= rawClasspathEntry.getPath();
+			if (rawClasspathEntry.getEntryKind() != IClasspathEntry.CPE_CONTAINER && !rawPath.isAbsolute())
+				path= rawPath;
 			else
-				path= rawClasspathEntry.getPath();
+				path= root.getPath();
 		} catch (JavaModelException e) {
 			path= root.getPath();
 		}
