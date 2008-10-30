@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -186,13 +186,19 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 			CompilationUnit root= parsePartialCompilationUnit(compilationUnit);
 
 
-			final ISourceRange nameRange= input.getNameRange();
+			ISourceRange nameRange= input.getNameRange();
+			if (nameRange == null)
+				nameRange= input.getSourceRange();
 			// workaround for bug in getNameRange(): for AnnotationMembers length is negative
 			int length= nameRange.getLength();
 			if (length < 0)
 				length= 1;
 			ASTNode node2= NodeFinder.perform(root, new SourceRange(nameRange.getOffset(), length));
-			ASTNode node= ASTNodes.getParent(node2, BodyDeclaration.class);
+			ASTNode node;
+			if (node2.getNodeType() == ASTNode.INITIALIZER)
+				node= node2;
+			else
+				node= ASTNodes.getParent(node2, BodyDeclaration.class);
 			if (node == null)
 				node= ASTNodes.getParent(node2, AnnotationTypeDeclaration.class);
 			if (node == null)
