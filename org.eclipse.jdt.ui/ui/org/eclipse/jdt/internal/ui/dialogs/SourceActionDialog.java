@@ -78,8 +78,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * <li>{@link #INSERT_LAST_INDEX}</li>
 	 * <li>{@link #INSERT_POSITION_FROM_EDITOR}</li>
 	 * </ul>
+	 * <strong>Note:</strong> Since 3.4.2 the key is "InsertPosition.v2" instead of "InsertPosition"
+	 * in order to reset to the new defaults.
 	 */
-	private static final String SETTINGS_INSERT_POSITION= "InsertPosition"; //$NON-NLS-1$
+	private static final String SETTINGS_INSERT_POSITION= "InsertPosition.v2"; //$NON-NLS-1$
 	
 	// Valid values for the insert position:
 	private static final int INSERT_FIRST_INDEX= 0;
