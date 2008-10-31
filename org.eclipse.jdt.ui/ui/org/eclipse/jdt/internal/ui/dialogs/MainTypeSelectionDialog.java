@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,12 +57,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		}
 	}
 
-	/**
-	 * Constructor.
-	 */
-	public MainTypeSelectionDialog(Shell shell, IRunnableContext context,
-		IJavaSearchScope scope, int style)
-	{
+	public MainTypeSelectionDialog(Shell shell, IRunnableContext context, IJavaSearchScope scope, int style) {
 		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS),
 			new PackageRenderer());
 
