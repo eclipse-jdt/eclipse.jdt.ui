@@ -1081,13 +1081,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private final TypeInfoFilter fTypeInfoFilter;
 
-		/**
-		 * Creates instance of TypeItemsFilter
-		 *
-		 * @param scope
-		 * @param elementKind
-		 * @param extension
-		 */
+
 		public TypeItemsFilter(IJavaSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
 			/*
 			 * Horribly convoluted initialization:
@@ -1223,10 +1217,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		/**
-		 * @param text
+		 * Matches text with filter.
+		 * 
+		 * @param text the text to match with the filter
 		 * @return never returns
 		 * @throws UnsupportedOperationException always
-		 *
+		 * 
 		 * @deprecated not used
 		 */
 		protected boolean matches(String text) {
