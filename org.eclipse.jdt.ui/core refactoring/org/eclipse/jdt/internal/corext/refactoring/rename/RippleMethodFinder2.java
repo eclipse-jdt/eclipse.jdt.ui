@@ -188,7 +188,8 @@ public class RippleMethodFinder2 {
 
 		//TODO: report assertion as error status and fall back to only return fMethod
 		//check for bug 81058:
-		Assert.isTrue(fDeclarations.contains(fMethod), "Search for method declaration did not find original element"); //$NON-NLS-1$
+		if (! fDeclarations.contains(fMethod))
+			Assert.isTrue(false, "Search for method declaration did not find original element: " + fMethod.toString()); //$NON-NLS-1$
 
 		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1), owner);
 		createTypeToMethod();
