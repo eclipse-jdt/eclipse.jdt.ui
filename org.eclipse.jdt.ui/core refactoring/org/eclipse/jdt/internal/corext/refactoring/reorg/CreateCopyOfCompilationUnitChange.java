@@ -107,7 +107,6 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
 		engine.setScope(scope);
 		engine.setWorkingCopies(copies);
-		engine.searchPattern(monitor);
 		engine.setRequestor(new IRefactoringSearchRequestor() {
 			TypeOccurrenceCollector fTypeOccurrenceCollector= new TypeOccurrenceCollector(type);
 			public SearchMatch acceptSearchMatch(SearchMatch match) {
@@ -119,6 +118,8 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 				}
 			}
 		});
+		
+		engine.searchPattern(monitor);
 		final Object[] results= engine.getResults();
 		// Assert.isTrue(results.length <= 1);
 		// just 1 file or none, but inaccurate matches can play bad here (see
