@@ -212,12 +212,21 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					if (element instanceof IPackageFragmentRoot) {
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 						if (root.isArchive()) {
+							ZipFile file= null;
 							try {
-								ZipFile file= JarPackagerUtil.getArchiveFile(root.getPath());
+								file= JarPackagerUtil.getArchiveFile(root.getPath());
 								if (file != null)
 									count+= file.size();
 							} catch (CoreException e) {
 								JavaPlugin.log(e);
+							} finally {
+								try {
+									if (file != null) {
+										file.close();
+									}
+								} catch (IOException e) {
+									addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message, new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
+								}
 							}
 						} else if (root.isExternal()) {
 							try {
@@ -678,7 +687,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @param	pathInJar		the path that the file has in the JAR (i.e. project and source folder segments removed)
 	 * @param	progressMonitor			the progressMonitor to use
 	 * @return	the iterator over the corresponding classpath files for the given file
-	 * @throws CoreException
+	 * @throws CoreException if an exception occurs when looking for the files
 	 */
 	private Iterator filesOnClasspath(ITypeRoot typeRootElement, IPath pathInJar, IProgressMonitor progressMonitor) throws CoreException {
 		IFile file= (IFile) typeRootElement.getResource();

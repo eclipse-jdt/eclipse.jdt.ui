@@ -90,11 +90,11 @@ public class FatJarExportTests extends TestCase {
 	private static final Class THIS= FatJarExportTests.class;
 
 	public static Test suite() {
-		return allTests();
+		return setUpTest(new TestSuite(THIS));
 	}
 
-	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	private IJavaProject fProject;
@@ -191,6 +191,8 @@ public class FatJarExportTests extends TestCase {
 		assertNotNull(generatedArchive.getEntry("mylib/Foo.class"));
 		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner.class"));
 		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner$FooInnerInner.class"));
+		
+		generatedArchive.close();
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,27 +58,40 @@ public class FatJarManifestProvider implements IManifestProvider {
 		Manifest ownManifest= createOwn(jarPackage);
 		setManifestClasspath(ownManifest, fBuilder.getManifestClasspath());
 		if (fBuilder.isMergeManifests()) {
-			List otherManifests= new ArrayList();
-			Object[] elements= jarPackage.getElements();
-			for (int i= 0; i < elements.length; i++) {
-				Object element= elements[i];
-				if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) element).isArchive()) {
-					ZipFile zip= JarPackagerUtil.getArchiveFile(((IPackageFragmentRoot) element).getPath());
-					Enumeration entries= zip.entries();
-					while (entries.hasMoreElements()) {
-						ZipEntry entry= (ZipEntry) entries.nextElement();
-						if (entry.getName().equalsIgnoreCase("META-INF/MANIFEST.MF")) { //$NON-NLS-1$
-							try {
-								Manifest otherManifest= new Manifest(zip.getInputStream(entry));
-								otherManifests.add(otherManifest);
-							} catch (IOException e) {
-								JavaPlugin.log(e);
+			List openZips= new ArrayList();
+			try {
+				List otherManifests= new ArrayList();
+				Object[] elements= jarPackage.getElements();
+				for (int i= 0; i < elements.length; i++) {
+					Object element= elements[i];
+					if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) element).isArchive()) {
+						ZipFile zip= JarPackagerUtil.getArchiveFile(((IPackageFragmentRoot) element).getPath());
+						openZips.add(zip);
+						Enumeration entries= zip.entries();
+						while (entries.hasMoreElements()) {
+							ZipEntry entry= (ZipEntry) entries.nextElement();
+							if (entry.getName().equalsIgnoreCase("META-INF/MANIFEST.MF")) { //$NON-NLS-1$
+								try {
+									Manifest otherManifest= new Manifest(zip.getInputStream(entry));
+									otherManifests.add(otherManifest);
+								} catch (IOException e) {
+									JavaPlugin.log(e);
+								}
 							}
 						}
 					}
 				}
+				result= merge(ownManifest, otherManifests);
+			} finally {
+				for (Iterator iter= openZips.iterator(); iter.hasNext(); ) {
+					ZipFile file= (ZipFile) iter.next();
+					try {
+						file.close();
+					} catch (IOException e) {
+						JavaPlugin.log(e);
+					}
+				}
 			}
-			result= merge(ownManifest, otherManifests);
 		} else {
 			result= ownManifest;
 		}

@@ -273,14 +273,14 @@ public final class JarPackagerUtil {
 	}
 
 	/**
-	 * The archive file at the given location
-	 *
-	 * @param location
-	 *        the location of the archive file
-	 * @return the archive or null if it could not be retrieved
-	 * @throws CoreException
-	 *         if the archive could not be read
-	 *
+	 * Opens the archive file at the given location.<br>
+	 * <em>Note: It is the caller's responsibility to close the returned
+	 * {@link ZipFile}.</em>
+	 * 
+	 * @param location the location of the archive file
+	 * @return the archive or <code>null</code> if it could not be retrieved
+	 * @throws CoreException if the archive could not be read
+	 * 
 	 * @since 3.4
 	 */
 	public static ZipFile getArchiveFile(IPath location) throws CoreException {

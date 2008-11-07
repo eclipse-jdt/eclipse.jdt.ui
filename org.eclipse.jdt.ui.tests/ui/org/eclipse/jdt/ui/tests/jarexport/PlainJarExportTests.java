@@ -105,6 +105,7 @@ public class PlainJarExportTests extends TestCase {
 
 		ZipFile jar= createArchive(data);
 		ArrayList entries= getSortedEntries(jar);
+		jar.close();
 		List expected= Arrays.asList(new String[] {
 				"META-INF/MANIFEST.MF\n",
 				"org/eclipse/jdt/ui/test/Main$1.class\n",
@@ -122,6 +123,7 @@ public class PlainJarExportTests extends TestCase {
 
 		ZipFile jar= createArchive(data);
 		ArrayList entries= getSortedEntries(jar);
+		jar.close();
 		List expected= Arrays.asList(new String[] {
 				"META-INF/MANIFEST.MF\n",
 				"org/eclipse/jdt/ui/test/Main$1.class\n",
@@ -145,6 +147,7 @@ public class PlainJarExportTests extends TestCase {
 
 		ZipFile jar= createArchive(data);
 		ArrayList entries= getSortedEntries(jar);
+		jar.close();
 		List expected= Arrays.asList(new String[] {
 				"META-INF/MANIFEST.MF\n",
 				"org/eclipse/jdt/ui/test/Main$1.class\n",
