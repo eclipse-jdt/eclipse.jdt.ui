@@ -140,7 +140,7 @@ public class MoveAction extends SelectionDispatchAction{
 				return;
 
 			if (fReorgMoveAction.isEnabled())
-				fReorgMoveAction.run();
+				fReorgMoveAction.run(selection);
 
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
