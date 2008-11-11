@@ -106,7 +106,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		if (fWorkingSet == null) {
 			workingSets= factory.queryWorkingSets();
 			if (workingSets == null)
-				return null;
+				return super.createQuery(element); // in workspace
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
 		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, JavaSearchScopeFactory.NO_PROJ);
