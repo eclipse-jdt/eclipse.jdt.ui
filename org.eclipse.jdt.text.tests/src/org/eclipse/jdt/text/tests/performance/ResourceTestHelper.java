@@ -28,12 +28,12 @@ import junit.framework.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -213,10 +213,10 @@ public class ResourceTestHelper {
 	}
 
 	public static boolean setAutoBuilding(boolean value) {
-		Preferences preferences= ResourcesPlugin.getPlugin().getPluginPreferences();
-		boolean oldValue= preferences.getBoolean(ResourcesPlugin.PREF_AUTO_BUILDING);
+		IWorkspaceDescription workspaceDescription= ResourcesPlugin.getWorkspace().getDescription();
+		boolean oldValue= workspaceDescription.isAutoBuilding();
 		if (value != oldValue)
-			preferences.setValue(ResourcesPlugin.PREF_AUTO_BUILDING, value);
+			workspaceDescription.setAutoBuilding(value);
 		return oldValue;
 	}
 

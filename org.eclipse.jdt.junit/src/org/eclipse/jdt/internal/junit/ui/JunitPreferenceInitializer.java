@@ -12,8 +12,9 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * Default preference value initialization for the
@@ -23,8 +24,10 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	/** {@inheritDoc} */
 	public void initializeDefaultPreferences() {
-		Preferences prefs= JUnitPlugin.getDefault().getPluginPreferences();
+		IPreferenceStore prefs= JUnitPlugin.getDefault().getPreferenceStore();
+
 		prefs.setDefault(JUnitPreferencesConstants.DO_FILTER_STACK, true);
+
 		prefs.setDefault(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false);
 		prefs.setDefault(JUnitPreferencesConstants.ENABLE_ASSERTIONS, false);
 
