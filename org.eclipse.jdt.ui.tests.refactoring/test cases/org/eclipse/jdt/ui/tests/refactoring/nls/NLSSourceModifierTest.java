@@ -21,8 +21,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-import org.eclipse.core.runtime.Preferences;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Document;
@@ -72,6 +70,11 @@ public class NLSSourceModifierTest extends TestCase {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		options.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		options.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		options.put(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+
 		JavaCore.setOptions(options);
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -79,12 +82,6 @@ public class NLSSourceModifierTest extends TestCase {
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
-
-		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
         javaProject = ProjectTestSetup.getProject();
         fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");

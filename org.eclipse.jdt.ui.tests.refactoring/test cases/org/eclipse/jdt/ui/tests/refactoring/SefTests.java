@@ -13,11 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Hashtable;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -89,11 +90,12 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 
 	private void initializePreferences() {
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+		Hashtable options= new Hashtable();
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		options.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		options.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		options.put(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+		JavaCore.setOptions(options);
 	}
 
 	private static IField getField(ICompilationUnit unit, String fieldName) throws Exception {
