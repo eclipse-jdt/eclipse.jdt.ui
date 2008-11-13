@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -173,7 +173,14 @@ public class CompilationUnitRewrite {
 		return result;
 	}
 
-
+	/**
+	 * Creates a compilation unit change based on the events recorded by this compilation unit
+	 * rewrite.
+	 * 
+	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
+	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
+	 * @throws IllegalArgumentException when the AST rewrite encounters problems
+	 */
 	public CompilationUnitChange createChange() throws CoreException {
 		return createChange(true, null);
 	}
