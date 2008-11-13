@@ -326,7 +326,6 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				return 0; // don't sort
 			}
 		});
-		dialog.setMultipleSelection(false);
 		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title);
 		dialog.setMessage(PropertiesFileEditorMessages.OpenAction_SelectionDialog_message);
 		dialog.setElements(keyReferences);
