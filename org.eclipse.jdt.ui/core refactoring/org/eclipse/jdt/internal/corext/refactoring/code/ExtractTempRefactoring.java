@@ -89,8 +89,8 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
 
 import org.eclipse.jdt.internal.corext.Corext;
@@ -713,7 +713,6 @@ public class ExtractTempRefactoring extends Refactoring {
 			parent= parent.getParent();
 			locationInParent= target.getLocationInParent();
 		}
-		// assert (locationInParent == Block.STATEMENTS_PROPERTY || locationInParent == SwitchStatement.STATEMENTS_PROPERTY);
 		ListRewrite listRewrite= rewrite.getListRewrite(parent, (ChildListPropertyDescriptor)locationInParent);
 		listRewrite.insertBefore(declaration, target, groupDescription);
 	}
