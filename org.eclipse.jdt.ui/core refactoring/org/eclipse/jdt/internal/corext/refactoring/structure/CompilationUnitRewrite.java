@@ -223,8 +223,8 @@ public class CompilationUnitRewrite {
 	 * @param cuChange existing CompilationUnitChange with a MultiTextEdit root or no root at all.
 	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
 	 * @param monitor the progress monitor or <code>null</code>
-	 * @return a change combining the changes of this rewrite and the given rewrite.
-	 * @throws CoreException
+	 * @return a change combining the changes of this rewrite and the given rewrite, or <code>null</code> for an empty change
+	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 */
 	public CompilationUnitChange attachChange(CompilationUnitChange cuChange, boolean generateGroups, IProgressMonitor monitor) throws CoreException {
 		try {
