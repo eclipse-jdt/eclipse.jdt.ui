@@ -312,7 +312,7 @@ public class CompletionProposalLabelProvider {
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
 
-		return nameBuffer;
+		return Strings.markLTR(nameBuffer, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	StyledString createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
@@ -406,7 +406,7 @@ public class CompletionProposalLabelProvider {
 			buf.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
 			buf.append(new String(fullName, 0, qIndex - 1), StyledString.QUALIFIER_STYLER);
 		}
-		return buf;
+		return Strings.markLTR(buf, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	StyledString createJavadocTypeProposalLabel(char[] fullName) {
@@ -421,7 +421,7 @@ public class CompletionProposalLabelProvider {
 			buf.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
 			buf.append(new String(fullName, 0, qIndex - 1), StyledString.QUALIFIER_STYLER);
 		}
-		return buf;
+		return Strings.markLTR(buf, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	private int findSimpleNameStart(char[] array) {
@@ -445,7 +445,7 @@ public class CompletionProposalLabelProvider {
 			buf.append(VAR_TYPE_SEPARATOR);
 			buf.append(typeName);
 		}
-		return Strings.markLTR(buf);
+		return Strings.markLTR(buf, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	/**
@@ -487,11 +487,11 @@ public class CompletionProposalLabelProvider {
 
 	StyledString createPackageProposalLabel(CompletionProposal proposal) {
 		Assert.isTrue(proposal.getKind() == CompletionProposal.PACKAGE_REF);
-		return new StyledString(String.valueOf(proposal.getDeclarationSignature()));
+		return Strings.markLTR(new StyledString(String.valueOf(proposal.getDeclarationSignature())), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	StyledString createSimpleLabel(CompletionProposal proposal) {
-		return new StyledString(String.valueOf(proposal.getCompletion()));
+		return Strings.markLTR(new StyledString(String.valueOf(proposal.getCompletion())), JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	StyledString createAnonymousTypeLabel(CompletionProposal proposal) {
@@ -505,7 +505,7 @@ public class CompletionProposalLabelProvider {
 		buffer.append("  "); //$NON-NLS-1$
 		buffer.append(JavaTextMessages.ResultCollector_anonymous_type);
 
-		return buffer;
+		return Strings.markLTR(buffer, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
 	/**
