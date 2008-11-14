@@ -347,7 +347,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
 	public String[] guessFieldNames() {
-		String rawTempName= StubUtility.removePrefixAndSuffixForVariable(fCu.getJavaProject(), fTempDeclarationNode.resolveBinding());
+		String rawTempName= StubUtility.getBaseName(fTempDeclarationNode.resolveBinding(), fCu.getJavaProject());
 		String[] excludedNames= getNamesOfFieldsInDeclaringType();
 		int dim= ASTNodes.getDimensions(fTempDeclarationNode);
 		return StubUtility.getFieldNameSuggestions(fCu.getJavaProject(), rawTempName, dim, getModifiers(), excludedNames);

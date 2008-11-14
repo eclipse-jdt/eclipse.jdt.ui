@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT, JavaCore.IGNORE);
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		options.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
 		JavaCore.setOptions(options);
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -1791,7 +1793,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class X {\n");
-		buf.append("    public static void xoo(float f, Object o) {\n");
+		buf.append("    public static void xoo(float x, Object o) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
@@ -1975,7 +1977,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.Map;\n");
 		buf.append("\n");
 		buf.append("class E {\n");
-		buf.append("    void foo(@Deprecated final Map map){}\n");
+		buf.append("    void foo(@Deprecated final Map emptyMap){}\n");
 		buf.append("    {foo(Collections.EMPTY_MAP);}\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
@@ -2122,7 +2124,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void goo(String string) {\n");
+		buf.append("    public void goo(String count) {\n");
 		buf.append("    }\n");
 		buf.append("    public void foo(X<String> x, int y) {\n");
 		buf.append("        goo(x.count);\n");
@@ -3051,11 +3053,11 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("public class X {\n");
 		buf.append("    /**\n");
-		buf.append("     * @param set \n");
+		buf.append("     * @param emptySet \n");
 		buf.append("     * @param i The int value\n");
 		buf.append("     * @param k \n");
 		buf.append("     */\n");
-		buf.append("    public void xoo(Set set, int i, int k) {\n");
+		buf.append("    public void xoo(Set emptySet, int i, int k) {\n");
 		buf.append("       int j= 0;\n");
 		buf.append("    }\n");
 		buf.append("}\n");

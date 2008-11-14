@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -152,7 +151,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	/**
 	 * Creates a new self encapsulate field refactoring.
 	 * @param field the field, or <code>null</code> if invoked by scripting
-	 * @throws JavaModelException
+	 * @throws JavaModelException if initialization failed
 	 */
 	public SelfEncapsulateFieldRefactoring(IField field) throws JavaModelException {
 		fEncapsulateDeclaringClass= true;
@@ -165,7 +164,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private void initialize(IField field) throws JavaModelException {
 		fGetterName= GetterSetterUtil.getGetterName(field, null);
 		fSetterName= GetterSetterUtil.getSetterName(field, null);
-		fArgName= NamingConventions.removePrefixAndSuffixForFieldName(field.getJavaProject(), field.getElementName(), field.getFlags());
+		fArgName= StubUtility.getBaseName(field);
 		checkArgName();
 	}
 
@@ -651,7 +650,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			String string= CodeGeneration.getSetterComment(
 				fField.getCompilationUnit() , getTypeName(field.getParent()), fSetterName,
 				fField.getElementName(), ASTNodes.asString(type), fArgName,
-				NamingConventions.removePrefixAndSuffixForFieldName(fField.getJavaProject(), fField.getElementName(), fField.getFlags()),
+				StubUtility.getBaseName(fField),
 				lineDelimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc)fRewriter.createStringPlaceholder(string, ASTNode.JAVADOC);
@@ -698,7 +697,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			String string= CodeGeneration.getGetterComment(
 				fField.getCompilationUnit() , getTypeName(field.getParent()), fGetterName,
 				fField.getElementName(), ASTNodes.asString(type),
-				NamingConventions.removePrefixAndSuffixForFieldName(fField.getJavaProject(), fField.getElementName(), fField.getFlags()),
+				StubUtility.getBaseName(fField),
 				lineDelimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc)fRewriter.createStringPlaceholder(string, ASTNode.JAVADOC);

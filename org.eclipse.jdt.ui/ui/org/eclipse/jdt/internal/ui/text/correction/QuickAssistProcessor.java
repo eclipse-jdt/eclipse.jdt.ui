@@ -34,6 +34,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -653,7 +654,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		SimpleType bufferType= ast.newSimpleType(ast.newName(bufferOrBuilderName));
 		ClassInstanceCreation newBufferExpression= ast.newClassInstanceCreation();
 
-		String[] newBufferNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), bufferOrBuilderName, 0, fExcludedVariableNames, true);
+		String[] newBufferNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), bufferOrBuilderName, 0, fExcludedVariableNames, true);
 		String newBufferName= newBufferNames[0];
 
 		SimpleName bufferNameDeclaration= ast.newSimpleName(newBufferName);

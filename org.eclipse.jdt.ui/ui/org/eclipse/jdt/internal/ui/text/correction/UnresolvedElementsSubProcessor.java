@@ -266,13 +266,13 @@ public class UnresolvedElementsSubProcessor {
 		int type= bodyDeclaration.getNodeType();
 		if (type == ASTNode.METHOD_DECLARATION) {
 			int relevance= StubUtility.hasParameterName(cu.getJavaProject(), name) ? 8 : 5;
-			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createparameter_description, BasicElementLabels.getJavaElementName(simpleName.getIdentifier()));
+			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createparameter_description, BasicElementLabels.getJavaElementName(name));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.PARAM, simpleName, null, relevance, image));
 		}
 		if (type == ASTNode.INITIALIZER || type == ASTNode.METHOD_DECLARATION && !ASTResolving.isInsideConstructorInvocation((MethodDeclaration) bodyDeclaration, node)) {
 			int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
-			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createlocal_description, BasicElementLabels.getJavaElementName(simpleName.getIdentifier()));
+			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createlocal_description, BasicElementLabels.getJavaElementName(name));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
 		}
@@ -356,7 +356,7 @@ public class UnresolvedElementsSubProcessor {
 					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
 					image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 				}
-				int constRelevance= StubUtility.hasConstantName(name) ? 9 : 4;
+				int constRelevance= StubUtility.hasConstantName(targetCU.getJavaProject(), name) ? 9 : 4;
 				proposals.add(new NewVariableCorrectionProposal(label, targetCU, NewVariableCorrectionProposal.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, image));
 			}
 		}
@@ -1195,7 +1195,7 @@ public class UnresolvedElementsSubProcessor {
 			for (int i= diff - 1; i >= 0; i--) {
 				int idx= indexSkipped[i];
 				Expression arg= (Expression) arguments.get(idx);
-				String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
+				String name= getExpressionBaseName(arg);
 				ITypeBinding newType= Bindings.normalizeTypeBinding(argTypes[idx]);
 				if (newType == null) {
 					newType= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
@@ -1379,7 +1379,7 @@ public class UnresolvedElementsSubProcessor {
 		for (int i= 0; i < nDiffs; i++) {
 			int diffIndex= indexOfDiff[i];
 			Expression arg= (Expression) arguments.get(diffIndex);
-			String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
+			String name= getExpressionBaseName(arg);
 			ITypeBinding argType= argTypes[diffIndex];
 			if (argType.isWildcardType()) {
 				argType= ASTResolving.normalizeWildcardType(argType, true, arg.getAST());
@@ -1390,6 +1390,15 @@ public class UnresolvedElementsSubProcessor {
 			changeDesc[diffIndex]= new EditDescription(argType, name);
 		}
 		return changeDesc;
+	}
+
+	private static String getExpressionBaseName(Expression expr) {
+		IBinding argBinding= Bindings.resolveExpressionBinding(expr, true);
+		if (argBinding instanceof IVariableBinding)
+			return StubUtility.getBaseName((IVariableBinding)argBinding);
+		if (expr instanceof SimpleName)
+			return ((SimpleName) expr).getIdentifier();
+		return null;
 	}
 
 	private static ITypeBinding[] getArgumentTypes(List arguments) {

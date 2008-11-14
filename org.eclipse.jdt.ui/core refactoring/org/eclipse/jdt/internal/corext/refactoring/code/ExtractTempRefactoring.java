@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -899,7 +900,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= expression.resolveTypeBinding();
-					fGuessedTempNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
+					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
 				}
 			} catch (JavaModelException e) {
 			}

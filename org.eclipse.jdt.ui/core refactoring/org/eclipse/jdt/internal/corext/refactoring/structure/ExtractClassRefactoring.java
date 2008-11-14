@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -277,7 +278,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			fDescriptor.setClassName(type.getElementName() + "Data"); //$NON-NLS-1$
 		}
 		if (fDescriptor.getFieldName() == null) {
-			fDescriptor.setFieldName(StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, type.getJavaProject(), "data", 0, null, true)[0]); //$NON-NLS-1$
+			fDescriptor.setFieldName(StubUtility.getVariableNameSuggestions(NamingConventions.VK_INSTANCE_FIELD, type.getJavaProject(), "data", 0, null, true)[0]); //$NON-NLS-1$
 		}
 		if (fDescriptor.getFields() == null) {
 			try {

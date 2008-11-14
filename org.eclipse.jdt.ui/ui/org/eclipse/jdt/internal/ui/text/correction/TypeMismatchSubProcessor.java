@@ -36,12 +36,9 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -204,25 +201,7 @@ public class TypeMismatchSubProcessor {
 	}
 
 	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection proposals) throws JavaModelException {
-		IBinding callerBinding= null;
-		switch (nodeToCast.getNodeType()) {
-			case ASTNode.METHOD_INVOCATION:
-				callerBinding= ((MethodInvocation) nodeToCast).resolveMethodBinding();
-				break;
-			case ASTNode.SUPER_METHOD_INVOCATION:
-				callerBinding= ((SuperMethodInvocation) nodeToCast).resolveMethodBinding();
-				break;
-			case ASTNode.FIELD_ACCESS:
-				callerBinding= ((FieldAccess) nodeToCast).resolveFieldBinding();
-				break;
-			case ASTNode.SUPER_FIELD_ACCESS:
-				callerBinding= ((SuperFieldAccess) nodeToCast).resolveFieldBinding();
-				break;
-			case ASTNode.SIMPLE_NAME:
-			case ASTNode.QUALIFIED_NAME:
-				callerBinding= ((Name) nodeToCast).resolveBinding();
-				break;
-		}
+		IBinding callerBinding= Bindings.resolveExpressionBinding(nodeToCast, false);
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();

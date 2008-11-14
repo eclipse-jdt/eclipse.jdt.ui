@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -211,7 +210,7 @@ public final class StubUtility2 {
 			var.setType(imports.addImport(variableBindings[i].getType(), ast));
 			excluded= new String[list.size()];
 			list.toArray(excluded);
-			param= getParameterName(unit, variableBindings[i], excluded);
+			param= suggestParameterName(unit, variableBindings[i], excluded);
 			list.add(param);
 			var.setName(ast.newSimpleName(param));
 			parameters.add(var);
@@ -221,7 +220,7 @@ public final class StubUtility2 {
 		for (int i= 0; i < variableBindings.length; i++) {
 			excluded= new String[list.size()];
 			list.toArray(excluded);
-			final String paramName= getParameterName(unit, variableBindings[i], excluded);
+			final String paramName= suggestParameterName(unit, variableBindings[i], excluded);
 			list.add(paramName);
 			final String fieldName= variableBindings[i].getName();
 			Expression expression= null;
@@ -663,8 +662,8 @@ public final class StubUtility2 {
 		}
 	}
 
-	private static String getParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
-		final String name= NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
+	private static String suggestParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
+		String name= StubUtility.getBaseName(binding);
 		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
 	}
 

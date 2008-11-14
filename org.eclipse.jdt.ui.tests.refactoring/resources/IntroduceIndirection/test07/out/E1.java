@@ -13,10 +13,10 @@ public class E1 {
 	}
 
 	/**
-	 * @param inner1
+	 * @param e1Inner1
 	 */
-	public static void bar(E1Inner1 inner1) {
-		inner1.foo();
+	public static void bar(E1Inner1 e1Inner1) {
+		e1Inner1.foo();
 	}
 
 	public void foo() {

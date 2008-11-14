@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -456,7 +457,7 @@ public class JavaContext extends CompilationUnitContext {
 
 		IJavaProject project= getJavaProject();
 		if (project != null)
-			return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, type, dim, Arrays.asList(excludes), true);
+			return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, type, dim, Arrays.asList(excludes), true);
 
 		// fallback if we lack proper context: roll-our own lowercasing
 		return new String[] {Signature.getSimpleName(type).toLowerCase()};
@@ -585,7 +586,7 @@ public class JavaContext extends CompilationUnitContext {
 	 * @param type the type to inspect
 	 * @param name the name of the method to search for
 	 * @return true if has such a method
-	 * @throws JavaModelException
+	 * @throws JavaModelException if methods could not be retrieved
 	 * @since 3.4
 	 */
 	private boolean hasMethod(IType type, String name) throws JavaModelException {

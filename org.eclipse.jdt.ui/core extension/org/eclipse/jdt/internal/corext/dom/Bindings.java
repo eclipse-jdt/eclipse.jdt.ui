@@ -31,8 +31,12 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -41,12 +45,19 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class Bindings {
@@ -1274,6 +1285,63 @@ public class Bindings {
 
 		else
 			return null;
+	}
+
+	/**
+	 * Resolve the binding (<em>not</em> the type binding) for the expression or a nested expression
+	 * (e.g. nested in parentheses, cast, ...).
+	 * 
+	 * @param expression an expression node
+	 * @param goIntoCast iff <code>true</code>, go into a CastExpression's expression to resolve
+	 * @return the expression binding, or <code>null</code> if the expression has no binding or the
+	 *         binding could not be resolved
+	 *         
+	 * @see StubUtility#getVariableNameSuggestions(int, IJavaProject, ITypeBinding, Expression, java.util.Collection)
+	 * @since 3.5
+	 */
+	public static IBinding resolveExpressionBinding(Expression expression, boolean goIntoCast) {
+		//TODO: search for callers of resolve*Binding() methods and replace with call to this method
+		
+		// similar to StubUtility#getVariableNameSuggestions(int, IJavaProject, ITypeBinding, Expression, Collection)
+		switch (expression.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+			case ASTNode.QUALIFIED_NAME:
+				return ((Name) expression).resolveBinding();
+				
+			case ASTNode.FIELD_ACCESS:
+				return ((FieldAccess) expression).resolveFieldBinding();
+			case ASTNode.SUPER_FIELD_ACCESS:
+				return ((SuperFieldAccess) expression).resolveFieldBinding();
+				
+			case ASTNode.METHOD_INVOCATION:
+				return ((MethodInvocation) expression).resolveMethodBinding();
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				return ((SuperMethodInvocation) expression).resolveMethodBinding();
+			case ASTNode.CLASS_INSTANCE_CREATION:
+				return ((ClassInstanceCreation) expression).resolveConstructorBinding();
+				
+			case ASTNode.MARKER_ANNOTATION:
+			case ASTNode.SINGLE_MEMBER_ANNOTATION:
+			case ASTNode.NORMAL_ANNOTATION:
+				return ((Annotation) expression).resolveAnnotationBinding();
+				
+			case ASTNode.ARRAY_ACCESS:
+				return resolveExpressionBinding(((ArrayAccess) expression).getArray(), goIntoCast);
+			case ASTNode.CAST_EXPRESSION:
+				if (goIntoCast) {
+					return resolveExpressionBinding(((CastExpression) expression).getExpression(), true);
+				} else {
+					return null;
+				}
+			case ASTNode.PARENTHESIZED_EXPRESSION:
+				return resolveExpressionBinding(((ParenthesizedExpression) expression).getExpression(), goIntoCast);
+			case ASTNode.PREFIX_EXPRESSION:
+				return resolveExpressionBinding(((PrefixExpression) expression).getOperand(), goIntoCast);
+			case ASTNode.POSTFIX_EXPRESSION:
+				return resolveExpressionBinding(((PostfixExpression) expression).getOperand(), goIntoCast);
+			default:
+				return null;
+		}
 	}
 
 }

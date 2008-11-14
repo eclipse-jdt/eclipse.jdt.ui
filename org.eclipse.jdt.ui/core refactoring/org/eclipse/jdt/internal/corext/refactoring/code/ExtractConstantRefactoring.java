@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -237,7 +238,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= expression.resolveTypeBinding();
-					fGuessedConstNames= StubUtility.getVariableNameSuggestions(StubUtility.CONSTANT_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
+					fGuessedConstNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_CONSTANT_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
 				}
 			} catch (JavaModelException e) {
 			}

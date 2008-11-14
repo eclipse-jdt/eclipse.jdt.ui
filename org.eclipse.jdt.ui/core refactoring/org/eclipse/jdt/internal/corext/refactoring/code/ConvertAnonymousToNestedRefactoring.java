@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -660,8 +661,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		IVariableBinding[] bindings= getUsedLocalVariables();
 		ArrayList fieldNames= new ArrayList();
 		for (int i= 0; i < bindings.length; i++) {
-			String name= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
-			String[] fieldNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, project, name, 0, fieldNames, true);
+			String name= StubUtility.getBaseName(bindings[i], project);
+			String[] fieldNameProposals= StubUtility.getVariableNameSuggestions(NamingConventions.VK_INSTANCE_FIELD, project, name, 0, fieldNames, true);
 			fieldNames.add(fieldNameProposals[0]);
 
 
@@ -888,8 +889,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         // add parameters for all outer variables used
         boolean useThisAccess= useThisForFieldAccess();
         for (int i= 0; i < bindings.length; i++) {
-        	String baseName= StubUtility.removePrefixAndSuffixForVariable(project, bindings[i]);
-        	String[] paramNameProposals= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, baseName, 0, newParameterNames, true);
+        	String baseName= StubUtility.getBaseName(bindings[i], project);
+        	String[] paramNameProposals= StubUtility.getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, baseName, 0, newParameterNames, true);
         	String paramName= paramNameProposals[0];
 
         	SingleVariableDeclaration param= newParameterDeclaration(ast, importRewrite, paramName, bindings[i].getType());

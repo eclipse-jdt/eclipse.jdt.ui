@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,7 +109,7 @@ public class GetterSetterUtil {
 	 * @param addComments If <code>true</code>, comments will be added.
 	 * @param flags The flags signaling visibility, if static, synchronized or final
 	 * @return Returns the generated stub.
-	 * @throws CoreException
+	 * @throws CoreException when stub creation failed
 	 */
 	public static String getSetterStub(IField field, String setterName, boolean addComments, int flags) throws CoreException {
 
@@ -121,7 +121,7 @@ public class GetterSetterUtil {
 
 		IJavaProject project= field.getJavaProject();
 
-		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
+		String accessorName= StubUtility.getBaseName(field);
 		String argname= StubUtility.suggestArgumentName(project, accessorName, EMPTY);
 
 		boolean isStatic= Flags.isStatic(flags);
@@ -179,7 +179,7 @@ public class GetterSetterUtil {
 	 * @param addComments If <code>true</code>, comments will be added.
 	 * @param flags The flags signaling visibility, if static, synchronized or final
 	 * @return Returns the generated stub.
-	 * @throws CoreException
+	 * @throws CoreException when stub creation failed
 	 */
 	public static String getGetterStub(IField field, String getterName, boolean addComments, int flags) throws CoreException {
 		String fieldName= field.getElementName();
@@ -190,7 +190,7 @@ public class GetterSetterUtil {
 		boolean isFinal= Flags.isFinal(flags);
 
 		String typeName= Signature.toString(field.getTypeSignature());
-		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(field.getJavaProject(), fieldName, field.getFlags());
+		String accessorName= StubUtility.getBaseName(field);
 
 		String lineDelim= "\n"; // Use default line delimiter, as generated stub has to be formatted anyway //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();

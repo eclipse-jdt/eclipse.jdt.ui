@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.core.runtime.Preferences;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
@@ -27,6 +25,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 
 public class NameProposerTest extends TestCase {
@@ -79,13 +78,16 @@ public class NameProposerTest extends TestCase {
 		buf.append("  boolean fBlue;\n");
 		buf.append("  boolean modified;\n");
 		buf.append("  boolean isTouched;\n");
+		buf.append("\n");
+		buf.append("  static final int K_CONST;\n");
+		buf.append("  static final boolean MY_CONST_ANT;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		IType type= cu.getType("C");
 
-		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+		fJProject1.setOption(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		fJProject1.setOption(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+		fJProject1.setOption(JavaCore.CODEASSIST_STATIC_FINAL_FIELD_PREFIXES, "K_");
 
 		String[] excluded= new String[0];
 		IField f1= type.getField("fCount");
@@ -94,6 +96,8 @@ public class NameProposerTest extends TestCase {
 		IField f4= type.getField("fBlue");
 		IField f5= type.getField("modified");
 		IField f6= type.getField("isTouched");
+		IField f7= type.getField("K_CONST");
+		IField f8= type.getField("MY_CONST_ANT");
 
 		assertEqualString("setCount", GetterSetterUtil.getSetterName(f1, excluded));
 		assertEqualString("getCount", GetterSetterUtil.getGetterName(f1, excluded));
@@ -108,6 +112,14 @@ public class NameProposerTest extends TestCase {
 		assertEqualString("isModified", GetterSetterUtil.getGetterName(f5, excluded));
 		assertEqualString("setTouched", GetterSetterUtil.getSetterName(f6, excluded));
 		assertEqualString("isTouched", GetterSetterUtil.getGetterName(f6, excluded));
+		
+		// disabled because NamingConventions#suggestSetter/GetterName(..) don't funnel through getBaseName(..)
+		if (! StubUtility.NAMING_CONVENTIONS_BUGS) {
+			assertEqualString("setConst", GetterSetterUtil.getSetterName(f7, excluded));
+			assertEqualString("getConst", GetterSetterUtil.getGetterName(f7, excluded));
+			assertEqualString("setMyConstAnt", GetterSetterUtil.getSetterName(f8, excluded));
+			assertEqualString("isMyConstAnt", GetterSetterUtil.getGetterName(f8, excluded));
+		}
 
 	}
 

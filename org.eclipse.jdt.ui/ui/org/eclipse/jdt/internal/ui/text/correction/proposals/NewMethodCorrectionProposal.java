@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -252,7 +253,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 
 	private String evaluateParameterName(List takenNames, Expression argNode, Type type, String key) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		String[] names= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, type, argNode, takenNames);
+		String[] names= StubUtility.getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, type, argNode, takenNames);
 		for (int i= 0; i < names.length; i++) {
 			addLinkedPositionProposal(key, names[i], null);
 		}

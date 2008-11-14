@@ -193,15 +193,15 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 
 	public void test5() throws Exception {
-		helper1(11, 20, 11, 26, true, true, "CONSTANT", "RG");
+		helper1(11, 20, 11, 26, true, true, "CONSTANT", "R_G");
 	}
 
 	public void test6() throws Exception {
-		helper1(13, 20, 13, 35, true, true, "CONSTANT", "RF");
+		helper1(13, 20, 13, 35, true, true, "CONSTANT", "R_F");
 	}
 
 	public void test7() throws Exception {
-		helper1(12, 20, 12, 28, true, true, "CONSTANT", "RG");
+		helper1(12, 20, 12, 28, true, true, "CONSTANT", "R_G");
 	}
 
 	public void test8() throws Exception {
@@ -265,7 +265,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 
 	public void test23() throws Exception {
-		helper1(14, 12, 14, 15, true, false, "COLOR");
+		helper1(14, 12, 14, 15, true, false, "COLOR", "RED2");
 	}
 
 	public void test24() throws Exception {

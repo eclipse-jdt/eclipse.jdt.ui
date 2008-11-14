@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -1371,7 +1372,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding, List excluded) {
-		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), binding, null, excluded);
+		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), binding, null, excluded);
 	}
 
 	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {

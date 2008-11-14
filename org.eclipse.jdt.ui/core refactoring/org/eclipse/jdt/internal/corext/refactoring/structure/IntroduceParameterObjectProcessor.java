@@ -477,9 +477,9 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 
 	public String getFieldName(ParameterInfo element) {
 		IJavaProject javaProject= getCompilationUnit().getJavaProject();
-		String stripped= NamingConventions.removePrefixAndSuffixForArgumentName(javaProject, element.getOldName());
+		String stripped= NamingConventions.getBaseName(NamingConventions.VK_PARAMETER, element.getOldName(), javaProject);
 		int dim= element.getNewTypeBinding() != null ? element.getNewTypeBinding().getDimensions() : 0;
-		return StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, javaProject, stripped, dim, null, true)[0];
+		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_INSTANCE_FIELD, javaProject, stripped, dim, null, true)[0];
 	}
 
 	public Change[] getAllChanges() {

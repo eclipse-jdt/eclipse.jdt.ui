@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -314,12 +315,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, project, binding, expression, getUsedVariableNames());
+		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, binding, expression, getUsedVariableNames());
 	}
 
 	private String[] suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		int varKind= Modifier.isStatic(modifiers) ? StubUtility.STATIC_FIELD : StubUtility.INSTANCE_FIELD;
+		int varKind= Modifier.isStatic(modifiers) ? NamingConventions.VK_STATIC_FIELD : NamingConventions.VK_INSTANCE_FIELD;
 		return StubUtility.getVariableNameSuggestions(varKind, project, binding, expression, getUsedVariableNames());
 	}
 

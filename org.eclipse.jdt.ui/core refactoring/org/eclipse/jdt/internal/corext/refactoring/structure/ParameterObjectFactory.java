@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -172,7 +172,7 @@ public class ParameterObjectFactory {
 	 * @param cuRewrite the {@link CompilationUnitRewrite} that will be used for creation
 	 * @param listener the creation listener or null
 	 * @return the new declaration
-	 * @throws CoreException
+	 * @throws CoreException if creation failed
 	 */
 	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite, CreationListener listener) throws CoreException {
 		AST ast= cuRewrite.getAST();
@@ -279,8 +279,8 @@ public class ParameterObjectFactory {
 
 	private String getParameterName(ParameterInfo pi, IJavaProject project, ArrayList usedParameter) {
 		String fieldName= pi.getNewName();
-		String strippedName= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, 0);
-		String[] suggestions= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, strippedName, 0, usedParameter, true);
+		String strippedName= NamingConventions.getBaseName(NamingConventions.VK_INSTANCE_FIELD, fieldName, project);
+		String[] suggestions= StubUtility.getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, strippedName, 0, usedParameter, true);
 		return suggestions[0];
 	}
 
@@ -387,7 +387,7 @@ public class ParameterObjectFactory {
 		String fieldName= pi.getNewName();
 		String getterName= getGetterName(pi, ast, project);
 		String lineDelim= StubUtility.getLineDelimiterUsed(cu);
-		String bareFieldname= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, Flags.AccPrivate);
+		String bareFieldname= NamingConventions.getBaseName(NamingConventions.VK_INSTANCE_FIELD, fieldName, project);
 		if (createComments(project)) {
 			String comment= CodeGeneration.getGetterComment(cu, declaringType, getterName, fieldName, pi.getNewTypeName(), bareFieldname, lineDelim);
 			if (comment != null)
@@ -432,7 +432,7 @@ public class ParameterObjectFactory {
 		String fieldName= pi.getNewName();
 		String setterName= getSetterName(pi, ast, project);
 		String lineDelim= StubUtility.getLineDelimiterUsed(cu);
-		String bareFieldname= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, Flags.AccPrivate);
+		String bareFieldname= NamingConventions.getBaseName(NamingConventions.VK_INSTANCE_FIELD, fieldName, project);
 		String paramName= StubUtility.suggestArgumentName(project, bareFieldname, null);
 		if (createComments(project)) {
 			String comment= CodeGeneration.getSetterComment(cu, declaringType, setterName, fieldName, pi.getNewTypeName(), paramName, bareFieldname, lineDelim);
@@ -573,7 +573,7 @@ public class ParameterObjectFactory {
 	 * Updates the position of the newly inserted parameterObject so that it is
 	 * directly after the first checked parameter
 	 *
-	 * @param parameterObjectReference
+	 * @param parameterObjectReference the inserted parameterObject
 	 */
 	public void updateParameterPosition(ParameterInfo parameterObjectReference) {
 		fVariables.remove(parameterObjectReference);

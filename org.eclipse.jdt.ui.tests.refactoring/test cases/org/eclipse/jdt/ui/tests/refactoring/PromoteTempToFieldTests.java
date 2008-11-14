@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -612,7 +612,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		ISourceRange selection= TextRangeUtil.getSelection(cu, 4, 34, 4, 37);
         PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.checkInitialConditions(new NullProgressMonitor());
-        assertEquals("sortByDefiningTypeAction", ref.guessFieldNames()[0]);
+        assertEquals("fSortByDefiningTypeAction", ref.guessFieldNames()[0]);
 	}
 
 	public void test23() throws Exception{ //syntax error

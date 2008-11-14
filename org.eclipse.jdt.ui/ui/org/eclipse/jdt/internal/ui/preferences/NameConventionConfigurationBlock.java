@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,12 +71,15 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private final static int STATIC= 2;
 	private final static int ARGUMENT= 3;
 	private final static int LOCAL= 4;
+	private final static int STATIC_FINAL= 5;
 
 	// Preference store keys
 	private static final Key PREF_FIELD_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_FIELD_PREFIXES);
 	private static final Key PREF_FIELD_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_FIELD_SUFFIXES);
 	private static final Key PREF_STATIC_FIELD_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES);
 	private static final Key PREF_STATIC_FIELD_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES);
+	private static final Key PREF_STATIC_FINAL_FIELD_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_STATIC_FINAL_FIELD_PREFIXES);
+	private static final Key PREF_STATIC_FINAL_FIELD_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_STATIC_FINAL_FIELD_SUFFIXES);
 	private static final Key PREF_ARGUMENT_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_ARGUMENT_PREFIXES);
 	private static final Key PREF_ARGUMENT_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES);
 	private static final Key PREF_LOCAL_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_LOCAL_PREFIXES);
@@ -236,6 +239,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 					return registry.get(JavaPluginImages.DESC_FIELD_PUBLIC);
 				case STATIC:
 					return registry.get(new JavaElementImageDescriptor(JavaPluginImages.DESC_FIELD_PUBLIC, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE));
+				case STATIC_FINAL:
+					return registry.get(new JavaElementImageDescriptor(JavaPluginImages.DESC_FIELD_PUBLIC, JavaElementImageDescriptor.STATIC | JavaElementImageDescriptor.FINAL, JavaElementImageProvider.SMALL_SIZE));
 				case ARGUMENT:
 					return registry.get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
 				default:
@@ -253,6 +258,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 						return PreferencesMessages.NameConventionConfigurationBlock_field_label;
 					case STATIC:
 						return PreferencesMessages.NameConventionConfigurationBlock_static_label;
+					case STATIC_FINAL:
+						return PreferencesMessages.NameConventionConfigurationBlock_static_final_label;
 					case ARGUMENT:
 						return PreferencesMessages.NameConventionConfigurationBlock_arg_label;
 					default:
@@ -350,6 +357,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private static Key[] getAllKeys() {
 		return new Key[] {
 			PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES,
+			PREF_STATIC_FINAL_FIELD_PREFIXES, PREF_STATIC_FINAL_FIELD_SUFFIXES,
 			PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES,
 			PREF_EXCEPTION_NAME, PREF_KEYWORD_THIS, PREF_IS_FOR_GETTERS, PREF_USE_OVERRIDE_ANNOT
 		};
@@ -434,6 +442,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		ArrayList list= new ArrayList(4);
 		createEntry(list, PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, FIELD);
 		createEntry(list, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES, STATIC);
+		createEntry(list, PREF_STATIC_FINAL_FIELD_PREFIXES, PREF_STATIC_FINAL_FIELD_SUFFIXES, STATIC_FINAL);
 		createEntry(list, PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, ARGUMENT);
 		createEntry(list, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES, LOCAL);
 		fNameConventionList.setElements(list);
@@ -483,6 +492,10 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			case STATIC:
 				title= PreferencesMessages.NameConventionConfigurationBlock_static_dialog_title;
 				message= PreferencesMessages.NameConventionConfigurationBlock_static_dialog_message;
+				break;
+			case STATIC_FINAL:
+				title= PreferencesMessages.NameConventionConfigurationBlock_static_final_dialog_title;
+				message= PreferencesMessages.NameConventionConfigurationBlock_static_final_dialog_message;
 				break;
 			case ARGUMENT:
 				title= PreferencesMessages.NameConventionConfigurationBlock_arg_dialog_title;

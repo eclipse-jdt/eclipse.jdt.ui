@@ -529,6 +529,9 @@ public final class PreferencesMessages extends NLS {
 	public static String NameConventionConfigurationBlock_field_dialog_message;
 	public static String NameConventionConfigurationBlock_static_dialog_title;
 	public static String NameConventionConfigurationBlock_static_dialog_message;
+	public static String NameConventionConfigurationBlock_static_final_dialog_message;
+	public static String NameConventionConfigurationBlock_static_final_dialog_title;
+	public static String NameConventionConfigurationBlock_static_final_label;
 	public static String NameConventionConfigurationBlock_arg_dialog_title;
 	public static String NameConventionConfigurationBlock_arg_dialog_message;
 	public static String NameConventionConfigurationBlock_local_dialog_title;
