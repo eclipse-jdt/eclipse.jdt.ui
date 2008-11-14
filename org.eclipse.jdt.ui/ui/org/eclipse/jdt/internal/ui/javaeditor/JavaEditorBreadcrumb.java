@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -46,6 +47,7 @@ import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IImportContainer;
@@ -74,8 +76,12 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.filters.EmptyLibraryContainerFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.packageview.LibraryContainer;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
@@ -89,6 +95,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper;
  * @since 3.4
  */
 public class JavaEditorBreadcrumb extends EditorBreadcrumb {
+
+	private static final boolean SHOW_LIBRARIES_NODE= true;
+
 
 	private static class ProblemBreadcrumbViewer extends BreadcrumbViewer implements ResourceToItemsMapper.IContentViewerAccessor {
 
@@ -179,7 +188,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#configureDropDownViewer(org.eclipse.jface.viewers.TreeViewer, java.lang.Object)
 		 */
 		public void configureDropDownViewer(TreeViewer viewer, Object input) {
-			viewer.setContentProvider(createContentProvider());
+			viewer.setContentProvider(createDropDownContentProvider());
 			viewer.setLabelProvider(createDropDownLabelProvider());
 			viewer.setComparator(new JavaElementComparator());
 			viewer.addFilter(new ViewerFilter() {
@@ -194,6 +203,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					return true;
 				}
 			});
+			if (SHOW_LIBRARIES_NODE)
+				viewer.addFilter(new EmptyLibraryContainerFilter());
 			JavaUIHelp.setHelp(viewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
 		}
 
@@ -575,6 +586,101 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	private static JavaEditorBreadcrumbContentProvider createContentProvider() {
 		StandardJavaElementContentProvider parentContentProvider= new StandardJavaElementContentProvider(true);
+		return new JavaEditorBreadcrumbContentProvider(parentContentProvider);
+	}
+
+	/**
+	 * Create a new instance of the content provider to use for the Java editor breadcrumb.
+	 * 
+	 * @return a new content provider
+	 * @since 3.5
+	 */
+	private static JavaEditorBreadcrumbContentProvider createDropDownContentProvider() {
+		StandardJavaElementContentProvider parentContentProvider= new StandardJavaElementContentProvider(true) {
+			public Object[] getChildren(Object element) {
+				if (element instanceof PackageFragmentRootContainer)
+					return getContainerPackageFragmentRoots((PackageFragmentRootContainer)element);
+				return super.getChildren(element);
+			}
+
+			protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
+				if (!project.getProject().isOpen())
+					return NO_CHILDREN;
+
+				List result= new ArrayList();
+
+				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+				for (int i= 0; i < roots.length; i++) {
+					IPackageFragmentRoot root= roots[i];
+					IClasspathEntry classpathEntry= root.getRawClasspathEntry();
+					int entryKind= classpathEntry.getEntryKind();
+					if (entryKind == IClasspathEntry.CPE_CONTAINER) {
+						// all ClassPathContainers are added later
+					} else if (SHOW_LIBRARIES_NODE && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
+						// skip: will add the referenced library node later
+					} else {
+						if (isProjectPackageFragmentRoot(root)) {
+							// filter out package fragments that correspond to projects and
+							// replace them with the package fragments directly
+							Object[] fragments= getPackageFragmentRootContent(root);
+							for (int j= 0; j < fragments.length; j++) {
+								result.add(fragments[j]);
+							}
+						} else {
+							result.add(root);
+						}
+					}
+				}
+
+				if (SHOW_LIBRARIES_NODE) {
+					result.add(new LibraryContainer(project));
+				}
+
+				// separate loop to make sure all containers are on the classpath
+				IClasspathEntry[] rawClasspath= project.getRawClasspath();
+				for (int i= 0; i < rawClasspath.length; i++) {
+					IClasspathEntry classpathEntry= rawClasspath[i];
+					if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						result.add(new ClassPathContainer(project, classpathEntry));
+					}
+				}
+				Object[] resources= project.getNonJavaResources();
+				for (int i= 0; i < resources.length; i++) {
+					result.add(resources[i]);
+				}
+				return result.toArray();
+			}
+
+			private Object[] getContainerPackageFragmentRoots(PackageFragmentRootContainer container) {
+				return container.getChildren();
+			}
+
+			protected Object internalGetParent(Object element) {
+				if (element instanceof IPackageFragmentRoot) {
+					// since we insert logical package containers we have to fix
+					// up the parent for package fragment roots so that they refer
+					// to the container and containers refer to the project
+					IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+
+					try {
+						IClasspathEntry entry= root.getRawClasspathEntry();
+						int entryKind= entry.getEntryKind();
+						if (entryKind == IClasspathEntry.CPE_CONTAINER) {
+							return new ClassPathContainer(root.getJavaProject(), entry);
+						} else if (SHOW_LIBRARIES_NODE && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
+							return new LibraryContainer(root.getJavaProject());
+						}
+					} catch (JavaModelException e) {
+						// fall through
+					}
+				} else if (element instanceof PackageFragmentRootContainer) {
+					return ((PackageFragmentRootContainer)element).getJavaProject();
+				}
+				return super.internalGetParent(element);
+			}
+
+
+		};
 		return new JavaEditorBreadcrumbContentProvider(parentContentProvider);
 	}
 
