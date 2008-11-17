@@ -1696,7 +1696,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * 
 	 * @since 3.5
 	 */
-	private long fErrorMessageTimeout;
+	private static final long ERROR_MESSAGE_TIMEOUT= 1000;
 
 
 	/**
@@ -1793,7 +1793,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IPreferenceStore store= getPreferenceStore();
 		JavaSourceViewer javaSourceViewer= createJavaSourceViewer(editorComposite, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 
-		fErrorMessageTimeout= javaSourceViewer.getEmptySelectionChangedEventDelay() + 100;
 		JavaUIHelp.setHelp(this, javaSourceViewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
 
 		/*
@@ -3518,13 +3517,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void updateStatusLine() {
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		Annotation annotation= getAnnotation(selection.getOffset(), selection.getLength());
-		setStatusLineErrorMessage(null);
-		setStatusLineMessage(null);
+		String message= null;
 		if (annotation != null) {
 			updateMarkerViews(annotation);
 			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem() || isProblemMarkerAnnotation(annotation))
-				setStatusLineMessage(annotation.getText());
+				message= annotation.getText();
 		}
+		setStatusLineErrorMessage(null);
+		setStatusLineMessage(message);
 	}
 
 	/*
@@ -3533,9 +3533,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void setStatusLineErrorMessage(String message) {
 		long now= System.currentTimeMillis();
-		if (message != null || now - fErrorMessageTime > fErrorMessageTimeout)
+		if (message != null || now - fErrorMessageTime > ERROR_MESSAGE_TIMEOUT) {
 			super.setStatusLineErrorMessage(message);
-		fErrorMessageTime= message != null ? now : 0;
+			fErrorMessageTime= message != null ? now : 0;
+		}
 	}
 
 	/*
@@ -3543,7 +3544,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.5
 	 */
 	protected void setStatusLineMessage(String message) {
-		if (System.currentTimeMillis() - fErrorMessageTime > fErrorMessageTimeout)
+		if (System.currentTimeMillis() - fErrorMessageTime > ERROR_MESSAGE_TIMEOUT)
 			super.setStatusLineMessage(message);
 	}
 
