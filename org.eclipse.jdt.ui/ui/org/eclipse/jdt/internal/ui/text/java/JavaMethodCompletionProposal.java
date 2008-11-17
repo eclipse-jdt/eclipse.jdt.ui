@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
@@ -236,7 +238,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		if (super.isValidPrefix(prefix))
 			return true;
 		
-		String word= getDisplayString();
+		String word= TextProcessor.deprocess(getDisplayString());
 		if (isInJavadoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx==0) {
