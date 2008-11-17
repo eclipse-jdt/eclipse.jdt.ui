@@ -317,7 +317,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	/**
 	 * Request a project layout.
 	 */
-	private final class LayoutGroup implements Observer, SelectionListener {
+	private final class LayoutGroup implements Observer, SelectionListener, IDialogFieldListener {
 
 		private final SelectionButtonDialogField fStdRadio, fSrcBinRadio;
 		private Group fGroup;
@@ -326,14 +326,17 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public LayoutGroup() {
 			fStdRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fStdRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_option_oneFolder);
+			fStdRadio.setDialogFieldListener(this);
 
 			fSrcBinRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fSrcBinRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_option_separateFolders);
+			fSrcBinRadio.setDialogFieldListener(this);
 
 			boolean useSrcBin= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
 			fSrcBinRadio.setSelection(useSrcBin);
 			fStdRadio.setSelection(!useSrcBin);
 		}
+
 
 		public Control createContent(Composite composite) {
 			fGroup= new Group(composite, SWT.NONE);
@@ -364,11 +367,14 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 		private void updateEnableState() {
+			if (fDetectGroup == null)
+				return;
+			
 			final boolean detect= fDetectGroup.mustDetect();
 			fStdRadio.setEnabled(!detect);
 			fSrcBinRadio.setEnabled(!detect);
 			if (fPreferenceLink != null) {
-				fPreferenceLink.setEnabled(!detect);
+				fPreferenceLink.setEnabled(!detect && fSrcBinRadio.isSelected());
 			}
 			if (fGroup != null) {
 				fGroup.setEnabled(!detect);
@@ -399,6 +405,15 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
 			fDetectGroup.handlePossibleJVMChange();
 			fJREGroup.handlePossibleJVMChange();
+		}
+
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 * @since 3.5
+		 */
+		public void dialogFieldChanged(DialogField field) {
+			updateEnableState();
 		}
 	}
 
@@ -474,21 +489,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
 			fPreferenceLink.addSelectionListener(this);
 
-			Composite nonDefaultJREComposite= new Composite(fGroup, SWT.NONE);
-			nonDefaultJREComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			GridLayout layout= new GridLayout(2, false);
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
-			nonDefaultJREComposite.setLayout(layout);
-
-			fUseProjectJRE.doFillIntoGrid(nonDefaultJREComposite, 1);
-
-			Combo comboControl= fJRECombo.getComboControl(nonDefaultJREComposite);
+			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
+			Combo comboControl= fJRECombo.getComboControl(fGroup);
 			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 
-			fUseEEJRE.doFillIntoGrid(nonDefaultJREComposite, 1);
-
-			Combo eeComboControl= fEECombo.getComboControl(nonDefaultJREComposite);
+			fUseEEJRE.doFillIntoGrid(fGroup, 1);
+			Combo eeComboControl= fEECombo.getComboControl(fGroup);
 			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 
 			updateEnableState();
@@ -646,7 +652,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fJRECombo.setEnabled(!detect && fUseProjectJRE.isSelected());
 			fEECombo.setEnabled(!detect && fUseEEJRE.isSelected());
 			if (fPreferenceLink != null) {
-				fPreferenceLink.setEnabled(!detect);
+				fPreferenceLink.setEnabled(!detect && fUseDefaultJRE.isSelected());
 			}
 			if (fGroup != null) {
 				fGroup.setEnabled(!detect);
