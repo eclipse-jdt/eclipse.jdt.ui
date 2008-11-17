@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,23 +51,27 @@ public class CheckedListDialogField extends ListDialogField {
 	}
 
 	/**
-	 * Sets the index of the 'check' button in the button label array passed in the constructor.
+	 * Sets the index of the 'check all' button in the button label array passed in the constructor.
 	 * The behavior of the button marked as the check button will then be handled internally.
 	 * (enable state, button invocation behavior)
+	 * 
+	 * @param checkAllButtonIndex the index of the check all button
 	 */
-	public void setCheckAllButtonIndex(int checkButtonIndex) {
-		Assert.isTrue(checkButtonIndex < fButtonLabels.length);
-		fCheckAllButtonIndex= checkButtonIndex;
+	public void setCheckAllButtonIndex(int checkAllButtonIndex) {
+		Assert.isTrue(checkAllButtonIndex < fButtonLabels.length);
+		fCheckAllButtonIndex= checkAllButtonIndex;
 	}
 
 	/**
-	 * Sets the index of the 'uncheck' button in the button label array passed in the constructor.
-	 * The behavior of the button marked as the uncheck button will then be handled internally.
-	 * (enable state, button invocation behavior)
+	 * Sets the index of the 'uncheck all' button in the button label array passed in the
+	 * constructor. The behavior of the button marked as the uncheck button will then be handled
+	 * internally. (enable state, button invocation behavior)
+	 * 
+	 * @param uncheckAllButtonIndex the index of the check all button
 	 */
-	public void setUncheckAllButtonIndex(int uncheckButtonIndex) {
-		Assert.isTrue(uncheckButtonIndex < fButtonLabels.length);
-		fUncheckAllButtonIndex= uncheckButtonIndex;
+	public void setUncheckAllButtonIndex(int uncheckAllButtonIndex) {
+		Assert.isTrue(uncheckAllButtonIndex < fButtonLabels.length);
+		fUncheckAllButtonIndex= uncheckAllButtonIndex;
 	}
 
 
@@ -75,7 +79,7 @@ public class CheckedListDialogField extends ListDialogField {
 	 * @see ListDialogField#createTableViewer
 	 */
 	protected TableViewer createTableViewer(Composite parent) {
-		Table table= new Table(parent, SWT.CHECK + getListStyle());
+		Table table= new Table(parent, SWT.CHECK | getListStyle());
 		table.setFont(parent.getFont());
 		CheckboxTableViewer tableViewer= new CheckboxTableViewer(table);
 		tableViewer.addCheckStateListener(new ICheckStateListener() {
@@ -119,6 +123,8 @@ public class CheckedListDialogField extends ListDialogField {
 
 	/**
 	 * Gets the checked elements.
+	 * 
+	 * @return the list of checked elements
 	 */
 	public List getCheckedElements() {
 		if (isOkToUse(fTableControl)) {
@@ -137,6 +143,8 @@ public class CheckedListDialogField extends ListDialogField {
 
 	/**
 	 * Returns the number of checked elements.
+	 * 
+	 * @return the number of checked elements
 	 */
 	public int getCheckedSize() {
 		return fCheckedElements.size();
@@ -144,6 +152,9 @@ public class CheckedListDialogField extends ListDialogField {
 
 	/**
 	 * Returns true if the element is checked.
+	 * 
+	 * @param obj the element to check
+	 * @return <code>true</code> if the given element is checked
 	 */
 	public boolean isChecked(Object obj) {
 		if (isOkToUse(fTableControl)) {
@@ -163,6 +174,8 @@ public class CheckedListDialogField extends ListDialogField {
 
 	/**
 	 * Sets the checked elements.
+	 * 
+	 * @param list the list of checked elements
 	 */
 	public void setCheckedElements(Collection list) {
 		fCheckedElements= new ArrayList(list);
@@ -174,6 +187,9 @@ public class CheckedListDialogField extends ListDialogField {
 
 	/**
 	 * Sets the checked state of an element.
+	 * 
+	 * @param object the element for which to set the state
+	 * @param state the checked state
 	 */
 	public void setChecked(Object object, boolean state) {
 		setCheckedWithoutUpdate(object, state);
@@ -182,6 +198,9 @@ public class CheckedListDialogField extends ListDialogField {
 
 	/**
 	 * Sets the checked state of an element. No dialog changed listener is informed.
+	 * 
+	 * @param object the element for which to set the state
+	 * @param state the checked state
 	 */
 	public void setCheckedWithoutUpdate(Object object, boolean state) {
 		if (state) {
@@ -210,7 +229,9 @@ public class CheckedListDialogField extends ListDialogField {
 	}
 
 	/**
-	 * Sets the check state of all elements
+	 * Sets the check state of all elements.
+	 * 
+	 * @param state the checked state
 	 */
 	public void checkAll(boolean state) {
 		if (state) {
