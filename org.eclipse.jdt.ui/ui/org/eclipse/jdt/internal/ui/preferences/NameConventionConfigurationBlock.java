@@ -312,7 +312,12 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		String[] buttons= new String[] {
 			PreferencesMessages.NameConventionConfigurationBlock_list_edit_button
 		};
-		fNameConventionList= new ListDialogField(adapter, buttons, new NameConventionLabelProvider());
+		fNameConventionList= new ListDialogField(adapter, buttons, new NameConventionLabelProvider()) {
+			protected int getListStyle() {
+				return super.getListStyle() & ~SWT.MULTI | SWT.SINGLE;
+			}
+
+		};
 		fNameConventionList.setDialogFieldListener(adapter);
 		fNameConventionList.setLabelText(PreferencesMessages.NameConventionConfigurationBlock_list_label);
 
