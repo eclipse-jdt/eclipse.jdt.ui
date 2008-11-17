@@ -2165,7 +2165,45 @@
          </action>
       </actionSet>
    </extension>
-   
+   <extension
+         point="org.eclipse.ui.actionSetPartAssociations">
+      <actionSetPartAssociation
+            targetID="org.eclipse.jdt.ui.JavaActionSet">
+         <part
+               id="org.eclipse.jdt.ui.PackageExplorer">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.TypeHierarchy">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.CompilationUnitEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ClassFileEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.PropertiesFileEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ProjectsView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.PackagesView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.TypesView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.MembersView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.SourceView">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.actions.OpenCallHierarchy">
+         </part>
+      </actionSetPartAssociation>
+   </extension>
    
 <!-- with an A_                                                                -->
 <!-- the open action set is contributed before the CodeActionSet we prefix it  -->
