@@ -522,7 +522,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			buf.append("\n");
 			buf.append("    }//here\n");
 			buf.append("}\n");
-			assertEquals(doc.get(), buf.toString());
+			assertEquals(buf.toString(), doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -586,7 +586,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"    }\n" +
 				"}\n";
 
-		assertEquals(doc.get(), result);
+		assertEquals(result, doc.get());
 	}
 
 	private CompletionProposalCollector createCollector(ICompilationUnit cu, int offset) throws PartInitException, JavaModelException {
@@ -657,7 +657,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			buf.append("        return fWriter;\n");
 			buf.append("    }//here\n");
 			buf.append("}\n");
-			assertEquals(doc.get(), buf.toString());
+			assertEquals(buf.toString(), doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -719,7 +719,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			buf.append("\n");
 			buf.append("    }//here\n");
 			buf.append("}\n");
-			assertEquals(doc.get(), buf.toString());
+			assertEquals(buf.toString(), doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -919,7 +919,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				 "    }\n" +
 				 "}\n";
 
-		assertEquals(doc.get(), result);
+		assertEquals(result, doc.get());
 	}
 
 	public void testOverrideCompletion1() throws Exception {
@@ -980,7 +980,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("        return super.toString();\n");
 		buf.append("    }//here\n");
 		buf.append("}\n");
-		assertEquals(doc.get(), buf.toString());
+		assertEquals(buf.toString(), doc.get());
 	}
 
 	public void testOverrideCompletion2() throws Exception {
@@ -1042,7 +1042,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"        \n" +
 				"    }//here\n" +
 				"}");
-		assertEquals(doc.get(), buf.toString());
+		assertEquals(buf.toString(), doc.get());
 	}
 
 	public void testOverrideCompletion3() throws Exception {
@@ -1104,7 +1104,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("        super.close();\n");
 		buf.append("    }//here\n");
 		buf.append("}\n");
-		assertEquals(doc.get(), buf.toString());
+		assertEquals(buf.toString(), doc.get());
 	}
 
 	public void testOverrideCompletion4() throws Exception {
@@ -1174,7 +1174,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("        super.foo();\n");
 		buf.append("    }//here\n");
 		buf.append("}\n");
-		assertEquals(doc.get(), buf.toString());
+		assertEquals(buf.toString(), doc.get());
 	}
 
 	public void testOverrideCompletion5() throws Exception {
@@ -1238,7 +1238,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEquals(doc.get(), buf.toString());
+		assertEquals(buf.toString(), doc.get());
 	}
 
 	public void testOverrideCompletion6_bug157069() throws Exception {
@@ -1301,7 +1301,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("        super.foo(sub);\n");
 		buf.append("    }//here\n");
 		buf.append("}\n");
-		assertEquals(doc.get(), buf.toString());
+		assertEquals(buf.toString(), doc.get());
 	}
 
 	public void testSetterCompletion1() throws Exception {
@@ -1360,7 +1360,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			buf.append("        this.writer = writer;\n");
 			buf.append("    }//here\n");
 			buf.append("}\n");
-			assertEquals(doc.get(), buf.toString());
+			assertEquals(buf.toString(), doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
