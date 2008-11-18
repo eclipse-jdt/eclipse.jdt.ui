@@ -143,17 +143,10 @@ public class ExtractConstantTests extends RefactoringTest {
 		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, false, constantName, guessedConstantName);
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, boolean qualifyReferencesWithConstantName, String constantName) throws Exception{
-		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, qualifyReferencesWithConstantName, constantName, constantName);
-	}
-
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception{
-		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, false, constantName);
-	}
-
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception {
 		failHelper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, constantName, 0, false);
 	}
+
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, int errorCode, boolean checkCode) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
