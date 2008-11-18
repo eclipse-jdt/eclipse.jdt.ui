@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * @see org.eclipse.jdt.ui.IWorkingCopyManagerExtension
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @noextend This interface is not intended to be extended by clients.
  */
 public interface IWorkingCopyManager {
 

@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IType;
  * @see JavaUI#ID_TYPE_HIERARCHY
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @noextend This interface is not intended to be extended by clients.
  */
 public interface ITypeHierarchyViewPart extends IViewPart {
 

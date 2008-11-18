@@ -19,6 +19,7 @@ package org.eclipse.jdt.junit.model;
  * @since 3.3
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @noextend This interface is not intended to be extended by clients.
  */
 public interface ITestSuiteElement extends ITestElementContainer {
 
