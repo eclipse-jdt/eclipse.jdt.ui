@@ -1284,9 +1284,18 @@ public class StubUtility {
 		}
 		return names;
 	}
+	
+	public static String getBaseName(int variableKind, String variableName, IJavaProject javaProject) {
+		//TODO: check other callers of NamingConventions!
+		String baseName= NamingConventions.getBaseName(variableKind, variableName, javaProject);
+		if (NAMING_CONVENTIONS_BUGS && baseName.length() > 0 && Character.isUpperCase(baseName.charAt(0))) {
+			return Character.toLowerCase(baseName.charAt(0)) + baseName.substring(1);
+		}
+		return baseName;
+	}
 
 	public static String getBaseName(IField field) throws JavaModelException {
-		return NamingConventions.getBaseName(getFieldKind(field.getFlags()), field.getElementName(), field.getJavaProject());
+		return getBaseName(getFieldKind(field.getFlags()), field.getElementName(), field.getJavaProject());
 	}
 
 	public static String getBaseName(IVariableBinding binding) {
@@ -1294,7 +1303,7 @@ public class StubUtility {
 	}
 
 	public static String getBaseName(IVariableBinding binding, IJavaProject project) {
-		return NamingConventions.getBaseName(getKind(binding), binding.getName(), project);
+		return getBaseName(getKind(binding), binding.getName(), project);
 	}
 
 	/**
