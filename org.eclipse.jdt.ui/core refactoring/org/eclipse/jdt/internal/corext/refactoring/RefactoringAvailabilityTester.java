@@ -1250,6 +1250,6 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (!type.exists())
 			return false;
-		return ReorgUtils.isInsideCompilationUnit(type) && type.isClass();
+		return ReorgUtils.isInsideCompilationUnit(type) && type.isClass() && !type.isAnonymous();
 	}
 }
