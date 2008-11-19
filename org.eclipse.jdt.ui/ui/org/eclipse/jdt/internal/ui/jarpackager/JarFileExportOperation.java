@@ -576,7 +576,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					fJarBuilder.writeFile(file, classFilePath);
 				}
 			} catch (CoreException ex) {
-				addToStatus(ex);
+				Throwable realEx= ex.getStatus().getException();
+				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
+					addWarning(ex.getMessage(), realEx);
+				else
+					addToStatus(ex);
 			}
 		}
 	}
