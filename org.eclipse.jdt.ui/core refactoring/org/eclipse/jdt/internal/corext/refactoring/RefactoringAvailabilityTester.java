@@ -393,6 +393,8 @@ public final class RefactoringAvailabilityTester {
 			if (JdtFlags.isNative(method))
 				return false;
 			member= method.getDeclaringType();
+		} else if (member instanceof IField) {
+			member= member.getDeclaringType();
 		}
 		if (member instanceof IType) {
 			if (JdtFlags.isEnum(member) || JdtFlags.isAnnotation(member))
