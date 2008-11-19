@@ -386,19 +386,21 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (!Checks.isAvailable(member))
 			return false;
-		if (member instanceof IType) {
-			if (!JdtFlags.isStatic(member) && !JdtFlags.isEnum(member) && !JdtFlags.isAnnotation(member))
-				return false;
-		}
 		if (member instanceof IMethod) {
 			final IMethod method= (IMethod) member;
 			if (method.isConstructor())
 				return false;
 			if (JdtFlags.isNative(method))
 				return false;
-			final IType declaring= method.getDeclaringType();
-			if (declaring != null && declaring.isAnnotation())
+			member= method.getDeclaringType();
+		}
+		if (member instanceof IType) {
+			if (JdtFlags.isEnum(member) || JdtFlags.isAnnotation(member))
 				return false;
+			if (member.getDeclaringType() != null && !JdtFlags.isStatic(member))
+				return false;
+			if (((IType)member).isAnonymous())
+				return false; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=253727
 		}
 		return true;
 	}
@@ -406,8 +408,8 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isExtractSupertypeAvailable(final IMember[] members) throws JavaModelException {
 		if (members != null && members.length != 0) {
 			final IType type= getTopLevelType(members);
-			if (type != null && !type.isInterface())
-				return true;
+			if (type != null && !type.isClass())
+				return false;
 			for (int index= 0; index < members.length; index++) {
 				if (!isExtractSupertypeAvailable(members[index]))
 					return false;
