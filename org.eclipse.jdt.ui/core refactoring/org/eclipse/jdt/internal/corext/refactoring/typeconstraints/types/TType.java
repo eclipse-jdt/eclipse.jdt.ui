@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,14 +60,21 @@ public abstract class TType {
 	private int fFlags;
 
 	/**
-	 * Creates a new type with the given environment as an owner
+	 * Creates a new type with the given environment as an owner.
+	 * The type environment <em>must</em> call {@link #initialize(ITypeBinding)} after using this constructor.
+	 * 
+	 * @param environment owner
 	 */
 	protected TType(TypeEnvironment environment) {
 		fEnvironment= environment;
 	}
 
 	/**
-	 * Creates a new type with the given environment as an owner
+	 * Creates a new type with the given environment as an owner.
+	 * The type environment must <em>not</em> call {@link #initialize(ITypeBinding)} after using this constructor.
+	 * 
+	 * @param environment owner
+	 * @param key this type's binding key
 	 */
 	protected TType(TypeEnvironment environment, String key) {
 		this(environment);
@@ -459,11 +466,14 @@ public abstract class TType {
 		return doEquals(otherType);
 	}
 
+	public abstract int hashCode();
+	
 	/**
 	 * Performs the actual equals check.
 	 *
 	 * @param type The right hand side of the equals operation. The dynamic type
 	 *        of the actual argument must be the same as the receiver type.
+	 * @return <code>true</code> iff this type is the same as the argument
 	 */
 	protected abstract boolean doEquals(TType type);
 
@@ -519,7 +529,8 @@ public abstract class TType {
 	 * Returns whether the receiver type is type equivalent to the other type.
 	 * This method considers the erasure for generic, raw and parameterized
 	 * types.
-	 *
+	 * 
+	 * @param other the other type
 	 * @return whether the receiver is type equivalent to other
 	 */
 	protected boolean isTypeEquivalentTo(TType other) {
@@ -531,7 +542,8 @@ public abstract class TType {
 	 * a type argument of a parameterized type is compatible with the given type
 	 * <code>rhs</code>. For example if
 	 * <code>List&lt;this&gt;= List&lt;rhs&gt;</code> is a valid assignment.
-	 *
+	 * 
+	 * @param rhs the right-hand-side type
 	 * @return <code>true</code> iff <code>this</code> contains <code>rhs</code> according to JLS3 4.5.1.1
 	 */
 	protected boolean checkTypeArgument(TType rhs) {
