@@ -59,6 +59,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.INullSelectionListener;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewSite;
@@ -132,7 +133,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 
-abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener, IViewPartInputProvider {
+abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener, IViewPartInputProvider, INullSelectionListener {
 
 	private static final String TAG_SELECTED_ELEMENTS= "selectedElements"; //$NON-NLS-1$
 	private static final String TAG_SELECTED_ELEMENT= "selectedElement"; //$NON-NLS-1$
@@ -747,7 +748,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				setInput(null);
 			fPreviousSelectionProvider= part;
 			return;
-		} else	if (selection.isEmpty() && !isInputResetBy(part)) {
+		} else if (selection != null && selection.isEmpty() && !isInputResetBy(part)) {
 			fPreviousSelectionProvider= part;
 			return;
 		} else if (selectedElement == null && part == fPreviousSelectionProvider) {
@@ -1187,12 +1188,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			if (ei instanceof IFileEditorInput) {
 				IFile file= ((IFileEditorInput)ei).getFile();
 				IJavaElement je= (IJavaElement)file.getAdapter(IJavaElement.class);
+				IContainer container= null;
 				if (je == null) {
-					IContainer container= ((IFileEditorInput)ei).getFile().getParent();
+					container= ((IFileEditorInput)ei).getFile().getParent();
 					if (container != null)
 						je= (IJavaElement)container.getAdapter(IJavaElement.class);
 				}
-				if (je == null) {
+				if (je == null && container == null) {
 					setSelection(null, false);
 					return;
 				}
