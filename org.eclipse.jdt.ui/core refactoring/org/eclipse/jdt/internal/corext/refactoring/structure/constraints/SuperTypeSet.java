@@ -96,9 +96,11 @@ public abstract class SuperTypeSet implements ITypeSet {
 					return this;
 				final SuperTypeSingletonSet singleton= (SuperTypeSingletonSet) set;
 				final TType rightErasure= singleton.fType.getErasure();
-				if (leftErasure.isGenericType() && rightErasure.isGenericType()) {
-					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
-						return this;
+				if (leftErasure.isHierarchyType() && rightErasure.isHierarchyType()) {
+					if (leftErasure.isGenericType() || rightErasure.isGenericType()) {
+						if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
+							return this;
+					}
 				}
 				if (rightErasure.isJavaLangObject())
 					return this;
@@ -110,9 +112,11 @@ public abstract class SuperTypeSet implements ITypeSet {
 					return this;
 				final SuperTypeTuple tuple= (SuperTypeTuple) set;
 				final TType rightErasure= tuple.fSuperType.getErasure();
-				if (leftErasure.isGenericType() && rightErasure.isGenericType()) {
-					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
-						return this;
+				if (leftErasure.isHierarchyType() && rightErasure.isHierarchyType()) {
+					if (leftErasure.isGenericType() || rightErasure.isGenericType()) {
+						if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
+							return this;
+					}
 				}
 				if (rightErasure.isJavaLangObject())
 					return this;
@@ -179,9 +183,12 @@ public abstract class SuperTypeSet implements ITypeSet {
 				final TType rightErasure= singleton.fType.getErasure();
 				final TType subErasure= fSubType.getErasure();
 				final TType superErasure= fSuperType.getErasure();
-				if (subErasure.isGenericType() && superErasure.isGenericType() && rightErasure.isGenericType()) {
-					if ((rightErasure.equals(subErasure) || ((HierarchyType) subErasure).isSubType((HierarchyType) rightErasure)) && (rightErasure.equals(superErasure) || ((HierarchyType) superErasure).isSubType((HierarchyType) rightErasure)))
-						return this;
+				if (subErasure.isHierarchyType() && superErasure.isHierarchyType() && rightErasure.isHierarchyType()) {
+					if (subErasure.isGenericType() || superErasure.isGenericType() || rightErasure.isGenericType()) {
+						if ((rightErasure.equals(subErasure) || ((HierarchyType) subErasure).isSubType((HierarchyType) rightErasure))
+								&& (rightErasure.equals(superErasure) || ((HierarchyType) superErasure).isSubType((HierarchyType) rightErasure)))
+							return this;
+					}
 				}
 				if (rightErasure.isJavaLangObject())
 					return this;
