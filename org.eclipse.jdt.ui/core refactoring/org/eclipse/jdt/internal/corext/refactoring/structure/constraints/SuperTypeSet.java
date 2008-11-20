@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,7 +96,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 					return this;
 				final SuperTypeSingletonSet singleton= (SuperTypeSingletonSet) set;
 				final TType rightErasure= singleton.fType.getErasure();
-				if (leftErasure.isGenericType() || rightErasure.isGenericType()) {
+				if (leftErasure.isGenericType() && rightErasure.isGenericType()) {
 					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
 						return this;
 				}
@@ -110,7 +110,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 					return this;
 				final SuperTypeTuple tuple= (SuperTypeTuple) set;
 				final TType rightErasure= tuple.fSuperType.getErasure();
-				if (leftErasure.isGenericType() || rightErasure.isGenericType()) {
+				if (leftErasure.isGenericType() && rightErasure.isGenericType()) {
 					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
 						return this;
 				}
@@ -179,7 +179,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 				final TType rightErasure= singleton.fType.getErasure();
 				final TType subErasure= fSubType.getErasure();
 				final TType superErasure= fSuperType.getErasure();
-				if (subErasure.isGenericType() || superErasure.isGenericType() || rightErasure.isGenericType()) {
+				if (subErasure.isGenericType() && superErasure.isGenericType() && rightErasure.isGenericType()) {
 					if ((rightErasure.equals(subErasure) || ((HierarchyType) subErasure).isSubType((HierarchyType) rightErasure)) && (rightErasure.equals(superErasure) || ((HierarchyType) superErasure).isSubType((HierarchyType) rightErasure)))
 						return this;
 				}
