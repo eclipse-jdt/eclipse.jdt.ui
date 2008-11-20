@@ -906,8 +906,6 @@ public class StubUtility {
 
 	// --------------------------- name suggestions --------------------------
 
-	public static final boolean NAMING_CONVENTIONS_BUGS= true; //FIXME, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=255345
-
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection excluded) {
 		LinkedHashSet res= new LinkedHashSet(); // avoid duplicates but keep order
 
@@ -934,9 +932,6 @@ public class StubUtility {
 					expectedType= expectedType.getTypeDeclaration();
 				}
 				String typeName= expectedType.getName();
-				if (NAMING_CONVENTIONS_BUGS && variableKind == NamingConventions.VK_CONSTANT_FIELD && (expectedType.isPrimitive() || typeName.length() == 1)) {
-					res.add(expectedType.getName().toUpperCase());
-				}
 				if (typeName.length() > 0) {
 					add(getVariableNameSuggestions(variableKind, project, typeName, dim, excluded, false), res);
 				}
@@ -993,7 +988,7 @@ public class StubUtility {
 	}
 
 	private static String[] getDefaultVariableNameSuggestions(int variableKind, Collection excluded) {
-		String prop= variableKind == NamingConventions.VK_CONSTANT_FIELD ? "X" : "x"; //$NON-NLS-1$//$NON-NLS-2$
+		String prop= variableKind == NamingConventions.VK_STATIC_FINAL_FIELD ? "X" : "x"; //$NON-NLS-1$//$NON-NLS-2$
 		String name= prop;
 		int i= 1;
 		while (excluded.contains(name)) {
@@ -1009,7 +1004,7 @@ public class StubUtility {
 	 * @param variableKind specifies what type the variable is: {@link NamingConventions#VK_LOCAL},
 	 *            {@link NamingConventions#VK_PARAMETER}, {@link NamingConventions#VK_STATIC_FIELD},
 	 *            {@link NamingConventions#VK_INSTANCE_FIELD}, or
-	 *            {@link NamingConventions#VK_CONSTANT_FIELD}.
+	 *            {@link NamingConventions#VK_STATIC_FINAL_FIELD}.
 	 * @param project the current project
 	 * @param baseName the base name to make a suggestion on. The base name is expected to be a name
 	 *            without any pre- or suffixes in singular form. Type name are accepted as well.
@@ -1025,9 +1020,6 @@ public class StubUtility {
 	 *         no good suggestion for the given base name.
 	 */
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, String baseName, int dimensions, Collection excluded, boolean evaluateDefault) {
-		if (NAMING_CONVENTIONS_BUGS && variableKind == NamingConventions.VK_CONSTANT_FIELD && baseName.length() == 1) {
-			return new String[] { baseName.toUpperCase() };
-		}
 		return NamingConventions.suggestVariableNames(variableKind, NamingConventions.BK_TYPE_NAME, removeTypeArguments(baseName), project, dimensions, getExcludedArray(excluded), evaluateDefault);
 	}
 
@@ -1068,7 +1060,7 @@ public class StubUtility {
 			name= ((SuperMethodInvocation)assignedExpression).getName().getIdentifier();
 		} else if (assignedExpression instanceof FieldAccess) {
 			return ((FieldAccess)assignedExpression).getName().getIdentifier();
-		} else if (variableKind == NamingConventions.VK_CONSTANT_FIELD && (assignedExpression instanceof StringLiteral || assignedExpression instanceof NumberLiteral)) {
+		} else if (variableKind == NamingConventions.VK_STATIC_FINAL_FIELD && (assignedExpression instanceof StringLiteral || assignedExpression instanceof NumberLiteral)) {
 			String string= assignedExpression instanceof StringLiteral ? ((StringLiteral)assignedExpression).getLiteralValue() : ((NumberLiteral)assignedExpression).getToken();
 			StringBuffer res= new StringBuffer();
 			boolean needsUnderscore= false;
@@ -1180,7 +1172,7 @@ public class StubUtility {
 
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
 		if (Flags.isFinal(modifiers) && Flags.isStatic(modifiers)) {
-			return getVariableNameSuggestions(NamingConventions.VK_CONSTANT_FIELD, project, baseName, dimensions, new ExcludedCollection(excluded), true);
+			return getVariableNameSuggestions(NamingConventions.VK_STATIC_FINAL_FIELD, project, baseName, dimensions, new ExcludedCollection(excluded), true);
 		} else if (Flags.isStatic(modifiers)) {
 			return getVariableNameSuggestions(NamingConventions.VK_STATIC_FIELD, project, baseName, dimensions, new ExcludedCollection(excluded), true);
 		}
@@ -1285,17 +1277,8 @@ public class StubUtility {
 		return names;
 	}
 	
-	public static String getBaseName(int variableKind, String variableName, IJavaProject javaProject) {
-		//TODO: check other callers of NamingConventions!
-		String baseName= NamingConventions.getBaseName(variableKind, variableName, javaProject);
-		if (NAMING_CONVENTIONS_BUGS && baseName.length() > 0 && Character.isUpperCase(baseName.charAt(0))) {
-			return Character.toLowerCase(baseName.charAt(0)) + baseName.substring(1);
-		}
-		return baseName;
-	}
-
 	public static String getBaseName(IField field) throws JavaModelException {
-		return getBaseName(getFieldKind(field.getFlags()), field.getElementName(), field.getJavaProject());
+		return NamingConventions.getBaseName(getFieldKind(field.getFlags()), field.getElementName(), field.getJavaProject());
 	}
 
 	public static String getBaseName(IVariableBinding binding) {
@@ -1303,7 +1286,7 @@ public class StubUtility {
 	}
 
 	public static String getBaseName(IVariableBinding binding, IJavaProject project) {
-		return getBaseName(getKind(binding), binding.getName(), project);
+		return NamingConventions.getBaseName(getKind(binding), binding.getName(), project);
 	}
 
 	/**
@@ -1330,7 +1313,7 @@ public class StubUtility {
 		if (!Modifier.isFinal(modifiers))
 			return NamingConventions.VK_STATIC_FIELD;
 
-		return NamingConventions.VK_CONSTANT_FIELD;
+		return NamingConventions.VK_STATIC_FINAL_FIELD;
 	}
 
 	private static class ExcludedCollection extends AbstractList {

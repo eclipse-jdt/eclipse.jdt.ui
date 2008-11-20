@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 
 public class NameProposerTest extends TestCase {
@@ -113,14 +112,10 @@ public class NameProposerTest extends TestCase {
 		assertEqualString("setTouched", GetterSetterUtil.getSetterName(f6, excluded));
 		assertEqualString("isTouched", GetterSetterUtil.getGetterName(f6, excluded));
 		
-		// disabled because NamingConventions#suggestSetter/GetterName(..) don't funnel through getBaseName(..)
-		if (! StubUtility.NAMING_CONVENTIONS_BUGS) {
-			assertEqualString("setConst", GetterSetterUtil.getSetterName(f7, excluded));
-			assertEqualString("getConst", GetterSetterUtil.getGetterName(f7, excluded));
-			assertEqualString("setMyConstAnt", GetterSetterUtil.getSetterName(f8, excluded));
-			assertEqualString("isMyConstAnt", GetterSetterUtil.getGetterName(f8, excluded));
-		}
-
+		assertEqualString("setConst", GetterSetterUtil.getSetterName(f7, excluded));
+		assertEqualString("getConst", GetterSetterUtil.getGetterName(f7, excluded));
+		assertEqualString("setMyConstAnt", GetterSetterUtil.getSetterName(f8, excluded));
+		assertEqualString("isMyConstAnt", GetterSetterUtil.getGetterName(f8, excluded));
 	}
 
 	private void assertEqualString(String expected, String actual) {

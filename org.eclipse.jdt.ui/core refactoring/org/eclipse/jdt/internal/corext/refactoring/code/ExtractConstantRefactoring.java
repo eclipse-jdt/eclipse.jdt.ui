@@ -64,8 +64,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractConstantDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
@@ -238,7 +238,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= expression.resolveTypeBinding();
-					fGuessedConstNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_CONSTANT_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
+					fGuessedConstNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_STATIC_FINAL_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
 				}
 			} catch (JavaModelException e) {
 			}
