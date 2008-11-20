@@ -1136,6 +1136,7 @@
             verticalRulerPreferenceValue="false"
             colorPreferenceKey="writeOccurrenceIndicationColor"
             colorPreferenceValue="240,216,168"
+            presentationLayer="4"
             textStylePreferenceKey="writeOccurrenceTextStyle"
             textStylePreferenceValue="NONE">
 	  </specification>	  
