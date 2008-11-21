@@ -82,8 +82,8 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.InlineConstantDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -601,10 +601,11 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	/**
 	 * Creates a new inline constant refactoring.
+	 * 
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
 	 * @param node the compilation unit node, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart the start of the selection
+	 * @param selectionLength the length of the selection
 	 */
 	public InlineConstantRefactoring(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
