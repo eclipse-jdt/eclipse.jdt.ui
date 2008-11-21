@@ -453,6 +453,8 @@ public class PropertyKeyHyperlink implements IHyperlink {
 								IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
 
 								SearchPattern pattern= SearchPattern.createPattern(fPropertiesKey, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
+								if (pattern == null)
+									return;
 								try {
 									new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
 										public void acceptSearchMatch(SearchMatch match) throws CoreException {
