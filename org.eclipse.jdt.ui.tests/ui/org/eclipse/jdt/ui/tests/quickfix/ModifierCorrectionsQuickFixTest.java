@@ -825,7 +825,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 	}
 
-	public void testAbstractMethodInNonAbstractClass() throws Exception {
+	public void disabled_testAbstractMethodInNonAbstractClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
