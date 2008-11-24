@@ -76,6 +76,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.AbstractMethodInAbstractClass:
 			case IProblem.AbstractMethodMustBeImplemented:
 			case IProblem.EnumAbstractMethodMustBeImplemented:
+			case IProblem.AbstractMethodsInConcreteClass:
+			case IProblem.AbstractMethodInEnum:
 			case IProblem.EnumConstantMustImplementAbstractMethod:
 			case IProblem.ShouldImplementHashcode:
 			case IProblem.BodyForNativeMethod:
@@ -410,8 +412,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
+			case IProblem.AbstractMethodInEnum:
 			case IProblem.EnumAbstractMethodMustBeImplemented:
 				ModifierCorrectionSubProcessor.addAbstractMethodProposals(context, problem, proposals);
+				break;
+			case IProblem.AbstractMethodsInConcreteClass:
+				ModifierCorrectionSubProcessor.addAbstractTypeProposals(context, problem, proposals);
 				break;
 			case IProblem.AbstractMethodMustBeImplemented:
 			case IProblem.EnumConstantMustImplementAbstractMethod:

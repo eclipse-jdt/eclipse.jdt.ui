@@ -466,7 +466,10 @@ public class ModifierCorrectionSubProcessor {
 		boolean hasNoBody= decl.getBody() == null;
 
 		int id= problem.getProblemId();
-		if (id == IProblem.AbstractMethodInAbstractClass || id == IProblem.EnumAbstractMethodMustBeImplemented || parentIsAbstractClass) {
+		if (id == IProblem.AbstractMethodInAbstractClass
+				|| id == IProblem.EnumAbstractMethodMustBeImplemented
+				|| id == IProblem.AbstractMethodInEnum
+				|| parentIsAbstractClass) {
 			AST ast= astRoot.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -504,16 +507,45 @@ public class ModifierCorrectionSubProcessor {
 		}
 
 		if (id == IProblem.AbstractMethodInAbstractClass && parentTypeDecl != null) {
-			MakeTypeAbstractOperation operation= new UnimplementedCodeFix.MakeTypeAbstractOperation(parentTypeDecl);
-
-			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, BasicElementLabels.getJavaElementName(parentTypeDecl.getName().getIdentifier()));
-			UnimplementedCodeFix fix= new UnimplementedCodeFix(label, astRoot, new CompilationUnitRewriteOperation[] { operation });
-
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, 5, image, context);
-			proposals.add(proposal);
+			addMakeTypeAbstractProposal(context, parentTypeDecl, proposals);
 		}
 
+	}
+
+	private static void addMakeTypeAbstractProposal(IInvocationContext context, TypeDeclaration parentTypeDecl, Collection proposals) {
+		MakeTypeAbstractOperation operation= new UnimplementedCodeFix.MakeTypeAbstractOperation(parentTypeDecl);
+	
+		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, BasicElementLabels.getJavaElementName(parentTypeDecl.getName().getIdentifier()));
+		UnimplementedCodeFix fix= new UnimplementedCodeFix(label, context.getASTRoot(), new CompilationUnitRewriteOperation[] { operation });
+	
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, 5, image, context);
+		proposals.add(proposal);
+	}
+
+	public static void addAbstractTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit astRoot= context.getASTRoot();
+
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (selectedNode == null) {
+			return;
+		}
+		
+		TypeDeclaration parentTypeDecl= null;
+		if (selectedNode instanceof SimpleName) {
+			ASTNode parent= selectedNode.getParent();
+			if (parent != null) {
+				parentTypeDecl= (TypeDeclaration) parent;
+			}
+		} else if (selectedNode instanceof TypeDeclaration) {
+			parentTypeDecl= (TypeDeclaration) selectedNode;
+		}
+		
+		if (parentTypeDecl == null) {
+			return;
+		}
+		
+		addMakeTypeAbstractProposal(context, parentTypeDecl, proposals);
 	}
 
 	public static void addNativeMethodProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {

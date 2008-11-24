@@ -201,6 +201,12 @@ public class QuickFixTest extends TestCase {
 
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(nProblems, problems);
+		
+		return collectCorrections(cu, problems[0], context);
+	}
+
+	protected static void assertNumberOfProblems(int nProblems, IProblem[] problems) {
 		if (problems.length != nProblems) {
 			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
 			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
@@ -210,9 +216,7 @@ public class QuickFixTest extends TestCase {
 				buf.append('\n');
 			}
 			assertTrue(buf.toString(), false);
-
 		}
-		return collectCorrections(cu, problems[0], context);
 	}
 
 	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws CoreException {
@@ -242,17 +246,8 @@ public class QuickFixTest extends TestCase {
 		}
 
 		IProblem[] problems= (IProblem[]) problemsList.toArray(new IProblem[problemsList.size()]);
-		if (problems.length != nProblems) {
-			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
-			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
-			for (int i= 0; i < problems.length; i++) {
-				buf.append(problems[i]);
-				buf.append('[').append(problems[i].getSourceStart()).append(" ,").append(problems[i].getSourceEnd()).append(']');
-				buf.append('\n');
-			}
-			assertTrue(buf.toString(), false);
-
-		}
+		assertNumberOfProblems(nProblems, problems);
+		
 		return collectCorrections(cu, problems[0], null);
 	}
 

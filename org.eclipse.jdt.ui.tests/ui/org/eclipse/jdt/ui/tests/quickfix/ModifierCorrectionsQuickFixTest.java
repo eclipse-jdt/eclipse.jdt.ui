@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -825,7 +826,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 	}
 
-	public void disabled_testAbstractMethodInNonAbstractClass() throws Exception {
+	public void testAbstractMethodInNonAbstractClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -835,12 +836,34 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(2, problems);
+		
+		ArrayList proposals= collectCorrections(cu, problems[0], null);
+		
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public abstract int foo();\n");
+		buf.append("}\n");
+		String expectedMakeClassAbstract= buf.toString();
+		
+		assertEquals(preview1, expectedMakeClassAbstract);
+		
+		
+		proposals= collectCorrections(cu, problems[1], null);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		proposal= (CUCorrectionProposal) proposals.get(0);
+		preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -854,14 +877,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public abstract int foo();\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expectedMakeClassAbstract });
 	}
 
 	public void testNativeMethodWithBody() throws Exception {
