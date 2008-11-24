@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.jdt.ui" version="2">
+    <resource path="ui/org/eclipse/jdt/ui/actions/IJavaEditorActionDefinitionIds.java" type="org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="ITextEditorActionDefinitionIds"/>
+                <message_argument value="IJavaEditorActionDefinitionIds"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
