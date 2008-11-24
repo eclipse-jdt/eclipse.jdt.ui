@@ -305,6 +305,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 				// copy old content of line behind insertion point to new line
 				// unless we think we are inserting an anonymous type definition
+
 				if (c.offset == 0 || computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) == -1) {
 					if (lineEnd - contentStart > 0) {
 						c.length=  lineEnd - c.offset;
@@ -373,16 +374,16 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			scanTo= length;
 
 		int closingParen= findClosingParenToLeft(scanner, pos) - 1;
+		boolean hasNewToken= looksLikeAnonymousClassDef(document, partitioning, scanner, pos);
 		int openingParen= -1;
 		while (true) {
 			int startScan= closingParen + 1;
 			closingParen= scanner.scanForward(startScan, scanTo, ')');
 			if (closingParen == -1) {
-				if (openingParen == -1)
-					break;
-				return openingParen + 1;
+				if (hasNewToken && openingParen != -1)
+					return openingParen + 1;
+				break;
 			}
-
 
 			openingParen= scanner.findOpeningPeer(closingParen - 1, '(', ')');
 
@@ -405,7 +406,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	/**
 	 * Finds a closing parenthesis to the left of <code>position</code> in document, where that parenthesis is only
 	 * separated by whitespace from <code>position</code>. If no such parenthesis can be found, <code>position</code> is returned.
-	 *
+	 * 
 	 * @param scanner the java heuristic scanner set up on the document
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @return the position of a closing parenthesis left to <code>position</code> separated only by whitespace, or <code>position</code> if no parenthesis can be found
