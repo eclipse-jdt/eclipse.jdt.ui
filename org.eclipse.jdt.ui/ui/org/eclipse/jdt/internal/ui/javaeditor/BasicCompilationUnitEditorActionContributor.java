@@ -147,8 +147,8 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
 
-		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
-		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
+		fContentAssist.setAction(getAction(textEditor, ITextEditorActionConstants.CONTENT_ASSIST));
+		fContextInformation.setAction(getAction(textEditor, ITextEditorActionConstants.CONTENT_ASSIST_CONTEXT_INFORMATION));
 		fQuickAssistAction.setAction(getAction(textEditor, ITextEditorActionConstants.QUICK_ASSIST));
 
 		if (fSpecificAssistActions != null) {
