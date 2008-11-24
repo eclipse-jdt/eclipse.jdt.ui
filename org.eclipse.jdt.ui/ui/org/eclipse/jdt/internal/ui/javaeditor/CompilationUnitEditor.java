@@ -89,7 +89,6 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -1036,23 +1035,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		super.createActions();
 
-		IAction action= new ContentAssistAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); //$NON-NLS-1$
-		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-		setAction("ContentAssistProposal", action); //$NON-NLS-1$
-		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.CONTENT_ASSIST_ACTION);
-
-		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
-		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
-		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
-		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
-
-		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);
-		setAction("Comment", action); //$NON-NLS-1$
-		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.COMMENT_ACTION);
+		IAction action= getAction(ITextEditorActionConstants.CONTENT_ASSIST_CONTEXT_INFORMATION);
+		if (action != null) {
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
+			action.setText(JavaEditorMessages.getBundleForConstructedKeys().getString("ContentAssistContextInformation.label")); //$NON-NLS-1$
+			action.setToolTipText(JavaEditorMessages.getBundleForConstructedKeys().getString("ContentAssistContextInformation.tooltip")); //$NON-NLS-1$
+			action.setDescription(JavaEditorMessages.getBundleForConstructedKeys().getString("ContentAssistContextInformation.description")); //$NON-NLS-1$
+		}
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);
