@@ -54,10 +54,13 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -82,6 +85,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -880,18 +884,65 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		if (selectedNode.getParent() instanceof ExpressionStatement) {
-			selectedNode= selectedNode.getParent();
+		
+		ASTNode parent= selectedNode.getParent();
+		if (parent instanceof ExpressionStatement) {
+			addRemoveProposal(context, parent, proposals);
+			
+		} else if (parent instanceof WhileStatement) {
+			addRemoveIncludingConditionProposal(context, parent, null, proposals);
+			
+		} else if (selectedNode.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY) {
+			Statement elseStatement= ((IfStatement)parent).getElseStatement();
+			addRemoveIncludingConditionProposal(context, parent, elseStatement, proposals);
+			
+		} else if (selectedNode.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
+			Statement thenStatement= ((IfStatement)parent).getThenStatement();
+			addRemoveIncludingConditionProposal(context, parent, thenStatement, proposals);
+			
+		} else if (selectedNode.getLocationInParent() == ForStatement.BODY_PROPERTY) {
+			Statement body= ((ForStatement)parent).getBody();
+			addRemoveIncludingConditionProposal(context, parent, body, proposals);
+			
+		} else if (selectedNode.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY) {
+			Expression elseExpression= ((ConditionalExpression)parent).getElseExpression();
+			addRemoveIncludingConditionProposal(context, parent, elseExpression, proposals);
+			
+		} else if (selectedNode.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+			Expression thenExpression= ((ConditionalExpression)parent).getThenExpression();
+			addRemoveIncludingConditionProposal(context, parent, thenExpression, proposals);
+			
+		} else {
+			// no special case, just remove the node:
+			addRemoveProposal(context, selectedNode, proposals);
 		}
+	}
 
-		if (selectedNode instanceof Statement) {
-			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
-			rewrite.remove(selectedNode, null);
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
-			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image);
-			proposals.add(proposal);
+	private static void addRemoveProposal(IInvocationContext context, ASTNode selectedNode, Collection proposals) {
+		ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
+		rewrite.remove(selectedNode, null);
+		
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
+		addRemoveProposal(context, rewrite, label, proposals);
+	}
+
+	private static void addRemoveIncludingConditionProposal(IInvocationContext context, ASTNode toRemove, ASTNode replacement, Collection proposals) {
+		ASTRewrite rewrite= ASTRewrite.create(toRemove.getAST());
+		if (replacement == null
+				|| replacement instanceof EmptyStatement
+				|| replacement instanceof Block && ((Block)replacement).statements().size() == 0) {
+			rewrite.remove(toRemove, null);
+		} else {
+			rewrite.replace(toRemove, rewrite.createMoveTarget(replacement), null);
 		}
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
+		addRemoveProposal(context, rewrite, label, proposals);
+	}
+
+	private static void addRemoveProposal(IInvocationContext context, ASTRewrite rewrite, String label, Collection proposals) {
+		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image);
+		proposals.add(proposal);
 	}
 
 	public static void getAssignmentHasNoEffectProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {

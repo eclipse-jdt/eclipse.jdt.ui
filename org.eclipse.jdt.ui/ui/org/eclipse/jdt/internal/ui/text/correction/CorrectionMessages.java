@@ -98,6 +98,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_uninitializedvariable_description;
 	public static String LocalCorrectionsSubProcessor_removesemicolon_description;
 	public static String LocalCorrectionsSubProcessor_removeunreachablecode_description;
+	public static String LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
 	public static String LocalCorrectionsSubProcessor_removeelse_description;
 	public static String LocalCorrectionsSubProcessor_hiding_local_label;
 	public static String LocalCorrectionsSubProcessor_hiding_field_label;
