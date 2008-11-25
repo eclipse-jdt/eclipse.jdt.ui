@@ -31,6 +31,10 @@ import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 
 public class OptionsConfigurationBlockTest extends TestCase {
 
+	/*
+	 * NOTE: This test is not contained in the build test suite, since missing
+	 * UI should not make the build go red.
+	 */
 	public static Test suite() {
 		return new TestSuite(OptionsConfigurationBlockTest.class);
 	}
