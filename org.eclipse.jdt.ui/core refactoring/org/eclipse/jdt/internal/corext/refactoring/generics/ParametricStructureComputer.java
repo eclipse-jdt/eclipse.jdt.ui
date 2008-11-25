@@ -339,18 +339,6 @@ public class ParametricStructureComputer {
 		if (elemContainerStructure == ParametricStructure.NONE)
 			return;
 
-		if (false) {
-			if (v1 instanceof CollectionElementVariable2) {
-				// if v1's container no longer has structure, remove structure from elemContainer
-				CollectionElementVariable2 ev1= (CollectionElementVariable2) v1;
-				ConstraintVariable2 v1Container= ev1.getParentConstraintVariable();
-
-				if (elemStructure(v1Container) == ParametricStructure.NONE)
-					setStructureAndPush(elemContainer, ParametricStructure.NONE);
-				return;
-			}
-		}
-
 		if (elemContainerStructure == null) { // handle clone()
 			elemContainerStructure= newParametricType(elemContainer.getType());
 			setStructureAndPush(elemContainer, elemContainerStructure);
