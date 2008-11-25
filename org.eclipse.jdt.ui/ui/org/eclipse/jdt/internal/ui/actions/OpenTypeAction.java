@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
@@ -65,13 +64,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 			return;
 		}
 
-		SelectionDialog dialog;
-		if (e != null && e.stateMask == SWT.MOD1) {
-			// use old open type dialog when MOD1 (but no other modifier) is down:
-			dialog= createOpenTypeSelectionDialog2(parent);
-		} else {
-			dialog= new OpenTypeSelectionDialog(parent, true, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
-		}
+		SelectionDialog dialog= new OpenTypeSelectionDialog(parent, true, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
 		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle);
 		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage);
 
@@ -91,15 +84,6 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 				}
 			}
 		}
-	}
-
-	/**
-	 * @deprecated
-	 * @param parent
-	 * @return the dialog
-	 */
-	private SelectionDialog createOpenTypeSelectionDialog2(Shell parent) {
-		return new org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2(parent, false, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
 	}
 
 	/**
