@@ -92,11 +92,11 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				JavaCore.COMPILER_PB_INVALID_IMPORT,
 				JavaCore.COMPILER_PB_UNREACHABLE_CODE,
 				JavaCore.COMPILER_PB_UNSAFE_TYPE_OPERATION,
-				JavaCore.COMPILER_PB_BOOLEAN_METHOD_THROWING_EXCEPTION, // to be deprecated, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=245963
+				JavaCore.COMPILER_PB_BOOLEAN_METHOD_THROWING_EXCEPTION,
 
 				JavaCore.CODEASSIST_VISIBILITY_CHECK, // gets set directly, based on org.eclipse.jdt.ui.PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS
 
-				JavaCore.CORE_ENCODING, // useless
+				JavaCore.CORE_ENCODING, // useless copy of option from ResourcesPlugin
 				JavaCore.CORE_JAVA_BUILD_ORDER, // not relevant any more, since project references are not necessary for build path
 
 				JavaCore.COMPILER_PB_OVERRIDING_METHOD_WITHOUT_SUPER_INVOCATION, // not useful without suppressWarnings for 1.4: https://bugs.eclipse.org/bugs/show_bug.cgi?id=156736
