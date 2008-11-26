@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IEditingSupport;
 import org.eclipse.jface.text.IEditingSupportRegistry;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewerExtension6;
+import org.eclipse.jface.text.IUndoManager;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
@@ -139,7 +141,6 @@ public class RenameLinkedMode {
 
 	private RenameInformationPopup fInfoPopup;
 	
-	private boolean fOriginalSaved;
 	private Point fOriginalSelection;
 	private String fOriginalName;
 
@@ -179,8 +180,6 @@ public class RenameLinkedMode {
 			fgActiveLinkedMode.startFullDialog();
 			return;
 		}
-		
-		fOriginalSaved= ! fEditor.isDirty();
 		
 		ISourceViewer viewer= fEditor.getViewer();
 		IDocument document= viewer.getDocument();
@@ -382,33 +381,17 @@ public class RenameLinkedMode {
 	private RenameSupport undoAndCreateRenameSupport(String newName) throws CoreException {
 		// Assumption: the linked mode model should be shut down by now.
 		
-		ISourceViewer viewer= fEditor.getViewer();
-		final IDocument document= viewer.getDocument();
+		final ISourceViewer viewer= fEditor.getViewer();
 		
 		try {
 			if (! fOriginalName.equals(newName)) {
 				fEditor.getSite().getWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
-						Arrays.sort(positions, new Comparator() {
-							public int compare(Object o1, Object o2) {
-								return ((LinkedPosition) o1).offset - ((LinkedPosition) o2).offset;
+						if (viewer instanceof ITextViewerExtension6) {
+							IUndoManager undoManager= ((ITextViewerExtension6)viewer).getUndoManager();
+							if (undoManager != null && undoManager.undoable()) {
+								undoManager.undo();
 							}
-						});
-						int correction= 0;
-						int originalLength= fOriginalName.length();
-						for (int i= 0; i < positions.length; i++) {
-							LinkedPosition position= positions[i];
-							try {
-								int length= position.getLength();
-								document.replace(position.getOffset() + correction, length, fOriginalName);
-								correction= correction - length + originalLength;
-							} catch (BadLocationException e) {
-								throw new InvocationTargetException(e);
-							}
-						}
-						if (fOriginalSaved) {
-							fEditor.doSave(monitor); // started saved -> end saved
 						}
 					}
 				});
