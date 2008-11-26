@@ -79,8 +79,8 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Create a new AbstractTemplatesPage for the JavaEditor
-	 *
-	 * @param javaEditor
+	 * 
+	 * @param javaEditor the java editor
 	 */
 	public JavaTemplatesPage(JavaEditor javaEditor) {
 		super(javaEditor, javaEditor.getViewer());
@@ -262,7 +262,8 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Undomanager - end compound change
-	 * @param viewer
+	 * 
+	 * @param viewer the viewer
 	 */
 	private void endCompoundChange(ISourceViewer viewer) {
 		if (viewer instanceof ITextViewerExtension)
@@ -271,7 +272,8 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Undomanager - begin a compound change
-	 * @param viewer
+	 * 
+	 * @param viewer the viewer
 	 */
 	private void beginCompoundChange(ISourceViewer viewer) {
 		if (viewer instanceof ITextViewerExtension)
@@ -279,11 +281,11 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	}
 
 	/**
-	 * Check whether the template is allowed eventhough the context can't evaluate it. This is needed because
-	 * the Dropping of a template is more lenient than ctl-space invoked code assist.
-	 *
-	 * @param context
-	 * @param template
+	 * Check whether the template is allowed eventhough the context can't evaluate it. This is
+	 * needed because the Dropping of a template is more lenient than ctl-space invoked code assist.
+	 * 
+	 * @param context the template context
+	 * @param template the template
 	 * @return true if the template is allowed
 	 */
 	private boolean isTemplateAllowed(DocumentTemplateContext context, Template template) {
@@ -301,9 +303,9 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Checks whether the character is a valid character in Java template names
-	 *
-	 * @param ch
-	 * @return true or false
+	 * 
+	 * @param ch the character
+	 * @return <code>true</code> if the character is part of a template name
 	 */
 	private boolean isTemplateNamePart(char ch) {
 		return !Character.isWhitespace(ch) && ch != '(' && ch != ')' && ch != '{' && ch != '}' && ch != ';';
@@ -311,11 +313,11 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 
 	/**
 	 * Get context
-	 *
-	 * @param document
-	 * @param template
-	 * @param offset
-	 * @param length
+	 * 
+	 * @param document the document
+	 * @param template the template
+	 * @param offset the offset
+	 * @param length the length
 	 * @return the context
 	 */
 	private DocumentTemplateContext getContext(IDocument document, Template template, final int offset, int length) {
@@ -335,9 +337,9 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	 * <p>
 	 * FIXME: should trigger code assist to get the context.
 	 * </p>
-	 *
-	 * @param document
-	 * @param offset
+	 * 
+	 * @param document the document
+	 * @param offset the offset
 	 * @return an array of valid context id
 	 */
 	protected String[] getContextTypeIds(IDocument document, int offset) {
@@ -353,16 +355,15 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	}
 
 	/**
-	 * Get the java identifier terminated at the given offset
-	 *
-	 * @param document
-	 * @param template
-	 * @param offset
-	 * @param length
-	 * @return the identifier part
-	 * @throws BadLocationException
+	 * Get the Java identifier terminated at the given offset
+	 * 
+	 * @param document the document
+	 * @param template the template
+	 * @param offset the offset
+	 * @param length the length
+	 * @return the identifier part the Java identifier
 	 */
-	private String getIdentifierPart(IDocument document, Template template, int offset, int length) throws BadLocationException {
+	private String getIdentifierPart(IDocument document, Template template, int offset, int length) {
 		return getContext(document, template, offset, length).getKey();
 	}
 }
