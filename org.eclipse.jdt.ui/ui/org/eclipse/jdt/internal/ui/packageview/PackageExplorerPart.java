@@ -25,10 +25,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -56,18 +53,15 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -346,84 +340,6 @@ public class PackageExplorerPart extends ViewPart
 			return elements;
 		}
 
-	    //---- special handling to preserve the selection correctly
-	    private boolean fInPreserveSelection;
-		protected void preservingSelection(Runnable updateCode) {
-			try {
-				fInPreserveSelection= true;
-				super.preservingSelection(updateCode);
-			} finally {
-				fInPreserveSelection= false;
-			}
-		}
-		protected void setSelectionToWidget(ISelection selection, boolean reveal) {
-			if (true) {
-				super.setSelectionToWidget(selection, reveal);
-				return;
-			}
-			if (!fInPreserveSelection || !(selection instanceof ITreeSelection)) {
-				super.setSelectionToWidget(selection, reveal);
-				return;
-			}
-			IContentProvider cp= getContentProvider();
-			if (!(cp instanceof IMultiElementTreeContentProvider)) {
-				super.setSelectionToWidget(selection, reveal);
-				return;
-			}
-			IMultiElementTreeContentProvider contentProvider= (IMultiElementTreeContentProvider)cp;
-			ITreeSelection toRestore= (ITreeSelection)selection;
-			List pathsToSelect= new ArrayList();
-			for (Iterator iter= toRestore.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				TreePath[] pathsToRestore= toRestore.getPathsFor(element);
-				CustomHashtable currentParents= createRootAccessedMap(contentProvider.getTreePaths(element));
-				for (int i= 0; i < pathsToRestore.length; i++) {
-					TreePath path= pathsToRestore[i];
-					Object root= path.getFirstSegment();
-					if (root != null && path.equals((TreePath)currentParents.get(root), getComparer())) {
-						pathsToSelect.add(path);
-					}
-				}
-			}
-			List toSelect= new ArrayList();
-			for (Iterator iter= pathsToSelect.iterator(); iter.hasNext();) {
-				TreePath path= (TreePath)iter.next();
-				int size= path.getSegmentCount();
-				if (size == 0)
-					continue;
-				Widget current= getTree();
-				int last= size - 1;
-				Object segment;
-				for (int i= 0; i < size && current != null && (segment= path.getSegment(i)) != null; i++) {
-					internalExpandToLevel(current, 1);
-					current= internalFindChild(current, segment);
-					if (i == last && current != null)
-						toSelect.add(current);
-				}
-			}
-			getTree().setSelection((TreeItem[])toSelect.toArray(new TreeItem[toSelect.size()]));
-		}
-	    private Widget internalFindChild(Widget parent, Object element) {
-	        Item[] items = getChildren(parent);
-	        for (int i = 0; i < items.length; i++) {
-	            Item item = items[i];
-	            Object data = item.getData();
-	            if (data != null && equals(data, element))
-	                return item;
-	        }
-	        return null;
-	    }
-		private CustomHashtable createRootAccessedMap(TreePath[] paths) {
-			CustomHashtable result= new CustomHashtable(getComparer());
-			for (int i= 0; i < paths.length; i++) {
-				TreePath path= paths[i];
-				Object root= path.getFirstSegment();
-				if (root != null) {
-					result.put(root, path);
-				}
-			}
-			return result;
-		}
 	}
 
 	public PackageExplorerPart() {
