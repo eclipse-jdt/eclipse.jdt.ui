@@ -172,8 +172,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		return fContext;
 	}
 
-	/*
-	 * @see ICompletionProposal#apply(IDocument)
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @deprecated This method is no longer called by the framework and clients should overwrite
+	 *             {@link #apply(ITextViewer, char, int, int)} instead
 	 */
 	public final void apply(IDocument document) {
 		// not called anymore
