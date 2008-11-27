@@ -577,14 +577,7 @@ public class LocalCorrectionsSubProcessor {
 			expression.setOperator(InfixExpression.Operator.NOT_EQUALS);
 			expression.setRightOperand(ast.newNullLiteral());
 
-
-			if (false/*ASTNodes.needsParentheses(expression)*/) {
-				ParenthesizedExpression parents= ast.newParenthesizedExpression();
-				parents.setExpression(expression);
-				rewrite.replace(inst, parents, null);
-			} else {
-				rewrite.replace(inst, expression, null);
-			}
+			rewrite.replace(inst, expression, null);
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_unnecessaryinstanceof_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
