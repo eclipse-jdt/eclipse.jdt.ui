@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IStorage;
@@ -35,14 +36,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  */
 public class JarEntryEditorInput implements IStorageEditorInput {
 
-	private IStorage fJarEntryFile;
+	private final IStorage fJarEntryFile;
 
 	public JarEntryEditorInput(IStorage jarEntryFile) {
+		Assert.isNotNull(jarEntryFile);
 		fJarEntryFile= jarEntryFile;
 	}
 
-	/*
-	 */
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -52,6 +52,10 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 		return fJarEntryFile.equals(other.fJarEntryFile);
 	}
 
+	public int hashCode() {
+		return fJarEntryFile.hashCode();
+	}
+	
 	/*
 	 * @see IEditorInput#getPersistable()
 	 */

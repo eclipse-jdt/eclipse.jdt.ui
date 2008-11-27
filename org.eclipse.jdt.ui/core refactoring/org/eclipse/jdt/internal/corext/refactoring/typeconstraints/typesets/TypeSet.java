@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,14 +57,22 @@ public abstract class TypeSet implements ITypeSet {
 
 	abstract public TypeSet makeClone();
 
+	/**
+	 * @param s2 another type set 
+	 * @return intersection of this type set with the given type set
+	 */
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		return null;
 	}
+	
+	public abstract boolean equals(Object obj);
+	
+	public abstract int hashCode();
 
 	/**
 	 * Computes and returns a <em>new</em> TypeSet representing the intersection of the
 	 * receiver with s2. Does not modify the receiver or argument sets.
-	 * @param s2
+	 * @param s2 another type set
 	 * @return the new TypeSet
 	 */
 	public TypeSet intersectedWith(TypeSet s2) {
@@ -103,6 +111,9 @@ public abstract class TypeSet implements ITypeSet {
 	/**
 	 * Returns the TypeSet resulting from union'ing the receiver with the argument.
 	 * Does not modify the receiver or the argument sets.
+	 * 
+	 * @param that another type set
+	 * @return the union type set
 	 */
 	public TypeSet addedTo(TypeSet that) {
 		if (isUniverse() || that.isUniverse())
@@ -118,7 +129,7 @@ public abstract class TypeSet implements ITypeSet {
 	}
 
 	/**
-	 * Returns a new TypeSet representing the set of all sub-types of the
+	 * @return a new TypeSet representing the set of all sub-types of the
 	 * types in the receiver.
 	 */
 	public TypeSet subTypes() {
@@ -153,8 +164,8 @@ public abstract class TypeSet implements ITypeSet {
 	}
 
 	/**
-	 * Returns a new TypeSet representing the set of all super-types of the
-	 * types in the receiver.
+	 * @return a new TypeSet representing the set of all super-types of the
+	 * types in the receiver
 	 */
 	public TypeSet superTypes() {
 		if (isUniverse())
@@ -167,70 +178,72 @@ public abstract class TypeSet implements ITypeSet {
 	}
 
 	/**
-	 * Return true iff the type set contains no types.
+	 * @return true iff the type set contains no types
 	 */
 	abstract public boolean isEmpty();
 
 	/**
-	 * Returns the types in the upper bound of this set.
+	 * @return the types in the upper bound of this set
 	 */
 	abstract public TypeSet upperBound();
 
 	/**
-	 * Returns the types in the lower bound of this set.
+	 * @return the types in the lower bound of this set
 	 */
 	abstract public TypeSet lowerBound();
 
 	/**
-	 * Returns true iff this TypeSet has a unique lower bound.
+	 * @return true iff this TypeSet has a unique lower bound
 	 */
 	abstract public boolean hasUniqueLowerBound();
 
 	/**
-	 * Returns true iff this TypeSet has a unique upper bound other than
-	 * java.lang.Object.
+	 * @return true iff this TypeSet has a unique upper bound other than
+	 * java.lang.Object
 	 */
 	abstract public boolean hasUniqueUpperBound();
 
 	/**
-	 * Returns the unique lower bound of this set of types, if it has one,
-	 * or null otherwise.
+	 * @return the unique lower bound of this set of types, if it has one,
+	 * or null otherwise
 	 */
 	abstract public TType uniqueLowerBound();
 
 	/**
-	 * Returns the unique upper bound of this set of types, if it has one,
-	 * or null otherwise.
+	 * @return the unique upper bound of this set of types, if it has one,
+	 * or null otherwise
 	 */
 	abstract public TType uniqueUpperBound();
 
 	/**
-	 * Returns true iff the type set contains the given type.
+	 * @param t a type
+	 * @return true iff the type set contains the given type
 	 */
 	abstract public boolean contains(TType t);
 
 	/**
-	 * Returns true iff the type set contains all of the types in the given TypeSet.
+	 * @param s another type set
+	 * @return true iff the type set contains all of the types in the given TypeSet
 	 */
 	abstract public boolean containsAll(TypeSet s);
 
 	/**
-	 * Returns an iterator over the types in the receiver.
+	 * @return an iterator over the types in the receiver
 	 */
 	abstract public Iterator iterator();
 
 	/**
-	 * Returns a new TypeSet enumerating the receiver's contents.
+	 * @return a new TypeSet enumerating the receiver's contents
 	 */
 	abstract public EnumeratedTypeSet enumerate();
 
 	/**
-	 * Returns true iff the given set has precisely one element
+	 * @return true iff the given set has precisely one element
 	 */
 	abstract public boolean isSingleton();
 
 	/**
-	 * Returns an arbitrary member of the given Typeset.
+	 * @return an arbitrary member of the given Typeset
 	 */
 	abstract public TType anyMember();
 }
