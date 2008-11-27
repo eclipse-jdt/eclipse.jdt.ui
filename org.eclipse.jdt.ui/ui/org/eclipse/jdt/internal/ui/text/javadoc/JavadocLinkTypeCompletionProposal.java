@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,13 +37,12 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 	 */
 	protected String computeReplacementString() {
 		String typeReplacement= super.computeReplacementString();
-		// TODO respect the auto-close preference, but do so consistently with method completions
+		// XXX: respect the auto-close preference, but do so consistently with method completions
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
 //		if (autocloseBrackets())
-		if (true)
 			return "{@link " + typeReplacement + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-		else
-			return "{@link " + typeReplacement; //$NON-NLS-1$
+//		else
+//			return "{@link " + typeReplacement; //$NON-NLS-1$
 	}
 
 	/*
@@ -53,7 +52,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 		// convert . to #
 		if (trigger == '.')
 			trigger= '#';
-		// TODO respect the auto-close preference, but do so consistently with method completions
+		// XXX: respect the auto-close preference, but do so consistently with method completions
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
 //		boolean continueWithMember= trigger == '#' && autocloseBrackets();
 		boolean continueWithMember= trigger == '#';
