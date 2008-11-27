@@ -40,7 +40,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -248,16 +247,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 					}
 				}
 				List fragments= copy.fragments();
-				for (Iterator iter= fragments.iterator(), original= statement.fragments().iterator(); iter.hasNext();) {
+				for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
-					IVariableBinding binding= ((VariableDeclarationFragment)original.next()).resolveBinding();
-					// If we want to initialize the new local then we should do a flow analysis upfront
-					// to decide if the first access is a read or write.
-					if (true /* binding == null */) {
-						fragment.setInitializer(null);
-					} else {
-						fragment.setInitializer(ASTNodeFactory.newDefaultExpression(ast, binding.getType()));
-					}
+					fragment.setInitializer(null);
 				}
 				CompilationUnit root= (CompilationUnit)statement.getRoot();
 				int extendedStart= root.getExtendedStartPosition(statement);
