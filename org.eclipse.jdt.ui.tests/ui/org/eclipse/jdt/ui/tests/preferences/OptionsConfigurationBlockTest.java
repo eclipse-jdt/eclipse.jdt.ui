@@ -103,6 +103,8 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				JavaCore.COMPILER_PB_UNUSED_TYPE_ARGUMENTS_FOR_METHOD_INVOCATION, // maybe for 1.7
 
 				JavaCore.CODEASSIST_IMPLICIT_QUALIFICATION, // TODO: not used: bug?
+				
+				JavaCore.COMPILER_PB_DEAD_CODE_IN_TRIVIAL_IF_STATEMENT, // default is good (don't flag trivial 'if (DEBUG)')
 		}));
 	}
 
