@@ -159,6 +159,8 @@ public void ${testname}() throws Exception {
 
 <template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true" autoinsert="false">//$$NON-NLS-${N}$$</template>
 
+<template name="fall-through" description="%Templates.fall-through" id="org.eclipse.jdt.ui.templates.fall-through" context="java" enabled="true" autoinsert="false">//$$FALL-THROUGH$$</template>
+
 <template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java-statements" enabled="true" autoinsert="false">synchronized (${mutex:var}) {
 	${line_selection}
 }</template>
