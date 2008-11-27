@@ -610,43 +610,46 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	private int[] getPolygon(boolean border) {
 		Point e = getExtent();
 		int b = border ? 1 : 0;
-		if (true /*arrowOnLeft*/) {
+		boolean isRTL= (fPopup.getStyle() & SWT.RIGHT_TO_LEFT) != 0;
+		int ha1= isRTL ? e.x - HAO :           HAO + HAW;
+		int ha2= isRTL ? e.x - HAO - HAW / 2 : HAO + HAW / 2;
+		int ha3= isRTL ? e.x - HAO - HAW :     HAO;
+			int[] poly;
 			switch (fSnapPosition) {
 				case SNAP_POSITION_OVER_LEFT_FIELD:
-					return new int[] {
+					poly= new int[] {
 							0, 0,
 							e.x - b, 0,
 							e.x - b, e.y - b,
-							HAO + HAW, e.y - b,
-							HAO + HAW / 2, e.y + HAH - b,
-							HAO, e.y - b,
+							ha1, e.y - b,
+							ha2, e.y + HAH - b,
+							ha3, e.y - b,
 							0, e.y - b,
 							0, 0 };
+					break;
 
 				case SNAP_POSITION_UNDER_LEFT_FIELD:
-					return new int[] {
+					poly= new int[] {
 							0, HAH,
-							HAO + b, HAH,
-							HAO + HAW / 2, b,
-							HAO + HAW - b, HAH,
+							ha3 + b, HAH,
+							ha2, b,
+							ha1 - b, HAH,
 							e.x - b, HAH,
 							e.x - b, e.y + HAH - b,
 							0, e.y + HAH - b,
 							0, HAH };
+					break;
 
 				default:
-					return new int[] {
+					poly= new int[] {
 							0, 0,
 							e.x - b, 0,
 							e.x - b, e.y - b,
 							0, e.y - b,
 							0, 0 };
+					break;
 			}
-		}
-		//TODO: BiDi?
-		return new int[] { 0, 0, e.x - b, 0, e.x - b, e.y - b,
-				e.x - HAO - b, e.y - b, e.x - HAO - HAW / 2, e.y + HAH - b,
-				e.x - HAO - HAW, e.y - b, 0, e.y - b, 0, 0 };
+		return poly;
 	}
 
 	private void createContent(Composite parent) {
