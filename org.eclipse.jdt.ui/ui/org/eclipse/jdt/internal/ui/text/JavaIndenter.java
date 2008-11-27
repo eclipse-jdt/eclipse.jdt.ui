@@ -236,9 +236,6 @@ public final class JavaIndenter {
 		}
 
 		private int prefCaseBlockIndent() {
-			if (true)
-				return prefBlockIndent();
-
 			if (DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES)))
 				return prefBlockIndent();
 			else
@@ -304,17 +301,7 @@ public final class JavaIndenter {
 		}
 
 		private boolean prefParenthesisDeepIndent() {
-			if (true) // don't do parenthesis deep indentation
-				return false;
-
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION);
-			try {
-				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-
-			return false; // sensible default
+			return false; // don't do parenthesis deep indentation (check rev. 1.60 for experimental code)
 		}
 
 		private int prefParenthesisIndent() {
