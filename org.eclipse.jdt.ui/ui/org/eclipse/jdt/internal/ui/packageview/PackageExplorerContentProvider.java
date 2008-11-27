@@ -33,7 +33,6 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -678,7 +677,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (kind == IJavaElementDelta.CHANGED) {
 				// isStructuralCUChange already performed above
 				postRefresh(element, ORIGINAL, element, runnables);
-				updateSelection(delta, runnables);
 			}
 			return false;
 		}
@@ -780,38 +778,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (project == null || !project.exists())
 			return false;
 		return project.isOnClasspath(element);
-	}
-
-	/**
-	 * Updates the selection. It finds newly added elements
-	 * and selects them.
-	 * @param delta the delta to process
-	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
-	 */
-	private void updateSelection(IJavaElementDelta delta, Collection runnables) {
-		final IJavaElement addedElement= findAddedElement(delta);
-		if (addedElement != null) {
-			final StructuredSelection selection= new StructuredSelection(addedElement);
-			runnables.add(new Runnable() {
-				public void run() {
-					// 19431
-					// if the item is already visible then select it
-					if (fViewer.testFindItem(addedElement) != null)
-						fViewer.setSelection(selection);
-				}
-			});
-		}
-	}
-
-	private IJavaElement findAddedElement(IJavaElementDelta delta) {
-		if (delta.getKind() == IJavaElementDelta.ADDED)
-			return delta.getElement();
-
-		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
-		for (int i= 0; i < affectedChildren.length; i++)
-			return findAddedElement(affectedChildren[i]);
-
-		return null;
 	}
 
 	/**
