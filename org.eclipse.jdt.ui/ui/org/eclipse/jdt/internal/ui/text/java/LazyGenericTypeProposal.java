@@ -149,6 +149,16 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			}
 			return false;
 		}
+
+		/*
+		 * @see java.lang.Object#hashCode()
+		 * @since 3.1
+		 */
+		public int hashCode() {
+			int low= fContextDisplayString != null ? fContextDisplayString.hashCode() : 0;
+			return fPosition << 24 | fInformationDisplayString.hashCode() << 16 | low;
+		}
+
 	}
 
 	private static final class TypeArgumentProposal {
@@ -346,10 +356,11 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	 * <li>the type parameter name for all other (unbounded or more than one bound) type parameters</li>
 	 * </ul>
 	 * Type argument proposals for type parameters are always ambiguous.
-	 *
+	 * 
 	 * @param parameter the type parameter of the inserted type
 	 * @return a type argument proposal for <code>parameter</code>
-	 * @throws JavaModelException
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
 	 */
 	private TypeArgumentProposal computeTypeProposal(ITypeParameter parameter) throws JavaModelException {
 		String[] bounds= parameter.getBounds();
@@ -386,11 +397,12 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	 * </ul>
 	 * </li>
 	 * </ul>
-	 *
+	 * 
 	 * @param binding the type argument binding in the expected type
 	 * @param parameter the type parameter of the inserted type
 	 * @return a type argument proposal for <code>binding</code>
-	 * @throws JavaModelException
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
 	 * @see #computeTypeProposal(ITypeParameter)
 	 */
 	private TypeArgumentProposal computeTypeProposal(ITypeBinding binding, ITypeParameter parameter) throws JavaModelException {
@@ -414,24 +426,22 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	}
 
 	/**
-	 * Computes one inheritance path from <code>superType</code> to
-	 * <code>subType</code> or <code>null</code> if <code>subType</code>
-	 * does not inherit from <code>superType</code>. Note that there may be
-	 * more than one inheritance path - this method simply returns one.
+	 * Computes one inheritance path from <code>superType</code> to <code>subType</code> or
+	 * <code>null</code> if <code>subType</code> does not inherit from <code>superType</code>. Note
+	 * that there may be more than one inheritance path - this method simply returns one.
 	 * <p>
-	 * The returned array contains <code>superType</code> at its first index,
-	 * and <code>subType</code> at its last index. If <code>subType</code>
-	 * equals <code>superType</code>, an array of length 1 is returned
-	 * containing that type.
+	 * The returned array contains <code>superType</code> at its first index, and
+	 * <code>subType</code> at its last index. If <code>subType</code> equals <code>superType</code>
+	 * , an array of length 1 is returned containing that type.
 	 * </p>
-	 *
+	 * 
 	 * @param subType the sub type
 	 * @param superType the super type
-	 * @return an inheritance path from <code>superType</code> to
-	 *         <code>subType</code>, or <code>null</code> if
-	 *         <code>subType</code> does not inherit from
+	 * @return an inheritance path from <code>superType</code> to <code>subType</code>, or
+	 *         <code>null</code> if <code>subType</code> does not inherit from
 	 *         <code>superType</code>
-	 * @throws JavaModelException
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
 	 */
 	private IType[] computeInheritancePath(IType subType, IType superType) throws JavaModelException {
 		if (superType == null)
@@ -461,27 +471,23 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 	}
 
 	/**
-	 * For the type parameter at <code>paramIndex</code> in the type at
-	 * <code>path[pathIndex]</code>, this method computes the corresponding
-	 * type parameter index in the type at <code>path[0]</code>. If the type
-	 * parameter does not map to a type parameter of the super type,
-	 * <code>-1</code> is returned.
-	 *
-	 * @param path the type inheritance path, a non-empty array of consecutive
-	 *        sub types
-	 * @param pathIndex an index into <code>path</code> specifying the type to
-	 *        start with
-	 * @param paramIndex the index of the type parameter to map -
-	 *        <code>path[pathIndex]</code> must have a type parameter at that
-	 *        index, lest an <code>ArrayIndexOutOfBoundsException</code> is
-	 *        thrown
-	 * @return the index of the type parameter in <code>path[0]</code>
-	 *         corresponding to the type parameter at <code>paramIndex</code>
-	 *         in <code>path[pathIndex]</code>, or -1 if there is no
-	 *         corresponding type parameter
-	 * @throws JavaModelException
-	 * @throws ArrayIndexOutOfBoundsException if <code>path[pathIndex]</code>
-	 *         has &lt;= <code>paramIndex</code> parameters
+	 * For the type parameter at <code>paramIndex</code> in the type at <code>path[pathIndex]</code>
+	 * , this method computes the corresponding type parameter index in the type at
+	 * <code>path[0]</code>. If the type parameter does not map to a type parameter of the super
+	 * type, <code>-1</code> is returned.
+	 * 
+	 * @param path the type inheritance path, a non-empty array of consecutive sub types
+	 * @param pathIndex an index into <code>path</code> specifying the type to start with
+	 * @param paramIndex the index of the type parameter to map - <code>path[pathIndex]</code> must
+	 *            have a type parameter at that index, lest an
+	 *            <code>ArrayIndexOutOfBoundsException</code> is thrown
+	 * @return the index of the type parameter in <code>path[0]</code> corresponding to the type
+	 *         parameter at <code>paramIndex</code> in <code>path[pathIndex]</code>, or -1 if there
+	 *         is no corresponding type parameter
+	 * @throws JavaModelException if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 * @throws ArrayIndexOutOfBoundsException if <code>path[pathIndex]</code> has &lt;=
+	 *             <code>paramIndex</code> parameters
 	 */
 	private int mapTypeParameterIndex(IType[] path, int pathIndex, int paramIndex) throws JavaModelException, ArrayIndexOutOfBoundsException {
 		if (pathIndex == 0)

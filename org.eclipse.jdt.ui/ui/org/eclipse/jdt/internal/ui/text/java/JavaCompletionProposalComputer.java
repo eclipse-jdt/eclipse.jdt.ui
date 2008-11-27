@@ -103,6 +103,14 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 			else
 				return fContextInformation.equals(object);
 		}
+
+		/*
+		 * @see java.lang.Object#hashCode()
+		 * @since 3.5
+		 */
+		public int hashCode() {
+			return fContextInformation.hashCode();
+		}
 	}
 
 	private static final long JAVA_CODE_ASSIST_TIMEOUT= 500; // ms
