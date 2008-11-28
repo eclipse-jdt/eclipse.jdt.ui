@@ -71,11 +71,20 @@ public class FatJarManifestProvider implements IManifestProvider {
 						while (entries.hasMoreElements()) {
 							ZipEntry entry= (ZipEntry) entries.nextElement();
 							if (entry.getName().equalsIgnoreCase("META-INF/MANIFEST.MF")) { //$NON-NLS-1$
+								InputStream inputStream= null;
 								try {
-									Manifest otherManifest= new Manifest(zip.getInputStream(entry));
+									inputStream= zip.getInputStream(entry);
+									Manifest otherManifest= new Manifest(inputStream);
 									otherManifests.add(otherManifest);
 								} catch (IOException e) {
 									JavaPlugin.log(e);
+								} finally {
+									if (inputStream != null) {
+										try {
+											inputStream.close();
+										} catch(IOException e){
+										}
+									}
 								}
 							}
 						}
