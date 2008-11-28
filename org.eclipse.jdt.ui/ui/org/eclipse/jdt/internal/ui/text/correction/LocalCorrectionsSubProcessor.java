@@ -879,10 +879,12 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		ASTNode parent= selectedNode.getParent();
-		if (parent instanceof ExpressionStatement) {
-			addRemoveProposal(context, parent, proposals);
-			
-		} else if (parent instanceof WhileStatement) {
+		while (parent instanceof ExpressionStatement) {
+			selectedNode= parent;
+			parent= selectedNode.getParent();
+		}
+		
+		if (parent instanceof WhileStatement) {
 			addRemoveIncludingConditionProposal(context, parent, null, proposals);
 			
 		} else if (selectedNode.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY) {
@@ -904,6 +906,27 @@ public class LocalCorrectionsSubProcessor {
 		} else if (selectedNode.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
 			Expression thenExpression= ((ConditionalExpression)parent).getThenExpression();
 			addRemoveIncludingConditionProposal(context, parent, thenExpression, proposals);
+			
+		} else if (selectedNode.getLocationInParent() == InfixExpression.RIGHT_OPERAND_PROPERTY) {
+			InfixExpression infixExpression= (InfixExpression)parent;
+			Expression leftOperand= infixExpression.getLeftOperand();
+			List extendedOperands= infixExpression.extendedOperands();
+			
+			ASTRewrite rewrite= ASTRewrite.create(parent.getAST());
+			if (extendedOperands.size() == 0) {
+				rewrite.replace(infixExpression, rewrite.createMoveTarget(leftOperand), null);
+			} else {
+				ASTNode firstExtendedOp= rewrite.createMoveTarget((Expression)extendedOperands.get(0));
+				rewrite.set(infixExpression, InfixExpression.RIGHT_OPERAND_PROPERTY, firstExtendedOp, null);
+				rewrite.remove(leftOperand, null);
+			}
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
+			addRemoveProposal(context, rewrite, label, proposals);
+			
+			AssistContext assistContext= new AssistContext(context.getCompilationUnit(), infixExpression.getRightOperand().getStartPosition() - 1, 0);
+			assistContext.setASTRoot(root);
+			AdvancedQuickAssistProcessor.getSplitAndConditionProposals(assistContext, infixExpression, proposals);
+			AdvancedQuickAssistProcessor.getSplitOrConditionProposals(assistContext, infixExpression, proposals);
 			
 		} else {
 			// no special case, just remove the node:
@@ -934,7 +957,7 @@ public class LocalCorrectionsSubProcessor {
 
 	private static void addRemoveProposal(IInvocationContext context, ASTRewrite rewrite, String label, Collection proposals) {
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 		proposals.add(proposal);
 	}
 

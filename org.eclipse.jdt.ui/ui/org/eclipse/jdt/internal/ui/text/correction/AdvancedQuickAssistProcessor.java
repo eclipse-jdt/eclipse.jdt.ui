@@ -779,7 +779,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return parenthesizedExpression;
 	}
 
-	private static boolean getSplitAndConditionProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	public static boolean getSplitAndConditionProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Operator andOperator= InfixExpression.Operator.CONDITIONAL_AND;
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
@@ -980,7 +980,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return expression;
 	}
 
-	private static boolean getSplitOrConditionProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	public static boolean getSplitOrConditionProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Operator orOperator= InfixExpression.Operator.CONDITIONAL_OR;
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
