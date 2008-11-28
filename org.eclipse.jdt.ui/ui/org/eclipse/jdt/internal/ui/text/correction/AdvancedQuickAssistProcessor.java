@@ -800,9 +800,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		IfStatement ifStatement= (IfStatement) statement;
-		if (ifStatement.getElseStatement() != null) {
-			return false;
-		}
+
 		// check that infix expression is part of first level && condition of IfStatement
 		InfixExpression topInfixExpression= infixExpression;
 		while (topInfixExpression.getParent() instanceof InfixExpression && ((InfixExpression) topInfixExpression.getParent()).getOperator() == andOperator) {
@@ -825,17 +823,25 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression leftCondition= newOperands[0];
 		Expression rightCondition= newOperands[1];
 
-		// replace condition in inner IfStatement
-		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, rightCondition, null);
-		// prepare outer IfStatement
-		IfStatement outerIfStatement= ast.newIfStatement();
-		outerIfStatement.setExpression(leftCondition);
-		Block outerBlock= ast.newBlock();
-		outerIfStatement.setThenStatement(outerBlock);
-		ASTNode ifPlaceholder= rewrite.createMoveTarget(ifStatement);
-		outerBlock.statements().add(ifPlaceholder);
-		// replace ifStatement
-		rewrite.replace(ifStatement, outerIfStatement, null);
+		// replace conditions in outer IfStatement
+		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, leftCondition, null);
+		
+		// prepare inner IfStatement
+		IfStatement innerIf= ast.newIfStatement();
+		
+		innerIf.setExpression(rightCondition);
+		innerIf.setThenStatement((Statement) rewrite.createMoveTarget(ifStatement.getThenStatement()));
+		Block innerBlock= ast.newBlock();
+		innerBlock.statements().add(innerIf);
+		
+		Statement elseStatement= ifStatement.getElseStatement();
+		if (elseStatement != null) {
+			innerIf.setElseStatement((Statement) rewrite.createCopyTarget(elseStatement));
+		}
+		
+		// replace outer thenStatement
+		rewrite.replace(ifStatement.getThenStatement(), innerBlock, null);
+		
 		// add correction proposal
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_splitAndCondition_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
