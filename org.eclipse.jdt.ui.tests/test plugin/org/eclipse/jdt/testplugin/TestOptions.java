@@ -36,6 +36,7 @@ public class TestOptions {
 		result.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.IGNORE);
+		result.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.IGNORE);
 		// should cover all compiler settings
 		result.putAll(TestFormatterOptions.getSettings());
 		return result;
