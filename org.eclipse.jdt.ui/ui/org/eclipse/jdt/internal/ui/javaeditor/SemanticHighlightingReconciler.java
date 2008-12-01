@@ -131,7 +131,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						addPosition(offset, length, fJobDeprecatedMemberHighlighting);
 				}
 			}
-			return false;
+			return true;
 		}
 
 		/*
@@ -149,7 +149,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						addPosition(offset, length, fJobDeprecatedMemberHighlighting);
 				}
 			}
-			return false;
+			return true;
 		}
 
 		/*
