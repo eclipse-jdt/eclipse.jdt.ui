@@ -908,6 +908,7 @@ public class LocalCorrectionsSubProcessor {
 			addRemoveIncludingConditionProposal(context, parent, thenExpression, proposals);
 			
 		} else if (selectedNode.getLocationInParent() == InfixExpression.RIGHT_OPERAND_PROPERTY) {
+			// also offer split && / || condition proposals:
 			InfixExpression infixExpression= (InfixExpression)parent;
 			Expression leftOperand= infixExpression.getLeftOperand();
 			List extendedOperands= infixExpression.extendedOperands();
@@ -927,6 +928,23 @@ public class LocalCorrectionsSubProcessor {
 			assistContext.setASTRoot(root);
 			AdvancedQuickAssistProcessor.getSplitAndConditionProposals(assistContext, infixExpression, proposals);
 			AdvancedQuickAssistProcessor.getSplitOrConditionProposals(assistContext, infixExpression, proposals);
+			
+		} else if (selectedNode instanceof Statement && selectedNode.getLocationInParent().isChildListProperty()) {
+			// remove all statements following the unreachable:
+			List statements= (List) selectedNode.getParent().getStructuralProperty(selectedNode.getLocationInParent());
+			int idx= statements.indexOf(selectedNode);
+			
+			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
+			for (int i= idx; i < statements.size(); i++) {
+				ASTNode statement= (ASTNode)statements.get(i);
+				if (statement instanceof SwitchCase)
+					break; // stop at case *: and default:
+				rewrite.remove(statement, null);
+			}
+			
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
+			addRemoveProposal(context, rewrite, label, proposals);
+			
 			
 		} else {
 			// no special case, just remove the node:
