@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.internal.core.refactoring.UndoManager;
 import org.eclipse.ltk.internal.core.refactoring.UndoManager2;
 
 public class UndoManagerTests extends RefactoringTest {
@@ -55,12 +54,9 @@ public class UndoManagerTests extends RefactoringTest {
 	}
 
 	private void testCounts(int iterationCount, int undoCount, int redoCount) {
-		if (RefactoringCore.getUndoManager() instanceof UndoManager) {
-			UndoManager manager= (UndoManager)RefactoringCore.getUndoManager();
-			assertTrue(iterationCount + "undo stack", manager.testHasNumberOfUndos(undoCount));
-			assertTrue(iterationCount + "redo stack", manager.testHasNumberOfRedos(redoCount));
-		} else if (RefactoringCore.getUndoManager() instanceof UndoManager2) {
-			UndoManager2 manager= (UndoManager2)RefactoringCore.getUndoManager();
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		if (undoManager instanceof UndoManager2) {
+			UndoManager2 manager= (UndoManager2)undoManager;
 			assertTrue(iterationCount + "undo stack", manager.testHasNumberOfUndos(undoCount));
 			assertTrue(iterationCount + "redo stack", manager.testHasNumberOfRedos(redoCount));
 		}
