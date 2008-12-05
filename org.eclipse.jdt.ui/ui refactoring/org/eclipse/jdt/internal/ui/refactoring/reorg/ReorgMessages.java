@@ -133,6 +133,12 @@ public final class ReorgMessages extends NLS {
 	public static String CopyToClipboardAction_5;
 	public static String DeleteAction_3;
 	public static String DeleteAction_4;
+	public static String DeleteWorkingSet_Hide;
+	public static String DeleteWorkingSet_removeorhideworkingset_single;
+	public static String DeleteWorkingSet_removeorhideworkingset_multiple;
+	public static String DeleteWorkingSet_Remove;
+	public static String DeleteWorkingSet_single;
+	public static String DeleteWorkingSet_multiple;
 	public static String NewNameQueries_21;
 	public static String NewNameQueries_22;
 	public static String ReorgCopyAction_3;

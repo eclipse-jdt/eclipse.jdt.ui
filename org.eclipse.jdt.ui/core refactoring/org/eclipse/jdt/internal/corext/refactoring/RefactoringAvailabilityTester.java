@@ -277,8 +277,11 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isDeleteAvailable(final Object[] objects) {
 		if (objects.length != 0) {
+			if (ReorgUtils.containsOnlyWorkingSets(Arrays.asList(objects)))
+				return true;
 			final IResource[] resources= RefactoringAvailabilityTester.getResources(objects);
 			final IJavaElement[] elements= RefactoringAvailabilityTester.getJavaElements(objects);
+
 			if (objects.length != resources.length + elements.length)
 				return false;
 			for (int index= 0; index < resources.length; index++) {

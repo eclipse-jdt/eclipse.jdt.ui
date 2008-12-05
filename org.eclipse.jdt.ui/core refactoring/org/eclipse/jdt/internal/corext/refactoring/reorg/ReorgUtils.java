@@ -86,6 +86,37 @@ public class ReorgUtils {
 		return (element instanceof IJavaProject) || (element instanceof IProject);
 	}
 
+	/**
+	 * Checks whether the given list contains only working sets.
+	 * 
+	 * @param elements the list with elements to check
+	 * @return <code>true</code> if the list contains only working sets, <code>false</code>
+	 *         otherwise
+	 * @since 3.5
+	 */
+	public static boolean containsOnlyWorkingSets (List elements){
+		if (elements.isEmpty())
+			return false;
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			if (!isWorkingSet(iter.next()))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks whether the given object is a working set.
+	 * 
+	 * @param element the element to test
+	 * @return <code>true</code> if the element is a working set, <code>false</code> otherwise
+	 * @since 3.5
+	 * 
+	 */
+
+	public static boolean isWorkingSet(Object element){
+		return (element instanceof IWorkingSet);
+	}
+
 	public static boolean isInsideCompilationUnit(IJavaElement element) {
 		return 	!(element instanceof ICompilationUnit) &&
 				hasAncestorOfType(element, IJavaElement.COMPILATION_UNIT);
