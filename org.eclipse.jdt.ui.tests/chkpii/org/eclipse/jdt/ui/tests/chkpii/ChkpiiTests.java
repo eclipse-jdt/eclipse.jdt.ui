@@ -332,7 +332,8 @@ public class ChkpiiTests extends TestCase {
 
 	/**
 	 * Constructor for EmptyDirectoriesTest.
-	 * @param name
+	 * 
+	 * @param name the test name
 	 */
 	public ChkpiiTests(String name) {
 		super(name);

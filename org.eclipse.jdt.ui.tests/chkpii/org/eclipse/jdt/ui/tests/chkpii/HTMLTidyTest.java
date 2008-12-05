@@ -53,13 +53,13 @@ public class HTMLTidyTest extends TestCase {
 	private Writer fTidyResults;
 
 	/**
-	 * Main method for manual testing of a file or folder selected in the workspace.
-	 * To run, create a Java launch configuration with program argument<br>
+	 * Main method for manual testing of a file or folder selected in the workspace. To run, create
+	 * a Java launch configuration with program argument<br>
 	 * <code>"${resource_loc}"</code><br>
 	 * (including double quotes!).
-	 *
+	 * 
 	 * @param args 1 argument: Absolute path to a file or folder
-	 * @throws Exception
+	 * @throws Exception if checking fails
 	 */
 	public static void main(String[] args) throws Exception {
 		HTMLTidyTest test= new HTMLTidyTest();
