@@ -45,6 +45,7 @@ org.eclipse.releng.tools/*
 org.eclipse.sdk.tests-feature/*
 org.eclipse.sdk-feature/*
 org.eclipse.perfmsr.core/*
+org.eclipse.test.performance.ui/*
 org.eclipse.pde.source/*
 org.eclipse.ui.examples.recipeeditor/doc/article.html
 org.eclipse.ui.examples.recipeeditor/templates/templates.xml
@@ -68,6 +69,7 @@ org.eclipse.equinox.preferences/*
 org.eclipse.equinox.registry/*
 org.eclipse.equinox.p2.metadata.generator/*
 org.eclipse.equinox.p2.engine/*
+org.eclipse.equinox.p2.publisher/*
 org.eclipse.help/*
 org.eclipse.help.appserver/*
 org.eclipse.help.base/*
