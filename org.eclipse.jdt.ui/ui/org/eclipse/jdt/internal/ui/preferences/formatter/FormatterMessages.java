@@ -298,7 +298,8 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_splitting_wrap_always;
 	public static String LineWrappingTabPage_splitting_wrap_always_indent_all_but_first;
 	public static String LineWrappingTabPage_splitting_wrap_always_except_first_only_if_necessary;
-	public static String LineWrappingTabPage_width_indent;
+	public static String LineWrappingTabPage_general_settings;
+	public static String LineWrappingTabPage_do_not_join_lines;
 	public static String LineWrappingTabPage_width_indent_option_max_line_width;
 	public static String LineWrappingTabPage_width_indent_option_default_indent_wrapped;
 	public static String LineWrappingTabPage_width_indent_option_default_indent_array;
@@ -365,6 +366,7 @@ final class FormatterMessages extends NLS {
 	public static String CommentsTabPage_line_width;
 	public static String CommentsTabPage_never_indent_block_comments_on_first_column;
 	public static String CommentsTabPage_never_indent_line_comments_on_first_column;
+	public static String CommentsTabPage_do_not_join_lines;
 	public static String ControlStatementsTabPage_preview_header;
 	public static String ControlStatementsTabPage_general_group_title;
 	public static String ControlStatementsTabPage_general_group_insert_new_line_before_else_statements;

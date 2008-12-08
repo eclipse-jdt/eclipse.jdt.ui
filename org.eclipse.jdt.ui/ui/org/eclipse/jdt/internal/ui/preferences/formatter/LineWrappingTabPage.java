@@ -68,6 +68,13 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		DefaultCodeFormatterConstants.TRUE
 	};
 
+	/**
+	 * Constant array for boolean selection.
+	 * 
+	 * @since 3.5
+	 */
+	private static String[] TRUE_FALSE= { DefaultCodeFormatterConstants.TRUE, DefaultCodeFormatterConstants.FALSE };
+
     /**
      * Represents a line wrapping category. All members are final.
      */
@@ -439,7 +446,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	private final Category fMessageSendArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION,
-	    "class Example {void foo() {Other.bar( 100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
+			"class Example {void foo() {Other.bar( 100,\n200,\n300,\n400,\n500,\n600,\n700,\n800,\n900 );}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_arguments
 	);
 
@@ -468,25 +475,25 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	private final Category fAllocationExpressionArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION,
-	    "class Example {SomeClass foo() {return new SomeClass(100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
+			"class Example {SomeClass foo() {return new SomeClass(100,\n200,\n300,\n400,\n500,\n600,\n700,\n800,\n900 );}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_object_allocation
 	);
 
 	private final Category fQualifiedAllocationExpressionCategory= new Category (
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION,
-	    "class Example {SomeClass foo() {return SomeOtherClass.new SomeClass(100, 200, 300, 400, 500 );}}", //$NON-NLS-1$
+			"class Example {SomeClass foo() {return SomeOtherClass.new SomeClass(100,\n200,\n300,\n400,\n500 );}}", //$NON-NLS-1$
 		FormatterMessages.LineWrappingTabPage_qualified_object_allocation
 	);
 
 	private final Category fArrayInitializerExpressionsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER,
-	    "class Example {int [] fArray= {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};}", //$NON-NLS-1$
+			"class Example {int [] fArray= {1,\n2,\n3,\n4,\n5,\n6,\n7,\n8,\n9,\n10,\n11,\n12};}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_array_init
 	);
 
 	private final Category fExplicitConstructorArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL,
-	    "class Example extends AnotherClass {Example() {super(100, 200, 300, 400, 500, 600, 700);}}", //$NON-NLS-1$
+			"class Example extends AnotherClass {Example() {super(100,\n200,\n300,\n400,\n500,\n600,\n700);}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_explicit_constructor_invocations
 	);
 
@@ -500,8 +507,8 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION,
 	    "class Example extends AnotherClass {" + //$NON-NLS-1$
 	    "int foo() {" + //$NON-NLS-1$
-	    "  int sum= 100 + 200 + 300 + 400 + 500 + 600 + 700 + 800;" + //$NON-NLS-1$
-	    "  int product= 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10;" + //$NON-NLS-1$
+			"  int sum= 100\n + 200\n + 300\n + 400\n + 500\n + 600\n + 700\n + 800;" + //$NON-NLS-1$
+			"  int product= 1\n * 2\n * 3\n * 4\n * 5\n * 6\n * 7\n * 8\n * 9\n * 10;" + //$NON-NLS-1$
 	    "  boolean val= true && false && true && false && true;" +  //$NON-NLS-1$
 	    "  return product / sum;}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_binary_exprs
@@ -603,8 +610,9 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	/**
 	 * Create a new line wrapping tab page.
-	 * @param modifyDialog
-	 * @param workingValues
+	 * 
+	 * @param modifyDialog the modify dialog
+	 * @param workingValues the values
 	 */
 	public LineWrappingTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
@@ -674,11 +682,12 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 		fOptionsComposite= composite;
 
-		final Group lineWidthGroup= createGroup(numColumns, composite, FormatterMessages.LineWrappingTabPage_width_indent);
+		final Group lineWidthGroup= createGroup(numColumns, composite, FormatterMessages.LineWrappingTabPage_general_settings);
 
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_max_line_width, DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, 9999);
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_wrapped, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999);
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_array, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999);
+		createCheckboxPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_do_not_join_lines, DefaultCodeFormatterConstants.FORMATTER_JOIN_WRAPPED_LINES, TRUE_FALSE);
 
 		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
