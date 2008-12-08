@@ -118,7 +118,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 		private String previousFilterText;
 
 		public FilteredTreeWithFilter(Composite parent, int treeStyle, String initialFilter, boolean deepFiltering) {
-			super(parent, treeStyle, new MultiplePatternFilter(deepFiltering));
+			super(parent, treeStyle, new MultiplePatternFilter(deepFiltering), true);
 			if (initialFilter != null) {
 				setFilterText(initialFilter);
 				textChanged();
@@ -173,9 +173,8 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 						}
 						treeViewer.refresh(true);
 
-						// disabled toolbar - there is no text to clear
-						// and the list is currently not filtered
-						updateToolbar(false);
+						updateToolbar(text.length() > 0 && !initial);
+
 					} finally {
 						// done updating the tree - set redraw back to true
 						TreeItem[] items= getViewer().getTree().getItems();
