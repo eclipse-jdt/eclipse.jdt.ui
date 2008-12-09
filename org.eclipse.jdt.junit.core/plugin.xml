@@ -221,6 +221,12 @@
                id="org.eclipse.search.SearchResultView">
          </part>
       </actionSetPartAssociation>
+      <actionSetPartAssociation
+            targetID="org.eclipse.jdt.ui.JavaActionSet">
+         <part
+               id="org.eclipse.jdt.junit.ResultView">
+         </part>
+      </actionSetPartAssociation>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
