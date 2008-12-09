@@ -2201,7 +2201,7 @@
                id="org.eclipse.jdt.ui.SourceView">
          </part>
          <part
-               id="org.eclipse.jdt.ui.actions.OpenCallHierarchy">
+               id="org.eclipse.jdt.callhierarchy.view">
          </part>
       </actionSetPartAssociation>
    </extension>
