@@ -384,12 +384,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a key used in hash maps for a method signature (gettersettername+arguments(fqn)).
-	 * 
+	 * Creates a key used in hash maps for a method signature
+	 * (gettersettername+arguments(fqn)).
 	 * @param methodName the method name
 	 * @param field the filed
 	 * @return the signature
-	 * @throws JavaModelException if getting the field's type signature fails
+	 * @throws JavaModelException
 	 */
 	private static String createSignatureKey(String methodName, IField field) throws JavaModelException {
 		StringBuffer buffer= new StringBuffer();
@@ -758,8 +758,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	/**
 	 * @param type the type
 	 * @return map IField -> GetterSetterEntry[]
-	 * @throws JavaModelException if the type does not exist or if an exception occurs while
-	 *             accessing its corresponding resource
+	 * @throws JavaModelException
 	 */
 	private Map createGetterSetterMapping(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
