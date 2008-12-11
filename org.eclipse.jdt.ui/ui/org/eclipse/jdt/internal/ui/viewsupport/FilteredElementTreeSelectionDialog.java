@@ -173,9 +173,8 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 						}
 						treeViewer.refresh(true);
 
-						// disabled toolbar - there is no text to clear
-						// and the list is currently not filtered
-						updateToolbar(false);
+						updateToolbar(text.length() > 0 && !initial);
+
 					} finally {
 						// done updating the tree - set redraw back to true
 						TreeItem[] items= getViewer().getTree().getItems();
