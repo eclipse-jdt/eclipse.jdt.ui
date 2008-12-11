@@ -141,10 +141,6 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 						} else {
 							group.addPosition(astRewrite.track(argType), false);
 						}
-						if (argType.isWildcardType()) {
-							group.addProposal("?", null, 10);  //$NON-NLS-1$
-							group.addProposal("Object", null, 10);  //$NON-NLS-1$
-						}
 						positionGroups.addPositionGroup(group);
 						j++;
 					}
