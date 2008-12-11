@@ -188,7 +188,11 @@ public class MoveTest extends RefactoringTest {
 	private void verifyValidDestination(JavaMoveProcessor ref, Object destination) throws Exception {
 		RefactoringStatus status= ref.setDestination(ReorgDestinationFactory.createDestination(destination));
 
-		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
+		int severity= status.getSeverity();
+		if (severity == RefactoringStatus.INFO) // see ReorgPolicyFactory.MoveFilesFoldersAndCusPolicy.verifyDestination(..)
+			return;
+		
+		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(severity), RefactoringStatus.OK, severity);
 	}
 
 	private void verifyInvalidDestination(JavaMoveProcessor ref, Object destination) throws Exception {
@@ -2124,7 +2128,8 @@ public class MoveTest extends RefactoringTest {
 		if (javaDestination != null) {
 			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(javaDestination, location)).isOK());
 		} else {
-			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(destination, location)).isOK());
+			RefactoringStatus status= processor.setDestination(ReorgDestinationFactory.createDestination(destination, location));
+			assertTrue(status.getSeverity() <= RefactoringStatus.INFO);
 		}
 
 		Refactoring ref= new MoveRefactoring(processor);

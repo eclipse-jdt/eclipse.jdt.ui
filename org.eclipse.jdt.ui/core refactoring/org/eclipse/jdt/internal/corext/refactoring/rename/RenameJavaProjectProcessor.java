@@ -120,10 +120,6 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 
 	//---- IReferenceUpdating --------------------------------------
 
-	public boolean canEnableUpdateReferences() {
-		return true;
-	}
-
 	public void setUpdateReferences(boolean update) {
 		fUpdateReferences= update;
 	}

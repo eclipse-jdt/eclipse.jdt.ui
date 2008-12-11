@@ -194,10 +194,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		status.merge(initialize(arguments));
 	}
 
-	public final boolean canEnableUpdateReferences() {
-		return true;
-	}
-
 	protected RenameModifications computeRenameModifications() throws CoreException {
 		RenameModifications result= new RenameModifications();
 		result.rename(fTypeParameter, new RenameArguments(getNewElementName(), getUpdateReferences()));

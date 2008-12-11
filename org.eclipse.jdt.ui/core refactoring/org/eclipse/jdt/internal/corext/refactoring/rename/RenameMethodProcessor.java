@@ -247,10 +247,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	//---- IReferenceUpdating -----------------------------------
 
-	public boolean canEnableUpdateReferences() {
-		return true;
-	}
-
 	public final void setUpdateReferences(boolean update) {
 		fUpdateReferences= update;
 	}

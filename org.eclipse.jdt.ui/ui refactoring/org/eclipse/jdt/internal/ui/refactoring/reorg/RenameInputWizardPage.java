@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 	/**
 	 * Creates a new text input page.
+	 * @param description the page description
+	 * @param contextHelpId the context help ID
 	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
 	 *  user input page. Otherwise <code>false</code>.
 	 * @param initialValue the initial value
@@ -134,6 +136,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	/**
 	 * Returns the new name for the Java element or <code>null</code>
 	 * if no new name is provided
+	 * 
+	 * @param nameUpdating the name updating
 	 *
 	 * @return the new name or <code>null</code>
 	 */
@@ -162,8 +166,6 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 	private void addOptionalUpdateReferencesCheckbox(Composite result, RowLayouter layouter) {
 		final IReferenceUpdating ref= (IReferenceUpdating)getRefactoring().getAdapter(IReferenceUpdating.class);
-		if (ref == null || !ref.canEnableUpdateReferences())
-			return;
 		String title= RefactoringMessages.RenameInputWizardPage_update_references;
 		boolean defaultValue= true; //bug 77901
 		fUpdateReferences= createCheckbox(result, title, defaultValue, layouter);

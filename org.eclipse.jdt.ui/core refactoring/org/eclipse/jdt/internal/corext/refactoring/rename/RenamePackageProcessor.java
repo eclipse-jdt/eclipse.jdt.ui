@@ -210,10 +210,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 
 	//---- IReferenceUpdating --------------------------------------
 
-	public boolean canEnableUpdateReferences() {
-		return true;
-	}
-
 	public void setUpdateReferences(boolean update) {
 		fUpdateReferences= update;
 	}

@@ -98,8 +98,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.CopyDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveDescriptor;
@@ -1140,11 +1140,10 @@ public final class ReorgPolicyFactory {
 
 		private boolean fUpdateQualifiedNames;
 
-		private boolean fUpdateReferences;
+		private boolean fUpdateReferences= true;
 
 		MoveFilesFoldersAndCusPolicy(IFile[] files, IFolder[] folders, ICompilationUnit[] cus) {
 			super(files, folders, cus);
-			fUpdateReferences= true;
 			fUpdateQualifiedNames= false;
 			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
 		}
@@ -1152,9 +1151,12 @@ public final class ReorgPolicyFactory {
 		public boolean canEnableQualifiedNameUpdating() {
 			return getCus().length > 0 && !JavaElementUtil.isDefaultPackage(getCommonParent());
 		}
-
-		public boolean canEnableUpdateReferences() {
-			return getCus().length > 0;
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateJavaReferences() {
+			return true;
 		}
 
 		public boolean canUpdateQualifiedNames() {
@@ -1176,12 +1178,16 @@ public final class ReorgPolicyFactory {
 			return true;
 		}
 
-		public boolean canUpdateReferences() {
+		/**
+		 * @return <code>true</code> if the user could expect that we update references, but we don't
+		 * @since 3.5
+		 */
+		private boolean cannotUpdateReferencesForDestination() {
 			if (getCus().length == 0)
 				return false;
 			IPackageFragment pack= getDestinationAsPackageFragment();
 			if (pack == null || pack.isDefaultPackage())
-				return false;
+				return true;
 
 			IJavaElement destination= getJavaElementDestination();
 			if (destination instanceof IPackageFragmentRoot && getCus().length > 0) {
@@ -1189,9 +1195,7 @@ public final class ReorgPolicyFactory {
 			}
 
 			Object commonParent= getCommonParent();
-			if (JavaElementUtil.isDefaultPackage(commonParent))
-				return false;
-			return true;
+			return JavaElementUtil.isDefaultPackage(commonParent);
 		}
 
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
@@ -1428,9 +1432,7 @@ public final class ReorgPolicyFactory {
 			else
 				unitDestination= container;
 
-			// don't use fUpdateReferences directly since it is only valid if
-			// canUpdateReferences is true
-			boolean updateReferenes= canUpdateReferences() && getUpdateReferences();
+			boolean updateReferenes= getUpdateReferences();
 			if (unitDestination != null) {
 				ICompilationUnit[] units= getCus();
 				for (int i= 0; i < units.length; i++) {
@@ -1488,8 +1490,10 @@ public final class ReorgPolicyFactory {
 		public boolean hasAllInputSet() {
 			if (getResourceDestination() == null && getJavaElementDestination() == null)
 				return false;
-
-			return !canUpdateReferences() && !canUpdateQualifiedNames();
+			if (canUpdateQualifiedNames())
+				return false;
+			
+			return true;
 		}
 
 		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
@@ -1555,6 +1559,9 @@ public final class ReorgPolicyFactory {
 			if (destinationAsPackage != null && destinationAsPackage.equals(commonParent))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_parent);
 
+			if (cannotUpdateReferencesForDestination())
+				superStatus.addInfo(RefactoringCoreMessages.ReorgPolicyFactory_noJavaUpdates);
+
 			return superStatus;
 		}
 
@@ -1572,6 +1579,9 @@ public final class ReorgPolicyFactory {
 			IJavaElement destinationContainerAsPackage= getDestinationContainerAsJavaElement();
 			if (destinationContainerAsPackage != null && destinationContainerAsPackage.equals(commonParent))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_parent);
+			
+			if (cannotUpdateReferencesForDestination())
+				superStatus.addInfo(RefactoringCoreMessages.ReorgPolicyFactory_noJavaUpdates);
 
 			return superStatus;
 		}
@@ -1593,6 +1603,8 @@ public final class ReorgPolicyFactory {
 
 		private MoveModifications fModifications;
 
+		private boolean fUpdateReferences= true;
+		
 		MovePackageFragmentRootsPolicy(IPackageFragmentRoot[] roots) {
 			super(roots);
 		}
@@ -1684,7 +1696,7 @@ public final class ReorgPolicyFactory {
 
 			fModifications= new MoveModifications();
 			IJavaProject destination= getDestinationJavaProject();
-			boolean updateReferences= canUpdateReferences() && getUpdateReferences();
+			boolean updateReferences= getUpdateReferences();
 			if (destination != null) {
 				IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {
@@ -1794,14 +1806,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
-		public boolean canEnableUpdateReferences() {
-			return false;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean canUpdateReferences() {
+		public boolean canUpdateJavaReferences() {
 			return false;
 		}
 
@@ -1809,13 +1814,14 @@ public final class ReorgPolicyFactory {
 		 * {@inheritDoc}
 		 */
 		public boolean getUpdateReferences() {
-			return false;
+			return fUpdateReferences;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setUpdateReferences(boolean update) {
+			fUpdateReferences= update;
 		}
 
 		/**
@@ -1842,6 +1848,8 @@ public final class ReorgPolicyFactory {
 		private CreateTargetExecutionLog fCreateTargetExecutionLog= new CreateTargetExecutionLog();
 
 		private MoveModifications fModifications;
+
+		private boolean fUpdateReferences= true;
 
 		MovePackagesPolicy(IPackageFragment[] packageFragments) {
 			super(packageFragments);
@@ -1924,7 +1932,7 @@ public final class ReorgPolicyFactory {
 				return fModifications;
 
 			fModifications= new MoveModifications();
-			boolean updateReferences= canUpdateReferences() && getUpdateReferences();
+			boolean updateReferences= getUpdateReferences();
 			IPackageFragment[] packages= getPackages();
 			IPackageFragmentRoot javaDestination= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < packages.length; i++) {
@@ -2030,14 +2038,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
-		public boolean canEnableUpdateReferences() {
-			return false;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean canUpdateReferences() {
+		public boolean canUpdateJavaReferences() {
 			return false;
 		}
 
@@ -2045,13 +2046,14 @@ public final class ReorgPolicyFactory {
 		 * {@inheritDoc}
 		 */
 		public boolean getUpdateReferences() {
-			return false;
+			return fUpdateReferences;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setUpdateReferences(boolean update) {
+			fUpdateReferences= update;
 		}
 
 		/**
@@ -2065,6 +2067,8 @@ public final class ReorgPolicyFactory {
 	private static abstract class MoveSubCuElementsPolicy extends SubCuElementReorgPolicy implements IMovePolicy {
 
 		private CreateTargetExecutionLog fCreateTargetExecutionLog= new CreateTargetExecutionLog();
+		
+		private boolean fUpdateReferences= true;
 
 		MoveSubCuElementsPolicy(IJavaElement[] javaElements) {
 			super(javaElements);
@@ -2335,14 +2339,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
-		public boolean canEnableUpdateReferences() {
-			return false;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean canUpdateReferences() {
+		public boolean canUpdateJavaReferences() {
 			return false;
 		}
 
@@ -2350,13 +2347,14 @@ public final class ReorgPolicyFactory {
 		 * {@inheritDoc}
 		 */
 		public boolean getUpdateReferences() {
-			return false;
+			return fUpdateReferences;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public void setUpdateReferences(boolean update) {
+			fUpdateReferences= update;
 		}
 
 		/**
@@ -2662,14 +2660,7 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
-		public boolean canEnableUpdateReferences() {
-			return false;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean canUpdateReferences() {
+		public boolean canUpdateJavaReferences() {
 			return false;
 		}
 

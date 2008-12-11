@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,8 +82,16 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return fMovePolicy.canUpdateQualifiedNames();
 	}
 
-	public boolean canUpdateReferences() {
-		return fMovePolicy.canUpdateReferences();
+	/**
+	 * Checks if <b>Java</b> references to the selected element(s) can be updated if moved to
+	 * the selected destination. Even if <code>false</code>, participants could still update
+	 * non-Java references.
+	 * 
+	 * @return <code>true</code> iff <b>Java</b> references to the moved element can be updated
+	 * @since 3.5
+	 */
+	public boolean canUpdateJavaReferences() {
+		return fMovePolicy.canUpdateJavaReferences();
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
@@ -212,8 +220,6 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	}
 
 	public boolean getUpdateReferences() {
-		if (!canUpdateReferences())
-			return false;
 		return fMovePolicy.getUpdateReferences();
 	}
 

@@ -122,8 +122,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			getRefactoringWizard().setForcePreviewReview(false);
 			JavaMoveProcessor processor= getJavaMoveProcessor();
 			if (fReferenceCheckbox != null){
-				fReferenceCheckbox.setEnabled(canUpdateReferences());
-				processor.setUpdateReferences(fReferenceCheckbox.getEnabled() && fReferenceCheckbox.getSelection());
+				processor.setUpdateReferences(fReferenceCheckbox.getSelection());
 			}
 			if (fQualifiedNameCheckbox != null){
 				boolean enabled= processor.canEnableQualifiedNameUpdating();
@@ -141,12 +140,11 @@ public class ReorgMoveWizard extends RefactoringWizard {
 
 		private void addUpdateReferenceComponent(Composite result) {
 			final JavaMoveProcessor processor= getJavaMoveProcessor();
-			if (! processor.canUpdateReferences())
+			if (! processor.canUpdateJavaReferences())
 				return;
 			fReferenceCheckbox= new Button(result, SWT.CHECK);
 			fReferenceCheckbox.setText(ReorgMessages.JdtMoveAction_update_references);
 			fReferenceCheckbox.setSelection(processor.getUpdateReferences());
-			fReferenceCheckbox.setEnabled(canUpdateReferences());
 
 			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -245,10 +243,6 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			} else {
 				return super.addLabel(parent);
 			}
-		}
-
-		private boolean canUpdateReferences() {
-			return getJavaMoveProcessor().canUpdateReferences();
 		}
 
 		private void doNewButtonPressed() {

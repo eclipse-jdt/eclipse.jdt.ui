@@ -163,13 +163,6 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating#canEnableUpdateReferences()
-	 */
-	public boolean canEnableUpdateReferences() {
-		return true;
-	}
-
-	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#getUpdateReferences()
 	 */
 	public boolean getUpdateReferences() {

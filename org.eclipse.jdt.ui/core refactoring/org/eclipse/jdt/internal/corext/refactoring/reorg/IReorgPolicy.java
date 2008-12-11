@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,7 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 
 	/**
 	 * @return true if this policy can handle the source elements
-	 * @throws JavaModelException
+	 * @throws JavaModelException in unexpected cases
 	 */
 	public boolean canEnable() throws JavaModelException;
 
@@ -70,7 +70,7 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	 *
 	 * @param destination the destination to verify
 	 * @return OK status if valid destination
-	 * @throws JavaModelException
+	 * @throws JavaModelException in unexpected cases
 	 */
 	public RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException;
 
@@ -123,7 +123,15 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 		public CreateTargetExecutionLog getCreateTargetExecutionLog();
 		public void setDestinationCheck(boolean check);
 		public boolean hasAllInputSet();
-		public boolean canUpdateReferences();
+		/**
+		 * Checks if <b>Java</b> references to the selected element(s) can be updated if moved to
+		 * the selected destination. Even if <code>false</code>, participants could still update
+		 * non-Java references.
+		 * 
+		 * @return <code>true</code> iff <b>Java</b> references to the moved element can be updated
+		 * @since 3.5
+		 */
+		public boolean canUpdateJavaReferences();
 		public boolean canUpdateQualifiedNames();
 	}
 }

@@ -338,10 +338,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		fUpdateReferences= update;
 	}
 
-	public boolean canEnableUpdateReferences(){
-		return true;
-	}
-
 	public boolean getUpdateReferences(){
 		return fUpdateReferences;
 	}

@@ -190,12 +190,6 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 
 	//---- IReferenceUpdating -----------------------------------
 
-	public boolean canEnableUpdateReferences() {
-		if (fRenameTypeProcessor == null)
-			return false;
-		return fRenameTypeProcessor.canEnableUpdateReferences();
-	}
-
 	public void setUpdateReferences(boolean update) {
 		if (fRenameTypeProcessor != null)
 			fRenameTypeProcessor.setUpdateReferences(update);

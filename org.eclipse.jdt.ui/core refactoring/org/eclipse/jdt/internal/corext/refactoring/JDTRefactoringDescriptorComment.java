@@ -247,7 +247,7 @@ public final class JDTRefactoringDescriptorComment {
 		}
 		if (object instanceof IReferenceUpdating) {
 			final IReferenceUpdating updating= (IReferenceUpdating) object;
-			if (updating.canEnableUpdateReferences() && updating.getUpdateReferences())
+			if (updating.getUpdateReferences())
 				fSettings.add(RefactoringCoreMessages.JavaRefactoringDescriptor_update_references);
 		}
 		if (object instanceof ISimilarDeclarationUpdating) {

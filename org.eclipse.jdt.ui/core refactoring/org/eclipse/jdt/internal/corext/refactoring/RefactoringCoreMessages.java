@@ -2200,6 +2200,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_noCopying;
 
+	public static String ReorgPolicyFactory_noJavaUpdates;
+
 	public static String ReorgPolicyFactory_noMoving;
 
 	public static String ReorgPolicyFactory_not_this_resource;
