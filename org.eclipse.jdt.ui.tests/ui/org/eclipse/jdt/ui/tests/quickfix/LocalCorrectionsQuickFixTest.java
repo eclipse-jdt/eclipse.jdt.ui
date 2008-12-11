@@ -7173,6 +7173,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
+		buf.append("    private int fField;\n");
+		buf.append("\n");
 		buf.append("    public boolean equals(Object o) {\n");
 		buf.append("        return true;\n");
 		buf.append("    }\n");
@@ -7190,6 +7192,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
+		buf.append("    private int fField;\n");
+		buf.append("\n");
 		buf.append("    public boolean equals(Object o) {\n");
 		buf.append("        return true;\n");
 		buf.append("    }\n");

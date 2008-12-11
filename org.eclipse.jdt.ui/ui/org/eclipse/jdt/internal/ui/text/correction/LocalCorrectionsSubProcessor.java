@@ -1275,30 +1275,40 @@ public class LocalCorrectionsSubProcessor {
 		}
 		final IType type= (IType) binding.getJavaElement();
 		
-		//Generate hashCode() and equals()... proposal
-		String label= CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, null, 3, image) {
-			public void apply(IDocument document) {
-				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
-				IWorkbenchPage p= JavaPlugin.getActivePage();
-				if (p == null)
-					return;
-
-				IEditorPart part= p.findEditor(input);
-				if (!(part instanceof JavaEditor))
-					return;
-
-				IEditorSite site= ((JavaEditor)part).getEditorSite();
-				GenerateHashCodeEqualsAction action= new GenerateHashCodeEqualsAction(site);
-				action.run(new StructuredSelection(type));
+		boolean hasInstanceFields= false;
+		IVariableBinding[] declaredFields= binding.getDeclaredFields();
+		for (int i= 0; i < declaredFields.length; i++) {
+			if (!Modifier.isStatic(declaredFields[i].getModifiers())) {
+				hasInstanceFields= true;
+				break;
 			}
-
-			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-				return CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_additional_info;
-			}
-		};
-		proposals.add(proposal);
+		}
+		if (hasInstanceFields) {
+			//Generate hashCode() and equals()... proposal
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, null, 3, image) {
+				public void apply(IDocument document) {
+					IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+					IWorkbenchPage p= JavaPlugin.getActivePage();
+					if (p == null)
+						return;
+	
+					IEditorPart part= p.findEditor(input);
+					if (!(part instanceof JavaEditor))
+						return;
+	
+					IEditorSite site= ((JavaEditor)part).getEditorSite();
+					GenerateHashCodeEqualsAction action= new GenerateHashCodeEqualsAction(site);
+					action.run(new StructuredSelection(type));
+				}
+	
+				public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+					return CorrectionMessages.LocalCorrectionsSubProcessor_generate_hashCode_equals_additional_info;
+				}
+			};
+			proposals.add(proposal);
+		}
 		
 		
 		//Override hashCode() proposal
@@ -1307,8 +1317,8 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		
-		label= CorrectionMessages.LocalCorrectionsSubProcessor_override_hashCode_description;
-		image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_override_hashCode_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 		
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 		LinkedCorrectionProposal proposal2= new LinkedCorrectionProposal(label, cu, rewrite, 5, image);
