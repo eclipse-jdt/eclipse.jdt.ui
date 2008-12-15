@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.refactoring.descriptors.InlineLocalVariableDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
@@ -30,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
  *
  * @since 3.2
  */
-public final class InlineTempRefactoringContribution extends JavaRefactoringContribution {
+public final class InlineTempRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -41,10 +40,10 @@ public final class InlineTempRefactoringContribution extends JavaRefactoringCont
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new InlineLocalVariableDescriptor();
+		return RefactoringSignatureDescriptorFactory.createInlineLocalVariableDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new InlineLocalVariableDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createInlineLocalVariableDescriptor(project, description, comment, arguments, flags);
 	}
 }

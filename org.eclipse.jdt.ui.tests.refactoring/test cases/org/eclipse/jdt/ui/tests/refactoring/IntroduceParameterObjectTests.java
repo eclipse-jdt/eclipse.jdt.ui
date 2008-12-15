@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor.Parameter;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -170,7 +171,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		super.setUp();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
-		fDescriptor= new IntroduceParameterObjectDescriptor();
+		fDescriptor= RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor();
 		fPack= getPackageP();
 	}
 

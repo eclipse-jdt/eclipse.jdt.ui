@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
@@ -77,7 +78,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		final ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		final IType classA= getType(cu, "A");
 		final IMethod method= classA.getMethod(methodName, signatures);
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
 		descriptor.setNewName(newMethodName);
 		descriptor.setUpdateReferences(updateReferences);
@@ -394,7 +395,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		IType classB= getType(cu, "B");
 		IMethod method= classB.getMethod("m", new String[]{"I"});
 
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
 		descriptor.setNewName("kk");
 		descriptor.setUpdateReferences(true);
@@ -505,7 +506,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		IType localClass= cu.getType("A").getMethod("doit", new String[0]).getType("LocalClass", 1);
 		IMethod method= localClass.getMethod("method", new String[]{"I"});
 
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
 		descriptor.setNewName("method2");
 		descriptor.setUpdateReferences(true);

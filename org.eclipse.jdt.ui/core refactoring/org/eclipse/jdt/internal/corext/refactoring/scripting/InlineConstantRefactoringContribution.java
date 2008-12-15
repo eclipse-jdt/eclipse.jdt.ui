@@ -18,10 +18,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.refactoring.descriptors.InlineConstantDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 
@@ -30,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactorin
  *
  * @since 3.2
  */
-public final class InlineConstantRefactoringContribution extends JavaRefactoringContribution {
+public final class InlineConstantRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -41,10 +40,10 @@ public final class InlineConstantRefactoringContribution extends JavaRefactoring
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new InlineConstantDescriptor();
+		return RefactoringSignatureDescriptorFactory.createInlineConstantDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new InlineConstantDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createInlineConstantDescriptor(project, description, comment, arguments, flags);
 	}
 }

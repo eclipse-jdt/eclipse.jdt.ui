@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractConstantDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -142,8 +143,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 	/**
 	 * Creates a new extract constant refactoring
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart start
+	 * @param selectionLength length
 	 */
 	public ExtractConstantRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -581,7 +582,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		arguments.put(ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fVisibility)).toString());
 
-		ExtractConstantDescriptor descriptor= new ExtractConstantDescriptor(project, description, comment.asString(), arguments, flags);
+		ExtractConstantDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractConstantDescriptor(project, description, comment.asString(), arguments, flags);
 		return descriptor;
 	}
 
@@ -796,7 +797,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	 * Returns the type to which the new constant will be added to. It is the first non-anonymous parent.
 	 * @return the type to add the new constant to
 	 *
-	 * @throws JavaModelException
+	 * @throws JavaModelException shouldn't happen
 	 */
 	private AbstractTypeDeclaration getContainingTypeDeclarationNode() throws JavaModelException {
 		AbstractTypeDeclaration result= (AbstractTypeDeclaration) ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), AbstractTypeDeclaration.class);

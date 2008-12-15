@@ -18,6 +18,6 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.core.refactoring.descriptors,
  org.eclipse.jdt.core.refactoring.participants,
  org.eclipse.jdt.internal.core.manipulation;x-internal:=true,
- org.eclipse.jdt.internal.core.refactoring.descriptors;x-internal:=true
+ org.eclipse.jdt.internal.core.refactoring.descriptors;x-friends:="org.eclipse.jdt.ui"
 Import-Package: com.ibm.icu.text
 Bundle-RequiredExecutionEnvironment: J2SE-1.4

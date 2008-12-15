@@ -78,11 +78,12 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertAnonymousDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -159,10 +160,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	private LinkedProposalModel fLinkedProposalModel;
 
 	/**
-	 * Creates a new convert anonymous to nested refactoring
+	 * Creates a new convert anonymous to nested refactoring.
+	 * 
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart start
+	 * @param selectionLength length
 	 */
     public ConvertAnonymousToNestedRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
         Assert.isTrue(selectionStart >= 0);
@@ -543,7 +545,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 
-		ConvertAnonymousDescriptor descriptor= new ConvertAnonymousDescriptor(projectName, description, comment.asString(), arguments, flags);
+		ConvertAnonymousDescriptor descriptor= RefactoringSignatureDescriptorFactory.createConvertAnonymousDescriptor(projectName, description, comment.asString(), arguments, flags);
 		return new RefactoringChangeDescriptor(descriptor);
 	}
 

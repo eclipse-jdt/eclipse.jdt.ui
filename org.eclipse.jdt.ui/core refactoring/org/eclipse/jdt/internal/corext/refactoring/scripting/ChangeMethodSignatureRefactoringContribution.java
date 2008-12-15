@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
-import org.eclipse.jdt.core.refactoring.descriptors.ChangeMethodSignatureDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProc
  *
  * @since 3.2
  */
-public final class ChangeMethodSignatureRefactoringContribution extends JavaRefactoringContribution {
+public final class ChangeMethodSignatureRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -43,11 +42,11 @@ public final class ChangeMethodSignatureRefactoringContribution extends JavaRefa
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new ChangeMethodSignatureDescriptor();
+		return RefactoringSignatureDescriptorFactory.createChangeMethodSignatureDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new ChangeMethodSignatureDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createChangeMethodSignatureDescriptor(project, description, comment, arguments, flags);
 	}
 
 }

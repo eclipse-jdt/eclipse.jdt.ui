@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -228,7 +229,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(name, this, header);
 				comment.addSetting(Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 				addSuperTypeSettings(comment, false);
-				final UseSupertypeDescriptor descriptor= new UseSupertypeDescriptor();
+				final UseSupertypeDescriptor descriptor= RefactoringSignatureDescriptorFactory.createUseSupertypeDescriptor();
 				descriptor.setProject(name);
 				descriptor.setDescription(description);
 				descriptor.setComment(comment.asString());

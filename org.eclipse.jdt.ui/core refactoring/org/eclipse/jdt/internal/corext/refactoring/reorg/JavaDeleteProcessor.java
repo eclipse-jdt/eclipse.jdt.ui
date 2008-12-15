@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.DeleteDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -365,7 +366,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	 * Adds all subpackages of the selected packages to the list of items to be
 	 * deleted.
 	 *
-	 * @throws JavaModelException
+	 * @throws JavaModelException should not happen
 	 */
 	private void addSubPackages() throws JavaModelException {
 
@@ -384,7 +385,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	/**
 	 * Add deletable parent packages to the list of items to delete.
 	 *
-	 * @throws CoreException
+	 * @throws CoreException should not happen
 	 */
 	private void addDeletableParentPackagesOnPackageDeletion() throws CoreException {
 
@@ -461,11 +462,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	/**
-	 * @param pack
-	 * @param packagesToDelete
+	 * @param pack the package to delete
+	 * @param packagesToDelete all packages to delete
 	 * @return true if this initially selected package is really deletable
 	 * (if it has non-selected subpackages, it may only be cleared).
-	 * @throws JavaModelException
+	 * @throws JavaModelException should not happen
 	 */
 	private boolean canRemoveCompletely(IPackageFragment pack, List packagesToDelete) throws JavaModelException {
 		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);
@@ -480,11 +481,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	 * Adds deletable parent packages of the fragment "frag" to the list
 	 * "deletableParentPackages"; also adds the resources of those packages to the
 	 * set "resourcesToDelete".
-	 * @param frag
-	 * @param initialPackagesToDelete
-	 * @param resourcesToDelete
-	 * @param deletableParentPackages
-	 * @throws CoreException
+	 * @param frag the package fragment
+	 * @param initialPackagesToDelete the initial packages to delete
+	 * @param resourcesToDelete result to add resources to delete
+	 * @param deletableParentPackages result ro add deletable parent packages
+	 * @throws CoreException should not happen
 	 */
 	private void addDeletableParentPackages(IPackageFragment frag, List initialPackagesToDelete, Set resourcesToDelete, List deletableParentPackages)
 			throws CoreException {
@@ -623,7 +624,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_subpackages);
 		 	if (fAccessorsDeleted)
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_accessors);
-			final DeleteDescriptor descriptor= new DeleteDescriptor(project, description, comment.asString(), arguments, flags);
+			final DeleteDescriptor descriptor= RefactoringSignatureDescriptorFactory.createDeleteDescriptor(project, description, comment.asString(), arguments, flags);
 			arguments.put(ATTRIBUTE_DELETE_SUBPACKAGES, Boolean.valueOf(fDeleteSubPackages).toString());
 			arguments.put(ATTRIBUTE_SUGGEST_ACCESSORS, Boolean.valueOf(fSuggestGetterSetterDeletion).toString());
 			arguments.put(ATTRIBUTE_RESOURCES, new Integer(fResources.length).toString());

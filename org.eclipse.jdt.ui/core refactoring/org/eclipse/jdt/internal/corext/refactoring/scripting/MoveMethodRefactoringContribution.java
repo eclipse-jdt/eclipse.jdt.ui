@@ -19,10 +19,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodP
  *
  * @since 3.2
  */
-public final class MoveMethodRefactoringContribution extends JavaRefactoringContribution {
+public final class MoveMethodRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -43,10 +42,10 @@ public final class MoveMethodRefactoringContribution extends JavaRefactoringCont
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new MoveMethodDescriptor();
+		return RefactoringSignatureDescriptorFactory.createMoveMethodDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new MoveMethodDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createMoveMethodDescriptor(project, description, comment, arguments, flags);
 	}
 }

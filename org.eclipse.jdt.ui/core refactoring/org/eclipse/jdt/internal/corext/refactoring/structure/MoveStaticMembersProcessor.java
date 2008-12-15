@@ -88,6 +88,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -829,7 +830,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, BasicElementLabels.getJavaElementName(members[0].getElementName())) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, getQualifiedTypeLabel(fDestinationType)));
-		final MoveStaticMembersDescriptor descriptor= new MoveStaticMembersDescriptor();
+		final MoveStaticMembersDescriptor descriptor= RefactoringSignatureDescriptorFactory.createMoveStaticMembersDescriptor();
 		descriptor.setProject(project);
 		descriptor.setDescription(description);
 		descriptor.setComment(comment.asString());

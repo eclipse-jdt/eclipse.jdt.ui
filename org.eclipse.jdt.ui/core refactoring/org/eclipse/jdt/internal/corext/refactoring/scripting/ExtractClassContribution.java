@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring;
+package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
 import java.util.Map;
 
@@ -19,22 +19,28 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefactoring;
 
-public class ExtractClassContribution extends JavaRefactoringContribution {
+/**
+ * Refactoring contribution for the extract class refactoring.
+ *
+ * @since 3.4
+ */
+public class ExtractClassContribution extends JavaUIRefactoringContribution {
 
 	public ExtractClassContribution() {
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
-		return new ExtractClassDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createExtractClassDescriptor(project, description, comment, arguments, flags);
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new ExtractClassDescriptor();
+		return RefactoringSignatureDescriptorFactory.createExtractClassDescriptor();
 	}
 
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {

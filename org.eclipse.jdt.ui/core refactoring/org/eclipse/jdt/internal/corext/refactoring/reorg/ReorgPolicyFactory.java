@@ -100,10 +100,9 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
-import org.eclipse.jdt.core.refactoring.descriptors.CopyDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.MoveDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -291,7 +290,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
-			return new CopyDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		protected String getDescriptionPlural() {
@@ -427,7 +426,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
-			return new CopyDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		protected String getDescriptionPlural() {
@@ -548,7 +547,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
-			return new CopyDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		protected String getDescriptionPlural() {
@@ -639,7 +638,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			ReorgExecutionLog log= getReorgExecutionLog();
 			storeReorgExecutionLog(project, arguments, log);
-			return new CopyDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		private CompilationUnit createSourceCuNode() {
@@ -1304,7 +1303,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
-			return new MoveDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		private Change createReferenceUpdatingMoveChange(IProgressMonitor pm) throws JavaModelException {
@@ -1667,7 +1666,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
-			return new MoveDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		public CreateTargetExecutionLog getCreateTargetExecutionLog() {
@@ -1904,7 +1903,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
-			return new MoveDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		public CreateTargetExecutionLog getCreateTargetExecutionLog() {
@@ -2124,7 +2123,7 @@ public final class ReorgPolicyFactory {
 		protected JavaRefactoringDescriptor createRefactoringDescriptor(JDTRefactoringDescriptorComment comment, Map arguments, String description, String project, int flags) {
 			CreateTargetExecutionLog log= getCreateTargetExecutionLog();
 			storeCreateTargetExecutionLog(project, arguments, log);
-			return new MoveDescriptor(project, description, comment.asString(), arguments, flags);
+			return RefactoringSignatureDescriptorFactory.createMoveDescriptor(project, description, comment.asString(), arguments, flags);
 		}
 
 		public IFile[] getAllModifiedFiles() {
@@ -3268,7 +3267,7 @@ public final class ReorgPolicyFactory {
 		 *
 		 * @return the modifications
 		 *
-		 * @throws CoreException
+		 * @throws CoreException if creating the modifications failed
 		 */
 		protected RefactoringModifications getModifications() throws CoreException {
 			return null;
@@ -3390,7 +3389,7 @@ public final class ReorgPolicyFactory {
 		 *
 		 * @param destination the destination to verify
 		 * @return OK status if valid destination
-		 * @throws JavaModelException
+		 * @throws JavaModelException should not happen
 		 */
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_no_java_element);
@@ -3401,7 +3400,7 @@ public final class ReorgPolicyFactory {
 		 *
 		 * @param destination the destination to verify
 		 * @return OK status if valid destination
-		 * @throws JavaModelException
+		 * @throws JavaModelException should not happen
 		 */
 		protected RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_no_resource);
@@ -3779,7 +3778,7 @@ public final class ReorgPolicyFactory {
 		 * @param destination the destination
 		 * @param location the location
 		 * @return returns the status
-		 * @throws JavaModelException
+		 * @throws JavaModelException should not happen
 		 */
 		protected RefactoringStatus verifyDestination(IJavaElement destination, int location) throws JavaModelException {
 			Assert.isNotNull(destination);

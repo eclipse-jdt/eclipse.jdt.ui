@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -96,7 +97,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
 		IField field= classA.getField(fieldName);
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
 		descriptor.setJavaElement(field);
 		descriptor.setUpdateReferences(true);
 		descriptor.setNewName(newFieldName);
@@ -125,7 +126,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		IField field= classA.getField(fieldName);
 		boolean isEnum= JdtFlags.isEnum(field);
 		String id= isEnum ? IJavaRefactorings.RENAME_ENUM_CONSTANT : IJavaRefactorings.RENAME_FIELD;
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(id);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(id);
 		descriptor.setJavaElement(field);
 		descriptor.setNewName(newFieldName);
 		descriptor.setUpdateReferences(fUpdateReferences);

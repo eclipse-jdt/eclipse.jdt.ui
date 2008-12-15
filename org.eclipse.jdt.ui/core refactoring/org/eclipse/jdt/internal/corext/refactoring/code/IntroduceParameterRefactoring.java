@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ChangeMethodSignatureDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -113,8 +114,8 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	/**
 	 * Creates a new introduce parameter refactoring.
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart start
+	 * @param selectionLength length
 	 */
 	public IntroduceParameterRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -536,7 +537,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, BasicElementLabels.getJavaCodeString(ASTNodes.asString(fSelectedExpression))));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, BasicElementLabels.getJavaElementName(getAddedParameterInfo().getNewName())));
-		return new IntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());
+		return RefactoringSignatureDescriptorFactory.createIntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());
 	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {

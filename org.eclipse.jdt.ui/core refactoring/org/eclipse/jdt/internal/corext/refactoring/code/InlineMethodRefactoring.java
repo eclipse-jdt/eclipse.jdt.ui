@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.descriptors.InlineMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
@@ -162,8 +163,8 @@ public class InlineMethodRefactoring extends Refactoring {
 	 * Creates a new inline method refactoring
 	 * @param unit the compilation unit or class file
 	 * @param node the compilation unit node
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart start
+	 * @param selectionLength length
 	 * @return returns the refactoring
 	 */
 	public static InlineMethodRefactoring create(ITypeRoot unit, CompilationUnit node, int selectionStart, int selectionLength) {
@@ -386,7 +387,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_remove_method);
 		if (fCurrentMode == Mode.INLINE_ALL)
 			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_replace_references);
-		final InlineMethodDescriptor descriptor= new InlineMethodDescriptor(project, description, comment.asString(), arguments, flags);
+		final InlineMethodDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fInitialTypeRoot));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());

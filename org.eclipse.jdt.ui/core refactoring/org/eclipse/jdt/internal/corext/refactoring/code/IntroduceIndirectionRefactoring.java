@@ -71,8 +71,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceIndirectionDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -80,6 +80,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -320,7 +321,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	/**
-	 * @param fullyQualifiedTypeName
+	 * @param fullyQualifiedTypeName the fully qualified name of the intermediary method
 	 * @return status for type name. Use {@link #setIntermediaryMethodName(String)} to check for overridden methods.
 	 */
 	public RefactoringStatus setIntermediaryClassName(String fullyQualifiedTypeName) {
@@ -751,7 +752,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_declaring_pattern, JavaElementLabels.getTextLabel(fIntermediaryClass, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		if (fUpdateReferences)
 			comment.addSetting(RefactoringCoreMessages.JavaRefactoringDescriptor_update_references);
-		final IntroduceIndirectionDescriptor descriptor= new IntroduceIndirectionDescriptor(project, description, comment.asString(), arguments, flags);
+		final IntroduceIndirectionDescriptor descriptor= RefactoringSignatureDescriptorFactory.createIntroduceIndirectionDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fTargetMethod));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fIntermediaryMethodName);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1, JavaRefactoringDescriptorUtil.elementToHandle(project, fIntermediaryClass));
@@ -765,7 +766,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * Checks whether the target method can be created. Note that this
 	 * can only be done after fDelegateParameterType has been initialized.
 	 * @return resulting status
-	 * @throws JavaModelException
+	 * @throws JavaModelException should not happen
 	 */
 	private RefactoringStatus checkCanCreateIntermediaryMethod() throws JavaModelException {
 		// check if method already exists:
@@ -1011,10 +1012,10 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * 		2b) outside the type of the invocation
 	 *
 	 * In case of 1a) and 2b), qualify with the enclosing type.
-	 * @param expr
-	 * @param originalInvocation
-	 * @param enclosing
-	 * @param unitRewriter
+	 * @param expr a {@link ThisExpression}
+	 * @param originalInvocation the original method invocation
+	 * @param enclosing the enclosing member of the original method invocation
+	 * @param unitRewriter the rewrite
 	 * @return resulting status
 	 *
 	 */

@@ -74,6 +74,7 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -128,7 +129,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 	// -------------
 	private RenameJavaElementDescriptor createRefactoringDescriptor(IPackageFragment pack, String newName) {
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(pack);
 		descriptor.setNewName(newName);
 		descriptor.setUpdateReferences(true);
@@ -607,7 +608,7 @@ public class RenamePackageTests extends RefactoringTest {
 		file.create(new ByteArrayInputStream(content), true, null);
 		file.refreshLocal(IResource.DEPTH_ONE, null);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(fragment);
 		descriptor.setNewName("org.test2");
 		descriptor.setUpdateReferences(true);
@@ -643,7 +644,7 @@ public class RenamePackageTests extends RefactoringTest {
 		file.create(new ByteArrayInputStream(content), true, null);
 		file.refreshLocal(IResource.DEPTH_ONE, null);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(fragment);
 		descriptor.setNewName("org.test2");
 		descriptor.setUpdateReferences(true);

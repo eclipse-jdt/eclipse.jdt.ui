@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
 public class RenamePrivateFieldTests extends RefactoringTest {
@@ -81,7 +82,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper1_0(String fieldName, String newFieldName, String typeName, boolean renameGetter, boolean renameSetter) throws Exception{
 		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
 		IField field= declaringType.getField(fieldName);
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
 		descriptor.setJavaElement(field);
 		descriptor.setNewName(newFieldName);
 		descriptor.setUpdateReferences(true);
@@ -106,7 +107,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		IField field= classA.getField(fieldName);
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
 		descriptor.setJavaElement(field);
 		descriptor.setNewName(newFieldName);
 		descriptor.setUpdateReferences(updateReferences);

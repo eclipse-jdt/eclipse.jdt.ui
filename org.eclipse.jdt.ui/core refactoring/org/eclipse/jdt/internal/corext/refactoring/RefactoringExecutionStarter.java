@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
@@ -488,7 +489,7 @@ public final class RefactoringExecutionStarter {
 			MessageDialog.openError(shell, RefactoringMessages.RefactoringExecutionStarter_IntroduceParameterObject_problem_title, RefactoringMessages.RefactoringExecutionStarter_IntroduceParameterObject_problem_description);
 			return;
 		}
-		IntroduceParameterObjectDescriptor ipod= new IntroduceParameterObjectDescriptor();
+		IntroduceParameterObjectDescriptor ipod= RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor();
 		ipod.setMethod(method);
 
 		IntroduceParameterObjectProcessor processor= new IntroduceParameterObjectProcessor(ipod);
@@ -506,7 +507,7 @@ public final class RefactoringExecutionStarter {
 				}
 				String message= Messages.format(RefactoringMessages.RefactoringErrorDialogUtil_okToPerformQuestion, entry.getMessage());
 				if (element != null && MessageDialog.openQuestion(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, message)) {
-					ipod= new IntroduceParameterObjectDescriptor();
+					ipod= RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor();
 					ipod.setMethod(superMethod);
 					processor= new IntroduceParameterObjectProcessor(ipod);
 				}
@@ -521,7 +522,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startExtractClassRefactoring(IType type, Shell shell) {
-		ExtractClassDescriptor descriptor= new ExtractClassDescriptor();
+		ExtractClassDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractClassDescriptor();
 		descriptor.setType(type);
 		ExtractClassRefactoring refactoring= new ExtractClassRefactoring(descriptor);
 		ExtractClassWizard wizard= new ExtractClassWizard(descriptor, refactoring);

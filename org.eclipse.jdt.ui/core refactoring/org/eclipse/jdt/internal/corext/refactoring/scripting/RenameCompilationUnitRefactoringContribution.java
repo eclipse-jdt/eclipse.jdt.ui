@@ -20,10 +20,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 
@@ -32,7 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitP
  *
  * @since 3.2
  */
-public final class RenameCompilationUnitRefactoringContribution extends JavaRefactoringContribution {
+public final class RenameCompilationUnitRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -44,10 +43,10 @@ public final class RenameCompilationUnitRefactoringContribution extends JavaRefa
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
+		return RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new RenameJavaElementDescriptor(id, project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(id, project, description, comment, arguments, flags);
 	}
 }

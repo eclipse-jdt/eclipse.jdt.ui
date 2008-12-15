@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.SourceRange;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
@@ -83,7 +84,7 @@ public class RenameTempTests extends RefactoringTest{
 		assertEquals(1, elements.length);
 		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
 
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 		descriptor.setJavaElement(elements[0]);
 		descriptor.setNewName(newName);
 		descriptor.setUpdateReferences(updateReferences);
@@ -130,7 +131,7 @@ public class RenameTempTests extends RefactoringTest{
 		assertEquals(1, elements.length);
 		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
 
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 		descriptor.setJavaElement(elements[0]);
 		descriptor.setNewName(newName);
 		descriptor.setUpdateReferences(updateReferences);

@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -684,7 +685,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				settings[index]= JavaElementLabels.getElementLabel(fMembersToMove[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
 			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.PushDownRefactoring_pushed_members_pattern, settings));
 			addSuperTypeSettings(comment, true);
-			final PushDownDescriptor descriptor= new PushDownDescriptor(project, description, comment.asString(), arguments, flags);
+			final PushDownDescriptor descriptor= RefactoringSignatureDescriptorFactory.createPushDownDescriptor(project, description, comment.asString(), arguments, flags);
 			if (fCachedDeclaringType != null)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCachedDeclaringType));
 			for (int index= 0; index < fMembersToMove.length; index++) {

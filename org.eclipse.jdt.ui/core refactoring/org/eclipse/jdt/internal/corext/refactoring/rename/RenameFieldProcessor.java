@@ -47,8 +47,8 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
@@ -285,7 +286,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	/**
 	 * @return Error message or <code>null</code> if getter can be renamed.
-	 * @throws CoreException
+	 * @throws CoreException should not happen
 	 */
 	public String canEnableGetterRenaming() throws CoreException{
 		if (fField.getDeclaringType().isInterface())
@@ -305,7 +306,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	/**
 	 * @return Error message or <code>null</code> if setter can be renamed.
-	 * @throws CoreException
+	 * @throws CoreException should not happen
 	 */
 	public String canEnableSetterRenaming() throws CoreException{
 		if (fField.getDeclaringType().isInterface())
@@ -628,7 +629,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_getter);
 		if (fRenameSetter)
 			comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_settter);
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
 		descriptor.setProject(project);
 		descriptor.setDescription(description);
 		descriptor.setComment(comment.asString());

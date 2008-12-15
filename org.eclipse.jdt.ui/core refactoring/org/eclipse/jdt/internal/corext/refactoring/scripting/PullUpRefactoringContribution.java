@@ -19,10 +19,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.PullUpDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringPr
  *
  * @since 3.2
  */
-public final class PullUpRefactoringContribution extends JavaRefactoringContribution {
+public final class PullUpRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -43,10 +42,10 @@ public final class PullUpRefactoringContribution extends JavaRefactoringContribu
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new PullUpDescriptor();
+		return RefactoringSignatureDescriptorFactory.createPullUpDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new PullUpDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createPullUpDescriptor(project, description, comment, arguments, flags);
 	}
 }

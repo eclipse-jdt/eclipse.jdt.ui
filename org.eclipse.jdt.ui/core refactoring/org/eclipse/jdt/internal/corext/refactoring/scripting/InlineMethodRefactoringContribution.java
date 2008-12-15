@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,9 +31,9 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.InlineMethodDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *
  * @since 3.2
  */
-public final class InlineMethodRefactoringContribution extends JavaRefactoringContribution {
+public final class InlineMethodRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -110,11 +110,18 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments, null));
 		return InlineMethodRefactoring.create(unit, node, selectionStart, selectionLength);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringDescriptor createDescriptor() {
+		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor();
+	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		return new InlineMethodDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor(project, description, comment, arguments, flags);
 	}
 }

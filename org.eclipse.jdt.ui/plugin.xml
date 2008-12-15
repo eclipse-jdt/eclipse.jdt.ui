@@ -5359,7 +5359,7 @@
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractConstantRefactoringContribution"
             id="org.eclipse.jdt.ui.extract.constant"/>
       <contribution
-            class="org.eclipse.jdt.internal.corext.refactoring.ExtractClassContribution"
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractClassContribution"
             id="org.eclipse.jdt.ui.extract.class">
       </contribution>
       <contribution

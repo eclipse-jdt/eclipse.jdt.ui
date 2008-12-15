@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDesc
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor.Parameter;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -503,7 +504,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	}
 
 	public JavaRefactoringDescriptor createDescriptor() {
-		IntroduceParameterObjectDescriptor ipod= new IntroduceParameterObjectDescriptor();
+		IntroduceParameterObjectDescriptor ipod= RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor();
 		ipod.setMethod(getMethod());
 		ipod.setClassName(getClassName());
 		ipod.setDelegate(getDelegateUpdating());

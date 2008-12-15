@@ -112,6 +112,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -1719,7 +1720,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_name_pattern, BasicElementLabels.getJavaElementName(getMethodName())));
 			if (needsTargetNode())
 				comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_parameter_name_pattern, BasicElementLabels.getJavaElementName(getTargetName())));
-			final MoveMethodDescriptor descriptor= new MoveMethodDescriptor( project, description, comment.asString(), arguments, flags);
+			final MoveMethodDescriptor descriptor= RefactoringSignatureDescriptorFactory.createMoveMethodDescriptor(project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fMethod));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
 			arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);

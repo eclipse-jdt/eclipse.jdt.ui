@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -712,7 +713,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			final String description= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fMethod.getElementName()));
 			final String header= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(getNewElementName())});
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+			final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 			descriptor.setProject(project);
 			descriptor.setDescription(description);
 			descriptor.setComment(comment);
@@ -741,7 +742,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	 * @param manager the text change manager
 	 * @param pm the progress monitor
 	 * @param status the status
-	 * @throws CoreException
+	 * @throws CoreException if change creation failed
 	 */
 	protected void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$

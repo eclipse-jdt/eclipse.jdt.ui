@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -897,7 +898,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				comment.addSetting(RefactoringCoreMessages.InlineConstantRefactoring_remove_declaration);
 			if (fReplaceAllReferences)
 				comment.addSetting(RefactoringCoreMessages.InlineConstantRefactoring_replace_references);
-			final InlineConstantDescriptor descriptor= new InlineConstantDescriptor(project, description, comment.asString(), arguments, flags);
+			final InlineConstantDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInlineConstantDescriptor(project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fSelectionCu));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());

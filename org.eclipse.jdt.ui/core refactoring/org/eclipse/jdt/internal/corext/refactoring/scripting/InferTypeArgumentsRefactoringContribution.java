@@ -18,10 +18,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.refactoring.descriptors.InferTypeArgumentsDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 
@@ -30,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRe
  *
  * @since 3.2
  */
-public final class InferTypeArgumentsRefactoringContribution extends JavaRefactoringContribution {
+public final class InferTypeArgumentsRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -41,10 +40,10 @@ public final class InferTypeArgumentsRefactoringContribution extends JavaRefacto
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new InferTypeArgumentsDescriptor();
+		return RefactoringSignatureDescriptorFactory.createInferTypeArgumentsDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new InferTypeArgumentsDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createInferTypeArgumentsDescriptor(project, description, comment, arguments, flags);
 	}
 }

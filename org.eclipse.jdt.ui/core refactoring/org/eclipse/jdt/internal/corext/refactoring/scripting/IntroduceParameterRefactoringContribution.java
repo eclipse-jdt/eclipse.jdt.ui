@@ -18,10 +18,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
@@ -30,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
  *
  * @since 3.2
  */
-public final class IntroduceParameterRefactoringContribution extends JavaRefactoringContribution {
+public final class IntroduceParameterRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -41,10 +40,10 @@ public final class IntroduceParameterRefactoringContribution extends JavaRefacto
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new IntroduceParameterDescriptor();
+		return RefactoringSignatureDescriptorFactory.createIntroduceParameterDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new IntroduceParameterDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createIntroduceParameterDescriptor(project, description, comment, arguments, flags);
 	}
 }

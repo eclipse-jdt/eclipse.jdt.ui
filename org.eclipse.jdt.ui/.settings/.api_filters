@@ -8,4 +8,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/scripting/JavaUIRefactoringContribution.java" type="org.eclipse.jdt.internal.corext.refactoring.scripting.JavaUIRefactoringContribution">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="JavaRefactoringContribution"/>
+                <message_argument value="JavaUIRefactoringContribution"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>

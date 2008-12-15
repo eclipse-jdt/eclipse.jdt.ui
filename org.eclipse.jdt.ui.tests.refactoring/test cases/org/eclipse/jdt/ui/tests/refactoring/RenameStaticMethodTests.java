@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final Class clazz= RenameStaticMethodTests.class;
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
@@ -52,7 +54,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
 		try{
 			IMethod method= classA.getMethod(methodName, signatures);
-			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 			descriptor.setJavaElement(method);
 			descriptor.setNewName(newMethodName);
 			descriptor.setUpdateReferences(true);
@@ -73,7 +75,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		try{
 			IType classA= getType(cu, "A");
 			IMethod method= classA.getMethod(methodName, signatures);
-			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 			descriptor.setUpdateReferences(updateReferences);
 			descriptor.setJavaElement(method);
 			descriptor.setNewName(newMethodName);
@@ -199,7 +201,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 
 		IType classB= getType(cuB, "B");
 		IMethod method= classB.getMethod("method", new String[0]);
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setUpdateReferences(true);
 		descriptor.setJavaElement(method);
 		descriptor.setNewName("newmethod");
@@ -220,7 +222,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 
 			IType classA= getType(cuA, "A");
 			IMethod method= classA.getMethod("method2", new String[0]);
-			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 			descriptor.setUpdateReferences(true);
 			descriptor.setJavaElement(method);
 			descriptor.setNewName("fred");

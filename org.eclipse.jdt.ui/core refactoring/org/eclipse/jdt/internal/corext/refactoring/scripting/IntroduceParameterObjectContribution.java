@@ -20,12 +20,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectProcessor;
 
-public class IntroduceParameterObjectContribution extends JavaRefactoringContribution {
+public class IntroduceParameterObjectContribution extends JavaUIRefactoringContribution {
 
 	public IntroduceParameterObjectContribution() {
 	}
@@ -39,11 +39,11 @@ public class IntroduceParameterObjectContribution extends JavaRefactoringContrib
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new IntroduceParameterObjectDescriptor();
+		return RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new IntroduceParameterObjectDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor(project, description, comment, arguments, flags);
 	}
 
 }

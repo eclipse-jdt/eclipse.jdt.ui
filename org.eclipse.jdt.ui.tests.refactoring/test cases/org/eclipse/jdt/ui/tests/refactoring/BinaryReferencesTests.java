@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.SearchMatch;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
@@ -136,7 +137,7 @@ public class BinaryReferencesTests extends TestCase {
 	}
 
 	public void testRenameType01() throws Exception {
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 		descriptor.setJavaElement(findType("source.BaseClass"));
 		descriptor.setNewName("RenamedBaseClass");
 		descriptor.setUpdateReferences(true);
@@ -150,7 +151,7 @@ public class BinaryReferencesTests extends TestCase {
 	}
 
 	public void testRenameType02() throws Exception {
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 		descriptor.setJavaElement(findType("source.Color"));
 		descriptor.setNewName("Colour");
 		descriptor.setUpdateSimilarDeclarations(true);
@@ -183,7 +184,7 @@ public class BinaryReferencesTests extends TestCase {
 	}
 
 	private static List doRenameMethod(String typeName, String methodName) throws CoreException {
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		IMethod method= findMethod(findType(typeName), methodName);
 		descriptor.setJavaElement(method);
 		descriptor.setNewName("newName");
@@ -232,7 +233,7 @@ public class BinaryReferencesTests extends TestCase {
 	private static List doRenameField(String typeName, String fieldName) throws CoreException {
 		IField field= findType(typeName).getField(fieldName);
 		String refactoringID= field.isEnumConstant() ? IJavaRefactorings.RENAME_ENUM_CONSTANT : IJavaRefactorings.RENAME_FIELD;
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(refactoringID);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(refactoringID);
 		descriptor.setJavaElement(field);
 		descriptor.setNewName(field.isEnumConstant() ? "BLA" : "newName");
 		descriptor.setUpdateReferences(true);
@@ -271,7 +272,7 @@ public class BinaryReferencesTests extends TestCase {
 	}
 
 	public void testRenamePackage01() throws Exception {
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		IPackageFragment pack= findType("source.BaseClass").getPackageFragment();
 		descriptor.setJavaElement(pack);
 		descriptor.setNewName("newName");
@@ -289,7 +290,7 @@ public class BinaryReferencesTests extends TestCase {
 	}
 
 	public void testRenamePackage02() throws Exception {
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		IPackageFragment pack= findType("source.BaseClass").getPackageFragment();
 		descriptor.setJavaElement(pack);
 		descriptor.setNewName("newName");

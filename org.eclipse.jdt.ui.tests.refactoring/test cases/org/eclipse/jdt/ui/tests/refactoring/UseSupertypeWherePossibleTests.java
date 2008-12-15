@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
@@ -70,7 +71,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 			units[i]= createCUfromTestFile(subType.getPackageFragment(), cuNames[i]);
 		}
 		final IType superType= subType.getJavaProject().findType(superTypeFullName, (IProgressMonitor) null);
-		final UseSupertypeDescriptor descriptor= new UseSupertypeDescriptor();
+		final UseSupertypeDescriptor descriptor= RefactoringSignatureDescriptorFactory.createUseSupertypeDescriptor();
 		descriptor.setSubtype(subType);
 		descriptor.setSupertype(superType);
 		descriptor.setReplaceInstanceof(replaceInstanceOf);

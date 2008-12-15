@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+
 public class RenameJavaProjectTests extends RefactoringTest {
 
 	private static final Class clazz= RenameJavaProjectTests.class;
@@ -70,7 +72,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			ParticipantTesting.reset();
 			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
 
-			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
+			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
 			descriptor.setJavaElement(p1);
 			descriptor.setUpdateReferences(true);
 			descriptor.setNewName(newProjectName);
@@ -162,7 +164,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			ParticipantTesting.reset();
 			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
 
-			RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
+			RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);
 			descriptor.setJavaElement(p1);
 			descriptor.setUpdateReferences(true);
 			descriptor.setNewName(newProjectName);

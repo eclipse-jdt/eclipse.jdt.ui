@@ -90,14 +90,15 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertMemberTypeDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -500,7 +501,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	 * Creates a new move inner to top refactoring.
 	 * @param type the type, or <code>null</code> if invoked by scripting
 	 * @param settings the code generation settings, or <code>null</code> if invoked by scripting
-	 * @throws JavaModelException
+	 * @throws JavaModelException if initialization failed
 	 */
 	public MoveInnerToTopRefactoring(IType type, CodeGenerationSettings settings) throws JavaModelException {
 		fType= type;
@@ -764,7 +765,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_parameter_pattern, BasicElementLabels.getJavaElementName(fNameForEnclosingInstanceConstructorParameter)));
 		if (enclosing && fMarkInstanceFieldAsFinal)
 			comment.addSetting(RefactoringCoreMessages.MoveInnerToTopRefactoring_declare_final);
-		final ConvertMemberTypeDescriptor descriptor= new ConvertMemberTypeDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
+		final ConvertMemberTypeDescriptor descriptor= RefactoringSignatureDescriptorFactory.createConvertMemberTypeDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fType));
 		if (enclosing)
 			arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);

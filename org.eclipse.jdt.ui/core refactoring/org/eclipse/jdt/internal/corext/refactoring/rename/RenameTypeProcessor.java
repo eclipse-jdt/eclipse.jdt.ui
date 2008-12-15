@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -557,7 +558,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * fields.
 	 *
 	 * May be called from the UI.
-	 * @param monitor
+	 * @param monitor progress monitor
 	 * @return initialization status
 	 * @throws JavaModelException some fundamental error with the underlying model
 	 * @throws OperationCanceledException if user canceled the task
@@ -695,13 +696,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 
 	/**
-	 * @param matchOffset
-	 * @param parentElement
+	 * @param matchOffset offset of the match
+	 * @param parentElement parent element of the match
 	 * @return true iff the given search match offset (must be a match of a type
 	 * reference) lies before the element name of its enclosing java element,
 	 * false if not. In other words: If this method returns true, the match is
 	 * the declared type (or return type) of the enclosing element.
-	 * @throws JavaModelException
+	 * @throws JavaModelException should not happen
 	 *
 	 */
 	private boolean isInDeclaredType(int matchOffset, IJavaElement parentElement) throws JavaModelException {
@@ -1010,7 +1011,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			final String description= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fType.getElementName()));
 			final String header= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementLabel()});
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
+			final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 			descriptor.setProject(project);
 			descriptor.setDescription(description);
 			descriptor.setComment(comment);
@@ -1223,10 +1224,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	/**
 	 * Creates and initializes the refactoring processors for similarly named elements
-	 * @param progressMonitor
-	 * @param context
+	 * @param progressMonitor progress monitor
+	 * @param context context
 	 * @return status
-	 * @throws CoreException
+	 * @throws CoreException should not happen
 	 */
 	private RefactoringStatus initializeSimilarElementsRenameProcessors(IProgressMonitor progressMonitor, CheckConditionsContext context) throws CoreException {
 
@@ -1421,8 +1422,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * Checks whether one of the given methods, which will all be renamed to
 	 * "newName", shares a type with another already registered method which is
 	 * renamed to the same new name and shares the same parameters.
-	 * @param methods
-	 * @param newName
+	 * @param methods methods to check
+	 * @param newName the new name
 	 * @return status
 	 *
 	 * @see #checkForConflictingRename(IField, String)
@@ -1478,8 +1479,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 *
 	 * Rename "FooBarThing" to "DifferentHunk". Suggestion for both fields is
 	 * "fDifferentHunk" (and rightly so).
-	 * @param currentField
-	 * @param newName
+	 * @param currentField field
+	 * @param newName new name
 	 * @return status
 	 */
 	private RefactoringStatus checkForConflictingRename(IField currentField, String newName) {
@@ -1632,9 +1633,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * field names, but non-qualified field names only iff there are no fields
 	 * which have the same original, but a different new name. Don't add java
 	 * references; duplicate edits may be created but do not matter.
-	 * @param manager
-	 * @param monitor
-	 * @throws CoreException
+	 * @param manager text change manager
+	 * @param monitor progress monitor
+	 * @throws CoreException if updating failed
 	 */
 	private void addSimilarElementsTextualUpdates(TextChangeManager manager, IProgressMonitor monitor) throws CoreException {
 

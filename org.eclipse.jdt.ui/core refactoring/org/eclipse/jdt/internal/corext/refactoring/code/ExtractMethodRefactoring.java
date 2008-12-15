@@ -79,11 +79,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -213,8 +214,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/**
 	 * Creates a new extract method refactoring
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart selection start
+	 * @param selectionLength selection end
 	 */
 	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		fCUnit= unit;
@@ -234,8 +235,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/**
 	 * Creates a new extract method refactoring
 	 * @param astRoot the AST root of an AST created from a compilation unit
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart start
+	 * @param selectionLength length
 	 */
 	public ExtractMethodRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
 		this((ICompilationUnit) astRoot.getTypeRoot(), selectionStart, selectionLength);
@@ -256,7 +257,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 *
 	 * @param pm a progress monitor to report progress during activation checking.
 	 * @return the refactoring status describing the result of the activation check.
-	 * @throws CoreException
+	 * @throws CoreException if checking fails
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
@@ -558,7 +559,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.ExtractMethodRefactoring_replace_occurrences);
 		if (fGenerateJavadoc)
 			comment.addSetting(RefactoringCoreMessages.ExtractMethodRefactoring_generate_comment);
-		final ExtractMethodDescriptor descriptor= new ExtractMethodDescriptor( project, description, comment.asString(), arguments, flags);
+		final ExtractMethodDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractMethodDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCUnit));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$

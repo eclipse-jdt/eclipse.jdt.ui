@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -112,7 +113,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		final String description= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fField.getElementName()));
 		final String header= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(field.getElementName()), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(getNewElementName())});
 		final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_ENUM_CONSTANT);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_ENUM_CONSTANT);
 		descriptor.setProject(project);
 		descriptor.setDescription(description);
 		descriptor.setComment(comment);

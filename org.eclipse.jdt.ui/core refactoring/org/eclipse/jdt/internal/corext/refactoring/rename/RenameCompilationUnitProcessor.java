@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -73,7 +74,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	/**
 	 * Creates a new rename compilation unit processor.
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @throws CoreException
+	 * @throws CoreException if the cu is broken
 	 */
 	public RenameCompilationUnitProcessor(ICompilationUnit unit) throws CoreException {
 		fCu= unit;
@@ -364,7 +365,8 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 
 	/**
 	 * Removes the extension (whatever comes after the last '.') from the given file name.
-	 * @param fileName
+	 * 
+	 * @param fileName the file name
 	 * @return main type name
 	 */
 	private static String removeFileNameExtension(String fileName) {
@@ -408,7 +410,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, BasicElementLabels.getResourceName(newName)});
 		final String comment= new JDTRefactoringDescriptorComment(name, this, header).asString();
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
-		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
 		descriptor.setProject(name);
 		descriptor.setDescription(description);
 		descriptor.setComment(comment);

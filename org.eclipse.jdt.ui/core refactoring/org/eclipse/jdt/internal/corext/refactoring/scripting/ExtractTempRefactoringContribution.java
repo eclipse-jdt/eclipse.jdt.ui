@@ -18,10 +18,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
@@ -30,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
  *
  * @since 3.2
  */
-public final class ExtractTempRefactoringContribution extends JavaRefactoringContribution {
+public final class ExtractTempRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -41,10 +40,10 @@ public final class ExtractTempRefactoringContribution extends JavaRefactoringCon
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new ExtractLocalDescriptor();
+		return RefactoringSignatureDescriptorFactory.createExtractLocalDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new ExtractLocalDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createExtractLocalDescriptor(project, description, comment, arguments, flags);
 	}
 }

@@ -19,10 +19,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcess
  *
  * @since 3.2
  */
-public final class UseSupertypeRefactoringContribution extends JavaRefactoringContribution {
+public final class UseSupertypeRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -43,10 +42,10 @@ public final class UseSupertypeRefactoringContribution extends JavaRefactoringCo
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new UseSupertypeDescriptor();
+		return RefactoringSignatureDescriptorFactory.createUseSupertypeDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new UseSupertypeDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createUseSupertypeDescriptor(project, description, comment, arguments, flags);
 	}
 }

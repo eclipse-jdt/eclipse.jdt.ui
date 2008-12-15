@@ -19,10 +19,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.PushDownDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
  *
  * @since 3.2
  */
-public final class PushDownRefactoringContribution extends JavaRefactoringContribution {
+public final class PushDownRefactoringContribution extends JavaUIRefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
@@ -43,10 +42,10 @@ public final class PushDownRefactoringContribution extends JavaRefactoringContri
 	}
 
 	public RefactoringDescriptor createDescriptor() {
-		return new PushDownDescriptor();
+		return RefactoringSignatureDescriptorFactory.createPushDownDescriptor();
 	}
 
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
-		return new PushDownDescriptor(project, description, comment, arguments, flags);
+		return RefactoringSignatureDescriptorFactory.createPushDownDescriptor(project, description, comment, arguments, flags);
 	}
 }

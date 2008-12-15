@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor.Field;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -158,7 +160,7 @@ public class ExtractClassTests extends RefactoringTest {
 		super.setUp();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
-		fDescriptor= new ExtractClassDescriptor();
+		fDescriptor= RefactoringSignatureDescriptorFactory.createExtractClassDescriptor();
 		fDescriptor.setFieldName("parameterObject");
 		fPack= getPackageP();
 	}

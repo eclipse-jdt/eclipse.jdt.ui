@@ -66,10 +66,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertLocalVariableDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -134,8 +135,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	/**
 	 * Creates a new promote temp to field refactoring.
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
-	 * @param selectionStart
-	 * @param selectionLength
+	 * @param selectionStart start
+	 * @param selectionLength length
 	 */
 	public PromoteTempToFieldRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength){
 		Assert.isTrue(selectionStart >= 0);
@@ -701,7 +702,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_declare_final);
 		else if (fDeclareStatic)
 			comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_declare_static);
-		final ConvertLocalVariableDescriptor descriptor= new ConvertLocalVariableDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+		final ConvertLocalVariableDescriptor descriptor= RefactoringSignatureDescriptorFactory.createConvertLocalVariableDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fFieldName);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$

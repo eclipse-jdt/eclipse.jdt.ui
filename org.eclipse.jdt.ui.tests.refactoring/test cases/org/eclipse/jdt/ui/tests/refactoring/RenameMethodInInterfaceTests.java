@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 public class RenameMethodInInterfaceTests extends RefactoringTest {
@@ -64,7 +65,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		IType interfaceI= getType(cu, "I");
 		IMethod method= interfaceI.getMethod(methodName, signatures);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
 		descriptor.setUpdateReferences(true);
 		descriptor.setNewName(newMethodName);
@@ -82,7 +83,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		IType interfaceI= getType(cu, "I");
 		IMethod method= interfaceI.getMethod(methodName, signatures);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
 		descriptor.setUpdateReferences(updateReferences);
 		descriptor.setNewName(newMethodName);

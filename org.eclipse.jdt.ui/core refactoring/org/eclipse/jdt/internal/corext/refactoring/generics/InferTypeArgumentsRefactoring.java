@@ -60,10 +60,11 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.InferTypeArgumentsDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -404,12 +405,13 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	}
 
 	/**
-	 * @param baseType
-	 * @param typeArgumentCvs
-	 * @param rewrite
-	 * @param tCModel
-	 * @param leaveUnconstraindRaw
-	 * @return the new type arguments, or <code>null</code> iff an argument could not be infered
+	 * @param baseType the base type
+	 * @param typeArgumentCvs type argument constraint variables
+	 * @param rewrite the cu rewrite
+	 * @param tCModel the type constraints model
+	 * @param leaveUnconstraindRaw <code>true</code> to keep unconstrained type references raw,
+	 *            <code>false</code> to infer <code>&lt;?&gt;</code> if possible
+	 * @return the new type arguments, or <code>null</code> iff an argument could not be inferred
 	 */
 	private static Type[] getTypeArguments(Type baseType, ArrayList typeArgumentCvs, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
 		if (typeArgumentCvs.size() == 0)
@@ -558,7 +560,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_assume_clone);
 					if (fLeaveUnconstrainedRaw)
 						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_leave_unconstrained);
-					final InferTypeArgumentsDescriptor descriptor= new InferTypeArgumentsDescriptor(name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					final InferTypeArgumentsDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInferTypeArgumentsDescriptor(name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
 						arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1), JavaRefactoringDescriptorUtil.elementToHandle(name, fElements[index]));
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());

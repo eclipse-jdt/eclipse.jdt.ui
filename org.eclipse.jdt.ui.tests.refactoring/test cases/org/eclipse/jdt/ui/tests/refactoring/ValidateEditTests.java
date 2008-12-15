@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
@@ -89,7 +90,7 @@ public class ValidateEditTests extends RefactoringTest {
 		ICompilationUnit cu2= fragment.createCompilationUnit("B.java", buf.toString(), true, null);
 		setReadOnly(cu2);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(fragment);
 		descriptor.setNewName("org.test2");
 		descriptor.setUpdateReferences(true);
@@ -131,7 +132,7 @@ public class ValidateEditTests extends RefactoringTest {
 		ICompilationUnit cu3= fragment2.createCompilationUnit("C.java", buf.toString(), true, null);
 		setReadOnly(cu3);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(fragment);
 		descriptor.setNewName("org.test2");
 		descriptor.setUpdateReferences(true);
@@ -162,7 +163,7 @@ public class ValidateEditTests extends RefactoringTest {
 		file.create(getStream(content), true, null);
 		setReadOnly(file);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(fragment);
 		descriptor.setNewName("org.test2");
 		descriptor.setUpdateReferences(true);
@@ -194,7 +195,7 @@ public class ValidateEditTests extends RefactoringTest {
 		file.refreshLocal( IResource.DEPTH_ONE, null);
 		setReadOnly(file);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(fragment);
 		descriptor.setNewName("org.test2");
 		descriptor.setUpdateReferences(true);
@@ -228,7 +229,7 @@ public class ValidateEditTests extends RefactoringTest {
 		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", buf.toString(), true, null);
 		setReadOnly(cu2);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
 		descriptor.setJavaElement(cu1);
 		descriptor.setNewName("MyClass2.java");
 		descriptor.setUpdateReferences(true);
@@ -260,7 +261,7 @@ public class ValidateEditTests extends RefactoringTest {
 		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", buf.toString(), true, null);
 		setReadOnly(cu2);
 
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 		descriptor.setJavaElement(cu1.findPrimaryType());
 		descriptor.setNewName("MyClass2");
 		descriptor.setUpdateReferences(true);

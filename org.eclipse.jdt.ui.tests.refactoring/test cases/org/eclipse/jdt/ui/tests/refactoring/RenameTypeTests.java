@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
@@ -79,7 +80,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 
 	private RenameJavaElementDescriptor createRefactoringDescriptor(IType type, String newName) {
-		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 		descriptor.setJavaElement(type);
 		descriptor.setNewName(newName);
 		descriptor.setUpdateReferences(true);

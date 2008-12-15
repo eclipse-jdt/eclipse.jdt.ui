@@ -82,6 +82,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -447,7 +448,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_do_not_use_accessors);
 		if (fGenerateJavadoc)
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_generate_comments);
-		final EncapsulateFieldDescriptor descriptor= new EncapsulateFieldDescriptor(project, description, comment.asString(), arguments, flags);
+		final EncapsulateFieldDescriptor descriptor= RefactoringSignatureDescriptorFactory.createEncapsulateFieldDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fField));
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 		arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
