@@ -39,6 +39,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -242,6 +243,21 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 	private final class WorkingSetModelAwareSelectionDialog extends SelectionDialog {
 
+		/**
+		 * Section ID for the WorkingSetModelAwareSelectionDialog class.
+		 * 
+		 * @since 3.5
+		 */
+		private static final String DIALOG_SETTINGS_SECTION= "WorkingSetModelAwareSelectionDialog"; //$NON-NLS-1$
+
+		/**
+		 * Key associated with the 'Show Only PE Visible Working Sets' check box.
+		 * 
+		 * @since 3.5
+		 */
+		private static final String SETTINGS_SHOW_VISIBLE_ONLY= "ShowVisibleOnly"; //$NON-NLS-1$
+
+
 		private final class GrayedCheckModelElementSorter extends ViewerSorter {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				GrayedCheckedModelElement w1= (GrayedCheckedModelElement)e1;
@@ -291,6 +307,11 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		private final IAdaptable[] fElements;
 		private final ArrayList fCreatedWorkingSets;
 
+		/**
+		 * @since 3.5
+		 */
+		private IDialogSettings fSettings;
+
 		private WorkingSetModelAwareSelectionDialog(Shell shell, GrayedCheckedModel model, IAdaptable[] elements) {
 			super(shell);
 
@@ -298,9 +319,13 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			setHelpAvailable(false);
 
 			fModel= model;
-			fShowVisibleOnly= true;
 			fElements= elements;
 			fCreatedWorkingSets= new ArrayList();
+			fSettings= JavaPlugin.getDefault().getDialogSettingsSection(DIALOG_SETTINGS_SECTION);
+			if (fSettings.get(SETTINGS_SHOW_VISIBLE_ONLY) == null) {
+				fSettings.put(SETTINGS_SHOW_VISIBLE_ONLY, true);
+			}
+			fShowVisibleOnly= fSettings.getBoolean(SETTINGS_SHOW_VISIBLE_ONLY);
 		}
 
 		public IWorkingSet[] getGrayed() {
@@ -517,6 +542,16 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					recalculateCheckedState();
 				}
 			});
+		}
+
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
+		 * @since 3.5
+		 */
+		protected void buttonPressed(int buttonId) {
+			if (IDialogConstants.OK_ID == buttonId)
+				fSettings.put(SETTINGS_SHOW_VISIBLE_ONLY, fShowVisibleOnly);
+			super.buttonPressed(buttonId);
 		}
 
 		private void recalculateCheckedState() {
