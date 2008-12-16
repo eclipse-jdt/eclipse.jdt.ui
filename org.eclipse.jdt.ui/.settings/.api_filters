@@ -8,11 +8,35 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/AddClassFileMarkerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.AddClassFileMarkerAction">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="AddMarkerAction"/>
+                <message_argument value="AddClassFileMarkerAction"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/scripting/JavaUIRefactoringContribution.java" type="org.eclipse.jdt.internal.corext.refactoring.scripting.JavaUIRefactoringContribution">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="JavaRefactoringContribution"/>
                 <message_argument value="JavaUIRefactoringContribution"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/ClassFileMarkerRulerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.ClassFileMarkerRulerAction">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="MarkerRulerAction"/>
+                <message_argument value="ClassFileMarkerRulerAction"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/CompilationUnitDocumentProvider.java" type="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider$CompilationUnitAnnotationModel">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="ResourceMarkerAnnotationModel"/>
+                <message_argument value="CompilationUnitAnnotationModel"/>
             </message_arguments>
         </filter>
     </resource>
