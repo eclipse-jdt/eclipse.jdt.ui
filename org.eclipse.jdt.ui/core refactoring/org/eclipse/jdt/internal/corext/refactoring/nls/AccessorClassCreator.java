@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -154,7 +154,7 @@ public class AccessorClassCreator {
 
 			String constructor= createConstructor(lineDelim) + lineDelim;
 			String initializer= createStaticInitializer(lineDelim) + lineDelim;
-			String fields= createStaticFields(lineDelim) + lineDelim;
+			String fields= createStaticFields() + lineDelim;
 
 			StringBuffer result= new StringBuffer();
 			result.append("public class ").append(fAccessorClassName).append(" extends NLS {"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -220,7 +220,7 @@ public class AccessorClassCreator {
 		return "RESOURCE_BUNDLE";//$NON-NLS-1$
 	}
 
-	private String createStaticFields(String lineDelim) {
+	private String createStaticFields() {
 		HashSet added= new HashSet();
 		List subs= new ArrayList();
 		for (int i= 0; i < fNLSSubstitutions.length; i++) {
@@ -253,7 +253,7 @@ public class AccessorClassCreator {
 		buf.append(';');
 	}
 
-	private String createGetStringMethod(String lineDelim) throws CoreException {
+	private String createGetStringMethod(String lineDelim) {
 		StringBuffer result= new StringBuffer();
 
 		result.append("public static String "); //$NON-NLS-1$
@@ -279,7 +279,7 @@ public class AccessorClassCreator {
 		return result.toString();
 	}
 
-	private String createStaticInitializer(String lineDelim) throws CoreException {
+	private String createStaticInitializer(String lineDelim) {
 		return "static {" //$NON-NLS-1$
 		+ lineDelim
 		+ "// initialize resource bundle" //$NON-NLS-1$
