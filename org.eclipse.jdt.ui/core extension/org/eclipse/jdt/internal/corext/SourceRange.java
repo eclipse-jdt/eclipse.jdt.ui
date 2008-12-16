@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-public class SourceRange implements ISourceRange{
+public class SourceRange implements ISourceRange { // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=88265 (Allow implementation of ISourceRange)
 
 	private final int fOffset;
 	private final int fLength;
