@@ -1652,11 +1652,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 	}
 
-	protected void updateStateDependentActions() {
-		super.updateStateDependentActions();
-		fGenerateActionGroup.editorStateChanged();
-	}
-
 	/*
 	 * @see AbstractTextEditor#rememberSelection()
 	 */

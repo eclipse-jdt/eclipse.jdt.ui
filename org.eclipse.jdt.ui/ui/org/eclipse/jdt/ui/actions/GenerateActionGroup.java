@@ -387,8 +387,9 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 *
+	 * 
 	 * @noreference This method is not intended to be referenced by clients.
+	 * @deprecated As of 3.5, this method is no longer called
 	 */
 	public void editorStateChanged() {
 		Assert.isTrue(isEditorOwner());
