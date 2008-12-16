@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -56,7 +57,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -123,22 +123,25 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			data.horizontalSpan= 2;
 			label.setLayoutData(data);
 
-			final TableLayoutComposite composite= new TableLayoutComposite(control, SWT.NULL);
-			composite.addColumnData(new ColumnWeightData(40, true));
-			composite.addColumnData(new ColumnWeightData(60, true));
+			final Composite composite= new Composite(control, SWT.NULL);
 
 			final Table table= new Table(composite, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
 			table.setHeaderVisible(true);
 			table.setLinesVisible(false);
 
-			TableColumn column= new TableColumn(table, SWT.NONE);
-			column.setText(RefactoringMessages.MoveInstanceMethodPage_Name);
-			column.setResizable(true);
+			TableColumn columnName= new TableColumn(table, SWT.NONE);
+			columnName.setText(RefactoringMessages.MoveInstanceMethodPage_Name);
+			columnName.setResizable(true);
 
-			column= new TableColumn(table, SWT.NONE);
-			column.setText(RefactoringMessages.MoveInstanceMethodPage_Type);
-			column.setResizable(true);
+			TableColumn columnType= new TableColumn(table, SWT.NONE);
+			columnType.setText(RefactoringMessages.MoveInstanceMethodPage_Type);
+			columnType.setResizable(true);
 
+			TableColumnLayout tableColumnLayout= new TableColumnLayout();
+			composite.setLayout(tableColumnLayout);
+			tableColumnLayout.setColumnData(columnName, new ColumnWeightData(40, true));
+			tableColumnLayout.setColumnData(columnType, new ColumnWeightData(60, true));
+			
 			final TableViewer viewer= new TableViewer(table);
 			viewer.setContentProvider(new ArrayContentProvider());
 			viewer.setLabelProvider(new TargetLabelProvider());
@@ -174,6 +177,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 			data= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
 			data.heightHint= SWTUtil.getTableHeightHint(table, 7);
+			data.widthHint= convertWidthInCharsToPixels(30);
 			data.horizontalSpan= 2;
 			composite.setLayoutData(data);
 

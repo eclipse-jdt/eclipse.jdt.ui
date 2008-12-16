@@ -39,6 +39,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
@@ -89,7 +90,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class IntroduceParameterObjectWizard extends RefactoringWizard {
@@ -451,9 +451,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			gridData.verticalIndent= 5;
 			l.setLayoutData(gridData);
 
-			TableLayoutComposite layoutComposite= new TableLayoutComposite(result, SWT.NONE);
-			layoutComposite.addColumnData(new ColumnWeightData(40, convertWidthInCharsToPixels(20), true));
-			layoutComposite.addColumnData(new ColumnWeightData(60, convertWidthInCharsToPixels(20), true));
+			Composite layoutComposite= new Composite(result, SWT.NONE);
 			final CheckboxTableViewer tv= CheckboxTableViewer.newCheckList(layoutComposite, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 			tv.setContentProvider(new ParameterObjectCreatorContentProvider());
 			createColumns(tv);
@@ -472,6 +470,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			tv.refresh(true);
 			gridData= new GridData(GridData.FILL_BOTH);
 			gridData.heightHint= SWTUtil.getTableHeightHint(table, parameterInfos.size());
+			gridData.widthHint= convertWidthInCharsToPixels(30);
 			layoutComposite.setLayoutData(gridData);
 			Composite controls= new Composite(result, SWT.NONE);
 			gridData= new GridData(GridData.FILL, GridData.FILL, false, false);
@@ -596,22 +595,22 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		private void createColumns(final CheckboxTableViewer tv) {
 			TextCellEditor cellEditor= new TextCellEditor(tv.getTable());
 
-			TableViewerColumn viwerColumn= new TableViewerColumn(tv, SWT.LEAD);
-			viwerColumn.setLabelProvider(new ParameterInfoLabelProvider() {
+			TableViewerColumn viewerColumn= new TableViewerColumn(tv, SWT.LEAD);
+			viewerColumn.setLabelProvider(new ParameterInfoLabelProvider() {
 				protected String doGetValue(ParameterInfo pi) {
 					return pi.getNewTypeName();
 				}
 			});
 
-			TableColumn column= viwerColumn.getColumn();
-			column.setText(RefactoringMessages.IntroduceParameterObjectWizard_type_column);
-			viwerColumn= new TableViewerColumn(tv, SWT.LEAD);
-			viwerColumn.setLabelProvider(new ParameterInfoLabelProvider() {
+			TableColumn columnType= viewerColumn.getColumn();
+			columnType.setText(RefactoringMessages.IntroduceParameterObjectWizard_type_column);
+			viewerColumn= new TableViewerColumn(tv, SWT.LEAD);
+			viewerColumn.setLabelProvider(new ParameterInfoLabelProvider() {
 				protected String doGetValue(ParameterInfo pi) {
 					return pi.getNewName();
 				}
 			});
-			viwerColumn.setEditingSupport(new ParameterInfoEditingSupport(cellEditor, tv) {
+			viewerColumn.setEditingSupport(new ParameterInfoEditingSupport(cellEditor, tv) {
 				public String doGetValue(ParameterInfo pi) {
 					return pi.getNewName();
 				}
@@ -619,8 +618,14 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					pi.setNewName(string);
 				}
 			});
-			column= viwerColumn.getColumn();
-			column.setText(RefactoringMessages.IntroduceParameterObjectWizard_name_column);
+			
+			TableColumn columnName= viewerColumn.getColumn();
+			columnName.setText(RefactoringMessages.IntroduceParameterObjectWizard_name_column);
+			
+			TableColumnLayout layout= new TableColumnLayout();
+			layout.setColumnData(columnType, new ColumnWeightData(50, convertWidthInCharsToPixels(20), true));
+			layout.setColumnData(columnName, new ColumnWeightData(50, convertWidthInCharsToPixels(20), true));
+			tv.getTable().getParent().setLayout(layout);
 		}
 
 		private void createGetterInput(Composite result) {
