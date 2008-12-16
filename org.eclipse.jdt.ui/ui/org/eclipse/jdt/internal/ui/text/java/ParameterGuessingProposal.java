@@ -202,11 +202,11 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	}
 
 	/**
-	 * Creates the completion string. Offsets and Lengths are set to the offsets and lengths
-	 * of the parameters.
-	 *
+	 * Creates the completion string. Offsets and Lengths are set to the offsets and lengths of the
+	 * parameters.
+	 * 
 	 * @return the completion string
-	 * @throws JavaModelException
+	 * @throws JavaModelException if parameter guessing failed
 	 */
 	private String computeGuessingCompletion() throws JavaModelException {
 
