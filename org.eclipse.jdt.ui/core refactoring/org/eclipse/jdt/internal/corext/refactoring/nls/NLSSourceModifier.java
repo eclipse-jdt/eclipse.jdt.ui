@@ -20,6 +20,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
@@ -115,10 +116,6 @@ public class NLSSourceModifier {
 		return change;
 	}
 
-	/**
-	 * @param substitution
-	 * @param change
-	 */
 	private void replaceAccessor(NLSSubstitution substitution, TextChange change) {
 		AccessorClassReference accessorClassRef= substitution.getAccessorClassReference();
 		if (accessorClassRef != null) {
@@ -181,7 +178,7 @@ public class NLSSourceModifier {
 					TextChangeCompatibility.addTextEdit(change, label, new InsertEdit(lineEnd, editText));
 
 				} catch (InvalidInputException e) {
-
+				} catch (BadLocationException e) {
 				}
 			}
 		}

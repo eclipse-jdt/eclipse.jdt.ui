@@ -34,26 +34,15 @@ public class NLSScanner {
 	private NLSScanner() {
 	}
 
-	/**
-	 * @param cu a compilation unit
-	 * @return an array with NLSLines found in the compilation unit
-	 * @throws JavaModelException
-	 * @throws InvalidInputException
-	 */
-	public static NLSLine[] scan(ICompilationUnit cu) throws JavaModelException, InvalidInputException {
+	public static NLSLine[] scan(ICompilationUnit cu) throws JavaModelException, BadLocationException, InvalidInputException {
 		return scan(cu.getBuffer().getCharacters());
 	}
 
-	/**
-	 * @param s a string
-	 * @return a list of NLSLines found in the string
-	 * @throws InvalidInputException
-	 */
-	public static NLSLine[] scan(String s) throws InvalidInputException {
+	public static NLSLine[] scan(String s) throws InvalidInputException, BadLocationException {
 		return scan(s.toCharArray());
 	}
 
-	private static NLSLine[] scan(char[] content) throws InvalidInputException {
+	private static NLSLine[] scan(char[] content) throws InvalidInputException, BadLocationException {
 		List lines= new ArrayList();
 		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 		scanner.setSource(content);
@@ -169,14 +158,10 @@ public class NLSScanner {
 			token= scanner.getNextToken();
 		}
 		NLSLine[] result;
-		try {
-			result= (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
-			IDocument document= new Document(String.valueOf(scanner.getSource()));
-			for (int i= 0; i < result.length; i++) {
-				setTagPositions(document, result[i]);
-			}
-		} catch (BadLocationException exception) {
-			throw new InvalidInputException();
+		result= (NLSLine[])lines.toArray(new NLSLine[lines.size()]);
+		IDocument document= new Document(String.valueOf(scanner.getSource()));
+		for (int i= 0; i < result.length; i++) {
+			setTagPositions(document, result[i]);
 		}
 		return result;
 	}

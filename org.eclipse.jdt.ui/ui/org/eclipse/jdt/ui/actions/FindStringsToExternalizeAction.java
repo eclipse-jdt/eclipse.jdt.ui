@@ -43,6 +43,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.jface.text.BadLocationException;
+
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
@@ -315,6 +317,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
 				Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed, BasicElementLabels.getFileName(cu)),
 				e));
+		} catch (BadLocationException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed,
+					BasicElementLabels.getFileName(cu)), e));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -76,13 +77,14 @@ public class NLSUtil {
 	}
 
 	/**
-	 * Creates and returns an NLS tag edit for a string that is at the specified position in
-	 * a compilation unit.
+	 * Creates and returns an NLS tag edit for a string that is at the specified position in a
+	 * compilation unit.
+	 * 
 	 * @param cu the compilation unit
 	 * @param position position of the string
-	 * @return the edit, or <code>null</code> if the string is already NLSed
-	 * or the edit could not be created for some other reason.
-	 * @throws CoreException
+	 * @return the edit, or <code>null</code> if the string is already NLSed or the edit could not
+	 *         be created for some other reason.
+	 * @throws CoreException if scanning fails
 	 */
 	public static TextEdit createNLSEdit(ICompilationUnit cu, int position) throws CoreException {
 		NLSLine nlsLine= scanCurrentLine(cu, position);
@@ -99,13 +101,14 @@ public class NLSUtil {
 	}
 
 	/**
-	 * Creates and returns NLS tag edits for strings that are at the specified positions in
-	 * a compilation unit.
+	 * Creates and returns NLS tag edits for strings that are at the specified positions in a
+	 * compilation unit.
+	 * 
 	 * @param cu the compilation unit
 	 * @param positions positions of the strings
-	 * @return the edit, or <code>null</code> if all strings are already NLSed
-	 * or the edits could not be created for some other reason.
-	 * @throws CoreException
+	 * @return the edit, or <code>null</code> if all strings are already NLSed or the edits could
+	 *         not be created for some other reason.
+	 * @throws CoreException if scanning fails
 	 */
 	public static TextEdit[] createNLSEdits(ICompilationUnit cu, int[] positions) throws CoreException {
 		List result= new ArrayList();
@@ -139,6 +142,8 @@ public class NLSUtil {
 			}
 		} catch (InvalidInputException e) {
 			return null;
+		} catch (BadLocationException e) {
+			return null;
 		}
 		if (result.isEmpty())
 			return null;
@@ -157,6 +162,8 @@ public class NLSUtil {
 			}
 			return null;
 		} catch (InvalidInputException e) {
+			return null;
+		} catch (BadLocationException e) {
 			return null;
 		}
 	}

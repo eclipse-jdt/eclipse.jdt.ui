@@ -273,6 +273,8 @@ public class NLSHint {
 			return new NLSLine[0];
 		} catch (InvalidInputException x) {
 			return new NLSLine[0];
+		} catch (BadLocationException x) {
+			return new NLSLine[0];
 		}
 	}
 
