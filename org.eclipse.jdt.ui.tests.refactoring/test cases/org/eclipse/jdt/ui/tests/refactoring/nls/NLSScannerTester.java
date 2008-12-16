@@ -16,8 +16,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.compiler.InvalidInputException;
-
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
@@ -237,14 +235,14 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for bug 102132
-	public void test17() throws InvalidInputException {
+	public void test17() throws Exception {
 		String text= "\n@Annotation(a= @Nested(\"Hello\"), b= \"World\")\n@Annotation2(a= (1 + 2) * 3, b= \"xx\")";
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals(0, l.length);
 	}
 
 	// test for bug 102132
-	public void test18() throws InvalidInputException {
+	public void test18() throws Exception {
 		String text= "@interface Annotation { String a= \"translate me\"; }";
 		NLSLine[] l= NLSScanner.scan(text);
 
@@ -256,7 +254,7 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for bug 102132
-	public void test19() throws InvalidInputException {
+	public void test19() throws Exception {
 		String text=
 				"@interface Annotation {\r\n" +
 				"	String a() default \"a\" + \"b\";\r\n" +
@@ -268,7 +266,7 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for bug 102132
-	public void test20() throws InvalidInputException {
+	public void test20() throws Exception {
 		String text=
 			"class C {\r\n" +
 			"    void m() {\r\n" +
@@ -295,7 +293,7 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
-	public void test21() throws InvalidInputException {
+	public void test21() throws Exception {
 		String text=
 			"class C {\r\n" +
 			"    void m() {\r\n" +
@@ -318,7 +316,7 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
-	public void test22() throws InvalidInputException {
+	public void test22() throws Exception {
 		String text=
 			"class C {\r\n" +
 			"    void m() {\r\n" +
@@ -341,7 +339,7 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
-	public void test23() throws InvalidInputException {
+	public void test23() throws Exception {
 		String text=
 			"class C {\r\n" +
 			"    Object field= (new Object() {\r\n" +
@@ -362,7 +360,7 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
-	public void test24() throws InvalidInputException {
+	public void test24() throws Exception {
 		String text=
 			"class C {\r\n" +
 			"    @java.lang.Deprecated int field2= (\"me\").length();\r\n" +
@@ -378,7 +376,7 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	// test for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=233905
-	public void test25() throws InvalidInputException {
+	public void test25() throws Exception {
 		String text=
 				"@SuppressWarnings(\"unchecked\") //$NON-NLS-1$\r\n" +
 				"public class B {}\r\n" +
