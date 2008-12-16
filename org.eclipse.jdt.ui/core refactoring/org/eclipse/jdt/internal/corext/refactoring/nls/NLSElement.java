@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,9 +34,7 @@ public class NLSElement {
 	private boolean fIsEclipseNLS;
 	private AccessorClassReference fAccessorClassReference;
 
-	/**
-	 * Creates a new NLS element for the given string and position.
-	 */
+
 	public NLSElement(String value, int start, int length, int index, boolean isEclipseNLS) {
 		fValue= value;
 		fIndex= index;
@@ -63,6 +61,8 @@ public class NLSElement {
 
 	/**
 	 * Sets the actual string value.
+	 * 
+	 * @param value the value
 	 */
 	public void setValue(String value) {
 		fValue= value;
@@ -70,22 +70,28 @@ public class NLSElement {
 
 	/**
 	 * Sets the tag position if one is associated with the NLS element.
+	 * 
+	 * @param start the start offset
+	 * @param length the length
 	 */
 	public void setTagPosition(int start, int length) {
 		fTagPosition= new Region(start, length);
 	}
 
 	/**
-	 * Returns the tag position for this element. The method can return <code>null</code>.
-	 * In this case no tag has been found for this NLS element.
+	 * Returns the tag position for this element. The method can return <code>null</code>. In this
+	 * case no tag has been found for this NLS element.
+	 * 
+	 * @return the new tag region region
 	 */
 	public Region getTagPosition() {
 		return fTagPosition;
 	}
 
 	/**
-	 * Returns <code>true</code> if the NLS element has an asscociated $NON-NLS-*$ tag.
-	 * Otherwise <code>false</code> is returned.
+	 * Returns whether this element has an associated $NON-NLS-*$ tag.
+	 * 
+	 * @return <code>true</code> if the NLS element has an associated $NON-NLS-*$ tag
 	 */
 	public boolean hasTag() {
 		return fTagPosition != null && fTagPosition.getLength() > 0;
