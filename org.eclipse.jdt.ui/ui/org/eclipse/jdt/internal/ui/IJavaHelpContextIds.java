@@ -444,7 +444,6 @@ public interface IJavaHelpContextIds {
 	public static final String TASK_TAG_INPUT_DIALOG= PREFIX + "todo_task_input_dialog_context"; //$NON-NLS-1$
 	//Build path
 	public static final String BP_CHOOSE_EXISTING_FOLDER_TO_MAKE_SOURCE_FOLDER= PREFIX + "bp_choose_existing_folder_to_make_source_folder"; //$NON-NLS-1$
-	public static final String BP_CREATE_NEW_FOLDER= PREFIX + "bp_create_new_folder_dialog"; //$NON-NLS-1$
 	public static final String BP_SELECT_DEFAULT_OUTPUT_FOLDER_DIALOG= PREFIX + "bp_select_default_output_folder_dialog"; //$NON-NLS-1$
 	public static final String BP_SELECT_CLASSPATH_CONTAINER= PREFIX + "bp_select_classpath_container"; //$NON-NLS-1$
 }
