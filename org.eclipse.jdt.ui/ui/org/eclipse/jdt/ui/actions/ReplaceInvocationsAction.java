@@ -99,7 +99,7 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * @param selection
+	 * @param selection the selection
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
