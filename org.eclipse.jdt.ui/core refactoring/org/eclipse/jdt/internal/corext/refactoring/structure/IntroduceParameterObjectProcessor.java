@@ -214,12 +214,14 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	}
 
 	private final class RewriteParameterBody extends BodyUpdater {
+		private boolean fParameterClassCreated= false;
 
 		public void updateBody(MethodDeclaration methodDeclaration, final CompilationUnitRewrite cuRewrite, RefactoringStatus result) throws CoreException {
 			// ensure that the parameterObject is imported
 			fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite, methodDeclaration.getStartPosition());
-			if (cuRewrite.getCu().equals(getCompilationUnit()) && fOtherChanges.size() == 0) {
+			if (cuRewrite.getCu().equals(getCompilationUnit()) && !fParameterClassCreated) {
 				createParameterClass(methodDeclaration, cuRewrite);
+				fParameterClassCreated= true;
 			}
 			Block body= methodDeclaration.getBody();
 			final List parameters= methodDeclaration.parameters();
