@@ -214,8 +214,6 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	}
 
 	private final class RewriteParameterBody extends BodyUpdater {
-		private boolean fParameterClassCreated= false;
-
 		public void updateBody(MethodDeclaration methodDeclaration, final CompilationUnitRewrite cuRewrite, RefactoringStatus result) throws CoreException {
 			// ensure that the parameterObject is imported
 			fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite, methodDeclaration.getStartPosition());
@@ -308,6 +306,8 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	private boolean fCreateAsTopLevel= true;
 
 	private ParameterInfo fParameterObjectReference;
+
+	private boolean fParameterClassCreated= false;
 
 	private List/*<Change>*/ fOtherChanges;
 
@@ -493,6 +493,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	protected void clearManagers() {
 		super.clearManagers();
 		fOtherChanges= new ArrayList();
+		fParameterClassCreated= false;
 	}
 
 	public String getProcessorName() {
