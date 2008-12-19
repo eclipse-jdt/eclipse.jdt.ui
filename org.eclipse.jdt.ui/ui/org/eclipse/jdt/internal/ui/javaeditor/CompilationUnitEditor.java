@@ -987,6 +987,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
+	private RefactorActionGroup fRefactorActionGroup;
 	private CompositeActionGroup fContextMenuGroup;
 
 	private CorrectionCommandInstaller fCorrectionCommands;
@@ -1118,22 +1119,42 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
-		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT, false);
+		fRefactorActionGroup= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT, false);
 		ActionGroup surroundWith= new SurroundWithActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 
 		fActionGroups.addGroup(surroundWith);
-		fActionGroups.addGroup(rg);
+		fActionGroups.addGroup(fRefactorActionGroup);
 		fActionGroups.addGroup(fGenerateActionGroup);
 
 		// We have to keep the context menu group separate to have better control over positioning
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {
 			fGenerateActionGroup,
-			rg,
+			fRefactorActionGroup,
 			surroundWith,
 			new LocalHistoryActionGroup(this, ITextEditorActionConstants.GROUP_EDIT)});
 
 		fCorrectionCommands= new CorrectionCommandInstaller(); // allow shortcuts for quick fix/assist
 		fCorrectionCommands.registerCommands(this);
+	}
+
+	/**
+	 * Returns the refactor action group.
+	 * 
+	 * @return the refactor action group, or <code>null</code> if there is none
+	 * @since 3.5
+	 */
+	protected RefactorActionGroup getRefactorActionGroup() {
+		return fRefactorActionGroup;
+	}
+
+	/**
+	 * Returns the generate action group.
+	 * 
+	 * @return the generate action group, or <code>null</code> if there is none
+	 * @since 3.5
+	 */
+	protected GenerateActionGroup getGenerateActionGroup() {
+		return fGenerateActionGroup;
 	}
 
 	/*
@@ -1754,4 +1775,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		markAsStateDependentAction(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, true);
 	}
 
+	/**
+	 * Returns the correction command installer.
+	 * 
+	 * @return the correction command installer, or <code>null</code> if there is none
+	 * @since 3.5
+	 */
+	protected CorrectionCommandInstaller getCorrectionCommands() {
+		return fCorrectionCommands;
+	}
 }
