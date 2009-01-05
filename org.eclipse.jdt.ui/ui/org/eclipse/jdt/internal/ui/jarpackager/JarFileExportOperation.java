@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -424,26 +424,32 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			exportElement(children[i], progressMonitor);
 	}
 
-	private void exportExternalClassFolder(IPackageFragmentRoot classFolder, IProgressMonitor progressMonitor) {
+	private void exportExternalClassFolder(IPackageFragmentRoot classFolder, IProgressMonitor progressMonitor) throws InterruptedException {
 		try {
 			IJavaElement[] children= classFolder.getChildren();
 			for (int i= 0; i < children.length; i++) {
 				exportExternalClassFolderElement(children[i], classFolder.getPath(), progressMonitor);
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
+		} catch (JavaModelException e) {
+			addToStatus(e);
 		}
 	}
 
-	private void exportExternalClassFolderElement(IJavaElement javaElement, IPath classFolderPath, IProgressMonitor progressMonitor) throws CoreException {
+	private void exportExternalClassFolderElement(IJavaElement javaElement, IPath classFolderPath, IProgressMonitor progressMonitor) throws JavaModelException, InterruptedException {
 		if (javaElement instanceof IClassFile) {
 			IClassFile classFile= (IClassFile) javaElement;
 			IPath path= classFile.getPath();
 
 			IPath destination= path.removeFirstSegments(classFolderPath.segmentCount()).setDevice(null);
 
-			((IJarBuilderExtension) fJarBuilder).writeFile(path.toFile(), destination);
-			progressMonitor.worked(1);
+			try {
+				((IJarBuilderExtension) fJarBuilder).writeFile(path.toFile(), destination);
+			} catch (CoreException e) {
+				handleCoreExceptionOnExport(e);
+			} finally {
+				progressMonitor.worked(1);
+				ModalContext.checkCanceled(progressMonitor);
+			}
 		} else if (javaElement instanceof IPackageFragment) {
 			IJavaElement[] children= ((IPackageFragment) javaElement).getChildren();
 			for (int i= 0; i < children.length; i++) {
@@ -471,11 +477,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, BasicElementLabels.getPathLabel(destinationPath, false)));
 				fJarBuilder.writeFile((IFile)resource, destinationPath);
 			} catch (CoreException ex) {
-				Throwable realEx= ex.getStatus().getException();
-				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
-					addWarning(ex.getMessage(), realEx);
-				else
-					addToStatus(ex);
+				handleCoreExceptionOnExport(ex);
 			} finally {
 				progressMonitor.worked(1);
 				ModalContext.checkCanceled(progressMonitor);
@@ -541,11 +543,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, BasicElementLabels.getPathLabel(destinationPath, false)));
 				fJarBuilder.writeFile((IFile)resource, destinationPath);
 			} catch (CoreException ex) {
-				Throwable realEx= ex.getStatus().getException();
-				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
-					addWarning(ex.getMessage(), realEx);
-				else
-					addToStatus(ex);
+				handleCoreExceptionOnExport(ex);
 			}
 		}
 	}
@@ -573,14 +571,14 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					IFile file= (IFile)iter.next();
 					IPath classFilePath= baseDestinationPath.append(file.getName());
 					progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, BasicElementLabels.getPathLabel(classFilePath, false)));
-					fJarBuilder.writeFile(file, classFilePath);
+					try {
+						fJarBuilder.writeFile(file, classFilePath);
+					} catch (CoreException ex) {
+						handleCoreExceptionOnExport(ex);
+					}
 				}
 			} catch (CoreException ex) {
-				Throwable realEx= ex.getStatus().getException();
-				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
-					addWarning(ex.getMessage(), realEx);
-				else
-					addToStatus(ex);
+				addToStatus(ex);
 			}
 		}
 	}
@@ -877,6 +875,21 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return JavaPlugin.getWorkspace().getRoot().getFolder(folderPath);
 		else
 			return null;
+	}
+
+	/**
+	 * Handles core exceptions that are thrown by {@link IJarBuilder#writeFile(IFile, IPath)}.
+	 *  
+	 * @param ex the core exception
+	 * @since 3.5
+	 */
+	private void handleCoreExceptionOnExport(CoreException ex) {
+		Throwable realEx= ex.getStatus().getException();
+		if (realEx instanceof ZipException && realEx.getMessage() != null
+				&& realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$ hardcoded message string from java.util.zip.ZipOutputStream.putNextEntry(ZipEntry)
+			addWarning(ex.getMessage(), realEx);
+		else
+			addToStatus(ex);
 	}
 
 	/**
