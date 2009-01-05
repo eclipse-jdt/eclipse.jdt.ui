@@ -486,8 +486,13 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, BasicElementLabels.getPathLabel(container.getFullPath(), false)), exception);
 		}
 		if (children != null) {
-			for (int i= 0; i < children.length; i++)
-				exportElement(children[i], progressMonitor);
+			IJavaProject javaProject= JavaCore.create(container.getProject());
+			boolean isOnCP= javaProject.isOnClasspath(container);
+			for (int i= 0; i < children.length; i++) {
+				IResource child= children[i];
+				if (isOnCP || !javaProject.isOnClasspath(child))
+					exportElement(child, progressMonitor);
+			}
 		}
 	}
 
@@ -560,7 +565,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					fJarBuilder.writeFile(file, classFilePath);
 				}
 			} catch (CoreException ex) {
-				addToStatus(ex);
+				Throwable realEx= ex.getStatus().getException();
+				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
+					addWarning(ex.getMessage(), realEx);
+				else
+					addToStatus(ex);
 			}
 		}
 	}
