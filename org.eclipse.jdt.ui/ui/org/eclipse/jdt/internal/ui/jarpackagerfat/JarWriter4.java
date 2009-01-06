@@ -7,15 +7,17 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
- *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 220257 [jar application] ANT build file does not create Class-Path Entry in Manifest
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] Deploy java application as executable jar - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83258
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar application] ANT build file does not create Class-Path Entry in Manifest - https://bugs.eclipse.org/bugs/show_bug.cgi?id=220257 
  *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar application] add Jar-in-Jar ClassLoader option - https://bugs.eclipse.org/bugs/show_bug.cgi?id=219530
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -69,6 +71,24 @@ public class JarWriter4 extends JarWriter3 {
 		newEntry.setTime(lastModified);
 
 		addEntry(newEntry, zipFile.getInputStream(zipEntry));
+	}
+
+	public void addZipEntryStream(ZipEntry zipEntry, InputStream is, String path) throws IOException {
+		if (fJarPackage.areDirectoryEntriesIncluded())
+			addDirectories(path);
+		JarEntry newEntry= new JarEntry(path.replace(File.separatorChar, '/'));
+		if (fJarPackage.isCompressed())
+			newEntry.setMethod(ZipEntry.DEFLATED);
+		// Entry is filled automatically.
+		else {
+			newEntry.setMethod(ZipEntry.STORED);
+			newEntry.setSize(zipEntry.getSize());
+			newEntry.setCrc(zipEntry.getCrc());
+		}
+		long lastModified= System.currentTimeMillis();
+		// Set modification time
+		newEntry.setTime(lastModified);
+		addEntry(newEntry, is);
 	}
 
 	public void write(File file, IPath destinationPath) throws CoreException {

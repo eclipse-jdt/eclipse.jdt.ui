@@ -10,6 +10,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
  *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -47,6 +48,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage.LibraryHandler;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -58,6 +60,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class FatJarPackageWizard extends Wizard implements IExportWizard {
 
+	private static String DIALOG_SETTINGS_KEY= "FatJarPackageWizard"; //$NON-NLS-1$
+
 	private static final class IPIssueWarningDialog extends OptionalMessageDialog {
 
 		private static final String ID= "RunnableJar.export.ipwarning"; //$NON-NLS-1$
@@ -67,8 +71,6 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 		}
 
 	}
-
-	private static String DIALOG_SETTINGS_KEY= "FatJarPackageWizard"; //$NON-NLS-1$
 
 	private boolean fHasNewDialogSettings;
 	private boolean fInitializeFromJarPackage;
@@ -202,16 +204,20 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 	 * {@inheritDoc}
 	 */
 	public boolean performFinish() {
-		fJarPackage.setJarBuilder(new FatJarBuilder());
+		LibraryHandler libraryHandler= fJarPackageWizardPage.getLibraryHandler();
+		fJarPackage.setJarBuilder(libraryHandler.getBuilder(fJarPackage));
 		MultiStatus status= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, FatJarPackagerMessages.FatJarPackageWizard_JarExportProblems_message, null);
 		Object[] elements= fJarPackageWizardPage.getSelectedElementsWithoutContainedChildren(status);
 		fJarPackage.setElements(elements);
 
-		if (OptionalMessageDialog.isDialogEnabled(IPIssueWarningDialog.ID) && hasArchive(elements)) {
-			IPIssueWarningDialog dialog= new IPIssueWarningDialog(getShell(), FatJarPackagerMessages.FatJarPackageWizard_IPIssueDialog_title,
-					FatJarPackagerMessages.FatJarPackageWizard_IPIssueDialog_message);
-			if (dialog.open() != Window.OK)
-				return false;
+		if ((libraryHandler.isShowWarning()) && hasArchive(elements)) {
+			if (OptionalMessageDialog.isDialogEnabled(IPIssueWarningDialog.ID)) {
+				IPIssueWarningDialog dialog= new IPIssueWarningDialog(getShell(), FatJarPackagerMessages.FatJarPackageWizard_IPIssueDialog_title,
+						FatJarPackagerMessages.FatJarPackageWizard_IPIssueDialog_message);
+				if (dialog.open() != Window.OK)
+					return false;
+				OptionalMessageDialog.setDialogEnabled(IPIssueWarningDialog.ID, true);
+			}
 		}
 
 		fJarPackageWizardPage.exportAntScript(status);

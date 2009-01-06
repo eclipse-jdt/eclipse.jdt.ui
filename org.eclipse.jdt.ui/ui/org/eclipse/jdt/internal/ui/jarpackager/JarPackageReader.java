@@ -63,7 +63,9 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.UnpackFatJarBuilder;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarRsrcUrlBuilder;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.UnpackJarBuilder;
 
 /**
  * Reads data from an InputStream and returns a JarPackage
@@ -417,8 +419,12 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			String id = element.getAttribute("builder"); //$NON-NLS-1$
 			IJarBuilder builder= jarPackage.getJarBuilder();
 			if (builder == null || !builder.getId().equals(id)) {
-				if (FatJarBuilder.BUILDER_ID.equals(id)) {
+				if (UnpackFatJarBuilder.BUILDER_ID.equals(id)) {
 					jarPackage.setJarBuilder(jarPackage.createFatJarBuilder());
+				} else if (UnpackJarBuilder.BUILDER_ID.equals(id)) {
+					jarPackage.setJarBuilder(new UnpackJarBuilder(jarPackage));
+				} else if (FatJarRsrcUrlBuilder.BUILDER_ID.equals(id)) {
+					jarPackage.setJarBuilder(new FatJarRsrcUrlBuilder());
 				} else if (PlainJarBuilder.BUILDER_ID.equals(id)) {
 					jarPackage.setJarBuilder(jarPackage.createPlainJarBuilder());
 				} else {

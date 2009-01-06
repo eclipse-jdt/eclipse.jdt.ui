@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackageReader;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWriter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.jarpackager.PlainJarBuilder;
-import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.UnpackFatJarBuilder;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
@@ -910,7 +910,7 @@ public class JarPackageData {
 	 * @since 3.4
 	 */
 	public IJarBuilder createFatJarBuilder() {
-		return new FatJarBuilder();
+		return new UnpackFatJarBuilder();
 	}
 
 	/**

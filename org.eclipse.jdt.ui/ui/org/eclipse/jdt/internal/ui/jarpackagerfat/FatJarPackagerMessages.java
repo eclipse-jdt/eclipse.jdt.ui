@@ -10,6 +10,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 211045 [jar application] program arguments are ignored
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -37,6 +38,17 @@ public final class FatJarPackagerMessages extends NLS {
 	public static String FatJarPackageWizardPage_saveAntScript_text;
 	public static String FatJarPackageWizardPage_antScriptLocation_text;
 	public static String FatJarPackageWizardPage_antScriptLocationBrowse_text;
+	public static String FatJarPackageWizardPage_libraryHandlingGroupTitle;
+
+	public static String FatJarPackageWizardPage_extractJars_text;
+
+	public static String FatJarPackageWizardPage_extractJars_tooltip_text;
+
+	public static String FatJarPackageWizardPage_packageJars_text;
+
+	public static String FatJarPackageWizardPage_copyJarFiles_text;
+
+	public static String FatJarPackageWizardPage_copyJarFiles_tooltip_text;
 	public static String FatJarPackageWizardPage_error_missingClassFile;
 	public static String FatJarPackageWizard_IPIssueDialog_message;
 

@@ -10,6 +10,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 211045 [jar application] program arguments are ignored
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -51,6 +52,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.debug.core.DebugPlugin;
@@ -93,6 +95,88 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  */
 public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
+	public static abstract class LibraryHandler {
+		public abstract FatJarAntExporter getAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration);
+
+		public abstract FatJarBuilder getBuilder(JarPackageData jarPackageData);
+
+		public abstract int getID();
+
+		public abstract boolean isShowWarning();
+	}
+
+	public static class ExtractLibraryHandler extends LibraryHandler {
+
+		public final static int ID= 1;
+
+		public ExtractLibraryHandler() {
+		}
+
+		public FatJarAntExporter getAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
+			return new UnpackFatJarAntExporter(antScriptLocation, jarLocation, launchConfiguration);
+		}
+
+		public FatJarBuilder getBuilder(JarPackageData jarPackageData) {
+			return new UnpackFatJarBuilder();
+		}
+
+		public int getID() {
+			return ID;
+		}
+
+		public boolean isShowWarning() {
+			return true;
+		}
+	}
+
+	public static class PackageLibraryHandler extends LibraryHandler {
+
+		public final static int ID= 2;
+
+		public PackageLibraryHandler() {
+		}
+
+		public FatJarAntExporter getAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
+			return new FatJarRsrcUrlAntExporter(antScriptLocation, jarLocation, launchConfiguration);
+		}
+
+		public FatJarBuilder getBuilder(JarPackageData jarPackageData) {
+			return new FatJarRsrcUrlBuilder();
+		}
+
+		public int getID() {
+			return ID;
+		}
+
+		public boolean isShowWarning() {
+			return false;
+		}
+	}
+
+	public static class CopyLibraryHandler extends LibraryHandler {
+
+		public final static int ID= 3;
+
+		public CopyLibraryHandler() {
+		}
+
+		public FatJarAntExporter getAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
+			return new UnpackJarAntExporter(antScriptLocation, jarLocation, launchConfiguration);
+		}
+
+		public FatJarBuilder getBuilder(JarPackageData jarPackageData) {
+			return new UnpackJarBuilder(jarPackageData);
+		}
+
+		public int getID() {
+			return ID;
+		}
+
+		public boolean isShowWarning() {
+			return false;
+		}
+	}
+	
 	private abstract static class LaunchConfigurationElement {
 
 		public abstract ILaunchConfiguration getLaunchConfiguration();
@@ -164,10 +248,12 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	private static final String STORE_ANTSCRIPT_SAVE= PAGE_NAME + ".ANTSCRIPT_SAVE"; //$NON-NLS-1$
 	private static final String STORE_ANTSCRIPT_LOCATION= PAGE_NAME + ".ANTSCRIPT_LOCATION"; //$NON-NLS-1$
 	private static final String STORE_ANTSCRIPT_LOCATION_HISTORY= PAGE_NAME + ".ANTSCRIPT_LOCATION_HISTORY"; //$NON-NLS-1$
+	private static final String STORE_LIBRARY_HANDLING= PAGE_NAME + ".LIBRARY_HANDLING"; //$NON-NLS-1$
 
 	private static final String ANTSCRIPT_EXTENSION= "xml"; //$NON-NLS-1$
 
 	private final JarPackageData fJarPackage;
+	private LibraryHandler fLibraryHandler;
 
 	/**
 	 * Model for the launch combo box. Element: {@link LaunchConfigurationElement}
@@ -182,6 +268,11 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	private Button fAntScriptBrowseButton;
 
 	private IPath fAntScriptLocation;
+
+	private Composite fLibraryHandlingGroup;
+	private Button fExtractJarsRadioButton;
+	private Button fPackageJarsRadioButton;
+	private Button fCopyJarFilesRadioButton;
 
 	public FatJarPackageWizardPage(JarPackageData jarPackage, IStructuredSelection selection) {
 		super(PAGE_NAME, selection, jarPackage);
@@ -204,6 +295,8 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 		createContentGroup(composite);
 
+		createLibraryHandlingGroup(composite);
+
 		Label seperator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		seperator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
@@ -222,17 +315,10 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		composite.setLayout(new GridLayout(1, false));
 
-		Label description= new Label(composite, SWT.NONE);
-		GridData gridData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-		description.setLayoutData(gridData);
-		description.setText(FatJarPackagerMessages.FatJarPackageWizardPage_launchConfigGroupTitle);
-
+		createLabel(composite, FatJarPackagerMessages.FatJarPackageWizardPage_launchConfigGroupTitle, false);
 		createLaunchConfigSelectionGroup(composite);
 
-		Label label= new Label(composite, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-		label.setText(FatJarPackagerMessages.FatJarPackageWizardPage_destinationGroupTitle);
-
+		createLabel(composite, FatJarPackagerMessages.FatJarPackageWizardPage_destinationGroupTitle, false);
 		createDestinationGroup(composite);
 	}
 
@@ -266,21 +352,13 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 		fAntScriptSaveCheckbox= new Button(composite, SWT.CHECK | SWT.LEFT);
 		fAntScriptSaveCheckbox.setText(FatJarPackagerMessages.FatJarPackageWizardPage_saveAntScript_text);
-		fAntScriptSaveCheckbox.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				update();
-			}
-		});
+		fAntScriptSaveCheckbox.addListener(SWT.Selection, this);
 		GridData data= new GridData(SWT.BEGINNING);
 		data.horizontalSpan= 3;
 		fAntScriptSaveCheckbox.setLayoutData(data);
 
 		// ant script name entry field
-		fAntScriptLabel= new Label(composite, SWT.NONE);
-		GridData gridData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-		gridData.horizontalIndent= 15;
-		fAntScriptLabel.setLayoutData(gridData);
-		fAntScriptLabel.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocation_text);
+		fAntScriptLabel= createLabel(composite, FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocation_text, false);
 
 		fAntScriptNamesCombo= new Combo(composite, SWT.SINGLE | SWT.BORDER);
 		SWTUtil.setDefaultVisibleItemCount(fAntScriptNamesCombo);
@@ -336,7 +414,93 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	/**
-	 *	Stores the widget values in the JAR package.
+	 * Creates a new label with an optional bold font.
+	 * 
+	 * @param parent the parent control
+	 * @param text the label text
+	 * @param bold bold or not
+	 * @return the new label control
+	 */
+	protected Label createLabel(Composite parent, String text, boolean bold) {
+		Label label= new Label(parent, SWT.NONE);
+		if (bold)
+			label.setFont(JFaceResources.getBannerFont());
+		label.setText(text);
+		GridData gridData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+		label.setLayoutData(gridData);
+		return label;
+	}
+
+	/**
+	 * Create the export options specification widgets.
+	 * 
+	 * @param parent org.eclipse.swt.widgets.Composite
+	 */
+	protected void createLibraryHandlingGroup(Composite parent) {
+		fLibraryHandlingGroup= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		fLibraryHandlingGroup.setLayout(layout);
+		fLibraryHandlingGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
+
+		createLabel(fLibraryHandlingGroup, FatJarPackagerMessages.FatJarPackageWizardPage_libraryHandlingGroupTitle, false);
+
+		fExtractJarsRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
+		fExtractJarsRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_extractJars_text);
+		fExtractJarsRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fExtractJarsRadioButton.setToolTipText(FatJarPackagerMessages.FatJarPackageWizardPage_extractJars_tooltip_text);
+		fExtractJarsRadioButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				if (((Button)event.widget).getSelection())
+					fLibraryHandler= new ExtractLibraryHandler();
+			}
+		});
+
+		fPackageJarsRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
+		fPackageJarsRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_packageJars_text);
+		fPackageJarsRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fPackageJarsRadioButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				if (((Button)event.widget).getSelection())
+					fLibraryHandler= new PackageLibraryHandler();
+			}
+		});
+
+		fCopyJarFilesRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
+		fCopyJarFilesRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_copyJarFiles_text);
+		fCopyJarFilesRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fCopyJarFilesRadioButton.setToolTipText(FatJarPackagerMessages.FatJarPackageWizardPage_copyJarFiles_tooltip_text);
+		fCopyJarFilesRadioButton.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				if (((Button)event.widget).getSelection())
+					fLibraryHandler= new CopyLibraryHandler();
+			}
+		});
+
+		// set default for first selection (no previous widget settings to restore)
+		setLibraryHandler(new ExtractLibraryHandler());
+	}
+
+	public LibraryHandler getLibraryHandler() {
+		return fLibraryHandler;
+	}
+
+	public void setLibraryHandler(LibraryHandler libraryHandler) {
+		fLibraryHandler= libraryHandler;
+		fExtractJarsRadioButton.setSelection(libraryHandler.getID() == ExtractLibraryHandler.ID);
+		fPackageJarsRadioButton.setSelection(libraryHandler.getID() == PackageLibraryHandler.ID);
+		fCopyJarFilesRadioButton.setSelection(libraryHandler.getID() == CopyLibraryHandler.ID);
+	}
+
+	LibraryHandler createLibraryHandlerById(int handlerId) {
+		if (handlerId == PackageLibraryHandler.ID)
+			return new PackageLibraryHandler();
+		if (handlerId == CopyLibraryHandler.ID)
+			return new CopyLibraryHandler();
+		return new ExtractLibraryHandler();
+	}
+
+	/**
+	 * Stores the widget values in the JAR package.
 	 */
 	protected void updateModel() {
 		super.updateModel();
@@ -725,6 +889,14 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 					fAntScriptNamesCombo.add(directoryNames[i]);
 			}
 
+			// LIBRARY HANDLING
+			int libraryHandling= ExtractLibraryHandler.ID; // default value for migrated (Eclipse 3.4) settings
+			try {
+				libraryHandling= settings.getInt(STORE_LIBRARY_HANDLING);
+			} catch (NumberFormatException ignore) { // also thrown if no value was stored (null)
+			}
+			setLibraryHandler(createLibraryHandlerById(libraryHandling));
+
 			// LAUNCH CONFIG
 			String name= settings.get(STORE_LAUNCH_CONFIGURATION_SELECTION_NAME);
 			if (name != null) {
@@ -772,6 +944,9 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 				directoryNames= new String[0];
 			directoryNames= addToHistory(directoryNames, getAntScriptValue());
 			settings.put(STORE_ANTSCRIPT_LOCATION_HISTORY, directoryNames);
+
+			// LIBRARY HANDLING
+			settings.put(STORE_LIBRARY_HANDLING, getLibraryHandler().getID());
 
 			// LAUNCH CONFIG
 			int index= fLaunchConfigurationCombo.getSelectionIndex();
@@ -822,8 +997,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		if (canCreateAntScript(getShell())) {
 			LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(fLaunchConfigurationCombo.getSelectionIndex());
 			Assert.isNotNull(element);
-			FatJarAntExporter antExporter= new FatJarAntExporter(fAntScriptLocation, fJarPackage.getAbsoluteJarLocation(), element.getLaunchConfiguration());
-
+			FatJarAntExporter antExporter= getLibraryHandler().getAntExporter(fAntScriptLocation, fJarPackage.getAbsoluteJarLocation(), element.getLaunchConfiguration());
 			try {
 				antExporter.run(status);
 			} catch (CoreException e) {

@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -19,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.jar.JarEntry;
 import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -141,6 +142,13 @@ public final class JarPackagerUtil {
 		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmReplace_title, Messages.format(JarPackagerMessages.JarPackage_confirmReplace_message, BasicElementLabels.getPathLabel(filePath, isOSPath)));
 	}
 
+	public static boolean askForOverwriteFolderPermission(final Shell parent, IPath filePath, boolean isOSPath) {
+		if (parent == null)
+			return false;
+		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmOverwriteFolder_title, Messages.format(JarPackagerMessages.JarPackage_confirmOverwriteFolder_message, BasicElementLabels
+				.getPathLabel(filePath, isOSPath)));
+	}
+
 	/**
 	 * Gets the name of the manifest's main class
 	 * 
@@ -250,7 +258,7 @@ public final class JarPackagerUtil {
 	 * @throws IOException
 	 *             if an input/output error occurs
 	 */
-	public static void calculateCrcAndSize(final JarEntry entry, final InputStream stream, final byte[] buffer) throws IOException {
+	public static void calculateCrcAndSize(final ZipEntry entry, final InputStream stream, final byte[] buffer) throws IOException {
 		int size= 0;
 		final CRC32 crc= new CRC32();
 		int count;

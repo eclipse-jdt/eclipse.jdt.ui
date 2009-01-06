@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -238,6 +239,10 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarPackage_confirmReplace_message;
 
 	public static String JarPackage_confirmReplace_title;
+
+	public static String JarPackage_confirmOverwriteFolder_message;
+
+	public static String JarPackage_confirmOverwriteFolder_title;
 
 	public static String JarPackageReader_error_badFormat;
 
