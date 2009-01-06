@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -303,6 +303,15 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		Parameter[] parameters= IntroduceParameterObjectDescriptor.createParameters(fDescriptor.getMethod());
 		parameters[3].setCreateField(false);
 		fDescriptor.setParameters(parameters);
+		runRefactoring(false, true);
+	}
+	
+	public void testSubclassInCU() throws Exception {
+		// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=259095
+		fDescriptor.setMethod(setupMethod());
+		fDescriptor.setTopLevel(true);
+		fDescriptor.setClassName("FooParameter");
+		
 		runRefactoring(false, true);
 	}
 

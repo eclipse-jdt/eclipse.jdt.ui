@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,12 +54,15 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
@@ -449,7 +452,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	protected boolean shouldReport(IProblem problem, CompilationUnit cu) {
 		if (!super.shouldReport(problem, cu))
 			return false;
-		ASTNode node= ASTNodeSearchUtil.getAstNode(cu, problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart());
+		ASTNode node= ASTNodeSearchUtil.getAstNode(cu, problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1);
 		if (node instanceof Type) {
 			Type type= (Type) node;
 			if (problem.getID() == IProblem.UndefinedType && getClassName().equals(ASTNodes.getTypeName(type))) {
@@ -460,6 +463,14 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			Name name= (Name) node;
 			if (problem.getID() == IProblem.ImportNotFound && getPackage().indexOf(name.getFullyQualifiedName()) != -1)
 				return false;
+			if (problem.getID() == IProblem.MissingTypeInMethod) {
+				StructuralPropertyDescriptor locationInParent= name.getLocationInParent();
+				String[] arguments= problem.getArguments();
+				if ((locationInParent == MethodInvocation.NAME_PROPERTY || locationInParent == SuperMethodInvocation.NAME_PROPERTY)
+						&& arguments.length > 3
+						&& arguments[3].endsWith(getClassName()))
+					return false;
+			}
 		}
 		return true;
 	}
