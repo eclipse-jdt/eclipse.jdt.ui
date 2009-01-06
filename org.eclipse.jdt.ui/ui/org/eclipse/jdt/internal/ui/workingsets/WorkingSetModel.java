@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -378,8 +378,9 @@ public class WorkingSetModel {
 	}
 
 	/**
-	 * Restore localWorkingSetManager and active working sets
-	 * @param memento
+	 * Restore localWorkingSetManager and active working sets.
+	 * 
+	 * @param memento a memento
 	 * @return whether the restore was successful
 	 */
 	private boolean restoreState(IMemento memento) {
@@ -415,6 +416,19 @@ public class WorkingSetModel {
 			}
 			return;
 		}
+
+		// Add new working set to the list of active working sets
+		if (IWorkingSetManager.CHANGE_WORKING_SET_ADD.equals(property)) {
+			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
+			List allWorkingSets= new ArrayList(Arrays.asList(manager.getAllWorkingSets()));
+			if (workingSet.isVisible() && allWorkingSets.contains(workingSet) && !fActiveWorkingSets.contains(workingSet)) {
+				List elements= new ArrayList(fActiveWorkingSets);
+				elements.add(workingSet);
+				setActiveWorkingSets((IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
+			}
+		}
+
 		// don't handle working sets not managed by the model
 		if (!isAffected(event))
 			return;
@@ -433,6 +447,7 @@ public class WorkingSetModel {
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
 			fireEvent(event);
 		}
+
 	}
 
 	private void fireEvent(PropertyChangeEvent event) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -65,10 +64,7 @@ public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
 			PackageExplorerPart explorer= getActivePackageExplorer();
 			if (explorer != null) {
 				if (explorer.getRootMode() == PackageExplorerPart.WORKING_SETS_AS_ROOTS) {
-					if (MessageDialog.openQuestion(getShell(), getWindowTitle(), NewWizardMessages.NewJavaWorkingSetWizard_add_as_root_message)) {
-						explorer.getWorkingSetModel().addActiveWorkingSet(ws);
-						explorer.selectReveal(new StructuredSelection(ws));
-					}
+					explorer.selectReveal(new StructuredSelection(ws));
 				}
 			}
 		}
