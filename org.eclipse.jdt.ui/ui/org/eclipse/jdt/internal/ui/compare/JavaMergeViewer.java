@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
@@ -29,9 +34,21 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.contexts.IContextService;
+import org.eclipse.ui.part.FileEditorInput;
+
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -54,6 +71,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator.ITokenComparatorFactory;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 
 
@@ -61,8 +79,10 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private IPropertyChangeListener fPreferenceChangeListener;
 	private IPreferenceStore fPreferenceStore;
-	private JavaSourceViewerConfiguration fSourceViewerConfiguration;
-	private ArrayList fSourceViewer;
+	private Map /*<JavaSourceViewerConfiguration>*/ fSourceViewerConfiguration;
+	private Map /*<CompilationUnitEditorAdapter>*/ fEditor;
+	private ArrayList /*<SourceViewer>*/ fSourceViewer;
+	private IWorkbenchPartSite fSavedSite;
 
 
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
@@ -78,6 +98,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 	protected void handleDispose(DisposeEvent event) {
 		setPreferenceStore(null);
 		fSourceViewer= null;
+		if (fEditor != null) {
+			for (Iterator iterator= fEditor.values().iterator(); iterator.hasNext();) {
+				CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)iterator.next();
+				editor.dispose();
+			}
+			fEditor= null;
+		}
 		super.handleDispose(event);
 	}
 
@@ -112,22 +139,20 @@ public class JavaMergeViewer extends TextMergeViewer {
 	}
 
     public void setInput(Object input) {
-
     	if (input instanceof ICompareInput) {
     		IJavaProject project= getJavaProject((ICompareInput)input);
 			if (project != null) {
 				setPreferenceStore(createChainedPreferenceStore(project));
-				if (fSourceViewer != null) {
-					Iterator iterator= fSourceViewer.iterator();
-					while (iterator.hasNext()) {
-						SourceViewer sourceViewer= (SourceViewer) iterator.next();
-						sourceViewer.unconfigure();
-						sourceViewer.configure(getSourceViewerConfiguration());
-					}
-				}
+			}
+		}
+		if (fSourceViewer != null) {
+			Iterator iterator= fSourceViewer.iterator();
+			while (iterator.hasNext()) {
+				SourceViewer sourceViewer= (SourceViewer)iterator.next();
+				sourceViewer.unconfigure();
+				sourceViewer.configure(getSourceViewerConfiguration(sourceViewer, null));
 			}
     	}
-
     	super.setInput(input);
     }
 
@@ -142,8 +167,13 @@ public class JavaMergeViewer extends TextMergeViewer {
     }
 
 	private void handlePropertyChange(PropertyChangeEvent event) {
-		if (fSourceViewerConfiguration != null && fSourceViewerConfiguration.affectsTextPresentation(event)) {
-			fSourceViewerConfiguration.handlePropertyChangeEvent(event);
+		if (fSourceViewerConfiguration != null) {
+			for (Iterator iterator= fSourceViewerConfiguration.values().iterator(); iterator.hasNext();) {
+				JavaSourceViewerConfiguration configuration= (JavaSourceViewerConfiguration)iterator.next();
+				if (configuration.affectsTextPresentation(event)) {
+					configuration.handlePropertyChangeEvent(event);
+				}
+			}
 			invalidateTextPresentation();
 		}
 	}
@@ -168,21 +198,88 @@ public class JavaMergeViewer extends TextMergeViewer {
 		return IJavaPartitions.JAVA_PARTITIONING;
 	}
 
-	protected void configureTextViewer(TextViewer textViewer) {
-		if (textViewer instanceof SourceViewer) {
+	protected void configureTextViewer(TextViewer viewer) {
+		if (viewer instanceof SourceViewer) {
+			SourceViewer sourceViewer= (SourceViewer)viewer;
 			if (fSourceViewer == null)
 				fSourceViewer= new ArrayList();
-			fSourceViewer.add(textViewer);
+			if (!fSourceViewer.contains(sourceViewer))
+				fSourceViewer.add(sourceViewer);
 			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
-			if (tools != null)
-				((SourceViewer)textViewer).configure(getSourceViewerConfiguration());
+			if (tools != null) {
+				IEditorInput editorInput= getEditorInput(sourceViewer);
+				if (editorInput == null)
+					return;
+				sourceViewer.unconfigure();
+				getSourceViewerConfiguration(sourceViewer, editorInput);
+			}
 		}
 	}
 
-	private JavaSourceViewerConfiguration getSourceViewerConfiguration() {
-		if (fSourceViewerConfiguration == null)
+	/*
+	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#setEditable(org.eclipse.jface.text.source.ISourceViewer, boolean)
+	 * @since 3.5
+	 */
+	protected void setEditable(ISourceViewer sourceViewer, boolean state) {
+		super.setEditable(sourceViewer, state);
+		if (fEditor != null) {
+			Object editor= fEditor.get(sourceViewer);
+			if (editor instanceof CompilationUnitEditorAdapter)
+				((CompilationUnitEditorAdapter)editor).setEditable(state);
+		}
+	}
+
+	protected IEditorInput getEditorInput(ISourceViewer sourceViewer) {
+		IEditorInput editorInput= super.getEditorInput(sourceViewer);
+		if (editorInput == null)
+			return null;
+		if (getSite() == null)
+			return null;
+		if (!isInputValid(editorInput))
+			return null;
+		return editorInput;
+	}
+
+	private IWorkbenchPartSite getSite() {
+		IWorkbenchPart workbenchPart= getCompareConfiguration().getContainer().getWorkbenchPart();
+		IWorkbenchPartSite site= null;
+		if (workbenchPart != null)
+			site = workbenchPart.getSite();
+		if (fSavedSite == null)
+			fSavedSite = site;
+		// TODO: this is a hack
+		return fSavedSite;
+	}
+
+	private boolean isInputValid(IEditorInput editorInput) {
+		if (editorInput instanceof FileEditorInput) {
+			FileEditorInput fileEditorInput= (FileEditorInput)editorInput;
+			return fileEditorInput.getFile().isAccessible();
+		}
+		return false;
+	}
+
+	private JavaSourceViewerConfiguration getSourceViewerConfiguration(SourceViewer sourceViewer, IEditorInput editorInput) {
+		if (fSourceViewerConfiguration == null) {
+			fSourceViewerConfiguration= new HashMap(3);
+		}
+		if (fPreferenceStore == null)
 			getPreferenceStore();
-		return fSourceViewerConfiguration;
+		JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
+		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, getDocumentPartitioning());
+		if (editorInput != null) {
+			// when input available, use editor
+			CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)fEditor.get(sourceViewer);
+			try {
+				editor.init((IEditorSite)editor.getSite(), editorInput);
+				editor.createActions();
+				configuration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, editor, getDocumentPartitioning());
+			} catch (PartInitException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		fSourceViewerConfiguration.put(sourceViewer, configuration);
+		return (JavaSourceViewerConfiguration)fSourceViewerConfiguration.get(sourceViewer);
 	}
 
 	protected int findInsertionPosition(char type, ICompareInput input) {
@@ -359,14 +456,131 @@ public class JavaMergeViewer extends TextMergeViewer {
 		}
 		fPreferenceStore= ps;
 		if (fPreferenceStore != null) {
-			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
-			fSourceViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, getDocumentPartitioning());
 			fPreferenceChangeListener= new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
 					handlePropertyChange(event);
 				}
 			};
 			fPreferenceStore.addPropertyChangeListener(fPreferenceChangeListener);
+		}
+	}
+	
+	protected ISourceViewer createSourceViewer(Composite parent, int textOrientation) {
+		ISourceViewer sourceViewer;
+		if (getSite() != null) {
+			CompilationUnitEditorAdapter editor= new CompilationUnitEditorAdapter(textOrientation);
+			editor.createPartControl(parent);
+
+			sourceViewer= editor.getViewer();
+
+			if (fEditor == null)
+				fEditor= new HashMap(3);
+			fEditor.put(sourceViewer, editor);
+		} else {
+			sourceViewer= super.createSourceViewer(parent, textOrientation);
+		}
+
+		if (fSourceViewer == null)
+			fSourceViewer= new ArrayList();
+		fSourceViewer.add(sourceViewer);
+
+		return sourceViewer;
+	}
+	
+	protected void setActionsActivated(SourceViewer sourceViewer, boolean state) {
+		if (fEditor != null) {
+			Object editor= fEditor.get(sourceViewer);
+			if (editor instanceof CompilationUnitEditorAdapter)
+				((CompilationUnitEditorAdapter)editor).setActionsActivated(state);
+		}
+	}
+
+	protected void createControls(Composite composite) {
+		super.createControls(composite);
+		IWorkbenchPart workbenchPart = getCompareConfiguration().getContainer().getWorkbenchPart();
+		if (workbenchPart != null) {
+			IContextService service = (IContextService)workbenchPart.getSite().getService(IContextService.class);
+			if (service != null) {
+				service.activateContext("org.eclipse.jdt.ui.javaEditorScope"); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	private class CompilationUnitEditorAdapter extends CompilationUnitEditor {
+		private boolean fInputSet = false;
+		private int fTextOrientation;
+		private boolean fEditable;
+		
+		CompilationUnitEditorAdapter(int textOrientation) {
+			super();
+			fTextOrientation = textOrientation;
+			// TODO: has to be set here
+			setPreferenceStore(createChainedPreferenceStore(null));
+		}
+		private void setEditable(boolean editable) {
+			fEditable= editable;
+		}
+		public IWorkbenchPartSite getSite() {
+			return JavaMergeViewer.this.getSite();
+		}
+		public void createActions() {
+			if (fInputSet) {
+				super.createActions();
+				// to avoid handler conflicts disable extra actions
+				// we're not handling by CompareHandlerService
+				getCorrectionCommands().deregisterCommands();
+				getRefactorActionGroup().dispose();
+				getGenerateActionGroup().dispose();
+			}
+			// else do nothing, we will create actions later, when input is available
+		}
+		public void createPartControl(Composite composite) {
+			SourceViewer sourceViewer= createJavaSourceViewer(composite, new CompositeRuler(), null, false, fTextOrientation | SWT.H_SCROLL | SWT.V_SCROLL, createChainedPreferenceStore(null));
+			setSourceViewer(this, sourceViewer);
+			getSelectionProvider().addSelectionChangedListener(getSelectionChangedListener());
+		}
+
+		protected void doSetInput(IEditorInput input) throws CoreException {
+			super.doSetInput(input);
+			// the editor input has been explicitly set
+			fInputSet = true;
+		}
+		public IEditorInput getEditorInput() {
+			return fInputSet ? JavaMergeViewer.this.getEditorInput(getViewer()) : super.getEditorInput();
+		}
+		// called by org.eclipse.ui.texteditor.TextEditorAction.canModifyEditor()
+		public boolean isEditable() {
+			return fEditable;
+		}
+		public boolean isEditorInputModifiable() {
+			return fEditable;
+		}
+		public boolean isEditorInputReadOnly() {
+			return !fEditable;
+		}
+
+		protected void setActionsActivated(boolean state) {
+			super.setActionsActivated(state);
+		}
+	}
+
+	// no setter to private field AbstractTextEditor.fSourceViewer
+	private void setSourceViewer(ITextEditor editor, SourceViewer viewer) {
+		Field field= null;
+		try {
+			field= AbstractTextEditor.class.getDeclaredField("fSourceViewer"); //$NON-NLS-1$
+		} catch (SecurityException ex) {
+			JavaPlugin.log(ex);
+		} catch (NoSuchFieldException ex) {
+			JavaPlugin.log(ex);
+		}
+		field.setAccessible(true);
+		try {
+			field.set(editor, viewer);
+		} catch (IllegalArgumentException ex) {
+			JavaPlugin.log(ex);
+		} catch (IllegalAccessException ex) {
+			JavaPlugin.log(ex);
 		}
 	}
 }
