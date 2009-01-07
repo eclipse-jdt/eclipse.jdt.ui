@@ -866,7 +866,7 @@ public class ASTFlattener extends GenericVisitor {
 					TypeParameter t= (TypeParameter) it.next();
 					t.accept(this);
 					if (it.hasNext()) {
-						this.fBuffer.append(",");//$NON-NLS-1$
+						this.fBuffer.append(", ");//$NON-NLS-1$
 					}
 				}
 				this.fBuffer.append("> ");//$NON-NLS-1$
@@ -887,7 +887,7 @@ public class ASTFlattener extends GenericVisitor {
 			SingleVariableDeclaration v= (SingleVariableDeclaration) it.next();
 			v.accept(this);
 			if (it.hasNext()) {
-				this.fBuffer.append(",");//$NON-NLS-1$
+				this.fBuffer.append(", ");//$NON-NLS-1$
 			}
 		}
 		this.fBuffer.append(")");//$NON-NLS-1$
