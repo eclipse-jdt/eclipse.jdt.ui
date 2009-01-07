@@ -262,19 +262,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				GrayedCheckedModelElement w1= (GrayedCheckedModelElement)e1;
 				GrayedCheckedModelElement w2= (GrayedCheckedModelElement)e2;
-				if (fWorkingSetModel == null)
-					return Collator.getInstance().compare(w1.getWorkingSet().getLabel(), w2.getWorkingSet().getLabel());
-
-				IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
-				for (int i= 0; i < activeWorkingSets.length; i++) {
-					IWorkingSet active= activeWorkingSets[i];
-					if (active == w1.getWorkingSet()) {
-						return -1;
-					} else if (active == w2.getWorkingSet()) {
-						return 1;
-					}
-				}
-
 				return Collator.getInstance().compare(w1.getWorkingSet().getLabel(), w2.getWorkingSet().getLabel());
 			}
 		}
