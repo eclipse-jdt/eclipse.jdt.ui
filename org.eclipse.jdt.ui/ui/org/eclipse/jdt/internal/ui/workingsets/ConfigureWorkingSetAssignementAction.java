@@ -673,14 +673,60 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		for (int i= 0; i < newWorkingSets.length; i++) {
 			IWorkingSet set= newWorkingSets[i];
 			if (isValidWorkingSet(set) && !grayedSets.contains(set)) {
+				boolean checkForYetHiddenWorkingSet= false;
 				for (int j= 0; j < elements.length; j++) {
 					IAdaptable adapted= adapt(set, elements[j]);
 					if (adapted != null && !contains(set, adapted)) {
 						add(set, adapted);
+						checkForYetHiddenWorkingSet= true;
+					}
+				}
+				if (checkForYetHiddenWorkingSet) {
+					IWorkingSet[] activeSets= getActiveWorkingSets();
+					if (activeSets != null) {
+						List activeWorkingSets= new ArrayList(Arrays.asList(activeSets));
+						if (!activeWorkingSets.contains(set))
+							activateWorkingSet(set);
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Adds the given working set to the set of currently active working sets.
+	 * 
+	 * @param workingSet working set to be activated
+	 * @since 3.5
+	 */
+	private void activateWorkingSet(IWorkingSet workingSet) {
+		if (fWorkingSetModel != null) {
+			fWorkingSetModel.addActiveWorkingSet(workingSet);
+		} else {
+			PackageExplorerPart activePart= getActivePackageExplorer();
+			if (activePart != null) {
+				activePart.getWorkingSetModel().addActiveWorkingSet(workingSet);
+			}
+		}
+
+	}
+
+	/**
+	 * Returns an array of currently active WorkingSets.
+	 * 
+	 * @return array of active working sets or <code>null</code> if none
+	 * @since 3.5
+	 */
+	private IWorkingSet[] getActiveWorkingSets() {
+		if (fWorkingSetModel != null) {
+			return fWorkingSetModel.getActiveWorkingSets();
+		} else {
+			PackageExplorerPart activePart= getActivePackageExplorer();
+			if (activePart != null)
+				return activePart.getWorkingSetModel().getActiveWorkingSets();
+		}
+		return null;
+
 	}
 
 	private IWorkingSet[] getAllWorkingSets() {
