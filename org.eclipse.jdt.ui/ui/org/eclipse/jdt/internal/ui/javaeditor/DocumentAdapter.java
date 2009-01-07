@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -195,6 +196,8 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	private ITextFileBuffer fTextFileBuffer;
 	private IDocument fDocument;
 
+	private boolean fIsClosed= true;
+
 	private DocumentSetCommand fSetCmd= new DocumentSetCommand();
 	private DocumentReplaceCommand fReplaceCmd= new DocumentReplaceCommand();
 	private ApplyTextEditCommand fTextEditCmd= new ApplyTextEditCommand();
@@ -261,6 +264,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 				((ISynchronizable)fDocument).setLockObject(new Object());
 		}
 		fDocument.addDocumentListener(this);
+		fIsClosed= false;
 	}
 
 	/**
@@ -328,7 +332,8 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 			return;
 
 		IDocument d= fDocument;
-		fDocument= null;
+		fDocument= new Document();
+		fIsClosed= true;
 		d.removeDocumentListener(this);
 
 		if (fTextFileBuffer != null) {
@@ -414,7 +419,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	 * @see IBuffer#isClosed()
 	 */
 	public boolean isClosed() {
-		return fDocument == null;
+		return fIsClosed;
 	}
 
 	/*
