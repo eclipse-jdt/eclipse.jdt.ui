@@ -123,6 +123,8 @@ public final class CorrectionMessages extends NLS {
 	public static String RemoveDeclarationCorrectionProposal_removeunusedconstructor_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedtype_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedvar_description;
+	public static String RenameRefactoringProposal_additionalInfo;
+	public static String RenameRefactoringProposal_name;
 	public static String ModifierCorrectionSubProcessor_changemodifiertostatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertononstatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertofinal_description;

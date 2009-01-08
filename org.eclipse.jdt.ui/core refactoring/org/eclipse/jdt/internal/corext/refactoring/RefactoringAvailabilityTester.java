@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1156,6 +1156,38 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isRenameVirtualMethodAvailable(final IMethod method) throws CoreException {
 		return isRenameAvailable(method) && MethodChecks.isVirtual(method);
+	}
+
+	public static boolean isRenameElementAvailable(IJavaElement element) throws CoreException {
+		switch (element.getElementType()) {
+			case IJavaElement.JAVA_PROJECT:
+				return isRenameAvailable((IJavaProject) element);
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				return isRenameAvailable((IPackageFragmentRoot) element);
+			case IJavaElement.PACKAGE_FRAGMENT:
+				return isRenameAvailable((IPackageFragment) element);
+			case IJavaElement.COMPILATION_UNIT:
+				return isRenameAvailable((ICompilationUnit) element);
+			case IJavaElement.TYPE:
+				return isRenameAvailable((IType) element);
+			case IJavaElement.METHOD:
+				final IMethod method= (IMethod) element;
+				if (method.isConstructor())
+					return isRenameAvailable(method.getDeclaringType());
+				else
+					return isRenameAvailable(method);
+			case IJavaElement.FIELD:
+				final IField field= (IField) element;
+				if (Flags.isEnum(field.getFlags()))
+					return isRenameEnumConstAvailable(field);
+				else
+					return isRenameFieldAvailable(field);
+			case IJavaElement.TYPE_PARAMETER:
+				return isRenameAvailable((ITypeParameter) element);
+			case IJavaElement.LOCAL_VARIABLE:
+				return isRenameAvailable((ILocalVariable) element);
+		}
+		return false;
 	}
 
 	public static boolean isReplaceInvocationsAvailable(IMethod method) throws JavaModelException {
