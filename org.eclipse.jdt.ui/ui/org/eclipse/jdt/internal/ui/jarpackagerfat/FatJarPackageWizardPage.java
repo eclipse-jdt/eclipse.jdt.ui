@@ -447,7 +447,6 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fExtractJarsRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
 		fExtractJarsRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_extractJars_text);
 		fExtractJarsRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fExtractJarsRadioButton.setToolTipText(FatJarPackagerMessages.FatJarPackageWizardPage_extractJars_tooltip_text);
 		fExtractJarsRadioButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				if (((Button)event.widget).getSelection())
@@ -468,7 +467,6 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fCopyJarFilesRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
 		fCopyJarFilesRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_copyJarFiles_text);
 		fCopyJarFilesRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fCopyJarFilesRadioButton.setToolTipText(FatJarPackagerMessages.FatJarPackageWizardPage_copyJarFiles_tooltip_text);
 		fCopyJarFilesRadioButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				if (((Button)event.widget).getSelection())

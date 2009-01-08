@@ -42,13 +42,10 @@ public final class FatJarPackagerMessages extends NLS {
 
 	public static String FatJarPackageWizardPage_extractJars_text;
 
-	public static String FatJarPackageWizardPage_extractJars_tooltip_text;
-
 	public static String FatJarPackageWizardPage_packageJars_text;
 
 	public static String FatJarPackageWizardPage_copyJarFiles_text;
 
-	public static String FatJarPackageWizardPage_copyJarFiles_tooltip_text;
 	public static String FatJarPackageWizardPage_error_missingClassFile;
 	public static String FatJarPackageWizard_IPIssueDialog_message;
 
