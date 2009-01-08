@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 
 public class AssistQuickFixTest extends QuickFixTest {
 
@@ -2007,7 +2008,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
-	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, AssignToVariableAssistProposal.class };
+	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class };
 
     public void testInvertEquals() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

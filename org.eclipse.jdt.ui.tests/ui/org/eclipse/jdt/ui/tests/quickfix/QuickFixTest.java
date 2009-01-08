@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProc
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTemplateProposal;
 
 /**
@@ -319,7 +320,7 @@ public class QuickFixTest extends TestCase {
 	}
 
 	protected static final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
-		Class[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class };
+		Class[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class };
 		return collectAssists(context, filteredTypes);
 	}
 
