@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -74,6 +75,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -435,15 +438,23 @@ public class ASTNodes {
     		return false;
 
     	ASTNode parent= location.getParent();
-    	if (parent instanceof VariableDeclarationFragment){
-    		VariableDeclarationFragment vdf= (VariableDeclarationFragment)parent;
-    		if (vdf.getInitializer().equals(location))
-    			return false;
-    	} else if (parent instanceof MethodInvocation){
-    		MethodInvocation mi= (MethodInvocation)parent;
-    		if (mi.arguments().contains(location))
-    			return false;
-    	} else if (parent instanceof ReturnStatement) {
+    	StructuralPropertyDescriptor locationInParent= location.getLocationInParent();
+		if (locationInParent instanceof ChildListPropertyDescriptor) {
+			// e.g. argument lists of MethodInvocation, ClassInstanceCreation, ...
+   			return false;
+    	} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+   			return false;
+    	} else if (locationInParent == SingleVariableDeclaration.INITIALIZER_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == EnhancedForStatement.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == SwitchCase.EXPRESSION_PROPERTY) {
+    		return false;
+    	} else if (locationInParent == ArrayAccess.INDEX_PROPERTY) {
     		return false;
     	} else if (parent instanceof Expression) {
 			int substitutePrecedence= OperatorPrecedence.getExpressionPrecedence(substitute);

@@ -59,7 +59,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -78,6 +77,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -373,16 +373,27 @@ public class InlineTempRefactoring extends Refactoring {
 		
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
 		
-		ITypeBinding referenceType= reference.resolveTypeBinding();
 		ITypeBinding initializerType= initializer.resolveTypeBinding();
-		if (referenceType != null && referenceType.isPrimitive()
-				&& initializerType != null && initializerType.isPrimitive()
-				&& referenceType != initializerType) {
-			CastExpression cast= rewrite.getAST().newCastExpression();
-			cast.setExpression(copy);
-			cast.setType(rewrite.getAST().newPrimitiveType(PrimitiveType.toCode(referenceType.getName())));
-			copy= cast;
-			
+		ITypeBinding referenceType= reference.resolveTypeBinding();
+		if (initializerType != null && referenceType != null) {
+			if (initializerType.isPrimitive() && referenceType.isPrimitive() && referenceType != initializerType
+					|| initializerType.isPrimitive() && ! referenceType.isPrimitive() // reference was autoboxed
+					|| ! TypeRules.canAssign(initializerType, referenceType)) { //OK
+//					|| ! initializerType.isSubTypeCompatible(referenceType)) {
+//					|| ! initializerType.isAssignmentCompatible(referenceType)) {
+				CastExpression cast= rewrite.getAST().newCastExpression();
+				cast.setExpression(copy);
+				cast.setType(rewrite.getImportRewrite().addImport(referenceType, rewrite.getAST()));
+				copy= cast;
+
+			} else if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
+				ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
+
+				ArrayCreation newArrayCreation= rewrite.getAST().newArrayCreation();
+				newArrayCreation.setType(newType);
+				newArrayCreation.setInitializer((ArrayInitializer) copy);
+				return newArrayCreation;
+			}
 		} else if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
 			ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
 

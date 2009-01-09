@@ -262,7 +262,17 @@ public class InlineTempTests extends RefactoringTest {
 
 	public void test33() throws Exception{
 		// add explicit cast for primitive types: https://bugs.eclipse.org/bugs/show_bug.cgi?id=46216
-		helper1(10, 14, 10, 15);
+		helper1(5, 14, 5, 15);
+	}
+	
+	public void test34() throws Exception{
+		// add explicit cast for boxing: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201434#c4
+		helper1(5, 17, 5, 17);
+	}
+	
+	public void test35() throws Exception{
+		// add explicit cast for unchecked conversion: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201434#c0
+		helper1(7, 32, 7, 36);
 	}
 	
 	//------
