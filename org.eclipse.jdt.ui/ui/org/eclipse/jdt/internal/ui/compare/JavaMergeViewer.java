@@ -145,14 +145,6 @@ public class JavaMergeViewer extends TextMergeViewer {
 				setPreferenceStore(createChainedPreferenceStore(project));
 			}
 		}
-		if (fSourceViewer != null) {
-			Iterator iterator= fSourceViewer.iterator();
-			while (iterator.hasNext()) {
-				SourceViewer sourceViewer= (SourceViewer)iterator.next();
-				sourceViewer.unconfigure();
-				sourceViewer.configure(getSourceViewerConfiguration(sourceViewer, null));
-			}
-    	}
     	super.setInput(input);
     }
 
@@ -208,9 +200,11 @@ public class JavaMergeViewer extends TextMergeViewer {
 			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
 			if (tools != null) {
 				IEditorInput editorInput= getEditorInput(sourceViewer);
-				if (editorInput == null)
-					return;
 				sourceViewer.unconfigure();
+				if (editorInput == null) {
+					sourceViewer.configure(getSourceViewerConfiguration(sourceViewer, null));
+					return;
+				}
 				getSourceViewerConfiguration(sourceViewer, editorInput);
 			}
 		}
