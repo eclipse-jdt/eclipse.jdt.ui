@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,9 @@ public class CodeFormatterTest extends CoreTests {
 		return allTests();
 	}
 
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -266,7 +269,9 @@ public class CodeFormatterTest extends CoreTests {
 			+ "* javadoc\n" // javadoc is not formatted
 			+ "     */\n"
 			+ "    public method() {\n"
-			+ "        /* a comment */\n" // comment is formatted
+			+ "        /*\n" // comment is formatted
+			+ "         * a comment\n"
+			+ "         */\n"
 			+ "int local;\n" // local does not get formatted
 			+ "    }\n"
 			+ "}\n";
