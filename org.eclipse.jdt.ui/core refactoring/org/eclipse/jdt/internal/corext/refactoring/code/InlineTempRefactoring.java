@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -58,6 +59,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -316,8 +318,7 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 	}
 
-    private boolean needsBrackets(SimpleName name, VariableDeclaration variableDeclaration) {
-		Expression initializer= variableDeclaration.getInitializer();
+    private boolean needsBrackets(SimpleName name, Expression initializer) {
 		if (initializer instanceof Assignment) //for esthetic reasons
 			return true;
 
@@ -339,7 +340,7 @@ public class InlineTempRefactoring extends Refactoring {
 
 	private Expression getInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
 		Expression copy= getModifiedInitializerSource(rewrite, reference);
-		boolean brackets= needsBrackets(reference, getVariableDeclaration());
+		boolean brackets= needsBrackets(reference, copy);
 		if (brackets) {
 			ParenthesizedExpression parentExpr= rewrite.getAST().newParenthesizedExpression();
 			parentExpr.setExpression(copy);
@@ -369,9 +370,20 @@ public class InlineTempRefactoring extends Refactoring {
 				}
 			}
 		}
-
+		
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
-		if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
+		
+		ITypeBinding referenceType= reference.resolveTypeBinding();
+		ITypeBinding initializerType= initializer.resolveTypeBinding();
+		if (referenceType != null && referenceType.isPrimitive()
+				&& initializerType != null && initializerType.isPrimitive()
+				&& referenceType != initializerType) {
+			CastExpression cast= rewrite.getAST().newCastExpression();
+			cast.setExpression(copy);
+			cast.setType(rewrite.getAST().newPrimitiveType(PrimitiveType.toCode(referenceType.getName())));
+			copy= cast;
+			
+		} else if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
 			ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
 
 			ArrayCreation newArrayCreation= rewrite.getAST().newArrayCreation();

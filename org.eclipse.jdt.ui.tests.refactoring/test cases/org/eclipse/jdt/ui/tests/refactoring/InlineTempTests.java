@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -260,6 +260,11 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(10, 27, 10, 27);
 	}
 
+	public void test33() throws Exception{
+		// add explicit cast for primitive types: https://bugs.eclipse.org/bugs/show_bug.cgi?id=46216
+		helper1(10, 14, 10, 15);
+	}
+	
 	//------
 
 	public void testFail0() throws Exception{

@@ -8,7 +8,7 @@ public class GrueziWohl {
 	
 	public String holenGruss() {
 		String gruezi= "Gruezi";
-		return gruezi + ((jh && "Gruezi".equals(GrueziWohl.gruezi)) ? " Wohl" : "") + "!";
+		return gruezi + (jh && "Gruezi".equals(GrueziWohl.gruezi) ? " Wohl" : "") + "!";
 	}
 	
 	private boolean wohl() {
