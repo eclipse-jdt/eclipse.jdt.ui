@@ -32,6 +32,7 @@ org.eclipse.platform.doc.isv/buildDoc.xml
 org.eclipse.jdt.doc.isv/buildDoc.xml
 org.eclipse.jdt.core/*
 org.eclipse.core.resources/build-user.xml
+org.eclipse.core.tests.resources/test.xml
 org.eclipse.tomcat/conf/*
 org.eclipse.ui/plugin.xml
 org.eclipse.platform.source/*
