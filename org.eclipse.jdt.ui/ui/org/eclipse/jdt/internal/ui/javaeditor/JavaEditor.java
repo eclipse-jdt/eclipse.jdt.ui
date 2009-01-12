@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2546,7 +2546,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			((JavaSourceViewer)getSourceViewer()).setPreferenceStore(store);
 
 		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
-		fIsBreadcrumbVisible= isBreadcrumbShown();
 		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 		fMarkTypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES);
 		fMarkMethodOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES);
@@ -3047,6 +3046,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			installSemanticHighlighting();
 
 		fBreadcrumb= createBreadcrumb();
+		fIsBreadcrumbVisible= isBreadcrumbShown();
 		if (fIsBreadcrumbVisible)
 			showBreadcrumb();
 
