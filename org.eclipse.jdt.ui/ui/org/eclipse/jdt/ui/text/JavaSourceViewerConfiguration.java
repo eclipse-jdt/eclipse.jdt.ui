@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Eicher (Avaloq Evolution AG) - block selection mode
  *******************************************************************************/
 package org.eclipse.jdt.ui.text;
 
@@ -459,9 +460,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
 			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning) };
 		else if (IJavaPartitions.JAVA_CHARACTER.equals(contentType) || IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
-			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, getProject()) };
+			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, getProject(), sourceViewer) };
 		else
-			return new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, getProject()) };
+			return new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, getProject(), sourceViewer) };
 	}
 
 	/*

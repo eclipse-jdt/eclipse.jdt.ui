@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev - Fixed https://bugs.eclipse.org/bugs/show_bug.cgi?id=29909
+ *     Tom Eicher (Avaloq Evolution AG) - block selection mode
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -27,6 +28,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.rules.FastPartitioner;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -92,16 +94,23 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private String fPartitioning;
 	private final IJavaProject fProject;
 	private static IScanner fgScanner= ToolFactory.createScanner(false, false, false, false);
+	/**
+	 * The viewer.
+	 * @since 3.5
+	 */
+	private final ISourceViewer fViewer;
 
 	/**
 	 * Creates a new Java auto indent strategy for the given document partitioning.
 	 *
 	 * @param partitioning the document partitioning
 	 * @param project the project to get formatting preferences from, or null to use default preferences
+	 * @param viewer the source viewer that this strategy is attached to
 	 */
-	public JavaAutoIndentStrategy(String partitioning, IJavaProject project) {
+	public JavaAutoIndentStrategy(String partitioning, IJavaProject project, ISourceViewer viewer) {
 		fPartitioning= partitioning;
 		fProject= project;
+		fViewer= viewer;
  	}
 
 	private int getBracketCount(IDocument d, int startOffset, int endOffset, boolean ignoreCloseBrackets) throws BadLocationException {
@@ -1211,7 +1220,8 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		else if (c.text.length() == 1)
 			smartIndentOnKeypress(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
-			smartPaste(d, c); // no smart backspace for paste
+			if (fViewer == null || fViewer.getTextWidget() == null || !fViewer.getTextWidget().getBlockSelection())
+				smartPaste(d, c); // no smart backspace for paste
 
 	}
 

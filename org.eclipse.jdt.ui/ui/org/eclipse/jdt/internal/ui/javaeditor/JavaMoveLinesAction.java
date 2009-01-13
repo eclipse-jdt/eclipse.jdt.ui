@@ -7,13 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Eicher (Avaloq Evolution AG) - block selection mode
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.core.runtime.Assert;
@@ -320,11 +320,9 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			return;
 
 		// get selection
-		Point p= viewer.getSelectedRange();
-		if (p == null)
+		ITextSelection sel= (ITextSelection) viewer.getSelectionProvider().getSelection();
+		if (sel.isEmpty())
 			return;
-
-		ITextSelection sel= new TextSelection(document, p.x, p.y);
 
 		ITextSelection skippedLine= getSkippedLine(document, sel);
 		if (skippedLine == null)
@@ -436,7 +434,14 @@ public class JavaMoveLinesAction extends TextEditorAction {
 		if (numberOfLines < 1)
 			return new Region(offset, 0);
 		int endLine= startLine + numberOfLines - 1;
-		int endOffset= document.getLineOffset(endLine) + document.getLineLength(endLine);
+		int endOffset;
+		if (fSharedState.fEditor.isBlockSelectionEnabled()) {
+			// in column mode, don't select the last delimiter as we count an empty selected line
+			IRegion endLineInfo= document.getLineInformation(endLine);
+			endOffset= endLineInfo.getOffset() + endLineInfo.getLength();
+		} else {
+			endOffset= document.getLineOffset(endLine) + document.getLineLength(endLine);
+		}
 		return new Region(offset, endOffset - offset);
 	}
 

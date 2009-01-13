@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Eicher (Avaloq Evolution AG) - block selection mode
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
@@ -148,10 +149,8 @@ public class IndentAction extends TextEditorAction {
 
 			try {
 				document.addPosition(end);
-				firstLine= document.getLineOfOffset(offset);
-				// check for marginal (zero-length) lines
-				int minusOne= length == 0 ? 0 : 1;
-				nLines= document.getLineOfOffset(offset + length - minusOne) - firstLine + 1;
+				firstLine= selection.getStartLine();
+				nLines= selection.getEndLine() - firstLine + 1;
 			} catch (BadLocationException e) {
 				// will only happen on concurrent modification
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "", e)); //$NON-NLS-1$
