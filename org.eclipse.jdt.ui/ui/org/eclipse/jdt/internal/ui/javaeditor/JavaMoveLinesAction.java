@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -435,8 +435,8 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			return new Region(offset, 0);
 		int endLine= startLine + numberOfLines - 1;
 		int endOffset;
-		if (fSharedState.fEditor.isBlockSelectionEnabled()) {
-			// in column mode, don't select the last delimiter as we count an empty selected line
+		if (fSharedState.fEditor.isBlockSelectionModeEnabled()) {
+			// in block selection mode, don't select the last delimiter as we count an empty selected line
 			IRegion endLineInfo= document.getLineInformation(endLine);
 			endOffset= endLineInfo.getOffset() + endLineInfo.getLength();
 		} else {

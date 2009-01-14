@@ -763,7 +763,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			int next= findNextPosition(position);
 			try {
-				if (isBlockSelectionEnabled() && document.getLineOfOffset(next) != document.getLineOfOffset(position)) {
+				if (isBlockSelectionModeEnabled() && document.getLineOfOffset(next) != document.getLineOfOffset(position)) {
 					super.run(); // may navigate into virtual white space
 				} else if (next != BreakIterator.DONE) {
 					setCaretPosition(next);
@@ -866,7 +866,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			final ISourceViewer viewer= getSourceViewer();
 			StyledText text= viewer.getTextWidget();
 			Point widgetSelection= text.getSelection();
-			if (isBlockSelectionEnabled() && widgetSelection.y != widgetSelection.x) {
+			if (isBlockSelectionModeEnabled() && widgetSelection.y != widgetSelection.x) {
 				final int caret= text.getCaretOffset();
 				final int offset= modelOffset2WidgetOffset(viewer, position);
 
@@ -975,7 +975,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			int previous= findPreviousPosition(position);
 			try {
-				if (isBlockSelectionEnabled() && document.getLineOfOffset(previous) != document.getLineOfOffset(position)) {
+				if (isBlockSelectionModeEnabled() && document.getLineOfOffset(previous) != document.getLineOfOffset(position)) {
 					super.run(); // may navigate into virtual white space
 				} else if (previous != BreakIterator.DONE) {
 					setCaretPosition(previous);
@@ -1080,7 +1080,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			final ISourceViewer viewer= getSourceViewer();
 			StyledText text= viewer.getTextWidget();
 			Point widgetSelection= text.getSelection();
-			if (isBlockSelectionEnabled() && widgetSelection.y != widgetSelection.x) {
+			if (isBlockSelectionModeEnabled() && widgetSelection.y != widgetSelection.x) {
 				final int caret= text.getCaretOffset();
 				final int offset= modelOffset2WidgetOffset(viewer, position);
 
