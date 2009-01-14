@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -713,6 +713,8 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 				fIsMenuUp= false;
 			}
 			public void menuAboutToShow(IMenuManager manager) {
+				boolean canRefactor= ! fRenameLinkedMode.isOriginalName();
+				
 				IAction refactorAction= new Action(ReorgMessages.RenameInformationPopup_RenameInWorkspace) {
 					public void run() {
 						activateEditor();
@@ -720,6 +722,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 					}
 				};
 				refactorAction.setAccelerator(SWT.CR);
+				refactorAction.setEnabled(canRefactor);
 				manager.add(refactorAction);
 
 				IAction previewAction= new Action(ReorgMessages.RenameInformationPopup_Preview) {
@@ -729,6 +732,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 					}
 				};
 				previewAction.setAccelerator(SWT.CTRL | SWT.CR);
+				previewAction.setEnabled(canRefactor);
 				manager.add(previewAction);
 
 				IAction openDialogAction= new Action(ReorgMessages.RenameInformationPopup_OpenDialog + '\t' + fOpenDialogBinding) {
