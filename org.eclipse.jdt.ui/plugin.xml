@@ -1286,7 +1286,7 @@
                definitionId="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
                disabledIcon="$nl$/icons/full/dtool16/mark_occurrences.gif"
                icon="$nl$/icons/full/etool16/mark_occurrences.gif"
-               helpContextId="toggle_mark_occurrences_action_context"
+               helpContextId="org.eclipse.jdt.ui.toggle_mark_occurrences_action_context"
                label="%toggleMarkOccurrences.label"
                retarget="true"
                tooltip="%toggleMarkOccurrences.tooltip">
@@ -1299,7 +1299,7 @@
                definitionId="org.eclipse.jdt.ui.edit.text.java.toggleBreadcrumb"
                disabledIcon="$nl$/icons/full/dtool16/toggle_breadcrumb.gif"
                icon="$nl$/icons/full/etool16/toggle_breadcrumb.gif"
-               helpContextId="toggle_mini_browser_action_context"
+               helpContextId="org.eclipse.jdt.ui.toggle_mini_browser_action_context"
                label="%toggleBreadcrumb.label"
                retarget="true"
                tooltip="%toggleBreadcrumb.tooltip">
@@ -2824,7 +2824,7 @@
          <action
                label="%openJavaSearchPageAction.label"
                icon="$nl$/icons/full/obj16/jsearch_obj.gif"
-               helpContextId="java_search_action_context"
+               helpContextId="org.eclipse.jdt.ui.java_search_action_context"
                class="org.eclipse.jdt.internal.ui.search.OpenJavaSearchPageAction"
                menubarPath="org.eclipse.search.menu/dialogGroup"
                id="org.eclipse.jdt.ui.actions.OpenJavaSearchPage">
