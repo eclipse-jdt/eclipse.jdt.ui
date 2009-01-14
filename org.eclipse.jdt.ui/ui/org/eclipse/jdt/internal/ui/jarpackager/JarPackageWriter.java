@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,11 +62,11 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	private final String fEncoding;
 
 	/**
-	 * Create a JarPackageWriter on the given output stream.
-	 * It is the clients responsibility to close the output stream.
-	 *
-	 * @param outputStream
-	 * @param encoding
+	 * Create a JarPackageWriter on the given output stream. It is the clients responsibility to
+	 * close the output stream.
+	 * 
+	 * @param outputStream the the output stream
+	 * @param encoding the encoding
 	 */
 	public JarPackageWriter(OutputStream outputStream, String encoding) {
 		Assert.isNotNull(outputStream);
@@ -84,11 +84,10 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	}
 
 	/**
-	 * Writes a XML representation of the JAR specification
-	 * to to the underlying stream.
-	 *
-	 * @param jarPackage
-	 * @exception IOException	if writing to the underlying stream fails
+	 * Writes a XML representation of the JAR specification to to the underlying stream.
+	 * 
+	 * @param jarPackage the JAR package data
+	 * @exception IOException if writing to the underlying stream fails
 	 */
 	public void writeXML(JarPackageData jarPackage) throws IOException {
 		Assert.isNotNull(jarPackage);
@@ -239,11 +238,10 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	}
 
 	/**
-     * Closes this stream.
-     * It is the client's responsibility to close the stream.
-     *
-     * @throws CoreException
-     */
+	 * Closes this stream. It is the client's responsibility to close the stream.
+	 * 
+	 * @throws CoreException if closing the stream fails
+	 */
     public void close() throws CoreException {
     	if (fOutputStream != null) {
 			try {
