@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,26 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
+/**
+ * A source range computer that uses the shortest possible source range for a given set of nodes.
+ * <p>
+ * For other nodes, the default extended source range from
+ * {@link TargetSourceRangeComputer#computeSourceRange(ASTNode)} is used.
+ * <p>
+ * For nodes inside "tight" nodes, the source range is the extended source range, unless this would
+ * violate the no-overlapping condition from the superclass.
+ * 
+ * @since 3.2
+ */
 public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 	private HashSet/*<ASTNode>*/ fTightSourceRangeNodes= new HashSet();
 
+	/**
+	 * Add the given node to the set of "tight" nodes.
+	 * 
+	 * @param reference a node
+	 * @since 3.2
+	 */
 	public void addTightSourceNode(ASTNode reference) {
 		fTightSourceRangeNodes.add(reference);
 
@@ -30,7 +47,7 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 	        StructuralPropertyDescriptor descriptor= (StructuralPropertyDescriptor)iterator.next();
 	        if (descriptor.isChildProperty()) {
 	        	ASTNode child= (ASTNode)reference.getStructuralProperty(descriptor);
-	        	if (isExtending(child, reference)) {
+	        	if (child != null && isExtending(child, reference)) {
 	        		addTightSourceNode(child);
 	        	}
 	        } else if (descriptor.isChildListProperty()) {
