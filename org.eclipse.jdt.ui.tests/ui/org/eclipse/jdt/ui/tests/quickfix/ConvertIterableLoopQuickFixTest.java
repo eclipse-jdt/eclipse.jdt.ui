@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -154,7 +154,16 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(fConvertLoopProposal);
 
 		buf= new StringBuffer();
-		buf.append("package test;\r\n");buf.append("import java.util.Vector;\r\n");buf.append("public class A {\r\n");buf.append("	Vector<String> c;\r\n");buf.append("	public A() {\r\n");buf.append("		for (String nextElement : c) {\r\n");buf.append("			System.out.println(nextElement);\r\n");buf.append("		}\r\n");buf.append("	}\r\n");buf.append("}");
+		buf.append("package test;\r\n");
+		buf.append("import java.util.Vector;\r\n");
+		buf.append("public class A {\r\n");
+		buf.append("	Vector<String> c;\r\n");
+		buf.append("	public A() {\r\n");
+		buf.append("		for (String nextElement : c) {\r\n");
+		buf.append("			System.out.println(nextElement);\r\n");
+		buf.append("		}\r\n");
+		buf.append("	}\r\n");
+		buf.append("}");
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}
