@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -585,11 +585,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	}
 
 	private IStatus checkExpressionCondition() {
-		String warningLabel= FixMessages.ConvertIterableLoopOperation_semanticChangeWarning;
+		String warningLable= FixMessages.ConvertIterableLoopOperation_semanticChangeWarning;
 
 		Expression expression= getForStatement().getExpression();
 		if (!(expression instanceof MethodInvocation))
-			return new StatusInfo(IStatus.WARNING, warningLabel);
+			return new StatusInfo(IStatus.WARNING, warningLable);
 
 		MethodInvocation invoc= (MethodInvocation)expression;
 		IMethodBinding methodBinding= invoc.resolveMethodBinding();
@@ -600,42 +600,16 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		if (declaringClass == null)
 			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 
-		List initializers= getForStatement().initializers();
-		if (initializers.size() != 1)
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-
-		expression= (Expression)initializers.get(0);
-		if (!(expression instanceof VariableDeclarationExpression))
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-
-		VariableDeclarationExpression declaration= (VariableDeclarationExpression)expression;
-		List variableDeclarationFragments= declaration.fragments();
-		if (variableDeclarationFragments.size() != 1)
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-
-		Object declarationFragment= variableDeclarationFragments.get(0);
-		if (!(declarationFragment instanceof VariableDeclarationFragment))
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-
-		Expression initializer= ((VariableDeclarationFragment)declarationFragment).getInitializer();
-		if (!(initializer instanceof MethodInvocation))
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-
-		MethodInvocation methodInvocation= (MethodInvocation)initializer;
-		String methodName= methodInvocation.getName().getIdentifier();
-		if (!"iterator".equals(methodName)) //$NON-NLS-1$
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-
 		String qualifiedName= declaringClass.getQualifiedName();
-		methodName= invoc.getName().getIdentifier();
+		String methodName= invoc.getName().getIdentifier();
 		if (qualifiedName.startsWith("java.util.Enumeration")) { //$NON-NLS-1$
 			if (!methodName.equals("hasMoreElements")) //$NON-NLS-1$
-				return new StatusInfo(IStatus.WARNING, warningLabel);
+				return new StatusInfo(IStatus.WARNING, warningLable);
 		} else if (qualifiedName.startsWith("java.util.Iterator")) { //$NON-NLS-1$
 			if (!methodName.equals("hasNext")) //$NON-NLS-1$
-				return new StatusInfo(IStatus.WARNING, warningLabel);
+				return new StatusInfo(IStatus.WARNING, warningLable);
 		} else {
-			return new StatusInfo(IStatus.WARNING, warningLabel);
+			return new StatusInfo(IStatus.WARNING, warningLable);
 		}
 
 		return StatusInfo.OK_STATUS;
