@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -376,8 +376,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return baseRelevance + 2;
 			case CompletionProposal.TYPE_REF:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 				return baseRelevance + 3;
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.CONSTRUCTOR_INVOCATION:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_DECLARATION:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
@@ -433,14 +435,17 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
 				return createFieldWithCastedReceiverProposal(proposal);
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.CONSTRUCTOR_INVOCATION:
 			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.JAVADOC_METHOD_REF:
 				return createMethodReferenceProposal(proposal);
 			case CompletionProposal.METHOD_DECLARATION:
 				return createMethodDeclarationProposal(proposal);
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
+				return createAnonymousTypeProposal(proposal, getInvocationContext());
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
-				return createAnonymousTypeProposal(proposal);
+				return createAnonymousTypeProposal(proposal, null);
 			case CompletionProposal.LABEL_REF:
 				return createLabelProposal(proposal);
 			case CompletionProposal.LOCAL_VARIABLE_REF:
@@ -588,6 +593,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.JAVADOC_METHOD_REF:
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.CONSTRUCTOR_INVOCATION:
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
@@ -657,7 +664,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		return javaProposal;
 	}
 
-	private IJavaCompletionProposal createAnonymousTypeProposal(CompletionProposal proposal) {
+	private IJavaCompletionProposal createAnonymousTypeProposal(CompletionProposal proposal, JavaContentAssistInvocationContext invocationContext) {
 		if (fCompilationUnit == null || fJavaProject == null)
 			return null;
 
@@ -679,7 +686,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 			StyledString label= fLabelProvider.createAnonymousTypeLabel(proposal);
 
-			JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, completion, label, String.valueOf(proposal.getDeclarationSignature()), type, relevance);
+			JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, invocationContext, start, length, completion, label, String.valueOf(proposal
+					.getDeclarationSignature()), type, relevance);
 			javaProposal.setProposalInfo(new AnonymousTypeProposalInfo(fJavaProject, proposal));
 			return javaProposal;
 		} catch (JavaModelException e) {

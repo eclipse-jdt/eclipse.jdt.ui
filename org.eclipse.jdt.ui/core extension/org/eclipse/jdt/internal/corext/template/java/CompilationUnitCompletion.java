@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -708,11 +708,13 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	CompilationUnitCompletion(ICompilationUnit unit) {
 		reset(unit);
 		setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+		setIgnored(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, true);
 		setIgnored(CompletionProposal.KEYWORD, true);
 		setIgnored(CompletionProposal.LABEL_REF, true);
 		setIgnored(CompletionProposal.METHOD_DECLARATION, true);
 		setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
 		setIgnored(CompletionProposal.METHOD_REF, true);
+		setIgnored(CompletionProposal.CONSTRUCTOR_INVOCATION, true);
 		setIgnored(CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER, true);
 		setIgnored(CompletionProposal.PACKAGE_REF, true);
 		setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);

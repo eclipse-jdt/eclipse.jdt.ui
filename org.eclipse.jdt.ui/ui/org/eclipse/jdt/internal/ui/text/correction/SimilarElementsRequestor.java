@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,12 +69,14 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 
 			SimilarElementsRequestor requestor= new SimilarElementsRequestor(identifier, kind, nArguments, returnType);
 			requestor.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+			requestor.setIgnored(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, true);
 			requestor.setIgnored(CompletionProposal.KEYWORD, true);
 			requestor.setIgnored(CompletionProposal.LABEL_REF, true);
 			requestor.setIgnored(CompletionProposal.METHOD_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.PACKAGE_REF, true);
 			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.METHOD_REF, true);
+			requestor.setIgnored(CompletionProposal.CONSTRUCTOR_INVOCATION, true);
 			requestor.setIgnored(CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER, true);
 			requestor.setIgnored(CompletionProposal.FIELD_REF, true);
 			requestor.setIgnored(CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER, true);

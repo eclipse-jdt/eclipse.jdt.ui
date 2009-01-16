@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,30 +62,32 @@ public class CompletionProposalLabelProvider {
 	}
 
 	/**
-	 * Creates and returns a parameter list of the given method or type proposal
-	 * suitable for display. The list does not include parentheses. The lower
-	 * bound of parameter types is returned.
+	 * Creates and returns a parameter list of the given method or type proposal suitable for
+	 * display. The list does not include parentheses. The lower bound of parameter types is
+	 * returned.
 	 * <p>
 	 * Examples:
+	 * 
 	 * <pre>
 	 *   &quot;void method(int i, Strings)&quot; -&gt; &quot;int i, String s&quot;
 	 *   &quot;? extends Number method(java.lang.String s, ? super Number n)&quot; -&gt; &quot;String s, Number n&quot;
 	 * </pre>
+	 * 
 	 * </p>
-	 *
-	 * @param proposal the proposal to create the parameter list
-	 *        for. Must be of kind {@link CompletionProposal#METHOD_REF} or
-	 *        {@link CompletionProposal#TYPE_REF}.
+	 * 
+	 * @param proposal the proposal to create the parameter list for
 	 * @return the list of comma-separated parameters suitable for display
 	 */
 	public String createParameterList(CompletionProposal proposal) {
 		int kind= proposal.getKind();
 		switch (kind) {
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.CONSTRUCTOR_INVOCATION:
 				return appendUnboundedParameterList(new StyledString(), proposal).getString();
 			case CompletionProposal.TYPE_REF:
 				return appendTypeParameterList(new StyledString(), proposal).getString();
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 				return appendUnboundedParameterList(new StyledString(), proposal).getString();
 			default:
 				Assert.isLegal(false);
@@ -277,6 +279,12 @@ public class CompletionProposalLabelProvider {
 		// declaring type
 		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
+
+		if (methodProposal.getRequiredProposals() != null) {
+			nameBuffer.append(Signature.getQualifier(declaringType), StyledString.QUALIFIER_STYLER);
+			nameBuffer.append('.', StyledString.QUALIFIER_STYLER);
+		}
+
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
 		return Strings.markLTR(nameBuffer, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
@@ -505,6 +513,11 @@ public class CompletionProposalLabelProvider {
 		buffer.append("  "); //$NON-NLS-1$
 		buffer.append(JavaTextMessages.ResultCollector_anonymous_type);
 
+		if (proposal.getRequiredProposals() != null) {
+			buffer.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
+			buffer.append(Signature.getSignatureQualifier(declaringTypeSignature), StyledString.QUALIFIER_STYLER);
+		}
+
 		return Strings.markLTR(buffer, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
 	}
 
@@ -530,6 +543,7 @@ public class CompletionProposalLabelProvider {
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.CONSTRUCTOR_INVOCATION:
 			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 				if (fContext != null && fContext.isInJavadoc())
@@ -538,6 +552,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.METHOD_DECLARATION:
 				return createOverrideMethodProposalLabel(proposal);
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 				return createAnonymousTypeLabel(proposal);
 			case CompletionProposal.TYPE_REF:
 				return createTypeProposalLabel(proposal);
@@ -583,10 +598,12 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.METHOD_DECLARATION:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.CONSTRUCTOR_INVOCATION:
 			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 				descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, flags);
 				break;
 			case CompletionProposal.TYPE_REF:
@@ -676,11 +693,13 @@ public class CompletionProposalLabelProvider {
 		if (Flags.isDeprecated(flags))
 			adornments |= JavaElementImageDescriptor.DEPRECATED;
 
-		if (kind == CompletionProposal.FIELD_REF || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF)
+		if (kind == CompletionProposal.FIELD_REF || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE
+				|| kind == CompletionProposal.METHOD_REF || kind == CompletionProposal.CONSTRUCTOR_INVOCATION)
 			if (Flags.isStatic(flags))
 				adornments |= JavaElementImageDescriptor.STATIC;
 
-		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF)
+		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF
+				|| kind == CompletionProposal.CONSTRUCTOR_INVOCATION)
 			if (Flags.isSynchronized(flags))
 				adornments |= JavaElementImageDescriptor.SYNCHRONIZED;
 
