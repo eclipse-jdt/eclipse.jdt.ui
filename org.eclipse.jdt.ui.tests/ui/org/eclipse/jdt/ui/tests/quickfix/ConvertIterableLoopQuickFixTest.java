@@ -19,6 +19,8 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -857,6 +859,112 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
+
+	public void testWrongIteratorMethod() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package snippet;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("interface NavigableSet<T> extends Set<T> {\n");
+		buf.append("    Iterator<?> descendingIterator();\n");
+		buf.append("}\n");
+
+		buf.append("public class Snippet {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        NavigableSet<String> set= null;\n");
+		buf.append("        for (Iterator<?> it = set.descendingIterator(); it.hasNext();) {\n");
+		buf.append("            Object element = it.next();\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+
+		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
+
+		assertCorrectLabels(proposals);
+
+		assertNotNull(fConvertLoopProposal.getStatusMessage());
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package snippet;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("interface NavigableSet<T> extends Set<T> {\n");
+		buf.append("    Iterator<?> descendingIterator();\n");
+		buf.append("}\n");
+
+		buf.append("public class Snippet {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        NavigableSet<String> set= null;\n");
+		buf.append("        for (Object element : set) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
+
+	public void testCorrectIteratorMethod() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package snippet;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("interface NavigableSet<T> extends Set<T> {\n");
+		buf.append("    Iterator<?> descendingIterator();\n");
+		buf.append("}\n");
+
+		buf.append("public class Snippet {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        NavigableSet<String> set= null;\n");
+		buf.append("        for (Iterator<?> it = set.iterator(); it.hasNext();) {\n");
+		buf.append("            Object element = it.next();\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+
+		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().isOK());
+
+		assertCorrectLabels(proposals);
+
+		assertNotNull(fConvertLoopProposal.getStatusMessage());
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package snippet;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("interface NavigableSet<T> extends Set<T> {\n");
+		buf.append("    Iterator<?> descendingIterator();\n");
+		buf.append("}\n");
+
+		buf.append("public class Snippet {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        NavigableSet<String> set= null;\n");
+		buf.append("        for (Object element : set) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}

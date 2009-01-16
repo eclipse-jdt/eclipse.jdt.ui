@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * @since 3.1
  */
 public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
+
+	private static final StatusInfo SEMANTIC_CHANGE_WARNING_STATUS= new StatusInfo(IStatus.WARNING, FixMessages.ConvertIterableLoopOperation_semanticChangeWarning);
 
 	/**
 	 * Returns the supertype of the given type with the qualified name.
@@ -540,10 +542,10 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					}
 				});
 				if (otherInvocationThenNext[0])
-					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+					return ERROR_STATUS;
 
 				if (nextInvocationCount[0] > 1)
-					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+					return ERROR_STATUS;
 
 				if (fElement != null) {
 					statement.accept(new ASTVisitor() {
@@ -580,38 +582,68 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		if ((fExpression != null || fThis) && fIterable != null && fIterator != null && !fAssigned) {
 			return resultStatus;
 		} else {
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+			return ERROR_STATUS;
 		}
 	}
 
 	private IStatus checkExpressionCondition() {
-		String warningLable= FixMessages.ConvertIterableLoopOperation_semanticChangeWarning;
-
 		Expression expression= getForStatement().getExpression();
 		if (!(expression instanceof MethodInvocation))
-			return new StatusInfo(IStatus.WARNING, warningLable);
+			return SEMANTIC_CHANGE_WARNING_STATUS;
 
 		MethodInvocation invoc= (MethodInvocation)expression;
 		IMethodBinding methodBinding= invoc.resolveMethodBinding();
 		if (methodBinding == null)
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+			return ERROR_STATUS;
 
 		ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 		if (declaringClass == null)
-			return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+			return ERROR_STATUS;
 
 		String qualifiedName= declaringClass.getQualifiedName();
 		String methodName= invoc.getName().getIdentifier();
 		if (qualifiedName.startsWith("java.util.Enumeration")) { //$NON-NLS-1$
 			if (!methodName.equals("hasMoreElements")) //$NON-NLS-1$
-				return new StatusInfo(IStatus.WARNING, warningLable);
+				return SEMANTIC_CHANGE_WARNING_STATUS;
 		} else if (qualifiedName.startsWith("java.util.Iterator")) { //$NON-NLS-1$
 			if (!methodName.equals("hasNext")) //$NON-NLS-1$
-				return new StatusInfo(IStatus.WARNING, warningLable);
+				return SEMANTIC_CHANGE_WARNING_STATUS;
+			return checkIteratorCondition();
 		} else {
-			return new StatusInfo(IStatus.WARNING, warningLable);
+			return SEMANTIC_CHANGE_WARNING_STATUS;
 		}
 
+		return StatusInfo.OK_STATUS;
+	}
+
+	private IStatus checkIteratorCondition() {
+
+		List initializers= getForStatement().initializers();
+		if (initializers.size() != 1)
+			return SEMANTIC_CHANGE_WARNING_STATUS;
+
+		Expression expression= (Expression)initializers.get(0);
+		if (!(expression instanceof VariableDeclarationExpression))
+			return SEMANTIC_CHANGE_WARNING_STATUS;
+
+		VariableDeclarationExpression declaration= (VariableDeclarationExpression)expression;
+		List variableDeclarationFragments= declaration.fragments();
+		if (variableDeclarationFragments.size() != 1)
+			return SEMANTIC_CHANGE_WARNING_STATUS;
+
+		Object declarationFragment= variableDeclarationFragments.get(0);
+		if (!(declarationFragment instanceof VariableDeclarationFragment))
+			return SEMANTIC_CHANGE_WARNING_STATUS;
+
+		Expression initializer= ((VariableDeclarationFragment)declarationFragment).getInitializer();
+		if (!(initializer instanceof MethodInvocation))
+			return SEMANTIC_CHANGE_WARNING_STATUS;
+
+		MethodInvocation methodInvocation= (MethodInvocation)initializer;
+		String methodName= methodInvocation.getName().getIdentifier();
+		if (!"iterator".equals(methodName)) //$NON-NLS-1$
+			return SEMANTIC_CHANGE_WARNING_STATUS;
+		
 		return StatusInfo.OK_STATUS;
 	}
 
