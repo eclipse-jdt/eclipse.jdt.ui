@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,8 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
@@ -75,9 +77,11 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	private boolean fIsContextInformationComputed;
 	private int fContextInformationPosition;
 
+	private ImportRewrite fImportRewrite;
 
-	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, StyledString displayName, String declarationSignature, IType superType, int relevance) {
-		super(constructorCompletion, cu, start, length, null, displayName, relevance);
+
+	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, JavaContentAssistInvocationContext invocationContext, int start, int length, String constructorCompletion, StyledString displayName, String declarationSignature, IType superType, int relevance) {
+		super(constructorCompletion, cu, start, length, null, displayName, relevance, null, invocationContext);
 		Assert.isNotNull(declarationSignature);
 		Assert.isNotNull(jproject);
 		Assert.isNotNull(cu);
@@ -258,6 +262,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	}
 
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
+		fImportRewrite= impRewrite;
 		String replacementString= getReplacementString();
 
 		// construct replacement text: an expression to be formatted
@@ -358,5 +363,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		return Signature.getParameterCount(proposal.getSignature()) > 0;
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#createLazyJavaTypeCompletionProposal(org.eclipse.jdt.core.CompletionProposal, org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
+	 * @since 3.5
+	 */
+	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
+		return new LazyJavaTypeCompletionProposal(completionProposal, invocationContext, fImportRewrite);
+	}
 
 }

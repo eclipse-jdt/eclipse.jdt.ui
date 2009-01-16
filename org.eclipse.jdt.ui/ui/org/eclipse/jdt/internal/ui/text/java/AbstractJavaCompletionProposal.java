@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -309,7 +309,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			for (int i= 0; requiredProposals != null &&  i < requiredProposals.length; i++) {
 				int oldLen= document.getLength();
 				if (requiredProposals[i].getKind() == CompletionProposal.TYPE_REF) {
-					LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(requiredProposals[i], fInvocationContext);
+					LazyJavaCompletionProposal proposal= createRequiredTypeCompletionProposal(requiredProposals[i], fInvocationContext);
 					proposal.apply(document);
 					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 				} else if (requiredProposals[i].getKind() == CompletionProposal.TYPE_IMPORT) {
@@ -380,6 +380,18 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		}
 	}
 
+
+	/**
+	 * Creates the required type proposal.
+	 * 
+	 * @param completionProposal the core completion proposal
+	 * @param invocationContext invocation context
+	 * @return the required type completion proposal
+	 * @since 3.5
+	 */
+	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
+		return new LazyJavaTypeCompletionProposal(completionProposal, invocationContext);
+	}
 
 	private boolean isSmartTrigger(char trigger) {
 		return trigger == ';' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON)
@@ -1063,11 +1075,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return false;
 
 		ProposalInfo proposalInfo= getProposalInfo();
-		if (!(proposalInfo instanceof MemberProposalInfo))
+		if (!(proposalInfo instanceof MemberProposalInfo || proposalInfo instanceof AnonymousTypeProposalInfo))
 			return false;
 
 		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
-		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF || proposal.getKind() == CompletionProposal.TYPE_REF);
+		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF || proposal.getKind() == CompletionProposal.TYPE_REF || proposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION || proposal.getKind() == CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION);
 	}
 
 }

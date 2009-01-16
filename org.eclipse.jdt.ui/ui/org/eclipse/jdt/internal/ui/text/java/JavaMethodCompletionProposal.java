@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -84,7 +85,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	protected IContextInformation computeContextInformation() {
 		// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
-		if (fProposal.getKind() == CompletionProposal.METHOD_REF &&  hasParameters() && (getReplacementString().endsWith(RPAREN) || getReplacementString().length() == 0)) {
+		if ((fProposal.getKind() == CompletionProposal.METHOD_REF || fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) && hasParameters()
+				&& (getReplacementString().endsWith(RPAREN) || getReplacementString().length() == 0)) {
 			ProposalContextInformation contextInformation= new ProposalContextInformation(fProposal);
 			if (fContextInformationPosition != 0 && fProposal.getCompletion().length == 0)
 				contextInformation.setContextInformationPosition(fContextInformationPosition);
@@ -201,7 +203,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			buffer.append(replacement.substring(0, replacement.lastIndexOf('.') + 1));
 		}
 
-		buffer.append(fProposal.getName());
+		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
+			buffer.append(fProposal.getName());
 
 		FormatterPrefs prefs= getFormatterPrefs();
 		if (prefs.beforeOpeningParen)
@@ -269,5 +272,25 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER && prefix != null)
 			prefix= prefix.substring(fProposal.getReceiverEnd() - fProposal.getReceiverStart() + 1);
 		return super.isPrefix(prefix, string);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefix(org.eclipse.jface.text.IDocument, int)
+	 * @since 3.5
+	 */
+	protected String getPrefix(IDocument document, int offset) {
+		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
+			return super.getPrefix(document, offset);
+
+		int replacementOffset= fProposal.getRequiredProposals()[0].getReplaceStart();
+
+		try {
+			int length= offset - replacementOffset;
+			if (length > 0)
+				return document.get(replacementOffset, length);
+		} catch (BadLocationException x) {
+		}
+		return ""; //$NON-NLS-1$
+
 	}
 }

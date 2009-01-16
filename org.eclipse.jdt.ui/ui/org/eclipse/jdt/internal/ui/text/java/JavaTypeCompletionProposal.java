@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -51,10 +52,12 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, null);
 	}
 
-	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance,
-		String fullyQualifiedTypeName)
-	{
-		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);
+	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance, String fullyQualifiedTypeName) {
+		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, fullyQualifiedTypeName, null);
+	}
+	
+	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance, String fullyQualifiedTypeName, JavaContentAssistInvocationContext invocationContext) {
+		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance, false, invocationContext);
 		fCompilationUnit= cu;
 		fFullyQualifiedTypeName= fullyQualifiedTypeName;
 		fUnqualifiedTypeName= fullyQualifiedTypeName != null ? Signature.getSimpleName(fullyQualifiedTypeName) : null;
@@ -62,14 +65,14 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 
 	/**
 	 * Updates the replacement string.
-	 *
+	 * 
 	 * @param document the document
 	 * @param trigger the trigger
 	 * @param offset the offset
 	 * @param impRewrite the import rewrite
 	 * @return <code>true</code> if the string got updated
-	 * @throws CoreException
-	 * @throws BadLocationException
+	 * @throws BadLocationException if accessing the document fails
+	 * @throws CoreException if something else fails
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		// avoid adding imports when inside imports container

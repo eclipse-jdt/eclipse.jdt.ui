@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ public class JavaAllCompletionProposalComputer extends JavaTypeCompletionProposa
 		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
 		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, false);
+		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, false);
 		collector.setIgnored(CompletionProposal.FIELD_REF, false);
 		collector.setIgnored(CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER, false);
 		collector.setIgnored(CompletionProposal.KEYWORD, false);
@@ -34,6 +35,7 @@ public class JavaAllCompletionProposalComputer extends JavaTypeCompletionProposa
 		collector.setIgnored(CompletionProposal.METHOD_DECLARATION, false);
 		collector.setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, false);
 		collector.setIgnored(CompletionProposal.METHOD_REF, false);
+		collector.setIgnored(CompletionProposal.CONSTRUCTOR_INVOCATION, false);
 		collector.setIgnored(CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER, false);
 		collector.setIgnored(CompletionProposal.PACKAGE_REF, false);
 		collector.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, false);

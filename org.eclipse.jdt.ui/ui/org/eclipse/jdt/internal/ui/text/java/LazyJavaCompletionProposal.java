@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -393,8 +393,10 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 				return baseRelevance + 2;
 			case CompletionProposal.TYPE_REF:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 				return baseRelevance + 3;
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.CONSTRUCTOR_INVOCATION:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_DECLARATION:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:

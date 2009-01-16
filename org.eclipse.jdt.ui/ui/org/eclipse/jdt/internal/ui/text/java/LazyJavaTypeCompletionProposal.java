@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,11 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		fQualifiedName= null;
 	}
 
+	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, ImportRewrite importRewrite) {
+		this(proposal, context);
+		fImportRewrite= importRewrite;
+	}
+
 	public final String getQualifiedTypeName() {
 		if (fQualifiedName == null)
 			fQualifiedName= String.valueOf(Signature.toCharArray(Signature.getTypeErasure(fProposal.getSignature())));
@@ -85,7 +90,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 		/* No import rewriting ever from within the import section. */
 		if (isImportCompletion())
-	        return replacement;
+			return replacement;
 
 		/* Always use the simple name for non-formal javadoc references to types. */
 		// TODO fix
@@ -121,7 +126,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		}
 
 		/* Add imports if the preference is on. */
-		fImportRewrite= createImportRewrite();
+		if (fImportRewrite == null)
+			fImportRewrite= createImportRewrite();
 		if (fImportRewrite != null) {
 			return fImportRewrite.addImport(qualifiedTypeName, fImportContext);
 		}
