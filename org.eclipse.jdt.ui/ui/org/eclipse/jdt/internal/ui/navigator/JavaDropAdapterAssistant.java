@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.ISelection;
@@ -34,6 +35,8 @@ import org.eclipse.ui.navigator.CommonDropAdapterAssistant;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
@@ -61,7 +64,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) {
 		if (LocalSelectionTransfer.getInstance().isSupportedType(dropAdapter.getCurrentTransfer())) {
 			try {
-
+				target= getActualTarget(target);
 				switch (dropAdapter.getCurrentOperation()) {
 					case DND.DROP_MOVE :
 						handleDropMove(target);
@@ -91,7 +94,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 				if (!(data instanceof String[]))
 					return Status.CANCEL_STATUS;
 
-				final IContainer targetContainer = getActualTarget(target);
+				final IContainer targetContainer= getTargetContainer(target);
 				if (targetContainer == null)
 					return Status.CANCEL_STATUS;
 
@@ -111,6 +114,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	public IStatus validateDrop(Object target, int operation, TransferData transferType) {
 		IStatus result = Status.OK_STATUS;
 		if (LocalSelectionTransfer.getInstance().isSupportedType(transferType)) {
+			target= getActualTarget(target);
 			initializeSelection();
 			try {
 				switch (operation) {
@@ -149,11 +153,20 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		return super.isSupportedType(transferType) || FileTransfer.getInstance().isSupportedType(transferType);
 	}
 
-	private IContainer getActualTarget(Object dropTarget) throws JavaModelException {
+	private Object getActualTarget(Object target) {
+		if (target instanceof IProject) {
+			IJavaProject jp= JavaCore.create((IProject)target);
+			if (jp.exists())
+				return jp;
+		}
+		return target;
+	}
+
+	private IContainer getTargetContainer(Object dropTarget) throws JavaModelException {
 		if (dropTarget instanceof IContainer)
 			return (IContainer) dropTarget;
 		else if (dropTarget instanceof IJavaElement)
-			return getActualTarget(((IJavaElement) dropTarget).getCorrespondingResource());
+			return getTargetContainer(((IJavaElement)dropTarget).getCorrespondingResource());
 		return null;
 	}
 
