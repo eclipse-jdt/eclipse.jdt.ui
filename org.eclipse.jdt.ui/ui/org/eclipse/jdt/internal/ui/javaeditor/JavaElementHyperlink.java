@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,10 +40,12 @@ public class JavaElementHyperlink implements IHyperlink {
 
 	/**
 	 * Creates a new Java element hyperlink.
+	 * 
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
 	 * @param element the java element to open
-	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for element.
+	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
+	 *            element.
 	 */
 	public JavaElementHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement element, boolean qualify) {
 		Assert.isNotNull(openAction);

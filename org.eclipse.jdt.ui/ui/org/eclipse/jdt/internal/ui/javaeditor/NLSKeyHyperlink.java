@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,10 +61,10 @@ public class NLSKeyHyperlink implements IHyperlink {
 
 	/**
 	 * Creates a new NLS key hyperlink.
-	 *
-	 * @param region
-	 * @param keyName
-	 * @param ref
+	 * 
+	 * @param region the region of the link
+	 * @param keyName the name of the key
+	 * @param ref the accessor class reference
 	 * @param editor the editor which contains the hyperlink
 	 */
 	public NLSKeyHyperlink(IRegion region, String keyName, AccessorClassReference ref, IEditorPart editor) {
