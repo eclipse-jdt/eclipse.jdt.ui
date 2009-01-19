@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -935,6 +935,20 @@ public class LocalCorrectionsSubProcessor {
 			int idx= statements.indexOf(selectedNode);
 			
 			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
+			
+			if (idx > 0) {
+				Object prevStatement= statements.get(idx - 1);
+				if (prevStatement instanceof IfStatement) {
+					IfStatement ifStatement= (IfStatement)prevStatement;
+					if (ifStatement.getElseStatement() == null) {
+						// remove if (true), see https://bugs.eclipse.org/bugs/show_bug.cgi?id=261519
+						rewrite.replace(ifStatement, rewrite.createMoveTarget(ifStatement.getThenStatement()), null);
+						label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
+					}
+				}
+			}
+			
 			for (int i= idx; i < statements.size(); i++) {
 				ASTNode statement= (ASTNode)statements.get(i);
 				if (statement instanceof SwitchCase)
@@ -942,7 +956,6 @@ public class LocalCorrectionsSubProcessor {
 				rewrite.remove(statement, null);
 			}
 			
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
 			addRemoveProposal(context, rewrite, label, proposals);
 			
 			

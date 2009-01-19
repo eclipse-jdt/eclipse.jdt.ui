@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -5624,6 +5624,40 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
+	public void testRemoveDeadCodeAfterIf() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo() {\n");
+		buf.append("        if (true) return false;\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public boolean foo() {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
 	public void testRemoveDeadCodeConditional() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
@@ -5688,8 +5722,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            return;\n");
+		buf.append("        return;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
