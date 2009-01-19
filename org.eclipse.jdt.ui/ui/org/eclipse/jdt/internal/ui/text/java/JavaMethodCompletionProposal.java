@@ -65,12 +65,13 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER) {
 			return fProposal.getTokenStart();
-		}
+		} else if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION)
+			return fProposal.getRequiredProposals()[0].getReplaceStart();
 		return super.getPrefixCompletionStart(document, completionOffset);
 	}
 	
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		if (hasArgumentList()) {
+		if (!hasArgumentList()) {
 			String completion= String.valueOf(fProposal.getName());
 			if (isCamelCaseMatching()) {
 				String prefix= getPrefix(document, completionOffset);
@@ -78,6 +79,12 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			}
 
 			return completion;
+		} else if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
+			String replacementString= new String(fProposal.getRequiredProposals()[0].getCompletion());
+			if (!isCamelCaseMatching())
+				return replacementString;
+			String prefix= getPrefix(document, completionOffset);
+			return getCamelCaseCompound(prefix, replacementString);
 		}
 		return super.getPrefixCompletionText(document, completionOffset);
 	}
