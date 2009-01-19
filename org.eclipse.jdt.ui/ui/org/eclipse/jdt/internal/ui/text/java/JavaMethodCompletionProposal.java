@@ -71,20 +71,13 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		if (!hasArgumentList()) {
+		if (hasArgumentList() || fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
 			String completion= String.valueOf(fProposal.getName());
 			if (isCamelCaseMatching()) {
 				String prefix= getPrefix(document, completionOffset);
 				return getCamelCaseCompound(prefix, completion);
 			}
-
 			return completion;
-		} else if (fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
-			String replacementString= new String(fProposal.getRequiredProposals()[0].getCompletion());
-			if (!isCamelCaseMatching())
-				return replacementString;
-			String prefix= getPrefix(document, completionOffset);
-			return getCamelCaseCompound(prefix, replacementString);
 		}
 		return super.getPrefixCompletionText(document, completionOffset);
 	}
