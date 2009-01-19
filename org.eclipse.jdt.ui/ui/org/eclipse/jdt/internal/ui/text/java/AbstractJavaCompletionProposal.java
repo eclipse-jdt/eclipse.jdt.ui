@@ -433,7 +433,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
 		// don't apply the proposal if for some reason we're not valid any longer
 		if (!isInJavadoc() && !validate(document, offset, null)) {
-			setCursorPosition(offset - getReplacementOffset());
+			setCursorPosition(getReplacementOffset());
 			if (trigger != '\0') {
 				try {
 					document.replace(offset, 0, String.valueOf(trigger));
