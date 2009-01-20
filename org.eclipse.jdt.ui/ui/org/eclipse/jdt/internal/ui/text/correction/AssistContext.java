@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,22 +23,29 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 
-/**
-  */
 public class AssistContext extends TextInvocationContext implements IInvocationContext {
 
 	private ICompilationUnit fCompilationUnit;
 
 	private CompilationUnit fASTRoot;
+	private SharedASTProvider.WAIT_FLAG fWaitFlag;
 
+	/*
+	 * @since 3.5
+	 */
+	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length, SharedASTProvider.WAIT_FLAG waitFlag) {
+		super(sourceViewer, offset, length);
+		fCompilationUnit= cu;
+		fASTRoot= null;
+		fWaitFlag= waitFlag;
+	}
+	
 	/*
 	 * Constructor for CorrectionContext.
 	 * @since 3.4
 	 */
 	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length) {
-		super(sourceViewer, offset, length);
-		fCompilationUnit= cu;
-		fASTRoot= null;
+		this(cu, sourceViewer, offset, length, SharedASTProvider.WAIT_YES);
 	}
 
 	/*
@@ -74,7 +81,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 
 	public CompilationUnit getASTRoot() {
 		if (fASTRoot == null) {
-			fASTRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, null);
+			fASTRoot= SharedASTProvider.getAST(fCompilationUnit, fWaitFlag, null);
 			if (fASTRoot == null) {
 				// see bug 63554
 				fASTRoot= ASTResolving.createQuickFixAST(fCompilationUnit, null);
