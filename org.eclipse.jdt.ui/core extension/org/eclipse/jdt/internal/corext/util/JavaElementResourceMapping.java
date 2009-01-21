@@ -299,11 +299,11 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			List result= new ArrayList();
 			if (context instanceof RemoteResourceMappingContext) {
 				for (int i= 0; i < fFragments.length; i++) {
-					result.add(Arrays.asList(getRemotePackageFragmentTraversals(fFragments[i], (RemoteResourceMappingContext)context, monitor)));
+					result.addAll(Arrays.asList(getRemotePackageFragmentTraversals(fFragments[i], (RemoteResourceMappingContext)context, monitor)));
 				}
 			} else {
 				for (int i= 0; i < fFragments.length; i++) {
-					result.add(Arrays.asList(getPackageFragmentTraversals(fFragments[i])));
+					result.addAll(Arrays.asList(getPackageFragmentTraversals(fFragments[i])));
 				}
 			}
 			return (ResourceTraversal[])result.toArray(new ResourceTraversal[result.size()]);
