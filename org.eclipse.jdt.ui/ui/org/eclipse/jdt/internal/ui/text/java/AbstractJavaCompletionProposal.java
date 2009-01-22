@@ -390,7 +390,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.5
 	 */
 	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
-		return new LazyJavaTypeCompletionProposal(completionProposal, invocationContext);
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
+			return (LazyJavaCompletionProposal)new FillArgumentNamesCompletionProposalCollector(invocationContext).createJavaCompletionProposal(completionProposal);
+		else
+			return new LazyJavaTypeCompletionProposal(completionProposal, invocationContext);
 	}
 
 	private boolean isSmartTrigger(char trigger) {

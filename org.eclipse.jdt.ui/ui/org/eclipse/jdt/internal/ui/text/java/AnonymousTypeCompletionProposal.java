@@ -368,7 +368,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @since 3.5
 	 */
 	protected LazyJavaCompletionProposal createRequiredTypeCompletionProposal(CompletionProposal completionProposal, JavaContentAssistInvocationContext invocationContext) {
-		return new LazyJavaTypeCompletionProposal(completionProposal, invocationContext, fImportRewrite);
+		LazyJavaCompletionProposal proposal= super.createRequiredTypeCompletionProposal(completionProposal, invocationContext);
+		if (proposal instanceof LazyJavaTypeCompletionProposal)
+			((LazyJavaTypeCompletionProposal)proposal).setImportRewrite(fImportRewrite);
+		return proposal;
 	}
 
 }

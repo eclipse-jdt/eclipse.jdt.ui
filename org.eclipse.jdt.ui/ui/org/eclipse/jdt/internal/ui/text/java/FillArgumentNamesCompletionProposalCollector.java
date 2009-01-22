@@ -83,9 +83,9 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createTypeCompletion(org.eclipse.jdt.core.CompletionProposal)
 	 */
-	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
+	IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
 		final ICompilationUnit cu= getCompilationUnit();
-		if (cu == null || getContext().isInJavadoc())
+		if (cu == null || getContext() != null && getContext().isInJavadoc())
 			return super.createJavaCompletionProposal(typeProposal);
 
 		IJavaProject project= cu.getJavaProject();

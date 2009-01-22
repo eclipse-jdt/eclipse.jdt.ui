@@ -65,8 +65,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		fQualifiedName= null;
 	}
 
-	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, ImportRewrite importRewrite) {
-		this(proposal, context);
+	void setImportRewrite(ImportRewrite importRewrite) {
 		fImportRewrite= importRewrite;
 	}
 
