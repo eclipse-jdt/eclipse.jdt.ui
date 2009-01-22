@@ -21,12 +21,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 
 /**
- *
  * @since 3.2
  */
 public class TypeCompletionTest extends AbstractCompletionTest {
-
-	private static final boolean HAS_GENERIC_COMPLETION_BUG_261352= true;
 
 	private static final Class THIS= TypeCompletionTest.class;
 
@@ -160,8 +157,6 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testGenericParameterGuessingUnambiguos() throws Exception {
-		if (HAS_GENERIC_COMPLETION_BUG_261352)
-			return;
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
 		expectImport("java.util.List");
@@ -169,30 +164,24 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	}
 
 	public void testGenericParameterGuessingExtends() throws Exception {
-		if (HAS_GENERIC_COMPLETION_BUG_261352)
-			return;
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
 		expectImport("java.util.List");
-		assertMethodBodyProposal("List<? extends Number> list= new A|", "ArrayList()", "List<? extends Number> list= new ArrayList<|Number|>");
+		assertMethodBodyProposal("List<? extends Number> list= new A|", "ArrayList()", "List<? extends Number> list= new ArrayList<Number>()|");
 	}
 
 	public void testGenericParameterGuessingSuper() throws Exception {
-		if (HAS_GENERIC_COMPLETION_BUG_261352)
-			return;
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
 		expectImport("java.util.List");
-		assertMethodBodyProposal("List<? super Number> list= new A|", "ArrayList()", "List<? super Number> list= new ArrayList<|E|>()");
+		assertMethodBodyProposal("List<? super Number> list= new A|", "ArrayList()", "List<? super Number> list= new ArrayList<E>()|");
 	}
 
 	public void testGenericParameterGuessingMixed() throws Exception {
-		if (HAS_GENERIC_COMPLETION_BUG_261352)
-			return;
 		addImport("java.util.Map");
 		expectImport("java.util.HashMap");
 		expectImport("java.util.Map");
-		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap()", "Map<String, ? extends Number> list= new HashMap<String, |Number|>");
+		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap()", "Map<String, ? extends Number> list= new HashMap<String, Number>()|");
 	}
 
 	public void testNoCamelCase() throws Exception {
