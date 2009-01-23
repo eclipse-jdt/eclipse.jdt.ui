@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -178,6 +178,8 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments(), isType(typeKind, PARAMETRIZED))); //$NON-NLS-1$
 					res.add(new Binding(this, "BOUND", typeBinding.getBound(), isType(typeKind, WILDCARD_TYPE))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS UPPERBOUND", typeBinding.isUpperbound(), isType(typeKind, WILDCARD_TYPE))); //$NON-NLS-1$
+					res.add(new Binding(this, "GENERIC TYPE OF WILDCARD TYPE", typeBinding.getGenericTypeOfWildcardType(), isType(typeKind, WILDCARD_TYPE))); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "RANK", typeBinding.getRank(), isType(typeKind, WILDCARD_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "WILDCARD", typeBinding.getWildcard(), isType(typeKind, CAPTURE_TYPE))); //$NON-NLS-1$
 
 					res.add(new Binding(this, "SUPERCLASS", typeBinding.getSuperclass(), isRefType)); //$NON-NLS-1$
