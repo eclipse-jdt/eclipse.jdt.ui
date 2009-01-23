@@ -73,6 +73,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
+import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
@@ -171,17 +172,15 @@ public class EditorUtility {
 		 */
 		if (inputElement instanceof IJavaElement) {
 			ICompilationUnit cu= (ICompilationUnit)((IJavaElement)inputElement).getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (cu != null && !JavaModelUtil.isPrimary(cu)) {
+			if (cu != null) {
 				IWorkbenchPage page= JavaPlugin.getActivePage();
-				if (page != null) {
-					IEditorPart editor= page.getActiveEditor();
-					if (editor != null) {
-						IJavaElement editorCU= EditorUtility.getEditorInputJavaElement(editor, false);
-						if (cu.equals(editorCU) || "org.eclipse.compare.CompareEditor".equals(editor.getEditorSite().getId())) { //$NON-NLS-1$
-							if (activate && page.getActivePart() != editor)
-								page.activate(editor);
-							return editor;
-						}
+				IEditorPart editor= page != null ? editor= page.getActiveEditor() : null;
+				if (editor != null && (!JavaModelUtil.isPrimary(cu) || editor.getEditorInput() instanceof CompareEditorInput)) {
+					IJavaElement editorCU= EditorUtility.getEditorInputJavaElement(editor, false);
+					if (cu.equals(editorCU)) {
+						if (activate && page.getActivePart() != editor)
+							page.activate(editor);
+						return editor;
 					}
 				}
 			}
@@ -390,7 +389,10 @@ public class EditorUtility {
 	 */
 	public static ITypeRoot getEditorInputJavaElement(IEditorPart editor, boolean primaryOnly) {
 		Assert.isNotNull(editor);
+		
 		IEditorInput editorInput= editor.getEditorInput();
+		if (editorInput instanceof CompareEditorInput)
+			editorInput= (IEditorInput)editor.getAdapter(IEditorInput.class);
 		if (editorInput == null)
 			return null;
 
