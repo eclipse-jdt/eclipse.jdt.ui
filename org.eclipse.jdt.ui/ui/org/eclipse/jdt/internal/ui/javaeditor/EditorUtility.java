@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.swt.SWT;
 
 import org.eclipse.core.filesystem.IFileStore;
@@ -26,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -73,7 +76,6 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
-import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
@@ -100,6 +102,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaCompareUtilities;
 import org.eclipse.jdt.internal.ui.text.LineComparator;
 
 
@@ -175,8 +178,14 @@ public class EditorUtility {
 			if (cu != null) {
 				IWorkbenchPage page= JavaPlugin.getActivePage();
 				IEditorPart editor= page != null ? editor= page.getActiveEditor() : null;
-				if (editor != null && (!JavaModelUtil.isPrimary(cu) || editor.getEditorInput() instanceof CompareEditorInput)) {
-					IJavaElement editorCU= EditorUtility.getEditorInputJavaElement(editor, false);
+				boolean isCompareEditorInput= false;
+				if (editor != null && (!JavaModelUtil.isPrimary(cu) || (isCompareEditorInput= isCompareEditorInput(editor.getEditorInput())))) {
+					IEditorInput editorInput;
+					if (isCompareEditorInput)
+						editorInput= (IEditorInput)editor.getAdapter(IEditorInput.class);
+					else
+						editorInput= editor.getEditorInput();
+					IJavaElement editorCU= getEditorInputJavaElement(editorInput, false);
 					if (cu.equals(editorCU)) {
 						if (activate && page.getActivePart() != editor)
 							page.activate(editor);
@@ -191,6 +200,20 @@ public class EditorUtility {
 			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT);
 
 		return openInEditor(input, getEditorID(input), activate);
+	}
+
+	/*
+	 * Avoid unnecessary loading of Compare plug-in
+	 */
+	private static boolean isComparePlugInActivated() {
+		return Platform.getBundle("org.eclipse.compare").getState() == Bundle.ACTIVE; //$NON-NLS-1$
+	}
+
+	/*
+	 * Avoid unnecessary loading of Compare plug-in
+	 */
+	private static boolean isCompareEditorInput(IEditorInput input) {
+		return isComparePlugInActivated() && JavaCompareUtilities.isCompareEditorInput(input);
 	}
 
 	/**
@@ -389,10 +412,10 @@ public class EditorUtility {
 	 */
 	public static ITypeRoot getEditorInputJavaElement(IEditorPart editor, boolean primaryOnly) {
 		Assert.isNotNull(editor);
-		
-		IEditorInput editorInput= editor.getEditorInput();
-		if (editorInput instanceof CompareEditorInput)
-			editorInput= (IEditorInput)editor.getAdapter(IEditorInput.class);
+		return getEditorInputJavaElement(editor.getEditorInput(), primaryOnly);
+	}
+
+	private static ITypeRoot getEditorInputJavaElement(IEditorInput editorInput, boolean primaryOnly) {
 		if (editorInput == null)
 			return null;
 

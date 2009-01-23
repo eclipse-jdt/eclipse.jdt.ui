@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 
+import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.IStreamContentAccessor;
 
@@ -51,7 +54,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 
 
-class JavaCompareUtilities {
+public class JavaCompareUtilities {
 
 	private static final char PACKAGEDECLARATION= '%';
 	private static final char IMPORTDECLARATION= '#';
@@ -464,5 +467,11 @@ class JavaCompareUtilities {
 
 		if (description != null)
 			a.setDescription(description);
+	}
+	/*
+	 * Needed to avoid unnecessary loading of Compare plug-in
+	 */
+	public static boolean isCompareEditorInput(IEditorInput input) {
+		return input instanceof CompareEditorInput;
 	}
 }
