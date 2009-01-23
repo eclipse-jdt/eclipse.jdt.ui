@@ -40,6 +40,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
@@ -249,6 +250,8 @@ public class JavaMergeViewer extends TextMergeViewer {
 		if (editorInput instanceof FileEditorInput) {
 			FileEditorInput fileEditorInput= (FileEditorInput)editorInput;
 			return fileEditorInput.getFile().isAccessible();
+		} else if (editorInput instanceof IStorageEditorInput) {
+			return true;
 		}
 		return false;
 	}
