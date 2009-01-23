@@ -32,6 +32,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -223,6 +224,15 @@ public class JavaMergeViewer extends TextMergeViewer {
 				((CompilationUnitEditorAdapter)editor).setEditable(state);
 		}
 	}
+	
+	/*
+	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#isEditorBacked(org.eclipse.jface.text.ITextViewer)
+	 * @since 3.5
+	 */
+	protected boolean isEditorBacked(ITextViewer textViewer) {
+		return true;
+	}
+
 
 	protected IEditorInput getEditorInput(ISourceViewer sourceViewer) {
 		IEditorInput editorInput= super.getEditorInput(sourceViewer);
