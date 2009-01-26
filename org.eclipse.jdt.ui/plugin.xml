@@ -5545,6 +5545,7 @@
          <triggerPoints>
             <or>
                <instanceof value="org.eclipse.core.resources.IFolder" />
+               <instanceof value="org.eclipse.core.resources.IFile" />
                <instanceof value="org.eclipse.jdt.core.IJavaElement" />
                <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
                <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
