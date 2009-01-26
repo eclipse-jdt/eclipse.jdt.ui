@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,9 +140,9 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		return project.getFile(path);
 	}
 
-	public IDiff createOutgoingDeletion(IProject project, String path) {
+	private ResourceDiff createResourceDiff(IProject project, String path, int kind) {
 		final IResource resource = getResource(project, path);
-		ResourceDiff diff = new ResourceDiff(resource, IDiff.REMOVE, 0, new FileRevision() {
+		ResourceDiff diff = new ResourceDiff(resource, kind, 0, new FileRevision() {
 			public String getName() {
 				return resource.getName();
 			}
@@ -171,12 +171,17 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 			public IFileRevision withAllProperties(IProgressMonitor monitor) throws CoreException {
 				return this;
 			}}, null);
-		return new ThreeWayDiff(diff, null);
+		return diff;
 	}
 
 	public void addOutgoingDeletion(IProject project, String path) {
 		IDiff diff = createOutgoingDeletion(project, path);
 		add(diff);
+	}
+
+	private IDiff createOutgoingDeletion(IProject project, String path) {
+		ResourceDiff diff= createResourceDiff(project, path, IDiff.REMOVE);
+		return new ThreeWayDiff(diff, null);
 	}
 
 	public void addIncomingAddition(IProject project, String path){
@@ -185,39 +190,20 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 	}
 
 	private IDiff createIncomingAddition(IProject project, String path) {
-		final IResource resource = getResource(project, path);
-		ResourceDiff diff = new ResourceDiff(resource, IDiff.ADD, 0, new FileRevision() {
-			public String getName() {
-				return resource.getName();
-			}
-			public IStorage getStorage(IProgressMonitor monitor) throws CoreException {
-				return new IStorage() {
-					public Object getAdapter(Class adapter) {
-						return null;
-					}
-					public boolean isReadOnly() {
-						return true;
-					}
-					public String getName() {
-						return resource.getName();
-					}
-					public IPath getFullPath() {
-						return resource.getFullPath();
-					}
-					public InputStream getContents() throws CoreException {
-						return new ByteArrayInputStream("".getBytes());
-					}
-				};
-			}
-			public boolean isPropertyMissing() {
-				return false;
-			}
-			public IFileRevision withAllProperties(IProgressMonitor monitor) throws CoreException {
-				return this;
-			}}, null);
+		ResourceDiff diff= createResourceDiff(project, path, IDiff.ADD);
 		return new ThreeWayDiff(null, diff);
 	}
 
+	public void addOutgoingChange(IProject project, String path){
+		IDiff diff= createOutgoingChange(project,path);
+		add(diff);
+	}
+	
+	private IDiff createOutgoingChange(IProject project, String path) {
+		ResourceDiff diff= createResourceDiff(project, path, IDiff.CHANGE);
+		return new ThreeWayDiff(diff, null);
+	}
+	
 	private void add(IDiff diff) {
 		((ResourceDiffTree)fContext.getDiffTree()).add(diff);
 	}
