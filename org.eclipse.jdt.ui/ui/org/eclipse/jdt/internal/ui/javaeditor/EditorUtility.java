@@ -178,18 +178,20 @@ public class EditorUtility {
 			if (cu != null) {
 				IWorkbenchPage page= JavaPlugin.getActivePage();
 				IEditorPart editor= page != null ? editor= page.getActiveEditor() : null;
-				boolean isCompareEditorInput= false;
-				if (editor != null && (!JavaModelUtil.isPrimary(cu) || (isCompareEditorInput= isCompareEditorInput(editor.getEditorInput())))) {
-					IEditorInput editorInput;
-					if (isCompareEditorInput)
-						editorInput= (IEditorInput)editor.getAdapter(IEditorInput.class);
-					else
-						editorInput= editor.getEditorInput();
-					IJavaElement editorCU= getEditorInputJavaElement(editorInput, false);
-					if (cu.equals(editorCU)) {
-						if (activate && page.getActivePart() != editor)
-							page.activate(editor);
-						return editor;
+				if (editor != null) {
+					boolean isCompareEditorInput= isCompareEditorInput(editor.getEditorInput());
+					if (isCompareEditorInput || !JavaModelUtil.isPrimary(cu)) {
+						IEditorInput editorInput;
+						if (isCompareEditorInput)
+							editorInput= (IEditorInput)editor.getAdapter(IEditorInput.class);
+						else
+							editorInput= editor.getEditorInput();
+						IJavaElement editorCU= getEditorInputJavaElement(editorInput, false);
+						if (cu.equals(editorCU)) {
+							if (activate && page.getActivePart() != editor)
+								page.activate(editor);
+							return editor;
+						}
 					}
 				}
 			}
