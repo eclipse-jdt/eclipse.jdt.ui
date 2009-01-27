@@ -568,8 +568,11 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.core.IBuffer.ITextEditCapability#applyTextEdit(org.eclipse.text.edits.TextEdit, org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * <strong>Note:<strong> This implementation applies the edits in a rewrite session.
+	 * 
 	 * @since 3.4
 	 */
 	public UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModelException {
