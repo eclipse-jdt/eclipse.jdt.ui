@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -316,7 +316,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			StyledText text= new StyledText(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 			GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
 			text.setLayoutData(data);
-			text.setText(annotation.getText());
+			String annotationText= annotation.getText();
+			if (annotationText != null)
+				text.setText(annotationText);
 		}
 
 		private void createCompletionProposalsControl(Composite parent, ICompletionProposal[] proposals) {
