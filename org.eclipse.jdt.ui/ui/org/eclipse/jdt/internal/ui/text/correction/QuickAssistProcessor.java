@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
@@ -126,6 +128,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
@@ -1109,6 +1112,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean getRenameRefactoringProposal(ASTNode node, IProblemLocation[] locations, boolean noErrorsAtLocation, Collection resultingCollections)
 			throws CoreException {
+		IEditorPart editor= JavaPlugin.getActivePage().getActiveEditor();
+		if (!(editor instanceof JavaEditor))
+			return false;
+		
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
@@ -1127,7 +1134,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 		
-		RenameRefactoringProposal proposal= new RenameRefactoringProposal();
+		RenameRefactoringProposal proposal= new RenameRefactoringProposal((JavaEditor) editor);
 		if (!noErrorsAtLocation) {
 			proposal.setRelevance(1);
 		} else if (containsQuickFixableRenameLocal(locations)) {

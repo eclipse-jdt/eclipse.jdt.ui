@@ -13,20 +13,19 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-import org.eclipse.ui.IEditorPart;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
@@ -42,31 +41,20 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 
 	private final String fLabel;
 	private int fRelevance;
+	private final JavaEditor fEditor;
 
-	public RenameRefactoringProposal() {
+	public RenameRefactoringProposal(JavaEditor editor) {
+		Assert.isNotNull(editor);
+		fEditor= editor;
 		fLabel= CorrectionMessages.RenameRefactoringProposal_name;
 		fRelevance= 8;
-	}
-
-	/**
-	 * Returns the currently active java editor, or <code>null</code> if it
-	 * cannot be determined.
-	 *
-	 * @return  the currently active java editor, or <code>null</code>
-	 */
-	private JavaEditor getJavaEditor() {
-		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
-		if (part instanceof JavaEditor)
-			return (JavaEditor) part;
-		else
-			return null;
 	}
 
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
 	public void apply(IDocument document) {
-		RenameJavaElementAction renameAction= new RenameJavaElementAction(getJavaEditor());
+		RenameJavaElementAction renameAction= new RenameJavaElementAction(fEditor);
 		renameAction.doRun();
 	}
 
