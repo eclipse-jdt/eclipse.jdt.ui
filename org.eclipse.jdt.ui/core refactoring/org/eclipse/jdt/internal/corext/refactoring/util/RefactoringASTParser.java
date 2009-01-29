@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,7 +109,7 @@ public class RefactoringASTParser {
 	 * RefactoringASTParser that uses settings similar to the ASTProvider.
 	 *
 	 * @param typeRoot the type root
-	 * @param resolveBindings TODO
+	 * @param resolveBindings whether bindings are to be resolved if a new AST needs to be created
 	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
 	 * @return the parsed CompilationUnit
 	 */
@@ -132,18 +132,25 @@ public class RefactoringASTParser {
 		return null;
 	}
 
+	/**
+	 * Returns the compiler options used for creating the refactoring AST.
+	 * <p>
+	 * Turns all errors and warnings into ignore and disables task tags. The customizable set of
+	 * compiler options only contains additional Eclipse options. The standard JDK compiler options
+	 * can't be changed anyway.
+	 * 
+	 * @param element an element (not the Java model)
+	 * @return compiler options
+	 */
 	public static Map getCompilerOptions(IJavaElement element) {
 		IJavaProject project= element.getJavaProject();
 		Map options= project.getOptions(true);
-		// turn all errors and warnings into ignore. The customizable set of compiler
-		// options only contains additional Eclipse options. The standard JDK compiler
-		// options can't be changed anyway.
 		for (Iterator iter= options.keySet().iterator(); iter.hasNext();) {
 			String key= (String)iter.next();
 			String value= (String)options.get(key);
-			if ("error".equals(value) || "warning".equals(value)) {  //$NON-NLS-1$//$NON-NLS-2$
+			if (JavaCore.ERROR.equals(value) || JavaCore.WARNING.equals(value)) {
 				// System.out.println("Ignoring - " + key);
-				options.put(key, "ignore"); //$NON-NLS-1$
+				options.put(key, JavaCore.IGNORE);
 			}
 		}
 		options.put(JavaCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$
