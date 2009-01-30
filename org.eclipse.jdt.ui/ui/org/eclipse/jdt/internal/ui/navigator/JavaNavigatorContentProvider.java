@@ -63,8 +63,6 @@ public class JavaNavigatorContentProvider extends
 
 	private IExtensionStateModel fStateModel;
 
-	private Object fRealInput;
-
 	private IPropertyChangeListener fLayoutPropertyListener;
 
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
@@ -100,14 +98,13 @@ public class JavaNavigatorContentProvider extends
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		fRealInput = newInput;
 		super.inputChanged(viewer, oldInput, findInputElement(newInput));
 	}
 
 	public Object getParent(Object element) {
 		Object parent= super.getParent(element);
 		if (parent instanceof IJavaModel) {
-			return parent.equals(getViewerInput()) ? fRealInput : parent;
+			return ((IJavaModel)parent).getWorkspace().getRoot();
 		}
 		if (parent instanceof IJavaProject) {
 			return ((IJavaProject)parent).getProject();
@@ -331,7 +328,7 @@ public class JavaNavigatorContentProvider extends
 			Object element = iter.next();
 			if (element instanceof IJavaModel) {
 				iter.remove();
-				toRefresh.add(element.equals(getViewerInput()) ? fRealInput : element);
+				toRefresh.add(((IJavaModel)element).getWorkspace().getRoot());
 				super.postRefresh(toRefresh, updateLabels, runnables);
 				return;
 			}
