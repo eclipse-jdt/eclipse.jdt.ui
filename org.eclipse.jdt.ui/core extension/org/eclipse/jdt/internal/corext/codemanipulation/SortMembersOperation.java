@@ -121,7 +121,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;
 			BodyDeclaration bodyDeclaration2= (BodyDeclaration) e2;
 
-			if (fDoNotSortFields && (isSortPreserved(bodyDeclaration1) || isSortPreserved(bodyDeclaration2))) {
+			if (fDoNotSortFields && isSortPreserved(bodyDeclaration1) && isSortPreserved(bodyDeclaration2)) {
 				return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 			}
 
