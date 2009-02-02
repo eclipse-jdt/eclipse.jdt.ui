@@ -472,8 +472,14 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	private IJavaElement findElement(TreeItem[] items) {
+		return findElement(items, null);
+	}
+
+	private IJavaElement findElement(TreeItem[] items, TreeItem toBeSkipped) {
 		ILabelProvider labelProvider= (ILabelProvider)fTreeViewer.getLabelProvider();
 		for (int i= 0; i < items.length; i++) {
+			if (toBeSkipped == items[i])
+				continue;
 
 			IJavaElement element= (IJavaElement)items[i].getData();
 			if (fStringMatcher == null)
@@ -491,9 +497,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 			TreeItem parentItem= items[i].getParentItem();
 			if (parentItem != null)
-				element= findElement(new TreeItem[] { parentItem });
+				element= findElement(new TreeItem[] { parentItem }, items[i]);
 			else
-				element= findElement(items[i].getParent().getItems());
+				element= findElement(items[i].getParent().getItems(), items[i]);
 			if (element != null)
 				return element;
 		}
