@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -76,6 +78,17 @@ public class HistoryListAction extends Action {
 
 			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT) {
 				/*
+				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getStyledText(java.lang.Object)
+				 * @since 3.5
+				 */
+				public StyledString getStyledText(Object element) {
+					IMember[] members= (IMember[]) element;
+					if (members.length == 1)
+						return HistoryAction.getSingleElementLabel(members[0]);
+					else
+						return new StyledString(HistoryAction.getElementLabel(members));
+				}
+				/*
 				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getText(java.lang.Object)
 				 */
 				public String getText(Object element) {
@@ -94,7 +107,7 @@ public class HistoryListAction extends Action {
 				}
 			};
 
-			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
+			fHistoryList= new ListDialogField(adapter, buttonLabels, new ColoringLabelProvider(labelProvider));
 			fHistoryList.setLabelText(CallHierarchyMessages.HistoryListDialog_label);
 			fHistoryList.setElements(Arrays.asList(elements));
 
