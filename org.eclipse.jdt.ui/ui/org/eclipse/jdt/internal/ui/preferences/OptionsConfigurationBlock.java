@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,9 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -404,14 +407,15 @@ public abstract class OptionsConfigurationBlock {
 		composite.setLayout(layout);
 		composite.setLayoutData(gd);
 
-		Button checkBox= new Button(composite, SWT.CHECK);
+		final Button checkBox= new Button(composite, SWT.CHECK);
 		checkBox.setFont(JFaceResources.getDialogFont());
 		checkBox.setData(data);
-		checkBox.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false));
+		checkBox.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
 		checkBox.addSelectionListener(getSelectionListener());
 
 		gd= new GridData(GridData.FILL, GridData.CENTER, true, false);
 		gd.widthHint= widthHint;
+		gd.horizontalIndent= -2;
 
 		Link link= new Link(composite, SWT.NONE);
 		link.setText(label);
@@ -419,6 +423,26 @@ public abstract class OptionsConfigurationBlock {
 		if (listener != null) {
 			link.addSelectionListener(listener);
 		}
+		
+		// toggle checkbox when user clicks unlinked text in link:
+		final boolean[] linkSelected= { false };
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				linkSelected[0]= true;
+			}
+		});
+		link.addMouseListener(new MouseAdapter() {
+			public void mouseDown(MouseEvent e) {
+				linkSelected[0]= false;
+			}
+			public void mouseUp(MouseEvent e) {
+				if (!linkSelected[0]) {
+					checkBox.setSelection(!checkBox.getSelection());
+					checkBox.setFocus();
+					linkSelected[0]= false;
+				}
+			}
+		});
 
 		makeScrollableCompositeAware(link);
 		makeScrollableCompositeAware(checkBox);
