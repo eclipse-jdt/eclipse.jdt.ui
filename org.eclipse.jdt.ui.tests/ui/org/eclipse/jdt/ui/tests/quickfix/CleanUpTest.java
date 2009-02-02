@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -6857,6 +6857,35 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testSortMembersBug263173() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class SM263173 {\n");
+		buf.append("    static int someInt;\n");
+		buf.append("    static {\n");
+		buf.append("        someInt = 1;\n");
+		buf.append("    };\n");
+		buf.append("    static int anotherInt = someInt;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM263173.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.SORT_MEMBERS);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class SM263173 {\n");
+		buf.append("    static int someInt;\n");
+		buf.append("    static {\n");
+		buf.append("        someInt = 1;\n");
+		buf.append("    };\n");
+		buf.append("    static int anotherInt = someInt;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testOrganizeImports01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

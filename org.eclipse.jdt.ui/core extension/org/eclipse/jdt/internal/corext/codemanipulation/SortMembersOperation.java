@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,9 +121,8 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;
 			BodyDeclaration bodyDeclaration2= (BodyDeclaration) e2;
 
-			if (fDoNotSortFields && bodyDeclaration1.getNodeType() == bodyDeclaration2.getNodeType()) {
-				if (bodyDeclaration1.getNodeType() == ASTNode.FIELD_DECLARATION || bodyDeclaration2.getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION)
-					return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
+			if (fDoNotSortFields && (isSortPreserved(bodyDeclaration1) || isSortPreserved(bodyDeclaration2))) {
+				return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 			}
 
 			int cat1= category(bodyDeclaration1);
@@ -245,6 +244,17 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 			}
 			return 0;
+		}
+
+		private boolean isSortPreserved(BodyDeclaration bodyDeclaration) {
+			switch (bodyDeclaration.getNodeType()) {
+				case ASTNode.FIELD_DECLARATION:
+				case ASTNode.ENUM_CONSTANT_DECLARATION:
+				case ASTNode.INITIALIZER:
+					return true;
+				default:
+					return false;
+			}
 		}
 
 		private int preserveRelativeOrder(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
