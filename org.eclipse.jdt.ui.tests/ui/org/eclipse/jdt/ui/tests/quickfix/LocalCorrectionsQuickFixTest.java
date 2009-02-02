@@ -6377,7 +6377,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		buf= new StringBuffer();
 		buf.append("package e;\n");
-		buf.append("@Requires1(value=\"\")\n");
+		buf.append("@Requires1(value = \"\")\n");
 		buf.append("@interface Requires1 {\n");
 		buf.append("        String value();\n");
 		buf.append("}\n");
