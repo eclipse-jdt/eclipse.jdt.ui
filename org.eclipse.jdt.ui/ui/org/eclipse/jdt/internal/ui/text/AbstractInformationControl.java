@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,6 +152,12 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.2
 	 */
 	private int fTreeStyle;
+
+	/**
+	 * The initial selection.
+	 * @since 3.5
+	 */
+	private Object fInitialSelection;
 
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -452,8 +458,13 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * matches the current filter pattern.
 	 */
 	protected void selectFirstMatch() {
-		Tree tree= fTreeViewer.getTree();
-		Object element= findElement(tree.getItems());
+		TreeItem selectedElement= (TreeItem)fTreeViewer.testFindItem(fInitialSelection);
+		Object element;
+		if (selectedElement != null)
+			element= findElement(new TreeItem[] { selectedElement });
+		else
+			element= findElement(fTreeViewer.getTree().getItems());
+
 		if (element != null)
 			fTreeViewer.setSelection(new StructuredSelection(element), true);
 		else
@@ -463,6 +474,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	private IJavaElement findElement(TreeItem[] items) {
 		ILabelProvider labelProvider= (ILabelProvider)fTreeViewer.getLabelProvider();
 		for (int i= 0; i < items.length; i++) {
+
 			IJavaElement element= (IJavaElement)items[i].getData();
 			if (fStringMatcher == null)
 				return element;
@@ -474,6 +486,14 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			}
 
 			element= findElement(items[i].getItems());
+			if (element != null)
+				return element;
+
+			TreeItem parentItem= items[i].getParentItem();
+			if (parentItem != null)
+				element= findElement(new TreeItem[] { parentItem });
+			else
+				element= findElement(items[i].getParent().getItems());
 			if (element != null)
 				return element;
 		}
@@ -517,9 +537,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	protected void inputChanged(Object newInput, Object newSelection) {
 		fFilterText.setText(""); //$NON-NLS-1$
 		fTreeViewer.setInput(newInput);
-		if (newSelection != null) {
+		fInitialSelection= newSelection;
+		if (newSelection != null)
 			fTreeViewer.setSelection(new StructuredSelection(newSelection));
-		}
 	}
 
 	/**
