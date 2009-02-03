@@ -458,10 +458,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * matches the current filter pattern.
 	 */
 	protected void selectFirstMatch() {
-		TreeItem selectedElement= (TreeItem)fTreeViewer.testFindItem(fInitialSelection);
+		Object selectedElement= fTreeViewer.testFindItem(fInitialSelection);
 		Object element;
-		if (selectedElement != null)
-			element= findElement(new TreeItem[] { selectedElement });
+		if (selectedElement instanceof TreeItem)
+			element= findElement(new TreeItem[] { (TreeItem)selectedElement });
 		else
 			element= findElement(fTreeViewer.getTree().getItems());
 
