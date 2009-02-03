@@ -71,6 +71,7 @@ import org.eclipse.ui.keys.KeySequence;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
@@ -154,10 +155,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	private int fTreeStyle;
 
 	/**
-	 * The initial selection.
+	 * The initially selected type.
 	 * @since 3.5
 	 */
-	private Object fInitialSelection;
+	private IType fInitiallySelectedType;
 
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -458,50 +459,53 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * matches the current filter pattern.
 	 */
 	protected void selectFirstMatch() {
-		Object selectedElement= fTreeViewer.testFindItem(fInitialSelection);
-		Object element;
+		Object selectedElement= fTreeViewer.testFindItem(fInitiallySelectedType);
+		TreeItem element;
+		final Tree tree= fTreeViewer.getTree();
 		if (selectedElement instanceof TreeItem)
 			element= findElement(new TreeItem[] { (TreeItem)selectedElement });
 		else
-			element= findElement(fTreeViewer.getTree().getItems());
+			element= findElement(tree.getItems());
 
-		if (element != null)
-			fTreeViewer.setSelection(new StructuredSelection(element), true);
-		else
+		if (element != null) {
+			tree.setSelection(element);
+			tree.showItem(element);
+		} else
 			fTreeViewer.setSelection(StructuredSelection.EMPTY);
 	}
 
-	private IJavaElement findElement(TreeItem[] items) {
+	private TreeItem findElement(TreeItem[] items) {
 		return findElement(items, null);
 	}
 
-	private IJavaElement findElement(TreeItem[] items, TreeItem toBeSkipped) {
+	private TreeItem findElement(TreeItem[] items, TreeItem toBeSkipped) {
 		ILabelProvider labelProvider= (ILabelProvider)fTreeViewer.getLabelProvider();
 		for (int i= 0; i < items.length; i++) {
-			if (toBeSkipped == items[i])
+			final TreeItem item= items[i];
+			if (toBeSkipped == item)
 				continue;
 
-			IJavaElement element= (IJavaElement)items[i].getData();
+			IJavaElement element= (IJavaElement)item.getData();
 			if (fStringMatcher == null)
-				return element;
+				return item;
 
 			if (element != null) {
 				String label= labelProvider.getText(element);
 				if (fStringMatcher.match(label))
-					return element;
+					return item;
 			}
 
-			element= findElement(items[i].getItems());
-			if (element != null)
-				return element;
+			TreeItem foundItem= findElement(item.getItems());
+			if (foundItem != null)
+				return foundItem;
 
-			TreeItem parentItem= items[i].getParentItem();
+			TreeItem parentItem= item.getParentItem();
 			if (parentItem != null)
-				element= findElement(new TreeItem[] { parentItem }, items[i]);
+				foundItem= findElement(new TreeItem[] { parentItem }, item);
 			else
-				element= findElement(items[i].getParent().getItems(), items[i]);
-			if (element != null)
-				return element;
+				foundItem= findElement(item.getParent().getItems(), item);
+			if (foundItem != null)
+				return foundItem;
 		}
 		return null;
 	}
@@ -543,7 +547,14 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	protected void inputChanged(Object newInput, Object newSelection) {
 		fFilterText.setText(""); //$NON-NLS-1$
 		fTreeViewer.setInput(newInput);
-		fInitialSelection= newSelection;
+		fInitiallySelectedType= null;
+		if (newSelection instanceof IJavaElement) {
+			IJavaElement javaElement= ((IJavaElement)newSelection);
+			if (javaElement.getElementType() == IJavaElement.TYPE)
+				fInitiallySelectedType= (IType)javaElement;
+			else
+				fInitiallySelectedType= (IType)javaElement.getAncestor(IJavaElement.TYPE);
+		}
 		if (newSelection != null)
 			fTreeViewer.setSelection(new StructuredSelection(newSelection));
 	}
