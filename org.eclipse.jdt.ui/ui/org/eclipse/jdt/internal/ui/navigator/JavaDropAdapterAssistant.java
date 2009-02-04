@@ -89,17 +89,12 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 			return Status.OK_STATUS;
 		} else if (FileTransfer.getInstance().isSupportedType(dropAdapter.getCurrentTransfer())) {
 			try {
-
-				final Object data = FileTransfer.getInstance().nativeToJava(dropAdapter.getCurrentTransfer());
-				if (!(data instanceof String[]))
-					return Status.CANCEL_STATUS;
-
 				final IContainer targetContainer= getTargetContainer(target);
 				if (targetContainer == null)
 					return Status.CANCEL_STATUS;
 
-
 				getShell().forceActive();
+				final Object data= FileTransfer.getInstance().nativeToJava(dropAdapter.getCurrentTransfer());
 				new CopyFilesAndFoldersOperation(getShell()).copyFiles((String[]) data, targetContainer);
 			} catch (JavaModelException e) {
 				String title = PackagesMessages.DropAdapter_errorTitle;
@@ -143,6 +138,22 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message);
 				//event.detail= DND.DROP_NONE;
+				result = Status.CANCEL_STATUS;
+			}
+		} else if (FileTransfer.getInstance().isSupportedType(transferType)) {
+			try {
+
+				final Object data= FileTransfer.getInstance().nativeToJava(transferType);
+				if (!(data instanceof String[]))
+					return Status.CANCEL_STATUS;
+
+				final IContainer targetContainer= getTargetContainer(target);
+				if (targetContainer == null || !targetContainer.isAccessible())
+					return Status.CANCEL_STATUS;
+			} catch (JavaModelException e) {
+				String title= PackagesMessages.DropAdapter_errorTitle;
+				String message= PackagesMessages.DropAdapter_errorMessage;
+				ExceptionHandler.handle(e, getShell(), title, message);
 				result = Status.CANCEL_STATUS;
 			}
 		}
