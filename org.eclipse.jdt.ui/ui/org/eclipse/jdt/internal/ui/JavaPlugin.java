@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
-
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -77,7 +76,6 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
@@ -789,9 +787,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public synchronized ContextTypeRegistry getTemplateContextRegistry() {
 		if (fContextTypeRegistry == null) {
-			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry();
+			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry(JavaUI.ID_CU_EDITOR);
 
-			registry.addContextType(JavaContextType.ID_ALL);
 			TemplateContextType all_contextType= registry.getContextType(JavaContextType.ID_ALL);
 			((AbstractJavaContextType) all_contextType).initializeContextTypeResolvers();
 
@@ -803,8 +800,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 			registerJavaContext(registry, SWTContextType.ID_MEMBERS, all_contextType);
 			registerJavaContext(registry, SWTContextType.ID_STATEMENTS, all_contextType);
-
-			registry.addContextType(JavaDocContextType.ID);
 
 			fContextTypeRegistry= registry;
 		}
@@ -821,7 +816,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.4
 	 */
 	private static void registerJavaContext(ContributionContextTypeRegistry registry, String id, TemplateContextType parent) {
-		registry.addContextType(id);
 		TemplateContextType contextType= registry.getContextType(id);
 		Iterator iter= parent.resolvers();
 		while (iter.hasNext())
