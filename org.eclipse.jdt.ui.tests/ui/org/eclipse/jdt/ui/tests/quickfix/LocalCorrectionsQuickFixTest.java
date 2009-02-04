@@ -5770,7 +5770,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            case 1:\n");
 		buf.append("                foo();\n");
 		buf.append("                break;\n");
-		buf.append("                case 2:\n");
+		buf.append("            case 2:\n");
 		buf.append("                foo();\n");
 		buf.append("                break;\n");
 		buf.append("            default:\n");
@@ -6833,7 +6833,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        switch (i) {\n");
 		buf.append("            case 1:\n");
 		buf.append("                time= System.currentTimeMillis();\n");
-		buf.append("            break;\n");
+		buf.append("                break;\n");
 		buf.append("            case 2:\n");
 		buf.append("                time= 3;\n");
 		buf.append("        }\n");
@@ -6867,7 +6867,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        switch (i) {\n");
 		buf.append("            case 1:\n");
 		buf.append("                time= System.currentTimeMillis();\n");
-		buf.append("            //$FALL-THROUGH$\n");
+		buf.append("                //$FALL-THROUGH$\n");
 		buf.append("            case 2:\n");
 		buf.append("                time= 3;\n");
 		buf.append("        }\n");
@@ -6916,7 +6916,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        switch (i) {\n");
 		buf.append("            case 1:\n");
 		buf.append("                time= System.currentTimeMillis();\n");
-		buf.append("            break;\n");
+		buf.append("                break;\n");
 		buf.append("            default:\n");
 		buf.append("                time= 3;\n");
 		buf.append("        }\n");
@@ -6950,7 +6950,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        switch (i) {\n");
 		buf.append("            case 1:\n");
 		buf.append("                time= System.currentTimeMillis();\n");
-		buf.append("            //$FALL-THROUGH$\n");
+		buf.append("                //$FALL-THROUGH$\n");
 		buf.append("            default:\n");
 		buf.append("                time= 3;\n");
 		buf.append("        }\n");
@@ -7037,7 +7037,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            case 1:\n");
 		buf.append("                time= System.currentTimeMillis();\n");
 		buf.append("                // fall through is OK\n");
-		buf.append("            //$FALL-THROUGH$\n");
+		buf.append("                //$FALL-THROUGH$\n");
 		buf.append("            default:\n");
 		buf.append("                time= 3;\n");
 		buf.append("        }\n");
