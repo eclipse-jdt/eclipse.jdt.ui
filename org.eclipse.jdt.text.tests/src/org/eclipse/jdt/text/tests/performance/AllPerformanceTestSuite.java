@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,13 +19,15 @@ import junit.framework.TestSuite;
  */
 public class AllPerformanceTestSuite extends TestSuite {
 
+	private static final boolean RUN_DEBUGGING_TEST_SUITE= false;
+
 	public static Test suite() {
 		return new AllPerformanceTestSuite();
 	}
 
 	public AllPerformanceTestSuite() {
 		// The Debug performance tests must be run separately in debug mode
-		if (true) {
+		if (RUN_DEBUGGING_TEST_SUITE) {
 			addTest(PerformanceTestSuite.suite());
 			addTest(PerformanceTestSuite2.suite());
 			addTest(PerformanceTestSuite3.suite());
