@@ -7,6 +7,7 @@
  *
  * Contributors:
  * IBM Corporation - initial API and implementation
+ * Francis Upton IV, Oakland Software <francisu@ieee.org> - [common navigator] Drag Java object from Project Explorer to Package Explorer gets "assertion failed" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=263751
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.navigator;
 
@@ -68,6 +69,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 				switch (dropAdapter.getCurrentOperation()) {
 					case DND.DROP_MOVE :
 						handleDropMove(target);
+						dropTargetEvent.detail= DND.DROP_NONE;
 						break;
 					case DND.DROP_COPY :
 						handleDropCopy(target);
@@ -79,11 +81,6 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 				ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
 			} catch (InterruptedException e) {
 				//ok
-			} finally {
-				// The drag source listener must not perform any operation
-				// since this drop adapter did the remove of the source even
-				// if we moved something.
-				//event.detail= DND.DROP_NONE;
 			}
 			clear();
 			return Status.OK_STATUS;
