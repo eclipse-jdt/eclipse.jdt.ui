@@ -17,6 +17,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ibm.icu.text.Collator;
 
@@ -508,6 +509,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			ppwsLink.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_OnlyShowVisible_link);
 			ppwsLink.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, true));
 			ppwsLink.addSelectionListener(new SelectionAdapter() {
+
 				public void widgetSelected(SelectionEvent e) {
 
 					List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
@@ -521,8 +523,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 						IWorkingSet[] selection= dialog.getSelection();
 						fWorkingSetModel.setActiveWorkingSets(selection);
 					}
-
-					recalculateCheckedState();
+					
+					recalculateCheckedState(dialog.getNewlyAddedWorkingSets());
 				}
 			});
 		}
@@ -537,8 +539,16 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			super.buttonPressed(buttonId);
 		}
 
-		private void recalculateCheckedState() {
-			fModel= createGrayedCheckedModel(fElements, getAllWorkingSets());
+		private void recalculateCheckedState(List addedWorkingSets) {
+			Set checkedWorkingSets= new HashSet();
+			GrayedCheckedModelElement[] elements= fModel.getChecked();
+			for (int i= 0; i < elements.length; i++)
+				checkedWorkingSets.add(elements[i].getWorkingSet());
+
+			if (addedWorkingSets != null)
+				checkedWorkingSets.addAll(addedWorkingSets);
+
+			fModel= createGrayedCheckedModel(fElements, getAllWorkingSets(), checkedWorkingSets);
 
 			fTableViewer.setInput(fModel);
 			fTableViewer.refresh();
@@ -612,7 +622,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 	public void run(IStructuredSelection selection) {
 		IAdaptable[] elements= getSelectedElements(selection);
-		GrayedCheckedModel model= createGrayedCheckedModel(elements, getAllWorkingSets());
+		GrayedCheckedModel model= createGrayedCheckedModel(elements, getAllWorkingSets(), null);
 		WorkingSetModelAwareSelectionDialog dialog= new WorkingSetModelAwareSelectionDialog(fSite.getShell(), model, elements);
 
 		if (elements.length == 1) {
@@ -633,21 +643,25 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 	}
 
-	private static GrayedCheckedModel createGrayedCheckedModel(IAdaptable[] elements, IWorkingSet[] workingSets) {
+	private static GrayedCheckedModel createGrayedCheckedModel(IAdaptable[] elements, IWorkingSet[] workingSets, Set checkedWorkingSets) {
 		GrayedCheckedModelElement[] result= new GrayedCheckedModelElement[workingSets.length];
 
 		for (int i= 0; i < workingSets.length; i++) {
-			IWorkingSet set= workingSets[i];
-
+			IWorkingSet workingSet= workingSets[i];
+			
 			int checkCount= 0;
 			for (int j= 0; j < elements.length; j++) {
-				IAdaptable adapted= adapt(set, elements[j]);
-				if (adapted != null && contains(set, adapted)) {
-					checkCount++;
+				if (checkedWorkingSets == null) {
+					IAdaptable adapted= adapt(workingSet, elements[j]);
+					if (adapted != null && contains(workingSet, adapted))
+						checkCount++;
+				} else {
+					if (checkedWorkingSets.contains(workingSet))
+						checkCount++;
 				}
 			}
 
-			result[i]= new GrayedCheckedModelElement(set, checkCount, elements.length);
+			result[i]= new GrayedCheckedModelElement(workingSet, checkCount, elements.length);
 		}
 
 		return new GrayedCheckedModel(result);
