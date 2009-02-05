@@ -128,7 +128,12 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 						if (handleValidateMove(target) != DND.DROP_NONE) {
 							result = Status.OK_STATUS;
 						} else {
-							result = Status.CANCEL_STATUS;
+							if (handleValidateCopy(target) != DND.DROP_NONE) {
+								getCommonDropAdapter().setCurrentOperation(DND.DROP_COPY);
+								result= Status.OK_STATUS;
+							} else {
+								result= Status.CANCEL_STATUS;
+							}
 						}
 						break;
 				}
