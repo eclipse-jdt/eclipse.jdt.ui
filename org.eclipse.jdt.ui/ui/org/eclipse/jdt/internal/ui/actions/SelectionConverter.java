@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,18 +56,19 @@ public class SelectionConverter {
 	}
 
 	/**
-	 * Converts the selection provided by the given part into a structured selection.
-	 * The following conversion rules are used:
+	 * Converts the selection provided by the given part into a structured selection. The following
+	 * conversion rules are used:
 	 * <ul>
-	 *	<li><code>part instanceof JavaEditor</code>: returns a structured selection
-	 * 	using code resolve to convert the editor's text selection.</li>
-	 * <li><code>part instanceof IWorkbenchPart</code>: returns the part's selection
-	 * 	if it is a structured selection.</li>
+	 * <li><code>part instanceof JavaEditor</code>: returns a structured selection using code
+	 * resolve to convert the editor's text selection.</li>
+	 * <li><code>part instanceof IWorkbenchPart</code>: returns the part's selection if it is a
+	 * structured selection.</li>
 	 * <li><code>default</code>: returns an empty structured selection.</li>
 	 * </ul>
+	 * 
 	 * @param part the part
 	 * @return the selection
-	 * @throws JavaModelException
+	 * @throws JavaModelException thrown when the type root can not be accessed
 	 */
 	public static IStructuredSelection getStructuredSelection(IWorkbenchPart part) throws JavaModelException {
 		if (part instanceof JavaEditor)
@@ -130,11 +131,11 @@ public class SelectionConverter {
 
 	/**
 	 * Perform a code resolve at the current selection of an editor
-	 *
+	 * 
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the resolved elements
-	 * @throws JavaModelException
+	 * @throws JavaModelException thrown when the type root can not be accessed
 	 * @since 3.2
 	 */
 	public static IJavaElement[] codeResolve(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
@@ -146,12 +147,14 @@ public class SelectionConverter {
 
 	/**
 	 * Perform a code resolve in a separate thread.
-	 *
+	 * 
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the resolved elements
-	 * @throws InterruptedException
-	 * @throws InvocationTargetException
+	 * @throws InvocationTargetException which wraps any exception or error which occurs while
+	 *             running the runnable
+	 * @throws InterruptedException propagated by the context if the runnable acknowledges
+	 *             cancelation by throwing this exception
 	 * @since 3.2
 	 */
 	public static IJavaElement[] codeResolveForked(JavaEditor editor, boolean primaryOnly) throws InvocationTargetException, InterruptedException {
@@ -167,14 +170,15 @@ public class SelectionConverter {
 
 	/**
 	 * Returns the element surrounding the selection of the given editor.
-	 *
+	 * 
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the element surrounding the current selection
-	 * @throws JavaModelException
+	 * @throws JavaModelException if the Java type root does not exist or if an exception occurs
+	 *             while accessing its corresponding resource
 	 * @since 3.2
 	 */
-	private static IJavaElement getElementAtOffset(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
+	public static IJavaElement getElementAtOffset(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
 		ITypeRoot input= getInput(editor, primaryOnly);
 		if (input != null)
 			return getElementAtOffset(input, (ITextSelection) editor.getSelectionProvider().getSelection());
