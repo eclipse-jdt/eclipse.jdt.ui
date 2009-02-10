@@ -3118,6 +3118,18 @@
                id="org.eclipse.jdt.ui.ClassFileEditor">
          </part>
       </actionSetPartAssociation>
+      <actionSetPartAssociation
+            targetID="org.eclipse.ui.edit.text.actionSet.presentation">
+         <part
+               id="org.eclipse.jdt.ui.CompilationUnitEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ClassFileEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.PropertiesFileEditor">
+         </part>
+      </actionSetPartAssociation>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
