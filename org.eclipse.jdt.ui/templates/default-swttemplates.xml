@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - 264052: [templates] new SWT templates - ToolBar and ToolItem
  *******************************************************************************/
 -->
 
@@ -355,6 +356,27 @@ ${item}.setText(${word_selection}${});
 ${imp:import(org.eclipse.swt.SWT)}${cursor}
 
 ${item}.setControl(${control});</template>
+
+
+<template 
+	name="ToolBar" 
+	description="%SWTTemplates.toolbar" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.toolbar" 
+	context="swt-statements" enabled="true" autoinsert="false"
+	
+>${type:newType(org.eclipse.swt.widgets.ToolBar)} ${bar:newName(org.eclipse.swt.widgets.ToolBar)}= new ${type}(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.FLAT, SWT.WRAP, SWT.RIGHT, SWT.HORIZONTAL, SWT.VERTICAL, SWT.SHADOW_OUT)});
+${bar}.setLayoutData(new ${gridDataType:newType(org.eclipse.swt.layout.GridData)}(SWT.${horizontal:link(FILL, BEGINNING, CENTER, END)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
+
+<template 
+	name="ToolItem" 
+	description="%SWTTemplates.toolitem" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.toolitem" 
+	context="swt-statements" enabled="true" autoinsert="false"
+	
+>${type:newType(org.eclipse.swt.widgets.ToolItem)} ${item:newName(org.eclipse.swt.widgets.ToolItem)}= new ${type}(${parent:var(org.eclipse.swt.widgets.ToolBar)}, ${style:link(SWT.PUSH, SWT.CHECK, SWT.RADIO, SWT.SEPARATOR, SWT.DROP_DOWN)});
+${item}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 
 <!-- ************************************************** Text Viewers ************************************************** -->
