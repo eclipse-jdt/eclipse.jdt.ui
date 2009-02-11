@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -978,7 +978,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			extension.setIsHandlingTemporaryProblems(isHandlingTemporaryProblems());
 		}
 
-		if (JavaModelUtil.isPrimary(original))
+		if (JavaModelUtil.isPrimary(original) && original.exists())
 			original.becomeWorkingCopy(requestor, getProgressMonitor());
 		cuInfo.fCopy= original;
 
@@ -1178,9 +1178,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
 
 			try  {
-			    cuInfo.fCopy.discardWorkingCopy();
+				cuInfo.fCopy.discardWorkingCopy();
 			} catch (JavaModelException x)  {
-			    handleCoreException(x, x.getMessage());
+				handleCoreException(x, x.getMessage());
 			}
 
 			if (cuInfo.fModel != null)
