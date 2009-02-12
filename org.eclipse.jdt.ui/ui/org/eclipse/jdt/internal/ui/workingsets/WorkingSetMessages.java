@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,6 +80,7 @@ public final class WorkingSetMessages extends NLS {
 	public static String WorkingSetConfigurationDialog_down_label;
 	public static String WorkingSetConfigurationDialog_selectAll_label;
 	public static String WorkingSetConfigurationDialog_deselectAll_label;
+	public static String WorkingSetConfigurationDialog_sort_working_sets;
 
 	public static String OpenCloseWorkingSetAction_close_label;
 	public static String OpenCloseWorkingSetAction_close_error_title;

@@ -514,14 +514,16 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 					List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
 					IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
+					boolean isSortingEnabled= fWorkingSetModel.isSortingEnabled();
 					WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(
 						getShell(),
 						(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]),
-						activeWorkingSets);
+							activeWorkingSets, isSortingEnabled);
 					dialog.setSelection(activeWorkingSets);
 					if (dialog.open() == IDialogConstants.OK_ID) {
+						isSortingEnabled= dialog.isSortingEnabled();
 						IWorkingSet[] selection= dialog.getSelection();
-						fWorkingSetModel.setActiveWorkingSets(selection);
+						fWorkingSetModel.setActiveWorkingSets(selection, isSortingEnabled);
 					}
 					
 					recalculateCheckedState(dialog.getNewlyAddedWorkingSets());

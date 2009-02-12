@@ -51,6 +51,13 @@ public class WorkingSetModel {
 	private static final String TAG_WORKING_SET_NAME= "workingSetName"; //$NON-NLS-1$
 	private static final String TAG_CONFIGURED= "configured"; //$NON-NLS-1$
 
+	/**
+	 * Key associated with the sort state of working sets.
+	 * 
+	 * @since 3.5
+	 */
+	private static final String TAG_SORT_WORKING_SETS= "sortWorkingSets"; //$NON-NLS-1$
+
 	private ILocalWorkingSetManager fLocalWorkingSetManager;
 	private List fActiveWorkingSets;
 	private ListenerList fListeners;
@@ -60,6 +67,13 @@ public class WorkingSetModel {
 	private ElementMapper fElementMapper= new ElementMapper();
 
 	private boolean fConfigured;
+
+	/**
+	 * Value of the sorted state of working sets.
+	 * 
+	 * @since 3.5
+	 */
+	private boolean fIsSortingEnabled;
 
 	private static class WorkingSetComparar implements IElementComparer {
 		public boolean equals(Object o1, Object o2) {
@@ -357,14 +371,30 @@ public class WorkingSetModel {
 	}
 
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
+		if (fIsSortingEnabled) {
+			Arrays.sort(workingSets, new WorkingSetSortComparator());
+		}
 		fActiveWorkingSets= new ArrayList(Arrays.asList(workingSets));
 		fElementMapper.rebuild(getActiveWorkingSets());
 		fOthersWorkingSetUpdater.updateElements();
 		fireEvent(new PropertyChangeEvent(this, CHANGE_WORKING_SET_MODEL_CONTENT, null, null));
 	}
 
+	/**
+	 * Sets the active working sets.
+	 * 
+	 * @param workingSets the array of working sets
+	 * @param isSortingEnabled <code>true</code> if sorting is enabled, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	public void setActiveWorkingSets(IWorkingSet[] workingSets, boolean isSortingEnabled) {
+		fIsSortingEnabled= isSortingEnabled;
+		setActiveWorkingSets(workingSets);
+	}
+
 	public void saveState(IMemento memento) {
-		memento.putString(TAG_CONFIGURED, Boolean.toString(fConfigured));
+		memento.putBoolean(TAG_SORT_WORKING_SETS, fIsSortingEnabled);
+		memento.putBoolean(TAG_CONFIGURED, fConfigured);
 		fLocalWorkingSetManager.saveState(memento.createChild(TAG_LOCAL_WORKING_SET_MANAGER));
 		for (Iterator iter= fActiveWorkingSets.iterator(); iter.hasNext();) {
 			IMemento active= memento.createChild(TAG_ACTIVE_WORKING_SET);
@@ -390,6 +420,12 @@ public class WorkingSetModel {
 
 		fConfigured= Boolean.valueOf(configured).booleanValue();
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
+		String isSortingEnabled= memento.getString(TAG_SORT_WORKING_SETS);
+		if (isSortingEnabled == null) {
+			fIsSortingEnabled= false;
+		} else {
+			fIsSortingEnabled= Boolean.valueOf(isSortingEnabled).booleanValue();
+		}
 
 		IMemento[] actives= memento.getChildren(TAG_ACTIVE_WORKING_SET);
 		for (int i= 0; i < actives.length; i++) {
@@ -476,8 +512,18 @@ public class WorkingSetModel {
 	public void addActiveWorkingSet(IWorkingSet workingSet) {
 		IWorkingSet[] workingSets= getActiveWorkingSets();
 		IWorkingSet[] activeWorkingSets= new IWorkingSet[workingSets.length+ 1];
-		activeWorkingSets[0]= workingSet;
-		System.arraycopy(workingSets, 0, activeWorkingSets, 1, workingSets.length);
+		System.arraycopy(workingSets, 0, activeWorkingSets, 0, workingSets.length);
+		activeWorkingSets[workingSets.length]= workingSet;
 		setActiveWorkingSets(activeWorkingSets);
+	}
+
+	/**
+	 * Returns whether sorting is enabled for working sets.
+	 * 
+	 * @return <code>true</code> if sorting is enabled, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	public boolean isSortingEnabled() {
+		return fIsSortingEnabled;
 	}
 }

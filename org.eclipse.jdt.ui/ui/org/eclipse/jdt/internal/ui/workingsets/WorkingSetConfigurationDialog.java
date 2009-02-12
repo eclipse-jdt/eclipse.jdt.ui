@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -53,6 +54,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -139,6 +141,13 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	private Button fSelectAll;
 	private Button fDeselectAll;
 
+	/**
+	 * Sort working sets button.
+	 * 
+	 * @since 3.5
+	 */
+	private Button fSortWorkingSet;
+
 	private IWorkingSet[] fResult;
 	private List fAddedWorkingSets;
 	private List fRemovedWorkingSets;
@@ -147,7 +156,14 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private int nextButtonId= IDialogConstants.CLIENT_ID + 1;
 
-	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, IWorkingSet[] activeWorkingSets) {
+	/**
+	 * Value of sorted state of working sets.
+	 * 
+	 * @since 3.5
+	 */
+	private boolean fIsSortingEnabled;
+
+	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, IWorkingSet[] activeWorkingSets, boolean isSortingEnabled) {
 		super(parentShell);
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
 		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message);
@@ -158,6 +174,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			if (filter.select(null, null, allWorkingSets[i]))
 				fAllWorkingSets.add(allWorkingSets[i]);
 		}
+		fIsSortingEnabled= isSortingEnabled;
 	}
 
 	/**
@@ -208,6 +225,18 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		createTableViewer(inner);
 		createOrderButtons(inner);
 		createModifyButtons(composite);
+		if (fIsSortingEnabled) {
+			Comparator comparator= new WorkingSetSortComparator();
+			fTableViewer.setComparator(new ViewerComparator(comparator) {
+				/*
+				 * @see ViewerComparator#compare(Viewer, Object, Object)
+				 * @since 3.5
+				 */
+				public int compare(Viewer viewer, Object e1, Object e2) {
+					return getComparator().compare(e1, e2);
+				}
+			});
+		}
 		fTableViewer.setInput(fAllWorkingSets);
 
 		return composite;
@@ -333,6 +362,37 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fDeselectAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				deselectAll();
+			}
+		});
+		/**
+		 * A check box that has persistence to sort the working sets alphabetically in the
+		 * WorkingSetConfigurationDialog. It restores the unsorted order of the working sets when
+		 * unchecked.
+		 * 
+		 * @since 3.5
+		 */
+		fSortWorkingSet= new Button(parent, SWT.CHECK);
+		fSortWorkingSet.setText(WorkingSetMessages.WorkingSetConfigurationDialog_sort_working_sets);
+		fSortWorkingSet.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, true));
+		fSortWorkingSet.setSelection(fIsSortingEnabled);
+		fSortWorkingSet.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fIsSortingEnabled= fSortWorkingSet.getSelection();
+				updateButtonAvailability();
+				if (fIsSortingEnabled) {
+					Comparator comparator= new WorkingSetSortComparator();
+					fTableViewer.setComparator(new ViewerComparator(comparator) {
+						/*
+						 * @see ViewerComparator#compare(Viewer, Object, Object)
+						 * @since 3.5
+						 */
+						public int compare(Viewer viewer, Object e1, Object e2) {
+							return getComparator().compare(e1, e2);
+						}
+					});
+				} else {
+					fTableViewer.setComparator(null);
+				}
 			}
 		});
 	}
@@ -590,21 +650,25 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	}
 
 	private boolean canMoveUp() {
-		int[] indc= fTableViewer.getTable().getSelectionIndices();
-		for (int i= 0; i < indc.length; i++) {
-			if (indc[i] != i) {
-				return true;
+		if (!fIsSortingEnabled) {
+			int[] indc= fTableViewer.getTable().getSelectionIndices();
+			for (int i= 0; i < indc.length; i++) {
+				if (indc[i] != i) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
 	private boolean canMoveDown() {
-		int[] indc= fTableViewer.getTable().getSelectionIndices();
-		int k= fAllWorkingSets.size() - 1;
-		for (int i= indc.length - 1; i >= 0; i--, k--) {
-			if (indc[i] != k) {
-				return true;
+		if (!fIsSortingEnabled) {
+			int[] indc= fTableViewer.getTable().getSelectionIndices();
+			int k= fAllWorkingSets.size() - 1;
+			for (int i= indc.length - 1; i >= 0; i--, k--) {
+				if (indc[i] != k) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -629,5 +693,15 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	public List getNewlyAddedWorkingSets() {
 		return fAddedWorkingSets;
 		
+	}
+
+	/**
+	 * Returns whether sorting is enabled for working sets.
+	 * 
+	 * @return <code>true</code> if sorting is enabled, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	public boolean isSortingEnabled() {
+		return fIsSortingEnabled;
 	}
 }
