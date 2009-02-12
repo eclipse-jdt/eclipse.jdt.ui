@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,9 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -58,6 +62,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -172,6 +177,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	private int fTypeFilterVersion= 0;
 
+	private TypeItemsFilter fFilter;
+
 	/**
 	 * Creates new FilteredTypesSelectionDialog instance
 	 *
@@ -249,7 +256,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		fTypeInfoUtil= new TypeInfoUtil(extension != null ? extension.getImageProvider() : null);
 
 		fTypeInfoLabelProvider= new TypeItemLabelProvider();
-
+		
 		setListLabelProvider(fTypeInfoLabelProvider);
 		setListSelectionLabelDecorator(fTypeInfoLabelProvider);
 		shell.addDisposeListener(new DisposeListener() {
@@ -513,7 +520,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#createFilter()
 	 */
 	protected ItemsFilter createFilter() {
-		return new TypeItemsFilter(fSearchScope, fElementKinds, fFilterExtension);
+		fFilter= new TypeItemsFilter(fSearchScope, fElementKinds, fFilterExtension);
+		return fFilter;
 	}
 
 	/*
@@ -748,8 +756,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		private boolean fContainerInfo;
 		private LocalResourceManager fImageManager;
 
+		private Font fBoldFont;
+
+		private Styler fBoldStyler;
+
+		private Styler fBoldQualifierStyler;
+
 		public TypeItemLabelProvider() {
 			fImageManager= new LocalResourceManager(JFaceResources.getResources());
+			fBoldStyler= createBoldStyler();
+			fBoldQualifierStyler= createBoldQualifierStyler();
 		}
 
 		/*
@@ -758,6 +774,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public void dispose() {
 			super.dispose();
 			fImageManager.dispose();
+			if (fBoldFont != null) {
+				fBoldFont.dispose();
+				fBoldFont= null;
+			}
 		}
 
 		public void setContainerInfo(boolean containerInfo) {
@@ -837,11 +857,67 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public StyledString getStyledText(Object element) {
 			String text= getText(element);
 			StyledString string= new StyledString(text);
+
+			final String namePattern= fFilter != null ? fFilter.getNamePattern() : null;
+			if (namePattern != null && !"*".equals(namePattern)) { //$NON-NLS-1$
+				int[] matchingRegions= SearchPattern.getMatchingRegions(namePattern, text, fFilter.getMatchRule());
+				markMatchingRegions(string, 0, matchingRegions, fBoldStyler);
+			}
+
 			int index= text.indexOf(JavaElementLabels.CONCAT_STRING);
 			if (index != -1) {
 				string.setStyle(index, text.length() - index, StyledString.QUALIFIER_STYLER);
+				final String packagePattern= fFilter != null ? fFilter.getPackagePattern() : null;
+				if (packagePattern != null && !"*".equals(packagePattern)) { //$NON-NLS-1$
+					index= index + JavaElementLabels.CONCAT_STRING.length();
+					String packageName= text.substring(index);
+					int[] matchingRegions= SearchPattern.getMatchingRegions(packagePattern, packageName, fFilter.getPackageFlags());
+					markMatchingRegions(string, index, matchingRegions, fBoldQualifierStyler);
+				}
 			}
 			return string;
+		}
+
+		private void markMatchingRegions(StyledString string, int index, int[] matchingRegions, Styler styler) {
+			if (matchingRegions != null) {
+				for (int i= 0; i + 1 < matchingRegions.length; i= i + 2)
+					string.setStyle(index + matchingRegions[i], matchingRegions[i + 1], styler);
+			}
+		}
+
+		/**
+		 * Create the bold variant of the currently used font.
+		 * 
+		 * @return the bold font
+		 * @since 3.5
+		 */
+		private Font getBoldFont() {
+			if (fBoldFont == null) {
+				Font font= getDialogArea().getFont();
+				FontData[] data= font.getFontData();
+				for (int i= 0; i < data.length; i++) {
+					data[i].setStyle(SWT.BOLD);
+				}
+				fBoldFont= new Font(font.getDevice(), data);
+			}
+			return fBoldFont;
+		}
+
+		private Styler createBoldStyler() {
+			return new Styler() {
+				public void applyStyles(TextStyle textStyle) {
+					textStyle.font= getBoldFont();
+				}
+			};
+		}
+
+		private Styler createBoldQualifierStyler() {
+			return new Styler() {
+				public void applyStyles(TextStyle textStyle) {
+					StyledString.QUALIFIER_STYLER.applyStyles(textStyle);
+					textStyle.font= getBoldFont();
+				}
+			};
 		}
 
 	}
