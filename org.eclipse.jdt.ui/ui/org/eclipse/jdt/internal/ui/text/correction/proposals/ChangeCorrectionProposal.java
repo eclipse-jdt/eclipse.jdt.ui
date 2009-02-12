@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
@@ -20,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+
 
 /**
  * Implementation of a Java completion proposal to be used for quick fix and quick assist
@@ -216,7 +216,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { getName(), shortCutString });
-			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER);
+			return StyledCellLabelProvider.styleDecoratedString(str, decorated, StyledString.QUALIFIER_STYLER);
 		}
 		return str;
 	}

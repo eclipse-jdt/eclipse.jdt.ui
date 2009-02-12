@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
@@ -180,7 +181,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		}
 		String decorated= decorateText(string.getString(), element);
 		if (decorated != null) {
-			return ColoringLabelProvider.decorateStyledString(string, decorated, StyledString.DECORATIONS_STYLER);
+			return StyledCellLabelProvider.styleDecoratedString(string, decorated, StyledString.DECORATIONS_STYLER);
 		}
 		return string;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
@@ -45,7 +46,7 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+
 
 public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 
@@ -128,7 +129,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		String name= coloredName.getString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoringLabelProvider.decorateStyledString(coloredName, decorated, StyledString.COUNTER_STYLER);
+			StyledCellLabelProvider.styleDecoratedString(coloredName, decorated, StyledString.COUNTER_STYLER);
 		}
 		return coloredName;
 	}

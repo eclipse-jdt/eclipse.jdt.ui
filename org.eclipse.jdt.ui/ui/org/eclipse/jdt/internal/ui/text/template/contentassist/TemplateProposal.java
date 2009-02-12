@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -72,7 +73,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.IndentUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 /**
  * A template proposal.
@@ -453,7 +453,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			String[] arguments= new String[] { fTemplate.getName(), fTemplate.getDescription() };
 			String decorated= Messages.format(TemplateContentAssistMessages.TemplateProposal_displayString, arguments);
 			StyledString string= new StyledString(fTemplate.getName(), StyledString.COUNTER_STYLER);
-			fDisplayString= ColoringLabelProvider.decorateStyledString(string, decorated, StyledString.QUALIFIER_STYLER);
+			fDisplayString= StyledCellLabelProvider.styleDecoratedString(string, decorated, StyledString.QUALIFIER_STYLER);
 		}
 		return fDisplayString;
 	}

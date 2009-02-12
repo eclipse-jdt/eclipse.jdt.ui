@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+
 
 /**
  * A quick assist proposal that starts the Rename refactoring.
@@ -92,7 +93,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fLabel, shortCutString });
-			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER);
+			return StyledCellLabelProvider.styleDecoratedString(str, decorated, StyledString.QUALIFIER_STYLER);
 		}
 		return str;
 	}

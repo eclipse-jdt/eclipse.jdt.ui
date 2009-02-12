@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
@@ -32,8 +33,6 @@ import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
-
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider {
 
@@ -68,7 +67,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
 					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
-					text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledString.QUALIFIER_STYLER);
+					text= StyledCellLabelProvider.styleDecoratedString(text, decorated, StyledString.QUALIFIER_STYLER);
 				}
 			}
 
@@ -76,7 +75,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			if (element instanceof ITestCaseElement) {
 				String className= BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestClassName());
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
-				text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledString.QUALIFIER_STYLER);
+				text= StyledCellLabelProvider.styleDecoratedString(text, decorated, StyledString.QUALIFIER_STYLER);
 			}
 		}
 		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
@@ -85,7 +84,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	private StyledString addElapsedTime(StyledString styledString, double time) {
 		String string= styledString.getString();
 		String decorated= addElapsedTime(string, time);
-		return ColoringLabelProvider.decorateStyledString(styledString, decorated, StyledString.COUNTER_STYLER);
+		return StyledCellLabelProvider.styleDecoratedString(styledString, decorated, StyledString.COUNTER_STYLER);
 	}
 
 	private String addElapsedTime(String string, double time) {
