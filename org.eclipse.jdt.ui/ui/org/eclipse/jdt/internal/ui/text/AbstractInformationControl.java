@@ -29,6 +29,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -232,10 +233,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
 					if (o instanceof TreeItem) {
+						Rectangle clientArea = tree.getClientArea();
 						if (!o.equals(fLastItem)) {
 							fLastItem= (TreeItem)o;
 							tree.setSelection(new TreeItem[] { fLastItem });
-						} else if (e.y < tree.getItemHeight() / 4) {
+						} else if (e.y - clientArea.y < tree.getItemHeight() / 4) {
 							// Scroll up
 							Point p= tree.toDisplay(e.x, e.y);
 							Item item= fTreeViewer.scrollUp(p.x, p.y);
@@ -243,7 +245,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 								fLastItem= (TreeItem)item;
 								tree.setSelection(new TreeItem[] { fLastItem });
 							}
-						} else if (e.y > tree.getBounds().height - tree.getItemHeight() / 4) {
+						} else if (clientArea.y + clientArea.height - e.y < tree.getItemHeight() / 4) {
 							// Scroll down
 							Point p= tree.toDisplay(e.x, e.y);
 							Item item= fTreeViewer.scrollDown(p.x, p.y);

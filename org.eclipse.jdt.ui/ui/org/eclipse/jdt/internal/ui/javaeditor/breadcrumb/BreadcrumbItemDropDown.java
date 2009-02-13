@@ -367,11 +367,12 @@ class BreadcrumbItemDropDown {
 				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
 					if (o instanceof TreeItem) {
+						Rectangle clientArea = tree.getClientArea();
 						TreeItem currentItem= (TreeItem) o;
 						if (!o.equals(fLastItem)) {
 							fLastItem= (TreeItem) o;
 							tree.setSelection(new TreeItem[] { fLastItem });
-						} else if (e.y < tree.getItemHeight() / 4) {
+						} else if (e.y - clientArea.y < tree.getItemHeight() / 4) {
 							// Scroll up
 							if (currentItem.getParentItem() == null) {
 								int index= tree.indexOf((TreeItem) o);
@@ -388,7 +389,7 @@ class BreadcrumbItemDropDown {
 									tree.setSelection(new TreeItem[] { fLastItem });
 								}
 							}
-						} else if (e.y > tree.getBounds().height - tree.getItemHeight() / 4) {
+						} else if (clientArea.y + clientArea.height - e.y < tree.getItemHeight() / 4) {
 							// Scroll down
 							if (currentItem.getParentItem() == null) {
 								int index= tree.indexOf((TreeItem) o);
