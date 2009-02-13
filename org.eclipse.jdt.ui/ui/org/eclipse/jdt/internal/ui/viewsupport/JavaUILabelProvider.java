@@ -181,7 +181,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		}
 		String decorated= decorateText(string.getString(), element);
 		if (decorated != null) {
-			return StyledCellLabelProvider.styleDecoratedString(string, decorated, StyledString.DECORATIONS_STYLER);
+			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.DECORATIONS_STYLER, string);
 		}
 		return string;
 	}

@@ -67,7 +67,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
 					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
-					text= StyledCellLabelProvider.styleDecoratedString(text, decorated, StyledString.QUALIFIER_STYLER);
+					text= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, text);
 				}
 			}
 
@@ -75,7 +75,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			if (element instanceof ITestCaseElement) {
 				String className= BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestClassName());
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
-				text= StyledCellLabelProvider.styleDecoratedString(text, decorated, StyledString.QUALIFIER_STYLER);
+				text= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, text);
 			}
 		}
 		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
@@ -84,7 +84,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	private StyledString addElapsedTime(StyledString styledString, double time) {
 		String string= styledString.getString();
 		String decorated= addElapsedTime(string, time);
-		return StyledCellLabelProvider.styleDecoratedString(styledString, decorated, StyledString.COUNTER_STYLER);
+		return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, styledString);
 	}
 
 	private String addElapsedTime(String string, double time) {

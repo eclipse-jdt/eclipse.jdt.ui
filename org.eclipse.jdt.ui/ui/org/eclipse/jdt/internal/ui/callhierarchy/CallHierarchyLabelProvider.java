@@ -80,7 +80,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			MethodWrapper wrapper= (MethodWrapper)element;
 			String decorated= getElementLabel(wrapper);
 			StyledString text= super.getStyledText(wrapper.getMember());
-			return StyledCellLabelProvider.styleDecoratedString(text, decorated, StyledString.COUNTER_STYLER);
+			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, text);
 		}
 		return new StyledString(getSpecialLabel(element));
 	}

@@ -257,7 +257,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fLabel, shortCutString });
-			return StyledCellLabelProvider.styleDecoratedString(str, decorated, StyledString.QUALIFIER_STYLER);
+			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, str);
 		}
 		return str;
 	}

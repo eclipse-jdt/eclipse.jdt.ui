@@ -453,7 +453,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			String[] arguments= new String[] { fTemplate.getName(), fTemplate.getDescription() };
 			String decorated= Messages.format(TemplateContentAssistMessages.TemplateProposal_displayString, arguments);
 			StyledString string= new StyledString(fTemplate.getName(), StyledString.COUNTER_STYLER);
-			fDisplayString= StyledCellLabelProvider.styleDecoratedString(string, decorated, StyledString.QUALIFIER_STYLER);
+			fDisplayString= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, string);
 		}
 		return fDisplayString;
 	}

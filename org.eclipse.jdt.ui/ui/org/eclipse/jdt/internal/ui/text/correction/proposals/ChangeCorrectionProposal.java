@@ -216,7 +216,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { getName(), shortCutString });
-			return StyledCellLabelProvider.styleDecoratedString(str, decorated, StyledString.QUALIFIER_STYLER);
+			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, str);
 		}
 		return str;
 	}

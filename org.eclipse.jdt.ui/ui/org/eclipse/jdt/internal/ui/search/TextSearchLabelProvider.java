@@ -35,7 +35,7 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 		String name= coloredName.getString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			StyledCellLabelProvider.styleDecoratedString(coloredName, decorated, StyledString.COUNTER_STYLER);
+			StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, coloredName);
 		}
 		return coloredName;
 	}

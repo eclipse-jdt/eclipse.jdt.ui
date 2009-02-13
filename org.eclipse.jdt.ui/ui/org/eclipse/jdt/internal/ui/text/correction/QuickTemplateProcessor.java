@@ -203,7 +203,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					TemplateProposal proposal= new SurroundWithTemplateProposal(cu, currentTemplate, context, region, image, selectedStatements);
 					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
 					String decorated= Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg);
-					proposal.setDisplayString(StyledCellLabelProvider.styleDecoratedString(new StyledString(currentTemplate.getName()), decorated, StyledString.QUALIFIER_STYLER));
+					proposal.setDisplayString(StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, new StyledString(currentTemplate.getName())));
 					result.add(proposal);
 				} else {
 					TemplateProposal proposal= new TemplateProposal(currentTemplate, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)) {
@@ -216,7 +216,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					};
 					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
 					String decorated= Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg);
-					proposal.setDisplayString(StyledCellLabelProvider.styleDecoratedString(new StyledString(currentTemplate.getName()), decorated, StyledString.QUALIFIER_STYLER));
+					proposal.setDisplayString(StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, new StyledString(currentTemplate.getName())));
 					result.add(proposal);
 				}
 			}
