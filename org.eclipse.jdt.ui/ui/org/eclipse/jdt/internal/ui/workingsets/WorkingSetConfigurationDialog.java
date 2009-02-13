@@ -163,6 +163,13 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	private boolean fIsSortingEnabled;
 
+	/**
+	 * The working set comparator.
+	 * 
+	 * @since 3.5
+	 */
+	private Comparator fComparator;
+
 	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, IWorkingSet[] activeWorkingSets, boolean isSortingEnabled) {
 		super(parentShell);
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
@@ -226,8 +233,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		createOrderButtons(inner);
 		createModifyButtons(composite);
 		if (fIsSortingEnabled) {
-			Comparator comparator= new WorkingSetSortComparator();
-			fTableViewer.setComparator(new ViewerComparator(comparator) {
+			fTableViewer.setComparator(new ViewerComparator(getComparator()) {
 				/*
 				 * @see ViewerComparator#compare(Viewer, Object, Object)
 				 * @since 3.5
@@ -380,8 +386,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				fIsSortingEnabled= fSortWorkingSet.getSelection();
 				updateButtonAvailability();
 				if (fIsSortingEnabled) {
-					Comparator comparator= new WorkingSetSortComparator();
-					fTableViewer.setComparator(new ViewerComparator(comparator) {
+					fTableViewer.setComparator(new ViewerComparator(getComparator()) {
 						/*
 						 * @see ViewerComparator#compare(Viewer, Object, Object)
 						 * @since 3.5
@@ -703,5 +708,18 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	public boolean isSortingEnabled() {
 		return fIsSortingEnabled;
+	}
+
+	/**
+	 * Returns the working set comparator.
+	 * 
+	 * @return the working set comparator
+	 * @since 3.5
+	 */
+	private Comparator getComparator() {
+		if (fComparator == null) {
+			fComparator= new WorkingSetSortComparator();
+		}
+		return fComparator;
 	}
 }
