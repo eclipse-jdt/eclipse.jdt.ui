@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.OpenAndLinkWithEditorHelper;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.handlers.IHandlerService;
@@ -913,7 +912,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (page != null)
 			selection= page.getSelection();
 		if (selection instanceof ITextSelection) {
-			Object part= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
+			Object part= page.getActivePart();
 			if (part instanceof IEditorPart) {
 				setSelectionFromEditor((IEditorPart)part);
 				if (fViewer.getSelection() != null)
