@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,6 +108,17 @@ public class CompliancePreferencePage extends PropertyAndPreferencePage {
 	protected void enablePreferenceContent(boolean enable) {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.enablePreferenceContent(enable);
+		}
+	}
+	
+	/*
+	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
+	 * @since 3.5
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible && fConfigurationBlock != null) {
+			fConfigurationBlock.refreshComplianceSettings();
 		}
 	}
 

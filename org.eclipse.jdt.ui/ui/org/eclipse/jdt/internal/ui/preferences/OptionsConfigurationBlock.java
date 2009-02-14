@@ -136,7 +136,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	/**
-	 * Key that is only managed locally ans not part of preference store.
+	 * Key that is only managed locally and not part of preference store.
 	 */
 	private static class LocalKey extends Key {
 		private HashMap fValues;
@@ -384,8 +384,7 @@ public abstract class OptionsConfigurationBlock {
 
 		makeScrollableCompositeAware(checkBox);
 
-		String currValue= getValue(key);
-		checkBox.setSelection(data.getSelection(currValue) == 0);
+		updateCheckBox(checkBox);
 
 		fCheckBoxes.add(checkBox);
 
@@ -440,6 +439,7 @@ public abstract class OptionsConfigurationBlock {
 					checkBox.setSelection(!checkBox.getSelection());
 					checkBox.setFocus();
 					linkSelected[0]= false;
+					controlChanged(checkBox);
 				}
 			}
 		});
@@ -447,8 +447,7 @@ public abstract class OptionsConfigurationBlock {
 		makeScrollableCompositeAware(link);
 		makeScrollableCompositeAware(checkBox);
 
-		String currValue= getValue(key);
-		checkBox.setSelection(data.getSelection(currValue) == 0);
+		updateCheckBox(checkBox);
 
 		fCheckBoxes.add(checkBox);
 
@@ -509,8 +508,7 @@ public abstract class OptionsConfigurationBlock {
 
 		makeScrollableCompositeAware(comboBox);
 
-		String currValue= getValue(key);
-		comboBox.select(data.getSelection(currValue));
+		updateCombo(comboBox);
 
 		fComboBoxes.add(comboBox);
 		return comboBox;
@@ -530,10 +528,8 @@ public abstract class OptionsConfigurationBlock {
 
 		fLabels.put(textBox, labelControl);
 
-		String currValue= getValue(key);
-		if (currValue != null) {
-			textBox.setText(currValue);
-		}
+		updateText(textBox);
+		
 		textBox.addModifyListener(getTextModifyListener());
 
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -663,10 +659,23 @@ public abstract class OptionsConfigurationBlock {
 		validateSettings(key, oldValue, number);
 	}
 
+	/**
+	 * Checks a setting.
+	 * 
+	 * @param key a key
+	 * @param value an assumed value for the key
+	 * @return <code>true</code> iff the given key's value is equal to the given value
+	 */
 	protected boolean checkValue(Key key, String value) {
 		return value.equals(getValue(key));
 	}
 
+	/**
+	 * Returns the value for the key.
+	 * 
+	 * @param key the key
+	 * @return the stored value
+	 */
 	protected String getValue(Key key) {
 		if (fDisabledProjectSettings != null) {
 			return (String) fDisabledProjectSettings.get(key);
@@ -679,6 +688,19 @@ public abstract class OptionsConfigurationBlock {
 		return Boolean.valueOf(getValue(key)).booleanValue();
 	}
 
+	/**
+	 * Sets the option <code>key</code> to the value <code>value</code>.
+	 * Note that callers have to make sure the corresponding controls are updated afterwards.
+	 * 
+	 * @param key the option key
+	 * @param value the new value
+	 * @return the old value
+	 * 
+	 * @see #updateControls()
+	 * @see #updateCheckBox(Button)
+	 * @see #updateCombo(Combo)
+	 * @see #updateText(Text)
+	 */
 	protected String setValue(Key key, String value) {
 		if (fDisabledProjectSettings != null) {
 			return (String) fDisabledProjectSettings.put(key, value);
@@ -688,27 +710,69 @@ public abstract class OptionsConfigurationBlock {
 		return oldValue;
 	}
 
+	/**
+	 * Sets the option <code>key</code> to the value <code>value</code>.
+	 * Note that callers have to make sure the corresponding controls are updated afterwards.
+	 * 
+	 * @param key the option key
+	 * @param value the new value
+	 * @return the old value
+	 * 
+	 * @see #updateControls()
+	 * @see #updateCheckBox(Button)
+	 * @see #updateCombo(Combo)
+	 * @see #updateText(Text)
+	 */
 	protected String setValue(Key key, boolean value) {
 		return setValue(key, String.valueOf(value));
 	}
 
 	protected final void setDefaultValue(Key key, String value) {
-		key.setStoredValue(fLookupOrder[fLookupOrder.length - 1], value, fManager);
+		IScopeContext instanceScope= fLookupOrder[fLookupOrder.length - 1];
+		key.setStoredValue(instanceScope, value, fManager);
 	}
 
 	/**
-	 * Returns the value as actually stored in the preference store.
+	 * Returns the value as stored in the preference store.
 	 *
 	 * @param key the key
-	 * @return the value as actually stored in the preference store.
+	 * @return the value
 	 */
 	protected String getStoredValue(Key key) {
 		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
+	
+	/**
+	 * Returns the value as actually stored in the preference store, without considering
+	 * the working copy store.
+	 *
+	 * @param key the key
+	 * @return the value as actually stored in the preference store
+	 */
+	protected String getOriginalStoredValue(Key key) {
+		return key.getStoredValue(fLookupOrder, false, null);
+	}
 
-	/* (non-javadoc)
-	 * Update fields and validate.
-	 * @param changedKey Key that changed, or null, if all changed.
+	/**
+	 * Reverts the given options to the stored values.
+	 * 
+	 * @param keys the options to revert
+	 * @since 3.5
+	 */
+	protected void revertValues(Key[] keys) {
+		for (int i= 0; i < keys.length; i++) {
+			Key curr= keys[i];
+			String origValue= curr.getStoredValue(fLookupOrder, false, null);
+			setValue(curr, origValue);
+		}
+	}
+
+	/**
+	 * Updates fields and validates settings.
+	 * 
+	 * @param changedKey key that changed, or <code>null</code>, if all changed.
+	 * @param oldValue old value or <code>null</code>
+	 * @param newValue new value or <code>null</code>
 	 */
 	protected abstract void validateSettings(Key changedKey, String oldValue, String newValue);
 
@@ -855,11 +919,7 @@ public abstract class OptionsConfigurationBlock {
 	 * @since 3.1
 	 */
 	public void performRevert() {
-		for (int i= 0; i < fAllKeys.length; i++) {
-			Key curr= fAllKeys[i];
-			String origValue= curr.getStoredValue(fLookupOrder, false, null);
-			setValue(curr, origValue);
-		}
+		revertValues(fAllKeys);
 
 		settingsUpdated();
 		updateControls();
@@ -869,8 +929,11 @@ public abstract class OptionsConfigurationBlock {
 	public void dispose() {
 	}
 
+	/**
+	 * Updates the UI from the current settings. Must be called whenever a setting has been changed
+	 * by code.
+	 */
 	protected void updateControls() {
-		// update the UI
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
 			updateCheckBox((Button) fCheckBoxes.get(i));
 		}

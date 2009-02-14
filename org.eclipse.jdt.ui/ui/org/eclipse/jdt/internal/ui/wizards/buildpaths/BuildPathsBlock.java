@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,11 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -71,7 +74,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -105,7 +111,7 @@ public class BuildPathsBlock {
 		 * @param removeLocation true if the folder at oldOutputLocation should be removed, false if only its content
 		 * @param oldOutputLocation The old output location
 		 * @return Returns true if .class files should be removed.
-		 * @throws OperationCanceledException
+		 * @throws OperationCanceledException if the operation was canceled
 		 */
 		boolean doQuery(boolean removeLocation, IPath oldOutputLocation) throws OperationCanceledException;
 
@@ -302,12 +308,14 @@ public class BuildPathsBlock {
 		List newClassPath= null;
 		IProject project= fCurrJProject.getProject();
 		projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
+		IClasspathEntry[] existingEntries= null;
 		if  (projectExists) {
 			if (outputLocation == null) {
 				outputLocation=  fCurrJProject.readOutputLocation();
 			}
+			existingEntries= fCurrJProject.readRawClasspath();
 			if (classpathEntries == null) {
-				classpathEntries=  fCurrJProject.readRawClasspath();
+				classpathEntries= existingEntries;
 			}
 		}
 		if (outputLocation == null) {
@@ -315,7 +323,7 @@ public class BuildPathsBlock {
 		}
 
 		if (classpathEntries != null) {
-			newClassPath= getExistingEntries(classpathEntries);
+			newClassPath= getCPListElements(classpathEntries, existingEntries);
 		}
 		if (newClassPath == null) {
 			newClassPath= getDefaultClassPath(jproject);
@@ -406,11 +414,12 @@ public class BuildPathsBlock {
 		fUserSettingsTimeStamp= getEncodedSettings();
 	}
 
-	private ArrayList getExistingEntries(IClasspathEntry[] classpathEntries) {
+	private ArrayList getCPListElements(IClasspathEntry[] classpathEntries, IClasspathEntry[] existingEntries) {
+		List existing= existingEntries == null ? Collections.EMPTY_LIST : Arrays.asList(existingEntries);
 		ArrayList newClassPath= new ArrayList();
 		for (int i= 0; i < classpathEntries.length; i++) {
 			IClasspathEntry curr= classpathEntries[i];
-			newClassPath.add(CPListElement.createFromExisting(curr, fCurrJProject));
+			newClassPath.add(CPListElement.create(curr, ! existing.contains(curr), fCurrJProject));
 		}
 		return newClassPath;
 	}
@@ -468,7 +477,7 @@ public class BuildPathsBlock {
 		list.add(new CPListElement(jproj, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
 
 		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-		list.addAll(getExistingEntries(jreEntries));
+		list.addAll(getCPListElements(jreEntries, null));
 		return list;
 	}
 
@@ -719,18 +728,32 @@ public class BuildPathsBlock {
 	}
 
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-
-		flush(fClassPathList.getElements(), getOutputLocation(), getJavaProject(), monitor);
+		configureJavaProject(null, monitor);
+	}
+	
+	public void configureJavaProject(String newProjectCompliance, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		flush(fClassPathList.getElements(), getOutputLocation(), getJavaProject(), newProjectCompliance, monitor);
 		initializeTimeStamps();
 
 		updateUI();
 	}
 
-	/*
-	 * Creates the Java project and sets the configured build path and output location.
-	 * If the project already exists only build paths are updated.
+	/**
+	 * Sets the configured build path and output location to the given Java project.
+	 * If the project already exists, only build paths are updated.
+	 * <p>
+	 * If the classpath contains an Execution Environment entry, the EE's compiler compliance options
+	 * are used as project-specific options (unless the classpath already contained the same Execution Environment)
+	 * 
+	 * @param classPathEntries the new classpath entries (list of {@link CPListElement})
+	 * @param outputLocation the output location
+	 * @param javaProject the Java project 
+	 * @param newProjectCompliance compliance to set for a new project, can be <code>null</code>
+	 * @param monitor a progress monitor, or <code>null</code>
+	 * @throws CoreException if flushing failed
+	 * @throws OperationCanceledException if flushing has been cancelled
 	 */
-	public static void flush(List classPathEntries, IPath outputLocation, IJavaProject javaProject, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public static void flush(List classPathEntries, IPath outputLocation, IJavaProject javaProject, String newProjectCompliance, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
@@ -862,6 +885,22 @@ public class BuildPathsBlock {
 						}
 					}
 				} else {
+					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						IPath path= entry.getPath();
+						if (! path.equals(entry.getOrginalPath())) {
+							String eeID= JavaRuntime.getExecutionEnvironmentId(path);
+							if (eeID != null) {
+								BuildPathSupport.setEEComplianceOptions(javaProject, eeID, newProjectCompliance);
+								newProjectCompliance= null; // don't set it again below
+							}
+						}
+						if (newProjectCompliance != null) {
+							Map options= javaProject.getOptions(false);
+							JavaModelUtil.setComplianceOptions(options, newProjectCompliance);
+							JavaModelUtil.setDefaultClassfileOptions(options, newProjectCompliance); // complete compliance options
+							javaProject.setOptions(options);
+						}
+					}
 					monitor.worked(3);
 				}
 				if (monitor.isCanceled()) {
@@ -1002,13 +1041,29 @@ public class BuildPathsBlock {
 	}
 
 	private CPListElement findElement(IClasspathEntry entry) {
+		CPListElement prefixMatch= null;
+		int entryKind= entry.getEntryKind();
 		for (int i= 0, len= fClassPathList.getSize(); i < len; i++) {
 			CPListElement curr= (CPListElement) fClassPathList.getElement(i);
-			if (curr.getEntryKind() == entry.getEntryKind() && curr.getPath().equals(entry.getPath())) {
-				return curr;
+			if (curr.getEntryKind() == entryKind) {
+				IPath entryPath= entry.getPath();
+				IPath currPath= curr.getPath();
+				if (currPath.equals(entryPath)) {
+					return curr;
+				}
+				// in case there's no full match, look for a similar container (same ID segment): 
+				if (prefixMatch == null && entryKind == IClasspathEntry.CPE_CONTAINER) {
+					int n= entryPath.segmentCount();
+					if (n > 0) {
+						IPath genericContainerPath= n == 1 ? entryPath : entryPath.removeLastSegments(n - 1);
+						if (n > 1 && genericContainerPath.isPrefixOf(currPath)) {
+							prefixMatch= curr;
+						}
+					}
+				}
 			}
 		}
-		return null;
+		return prefixMatch;
 	}
 
 	public void setElementToReveal(IClasspathEntry entry, String attributeKey) {
@@ -1044,7 +1099,7 @@ public class BuildPathsBlock {
 
 			Object page=  fTabFolder.getItem(pageIndex).getData();
 			if (page instanceof LibrariesWorkbookPage) {
-				CPListElement element= CPListElement.createFromExisting(entry, fCurrJProject);
+				CPListElement element= CPListElement.create(entry, true, fCurrJProject);
 				((LibrariesWorkbookPage) page).addElement(element);
 			}
 		}

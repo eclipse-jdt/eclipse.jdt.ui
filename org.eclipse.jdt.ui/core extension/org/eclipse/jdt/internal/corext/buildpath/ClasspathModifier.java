@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
@@ -1038,7 +1039,8 @@ public class ClasspathModifier {
 			IJavaModelStatus status= JavaConventions.validateClasspath(project, entries, outputLocation);
 			if (!status.isOK())
 				throw new JavaModelException(status);
-
+			
+			BuildPathSupport.setEEComplianceOptions(project, newEntries);
 			project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
 		} finally {
 			monitor.done();
@@ -1052,14 +1054,17 @@ public class ClasspathModifier {
 		monitor.beginTask("", 2); //$NON-NLS-1$
 
 		try {
-			IClasspathEntry[] entries= convert(cpProject.getCPListElements());
+			List cpListElements= cpProject.getCPListElements();
+			IClasspathEntry[] entries= convert(cpListElements);
 			IPath outputLocation= cpProject.getDefaultOutputLocation();
 
-			IJavaModelStatus status= JavaConventions.validateClasspath(cpProject.getJavaProject(), entries, outputLocation);
+			IJavaProject javaProject= cpProject.getJavaProject();
+			IJavaModelStatus status= JavaConventions.validateClasspath(javaProject, entries, outputLocation);
 			if (!status.isOK())
 				throw new JavaModelException(status);
 
-			cpProject.getJavaProject().setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
+			BuildPathSupport.setEEComplianceOptions(javaProject, cpListElements);
+			javaProject.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}

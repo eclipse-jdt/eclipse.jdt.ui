@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -317,7 +317,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	/**
 	 * Request a project layout.
 	 */
-	private final class LayoutGroup implements Observer, SelectionListener, IDialogFieldListener {
+	private final class LayoutGroup implements Observer, SelectionListener {
 
 		private final SelectionButtonDialogField fStdRadio, fSrcBinRadio;
 		private Group fGroup;
@@ -326,11 +326,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public LayoutGroup() {
 			fStdRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fStdRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_option_oneFolder);
-			fStdRadio.setDialogFieldListener(this);
 
 			fSrcBinRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fSrcBinRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_option_separateFolders);
-			fSrcBinRadio.setDialogFieldListener(this);
 
 			boolean useSrcBin= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
 			fSrcBinRadio.setSelection(useSrcBin);
@@ -374,7 +372,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fStdRadio.setEnabled(!detect);
 			fSrcBinRadio.setEnabled(!detect);
 			if (fPreferenceLink != null) {
-				fPreferenceLink.setEnabled(!detect && fSrcBinRadio.isSelected());
+				fPreferenceLink.setEnabled(!detect);
 			}
 			if (fGroup != null) {
 				fGroup.setEnabled(!detect);
@@ -406,22 +404,14 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fDetectGroup.handlePossibleJVMChange();
 			fJREGroup.handlePossibleJVMChange();
 		}
-
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 * @since 3.5
-		 */
-		public void dialogFieldChanged(DialogField field) {
-			updateEnableState();
-		}
 	}
 
 	private final class JREGroup implements Observer, SelectionListener, IDialogFieldListener {
 
 		private static final String LAST_SELECTED_EE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.execution.enviroment"; //$NON-NLS-1$
 		private static final String LAST_SELECTED_JRE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.project.jre"; //$NON-NLS-1$
-		private static final String LAST_SELECTED_JRE_KIND= JavaUI.ID_PLUGIN + ".last.selected.jre.kind"; //$NON-NLS-1$
+//		private static final String LAST_SELECTED_JRE_KIND= JavaUI.ID_PLUGIN + ".last.selected.jre.kind"; // used before EE became default
+		private static final String LAST_SELECTED_JRE_KIND2= JavaUI.ID_PLUGIN + ".last.selected.jre.kind2"; //$NON-NLS-1$
 
 		private static final int DEFAULT_JRE= 0;
 		private static final int PROJECT_JRE= 1;
@@ -481,6 +471,14 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fGroup.setLayout(initGridLayout(new GridLayout(2, false), true));
 			fGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_title);
 
+			fUseEEJRE.doFillIntoGrid(fGroup, 1);
+			Combo eeComboControl= fEECombo.getComboControl(fGroup);
+			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
+			
+			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
+			Combo comboControl= fJRECombo.getComboControl(fGroup);
+			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
+
 			fUseDefaultJRE.doFillIntoGrid(fGroup, 1);
 
 			fPreferenceLink= new Link(fGroup, SWT.NONE);
@@ -488,14 +486,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fPreferenceLink.setText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_link_description);
 			fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
 			fPreferenceLink.addSelectionListener(this);
-
-			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
-			Combo comboControl= fJRECombo.getComboControl(fGroup);
-			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-
-			fUseEEJRE.doFillIntoGrid(fGroup, 1);
-			Combo eeComboControl= fEECombo.getComboControl(fGroup);
-			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 
 			updateEnableState();
 			return fGroup;
@@ -633,7 +623,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					return environments[i].getId();
 			}
 
-			return "J2SE-1.5"; //$NON-NLS-1$
+			return "J2SE-1.6"; //$NON-NLS-1$
 		}
 
 		private String getDefaultJVMLabel() {
@@ -652,7 +642,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fJRECombo.setEnabled(!detect && fUseProjectJRE.isSelected());
 			fEECombo.setEnabled(!detect && fUseEEJRE.isSelected());
 			if (fPreferenceLink != null) {
-				fPreferenceLink.setEnabled(!detect && fUseDefaultJRE.isSelected());
+				fPreferenceLink.setEnabled(!detect);
 			}
 			if (fGroup != null) {
 				fGroup.setEnabled(!detect);
@@ -671,10 +661,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
+			String eeID= BuildPathSupport.EE_PREF_PAGE_ID;
 			String complianceId= CompliancePreferencePage.PREF_ID;
 			Map data= new HashMap();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
-			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID, complianceId  }, data).open();
+			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID, complianceId , eeID }, data).open();
 
 			handlePossibleJVMChange();
 			fDetectGroup.handlePossibleJVMChange();
@@ -702,19 +693,19 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				}
 			} else if (field == fUseDefaultJRE) {
 				if (fUseDefaultJRE.isSelected()) {
-					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, DEFAULT_JRE);
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND2, DEFAULT_JRE);
 					fUseProjectJRE.setSelection(false);
 					fUseEEJRE.setSelection(false);
 				}
 			} else if (field == fUseProjectJRE) {
 				if (fUseProjectJRE.isSelected()) {
-					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, PROJECT_JRE);
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND2, PROJECT_JRE);
 					fUseDefaultJRE.setSelection(false);
 					fUseEEJRE.setSelection(false);
 				}
 			} else if (field == fUseEEJRE) {
 				if (fUseEEJRE.isSelected()) {
-					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, EE_JRE);
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND2, EE_JRE);
 					fUseDefaultJRE.setSelection(false);
 					fUseProjectJRE.setSelection(false);
 				}
@@ -732,10 +723,10 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		private int getLastSelectedJREKind() {
 			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
-			if (settings.get(LAST_SELECTED_JRE_KIND) == null)
-				return DEFAULT_JRE;
+			if (settings.get(LAST_SELECTED_JRE_KIND2) == null)
+				return EE_JRE;
 
-			return settings.getInt(LAST_SELECTED_JRE_KIND);
+			return settings.getInt(LAST_SELECTED_JRE_KIND2);
 		}
 
 		private String getLastSelectedEE() {
@@ -962,11 +953,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
+			String eeID= BuildPathSupport.EE_PREF_PAGE_ID;
 			String complianceId= CompliancePreferencePage.PREF_ID;
 			Map data= new HashMap();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
 			String id= "JRE".equals(e.text) ? jreID : complianceId; //$NON-NLS-1$
-			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { jreID, complianceId  }, data).open();
+			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { jreID, complianceId, eeID  }, data).open();
 
 			fJREGroup.handlePossibleJVMChange();
 			handlePossibleJVMChange();
@@ -1324,18 +1316,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	 * @return returns the default class path entries
 	 */
 	public IClasspathEntry[] getDefaultClasspathEntries() {
-		IClasspathEntry[] defaultJRELibrary= PreferenceConstants.getDefaultJRELibrary();
-		String compliance= getCompilerCompliance();
-		IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
-		if (compliance == null || defaultJRELibrary.length > 1 || !jreContainerPath.isPrefixOf(defaultJRELibrary[0].getPath())) {
-			// use default
-			return defaultJRELibrary;
-		}
 		IPath newPath= fJREGroup.getJREContainerPath();
 		if (newPath != null) {
 			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
 		}
-		return defaultJRELibrary;
+		return PreferenceConstants.getDefaultJRELibrary();
 	}
 
 	/**

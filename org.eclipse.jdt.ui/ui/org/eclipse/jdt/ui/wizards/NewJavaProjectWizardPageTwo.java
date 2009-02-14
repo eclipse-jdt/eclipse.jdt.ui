@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
@@ -57,7 +56,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -466,18 +464,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			if (fCurrProject == null) {
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
-			configureJavaProject(new SubProgressMonitor(monitor, 2));
-
-			if (!fKeepContent) {
-				String compliance= fFirstPage.getCompilerCompliance();
-				if (compliance != null) {
-					IJavaProject project= JavaCore.create(fCurrProject);
-					Map options= project.getOptions(false);
-					JavaModelUtil.setComplianceOptions(options, compliance);
-					JavaModelUtil.setDefaultClassfileOptions(options, compliance); // complete compliance options
-					project.setOptions(options);
-				}
-			}
+			String newProjectCompliance= fKeepContent ? null : fFirstPage.getCompilerCompliance();
+			configureJavaProject(newProjectCompliance, new SubProgressMonitor(monitor, 2));
+			
 		} finally {
 			monitor.done();
 			fCurrProject= null;

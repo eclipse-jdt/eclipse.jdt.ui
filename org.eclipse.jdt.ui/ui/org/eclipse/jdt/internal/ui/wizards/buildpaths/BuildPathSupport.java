@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,10 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,7 +37,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -46,6 +54,14 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class BuildPathSupport {
 
 	public static final String JRE_PREF_PAGE_ID= "org.eclipse.jdt.debug.ui.preferences.VMPreferencePage"; //$NON-NLS-1$
+	public static final String EE_PREF_PAGE_ID= "org.eclipse.jdt.debug.ui.jreProfiles"; //$NON-NLS-1$
+	
+	/* see also ComplianceConfigurationBlock#PREFS_COMPLIANCE */
+	private static final String[] PREFS_COMPLIANCE= new String[] {
+			JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.COMPILER_PB_ENUM_IDENTIFIER,
+			JavaCore.COMPILER_SOURCE, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM,
+			JavaCore.COMPILER_COMPLIANCE
+	};
 
 
 	private BuildPathSupport() {
@@ -173,11 +189,11 @@ public class BuildPathSupport {
 	 * Apply a modified classpath entry to the classpath. The classpath entry can also be from a classpath container.
 	 * @param shell If not null and the entry could not be found on the projects classpath, a dialog will ask to put the entry on the classpath
 	 * @param newEntry The modified entry. The entry's kind or path must be unchanged.
-	 * @param changedAttributes The attibutes that have changed. See {@link CPListElement} for constants values.
+	 * @param changedAttributes The attributes that have changed. See {@link CPListElement} for constants values.
 	 * @param jproject Project where the entry belongs to
 	 * @param containerPath The path of the entry's parent container or <code>null</code> if the entry is not in a container
 	 * @param monitor The progress monitor to use
-	 * @throws CoreException
+	 * @throws CoreException if the update failed
 	 */
 	public static void modifyClasspathEntry(Shell shell, IClasspathEntry newEntry, String[] changedAttributes, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
 		if (containerPath != null) {
@@ -195,7 +211,7 @@ public class BuildPathSupport {
 	 * @param jproject Project where the entry belongs to
 	 * @param containerPath The path of the entry's parent container or <code>null</code> if the entry is not in a container
 	 * @param monitor The progress monitor to use
-	 * @throws CoreException
+	 * @throws CoreException if the update failed
 	 */
 	public static void modifyClasspathEntry(Shell shell, IClasspathEntry newEntry, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
 		modifyClasspathEntry(shell, newEntry, null, jproject, containerPath, monitor);
@@ -236,9 +252,9 @@ public class BuildPathSupport {
 	/**
 	 * Request a container update.
 	 * @param jproject The project of the container
-	 * @param container The container to requesta  change to
+	 * @param container The container to request a change to
 	 * @param newEntries The updated entries
-	 * @throws CoreException
+	 * @throws CoreException if the request failed
 	 */
 	public static void requestContainerUpdate(IJavaProject jproject, IClasspathContainer container, IClasspathEntry[] newEntries) throws CoreException {
 		IPath containerPath= container.getPath();
@@ -291,5 +307,105 @@ public class BuildPathSupport {
 			}
 		});
 		return result[0];
+	}
+
+	/**
+	 * Sets the default compiler compliance options iff <code>modifiedClassPathEntries</code>
+	 * contains a classpath container entry that is modified or new and that points to an execution
+	 * environment. Does nothing if the EE or the options could not be resolved.
+	 * 
+	 * @param javaProject the Java project
+	 * @param modifiedClassPathEntries a list of {@link CPListElement}
+	 * 
+	 * @see #getEEOptions(IExecutionEnvironment)
+	 * 
+	 * @since 3.5
+	 */
+	public static void setEEComplianceOptions(IJavaProject javaProject, List modifiedClassPathEntries) {
+		for (Iterator iter= modifiedClassPathEntries.iterator(); iter.hasNext();) {
+			CPListElement entry= (CPListElement)iter.next();
+			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				IPath path= entry.getPath();
+				if (! path.equals(entry.getOrginalPath())) {
+					String eeID= JavaRuntime.getExecutionEnvironmentId(path);
+					if (eeID != null) {
+						setEEComplianceOptions(javaProject, eeID, null);
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sets the default compiler compliance options based on the given execution environment.
+	 * Does nothing if the EE or the options could not be resolved.
+	 * 
+	 * @param javaProject the Java project
+	 * @param eeID the execution environment ID
+	 * @param newProjectCompliance compliance to set for a new project, can be <code>null</code>
+	 * 
+	 * @see #getEEOptions(IExecutionEnvironment)
+	 * 
+	 * @since 3.5
+	 */
+	public static void setEEComplianceOptions(IJavaProject javaProject, String eeID, String newProjectCompliance) {
+		IExecutionEnvironment ee= JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(eeID);
+		if (ee != null) {
+			Map options= javaProject.getOptions(false);
+			Map eeOptions= getEEOptions(ee);
+			if (eeOptions != null) {
+				for (int i= 0; i < PREFS_COMPLIANCE.length; i++) {
+					String option= PREFS_COMPLIANCE[i];
+					options.put(option, eeOptions.get(option));
+				}
+				
+				if (newProjectCompliance != null) {
+					JavaModelUtil.setDefaultClassfileOptions(options, newProjectCompliance); // complete compliance options
+				}
+				
+				String option= JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE;
+				String inlineJSR= (String)eeOptions.get(option);
+				if (inlineJSR != null) {
+					options.put(option, inlineJSR);
+				}
+				
+				javaProject.setOptions(options);
+			}
+		}
+	}
+
+	/**
+	 * Returns the compliance options from the given EE. If the result is not <code>null</code>,
+	 * it contains at least these core options:
+	 * <ul>
+	 * <li>{@link JavaCore#COMPILER_COMPLIANCE}</li>
+	 * <li>{@link JavaCore#COMPILER_SOURCE}</li>
+	 * <li>{@link JavaCore#COMPILER_CODEGEN_TARGET_PLATFORM}</li>
+	 * <li>{@link JavaCore#COMPILER_PB_ASSERT_IDENTIFIER}</li>
+	 * <li>{@link JavaCore#COMPILER_PB_ENUM_IDENTIFIER}</li>
+	 * <li>{@link JavaCore#COMPILER_CODEGEN_INLINE_JSR_BYTECODE} for compliance levels 1.5 and greater</li>
+	 * </ul>
+	 * 
+	 * @param ee the EE, can be <code>null</code>
+	 * @return the options, or <code>null</code> if none
+	 * @since 3.5
+	 */
+	public static Map getEEOptions(IExecutionEnvironment ee) {
+		if (ee == null)
+			return null;
+		Map eeOptions= ee.getComplianceOptions();
+		if (eeOptions == null)
+			return null;
+		
+		Object complianceOption= eeOptions.get(JavaCore.COMPILER_COMPLIANCE);
+		if (!(complianceOption instanceof String))
+			return null;
+	
+		// eeOptions can miss some options, make sure they are complete:
+		HashMap options= new HashMap();
+		JavaModelUtil.setComplianceOptions(options, (String)complianceOption);
+		options.putAll(eeOptions);
+		return options;
 	}
 }

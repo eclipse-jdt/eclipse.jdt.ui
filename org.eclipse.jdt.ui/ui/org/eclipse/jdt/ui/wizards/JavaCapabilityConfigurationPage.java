@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -260,6 +260,20 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * @throws InterruptedException Thrown when the operation has been canceled.
 	 */
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		configureJavaProject(null, monitor);
+	}
+	
+	/**
+	 * Adds the Java nature to the project (if not set yet) and configures the build classpath.
+	 *
+	 * @param newProjectCompliance compliance to set for a new project, can be <code>null</code>
+	 * @param monitor a progress monitor to report progress or <code>null</code> if
+	 * progress reporting is not desired
+	 * @throws CoreException Thrown when the configuring the Java project failed.
+	 * @throws InterruptedException Thrown when the operation has been canceled.
+	 * @since 3.5
+	 */
+	public void configureJavaProject(String newProjectCompliance, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
@@ -270,7 +284,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		try {
 			IProject project= getJavaProject().getProject();
 			BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
-			getBuildPathsBlock().configureJavaProject(new SubProgressMonitor(monitor, 5));
+			getBuildPathsBlock().configureJavaProject(newProjectCompliance, new SubProgressMonitor(monitor, 5));
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException();
 		} finally {

@@ -500,6 +500,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_codegen_targetplatform_label;
 	public static String ComplianceConfigurationBlock_pb_assert_as_identifier_label;
 	public static String ComplianceConfigurationBlock_pb_enum_as_identifier_label;
+	public static String ComplianceConfigurationBlock_compliance_follows_EE_label;
 	public static String ComplianceConfigurationBlock_compliance_group_label;
 	public static String ComplianceConfigurationBlock_classfiles_group_label;
 	public static String OptionsConfigurationBlock_job_title;

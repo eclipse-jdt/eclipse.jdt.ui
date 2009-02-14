@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -28,9 +29,12 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 
 /**
@@ -84,7 +88,7 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 		if (created == null || created.length != 1)
 			return;
 
-		IClasspathEntry result= created[0];
+		final IClasspathEntry result= created[0];
 		if (result == null || result.equals(fEntry))
 			return;
 
@@ -104,6 +108,13 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 			context.run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
+						if (result.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+							IPath path= result.getPath();
+							String eeID= JavaRuntime.getExecutionEnvironmentId(path);
+							if (eeID != null) {
+								BuildPathSupport.setEEComplianceOptions(fJavaProject, eeID, null);
+							}
+						}
 						fJavaProject.setRawClasspath(newEntries, fJavaProject.getOutputLocation(), monitor);
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);

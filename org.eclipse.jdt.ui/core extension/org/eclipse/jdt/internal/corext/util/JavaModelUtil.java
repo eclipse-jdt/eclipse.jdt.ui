@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -662,7 +662,7 @@ public final class JavaModelUtil {
 	/**
 	 * @param version1 the first version
 	 * @param version2 the second version
-	 * @return returns if version 1 is less than version 2.
+	 * @return <code>true</code> iff version1 is less than version2
 	 */
 	public static boolean isVersionLessThan(String version1, String version2) {
 		if (JavaCore.VERSION_CLDC_1_1.equals(version1)) {
@@ -736,12 +736,22 @@ public final class JavaModelUtil {
 	}
 
 	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {
+		Map complianceOptions= executionEnvironment.getComplianceOptions();
+		if (complianceOptions != null) {
+			Object compliance= complianceOptions.get(JavaCore.COMPILER_COMPLIANCE);
+			if (compliance instanceof String)
+				return (String)compliance;
+		}
+		
+		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf("1.6") != -1) { //$NON-NLS-1$
+		if (desc.indexOf(JavaCore.VERSION_1_6) != -1) {
 			return JavaCore.VERSION_1_6;
-		} else if (desc.indexOf("1.5") != -1) { //$NON-NLS-1$
+		} else if (desc.indexOf(JavaCore.VERSION_1_6) != -1) {
+			return JavaCore.VERSION_1_6;
+		} else if (desc.indexOf(JavaCore.VERSION_1_5) != -1) {
 			return JavaCore.VERSION_1_5;
-		} else if (desc.indexOf("1.4") != -1) { //$NON-NLS-1$
+		} else if (desc.indexOf(JavaCore.VERSION_1_4) != -1) {
 			return JavaCore.VERSION_1_4;
 		}
 		return JavaCore.VERSION_1_3;

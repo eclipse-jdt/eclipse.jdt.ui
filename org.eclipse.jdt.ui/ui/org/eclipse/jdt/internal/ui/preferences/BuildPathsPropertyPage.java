@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,31 +107,39 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		return pageSettings;
 	}
 
+	/*
+	 * @see org.eclipse.jface.preference.PreferencePage#okToLeave()
+	 * @since 3.5
+	 */
+	public boolean okToLeave() {
+		if (fBuildPathsBlock != null && fBuildPathsBlock.hasChangesInDialog()) {
+			String title= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_title;
+			String message= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_message;
+			String[] buttonLabels= new String[] {
+					PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_save,
+					PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_discard,
+					PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_ignore
+			};
+			MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
+			int res= dialog.open();
+			if (res == 0) { //save
+				fBlockOnApply= true;
+				performOk();
+			} else if (res == 1) { // discard
+				fBuildPathsBlock.init(JavaCore.create(getProject()), null, null);
+			} else {
+				// keep unsaved
+			}
+		}
+		return super.okToLeave();
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 		if (fBuildPathsBlock != null) {
-			if (!visible) {
-				if (fBuildPathsBlock.hasChangesInDialog()) {
-					String title= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_title;
-					String message= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_message;
-					String[] buttonLabels= new String[] {
-							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_save,
-							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_discard,
-							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_ignore
-					};
-					MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
-					int res= dialog.open();
-					if (res == 0) {
-						performOk();
-					} else if (res == 1) {
-						fBuildPathsBlock.init(JavaCore.create(getProject()), null, null);
-					} else {
-						// keep unsaved
-					}
-				}
-			} else {
+			if (visible) {
 				if (!fBuildPathsBlock.hasChangesInDialog() && fBuildPathsBlock.hasChangesInClasspathFile()) {
 					fBuildPathsBlock.init(JavaCore.create(getProject()), null, null);
 				}

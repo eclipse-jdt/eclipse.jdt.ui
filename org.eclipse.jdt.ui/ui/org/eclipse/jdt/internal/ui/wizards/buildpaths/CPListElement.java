@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,11 +85,15 @@ public class CPListElement {
 	}
 
 	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, IResource res, IPath linkTarget) {
+		this(parent, project, entryKind, path, false, res, linkTarget);
+	}
+	
+	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, boolean newElement, IResource res, IPath linkTarget) {
 		fProject= project;
 
 		fEntryKind= entryKind;
 		fPath= path;
-		fOrginalPath= path;
+		fOrginalPath= newElement ? null : path;
 		fLinkTarget= linkTarget;
 		fOrginalLinkTarget= linkTarget;
 		fChildren= new ArrayList();
@@ -125,7 +129,7 @@ public class CPListElement {
 					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
 					if (container != null) {
 						IClasspathEntry[] entries= container.getClasspathEntries();
-						if (entries != null) { // invalid container implementation
+						if (entries != null) { // catch invalid container implementation
 							for (int i= 0; i < entries.length; i++) {
 								IClasspathEntry entry= entries[i];
 								if (entry != null) {
@@ -541,10 +545,20 @@ public class CPListElement {
 	}
 
 	public static CPListElement createFromExisting(IClasspathEntry curr, IJavaProject project) {
-		return createFromExisting(null, curr, project);
+		//Note: Some old clients of this method could actually mean create(curr, true, project)
+		return create(curr, false, project);
 	}
 
 	public static CPListElement createFromExisting(Object parent, IClasspathEntry curr, IJavaProject project) {
+		//Note: Some old clients of this method could actually mean create(parent, curr, true, project)
+		return create(parent, curr, false, project);
+	}
+	
+	public static CPListElement create(IClasspathEntry curr, boolean newElement, IJavaProject project) {
+		return create(null, curr, newElement, project);
+	}
+	
+	public static CPListElement create(Object parent, IClasspathEntry curr, boolean newElement, IJavaProject project) {
 		IPath path= curr.getPath();
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
@@ -603,7 +617,7 @@ public class CPListElement {
 				isMissing= (res == null);
 				break;
 		}
-		CPListElement elem= new CPListElement(parent, project, curr.getEntryKind(), path, res, linkTarget);
+		CPListElement elem= new CPListElement(parent, project, curr.getEntryKind(), path, newElement, res, linkTarget);
 		elem.setExported(curr.isExported());
 		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
 		elem.setAttribute(OUTPUT, curr.getOutputLocation());
