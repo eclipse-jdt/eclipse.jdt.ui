@@ -193,6 +193,22 @@ public abstract class OptionsConfigurationBlock {
 			return fValues.length -1; // assume the last option is the least severe
 		}
 	}
+	
+	protected static class LinkControlData extends ControlData {
+		private Link fLink;
+
+		public LinkControlData(Key key, String[] values) {
+			super(key, values);
+		}
+
+		public void setLink(Link link) {
+			fLink= link;
+		}
+		
+		public Link getLink() {
+			return fLink;
+		}
+	}
 
 	private static final String REBUILD_COUNT_KEY= "preferences_build_requested"; //$NON-NLS-1$
 
@@ -392,7 +408,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	protected Button addCheckBoxWithLink(Composite parent, String label, Key key, String[] values, int indent, int widthHint, SelectionListener listener) {
-		ControlData data= new ControlData(key, values);
+		LinkControlData data= new LinkControlData(key, values);
 
 		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false);
 		gd.horizontalSpan= 3;
@@ -422,6 +438,7 @@ public abstract class OptionsConfigurationBlock {
 		if (listener != null) {
 			link.addSelectionListener(listener);
 		}
+		data.setLink(link);
 		
 		// toggle checkbox when user clicks unlinked text in link:
 		final boolean[] linkSelected= { false };
@@ -979,6 +996,20 @@ public abstract class OptionsConfigurationBlock {
 		return null;
 	}
 
+	protected Link getCheckBoxLink(Key key) {
+		if (fCheckBoxes == null)
+			return null;
+		
+		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
+			Button curr= (Button) fCheckBoxes.get(i);
+			ControlData data= (ControlData) curr.getData();
+			if (key.equals(data.getKey()) && data instanceof LinkControlData) {
+				return ((LinkControlData)data).getLink();
+			}
+		}
+		return null;
+	}
+	
 	protected Combo getComboBox(Key key) {
 		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
 			Combo curr= (Combo) fComboBoxes.get(i);

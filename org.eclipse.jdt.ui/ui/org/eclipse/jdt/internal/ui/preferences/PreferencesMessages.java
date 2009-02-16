@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -501,6 +501,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_pb_assert_as_identifier_label;
 	public static String ComplianceConfigurationBlock_pb_enum_as_identifier_label;
 	public static String ComplianceConfigurationBlock_compliance_follows_EE_label;
+	public static String ComplianceConfigurationBlock_compliance_follows_EE_with_EE_label;
 	public static String ComplianceConfigurationBlock_compliance_group_label;
 	public static String ComplianceConfigurationBlock_classfiles_group_label;
 	public static String OptionsConfigurationBlock_job_title;

@@ -527,7 +527,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void validateComplianceStatus() {
-		//TODO: updated VM in .classpath is not resolved yet!
 		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
 			boolean isVisible= false;
 			String compliance= getStoredValue(PREF_COMPLIANCE); // get actual value
@@ -608,8 +607,16 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		if (fProject != null) {
 			String complianceFollowsEE= DISABLED;
 			IExecutionEnvironment ee= getEE();
+			String label;
 			if (ee != null) {
 				complianceFollowsEE= getComplianceFollowsEE(ee);
+				label= Messages.format(PreferencesMessages.ComplianceConfigurationBlock_compliance_follows_EE_with_EE_label, ee.getId());
+			} else {
+				label= PreferencesMessages.ComplianceConfigurationBlock_compliance_follows_EE_label;
+			}
+			Link checkBoxLink= getCheckBoxLink(INTR_COMPLIANCE_FOLLOWS_EE);
+			if (checkBoxLink != null) {
+				checkBoxLink.setText(label);
 			}
 			setValue(INTR_COMPLIANCE_FOLLOWS_EE, complianceFollowsEE);
 		}
