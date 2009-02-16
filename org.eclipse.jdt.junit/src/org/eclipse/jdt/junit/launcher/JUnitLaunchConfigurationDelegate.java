@@ -392,10 +392,6 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 
 		private boolean fInDevelopmentMode;
 
-		protected ClasspathLocalizer() {
-			this(false);
-		}
-
 		public ClasspathLocalizer(boolean inDevelopmentMode) {
 			fInDevelopmentMode = inDevelopmentMode;
 		}

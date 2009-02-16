@@ -688,10 +688,6 @@ public class TestRunSession implements ITestRunSession {
 		}
 
 
-		public void testFailed(int status, String testId, String testName, String trace) {
-			testFailed(status, testId, testName, trace, null, null);
-		}
-
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.junit.model.ITestRunListener2#testFailed(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 		 */
@@ -719,10 +715,6 @@ public class TestRunSession implements ITestRunSession {
 				return string.substring(0, length - 1);
 			else
 				return string;
-		}
-
-		public void testReran(String testId, String testClass, String testName, int status, String trace) {
-			testReran(testId, testClass, testName, status, trace, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		/* (non-Javadoc)
