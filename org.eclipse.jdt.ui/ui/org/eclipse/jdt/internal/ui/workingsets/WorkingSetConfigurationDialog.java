@@ -718,7 +718,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	private Comparator getComparator() {
 		if (fComparator == null) {
-			fComparator= new WorkingSetSortComparator();
+			fComparator= new WorkingSetComparator(true);
 		}
 		return fComparator;
 	}

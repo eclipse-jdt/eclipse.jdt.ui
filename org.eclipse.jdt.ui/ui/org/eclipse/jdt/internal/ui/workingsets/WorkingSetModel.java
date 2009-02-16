@@ -360,7 +360,7 @@ public class WorkingSetModel {
 
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
 		if (fIsSortingEnabled) {
-			Arrays.sort(workingSets, new WorkingSetSortComparator());
+			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		}
 		fActiveWorkingSets= new ArrayList(Arrays.asList(workingSets));
 		fElementMapper.rebuild(getActiveWorkingSets());
