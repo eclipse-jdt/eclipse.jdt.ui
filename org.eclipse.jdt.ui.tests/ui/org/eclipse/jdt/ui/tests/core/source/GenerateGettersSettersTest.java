@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -36,7 +38,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Tests generation of getters and setters.
@@ -148,6 +153,144 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				"}";
 
 		compareSource(expected, fClassA.getSource());
+	}
+
+	/**
+	 * Tests normal getter/setter generation for one field.
+	 * 
+	 * @throws Exception
+	 */
+	public void testDoneWithSmartIs() throws Exception {
+
+		IField field1= fClassA.createField("boolean done;", null, false, new NullProgressMonitor());
+		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
+
+		String expected= "public class A {\r\n" +
+				"\r\n" +
+				"	boolean done;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @return Returns the done.\r\n" +
+				"	 */\r\n" +
+				"	public boolean isDone() {\r\n" +
+				"		return done;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param done The done to set.\r\n" +
+				"	 */\r\n" +
+				"	public void setDone(boolean done) {\r\n" +
+				"		this.done = done;\r\n" +
+				"	}\r\n" +
+				"}";
+
+		compareSource(expected, fClassA.getSource());
+	}
+
+	/**
+	 * Tests normal getter/setter generation for one field.
+	 * 
+	 * @throws Exception
+	 */
+	public void testIsDoneWithSmartIs() throws Exception {
+
+		IField field1= fClassA.createField("boolean isDone;", null, false, new NullProgressMonitor());
+		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
+
+		String expected= "public class A {\r\n" +
+				"\r\n" +
+				"	boolean isDone;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @return Returns the isDone.\r\n" +
+				"	 */\r\n" +
+				"	public boolean isDone() {\r\n" +
+				"		return isDone;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param isDone The isDone to set.\r\n" +
+				"	 */\r\n" +
+				"	public void setDone(boolean isDone) {\r\n" +
+				"		this.isDone = isDone;\r\n" +
+				"	}\r\n" +
+				"}";
+
+		compareSource(expected, fClassA.getSource());
+	}
+
+	/**
+	 * Tests normal getter/setter generation for one field.
+	 * 
+	 * @throws Exception
+	 */
+	public void testDoneWithoutSmartIs() throws Exception {
+		final IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		try {
+			store.setValue(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, false);
+			IField field1= fClassA.createField("boolean done;", null, false, new NullProgressMonitor());
+			runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
+
+			String expected= "public class A {\r\n" +
+				"\r\n" +
+				"	boolean done;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @return Returns the done.\r\n" +
+				"	 */\r\n" +
+					"	public boolean getDone() {\r\n" +
+				"		return done;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param done The done to set.\r\n" +
+				"	 */\r\n" +
+				"	public void setDone(boolean done) {\r\n" +
+				"		this.done = done;\r\n" +
+				"	}\r\n" +
+				"}";
+
+			compareSource(expected, fClassA.getSource());
+		} finally {
+			store.setValue(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, true);
+		}
+	}
+
+	/**
+	 * Tests normal getter/setter generation for one field.
+	 * 
+	 * @throws Exception
+	 */
+	public void testIsDoneWithoutSmartIs() throws Exception {
+		final IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		try {
+			store.setValue(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, false);
+			IField field1= fClassA.createField("boolean isDone;", null, false, new NullProgressMonitor());
+			runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
+
+			String expected= "public class A {\r\n" +
+				"\r\n" +
+				"	boolean isDone;\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @return Returns the isDone.\r\n" +
+				"	 */\r\n" +
+					"	public boolean getIsDone() {\r\n" +
+				"		return isDone;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	/**\r\n" +
+				"	 * @param isDone The isDone to set.\r\n" +
+				"	 */\r\n" +
+					"	public void setIsDone(boolean isDone) {\r\n" +
+				"		this.isDone = isDone;\r\n" +
+				"	}\r\n" +
+				"}";
+
+			compareSource(expected, fClassA.getSource());
+		} finally {
+			store.setValue(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, true);
+		}
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -262,11 +262,16 @@ public class PreferenceConstants {
 	public static final String CODEGEN_KEYWORD_THIS= "org.eclipse.jdt.ui.keywordthis"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether to use the prefix "is" or the prefix "get" for
-	 * automatically created getters which return a boolean field.
+	 * A named preference that controls whether automatically created getters which return a boolean
+	 * field should start with "is" or should be prefixed with "get".
+	 * <p>
+	 * If <code>true</code> and if the field starts with "is" then the created getter name will not
+	 * be additionally prefixed and "is" will not be part of the setter name.
+	 * </p>
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * 
 	 * @since 3.0
 	 */
 	public static final String CODEGEN_IS_FOR_GETTERS= "org.eclipse.jdt.ui.gettersetter.use.is"; //$NON-NLS-1$

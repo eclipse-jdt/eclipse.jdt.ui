@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,14 +76,15 @@ public class GetterSetterUtil {
 	}
 
 	public static String getSetterName(IJavaProject project, String fieldName, int flags, boolean isBoolean, String[] excludedNames){
-		return NamingConventions.suggestSetterName(project, fieldName, flags, isBoolean, excludedNames);
+		boolean useIs= StubUtility.useIsForBooleanGetters(project);
+		return NamingConventions.suggestSetterName(project, fieldName, flags, useIs && isBoolean, excludedNames);
 	}
 
 	public static String getSetterName(IField field, String[] excludedNames) throws JavaModelException {
 		if (excludedNames == null) {
 			excludedNames= EMPTY;
 		}
-		return NamingConventions.suggestSetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), JavaModelUtil.isBoolean(field), excludedNames);
+		return getSetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), JavaModelUtil.isBoolean(field), excludedNames);
 	}
 
 	public static IMethod getGetter(IField field) throws JavaModelException{
