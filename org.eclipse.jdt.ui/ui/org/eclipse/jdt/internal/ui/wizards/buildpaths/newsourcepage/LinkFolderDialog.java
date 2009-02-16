@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
+
 /**
  * @deprecated Not used anymore in 3.4
  */
@@ -85,10 +86,6 @@ public class LinkFolderDialog extends StatusDialog {
 			DialogField.createEmptySpace(parent, numColumns - 1);
 
             fNameDialogField.setDialogFieldListener(this);
-        }
-
-        public StringDialogField getNameDialogField() {
-            return fNameDialogField;
         }
 
         public void setText(String text) {

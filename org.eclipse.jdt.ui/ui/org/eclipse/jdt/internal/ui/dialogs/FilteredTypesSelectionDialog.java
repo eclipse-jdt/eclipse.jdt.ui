@@ -119,6 +119,7 @@ import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
+
 /**
  * Shows a list of Java types to the user with a text entry field for a string
  * pattern used to filter the list of types.
@@ -972,8 +973,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private final String[] fVMNames;
 
-		private boolean fFullyQualifyDuplicates;
-
 		public TypeInfoUtil(ITypeInfoImageProvider extension) {
 			fProviderExtension= extension;
 			List locations= new ArrayList();
@@ -985,10 +984,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fInstallLocations= (String[]) locations.toArray(new String[locations.size()]);
 			fVMNames= (String[]) labels.toArray(new String[labels.size()]);
 
-		}
-
-		public void setFullyQualifyDuplicates(boolean value) {
-			fFullyQualifyDuplicates= value;
 		}
 
 		private void processVMInstallType(IVMInstallType installType, List locations, List labels) {
@@ -1053,53 +1048,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return result.toString();
 		}
 
-		public String getText(TypeNameMatch last, TypeNameMatch current, TypeNameMatch next) {
-			StringBuffer result= new StringBuffer();
-			int qualifications= 0;
-			String currentTN= current.getSimpleTypeName();
-			result.append(currentTN);
-			String currentTCN= getTypeContainerName(current);
-			if (last != null) {
-				String lastTN= last.getSimpleTypeName();
-				String lastTCN= getTypeContainerName(last);
-				if (currentTCN.equals(lastTCN)) {
-					if (currentTN.equals(lastTN)) {
-						result.append(JavaElementLabels.CONCAT_STRING);
-						result.append(currentTCN);
-						result.append(JavaElementLabels.CONCAT_STRING);
-						result.append(getContainerName(current));
-						return result.toString();
-					}
-				} else if (currentTN.equals(lastTN)) {
-					qualifications= 1;
-				}
-			}
-			if (next != null) {
-				String nextTN= next.getSimpleTypeName();
-				String nextTCN= getTypeContainerName(next);
-				if (currentTCN.equals(nextTCN)) {
-					if (currentTN.equals(nextTN)) {
-						result.append(JavaElementLabels.CONCAT_STRING);
-						result.append(currentTCN);
-						result.append(JavaElementLabels.CONCAT_STRING);
-						result.append(getContainerName(current));
-						return result.toString();
-					}
-				} else if (currentTN.equals(nextTN)) {
-					qualifications= 1;
-				}
-			}
-			if (qualifications > 0) {
-				result.append(JavaElementLabels.CONCAT_STRING);
-				result.append(currentTCN);
-				if (fFullyQualifyDuplicates) {
-					result.append(JavaElementLabels.CONCAT_STRING);
-					result.append(getContainerName(current));
-				}
-			}
-			return result.toString();
-		}
-
 		public String getQualificationText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
 			String containerName= type.getTypeContainerName();
@@ -1118,13 +1066,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				return fProviderExtension.getImageDescriptor(fAdapter);
 			}
 			return null;
-		}
-
-		private String getTypeContainerName(TypeNameMatch info) {
-			String result= info.getTypeContainerName();
-			if (result.length() > 0)
-				return result;
-			return JavaUIMessages.FilteredTypesSelectionDialog_default_package;
 		}
 
 		private String getContainerName(TypeNameMatch type) {
@@ -1340,10 +1281,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			super();
 			fContentProvider= contentProvider;
 			fTypeItemsFilter= typeItemsFilter;
-		}
-
-		public void cancel() {
-			fStop= true;
 		}
 
 		/*

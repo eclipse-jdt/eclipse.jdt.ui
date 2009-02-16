@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IndentUtil.IndentResult;
 
+
 /**
  * Action for moving selected lines in a Java editor.
  * @since 3.1
@@ -62,10 +63,6 @@ public class JavaMoveLinesAction extends TextEditorAction {
 		 * The indent token shared by all four actions.
 		 */
 		public IndentResult fResult= null;
-		/**
-		 * Set to true before modifying the document, to false after.
-		 */
-		boolean fIsChanging= false;
 
 		/** <code>true</code> if a compound move / copy is going on. */
 		private boolean fEditInProgress= false;
@@ -380,7 +377,6 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			if (fCopy)
 				fSharedState.endCompoundEdit();
 			fSharedState.beginCompoundEdit();
-			fSharedState.fIsChanging= true;
 
 			document.replace(offset, lenght, insertion);
 
@@ -404,7 +400,6 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			// won't happen without concurrent modification - bail out
 			return;
 		} finally {
-			fSharedState.fIsChanging= false;
 			if (fCopy)
 				fSharedState.endCompoundEdit();
 		}

@@ -109,15 +109,6 @@ public class WorkingSetModel {
 				put(workingSets[i]);
 			}
 		}
-		public IAdaptable[] remove(IWorkingSet ws) {
-			IAdaptable[] elements= (IAdaptable[])fWorkingSetToElement.remove(ws);
-			if (elements != null) {
-				for (int i= 0; i < elements.length; i++) {
-					removeElement(elements[i], ws);
-				}
-			}
-			return elements;
-		}
 		public IAdaptable[] refresh(IWorkingSet ws) {
 			IAdaptable[] oldElements= (IAdaptable[])fWorkingSetToElement.get(ws);
 			if (oldElements == null)
@@ -155,9 +146,6 @@ public class WorkingSetModel {
 				 allElements= getAllElements(fElementToWorkingSet, ((IJavaElement) element).getResource());
 			 }
 			 return allElements;
-		}
-		public IWorkingSet getFirstWorkingSetForResource(IResource resource) {
-			return (IWorkingSet)getFirstElement(fResourceToWorkingSet, resource);
 		}
 		public List getAllWorkingSetsForResource(IResource resource) {
 			return getAllElements(fResourceToWorkingSet, resource);

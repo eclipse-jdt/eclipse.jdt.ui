@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IMessageProvider;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -47,18 +46,14 @@ public class InlineConstantWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */
 	protected void addUserInputPages() {
-
 		String message= null;
-		int messageType= IMessageProvider.NONE;
 		if(!getInlineConstantRefactoring().isInitializerAllStaticFinal()) {
 			message= RefactoringMessages.InlineConstantWizard_initializer_refers_to_fields;
-			messageType= IMessageProvider.INFORMATION;
 		} else {
 			message= MESSAGE;
-			messageType= IMessageProvider.NONE;
 		}
 
-		addPage(new InlineConstantInputPage(message, messageType));
+		addPage(new InlineConstantInputPage(message));
 	}
 
 	private InlineConstantRefactoring getInlineConstantRefactoring(){
@@ -72,13 +67,8 @@ public class InlineConstantWizard extends RefactoringWizard {
 		private InlineConstantRefactoring fRefactoring;
 		private Button fRemove;
 
-		private final int fOriginalMessageType;
-		private final String fOriginalMessage;
-
-		public InlineConstantInputPage(String description, int messageType) {
+		public InlineConstantInputPage(String description) {
 			super(PAGE_NAME);
-			fOriginalMessage= description;
-			fOriginalMessageType= messageType;
 			setDescription(description);
 		}
 
@@ -149,11 +139,5 @@ public class InlineConstantWizard extends RefactoringWizard {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_CONSTANT_WIZARD_PAGE);
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#restoreMessage()
-		 */
-		protected void restoreMessage() {
-			setMessage(fOriginalMessage, fOriginalMessageType);
-		}
 	}
 }

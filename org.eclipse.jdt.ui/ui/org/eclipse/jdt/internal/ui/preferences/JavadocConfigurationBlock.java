@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+
 
 public class JavadocConfigurationBlock {
 
@@ -793,26 +794,6 @@ public class JavadocConfigurationBlock {
 				}
 			}
 			return elem;
-		}
-
-		private Object recursiveFind(Object element, String name) {
-			if (name.equals(fProvider.getLabel(element))) {
-				return element;
-			}
-			List list= fProvider.getChildren(element);
-			if (list != null) {
-				for (int k= 0; k < list.size(); k++) {
-					Object res= recursiveFind(list.get(k), name);
-					if (res != null) {
-						return res;
-					}
-				}
-			}
-			return null;
-		}
-
-		public Object findFileByName(String name) {
-			return recursiveFind(fProvider.getRoot(), name);
 		}
 
 		/* non java-doc

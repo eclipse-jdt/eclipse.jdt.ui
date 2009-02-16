@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.ViewerComparator;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 
 /**
  * A list with a button bar.
@@ -845,10 +846,6 @@ public class TreeListDialogField extends DialogField {
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			// will never happen
-		}
-
-		public boolean isDeleted(Object element) {
-			return false;
 		}
 
 		public void dispose() {

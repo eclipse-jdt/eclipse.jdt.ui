@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -139,13 +139,6 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 			}
 
 			dispose();
-		}
-
-		public void showContextMenu(Menu menu) {
-			if (fInput.fAnnotationListener != null) {
-				VerticalRulerEvent event= new VerticalRulerEvent(fAnnotation);
-				fInput.fAnnotationListener.annotationContextMenuAboutToShow(event, menu);
-			}
 		}
 
 		public void deselect() {
@@ -449,7 +442,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	 * Creates a new control.
 	 *
 	 * @param parent parent shell
-	 * @param shellStyle additional style flags 
+	 * @param shellStyle additional style flags
 	 * @param access the annotation access
 	 */
 	public AnnotationExpansionControl(Shell parent, int shellStyle, IAnnotationAccess access) {
