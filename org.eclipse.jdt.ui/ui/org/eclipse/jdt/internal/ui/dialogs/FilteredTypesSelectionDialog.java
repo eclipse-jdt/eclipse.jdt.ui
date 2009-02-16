@@ -859,13 +859,15 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			String text= getText(element);
 			StyledString string= new StyledString(text);
 
+			int index= text.indexOf(JavaElementLabels.CONCAT_STRING);
+
 			final String namePattern= fFilter != null ? fFilter.getNamePattern() : null;
 			if (namePattern != null && !"*".equals(namePattern)) { //$NON-NLS-1$
-				int[] matchingRegions= SearchPattern.getMatchingRegions(namePattern, text, fFilter.getMatchRule());
+				String typeName= index == -1 ? text : text.substring(0, index);
+				int[] matchingRegions= SearchPattern.getMatchingRegions(namePattern, typeName, fFilter.getMatchRule());
 				markMatchingRegions(string, 0, matchingRegions, fBoldStyler);
 			}
 
-			int index= text.indexOf(JavaElementLabels.CONCAT_STRING);
 			if (index != -1) {
 				string.setStyle(index, text.length() - index, StyledString.QUALIFIER_STYLER);
 				final String packagePattern= fFilter != null ? fFilter.getPackagePattern() : null;
