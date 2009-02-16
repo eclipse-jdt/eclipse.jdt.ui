@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -199,10 +199,9 @@ abstract class TargetProvider {
 	}
 
 	private static class BodyData {
-		public BodyDeclaration fBody;
 		private List fInvocations;
-		public BodyData(BodyDeclaration declaration) {
-			fBody= declaration;
+
+		public BodyData() {
 		}
 		public void addInvocation(ASTNode node) {
 			if (fInvocations == null)
@@ -214,9 +213,6 @@ abstract class TargetProvider {
 		}
 		public boolean hasInvocations() {
 			return fInvocations != null && !fInvocations.isEmpty();
-		}
-		public BodyDeclaration getDeclaration() {
-			return fBody;
 		}
 	}
 
@@ -282,7 +278,7 @@ abstract class TargetProvider {
 		}
 		public boolean visit(FieldDeclaration node) {
 			fBodies.add(fCurrent);
-			fCurrent= new BodyData(node);
+			fCurrent= new BodyData();
 			return true;
 		}
 		public void endVisit(FieldDeclaration node) {
@@ -293,7 +289,7 @@ abstract class TargetProvider {
 		}
 		public boolean visit(MethodDeclaration node) {
 			fBodies.add(fCurrent);
-			fCurrent= new BodyData(node);
+			fCurrent= new BodyData();
 			return true;
 		}
 		public void endVisit(MethodDeclaration node) {
@@ -305,7 +301,7 @@ abstract class TargetProvider {
 		}
 		public boolean visit(Initializer node) {
 			fBodies.add(fCurrent);
-			fCurrent= new BodyData(node);
+			fCurrent= new BodyData();
 			return true;
 		}
 		public void endVisit(Initializer node) {
