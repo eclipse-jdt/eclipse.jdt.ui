@@ -873,7 +873,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				final String packagePattern= fFilter != null ? fFilter.getPackagePattern() : null;
 				if (packagePattern != null && !"*".equals(packagePattern)) { //$NON-NLS-1$
 					index= index + JavaElementLabels.CONCAT_STRING.length();
-					String packageName= text.substring(index);
+					int endIndex= text.indexOf(JavaElementLabels.CONCAT_STRING, index);
+					String packageName;
+					if (endIndex == -1)
+						packageName= text.substring(index);
+					else
+						packageName= text.substring(index, endIndex);
 					int[] matchingRegions= SearchPattern.getMatchingRegions(packagePattern, packageName, fFilter.getPackageFlags());
 					markMatchingRegions(string, index, matchingRegions, fBoldQualifierStyler);
 				}
@@ -883,8 +888,21 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private void markMatchingRegions(StyledString string, int index, int[] matchingRegions, Styler styler) {
 			if (matchingRegions != null) {
-				for (int i= 0; i + 1 < matchingRegions.length; i= i + 2)
-					string.setStyle(index + matchingRegions[i], matchingRegions[i + 1], styler);
+				int offset= -1;
+				int length= 0;
+				for (int i= 0; i + 1 < matchingRegions.length; i= i + 2) {
+					if (offset == -1)
+						offset= index + matchingRegions[i];
+					
+					// Concatenate adjacent regions
+					if (i + 2 < matchingRegions.length && matchingRegions[i] + matchingRegions[i + 1] == matchingRegions[i + 2]) {
+						length= length + matchingRegions[i + 1];
+					} else {
+						string.setStyle(offset, length + matchingRegions[i + 1], styler);
+						offset= -1;
+						length= 0;
+					}
+				}
 			}
 		}
 
