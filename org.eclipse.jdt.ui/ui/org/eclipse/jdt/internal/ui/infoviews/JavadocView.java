@@ -988,7 +988,8 @@ public class JavadocView extends AbstractInfoView {
 				String constantValue= null;
 				if (member instanceof IField) {
 					constantValue= computeFieldConstant(activePart, selection, (IField) member, monitor);
-					constantValue= HTMLPrinter.convertToHTMLContent(constantValue);
+					if (constantValue != null)
+						constantValue= HTMLPrinter.convertToHTMLContent(constantValue);
 				}
 
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
