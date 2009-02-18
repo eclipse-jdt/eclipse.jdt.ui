@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1276,7 +1276,13 @@ public final class JavaIndenter {
 				nextToken();
 				switch (fToken) {
 					case Symbols.TokenIDENT:
-						if (!JavaHeuristicScanner.isGenericStarter(getTokenContent()))
+						boolean isGenericStarter;
+						try {
+							isGenericStarter= !JavaHeuristicScanner.isGenericStarter(getTokenContent());
+						} catch (BadLocationException e) {
+							return false;
+						}
+						if (isGenericStarter)
 							break;
 						//$FALL-THROUGH$
 					case Symbols.TokenQUESTIONMARK:
@@ -1297,11 +1303,12 @@ public final class JavaIndenter {
 
 	/**
 	 * Returns the contents of the current token.
-	 *
+	 * 
 	 * @return the contents of the current token
+	 * @throws BadLocationException if the indices are out of bounds
 	 * @since 3.1
 	 */
-	private CharSequence getTokenContent() {
+	private CharSequence getTokenContent() throws BadLocationException {
 		return new DocumentCharacterIterator(fDocument, fPosition, fPreviousPos);
 	}
 

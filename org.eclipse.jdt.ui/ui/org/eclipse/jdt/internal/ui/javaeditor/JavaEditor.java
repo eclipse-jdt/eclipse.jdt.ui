@@ -756,13 +756,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			final ISourceViewer viewer= getSourceViewer();
 			final IDocument document= viewer.getDocument();
-			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
-			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
-			if (position == -1)
-				return;
-
-			int next= findNextPosition(position);
 			try {
+				fIterator.setText((CharacterIterator)new DocumentCharacterIterator(document));
+				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+				if (position == -1)
+					return;
+
+				int next= findNextPosition(position);
 				if (isBlockSelectionModeEnabled() && document.getLineOfOffset(next) != document.getLineOfOffset(position)) {
 					super.run(); // may navigate into virtual white space
 				} else if (next != BreakIterator.DONE) {
@@ -968,13 +968,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			final ISourceViewer viewer= getSourceViewer();
 			final IDocument document= viewer.getDocument();
-			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
-			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
-			if (position == -1)
-				return;
-
-			int previous= findPreviousPosition(position);
 			try {
+				fIterator.setText((CharacterIterator)new DocumentCharacterIterator(document));
+				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+				if (position == -1)
+					return;
+
+				int previous= findPreviousPosition(position);
 				if (isBlockSelectionModeEnabled() && document.getLineOfOffset(previous) != document.getLineOfOffset(position)) {
 					super.run(); // may navigate into virtual white space
 				} else if (previous != BreakIterator.DONE) {

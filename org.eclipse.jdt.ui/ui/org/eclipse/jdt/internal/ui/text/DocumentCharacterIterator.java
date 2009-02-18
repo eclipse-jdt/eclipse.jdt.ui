@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,40 +44,42 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 
 	/**
 	 * Creates an iterator for the entire document.
-	 *
+	 * 
 	 * @param document the document backing this iterator
+	 * @throws BadLocationException if the indices are out of bounds
 	 */
-	public DocumentCharacterIterator(IDocument document) {
+	public DocumentCharacterIterator(IDocument document) throws BadLocationException {
 		this(document, 0);
 	}
 
 	/**
 	 * Creates an iterator, starting at offset <code>first</code>.
-	 *
+	 * 
 	 * @param document the document backing this iterator
 	 * @param first the first character to consider
-	 * @throws IllegalArgumentException if the indices are out of bounds
+	 * @throws BadLocationException if the indices are out of bounds
 	 */
-	public DocumentCharacterIterator(IDocument document, int first) throws IllegalArgumentException {
+	public DocumentCharacterIterator(IDocument document, int first) throws BadLocationException {
 		this(document, first, document.getLength());
 	}
 
 	/**
-	 * Creates an iterator for the document contents from <code>first</code>
-	 * (inclusive) to <code>last</code> (exclusive).
-	 *
+	 * Creates an iterator for the document contents from <code>first</code> (inclusive) to
+	 * <code>last</code> (exclusive).
+	 * 
 	 * @param document the document backing this iterator
 	 * @param first the first character to consider
 	 * @param last the last character index to consider
-	 * @throws IllegalArgumentException if the indices are out of bounds
+	 * @throws BadLocationException if the indices are out of bounds
 	 */
-	public DocumentCharacterIterator(IDocument document, int first, int last) throws IllegalArgumentException {
+	public DocumentCharacterIterator(IDocument document, int first, int last) throws BadLocationException {
 		if (document == null)
 			throw new NullPointerException();
 		if (first < 0 || first > last)
-			throw new IllegalArgumentException();
-		if (last > document.getLength())
-			throw new IllegalArgumentException();
+			throw new BadLocationException();
+		if (last > document.getLength()) {
+			throw new BadLocationException();
+		}
 		fDocument= document;
 		fFirst= first;
 		fLast= last;
@@ -218,6 +220,10 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 			throw new IndexOutOfBoundsException();
 		if (end > length())
 			throw new IndexOutOfBoundsException();
-		return new DocumentCharacterIterator(fDocument, getBeginIndex() + start, getBeginIndex() + end);
+		try {
+			return new DocumentCharacterIterator(fDocument, getBeginIndex() + start, getBeginIndex() + end);
+		} catch (BadLocationException ex) {
+			throw new IndexOutOfBoundsException();
+		}
 	}
 }
