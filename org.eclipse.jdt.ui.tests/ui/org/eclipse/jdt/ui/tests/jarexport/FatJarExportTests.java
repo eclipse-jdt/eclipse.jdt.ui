@@ -12,6 +12,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 220257 [jar application] ANT build file does not create Class-Path Entry in Manifest
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 243163 [jar exporter] export directory entries in "Runnable JAR File"
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.jarexport;
 
@@ -237,7 +238,7 @@ public class FatJarExportTests extends TestCase {
 		assertNotNull(generatedArchive);
 		assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
 		// get loader entry
-		ZipEntry loaderClassEntry= generatedArchive.getEntry("org/eclipse/jdt/internal/ui/jarpackagerfat/JarRsrcLoader.class"); //$NON-NLS-1$
+		ZipEntry loaderClassEntry= generatedArchive.getEntry("org/eclipse/jdt/internal/jarinjarloader/JarRsrcLoader.class"); //$NON-NLS-1$
 		assertNotNull(loaderClassEntry);
 		// check version of class file JarRsrcLoader (jdk 1.3.1 = version 45.3)
 		InputStream in = generatedArchive.getInputStream(loaderClassEntry);
@@ -258,6 +259,10 @@ public class FatJarExportTests extends TestCase {
 		antExporter.run(status);
 		assertTrue(getProblems(status), status.getSeverity() == IStatus.OK || status.getSeverity() == IStatus.INFO);
 		
+		// check that jar-rsrc-loader.zip file was created next to build.xml 
+		IPath zipLocation= antScriptLocation(testName).removeLastSegments(1).append(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP);
+		assertTrue("loader zip missing: " + zipLocation.toOSString(), zipLocation.toFile().exists());
+
 		return data;
 	}
 
@@ -555,7 +560,7 @@ public class FatJarExportTests extends TestCase {
 
 		Element xmlAttribute2= (Element)xmlManifest.getElementsByTagName("attribute").item(1); //$NON-NLS-1$
 		assertEquals("Main-Class", xmlAttribute2.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("org.eclipse.jdt.internal.ui.jarpackagerfat.JarRsrcLoader", xmlAttribute2.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader", xmlAttribute2.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Element xmlAttribute3= (Element)xmlManifest.getElementsByTagName("attribute").item(2); //$NON-NLS-1$
 		assertEquals("Rsrc-Main-Class", xmlAttribute3.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$

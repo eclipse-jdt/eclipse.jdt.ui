@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,11 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +37,8 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Create an ANT script for a runnable JAR with class loader export. The script is generated based
  * on the classpath of the selected launch-configuration.
@@ -43,6 +49,26 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 
 	public FatJarRsrcUrlAntExporter(IPath antScriptLocation, IPath jarLocation, ILaunchConfiguration launchConfiguration) {
 		super(antScriptLocation, jarLocation, launchConfiguration);
+	}
+
+	protected void buildANTScript(IPath antScriptLocation, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws FileNotFoundException, IOException {
+		File antScriptFile= antScriptLocation.toFile();
+		buildANTScript(new FileOutputStream(antScriptFile), projectName, absJarfile, mainClass, sourceInfos);
+		copyJarInJarLoader(new File(antScriptFile.getParentFile(), FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP));
+	}
+
+	private void copyJarInJarLoader(File targetFile) throws IOException {
+		InputStream is= JavaPlugin.getDefault().getBundle().getEntry(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP).openStream();
+		OutputStream os= new FileOutputStream(targetFile);
+		byte[] buf= new byte[1024];
+		while (true) {
+			int cnt= is.read(buf);
+			if (cnt <= 0)
+				break;
+			os.write(buf, 0, cnt);
+		}
+		os.close();
+		is.close();
 	}
 
 	protected void buildANTScript(OutputStream outputStream, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws IOException {
@@ -89,7 +115,7 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 
 		attribute= document.createElement("attribute"); //$NON-NLS-1$
 		attribute.setAttribute("name", "Main-Class"); //$NON-NLS-1$ //$NON-NLS-2$s 
-		attribute.setAttribute("value", "org.eclipse.jdt.internal.ui.jarpackagerfat.JarRsrcLoader"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		attribute.setAttribute("value", "org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		manifest.appendChild(attribute);
 
 		attribute= document.createElement("attribute"); //$NON-NLS-1$

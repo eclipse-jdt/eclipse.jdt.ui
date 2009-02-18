@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,12 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 220257 [jar application] ANT build file does not create Class-Path Entry in Manifest
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
@@ -92,7 +91,7 @@ public abstract class FatJarAntExporter {
 			String mainClass= getMainClass(fLaunchConfiguration, status);
 			String projectName= fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
 
-			buildANTScript(new FileOutputStream(fAntScriptLocation.toFile()), projectName, fAbsJarfile, mainClass, convert(classpath));
+			buildANTScript(fAntScriptLocation, projectName, fAbsJarfile, mainClass, convert(classpath));
 
 		} catch (FileNotFoundException e) {
 			throw new CoreException(
@@ -166,15 +165,15 @@ public abstract class FatJarAntExporter {
 	}
 
 	/**
-	 * Create an ANT script to outputStream.
+	 * Create an ANT script at the given location.
 	 * 
-	 * @param outputStream to write ANT script to
+	 * @param antScriptLocation to write ANT script to
 	 * @param projectName base project for informational purpose only
 	 * @param absJarfile path to the destination
 	 * @param mainClass the optional main-class
 	 * @param sourceInfos array of sources
-	 * @throws IOException if an exception occured while writing to the stream,
+	 * @throws IOException if an exception occurred while writing to the stream,
 	 */
-	protected abstract void buildANTScript(OutputStream outputStream, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws IOException;
+	protected abstract void buildANTScript(IPath antScriptLocation, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws IOException;
 
 }
