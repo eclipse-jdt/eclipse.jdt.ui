@@ -40,6 +40,7 @@
 			  <include name="plugin.properties" />
 			  <include name=".options" />
 			  <include name="serialsupport.jar" />
+			  <include name="jar-in-jar-loader.zip" />
 			  <include name="JavadocViewStyleSheet.css" />
 			  <include name="JavadocHoverStyleSheet.css" />
 			  <include name="icons/**"/>

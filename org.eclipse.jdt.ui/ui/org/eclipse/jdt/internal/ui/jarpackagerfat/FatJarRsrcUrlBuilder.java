@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262746 [jar exporter] Create a builder for jar-in-jar-loader.zip
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
 /**
@@ -48,7 +50,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 
 	public static final String BUILDER_ID= "org.eclipse.jdt.ui.fat_jar_rsrc_url_builder"; //$NON-NLS-1$
-	public static final String JAR_RSRC_LOADER_ZIP= "jar-rsrc-loader.zip"; //$NON-NLS-1$
+	public static final String JAR_RSRC_LOADER_ZIP= "jar-in-jar-loader.zip"; //$NON-NLS-1$
 	
 	private Set jarNames;
 	private JarPackageData fJarPackage;
@@ -129,7 +131,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	}
 
 	public void writeRsrcUrlClasses() throws IOException {
-		InputStream is= getClass().getResourceAsStream(JAR_RSRC_LOADER_ZIP);
+		InputStream is= JavaPlugin.getDefault().getBundle().getEntry(JAR_RSRC_LOADER_ZIP).openStream();
 		ZipInputStream zis= new ZipInputStream(is);
 		ZipEntry zipEntry= zis.getNextEntry();
 		while (zipEntry != null) {

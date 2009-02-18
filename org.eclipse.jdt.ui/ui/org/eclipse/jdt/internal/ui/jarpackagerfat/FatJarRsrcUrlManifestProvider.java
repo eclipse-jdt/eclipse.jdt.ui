@@ -29,7 +29,11 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 
 	private static final String RSRC_MAIN_CLASS_MANIFEST_ATTRIBUTE= "Rsrc-Main-Class"; //$NON-NLS-1$
-	private static final String JAR_RSRC_LOADER_MAIN_CLASS= "org.eclipse.jdt.internal.ui.jarpackagerfat.JarRsrcLoader"; //$NON-NLS-1$
+	/**
+	 * This is <code>{@link org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader}.class.getName()</code>,
+	 * but that's not visible for the PDE builder.
+	 */
+	private static final String JAR_RSRC_LOADER_MAIN_CLASS= "org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"; //$NON-NLS-1$
 
 	public FatJarRsrcUrlManifestProvider(FatJarRsrcUrlBuilder builder) {
 		super(builder);
