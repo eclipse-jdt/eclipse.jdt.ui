@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 243163 [jar exporter] export directory entries in "Runnable JAR File"
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262763 [jar exporter] remove Built-By attribute in ANT files from Fat JAR Exporter
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.jarexport;
 
@@ -487,16 +488,12 @@ public class FatJarExportTests extends TestCase {
 		Element xmlManifest= (Element)xmlJar.getElementsByTagName("manifest").item(0); //$NON-NLS-1$
 
 		Element xmlAttribute1= (Element)xmlManifest.getElementsByTagName("attribute").item(0); //$NON-NLS-1$
-		assertEquals("Built-By", xmlAttribute1.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("${user.name}", xmlAttribute1.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Main-Class", xmlAttribute1.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("org.eclipse.jdt.ui.test.Main", xmlAttribute1.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Element xmlAttribute2= (Element)xmlManifest.getElementsByTagName("attribute").item(1); //$NON-NLS-1$
-		assertEquals("Main-Class", xmlAttribute2.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("org.eclipse.jdt.ui.test.Main", xmlAttribute2.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
-
-		Element xmlAttribute3= (Element)xmlManifest.getElementsByTagName("attribute").item(2); //$NON-NLS-1$
-		assertEquals("Class-Path", xmlAttribute3.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertTrue("actual value: " + xmlAttribute3.getAttribute("value"), xmlAttribute3.getAttribute("value").startsWith(".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		assertEquals("Class-Path", xmlAttribute2.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue("actual value: " + xmlAttribute2.getAttribute("value"), xmlAttribute2.getAttribute("value").startsWith(".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		NodeList xmlFilesets= xmlJar.getElementsByTagName("fileset"); //$NON-NLS-1$
 		assertEquals(filesets.length, xmlFilesets.getLength());
@@ -555,24 +552,20 @@ public class FatJarExportTests extends TestCase {
 		Element xmlManifest= (Element)xmlJar.getElementsByTagName("manifest").item(0); //$NON-NLS-1$
 
 		Element xmlAttribute1= (Element)xmlManifest.getElementsByTagName("attribute").item(0); //$NON-NLS-1$
-		assertEquals("Built-By", xmlAttribute1.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("${user.name}", xmlAttribute1.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Main-Class", xmlAttribute1.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader", xmlAttribute1.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Element xmlAttribute2= (Element)xmlManifest.getElementsByTagName("attribute").item(1); //$NON-NLS-1$
-		assertEquals("Main-Class", xmlAttribute2.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader", xmlAttribute2.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Rsrc-Main-Class", xmlAttribute2.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("org.eclipse.jdt.ui.test.Main", xmlAttribute2.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Element xmlAttribute3= (Element)xmlManifest.getElementsByTagName("attribute").item(2); //$NON-NLS-1$
-		assertEquals("Rsrc-Main-Class", xmlAttribute3.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("org.eclipse.jdt.ui.test.Main", xmlAttribute3.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Class-Path", xmlAttribute3.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals(".", xmlAttribute3.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Element xmlAttribute4= (Element)xmlManifest.getElementsByTagName("attribute").item(3); //$NON-NLS-1$
-		assertEquals("Class-Path", xmlAttribute4.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals(".", xmlAttribute4.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
-
-		Element xmlAttribute5= (Element)xmlManifest.getElementsByTagName("attribute").item(4); //$NON-NLS-1$
-		assertEquals("Rsrc-Class-Path", xmlAttribute5.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertTrue("actual value: " + xmlAttribute5.getAttribute("value"), xmlAttribute5.getAttribute("value").startsWith("./")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		assertEquals("Rsrc-Class-Path", xmlAttribute4.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue("actual value: " + xmlAttribute4.getAttribute("value"), xmlAttribute4.getAttribute("value").startsWith("./")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		NodeList xmlFilesets= xmlJar.getElementsByTagName("fileset"); //$NON-NLS-1$
 		assertEquals(filesets.length, xmlFilesets.getLength());
@@ -627,16 +620,12 @@ public class FatJarExportTests extends TestCase {
 		Element xmlManifest= (Element)xmlJar.getElementsByTagName("manifest").item(0); //$NON-NLS-1$
 
 		Element xmlAttribute1= (Element)xmlManifest.getElementsByTagName("attribute").item(0); //$NON-NLS-1$
-		assertEquals("Built-By", xmlAttribute1.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("${user.name}", xmlAttribute1.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Main-Class", xmlAttribute1.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("org.eclipse.jdt.ui.test.Main", xmlAttribute1.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Element xmlAttribute2= (Element)xmlManifest.getElementsByTagName("attribute").item(1); //$NON-NLS-1$
-		assertEquals("Main-Class", xmlAttribute2.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("org.eclipse.jdt.ui.test.Main", xmlAttribute2.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
-
-		Element xmlAttribute3= (Element)xmlManifest.getElementsByTagName("attribute").item(2); //$NON-NLS-1$
-		assertEquals("Class-Path", xmlAttribute3.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals(".", xmlAttribute3.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Class-Path", xmlAttribute2.getAttribute("name")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals(".", xmlAttribute2.getAttribute("value")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		NodeList xmlFilesets= xmlJar.getElementsByTagName("fileset"); //$NON-NLS-1$
 		assertEquals(filesets.length, xmlFilesets.getLength());

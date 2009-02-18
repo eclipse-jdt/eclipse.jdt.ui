@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262763 [jar exporter] remove Built-By attribute in ANT files from Fat JAR Exporter
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -109,11 +110,6 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 		jar.appendChild(manifest);
 
 		Element attribute= document.createElement("attribute"); //$NON-NLS-1$
-		attribute.setAttribute("name", "Built-By"); //$NON-NLS-1$ //$NON-NLS-2$s 
-		attribute.setAttribute("value", "${user.name}"); //$NON-NLS-1$ //$NON-NLS-2$s 
-		manifest.appendChild(attribute);
-
-		attribute= document.createElement("attribute"); //$NON-NLS-1$
 		attribute.setAttribute("name", "Main-Class"); //$NON-NLS-1$ //$NON-NLS-2$s 
 		attribute.setAttribute("value", "org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		manifest.appendChild(attribute);
