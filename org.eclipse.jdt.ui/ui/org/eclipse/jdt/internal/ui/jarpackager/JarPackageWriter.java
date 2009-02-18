@@ -7,7 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net -  83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262768 [jar exporter] Jardesc for normal Jar contains <fatjar builder="...
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -111,8 +112,6 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		if (jarPackage.areGeneratedFilesExported())
 			xmlWriteManifest(jarPackage, document, xmlJarDesc);
 		xmlWriteSelectedElements(jarPackage, document, xmlJarDesc);
-
-		xmlWriteFatjar(jarPackage, document, xmlJarDesc);
 
 		try {
 			// Write the document to the stream
@@ -290,10 +289,4 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 	}
 
-	private void xmlWriteFatjar(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
-		Element fatjar= document.createElement("fatjar"); //$NON-NLS-1$
-		xmlJarDesc.appendChild(fatjar);
-		fatjar.setAttribute("builder", jarPackage.getJarBuilder().getId()); //$NON-NLS-1$
-		fatjar.setAttribute("launchConfig", jarPackage.getLaunchConfigurationName()); //$NON-NLS-1$
-	}
 }

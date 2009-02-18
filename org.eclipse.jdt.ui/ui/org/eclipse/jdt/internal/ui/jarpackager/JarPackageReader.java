@@ -7,7 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net -  83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262768 [jar exporter] Jardesc for normal Jar contains <fatjar builder="...
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -57,15 +58,11 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.jarpackagerfat.UnpackFatJarBuilder;
-import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarRsrcUrlBuilder;
-import org.eclipse.jdt.internal.ui.jarpackagerfat.UnpackJarBuilder;
 
 /**
  * Reads data from an InputStream and returns a JarPackage
@@ -146,9 +143,6 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			if (jarPackage.areGeneratedFilesExported())
 				xmlReadManifest(jarPackage, element);
 			xmlReadSelectedElements(jarPackage, element);
-
-			// fatjar read builder props
-			xmlReadFatjar(jarPackage, element);
 		}
 		return jarPackage;
 	}
@@ -412,27 +406,6 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	 */
 	protected void addWarning(String message, Throwable error) {
 		fWarnings.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));
-	}
-
-	private void xmlReadFatjar(JarPackageData jarPackage, Element element) throws java.io.IOException {
-		if (element.getNodeName().equals("fatjar")) { //$NON-NLS-1$
-			String id = element.getAttribute("builder"); //$NON-NLS-1$
-			IJarBuilder builder= jarPackage.getJarBuilder();
-			if (builder == null || !builder.getId().equals(id)) {
-				if (UnpackFatJarBuilder.BUILDER_ID.equals(id)) {
-					jarPackage.setJarBuilder(jarPackage.createFatJarBuilder());
-				} else if (UnpackJarBuilder.BUILDER_ID.equals(id)) {
-					jarPackage.setJarBuilder(new UnpackJarBuilder(jarPackage));
-				} else if (FatJarRsrcUrlBuilder.BUILDER_ID.equals(id)) {
-					jarPackage.setJarBuilder(new FatJarRsrcUrlBuilder());
-				} else if (PlainJarBuilder.BUILDER_ID.equals(id)) {
-					jarPackage.setJarBuilder(jarPackage.createPlainJarBuilder());
-				} else {
-					throw new IOException(Messages.format(JarPackagerMessages.JarPackageReader_error_unknownJarBuilder, id));
-				}
-			}
-			jarPackage.setLaunchConfigurationName(element.getAttribute("launchConfig")); //$NON-NLS-1$
-		}
 	}
 
 }
