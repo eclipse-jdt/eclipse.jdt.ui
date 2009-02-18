@@ -503,7 +503,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		String constantValue;
 		if (elements.length == 1 && elements[0].getElementType() == IJavaElement.FIELD) {
 			constantValue= getConstantValue((IField) elements[0], hoverRegion);
-			constantValue= HTMLPrinter.convertToHTMLContent(constantValue);
+			if (constantValue != null)
+				constantValue= HTMLPrinter.convertToHTMLContent(constantValue);
 		} else {
 			constantValue= null;
 		}
