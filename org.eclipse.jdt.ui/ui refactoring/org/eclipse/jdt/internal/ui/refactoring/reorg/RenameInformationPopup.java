@@ -61,6 +61,7 @@ import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.Geometry;
+import org.eclipse.jface.util.Util;
 
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewerExtension5;
@@ -207,7 +208,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	 * Cached platform flag for dealing with platform-specific issue:
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=219326 : Shell with custom region and SWT.NO_TRIM still has border
 	 */
-	private static boolean CARBON = "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
+	private static boolean MAC = Util.isMac();
 
 	private static final int WIDGET_PRIORITY= 1000;
 
@@ -317,7 +318,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			}
 		});
 
-		if (! CARBON) { // carbon draws its own border...
+		if (! MAC) { // carbon and cocoa draw their own border...
 			fPopup.addPaintListener(new PaintListener() {
 				public void paintControl(PaintEvent pe) {
 					pe.gc.drawPolygon(getPolygon(true));
