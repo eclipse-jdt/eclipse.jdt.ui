@@ -194,6 +194,8 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 
 
 		public void textChanged(TextEvent event) {
+			if (!event.getViewerRedrawState())
+				return;
 			updatePopupLocation(false);
 			updateVisibility(); //only for hiding outside editor area
 		}
