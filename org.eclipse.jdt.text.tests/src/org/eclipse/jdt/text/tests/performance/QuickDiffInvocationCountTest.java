@@ -24,13 +24,13 @@ import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.internal.texteditor.quickdiff.compare.rangedifferencer.RangeDifference;
+import org.eclipse.ui.internal.texteditor.quickdiff.QuickDiffRangeDifference;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
 /**
- * Measures the number of created {@link RangeDifference}
+ * Measures the number of created {@link QuickDiffRangeDifference}
  * while QuickDiff is initializing with lots of changes in a large file.
  *
  * @since 3.1
@@ -76,13 +76,13 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	}
 
 	/**
-	 * Measures the number of created {@link RangeDifference}
+	 * Measures the number of created {@link QuickDiffRangeDifference}
 	 * while QuickDiff is initializing with lots of changes in a large file.
 	 *
-	 * @throws Exception
+	 * @throws Exception in case of problems
 	 */
 	public void test() throws Exception {
-		PerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(RangeDifference.class.getConstructors());
+		PerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(QuickDiffRangeDifference.class.getConstructors());
 		performanceMeter.start();
 		fEditor.showChangeInformation(true);
 		EditorTestHelper.runEventQueue(5000); // ensure QuickDiff job started
