@@ -978,7 +978,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			extension.setIsHandlingTemporaryProblems(isHandlingTemporaryProblems());
 		}
 
-		if (JavaModelUtil.isPrimary(original) && original.exists())
+		IResource resource= original.getResource();
+		if (JavaModelUtil.isPrimary(original) && (resource == null || resource.exists()))
 			original.becomeWorkingCopy(requestor, getProgressMonitor());
 		cuInfo.fCopy= original;
 
@@ -1326,7 +1327,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				} else
 					subMonitor= getSubProgressMonitor(monitor, listeners.length > 0 ? 70 : 100);
 
- 				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor);
+				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor);
 				if (listeners.length > 0)
 					notifyPostSaveListeners(info, changedRegions, listeners, getSubProgressMonitor(monitor, 30));
 
