@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,7 +81,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	}
 
 	private ICompletionProposal findCorrection(String id, boolean isAssist, ITextSelection selection, ICompilationUnit cu, IAnnotationModel model) {
-		AssistContext context= new AssistContext(cu, selection.getOffset(), selection.getLength());
+		AssistContext context= new AssistContext(cu, fEditor.getViewer(), fEditor, selection.getOffset(), selection.getLength());
 		Collection proposals= new ArrayList(10);
 		if (isAssist) {
 			if (id.equals(LinkedNamesAssistProposal.ASSIST_ID)) {
@@ -117,7 +117,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	private ICompletionProposal getLocalRenameProposal(IInvocationContext context) {
 		ASTNode node= context.getCoveringNode();
 		if (node instanceof SimpleName) {
-			return new LinkedNamesAssistProposal(context.getCompilationUnit(), (SimpleName) node);
+			return new LinkedNamesAssistProposal(context, (SimpleName) node);
 		}
 		return null;
 	}

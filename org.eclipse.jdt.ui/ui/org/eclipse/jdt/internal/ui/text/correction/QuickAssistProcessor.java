@@ -168,7 +168,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode != null) {
 			return getCatchClauseToThrowsProposals(context, coveringNode, null)
 				|| getRenameLocalProposals(context, coveringNode, null, false, null)
-				|| getRenameRefactoringProposal(coveringNode, null, false, null)
+				|| getRenameRefactoringProposal(context, coveringNode, null, false, null)
 				|| getAssignToVariableProposals(context, coveringNode, null)
 				|| getUnWrapProposals(context, coveringNode, null)
 				|| getAssignParamToFieldProposals(context, coveringNode, null)
@@ -203,7 +203,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			// quick assists that show up also if there is an error/warning
 			getRenameLocalProposals(context, coveringNode, locations, noErrorsAtLocation, resultingCollections);
-			getRenameRefactoringProposal(coveringNode, locations, noErrorsAtLocation, resultingCollections);
+			getRenameRefactoringProposal(context, coveringNode, locations, noErrorsAtLocation, resultingCollections);
 			getAssignToVariableProposals(context, coveringNode, resultingCollections);
 			getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 
@@ -1101,7 +1101,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
-		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(context.getCompilationUnit(), name);
+		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(context, name);
 		if (!noErrorsAtLocation) {
 			proposal.setRelevance(1);
 		}
@@ -1110,9 +1110,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getRenameRefactoringProposal(ASTNode node, IProblemLocation[] locations, boolean noErrorsAtLocation, Collection resultingCollections)
+	private static boolean getRenameRefactoringProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, boolean noErrorsAtLocation, Collection resultingCollections)
 			throws CoreException {
-		IEditorPart editor= JavaPlugin.getActivePage().getActiveEditor();
+		if (!(context instanceof AssistContext)) {
+			return false;
+		}
+		IEditorPart editor= ((AssistContext)context).getEditor();
 		if (!(editor instanceof JavaEditor))
 			return false;
 		

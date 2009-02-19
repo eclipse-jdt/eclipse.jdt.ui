@@ -40,7 +40,6 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -50,12 +49,14 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
@@ -105,22 +106,19 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	public static final String ASSIST_ID= "org.eclipse.jdt.ui.correction.renameInFile.assist"; //$NON-NLS-1$
 
 	private SimpleName fNode;
-	private ICompilationUnit fCompilationUnit;
+	private IInvocationContext fContext;
 	private String fLabel;
 	private String fValueSuggestion;
 	private int fRelevance;
 
-	public LinkedNamesAssistProposal(ICompilationUnit cu, SimpleName node) {
-		this(CorrectionMessages.LinkedNamesAssistProposal_description, cu, node, null);
-		fNode= node;
-		fCompilationUnit= cu;
-		fRelevance= 8;
+	public LinkedNamesAssistProposal(IInvocationContext context, SimpleName node) {
+		this(CorrectionMessages.LinkedNamesAssistProposal_description, context, node, null);
 	}
 
-	public LinkedNamesAssistProposal(String label, ICompilationUnit cu, SimpleName node, String valueSuggestion) {
+	public LinkedNamesAssistProposal(String label, IInvocationContext context, SimpleName node, String valueSuggestion) {
 		fLabel= label;
 		fNode= node;
-		fCompilationUnit= cu;
+		fContext= context;
 		fValueSuggestion= valueSuggestion;
 		fRelevance= 8;
 	}
@@ -133,7 +131,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			Point seletion= viewer.getSelectedRange();
 
 			// get full ast
-			CompilationUnit root= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, null);
+			CompilationUnit root= SharedASTProvider.getAST(fContext.getCompilationUnit(), SharedASTProvider.WAIT_YES, null);
 
 			ASTNode nameNode= NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 			final int pos= fNode.getStartPosition();
@@ -179,9 +177,11 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			LinkedModeModel model= new LinkedModeModel();
 			model.addGroup(group);
 			model.forceInstall();
-			JavaEditor editor= getJavaEditor();
-			if (editor != null) {
-				model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
+			if (fContext instanceof AssistContext) {
+				IEditorPart editor= ((AssistContext)fContext).getEditor();
+				if (editor instanceof JavaEditor) {
+					model.addLinkingListener(new EditorHighlightingSynchronizer((JavaEditor) editor));
+				}
 			}
 
 			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
@@ -200,20 +200,6 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-	}
-
-	/**
-	 * Returns the currently active java editor, or <code>null</code> if it
-	 * cannot be determined.
-	 *
-	 * @return  the currently active java editor, or <code>null</code>
-	 */
-	private JavaEditor getJavaEditor() {
-		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
-		if (part instanceof JavaEditor)
-			return (JavaEditor) part;
-		else
-			return null;
 	}
 
 	/*

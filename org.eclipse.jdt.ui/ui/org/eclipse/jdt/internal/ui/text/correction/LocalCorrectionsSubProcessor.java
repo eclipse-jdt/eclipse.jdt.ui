@@ -669,7 +669,7 @@ public class LocalCorrectionsSubProcessor {
 			valueSuggestion= nameNode.getIdentifier() + '1';
 		}
 
-		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name, context.getCompilationUnit(), nameNode, valueSuggestion);
+		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name, context, nameNode, valueSuggestion);
 		proposals.add(proposal);
 	}
 

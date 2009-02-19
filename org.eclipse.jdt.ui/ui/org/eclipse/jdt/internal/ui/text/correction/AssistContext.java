@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
 
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -25,19 +27,36 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 public class AssistContext extends TextInvocationContext implements IInvocationContext {
 
-	private ICompilationUnit fCompilationUnit;
+	private final ICompilationUnit fCompilationUnit;
+	private final IEditorPart fEditor;
 
 	private CompilationUnit fASTRoot;
-	private SharedASTProvider.WAIT_FLAG fWaitFlag;
+	private final SharedASTProvider.WAIT_FLAG fWaitFlag;
+
 
 	/*
 	 * @since 3.5
 	 */
-	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length, SharedASTProvider.WAIT_FLAG waitFlag) {
+	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, IEditorPart editor, int offset, int length, SharedASTProvider.WAIT_FLAG waitFlag) {
 		super(sourceViewer, offset, length);
 		fCompilationUnit= cu;
+		fEditor= editor;
 		fASTRoot= null;
 		fWaitFlag= waitFlag;
+	}
+	
+	/*
+	 * @since 3.5
+	 */
+	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length, SharedASTProvider.WAIT_FLAG waitFlag) {
+		this(cu, sourceViewer, null, offset, length, waitFlag);
+	}
+	
+	/*
+	 * @since 3.5
+	 */
+	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, IEditorPart editor, int offset, int length) {
+		this(cu, sourceViewer, editor, offset, length, SharedASTProvider.WAIT_YES);
 	}
 	
 	/*
@@ -45,7 +64,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	 * @since 3.4
 	 */
 	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length) {
-		this(cu, sourceViewer, offset, length, SharedASTProvider.WAIT_YES);
+		this(cu, sourceViewer, null, offset, length);
 	}
 
 	/*
@@ -61,6 +80,15 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
+	}
+	
+	/**
+	 * Returns the editor or <code>null</code> if none.
+	 * @return an <code>IEditorPart</code> or <code>null</code> if none
+	 * @since 3.5
+	 */
+	public IEditorPart getEditor() {
+		return fEditor;
 	}
 
 	/**
