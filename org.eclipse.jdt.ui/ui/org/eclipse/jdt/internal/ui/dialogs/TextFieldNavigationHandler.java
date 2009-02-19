@@ -43,6 +43,7 @@ import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.SWTKeySupport;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.Util;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -121,7 +122,7 @@ public class TextFieldNavigationHandler {
 		static final boolean BUG_106024_TEXT_SELECTION=
 				"win32".equals(SWT.getPlatform()) //$NON-NLS-1$
 				// on carbon, getCaretPosition() always returns getSelection().x
-				|| "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
+				|| Util.isMac();
 
 		private final Text fText;
 
