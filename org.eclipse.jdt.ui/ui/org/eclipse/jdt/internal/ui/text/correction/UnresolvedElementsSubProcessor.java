@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -1394,8 +1395,16 @@ public class UnresolvedElementsSubProcessor {
 
 	private static String getExpressionBaseName(Expression expr) {
 		IBinding argBinding= Bindings.resolveExpressionBinding(expr, true);
-		if (argBinding instanceof IVariableBinding)
-			return StubUtility.getBaseName((IVariableBinding)argBinding);
+		if (argBinding instanceof IVariableBinding) {
+			IJavaProject project= null;
+			ASTNode root= expr.getRoot();
+			if (root instanceof CompilationUnit) {
+				ITypeRoot typeRoot= ((CompilationUnit) root).getTypeRoot();
+				if (typeRoot != null)
+					project= typeRoot.getJavaProject();
+			}
+			return StubUtility.getBaseName((IVariableBinding)argBinding, project);
+		}
 		if (expr instanceof SimpleName)
 			return ((SimpleName) expr).getIdentifier();
 		return null;
