@@ -705,7 +705,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 
-		if (offset < getReplacementOffset())
+		if (!isOffsetValid(offset))
 			return false;
 
 		boolean validated= isValidPrefix(getPrefix(document, offset));
@@ -718,6 +718,17 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		}
 
 		return validated;
+	}
+
+	/**
+	 * Checks whether the given offset is valid for this proposal.
+	 * 
+	 * @param offset the caret offset
+	 * @return <code>true</code> if the offset is valid for this proposal
+	 * @since 3.5
+	 */
+	protected boolean isOffsetValid(int offset) {
+		return getReplacementOffset() <= offset;
 	}
 
 	/**

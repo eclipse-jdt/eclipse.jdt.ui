@@ -243,6 +243,17 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isOffsetValid(int)
+	 * @since 3.5
+	 */
+	protected boolean isOffsetValid(int offset) {
+		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
+			return super.isOffsetValid(offset);
+
+		return fProposal.getRequiredProposals()[0].getReplaceStart() <= offset;
+	}
+
+	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
 	protected boolean isValidPrefix(String prefix) {
