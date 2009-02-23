@@ -31,6 +31,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedModeModel;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -260,6 +261,16 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	public boolean isAutoInsertable() {
 		return false;
 	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
+	 * @since 3.5
+	 */
+	public void apply(IDocument document, char trigger, int offset) {
+		super.apply(document, trigger, offset);
+		LinkedModeModel.closeAllModels(document);
+	}
+
 
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		fImportRewrite= impRewrite;
