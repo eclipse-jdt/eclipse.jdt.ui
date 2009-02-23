@@ -265,13 +265,14 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		fImportRewrite= impRewrite;
 		String replacementString= getReplacementString();
 
+
 		// construct replacement text: an expression to be formatted
 		StringBuffer buf= new StringBuffer("new A("); //$NON-NLS-1$
 		buf.append(replacementString);
 
-		if (!replacementString.endsWith(")")) { //$NON-NLS-1$
+		boolean replacementStringEndsWithParentheses= replacementString.endsWith(")"); //$NON-NLS-1$
+		if (!replacementStringEndsWithParentheses)
 			buf.append(')');
-		}
 
 		String newBody= createNewBody(impRewrite);
 		if (newBody == null)
@@ -298,7 +299,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		}
 
 		if (pos < document.getLength() && document.getChar(pos) == ')') {
-			setReplacementLength(pos - offset + 1);
+			if (replacementStringEndsWithParentheses)
+				setReplacementLength(pos - offset);
+			else
+				setReplacementLength(pos - offset + 1);
 		}
 		return true;
 	}
