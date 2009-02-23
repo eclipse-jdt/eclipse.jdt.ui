@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -284,6 +284,14 @@ public class InlineConstantTests extends RefactoringTest {
 		helper1(new String[] {"p.A", "p.B", "p.C", "p.D", "q.Consts"}, "q.Consts", 5, 32, 5, 40, true, true);
 	}
 
+	public void test31() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=265448
+		helper1("p.A", 4, 23, 4, 28, true, true);
+	}
+	
+	public void test32() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=265448
+		helper1("p.A", 4, 23, 4, 28, true, true);
+	}
+	
 	// -- testing failing preconditions
 
 	public void testFail0() throws Exception {

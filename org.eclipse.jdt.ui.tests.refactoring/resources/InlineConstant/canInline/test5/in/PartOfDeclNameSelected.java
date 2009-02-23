@@ -4,6 +4,6 @@ package p;
 class PartOfDeclNameSelected {
 	public static final long foooo= 1;
 	static {
-		int i= foooo;	
+		long l= foooo;	
 	}
 }

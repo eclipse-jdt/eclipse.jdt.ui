@@ -275,6 +275,11 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(7, 32, 7, 36);
 	}
 	
+	public void test36() throws Exception{
+		// parenthesize complex cast expression
+		helper1(8, 21, 8, 24);
+	}
+	
 	//------
 
 	public void testFail0() throws Exception{

@@ -432,8 +432,19 @@ public class ASTNodes {
 			type == ASTNode.CAST_EXPRESSION || type == ASTNode.INSTANCEOF_EXPRESSION;
 	}
 
-
+	/**
+	 * Checks whether <code>substitute</code> must be parenthesized when used to replace
+	 * <code>location</code>.
+	 * 
+	 * @param substitute substitute expression
+	 * @param location expression to be replaced
+	 * @return <code>true</code> iff <code>substitute</code> must be parenthesized when used to
+	 *         replace <code>location</code>
+	 */
 	public static boolean substituteMustBeParenthesized(Expression substitute, Expression location) {
+		if (substitute instanceof Assignment) //for esthetic reasons
+			return true;
+
     	if (!needsParentheses(substitute))
     		return false;
 
@@ -464,6 +475,28 @@ public class ASTNodes {
 		}
 
         return true;
+	}
+
+	/**
+	 * Returns whether an inlined variable initializer needs an explicit cast.
+	 * 
+	 * @param initializerType the type of the initializer expression of the variable to inline 
+	 * @param referenceType the type of the reference to the variable (which is to be inlined)
+	 * @return <code>true</code> iff an explicit cast is necessary
+	 * @since 3.5
+	 */
+	public static boolean needsExplicitCast(ITypeBinding initializerType, ITypeBinding referenceType) {
+		if (initializerType == null || referenceType == null)
+			return false;
+		
+		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType))
+			return true;
+		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) // reference was autoboxed
+			return true;
+		else if (! TypeRules.canAssign(initializerType, referenceType))
+			return true;
+		
+		return false;
 	}
 
 	public static ASTNode getParent(ASTNode node, Class parentClass) {

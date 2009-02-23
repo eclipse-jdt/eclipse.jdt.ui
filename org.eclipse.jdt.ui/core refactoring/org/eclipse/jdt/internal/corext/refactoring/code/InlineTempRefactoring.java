@@ -77,7 +77,6 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -318,15 +317,7 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 	}
 
-    private boolean needsBrackets(SimpleName name, Expression initializer) {
-		if (initializer instanceof Assignment) //for esthetic reasons
-			return true;
-
-    	return ASTNodes.substituteMustBeParenthesized(initializer, name);
-    }
-
-
-	private void removeTemp(CompilationUnitRewrite cuRewrite) {
+    private void removeTemp(CompilationUnitRewrite cuRewrite) {
 		VariableDeclaration variableDeclaration= getVariableDeclaration();
 		TextEditGroup groupDesc= cuRewrite.createGroupDescription(RefactoringCoreMessages.InlineTempRefactoring_remove_edit_name);
 		ASTNode parent= variableDeclaration.getParent();
@@ -340,7 +331,7 @@ public class InlineTempRefactoring extends Refactoring {
 
 	private Expression getInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
 		Expression copy= getModifiedInitializerSource(rewrite, reference);
-		boolean brackets= needsBrackets(reference, copy);
+		boolean brackets= ASTNodes.substituteMustBeParenthesized(copy, reference);
 		if (brackets) {
 			ParenthesizedExpression parentExpr= rewrite.getAST().newParenthesizedExpression();
 			parentExpr.setExpression(copy);
@@ -375,25 +366,17 @@ public class InlineTempRefactoring extends Refactoring {
 		
 		ITypeBinding initializerType= initializer.resolveTypeBinding();
 		ITypeBinding referenceType= reference.resolveTypeBinding();
-		if (initializerType != null && referenceType != null) {
-			if (initializerType.isPrimitive() && referenceType.isPrimitive() && referenceType != initializerType
-					|| initializerType.isPrimitive() && ! referenceType.isPrimitive() // reference was autoboxed
-					|| ! TypeRules.canAssign(initializerType, referenceType)) { //OK
-//					|| ! initializerType.isSubTypeCompatible(referenceType)) {
-//					|| ! initializerType.isAssignmentCompatible(referenceType)) {
-				CastExpression cast= rewrite.getAST().newCastExpression();
-				cast.setExpression(copy);
-				cast.setType(rewrite.getImportRewrite().addImport(referenceType, rewrite.getAST()));
-				copy= cast;
-
-			} else if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
-				ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
-
-				ArrayCreation newArrayCreation= rewrite.getAST().newArrayCreation();
-				newArrayCreation.setType(newType);
-				newArrayCreation.setInitializer((ArrayInitializer) copy);
-				return newArrayCreation;
+		if (ASTNodes.needsExplicitCast(initializerType, referenceType)) {
+			CastExpression cast= rewrite.getAST().newCastExpression();
+			if (ASTNodes.substituteMustBeParenthesized(copy, cast)) {
+				ParenthesizedExpression parenthesized= rewrite.getAST().newParenthesizedExpression();
+				parenthesized.setExpression(copy);
+				copy= parenthesized;
 			}
+			cast.setExpression(copy);
+			cast.setType(rewrite.getImportRewrite().addImport(referenceType, rewrite.getAST()));
+			copy= cast;
+			
 		} else if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
 			ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
 

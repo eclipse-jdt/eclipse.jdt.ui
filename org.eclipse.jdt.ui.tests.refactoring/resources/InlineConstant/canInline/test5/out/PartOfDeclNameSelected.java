@@ -3,6 +3,6 @@ package p;
 
 class PartOfDeclNameSelected {
 	static {
-		int i= 1;	
+		long l= (long) 1;	
 	}
 }

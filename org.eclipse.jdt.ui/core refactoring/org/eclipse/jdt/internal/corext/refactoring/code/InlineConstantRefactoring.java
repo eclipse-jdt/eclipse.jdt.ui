@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
@@ -479,9 +480,24 @@ public class InlineConstantRefactoring extends Refactoring {
 				return;
 
 			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_Inline);
-			Expression newReference= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
+			
+			Expression newReference;
+			boolean isStringPlaceholder= false;
 
-			if (fInitializer instanceof ArrayInitializer) {
+			ITypeBinding referenceType= reference.resolveTypeBinding();
+			if (ASTNodes.needsExplicitCast(fInitializer.resolveTypeBinding(), referenceType)) {
+				CastExpression cast= fCuRewrite.getAST().newCastExpression();
+				Expression modifiedInitializerExpr= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
+				if (ASTNodes.substituteMustBeParenthesized(fInitializer, cast)) {
+					ParenthesizedExpression parenthesized= fCuRewrite.getAST().newParenthesizedExpression();
+					parenthesized.setExpression(modifiedInitializerExpr);
+					modifiedInitializerExpr= parenthesized;
+				}
+				cast.setExpression(modifiedInitializerExpr);
+				cast.setType(fCuRewrite.getImportRewrite().addImport(referenceType, fCuRewrite.getAST()));
+				newReference= cast;
+				
+			} else if (fInitializer instanceof ArrayInitializer) {
 				ArrayCreation arrayCreation= fCuRewrite.getAST().newArrayCreation();
 				ArrayType arrayType= (ArrayType) ASTNodeFactory.newType(fCuRewrite.getAST(), fOriginalDeclaration);
 				arrayCreation.setType(arrayType);
@@ -494,9 +510,13 @@ public class InlineConstantRefactoring extends Refactoring {
 				ITypeBinding typeToAddToImport= ASTNodes.getType(fOriginalDeclaration).resolveBinding();
 				fCuRewrite.getImportRewrite().addImport(typeToAddToImport);
 				fCuRewrite.getImportRemover().registerAddedImport(typeToAddToImport.getName());
+				
+			} else {
+				newReference= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
+				isStringPlaceholder= true;
 			}
 
-			if (shouldParenthesizeSubstitute(fInitializer, reference)) {
+			if (ASTNodes.substituteMustBeParenthesized((isStringPlaceholder ? fInitializer : newReference), reference)) {
 				ParenthesizedExpression parenthesized= fCuRewrite.getAST().newParenthesizedExpression();
 				parenthesized.setExpression(newReference);
 				newReference= parenthesized;
@@ -531,13 +551,6 @@ public class InlineConstantRefactoring extends Refactoring {
 				JavaPlugin.log(e);
 			}
 			return fInitializerUnit.getBuffer().getText(fInitializer.getStartPosition(), fInitializer.getLength());
-		}
-
-		private static boolean shouldParenthesizeSubstitute(Expression substitute, Expression location) {
-			if (substitute instanceof Assignment) // for esthetic reasons
-				return true;
-			else
-				return ASTNodes.substituteMustBeParenthesized(substitute, location);
 		}
 
 		private void removeConstantDeclarationIfNecessary() {
