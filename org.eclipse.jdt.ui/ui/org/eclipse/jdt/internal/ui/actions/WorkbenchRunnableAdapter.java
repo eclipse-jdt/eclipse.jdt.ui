@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.operation.IThreadListener;
 
@@ -31,9 +32,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
- * An <code>IRunnableWithProgress</code> that adapts and  <code>IWorkspaceRunnable</code>
- * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code>
- * thrown by the adapted runnable are caught and re-thrown as a <code>InterruptedException</code>.
+ * An {@link IRunnableWithProgress} that adapts an {@link IWorkspaceRunnable} so that is can be
+ * executed inside an {@link IRunnableContext}.
+ * <p>
+ * {@link OperationCanceledException}s thrown by the
+ * adapted runnable are caught and re-thrown as {@link InterruptedException}s.
  */
 public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadListener {
 
@@ -43,6 +46,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 
 	/**
 	 * Runs a workspace runnable with the workspace lock.
+	 * 
 	 * @param runnable the runnable
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
@@ -50,9 +54,11 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	}
 
 	/**
-	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
+	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at
+	 * all.
+	 * 
 	 * @param runnable the runnable
-	 * @param rule the scheduling rule
+	 * @param rule the scheduling rule, or <code>null</code>
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule) {
 		fWorkspaceRunnable= runnable;
@@ -60,11 +66,13 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	}
 
 	/**
-	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
+	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at
+	 * all.
+	 * 
 	 * @param runnable the runnable
-	 * @param rule the scheduling rule
-	 * @param transfer <code>true</code> if the rule is to be transfered
-	 *  to the model context thread. Otherwise <code>false</code>
+	 * @param rule the scheduling rule, or <code>null</code>
+	 * @param transfer <code>true</code> iff the rule is to be transfered to the model context
+	 *            thread
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule, boolean transfer) {
 		fWorkspaceRunnable= runnable;
@@ -98,7 +106,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	}
 
 	public void runAsUserJob(String name, final Object jobFamiliy) {
-		Job job = new Job(name){
+		Job job= new Job(name) {
 			/* (non-Javadoc)
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 */
