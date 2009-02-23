@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,14 +168,6 @@ public class RefactoringExecutionHelper {
 		} else {
 			rule= ResourcesPlugin.getWorkspace().getRoot();
 		}
-		class OperationRunner extends WorkbenchRunnableAdapter {
-			public OperationRunner(IWorkspaceRunnable runnable, ISchedulingRule schedulingRule) {
-				super(runnable, schedulingRule);
-			}
-			public void threadChange(Thread thread) {
-				manager.transferRule(getSchedulingRule(), thread);
-			}
-		}
 		try {
 			try {
 				Runnable r= new Runnable() {
@@ -194,9 +186,9 @@ public class RefactoringExecutionHelper {
 			final Operation op= new Operation(fork, forkChangeExecution);
 			fRefactoring.setValidationContext(fParent);
 			try{
-				fExecContext.run(fork, cancelable, new OperationRunner(op, rule));
+				fExecContext.run(fork, cancelable, new WorkbenchRunnableAdapter(op, rule, true));
 				if (fork && !forkChangeExecution && op.fPerformChangeOperation != null)
-					fExecContext.run(false, false, new OperationRunner(op.fPerformChangeOperation, rule));
+					fExecContext.run(false, false, new WorkbenchRunnableAdapter(op.fPerformChangeOperation, rule, true));
 
 				if (op.fPerformChangeOperation != null) {
 					RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
