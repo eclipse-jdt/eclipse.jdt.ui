@@ -314,6 +314,7 @@ public class JarPackageData {
 			// reverse of AbstractJarDestinationWizardPage#handleDestinationBrowseButtonPressed()
 			IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fJarLocation);
 			IPath absolutePath= file.getLocation();
+			if (absolutePath != null)
 				return absolutePath;
 		}
 		return fJarLocation;
