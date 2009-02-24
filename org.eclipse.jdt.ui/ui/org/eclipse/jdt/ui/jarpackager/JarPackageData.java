@@ -310,7 +310,7 @@ public class JarPackageData {
 	 * @since 3.0
 	 */
 	public IPath getAbsoluteJarLocation() {
-		if (!fJarLocation.isAbsolute()) {
+		if (!fJarLocation.isAbsolute() && fJarLocation.segmentCount() >= 2) {
 			// reverse of AbstractJarDestinationWizardPage#handleDestinationBrowseButtonPressed()
 			IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fJarLocation);
 			IPath absolutePath= file.getLocation();
