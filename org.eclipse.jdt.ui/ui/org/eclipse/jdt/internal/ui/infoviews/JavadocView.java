@@ -534,6 +534,7 @@ public class JavadocView extends AbstractInfoView {
 	protected void internalCreatePartControl(Composite parent) {
 		try {
 			fBrowser= new Browser(parent, SWT.NONE);
+			fBrowser.setJavascriptEnabled(false);
 			fIsUsingBrowserWidget= true;
 			addLinkListener(fBrowser);
 			fBrowser.addOpenWindowListener(new OpenWindowListener() {
