@@ -218,11 +218,9 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
-		composite.setFont(parent.getFont());
 
 		createMessageArea(composite);
 		Composite inner= new Composite(composite, SWT.NONE);
-		inner.setFont(composite.getFont());
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -244,6 +242,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			});
 		}
 		fTableViewer.setInput(fAllWorkingSets);
+		applyDialogFont(composite);
 
 		return composite;
 	}
@@ -259,7 +258,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		data.heightHint= convertHeightInCharsToPixels(20);
 		data.widthHint= convertWidthInCharsToPixels(50);
 		fTableViewer.getTable().setLayoutData(data);
-		fTableViewer.getTable().setFont(parent.getFont());
 
 		fTableViewer.addFilter(new Filter());
 		fTableViewer.setLabelProvider(new WorkingSetLabelProvider());
@@ -296,7 +294,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 		fNewButton= createButton(buttonComposite, nextButtonId++,
 			WorkingSetMessages.WorkingSetConfigurationDialog_new_label, false);
-		fNewButton.setFont(composite.getFont());
 		fNewButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				createWorkingSet();
@@ -305,7 +302,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 		fEditButton= createButton(buttonComposite, nextButtonId++,
 			WorkingSetMessages.WorkingSetConfigurationDialog_edit_label, false);
-		fEditButton.setFont(composite.getFont());
 		fEditButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				editSelectedWorkingSet();
@@ -314,7 +310,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 		fRemoveButton= createButton(buttonComposite, nextButtonId++,
 			WorkingSetMessages.WorkingSetConfigurationDialog_remove_label, false);
-		fRemoveButton.setFont(composite.getFont());
 		fRemoveButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				removeSelectedWorkingSets();
@@ -324,7 +319,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private void createOrderButtons(Composite parent) {
 		Composite buttons= new Composite(parent, SWT.NONE);
-		buttons.setFont(parent.getFont());
 		buttons.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -333,7 +327,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 		fUpButton= new Button(buttons, SWT.PUSH);
 		fUpButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_up_label);
-		fUpButton.setFont(parent.getFont());
 		setButtonLayoutData(fUpButton);
 		fUpButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -343,7 +336,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 		fDownButton= new Button(buttons, SWT.PUSH);
 		fDownButton.setText(WorkingSetMessages.WorkingSetConfigurationDialog_down_label);
-		fDownButton.setFont(parent.getFont());
 		setButtonLayoutData(fDownButton);
 		fDownButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -353,7 +345,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 		fSelectAll= new Button(buttons, SWT.PUSH);
 		fSelectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_selectAll_label);
-		fSelectAll.setFont(parent.getFont());
 		setButtonLayoutData(fSelectAll);
 		fSelectAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -363,7 +354,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 		fDeselectAll= new Button(buttons, SWT.PUSH);
 		fDeselectAll.setText(WorkingSetMessages.WorkingSetConfigurationDialog_deselectAll_label);
-		fDeselectAll.setFont(parent.getFont());
 		setButtonLayoutData(fDeselectAll);
 		fDeselectAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

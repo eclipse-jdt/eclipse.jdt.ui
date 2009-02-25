@@ -336,11 +336,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		protected final Control createDialogArea(Composite parent) {
 			Composite composite= (Composite)super.createDialogArea(parent);
-			composite.setFont(parent.getFont());
 
 			createMessageArea(composite);
 			Composite inner= new Composite(composite, SWT.NONE);
-			inner.setFont(composite.getFont());
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 			GridLayout layout= new GridLayout();
 			layout.numColumns= 2;
@@ -349,7 +347,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			inner.setLayout(layout);
 
 			Composite tableComposite= new Composite(inner, SWT.NONE);
-			tableComposite.setFont(composite.getFont());
 			tableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			layout= new GridLayout();
 			layout.marginHeight= 0;
@@ -367,7 +364,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		protected void createRightButtonBar(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setFont(parent.getFont());
 			composite.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
@@ -376,7 +372,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 			Button selectAll= new Button(composite, SWT.PUSH);
 			selectAll.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_SelectAll_button);
-			selectAll.setFont(composite.getFont());
 			setButtonLayoutData(selectAll);
 			selectAll.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -390,7 +385,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 			Button deselectAll= new Button(composite, SWT.PUSH);
 			deselectAll.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DeselectAll_button);
-			deselectAll.setFont(composite.getFont());
 			setButtonLayoutData(deselectAll);
 			deselectAll.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -406,7 +400,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 			Button newWorkingSet= new Button(composite, SWT.PUSH);
 			newWorkingSet.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_New_button);
-			newWorkingSet.setFont(composite.getFont());
 			setButtonLayoutData(newWorkingSet);
 			newWorkingSet.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -451,7 +444,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			data.heightHint= convertHeightInCharsToPixels(20);
 			data.widthHint= convertWidthInCharsToPixels(50);
 			result.getTable().setLayoutData(data);
-			result.getTable().setFont(parent.getFont());
 
 			result.addFilter(new Filter());
 			result.setLabelProvider(new GrayedCheckedModelLabelProvider());
