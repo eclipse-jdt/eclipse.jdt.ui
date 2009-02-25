@@ -497,7 +497,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 					return item;
 			}
 
-			TreeItem foundItem= findElement(item.getItems());
+			TreeItem foundItem= findElement(item.getItems(), toBeSkipped);
 			if (foundItem != null)
 				return foundItem;
 
