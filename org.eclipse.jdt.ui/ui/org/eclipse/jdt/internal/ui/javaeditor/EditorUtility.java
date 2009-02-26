@@ -122,6 +122,10 @@ public class EditorUtility {
 	 * @return the IEditorPart if shown, null if element is not open in an editor
 	 */
 	public static IEditorPart isOpenInEditor(Object inputElement) {
+		IEditorPart editor= findEditor(inputElement, false);
+		if (editor != null)
+			return editor;
+
 		IEditorInput input= getEditorInput(inputElement);
 
 		if (input != null) {
@@ -163,6 +167,26 @@ public class EditorUtility {
 		if (inputElement instanceof IFile)
 			return openInEditor((IFile) inputElement, activate);
 
+		IEditorPart editor= findEditor(inputElement, activate);
+		if (editor != null)
+			return editor;
+
+		IEditorInput input= getEditorInput(inputElement);
+		if (input == null)
+			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT);
+
+		return openInEditor(input, getEditorID(input), activate);
+	}
+	
+	/**
+	 * Tries to find the editor for the given input element.
+	 * 
+	 * @param inputElement the input element
+	 * @param activate <code>true</code> if the found editor should be activated
+	 * @return the editor or <code>null</code>
+	 * @since 3.5
+	 */
+	private static IEditorPart findEditor(Object inputElement, boolean activate) {
 		/*
 		 * Support to navigate inside non-primary working copy.
 		 * For now we only support to navigate inside the currently
@@ -196,12 +220,7 @@ public class EditorUtility {
 				}
 			}
 		}
-
-		IEditorInput input= getEditorInput(inputElement);
-		if (input == null)
-			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT);
-
-		return openInEditor(input, getEditorID(input), activate);
+		return null;
 	}
 
 	/*
