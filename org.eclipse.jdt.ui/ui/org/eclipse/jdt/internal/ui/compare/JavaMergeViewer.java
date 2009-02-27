@@ -230,7 +230,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 	 * @since 3.5
 	 */
 	protected boolean isEditorBacked(ITextViewer textViewer) {
-		return true;
+		return getSite() != null;
 	}
 
 
