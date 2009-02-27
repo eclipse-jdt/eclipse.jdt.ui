@@ -235,7 +235,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 							change.initializeValidationData(new NullProgressMonitor());
 							PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
 							op.setUndoManager(RefactoringCore.getUndoManager(), getDisplayString());
-							op.setSchedulingRule(fJavaProject.getProject());
+							op.setSchedulingRule(fJavaProject.getProject().getWorkspace().getRoot());
 							op.run(monitor);
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
