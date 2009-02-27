@@ -1367,6 +1367,12 @@
             targetId="org.eclipse.jdt.ui.javaCode">
       </hyperlinkDetector>
       <hyperlinkDetector
+	        class="org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkImplementationDetector"
+            id="org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkImplementationDetector"
+            name="%JavaElementHyperlinkImplementationDetector"
+            targetId="org.eclipse.jdt.ui.javaCode">
+      </hyperlinkDetector>
+      <hyperlinkDetector
             class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector"
             id="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector"
             name="%PropertyKeyHyperlinkDetector"
