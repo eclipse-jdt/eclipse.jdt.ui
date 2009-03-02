@@ -18,6 +18,7 @@ public interface I {
 	/**JD*/
 
 	//abstract
+
 	public abstract void b();
 
 	//destruct
