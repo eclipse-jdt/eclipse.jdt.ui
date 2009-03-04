@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class SWTUtil {
 
 	/**
 	 * The default visible item count for {@link Combo}s.
-	 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=7845 .
+	 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=245569 .
 	 *
 	 * @see Combo#setVisibleItemCount(int)
 	 *
@@ -51,7 +51,7 @@ public class SWTUtil {
 
 	/**
 	 * Returns the standard display to be used. The method first checks, if
-	 * the thread calling this method has an associated disaply. If so, this
+	 * the thread calling this method has an associated display. If so, this
 	 * display is returned. Otherwise the method returns the default display.
 	 * @return returns the standard display to be used
 	 */
