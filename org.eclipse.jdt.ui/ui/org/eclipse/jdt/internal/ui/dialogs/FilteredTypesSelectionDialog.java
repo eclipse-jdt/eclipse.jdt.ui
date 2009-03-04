@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -260,11 +258,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		
 		setListLabelProvider(fTypeInfoLabelProvider);
 		setListSelectionLabelDecorator(fTypeInfoLabelProvider);
-		shell.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				fTypeInfoLabelProvider.dispose();
-			}
-		});
+
 		setDetailsLabelProvider(new TypeItemDetailsLabelProvider(fTypeInfoUtil));
 
 		fTypeItemsComparator= new TypeItemsComparator();
