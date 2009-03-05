@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.tests.performance;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -62,6 +63,12 @@ public class SWTTestProject {
 
 		IProject project= createExistingProject(PROJECT);
 		fProject= JavaCore.create(project);
+		
+		//some classes in the archive are not 1.4 compliant, e.g. GridData uses 'enum' as identifier
+		Map options= fProject.getOptions(false);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_3, options);
+		fProject.setOptions(options);
+		
 		Assert.assertTrue(fProject.exists());
 	}
 
