@@ -36,8 +36,10 @@ public abstract class RepeatingRefactoringPerformanceTestCase extends Refactorin
 				fTestProject.delete();
  			}
 		}
-		commitMeasurements();
-		assertMeasurements();
+		if (measure) {
+			commitMeasurements();
+			assertMeasurements();
+		}
 	}
 
 	protected void finishMeasurements() {
