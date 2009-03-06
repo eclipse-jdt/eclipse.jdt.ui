@@ -415,9 +415,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					if (dialog.open() == Window.OK) {
 						IWorkingSet workingSet= wizard.getSelection();
 						if (isValidWorkingSet(workingSet)) {
-							addNewWorkingSet(workingSet);
-
 							manager.addWorkingSet(workingSet);
+							addNewWorkingSet(workingSet);
 							fCreatedWorkingSets.add(workingSet);
 						}
 					}
