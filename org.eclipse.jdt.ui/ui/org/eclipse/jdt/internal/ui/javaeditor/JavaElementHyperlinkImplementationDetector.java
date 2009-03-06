@@ -15,9 +15,15 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -32,9 +38,30 @@ public class JavaElementHyperlinkImplementationDetector extends JavaElementHyper
 	 * @since 3.5
 	 */
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, ITextEditor editor) {
-		if (element.getElementType() == IJavaElement.METHOD) {
+		if (element.getElementType() == IJavaElement.METHOD && canBeOverridden((IMethod)element)) {
 			return new JavaElementImplementationHyperlink(wordRegion, openAction, element, qualify, editor);
 		}
 		return null;
+	}
+
+	/**
+	 * Checks whether a method can be overridden.
+	 * 
+	 * @param method the method
+	 * @return <code>false</code> if the method is final, static, or a constructor, or if its declaring
+	 *         class is final, or in case of an exception, <code>true</code> otherwise
+	 */
+	private boolean canBeOverridden(IMethod method) {
+		try {
+			int flags= method.getFlags();
+			if (Flags.isFinal(flags) || Flags.isStatic(flags) || method.isConstructor()
+					|| Flags.isFinal(((IMember)method.getParent()).getFlags())) {
+				return false;
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return false;
+		}
+		return true;
 	}
 }
