@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -29,6 +30,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -212,8 +215,12 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			IRunnableContext context= fEditor.getSite().getWorkbenchWindow();
 			context.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "", e)); //$NON-NLS-1$
-			return;
+			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK,
+					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, fElement.getElementName()), e.getCause());
+			JavaPlugin.log(status);
+			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
+					JavaEditorMessages.JavaElementImplementationHyperlink_error_no_implementations_found_message, status);
 		} catch (InterruptedException e) {
 			if (e.getMessage() != dummyString) {
 				return;
