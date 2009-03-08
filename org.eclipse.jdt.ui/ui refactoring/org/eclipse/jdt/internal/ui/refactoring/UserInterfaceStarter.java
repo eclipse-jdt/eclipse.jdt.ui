@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 
 /**

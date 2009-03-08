@@ -64,13 +64,13 @@ import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefac
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
@@ -159,7 +159,7 @@ public class GetterSetterCorrectionSubProcessor {
 				refactoring.setConsiderVisibility(false);//private field references are just searched in local file
 				if (fNoDialog) {
 					IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-					final RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, RefactoringStatus.ERROR, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, JavaPlugin.getActiveWorkbenchShell(), window);
+					final RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, RefactoringStatus.ERROR, RefactoringSaveHelper.SAVE_REFACTORING, JavaPlugin.getActiveWorkbenchShell(), window);
 					if (Display.getCurrent() != null) {
 						try {
 							helper.perform(false, false);
@@ -182,7 +182,7 @@ public class GetterSetterCorrectionSubProcessor {
 						});
 					}
 				} else {
-					new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring), JavaPlugin.getActiveWorkbenchShell(), "", RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES); //$NON-NLS-1$
+					new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring), JavaPlugin.getActiveWorkbenchShell(), "", RefactoringSaveHelper.SAVE_REFACTORING); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_title, CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_message);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring;
+package org.eclipse.jdt.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -42,11 +42,23 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.GlobalBuildAction;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * Helper to save dirty editors prior to starting a refactoring.
+ * 
+ * @see PreferenceConstants#REFACTOR_SAVE_ALL_EDITORS
+ * @since 3.5
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
+ */
 public class RefactoringSaveHelper {
 
 	private boolean fFilesSaved;
@@ -63,40 +75,34 @@ public class RefactoringSaveHelper {
 	public static final int SAVE_ALL= 2;
 
 	/**
-	 * Save mode to save all unknown editors, i.e. those that don't work on
-	 * resources, don't use file buffers, or are otherwise suspect.
-	 *
-	 * Used for refactorings with participants or qualified name updating.
+	 * Save mode to not save any editors.
 	 */
-	public static final int SAVE_NON_JAVA_UPDATES= 3;
-
+	public static final int SAVE_NOTHING= 3;
+	
 	/**
-	 * Save mode to save only dirty editors on compilation units that are not in
-	 * working copy mode.
-	 *
-	 * Used for refactorings without participants or qualified name updating.
+	 * Save mode to save all editors that are known to cause trouble for Java refactorings, e.g.
+	 * editors on compilation units that are not in working copy mode.
 	 */
-	public static final int SAVE_JAVA_ONLY_UPDATES= 4;
-
+	public static final int SAVE_REFACTORING= 4;
+	
 	/**
-	 * Save mode to not save save any editors.
-	 */
-	public static final int SAVE_NOTHING= 5;
-
-	/**
+	 * Creates a refactoring save helper with the given save mode.
+	 * 
 	 * @param saveMode one of the SAVE_* constants
 	 */
 	public RefactoringSaveHelper(int saveMode) {
 		Assert.isTrue(saveMode == SAVE_ALL_ALWAYS_ASK
 				|| saveMode == SAVE_ALL
-				|| saveMode == SAVE_NON_JAVA_UPDATES
-				|| saveMode == SAVE_JAVA_ONLY_UPDATES
-				|| saveMode == SAVE_NOTHING);
+				|| saveMode == SAVE_NOTHING
+				|| saveMode == SAVE_REFACTORING);
 		fSaveMode= saveMode;
 	}
 
 	/**
-	 * @param shell
+	 * Saves all editors. Depending on the {@link PreferenceConstants#REFACTOR_SAVE_ALL_EDITORS}
+	 * preference, the user is asked to save affected dirty editors. 
+	 * 
+	 * @param shell the parent shell for the confirmation dialog
 	 * @return <code>true</code> if save was successful and refactoring can proceed;
 	 * 		false if the refactoring must be cancelled
 	 */
@@ -108,12 +114,8 @@ public class RefactoringSaveHelper {
 				dirtyEditors= EditorUtility.getDirtyEditors(true);
 				break;
 
-			case SAVE_NON_JAVA_UPDATES:
+			case SAVE_REFACTORING:
 				dirtyEditors= EditorUtility.getDirtyEditorsToSave(false); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=175495
-				break;
-
-			case SAVE_JAVA_ONLY_UPDATES:
-				dirtyEditors= EditorUtility.getDirtyEditorsToSave(false);
 				break;
 
 			case SAVE_NOTHING:
@@ -175,12 +177,23 @@ public class RefactoringSaveHelper {
 		}
 	}
 
+	/**
+	 * Triggers an in incremental build if this save helper has saved files before.
+	 */
 	public void triggerBuild() {
 		if (fFilesSaved && ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding()) {
 			new GlobalBuildAction(JavaPlugin.getActiveWorkbenchWindow(), IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
 		}
 	}
 
+	/**
+	 * Returns whether this save helper has saved files. 
+	 * @return iff files have been saved
+	 */
+	public boolean hasFilesSaved() {
+		return fFilesSaved;
+	}
+	
 	private boolean askSaveAllDirtyEditors(Shell shell, IEditorPart[] dirtyEditors) {
 		final boolean canSaveAutomatically= fSaveMode != SAVE_ALL_ALWAYS_ASK;
 		if (canSaveAutomatically && RefactoringSavePreferences.getSaveAllEditors()) //must save everything
@@ -212,10 +225,6 @@ public class RefactoringSaveHelper {
 		dialog.setContentProvider(new ArrayContentProvider());
 		dialog.setInput(Arrays.asList(dirtyEditors));
 		return dialog.open() == Window.OK;
-	}
-
-	public boolean hasFilesSaved() {
-		return fFilesSaved;
 	}
 
 	private ILabelProvider createDialogLabelProvider() {

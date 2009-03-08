@@ -60,9 +60,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public final class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
@@ -132,7 +132,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	}
 
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES;
+		return RefactoringSaveHelper.SAVE_REFACTORING;
 	}
 
 	//---- IRenameProcessor -------------------------------------

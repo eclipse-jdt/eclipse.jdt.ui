@@ -42,6 +42,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 
 
