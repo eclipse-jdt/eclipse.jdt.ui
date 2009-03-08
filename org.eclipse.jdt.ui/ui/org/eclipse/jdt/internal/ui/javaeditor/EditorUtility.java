@@ -588,18 +588,6 @@ public class EditorUtility {
 	/**
 	 * Returns an array of all editors that have an unsaved content. If the identical content is
 	 * presented in more than one editor, only one of those editor parts is part of the result.
-	 *
-	 * @return an array of all dirty editor parts.
-	 * @since 3.2
-	 * @deprecated TODO: remove for 3.4
-	 */
-	public static IEditorPart[] getDirtyEditors() {
-		return getDirtyEditors(false);
-	}
-
-	/**
-	 * Returns an array of all editors that have an unsaved content. If the identical content is
-	 * presented in more than one editor, only one of those editor parts is part of the result.
 	 * @param skipNonResourceEditors if <code>true</code>, editors whose inputs do not adapt to {@link IResource}
 	 * are not saved
 	 *
