@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -158,6 +159,9 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					ITypeBinding binding= expression.resolveTypeBinding();
 					elem= binding.getJavaElement();
 				}
+			} else if (parent instanceof MethodDeclaration) {
+				ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node);
+				elem= parentTypeBinding.getJavaElement();
 			}
 		}
 		final IType type= (IType)elem;
