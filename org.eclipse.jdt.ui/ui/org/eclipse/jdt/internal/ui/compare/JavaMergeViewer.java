@@ -49,7 +49,6 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.PartEventAction;
 import org.eclipse.ui.contexts.IContextService;
-import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
@@ -244,7 +243,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 			return null;
 		if (getSite() == null)
 			return null;
-		if (!isInputValid(editorInput))
+		if (!(editorInput instanceof IStorageEditorInput))
 			return null;
 		return editorInput;
 	}
@@ -258,16 +257,6 @@ public class JavaMergeViewer extends TextMergeViewer {
 			fSavedSite = site;
 		// TODO: this is a hack
 		return fSavedSite;
-	}
-
-	private boolean isInputValid(IEditorInput editorInput) {
-		if (editorInput instanceof FileEditorInput) {
-			FileEditorInput fileEditorInput= (FileEditorInput)editorInput;
-			return fileEditorInput.getFile().isAccessible();
-		} else if (editorInput instanceof IStorageEditorInput) {
-			return true;
-		}
-		return false;
 	}
 
 	private JavaSourceViewerConfiguration getSourceViewerConfiguration(SourceViewer sourceViewer, IEditorInput editorInput) {
@@ -562,14 +551,10 @@ public class JavaMergeViewer extends TextMergeViewer {
 			setSourceViewer(this, sourceViewer);
 			getSelectionProvider().addSelectionChangedListener(getSelectionChangedListener());
 		}
-
 		protected void doSetInput(IEditorInput input) throws CoreException {
 			super.doSetInput(input);
 			// the editor input has been explicitly set
 			fInputSet = true;
-		}
-		public IEditorInput getEditorInput() {
-			return fInputSet ? JavaMergeViewer.this.getEditorInput(getViewer()) : super.getEditorInput();
 		}
 		// called by org.eclipse.ui.texteditor.TextEditorAction.canModifyEditor()
 		public boolean isEditable() {
@@ -581,9 +566,11 @@ public class JavaMergeViewer extends TextMergeViewer {
 		public boolean isEditorInputReadOnly() {
 			return !fEditable;
 		}
-
 		protected void setActionsActivated(boolean state) {
 			super.setActionsActivated(state);
+		}
+		public void close(boolean save) {
+			getDocumentProvider().disconnect(getEditorInput());
 		}
 	}
 
