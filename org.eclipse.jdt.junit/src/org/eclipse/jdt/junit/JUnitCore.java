@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,17 @@
 package org.eclipse.jdt.junit;
 
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
@@ -67,4 +78,25 @@ public class JUnitCore {
 	public static void removeTestRunListener(TestRunListener listener) {
 		JUnitPlugin.getDefault().getNewTestRunListeners().remove(listener);
 	}
+
+	/**
+	 * Finds types that contain JUnit tests in the given container.
+	 *  
+	 * @param container the container
+	 * @param monitor the progress monitor used to report progress and request cancelation,
+	 *   or <code>null</code> if none
+	 * @return test types inside the given container
+	 * @throws CoreException when a problem occurs while accessing <code>container</code> or its children
+	 * @throws OperationCanceledException if the operation has been canceled
+	 * 
+	 * @since 3.5
+	 */
+	public static IType[] findTestTypes(IJavaElement container, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		final Set result= new HashSet();
+		JUnit4TestFinder finder= new JUnit4TestFinder();
+		finder.findTestsInContainer(container, result, null);
+
+		return (IType[])result.toArray(new IType[result.size()]);
+	}
+
 }

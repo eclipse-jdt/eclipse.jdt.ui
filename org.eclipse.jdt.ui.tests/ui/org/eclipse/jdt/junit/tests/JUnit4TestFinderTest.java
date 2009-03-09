@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 
@@ -61,7 +63,7 @@ public class JUnit4TestFinderTest extends TestCase {
 
 	/**
 	 * Copy from {@link JUnit3TestFinderTest}: All tests must work in Junit 4 as well
-	 * @throws Exception
+	 * @throws Exception if it fails
 	 */
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
@@ -409,7 +411,8 @@ public class JUnit4TestFinderTest extends TestCase {
 		}
 
 		HashSet set= new HashSet();
-		finder.findTestsInContainer(container, set, null);
+//		finder.findTestsInContainer(container, set, null);
+		set.addAll(Arrays.asList(JUnitCore.findTestTypes(container, null)));
 
 		HashSet namesFound= new HashSet();
 		for (Iterator iterator= set.iterator(); iterator.hasNext();) {
