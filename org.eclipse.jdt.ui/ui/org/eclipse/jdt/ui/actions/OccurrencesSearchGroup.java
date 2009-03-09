@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,9 +26,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -177,12 +175,8 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	 */
 	public void fillContextMenu(IMenuManager manager) {
 		String menuText= SearchMessages.group_occurrences;
-		String shortcut= getShortcutString();
-		if (shortcut != null) {
-			menuText= menuText + '\t' + shortcut;
-		}
-
 		MenuManager javaSearchMM= new MenuManager(menuText, IContextMenuConstants.GROUP_SEARCH);
+		javaSearchMM.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU);
 		javaSearchMM.add(new Action() {
 		});
 		javaSearchMM.addMenuListener(new IMenuListener() {
@@ -228,13 +222,6 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fFindImplementorOccurrencesAction.update(javaSelection);
 		fBreakContinueTargetOccurrencesAction.update(javaSelection);
 		fMethodExitOccurrencesAction.update(javaSelection);
-	}
-
-	private String getShortcutString() {
-		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-		if (bindingService == null)
-			return null;
-		return bindingService.getBestActiveBindingFormattedFor(IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU);
 	}
 
 	/*

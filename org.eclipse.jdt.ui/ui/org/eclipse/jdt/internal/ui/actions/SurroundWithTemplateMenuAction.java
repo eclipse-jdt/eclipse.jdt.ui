@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -220,12 +220,12 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 
 		final CompilationUnitEditor editor= (CompilationUnitEditor)activePart;
 
-		(new JDTQuickMenuAction(editor, SURROUND_WITH_QUICK_MENU_ACTION_ID) {
+		new JDTQuickMenuCreator(editor) {
 			protected void fillMenu(IMenuManager menu) {
 				SurroundWithTryCatchAction surroundWithTryCatch= createSurroundWithTryCatchAction(editor);
 				SurroundWithTemplateMenuAction.fillMenu(menu, editor, surroundWithTryCatch);
 			}
-		}).run();
+		}.createMenu();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,36 +13,43 @@ package org.eclipse.jdt.internal.ui.actions;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.actions.QuickMenuCreator;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
+/**
+ * Java editor aware quick menu creator. In the given editor, the menu will be aligned with the word
+ * at the current offset.
+ * 
+ * @since 3.5
+ */
+public abstract class JDTQuickMenuCreator extends QuickMenuCreator {
 
-public abstract class JDTQuickMenuAction extends QuickMenuAction {
+	private final JavaEditor fEditor;
 
-	private JavaEditor fEditor;
-
-	public JDTQuickMenuAction(String commandId) {
-		super(commandId);
-	}
-
-	public JDTQuickMenuAction(JavaEditor editor, String commandId) {
-		super(commandId);
+	/**
+	 * Create a JDT quick menu creator
+	 * @param editor a Java editor, or <code>null</code> if none
+	 */
+	public JDTQuickMenuCreator(JavaEditor editor) {
 		fEditor= editor;
-	}
-
-	protected JavaEditor getJavaEditor() {
-		return fEditor;
 	}
 
 	protected Point computeMenuLocation(StyledText text) {
 		if (fEditor == null || text != fEditor.getViewer().getTextWidget())
-			return null;
+			return super.computeMenuLocation(text);
 		return computeWordStart();
 	}
 
@@ -82,4 +89,19 @@ public abstract class JDTQuickMenuAction extends QuickMenuAction {
 
 		return new Region(start, end - start);
 	}
+
+	/**
+	 * Returns a handler that can create and open the quick menu.
+	 * 
+	 * @return a handler that can create and open the quick menu
+	 */
+	public IHandler createHandler() {
+		return new AbstractHandler() {
+			public Object execute(ExecutionEvent event) throws ExecutionException {
+				createMenu();
+				return null;
+			}
+		};
+	}
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.commands.IHandler;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -45,7 +46,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.internal.ui.actions.AllCleanUpsAction;
 import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
-import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
+import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuCreator;
 import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -144,16 +145,6 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
 
-	private class SourceQuickAccessAction extends JDTQuickMenuAction {
-		public SourceQuickAccessAction(CompilationUnitEditor editor) {
-			super(editor, QUICK_MENU_ID);
-		}
-		protected void fillMenu(IMenuManager menu) {
-			fillQuickMenu(menu);
-		}
-	}
-
-	private JDTQuickMenuAction fQuickAccessAction;
 	private IHandlerActivation fQuickAccessHandlerActivation;
 	private IHandlerService fHandlerService;
 
@@ -368,8 +359,12 @@ public class GenerateActionGroup extends ActionGroup {
 	private void installQuickAccessAction() {
 		fHandlerService= (IHandlerService)fSite.getService(IHandlerService.class);
 		if (fHandlerService != null) {
-			fQuickAccessAction= new SourceQuickAccessAction(fEditor);
-			fQuickAccessHandlerActivation= fHandlerService.activateHandler(fQuickAccessAction.getActionDefinitionId(), new ActionHandler(fQuickAccessAction));
+			IHandler handler= new JDTQuickMenuCreator(fEditor) {
+				protected void fillMenu(IMenuManager menu) {
+					fillQuickMenu(menu);
+				}
+			}.createHandler();
+			fQuickAccessHandlerActivation= fHandlerService.activateHandler(QUICK_MENU_ID, handler);
 		}
 	}
 
@@ -408,11 +403,8 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		String menuText= ActionMessages.SourceMenu_label;
-		if (fQuickAccessAction != null) {
-			menuText= fQuickAccessAction.addShortcut(menuText);
-		}
-		IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
+		MenuManager subMenu= new MenuManager(ActionMessages.SourceMenu_label, MENU_ID);
+		subMenu.setActionDefinitionId(QUICK_MENU_ID);
 		int added= 0;
 		if (isEditorOwner()) {
 			added= fillEditorSubMenu(subMenu);

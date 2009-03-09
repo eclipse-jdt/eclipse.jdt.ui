@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Menu;
 
+import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.operations.IUndoContext;
 
 import org.eclipse.core.runtime.PerformanceStats;
@@ -30,7 +31,6 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.ExtractSuperClassAction;
 import org.eclipse.jdt.internal.ui.actions.IntroduceParameterObjectAction;
-import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
+import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuCreator;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -180,16 +180,6 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
 
-	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
-		public RefactorQuickAccessAction(JavaEditor editor) {
-			super(editor, QUICK_MENU_ID);
-		}
-		protected void fillMenu(IMenuManager menu) {
-			fillQuickMenu(menu);
-		}
-	}
-
-	private JDTQuickMenuAction fQuickAccessAction;
 	private IHandlerActivation fQuickAccessHandlerActivation;
 	private IHandlerService fHandlerService;
 
@@ -438,8 +428,12 @@ public class RefactorActionGroup extends ActionGroup {
 	private void installQuickAccessAction() {
 		fHandlerService= (IHandlerService)fSite.getService(IHandlerService.class);
 		if (fHandlerService != null) {
-			fQuickAccessAction= new RefactorQuickAccessAction(fEditor);
-			fQuickAccessHandlerActivation= fHandlerService.activateHandler(fQuickAccessAction.getActionDefinitionId(), new ActionHandler(fQuickAccessAction));
+			IHandler handler= new JDTQuickMenuCreator(fEditor) {
+				protected void fillMenu(IMenuManager menu) {
+					fillQuickMenu(menu);
+				}
+			}.createHandler();
+			fQuickAccessHandlerActivation= fHandlerService.activateHandler(QUICK_MENU_ID, handler);
 		}
 	}
 
@@ -566,11 +560,8 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 
 	private void addRefactorSubmenu(IMenuManager menu) {
-		String menuText= ActionMessages.RefactorMenu_label;
-		if (fQuickAccessAction != null) {
-			menuText= fQuickAccessAction.addShortcut(menuText);
-		}
-		IMenuManager refactorSubmenu= new MenuManager(menuText, MENU_ID);
+		MenuManager refactorSubmenu= new MenuManager(ActionMessages.RefactorMenu_label, MENU_ID);
+		refactorSubmenu.setActionDefinitionId(QUICK_MENU_ID);
 		if (fEditor != null) {
 			final ITypeRoot element= getEditorInput();
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
