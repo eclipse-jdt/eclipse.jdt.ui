@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
@@ -51,15 +52,18 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 	}
 
 	public void test_10_10() throws Exception {
+		explainDegradation();
 		executeRefactoring(10, 10, true, 10);
 	}
 
 	public void test_100_10() throws Exception {
 		tagAsSummary("Rename method with overloading", Dimension.ELAPSED_PROCESS);
+		explainDegradation();
 		executeRefactoring(100, 10, true, 10);
 	}
 
 	public void test_1000_10() throws Exception {
+		explainDegradation();
 		executeRefactoring(1000, 10, true, 10);
 	}
 
@@ -109,4 +113,10 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 	protected void assertMeasurements() {
 		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
 	}
+
+	private void explainDegradation() {
+		Performance performance= Performance.getDefault();
+		performance.setComment(fPerformanceMeter, Performance.EXPLAINS_DEGRADATION_COMMENT, "The degradation is a consequence of fixing bug 250454 in JDT Core.");
+	}
+
 }
