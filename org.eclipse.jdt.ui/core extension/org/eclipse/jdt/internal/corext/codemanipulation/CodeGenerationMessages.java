@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -44,4 +45,25 @@ public final class CodeGenerationMessages extends NLS {
 	public static String GenerateHashCodeEqualsOperation_hash_code_argument;
 	public static String GenerateHashCodeEqualsOperation_tag_return;
 	public static String GenerateHashCodeEqualsOperation_return_comment;
+	public static String GenerateToStringOperation_apache_ToStringBilder_chained_style_name;
+	public static String GenerateToStringOperation_apache_ToStringBuilder_style_name;
+	public static String GenerateToStringOperation_objectClassGetNameVariableDescription;
+	public static String GenerateToStringOperation_objectClassNameVariableDescritpion;
+	public static String GenerateToStringOperation_objectHashCodeVariableDescription;
+	public static String GenerateToStringOperation_objectIdentityHashCodeVariableDescription;
+	public static String GenerateToStringOperation_objectSuperToStringVariableDescription;
+	public static String GenerateToStringOperation_description;
+	public static String GenerateToStringOperation_error_dialog_title;
+	public static String GenerateToStringOperation_invalid_message;
+	public static String GenerateToStringOperation_memberNameParenthesisVariableDescription;
+	public static String GenerateToStringOperation_memberNameVariableDescription;
+	public static String GenerateToStringOperation_memberValueVariableDescription;
+	public static String GenerateToStringOperation_otherFieldsVariableDescription;
+	public static String GenerateToStringOperation_spring_ToStringCreator_chained_style_name;
+	public static String GenerateToStringOperation_spring_ToStringCreator_style_name;
+	public static String GenerateToStringOperation_string_format_style_name;
+	public static String GenerateToStringOperation_StringBuilder_chained_style_name;
+	public static String GenerateToStringOperation_stringBuilder_style_name;
+	public static String GenerateToStringOperation_stringConcatenation_style_name;
+	public static String GenerateToStringOperation_warning_no_arrays_collections_with_this_style;
 }

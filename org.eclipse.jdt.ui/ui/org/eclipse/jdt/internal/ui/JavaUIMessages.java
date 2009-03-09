@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
@@ -83,7 +84,29 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateHashCodeEqualsDialog_select_at_least_one_field;
 	public static String GenerateHashCodeEqualsDialog_select_fields_to_include;
 
-
+	public static String GenerateToStringDialog_defaultTemplateName;
+	public static String GenerateToStringDialog_dialog_title;
+	public static String GenerateToStringDialog_select_fields_to_include;
+	public static String GenerateToStringDialog_selectioninfo_more;
+	public static String GenerateToStringDialog_methods_node;
+	public static String GenerateToStringDialog_fields_node;
+	public static String GenerateToStringDialog_inherited_fields_node;
+	public static String GenerateToStringDialog_inherited_methods_node;
+	public static String GenerateToStringDialog_string_format_combo;
+	public static String GenerateToStringDialog_manage_templates_button;
+	public static String GenerateToStringDialog_code_style_combo;
+	public static String GenerateToStringDialog_ignore_default_button;
+	public static String GenerateToStringDialog_limit_elements_button;
+	public static String GenerateToStringDialog_newTemplateName;
+	public static String GenerateToStringDialog_skip_null_button;
+	public static String GenerateToStringDialog_template_content;
+	public static String GenerateToStringDialog_template_name;
+	public static String GenerateToStringDialog_templateManagerApplyButton;
+	public static String GenerateToStringDialog_down_button;
+	public static String GenerateToStringDialog_templatesManagerNewButton;
+	public static String GenerateToStringDialog_templatesManagerRemoveButton;
+	public static String GenerateToStringDialog_templatesManagerTitle;
+	public static String GenerateToStringDialog_up_button;
 
 	public static String JavaImageLabelprovider_assert_wrongImage;
 
@@ -189,5 +212,4 @@ public final class JavaUIMessages extends NLS {
 	public static String HistoryListAction_remove;
 	public static String HistoryListAction_max_entries_constraint;
 	public static String HistoryListAction_remove_all;
-
 }

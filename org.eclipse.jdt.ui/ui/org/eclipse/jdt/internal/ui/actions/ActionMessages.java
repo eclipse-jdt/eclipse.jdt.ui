@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
@@ -151,26 +152,27 @@ public final class ActionMessages extends NLS {
 	public static String AddGettSetterAction_typeContainsNoFields_message;
 
 	public static String GenerateHashCodeEqualsAction_error_caption;
-	public static String GenerateHashCodeEqualsAction_error_not_applicable;
-	public static String GenerateHashCodeEqualsAction_error_removed_type;
-	public static String GenerateHashCodeEqualsAction_error_cannot_create;
+	public static String GenerateMethodAbstractAction_error_not_applicable;
+	public static String GenerateMethodAbstractAction_error_removed_type;
+	public static String GenerateMethodAbstractAction_error_cannot_create;
 	public static String GenerateHashCodeEqualsAction_label;
 	public static String GenerateHashCodeEqualsAction_description;
 	public static String GenerateHashCodeEqualsAction_tooltip;
-	public static String GenerateHashCodeEqualsAction_annotation_not_applicable;
-	public static String GenerateHashCodeEqualsAction_interface_not_applicable;
-	public static String GenerateHashCodeEqualsAction_enum_not_applicable;
-	public static String GenerateHashCodeEqualsAction_anonymous_type_not_applicable;
+	public static String GenerateMethodAbstractAction_annotation_not_applicable;
+	public static String GenerateMethodAbstractAction_interface_not_applicable;
+	public static String GenerateMethodAbstractAction_enum_not_applicable;
+	public static String GenerateMethodAbstractAction_anonymous_type_not_applicable;
 	public static String GenerateHashCodeEqualsAction_no_nonstatic_fields_error;
 	public static String GenerateHashCodeEqualsAction_transient_field_included_error;
 	public static String GenerateHashCodeEqualsAction_type_does_not_implement_hashCode_equals_error;
 	public static String GenerateHashCodeEqualsAction_interface_does_not_declare_hashCode_equals_error;
-	public static String GenerateHashCodeEqualsAction_final_hashCode_equals_in_superclass_error;
-	public static String GenerateHashCodeEqualsAction_already_has_hashCode_equals_error;
-	public static String GenerateHashCodeEqualsAction_super_class;
+	public static String GenerateMethodAbstractAction_final_method_in_superclass_error;
+	public static String GenerateMethodAbstractAction_already_has_this_method_error;
+	public static String GenerateMethodAbstractAction_super_class;
 	public static String GenerateHashCodeEqualsAction_field_type;
 	public static String GenerateHashCodeEqualsAction_equals;
 	public static String GenerateHashCodeEqualsAction_hashCode;
+	public static String GenerateHashCodeEqualsAction_hashcode_or_equals;
 	public static String GenerateHashCodeEqualsAction_equals_and_hashCode;
 
 	public static String GetterSetterTreeSelectionDialog_select_getters;
@@ -418,5 +420,11 @@ public final class ActionMessages extends NLS {
 	public static String CollapsAllAction_label;
 	public static String CollapsAllAction_tooltip;
 	public static String CollapsAllAction_description;
+
+	public static String GenerateToStringAction_label;
+	public static String GenerateToStringAction_description;
+	public static String GenerateToStringAction_tooltip;
+	public static String GenerateToStringAction_tostring;
+	public static String GenerateToStringAction_error_caption;
 
 }

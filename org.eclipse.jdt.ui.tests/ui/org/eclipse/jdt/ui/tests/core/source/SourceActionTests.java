@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -32,6 +33,7 @@ public class SourceActionTests extends TestCase {
 		suite.addTest(AddUnimplementedConstructorsTest.allTests());
 		suite.addTest(GenerateConstructorUsingFieldsTest.allTests());
 		suite.addTest(GenerateHashCodeEqualsTest.allTests());
+		suite.addTest(GenerateToStringTest.allTests());
 
 		return new ProjectTestSetup(suite);
 	}

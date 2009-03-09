@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> bug 38692
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
@@ -28,8 +29,10 @@ public interface IJavaHelpContextIds {
 	// Actions
 	public static final String GETTERSETTER_ACTION= 											PREFIX + "getter_setter_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= 					PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
-	/* @since 3.2 */
+	/** @since 3.2 **/
 	public static final String GENERATE_HASHCODE_EQUALS_ACTION=						PREFIX + "add_hashcode_equals_action_context"; //$NON-NLS-1$
+	/** @since 3.5 **/
+	public static final String GENERATE_TOSTRING_ACTION= PREFIX + "add_tostring_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION= 			PREFIX + "add_unimplemented_constructors_action_context"; //$NON-NLS-1$
 	public static final String CREATE_NEW_CONSTRUCTOR_ACTION= 					PREFIX + "create_new_constructor_action_context"; //$NON-NLS-1$
 	public static final String SHOW_IN_PACKAGEVIEW_ACTION= 								PREFIX + "show_in_packageview_action_context"; //$NON-NLS-1$
@@ -245,6 +248,7 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_GETTER_SETTER_SELECTION_DIALOG= PREFIX + "add_getter_setter_selection_dialog_context"; //$NON-NLS-1$
 	public static final String ADD_DELEGATE_METHODS_SELECTION_DIALOG= PREFIX + "add_delegate_methods_selection_dialog_context"; //$NON-NLS-1$
 	public static final String GENERATE_HASHCODE_EQUALS_SELECTION_DIALOG= PREFIX + "hash_code_equals_tree_selection_dialog_context"; //$NON-NLS-1$
+	public static final String GENERATE_TOSTRING_SELECTION_DIALOG= PREFIX + "to_string_tree_selection_dialog_context"; //$NON-NLS-1$
 	public static final String GENERATE_CONSTRUCTOR_USING_FIELDS_SELECTION_DIALOG= PREFIX + "generate_constructor_using_fields_selection_dialog_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_DIALOG= PREFIX + "add_unimplemented_constructors_dialog_context"; //$NON-NLS-1$
 

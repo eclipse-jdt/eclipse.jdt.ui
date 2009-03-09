@@ -11,6 +11,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.corext.buildpath;x-internal:=true,
  org.eclipse.jdt.internal.corext.callhierarchy;x-internal:=true,
  org.eclipse.jdt.internal.corext.codemanipulation;x-friends:="org.eclipse.jdt.junit",
+ org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;x-internal:=true,
  org.eclipse.jdt.internal.corext.dom;x-internal:=true,
  org.eclipse.jdt.internal.corext.dom.fragments;x-internal:=true,
  org.eclipse.jdt.internal.corext.fix;x-internal:=true,

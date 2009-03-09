@@ -2654,6 +2654,13 @@
                id="org.eclipse.jdt.ui.actions.GenerateHashCodeEquals">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.generate.tostring"
+               label="%GenerateToStringAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+               id="org.eclipse.jdt.ui.actions.GenerateToString">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"
                label="%GenerateDelegateMethodsAction.label"
                retarget="true"
@@ -3396,6 +3403,12 @@
             description="%ActionDefinition.generateHashCode.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.generate.hashcode.equals">
+      </command>
+      <command
+            name="%ActionDefinition.generateToString.name"
+            description="%ActionDefinition.generateToString.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.generate.tostring">
       </command>
       <command
             name="%ActionDefinition.delegateMethods.name"

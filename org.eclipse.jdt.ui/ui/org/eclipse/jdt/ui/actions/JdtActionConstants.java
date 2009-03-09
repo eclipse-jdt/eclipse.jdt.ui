@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
@@ -230,6 +231,13 @@ public class JdtActionConstants {
 	 * @since 3.2
 	 */
 	public static final String GENERATE_HASHCODE_EQUALS= "org.eclipse.jdt.ui.actions.GenerateHashCodeEquals"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of standard Generate toString() global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.GenerateToString"</code>).
+	 * @since 3.5
+	 */
+	public static final String GENERATE_TOSTRING= "org.eclipse.jdt.ui.actions.GenerateToString"; //$NON-NLS-1$
 
 	/**
 	 * Source menu: name of standard Add Javadoc Comment global action
