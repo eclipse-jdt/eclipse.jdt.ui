@@ -644,13 +644,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return fKeyAdapter;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleStatusFieldClicked() {
-		toggleShowInheritedMembers();
-	}
-
 	protected void toggleShowInheritedMembers() {
 		long flags= fInnerLabelProvider.getTextFlags();
 		flags ^= JavaElementLabels.ALL_POST_QUALIFIED;

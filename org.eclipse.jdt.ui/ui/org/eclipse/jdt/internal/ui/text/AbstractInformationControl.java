@@ -362,15 +362,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		setInfoText(getStatusFieldText());
 	}
 
-	/**
-	 * Handles click in status field.
-	 * <p>
-	 * Default does nothing.
-	 * </p>
-	 */
-	protected void handleStatusFieldClicked() {
-	}
-
 	protected String getStatusFieldText() {
 		return ""; //$NON-NLS-1$
 	}
