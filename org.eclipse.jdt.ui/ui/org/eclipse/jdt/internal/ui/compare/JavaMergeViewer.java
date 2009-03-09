@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -41,16 +42,19 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPageListener;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.PartEventAction;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -497,8 +501,20 @@ public class JavaMergeViewer extends TextMergeViewer {
 	protected void setActionsActivated(SourceViewer sourceViewer, boolean state) {
 		if (fEditor != null) {
 			Object editor= fEditor.get(sourceViewer);
-			if (editor instanceof CompilationUnitEditorAdapter)
-				((CompilationUnitEditorAdapter)editor).setActionsActivated(state);
+			if (editor instanceof CompilationUnitEditorAdapter) {
+				CompilationUnitEditorAdapter cuea = (CompilationUnitEditorAdapter)editor;
+				cuea.setActionsActivated(state);
+
+				IAction saveAction= cuea.getAction(ITextEditorActionConstants.SAVE);
+				if (saveAction instanceof IPageListener) {
+					PartEventAction partEventAction = (PartEventAction) saveAction;
+					IWorkbenchPart compareEditorPart= getCompareConfiguration().getContainer().getWorkbenchPart();
+					if (state)
+						partEventAction.partActivated(compareEditorPart);
+					else
+						partEventAction.partDeactivated(compareEditorPart);
+				}
+			}
 		}
 	}
 
