@@ -33,7 +33,8 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * An {@link IRunnableWithProgress} that adapts an {@link IWorkspaceRunnable} so that is can be
- * executed inside an {@link IRunnableContext}.
+ * executed inside an {@link IRunnableContext}. The runnable is run as an
+ * {@linkplain JavaCore#run(IWorkspaceRunnable, ISchedulingRule, IProgressMonitor) atomic Java model operation}.
  * <p>
  * {@link OperationCanceledException}s thrown by the
  * adapted runnable are caught and re-thrown as {@link InterruptedException}s.
@@ -71,7 +72,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	 * 
 	 * @param runnable the runnable
 	 * @param rule the scheduling rule, or <code>null</code>
-	 * @param transfer <code>true</code> iff the rule is to be transfered to the model context
+	 * @param transfer <code>true</code> iff the rule is to be transfered to the modal context
 	 *            thread
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule, boolean transfer) {
@@ -80,6 +81,11 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 		fTransfer= transfer;
 	}
 
+	/**
+	 * Returns the scheduling rule, or <code>null</code> if none.
+	 * 
+	 * @return the scheduling rule, or <code>null</code> if none
+	 */
 	public ISchedulingRule getSchedulingRule() {
 		return fRule;
 	}
