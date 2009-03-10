@@ -81,7 +81,7 @@ public class JUnitCore {
 
 	/**
 	 * Finds types that contain JUnit tests in the given container.
-	 *  
+	 * 
 	 * @param container the container
 	 * @param monitor the progress monitor used to report progress and request cancelation,
 	 *   or <code>null</code> if none
@@ -94,7 +94,7 @@ public class JUnitCore {
 	public static IType[] findTestTypes(IJavaElement container, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		final Set result= new HashSet();
 		JUnit4TestFinder finder= new JUnit4TestFinder();
-		finder.findTestsInContainer(container, result, null);
+		finder.findTestsInContainer(container, result, monitor);
 
 		return (IType[])result.toArray(new IType[result.size()]);
 	}
