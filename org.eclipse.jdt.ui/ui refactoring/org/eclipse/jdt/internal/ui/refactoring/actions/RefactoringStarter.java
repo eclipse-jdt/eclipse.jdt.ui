@@ -38,7 +38,7 @@ public class RefactoringStarter {
 			int result= op.run(parent, dialogTitle);
 			fStatus= op.getInitialConditionCheckingStatus();
 			if (result == IDialogConstants.CANCEL_ID || result == RefactoringWizardOpenOperation.INITIAL_CONDITION_CHECKING_FAILED) {
-				saveHelper.triggerBuild();
+				saveHelper.triggerIncrementalBuild();
 				return false;
 			} else {
 				return true;

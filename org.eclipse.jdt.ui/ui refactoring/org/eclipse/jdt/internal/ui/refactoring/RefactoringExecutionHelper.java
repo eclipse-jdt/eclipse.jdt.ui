@@ -220,7 +220,7 @@ public class RefactoringExecutionHelper {
 			} catch (OperationCanceledException e) {
 				throw new InterruptedException(e.getMessage());
 			} finally {
-				saveHelper.triggerBuild();
+				saveHelper.triggerIncrementalBuild();
 			}
 		} finally {
 			manager.endRule(rule);

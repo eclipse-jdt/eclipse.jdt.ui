@@ -91,7 +91,7 @@ public class RefactoringSaveHelper {
 	 * @param saveMode one of the SAVE_* constants
 	 */
 	public RefactoringSaveHelper(int saveMode) {
-		Assert.isTrue(saveMode == SAVE_ALL_ALWAYS_ASK
+		Assert.isLegal(saveMode == SAVE_ALL_ALWAYS_ASK
 				|| saveMode == SAVE_ALL
 				|| saveMode == SAVE_NOTHING
 				|| saveMode == SAVE_REFACTORING);
@@ -178,19 +178,20 @@ public class RefactoringSaveHelper {
 	}
 
 	/**
-	 * Triggers an in incremental build if this save helper has saved files before.
+	 * Triggers an incremental build if this save helper did save files before.
 	 */
-	public void triggerBuild() {
+	public void triggerIncrementalBuild() {
 		if (fFilesSaved && ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding()) {
 			new GlobalBuildAction(JavaPlugin.getActiveWorkbenchWindow(), IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
 		}
 	}
 
 	/**
-	 * Returns whether this save helper has saved files. 
-	 * @return iff files have been saved
+	 * Returns whether this save helper did actually save any files. 
+	 * 
+	 * @return <code>true</code> iff files have been saved
 	 */
-	public boolean hasFilesSaved() {
+	public boolean didSaveFiles() {
 		return fFilesSaved;
 	}
 	

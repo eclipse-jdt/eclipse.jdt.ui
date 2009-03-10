@@ -1040,7 +1040,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				public void run() {
 					RefactoringSaveHelper refactoringSaveHelper= new RefactoringSaveHelper(RefactoringSaveHelper.SAVE_ALL_ALWAYS_ASK);
 					res[0]= refactoringSaveHelper.saveEditors(fParentShell);
-					fFilesSaved= refactoringSaveHelper.hasFilesSaved();
+					fFilesSaved= refactoringSaveHelper.didSaveFiles();
 				}
 			});
 			if (!res[0]) {
