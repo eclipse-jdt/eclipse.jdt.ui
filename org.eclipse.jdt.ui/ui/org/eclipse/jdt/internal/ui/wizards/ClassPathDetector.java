@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,8 +114,9 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 	/**
 	 * Method detectClasspath.
+	 * 
 	 * @param monitor The progress monitor (not null)
-	 * @throws CoreException
+	 * @throws CoreException in case of any failure
 	 */
 	private void detectClasspath(IProgressMonitor monitor) throws CoreException {
 		try {
