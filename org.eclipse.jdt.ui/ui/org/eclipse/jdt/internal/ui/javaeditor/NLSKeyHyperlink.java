@@ -97,8 +97,19 @@ public class NLSKeyHyperlink implements IHyperlink {
 		} catch (JavaModelException e) {
 			// Don't open the file
 		}
+		openKeyInPropertiesFile(fKeyName, propertiesFile, fEditor);
+	}
+
+	/**
+	 * Calculates the region of the NLS key in the properties file and reveals it in editor.
+	 * 
+	 * @param keyName the NLS key
+	 * @param propertiesFile the properties file, or <code>null</code>
+	 * @param activeEditor the active editor part
+	 */
+	public static void openKeyInPropertiesFile(String keyName, IStorage propertiesFile, IEditorPart activeEditor) {
 		if (propertiesFile == null) {
-			showErrorInStatusLine(fEditor, JavaEditorMessages.Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage);
+			showErrorInStatusLine(activeEditor, JavaEditorMessages.Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage);
 			return;
 		}
 
@@ -106,7 +117,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 		try {
 			editor= EditorUtility.openInEditor(propertiesFile, true);
 		} catch (PartInitException e) {
-			handleOpenPropertiesFileFailed(propertiesFile);
+			handleOpenPropertiesFileFailed(propertiesFile, activeEditor);
 			return;
 		}
 
@@ -122,7 +133,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 				FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
 				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector();
 				detector.setContext(editor);
-				String key= PropertyFileDocumentModel.unwindEscapeChars(fKeyName);
+				String key= PropertyFileDocumentModel.unwindEscapeChars(keyName);
 				int offset= document.getLength() - 1;
 				try {
 					while (!found && offset >= 0) {
@@ -161,13 +172,19 @@ public class NLSKeyHyperlink implements IHyperlink {
 				EditorUtility.revealInEditor(editor, region);
 			else {
 				EditorUtility.revealInEditor(editor, 0, 0);
-				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, fKeyName));
+				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, keyName));
 			}
 		}
 	}
 
-	private void showErrorInStatusLine(IEditorPart editor, final String message) {
-		final Display display= fEditor.getSite().getShell().getDisplay();
+	/**
+	 * Shows the given message as error on the status line.
+	 * 
+	 * @param editor the editor part
+	 * @param message message to be displayed
+	 */
+	private static void showErrorInStatusLine(IEditorPart editor, final String message) {
+		final Display display= editor.getSite().getShell().getDisplay();
 		display.beep();
 		final IEditorStatusLine statusLine= (IEditorStatusLine)editor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) {
@@ -182,8 +199,14 @@ public class NLSKeyHyperlink implements IHyperlink {
 		}
 	}
 
-	private void handleOpenPropertiesFileFailed(IStorage propertiesFile) {
-		showErrorInStatusLine(fEditor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, BasicElementLabels.getPathLabel(propertiesFile.getFullPath(), true)));
+	/**
+	 * Shows error message in status line if opening the properties file in editor fails.
+	 * 
+	 * @param propertiesFile the propertiesFile
+	 * @param editor the editor part
+	 */
+	private static void handleOpenPropertiesFileFailed(IStorage propertiesFile, IEditorPart editor) {
+		showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, BasicElementLabels.getPathLabel(propertiesFile.getFullPath(), true)));
 	}
 
 	/*
