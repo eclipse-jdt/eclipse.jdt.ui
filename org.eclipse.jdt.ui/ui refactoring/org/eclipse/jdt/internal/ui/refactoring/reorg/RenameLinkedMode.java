@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.commands.operations.IOperationHistory;
+import org.eclipse.core.commands.operations.IUndoContext;
+import org.eclipse.core.commands.operations.IUndoableOperation;
+import org.eclipse.core.commands.operations.OperationHistoryFactory;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,6 +48,7 @@ import org.eclipse.jface.text.IEditingSupportRegistry;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension6;
 import org.eclipse.jface.text.IUndoManager;
+import org.eclipse.jface.text.IUndoManagerExtension;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
@@ -150,6 +156,14 @@ public class RenameLinkedMode {
 	private final FocusEditingSupport fFocusEditingSupport;
 	private boolean fShowPreview;
 
+	/**
+	 * The operation on top of the undo stack when the rename is {@link #start()}ed, or
+	 * <code>null</code> if rename has not been started or the undo stack was empty.
+	 * 
+	 * @since 3.5
+	 */
+	private IUndoableOperation fStartingUndoOperation;
+
 
 	public RenameLinkedMode(IJavaElement element, CompilationUnitEditor editor) {
 		Assert.isNotNull(element);
@@ -196,6 +210,16 @@ public class RenameLinkedMode {
 			}
 			SimpleName nameNode= (SimpleName) selectedNode;
 
+			if (viewer instanceof ITextViewerExtension6) {
+				IUndoManager undoManager= ((ITextViewerExtension6)viewer).getUndoManager();
+				if (undoManager instanceof IUndoManagerExtension) {
+					IUndoManagerExtension undoManagerExtension= (IUndoManagerExtension)undoManager;
+					IUndoContext undoContext= undoManagerExtension.getUndoContext();
+					IOperationHistory operationHistory= OperationHistoryFactory.getOperationHistory();
+					fStartingUndoOperation= operationHistory.getUndoOperation(undoContext);
+				}
+			}
+			
 			fOriginalName= nameNode.getIdentifier();
 			final int pos= nameNode.getStartPosition();
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
@@ -389,8 +413,15 @@ public class RenameLinkedMode {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						if (viewer instanceof ITextViewerExtension6) {
 							IUndoManager undoManager= ((ITextViewerExtension6)viewer).getUndoManager();
-							if (undoManager != null && undoManager.undoable()) {
-								undoManager.undo();
+							if (undoManager instanceof IUndoManagerExtension) {
+								IUndoManagerExtension undoManagerExtension= (IUndoManagerExtension)undoManager;
+								IUndoContext undoContext= undoManagerExtension.getUndoContext();
+								IOperationHistory operationHistory= OperationHistoryFactory.getOperationHistory();
+								while (undoManager.undoable()) {
+									if (fStartingUndoOperation != null && fStartingUndoOperation.equals(operationHistory.getUndoOperation(undoContext)))
+										return;
+									undoManager.undo();
+								}
 							}
 						}
 					}
