@@ -145,6 +145,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 *         project is not a java project
 	 */
 	private IJavaProject asJavaProject(final IProject project) {
+		if (project == null)
+			return null;
+		
 		try {
 			if (project.getDescription().hasNature(JavaCore.NATURE_ID))
 				return JavaCore.create(project);
