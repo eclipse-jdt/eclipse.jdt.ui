@@ -150,18 +150,23 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 		IJavaElement elem= null;
 		if (node instanceof SimpleName) {
 			ASTNode parent= node.getParent();
-			if (parent instanceof MethodInvocation) {
-				Expression expression= ((MethodInvocation)parent).getExpression();
-				if (expression == null) {
+			if (parent != null) {
+				if (parent instanceof MethodInvocation) {
+					Expression expression= ((MethodInvocation)parent).getExpression();
+					if (expression == null) {
+						ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node);
+						if (parentTypeBinding != null)
+							elem= parentTypeBinding.getJavaElement();
+					} else {
+						ITypeBinding binding= expression.resolveTypeBinding();
+						if (binding != null)
+							elem= binding.getJavaElement();
+					}
+				} else if (parent instanceof MethodDeclaration) {
 					ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node);
-					elem= parentTypeBinding.getJavaElement();
-				} else {
-					ITypeBinding binding= expression.resolveTypeBinding();
-					elem= binding.getJavaElement();
+					if (parentTypeBinding != null)
+						elem= parentTypeBinding.getJavaElement();
 				}
-			} else if (parent instanceof MethodDeclaration) {
-				ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node);
-				elem= parentTypeBinding.getJavaElement();
 			}
 		}
 		final IType type= (IType)elem;
@@ -187,12 +192,14 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 								IJavaElement element= (IJavaElement)match.getElement();
 								if (element instanceof IMember) {
 									IMember declaredClass= (IMember)element.getParent();
-									int flags= declaredClass.getFlags();
-									int memberFlags= ((IMember)element).getFlags();
-									if (!Flags.isInterface(flags) && !((Flags.isAbstract(flags)) && Flags.isAbstract(memberFlags))) {
-										links.add(element);
-										if (links.size() > 1) {
-											throw new OperationCanceledException(dummyString);
+									if (declaredClass != null) {
+										int flags= declaredClass.getFlags();
+										int memberFlags= ((IMember)element).getFlags();
+										if (!Flags.isInterface(flags) && !((Flags.isAbstract(flags)) && Flags.isAbstract(memberFlags))) {
+											links.add(element);
+											if (links.size() > 1) {
+												throw new OperationCanceledException(dummyString);
+											}
 										}
 									}
 								}
@@ -201,6 +208,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					};
 					int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
 					SearchPattern pattern= SearchPattern.createPattern(fElement, limitTo);
+					Assert.isNotNull(pattern);
 					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 					SearchEngine engine= new SearchEngine();
 					engine.search(pattern, participants, SearchEngine.createHierarchyScope(type), requestor, new SubProgressMonitor(monitor, 100));
