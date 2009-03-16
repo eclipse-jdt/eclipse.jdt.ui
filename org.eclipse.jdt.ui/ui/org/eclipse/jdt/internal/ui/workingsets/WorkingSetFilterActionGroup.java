@@ -324,7 +324,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 */
 	private void doPropertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
-		if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
+		if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {
 			fChangeListener.propertyChange(event);
 		} else if  (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
 			IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();

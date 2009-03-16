@@ -590,7 +590,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	private void doWorkingSetChanged(PropertyChangeEvent event) {
 		String property= event.getProperty();
-		if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+		if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property))
 			updateTitle();
 		else	if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
 			updateTitle();

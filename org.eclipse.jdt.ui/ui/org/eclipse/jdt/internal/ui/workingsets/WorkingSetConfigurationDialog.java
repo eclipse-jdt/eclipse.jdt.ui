@@ -464,7 +464,11 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		dialog.create();
 		if (dialog.open() == Window.OK) {
 			editWorkingSet= wizard.getSelection();
-			fTableViewer.update(editWorkingSet, null);
+			if (fIsSortingEnabled)
+				fTableViewer.refresh();
+			else
+				fTableViewer.update(editWorkingSet, null);
+
 			// make sure ok button is enabled when the selected working set
 			// is edited. Fixes bug 33386.
 			updateButtonAvailability();

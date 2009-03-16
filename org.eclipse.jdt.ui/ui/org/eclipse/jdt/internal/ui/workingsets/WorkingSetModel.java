@@ -468,8 +468,14 @@ public class WorkingSetModel {
 			List elements= new ArrayList(fActiveWorkingSets);
 			elements.remove(workingSet);
 			setActiveWorkingSets((IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-			fireEvent(event);
+		} else if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {
+			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
+			if (isSortingEnabled() && fActiveWorkingSets.contains(workingSet)) {
+				// re-sort the active working sets in PE after label update
+				setActiveWorkingSets((IWorkingSet[])fActiveWorkingSets.toArray(new IWorkingSet[fActiveWorkingSets.size()]));
+			} else {
+				fireEvent(event);
+			}
 		}
 
 	}
