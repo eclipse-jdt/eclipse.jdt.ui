@@ -35,9 +35,8 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -148,33 +148,25 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 		}
 
 		ASTNode node= NodeFinder.perform(ast, fRegion.getOffset(), fRegion.getLength());
-		IJavaElement elem= null;
+		ITypeBinding parentTypeBinding= null;
 		if (node instanceof SimpleName) {
 			ASTNode parent= node.getParent();
-			if (parent != null) {
-				if (parent instanceof MethodInvocation) {
-					Expression expression= ((MethodInvocation)parent).getExpression();
-					if (expression == null) {
-						ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node);
-						if (parentTypeBinding != null)
-							elem= parentTypeBinding.getJavaElement();
-					} else {
-						ITypeBinding binding= expression.resolveTypeBinding();
-						if (binding != null)
-							elem= binding.getJavaElement();
-					}
+			if (parent instanceof MethodInvocation) {
+				Expression expression= ((MethodInvocation)parent).getExpression();
+				if (expression == null) {
+					parentTypeBinding= Bindings.getBindingOfParentType(node);
+				} else {
+					parentTypeBinding= expression.resolveTypeBinding();
+				}
 			} else if (parent instanceof SuperMethodInvocation) {
 				// Directly go to the super method definition
 				fOpenAction.run(new StructuredSelection(fElement));
 				return;
 			} else if (parent instanceof MethodDeclaration) {
-					ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node);
-					if (parentTypeBinding != null)
-						elem= parentTypeBinding.getJavaElement();
-				}
+				parentTypeBinding= Bindings.getBindingOfParentType(node);
 			}
 		}
-		final IType type= (IType)elem;
+		final IType type= parentTypeBinding != null ? (IType) parentTypeBinding.getJavaElement() : null;
 		if (type == null) {
 			openQuickHierarchy();
 			return;
@@ -195,17 +187,10 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
 								IJavaElement element= (IJavaElement)match.getElement();
-								if (element instanceof IMember) {
-									IMember declaredClass= (IMember)element.getParent();
-									if (declaredClass != null) {
-										int flags= declaredClass.getFlags();
-										int memberFlags= ((IMember)element).getFlags();
-										if (!Flags.isInterface(flags) && !((Flags.isAbstract(flags)) && Flags.isAbstract(memberFlags))) {
-											links.add(element);
-											if (links.size() > 1) {
-												throw new OperationCanceledException(dummyString);
-											}
-										}
+								if (element instanceof IMethod && !JdtFlags.isAbstract((IMethod)element)) {
+									links.add(element);
+									if (links.size() > 1) {
+										throw new OperationCanceledException(dummyString);
 									}
 								}
 							}
