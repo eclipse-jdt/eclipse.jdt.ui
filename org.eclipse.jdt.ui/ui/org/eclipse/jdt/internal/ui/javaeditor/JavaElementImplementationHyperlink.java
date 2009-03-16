@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -162,7 +163,11 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 						if (binding != null)
 							elem= binding.getJavaElement();
 					}
-				} else if (parent instanceof MethodDeclaration) {
+			} else if (parent instanceof SuperMethodInvocation) {
+				// Directly go to the super method definition
+				fOpenAction.run(new StructuredSelection(fElement));
+				return;
+			} else if (parent instanceof MethodDeclaration) {
 					ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node);
 					if (parentTypeBinding != null)
 						elem= parentTypeBinding.getJavaElement();
