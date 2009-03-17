@@ -986,7 +986,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		};
 		fFocusAction.setText("&Show AST of active editor"); //$NON-NLS-1$
 		fFocusAction.setToolTipText("Show AST of active editor"); //$NON-NLS-1$
-		fFocusAction.setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
+		fFocusAction.setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH); //$NON-NLS-1$
 		ASTViewImages.setImageDescriptors(fFocusAction, ASTViewImages.SETFOCUS);
 
 		fCollapseAction = new Action() {
