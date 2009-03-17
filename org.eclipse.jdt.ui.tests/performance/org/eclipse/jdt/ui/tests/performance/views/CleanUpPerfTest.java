@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,7 +78,6 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		public static final String SRC_CONTAINER= "src";
 
 		public static IJavaProject fJProject1;
-		public static IPackageFragmentRoot fJunitSrcRoot;
 
 		public MyTestSetup(Test test) {
 			super(test);
@@ -88,7 +87,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
+			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
 
 		protected void tearDown() throws Exception {

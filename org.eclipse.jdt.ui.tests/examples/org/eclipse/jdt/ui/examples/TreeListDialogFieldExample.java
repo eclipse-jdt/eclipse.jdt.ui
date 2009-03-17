@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,10 +82,6 @@ public class TreeListDialogFieldExample {
 
 	private class Adapter implements ITreeListAdapter {
 
-		// -------- IStringButtonAdapter
-		public void changeControlPressed(DialogField field) {
-		}
-
 		// -------- ITreeListAdapter
 		public void customButtonPressed(TreeListDialogField field, int index) {
 			field.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
@@ -109,10 +105,6 @@ public class TreeListDialogFieldExample {
 
 		public boolean hasChildren(TreeListDialogField field, Object element) {
 			return field.getElements().contains(element);
-		}
-
-		// -------- IDialogFieldListener
-		public void dialogFieldChanged(DialogField field) {
 		}
 
 		public void doubleClicked(TreeListDialogField field) {
