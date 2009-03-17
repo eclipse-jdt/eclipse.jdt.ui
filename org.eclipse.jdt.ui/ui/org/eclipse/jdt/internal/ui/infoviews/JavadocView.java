@@ -664,9 +664,9 @@ public class JavadocView extends AbstractInfoView {
 		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider) getSelectionProvider());
 
 		fBackAction= new BackAction();
-		fBackAction.setActionDefinitionId("org.eclipse.ui.navigate.back"); //$NON-NLS-1$
+		fBackAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_BACK);
 		fForthAction= new ForthAction();
-		fForthAction.setActionDefinitionId("org.eclipse.ui.navigate.forward"); //$NON-NLS-1$
+		fForthAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_FORWARD);
 
 		fToggleLinkAction= new LinkAction();
 		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
