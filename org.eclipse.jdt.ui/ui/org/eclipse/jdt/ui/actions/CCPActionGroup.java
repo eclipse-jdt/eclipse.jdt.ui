@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,13 +18,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.part.Page;
 
-import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
@@ -92,19 +92,19 @@ public class CCPActionGroup extends ActionGroup {
 		fSelectionProvider= specialSelectionProvider == null ? site.getSelectionProvider() : specialSelectionProvider;
 
 		fPasteAction= new PasteAction(site);
-		fPasteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
+		fPasteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
 
 		fCopyAction= new CopyToClipboardAction(site);
-		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
+		fCopyAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 
 		fCopyQualifiedNameAction= new CopyQualifiedNameAction(site);
 		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 
 		fCutAction= new CutAction(site);
-		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
+		fCutAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
 
 		fDeleteAction= new DeleteAction(site);
-		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
+		fDeleteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
 
 		fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fCopyQualifiedNameAction, fPasteAction, fDeleteAction };
 		if (specialSelectionProvider != null) {

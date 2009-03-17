@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
@@ -39,7 +40,6 @@ import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.part.Page;
 
 import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -288,12 +288,12 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 
 		fAddBookmark= new AddBookmarkAction(site, true);
-		fAddBookmark.setActionDefinitionId(IWorkbenchActionDefinitionIds.ADD_BOOKMARK);
+		fAddBookmark.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADDBOOKMARK);
 
 		// context-menu only -> no action definition ids
 
 		fAddTaskAction= new AddTaskAction(site);
-		fAddTaskAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.ADD_TASK);
+		fAddTaskAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADDTASK);
 
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);

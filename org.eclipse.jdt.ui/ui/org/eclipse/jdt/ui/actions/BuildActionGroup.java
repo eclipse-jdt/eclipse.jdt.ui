@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.jface.window.IShellProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
@@ -35,7 +36,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.viewsupport.IRefreshable;
 
 /**
@@ -123,10 +123,10 @@ public class BuildActionGroup extends ActionGroup {
 
 		fBuildAction= new BuildAction(new ShellProviderAdapter(site.getShell()), IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
-		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
+		fBuildAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_BUILDPROJECT);
 
 		fRefreshAction= refreshAction;
-		fRefreshAction.setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
+		fRefreshAction.setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH);
 
 		if (specialSelectionProvider != null) {
 			fRefreshAction.setSpecialSelectionProvider(specialSelectionProvider);

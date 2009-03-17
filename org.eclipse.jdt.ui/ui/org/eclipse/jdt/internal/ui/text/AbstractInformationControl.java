@@ -61,6 +61,7 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ActionHandler;
 import org.eclipse.ui.commands.HandlerSubmission;
@@ -77,7 +78,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
@@ -783,7 +783,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			}
 		};
 		fShowViewMenuAction.setEnabled(true);
-		fShowViewMenuAction.setActionDefinitionId(IWorkbenchCommandIds.SHOW_VIEW_MENU);
+		fShowViewMenuAction.setActionDefinitionId(IWorkbenchCommandConstants.WINDOW_SHOWVIEWMENU);
 
 		return fViewMenuButtonComposite;
 	}

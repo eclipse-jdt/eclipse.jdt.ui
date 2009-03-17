@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 
-import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 
@@ -44,7 +44,7 @@ class LocationCopyAction extends Action {
 		fLocationViewer= locationViewer;
 
 		setText(CallHierarchyMessages.LocationCopyAction_copy);
-		setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
+		setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 
 		locationViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {

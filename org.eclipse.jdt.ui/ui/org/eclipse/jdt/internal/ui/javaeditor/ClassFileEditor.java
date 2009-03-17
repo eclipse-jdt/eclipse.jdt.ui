@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,10 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
-
-
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -63,13 +60,13 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClassFile;
@@ -101,6 +98,7 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
+
 
 /**
  * Java specific text editor.
@@ -781,7 +779,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						fNoSourceTextWidget.copy();
 					}
 				};
-				copyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
+				copyAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 				setAction(ITextEditorActionConstants.COPY, copyAction);
 				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
 				fNoSourceTextWidget.addSelectionListener(new SelectionListener() {
@@ -799,7 +797,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						copyAction.setEnabled(true);
 					}
 				};
-				selectAllAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.SELECT_ALL);
+				selectAllAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_SELECTALL);
 				setAction(ITextEditorActionConstants.SELECT_ALL, selectAllAction);
 				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
 				copyQualifiedName.setEnabled(false);

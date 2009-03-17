@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
@@ -41,7 +42,6 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 
 /**
  * Adds actions to open and close a project to the global menu bar.
@@ -93,13 +93,13 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelection selection= selectionProvider.getSelection();
 
 		fCloseAction= new CloseResourceAction(site);
-		fCloseAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_PROJECT);
+		fCloseAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_CLOSEPROJECT);
 
 		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(site);
-		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_UNRELATED_PROJECTS);
+		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_CLOSEUNRELATEDPROJECTS);
 
 		fOpenAction= new OpenProjectAction(site);
-		fOpenAction.setActionDefinitionId(IWorkbenchCommandIds.OPEN_PROJECT);
+		fOpenAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_OPENPROJECT);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;
 			fOpenAction.selectionChanged(s);

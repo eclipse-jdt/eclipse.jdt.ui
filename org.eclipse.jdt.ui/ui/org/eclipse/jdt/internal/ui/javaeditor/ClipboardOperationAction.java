@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,11 +42,11 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -221,13 +221,13 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 		if (operationCode == ITextOperationTarget.CUT) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.CUT_ACTION);
-			setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
+			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
 		} else if (operationCode == ITextOperationTarget.COPY) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.COPY_ACTION);
-			setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
+			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 		} else if (operationCode == ITextOperationTarget.PASTE) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.PASTE_ACTION);
-			setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
+			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
 		} else {
 			Assert.isTrue(false, "Invalid operation code"); //$NON-NLS-1$
 		}
