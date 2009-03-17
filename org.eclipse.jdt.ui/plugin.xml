@@ -1948,6 +1948,7 @@
          point="org.eclipse.compare.contentMergeViewers">
       <viewer
             extensions="java,java2"
+            label="%contentMergeViewers.java.label"
             class="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"
             id="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator">
       </viewer>
@@ -1960,6 +1961,7 @@
          point="org.eclipse.compare.contentMergeViewers">
       <viewer
             extensions="properties,properties2"
+            label="%contentMergeViewers.properties.label"
             class="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator"
             id="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator">
       </viewer>
@@ -1972,6 +1974,7 @@
          point="org.eclipse.compare.structureMergeViewers">
       <viewer
             extensions="java"
+            label="%structureMergeViewers.java.label"
             class="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewerCreator"
             id="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewerCreator">
       </viewer>
