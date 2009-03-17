@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -305,6 +305,40 @@ public class HierarchicalASTVisitorTest extends TestCase {
 					"where YY is the superclass of XX.", fNodeClassForCalledMethod);
 			fNodeClassForCalledMethod= nodeClassForMethod;
 		}
+		
+		public TestHierarchicalASTVisitor() {
+			if (Boolean.FALSE.booleanValue())
+				callSuperVisitToAvoidUnusedMethodsWarning();
+		}
+		/**
+		 * A useless method that calls all superVisit() and superEndVisit() methods.
+		 * This test calls these methods reflectively, but the compiler doesn't know that
+		 * and wrongly reports them as unused.
+		 * The explicit references here are to satisfy the compiler.
+		 */
+		private void callSuperVisitToAvoidUnusedMethodsWarning() {
+			superVisit((ASTNode) null);
+			superEndVisit((ASTNode) null);
+			superVisit((Expression) null);
+			superEndVisit((Expression) null);
+			superVisit((Annotation) null);
+			superEndVisit((Annotation) null);
+			superVisit((Name) null);
+			superEndVisit((Name) null);
+			superVisit((BodyDeclaration) null);
+			superEndVisit((BodyDeclaration) null);
+			superVisit((AbstractTypeDeclaration) null);
+			superEndVisit((AbstractTypeDeclaration) null);
+			superVisit((Comment) null);
+			superEndVisit((Comment) null);
+			superVisit((Type) null);
+			superEndVisit((Type) null);
+			superVisit((Statement) null);
+			superEndVisit((Statement) null);
+			superVisit((VariableDeclaration) null);
+			superEndVisit((VariableDeclaration) null);
+		}
+		
 	}
 
 	private static final Class THIS_CLASS= HierarchicalASTVisitorTest.class;
