@@ -1,6 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
@@ -76,6 +76,7 @@ import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
@@ -86,7 +87,6 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.astview.ASTViewImages;
 import org.eclipse.jdt.astview.ASTViewPlugin;
@@ -388,9 +388,6 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
-	//XXX: should reference platform constant, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=54581
-	public static final String LINK_WITH_EDITOR_COMMAND_ID= "org.eclipse.ui.navigate.linkWithEditor"; //$NON-NLS-1$ 
-	
 	private SashForm fSash;
 	private TreeViewer fViewer;
 	private ASTViewLabelProvider fASTLabelProvider;
@@ -665,11 +662,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
 		String version= root.getAST().apiLevel() == JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
-		if (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE) {		
+		if (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE) {
 			version+= ", from reconciler"; //$NON-NLS-1$
-		} else if (getCurrentInputKind() == ASTInputKindAction.USE_CACHE) {	
+		} else if (getCurrentInputKind() == ASTInputKindAction.USE_CACHE) {
 			version+= ", from ASTProvider"; //$NON-NLS-1$
-		} else if (getCurrentInputKind() == ASTInputKindAction.USE_FOCAL) {	
+		} else if (getCurrentInputKind() == ASTInputKindAction.USE_FOCAL) {
 			version+= ", using focal position"; //$NON-NLS-1$
 		}
 		TreeInfoCollector collector= new TreeInfoCollector(root);
@@ -839,12 +836,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 		bars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 		
 		IHandlerService handlerService= (IHandlerService) getViewSite().getService(IHandlerService.class);
-		handlerService.activateHandler(LINK_WITH_EDITOR_COMMAND_ID, new ActionHandler(fLinkWithEditor));
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR, new ActionHandler(fLinkWithEditor));
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
 		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
-			manager.add(fASTVersionToggleActions[i]);	
+			manager.add(fASTVersionToggleActions[i]);
 		}
 		manager.add(new Separator());
 		manager.add(fCreateBindingsAction);
@@ -853,7 +850,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(fFilterNonRelevantAction);
 		manager.add(new Separator());
 		for (int i= 0; i < fASTInputKindActions.length; i++) {
-			manager.add(fASTInputKindActions[i]);	
+			manager.add(fASTInputKindActions[i]);
 		}
 		manager.add(new Separator());
 		manager.add(fFindDeclaringNodeAction);
@@ -1028,7 +1025,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fLinkWithEditor.setChecked(fDoLinkWithEditor);
 		fLinkWithEditor.setText("&Link with Editor"); //$NON-NLS-1$
 		fLinkWithEditor.setToolTipText("Link With Editor"); //$NON-NLS-1$
-		fLinkWithEditor.setActionDefinitionId(LINK_WITH_EDITOR_COMMAND_ID);
+		fLinkWithEditor.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {
@@ -1056,7 +1053,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fDeleteAction.setEnabled(false);
 		fDeleteAction.setImageDescriptor(ASTViewPlugin.getDefault().getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
 		fDeleteAction.setId(ActionFactory.DELETE.getId());
-		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
+		fDeleteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
 		
 		refreshASTSettingsActions();
 	}
@@ -1229,7 +1226,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 	}
 
-	protected void performExpand() {	
+	protected void performExpand() {
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 		if (selection.isEmpty()) {
 			fViewer.expandToLevel(3);
