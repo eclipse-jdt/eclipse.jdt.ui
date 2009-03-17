@@ -132,8 +132,9 @@ public class ChkpiiTests extends TestCase {
 
 		StreamConsumer err= null;
 		StreamConsumer out= null;
+		Process process= null;
 		try {
-			Process process= aRuntime.exec(chkpiiString);
+			process= aRuntime.exec(chkpiiString);
 			err= new StreamConsumer(process.getErrorStream());
 			out= new StreamConsumer(process.getInputStream());
 			err.start();
@@ -155,6 +156,8 @@ public class ChkpiiTests extends TestCase {
 			System.out.flush();
 			return false;
 		}
+ 		int res= process.exitValue();
+ 		System.out.println("ChkpiiTests#" + getName() + "() exit value: " + res);
 		return true;
 	}
 
