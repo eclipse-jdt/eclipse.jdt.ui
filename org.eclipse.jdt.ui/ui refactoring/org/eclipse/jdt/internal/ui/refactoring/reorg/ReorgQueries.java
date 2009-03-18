@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
@@ -21,12 +24,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.wizard.Wizard;
 
+import org.eclipse.ui.dialogs.ListDialog;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 
 public class ReorgQueries implements IReorgQueries {
 
@@ -398,9 +402,21 @@ public class ReorgQueries implements IReorgQueries {
 
 	private static final class YesNoListDialog extends ListDialog {
 		private final boolean fYesToAllNoToAll;
+
 		private YesNoListDialog(Shell parent, boolean includeYesToAllNoToAll) {
 			super(parent);
+			setAddCancelButton(false);
 			fYesToAllNoToAll= includeYesToAllNoToAll;
+		}
+
+		protected Label createMessageArea(Composite composite) {
+			Label label= new Label(composite, SWT.WRAP);
+			label.setText(getMessage());
+			GridData gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
+			gd.widthHint= convertWidthInCharsToPixels(55);
+			label.setLayoutData(gd);
+			applyDialogFont(label);
+			return label;
 		}
 
 		protected void buttonPressed(int buttonId) {
