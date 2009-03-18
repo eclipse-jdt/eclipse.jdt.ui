@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Map;
@@ -30,6 +29,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -44,8 +44,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterHandle;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
 
 /**
  * Configures the content assist preferences.
