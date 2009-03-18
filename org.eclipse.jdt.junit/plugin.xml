@@ -348,7 +348,7 @@
       <renameParticipant
             class="org.eclipse.jdt.internal.junit.refactoring.ProjectRenameParticipant"
             name="%junitRenameParticipant"
-            id="org.eclipse.jdt.junit.renameTypeParticipant">
+            id="org.eclipse.jdt.junit.renameProjectParticipant">
          <enablement>
            <with variable="affectedNatures">
              <iterate operator="or">
