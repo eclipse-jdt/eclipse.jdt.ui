@@ -88,6 +88,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
+        <filter id="571519004">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring.createChange(IProgressMonitor)"/>
+                <message_argument value="JavaRefactoringDescriptor"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/CompatibilityTemplateStore.java" type="org.eclipse.jdt.internal.ui.CompatibilityTemplateStore">
         <filter id="571473929">
             <message_arguments>
