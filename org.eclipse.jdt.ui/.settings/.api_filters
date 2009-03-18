@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
-    <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/ProblemTreeViewer.java" type="org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer">
-        <filter id="571473929">
-            <message_arguments>
-                <message_argument value="TreeViewer"/>
-                <message_argument value="ProblemTreeViewer"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/JavaOutlinePage.java" type="org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage$JavaOutlineViewer">
         <filter id="571473929">
             <message_arguments>
@@ -16,11 +8,11 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/JavaOutlineInformationControl.java" type="org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl$OutlineTreeViewer">
+    <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/ProblemTreeViewer.java" type="org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="TreeViewer"/>
-                <message_argument value="OutlineTreeViewer"/>
+                <message_argument value="ProblemTreeViewer"/>
             </message_arguments>
         </filter>
     </resource>
@@ -32,6 +24,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/JavaOutlineInformationControl.java" type="org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl$OutlineTreeViewer">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="TreeViewer"/>
+                <message_argument value="OutlineTreeViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/callhierarchy/LocationViewer.java" type="org.eclipse.jdt.internal.ui.callhierarchy.LocationViewer">
         <filter id="571473929">
             <message_arguments>
@@ -40,19 +40,19 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/AddClassFileMarkerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.AddClassFileMarkerAction">
-        <filter id="571473929">
-            <message_arguments>
-                <message_argument value="AddMarkerAction"/>
-                <message_argument value="AddClassFileMarkerAction"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui refactoring/org/eclipse/jdt/internal/ui/refactoring/nls/ExternalizeWizardPage.java" type="org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizardPage">
         <filter id="571519004">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizardPage"/>
                 <message_argument value="TableViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/AddClassFileMarkerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.AddClassFileMarkerAction">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="AddMarkerAction"/>
+                <message_argument value="AddClassFileMarkerAction"/>
             </message_arguments>
         </filter>
     </resource>
@@ -96,14 +96,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
-        <filter id="571519004">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring"/>
-                <message_argument value="JavaRefactoringDescriptor"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/ExternalClassFileEditorInput.java" type="org.eclipse.jdt.internal.ui.javaeditor.ExternalClassFileEditorInput">
         <filter id="571473929">
             <message_arguments>
@@ -112,19 +104,19 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/ProblemTableViewer.java" type="org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer">
-        <filter id="571473929">
-            <message_arguments>
-                <message_argument value="TableViewer"/>
-                <message_argument value="ProblemTableViewer"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/callhierarchy/CallHierarchyViewer.java" type="org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewer">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="TreeViewer"/>
                 <message_argument value="CallHierarchyViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/ProblemTableViewer.java" type="org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="TableViewer"/>
+                <message_argument value="ProblemTableViewer"/>
             </message_arguments>
         </filter>
     </resource>
