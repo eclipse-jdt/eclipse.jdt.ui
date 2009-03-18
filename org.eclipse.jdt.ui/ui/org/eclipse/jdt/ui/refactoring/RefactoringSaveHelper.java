@@ -41,6 +41,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.GlobalBuildAction;
+import org.eclipse.ui.dialogs.ListDialog;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -48,8 +49,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
-import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 
 /**
  * Helper to save dirty editors prior to starting a refactoring.
@@ -100,7 +101,7 @@ public class RefactoringSaveHelper {
 
 	/**
 	 * Saves all editors. Depending on the {@link PreferenceConstants#REFACTOR_SAVE_ALL_EDITORS}
-	 * preference, the user is asked to save affected dirty editors. 
+	 * preference, the user is asked to save affected dirty editors.
 	 * 
 	 * @param shell the parent shell for the confirmation dialog
 	 * @return <code>true</code> if save was successful and refactoring can proceed;
@@ -187,7 +188,7 @@ public class RefactoringSaveHelper {
 	}
 
 	/**
-	 * Returns whether this save helper did actually save any files. 
+	 * Returns whether this save helper did actually save any files.
 	 * 
 	 * @return <code>true</code> iff files have been saved
 	 */
@@ -220,7 +221,6 @@ public class RefactoringSaveHelper {
 			}
 		};
 		dialog.setTitle(RefactoringMessages.RefactoringStarter_save_all_resources);
-		dialog.setAddCancelButton(true);
 		dialog.setLabelProvider(createDialogLabelProvider());
 		dialog.setMessage(RefactoringMessages.RefactoringStarter_must_save);
 		dialog.setContentProvider(new ArrayContentProvider());
