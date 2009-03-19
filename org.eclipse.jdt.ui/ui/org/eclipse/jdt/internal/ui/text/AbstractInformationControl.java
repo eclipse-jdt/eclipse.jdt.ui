@@ -468,39 +468,60 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	private TreeItem findElement(TreeItem[] items) {
-		return findElement(items, null);
+		return findElement(items, null, true);
 	}
 
-	private TreeItem findElement(TreeItem[] items, TreeItem toBeSkipped) {
+	private TreeItem findElement(TreeItem[] items, TreeItem[] toBeSkipped, boolean allowToGoUp) {
+		if (fStringMatcher == null)
+			return items.length > 0 ? items[0] : null;
+
 		ILabelProvider labelProvider= (ILabelProvider)fTreeViewer.getLabelProvider();
+
+		// First search at same level
 		for (int i= 0; i < items.length; i++) {
 			final TreeItem item= items[i];
-			if (toBeSkipped == item)
+			if (canSkip(item, toBeSkipped))
 				continue;
 
 			IJavaElement element= (IJavaElement)item.getData();
-			if (fStringMatcher == null)
-				return item;
-
 			if (element != null) {
 				String label= labelProvider.getText(element);
 				if (fStringMatcher.match(label))
 					return item;
 			}
+		}
 
-			TreeItem foundItem= findElement(item.getItems(), toBeSkipped);
-			if (foundItem != null)
-				return foundItem;
-
-			TreeItem parentItem= item.getParentItem();
-			if (parentItem != null)
-				foundItem= findElement(new TreeItem[] { parentItem }, item);
-			else
-				foundItem= findElement(item.getParent().getItems(), item);
+		// Go one level down for each item
+		for (int i= 0; i < items.length; i++) {
+			final TreeItem item= items[i];
+			if (canSkip(item, toBeSkipped))
+				continue;
+			
+			TreeItem foundItem= findElement(item.getItems(), null, false);
 			if (foundItem != null)
 				return foundItem;
 		}
-		return null;
+
+		if (!allowToGoUp || items.length == 0)
+			return null;
+
+		// Go one level up (parent is the same for all items)
+		TreeItem parentItem= items[0].getParentItem();
+		if (parentItem != null)
+			return findElement(new TreeItem[] { parentItem }, items, true);
+		else
+			return findElement(items[0].getParent().getItems(), items, true);
+	}
+	
+	private boolean canSkip(TreeItem item, TreeItem[] toBeSkipped) {
+		if (toBeSkipped == null)
+			return false;
+		
+		for (int i= 0; i < toBeSkipped.length; i++) {
+			if (toBeSkipped[i] == item)
+				return true;
+		}
+		return false;
 	}
 
 	/**
