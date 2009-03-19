@@ -27,9 +27,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -38,9 +42,11 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 
 public class ContentProviderTests extends TestCase {
 
@@ -51,8 +57,8 @@ public class ContentProviderTests extends TestCase {
 	private IWorkbenchPage fPage;
 	private MockPluginView fMyPart;
 	private ITreeContentProvider fProvider;
-	private IJavaElement fPackageFragment1;
-	private IJavaElement fPackageFragment2;
+	private IPackageFragment fPackageFragment1;
+	private IPackageFragment fPackageFragment2;
 	private IFile fFile1;
 
 	public static Test suite() {
@@ -79,9 +85,9 @@ public class ContentProviderTests extends TestCase {
 		// Create some packages
 		IProject project = (IProject)fJProject1.getResource();
 		project.getFolder("f1").create(false, true, null);
-		fPackageFragment1 = JavaCore.create(project.getFolder("f1"));
+		fPackageFragment1 = (IPackageFragment)JavaCore.create(project.getFolder("f1"));
 		project.getFolder("f2").create(false, true, null);
-		fPackageFragment2 = JavaCore.create(project.getFolder("f2"));
+		fPackageFragment2 = (IPackageFragment)JavaCore.create(project.getFolder("f2"));
 
 		//Create a non-Java file in one of the packges
 		fFile1 = project.getFile("f1/b");
@@ -183,6 +189,27 @@ public class ContentProviderTests extends TestCase {
 		expectedChildren = new Object[] { textfile };
 		children = fProvider.getChildren(noPackage);
 		assertEqualSets("Expected children of no-package does not match actual children", expectedChildren, children);
+	}
+	
+	public void testOutgoingPackageDeletion269167() throws Exception {
+		IProject project = (IProject)fJProject1.getResource();
+		
+		fMyPart.addOutgoingDeletion(project, "f3/");
+		IFolder f3= project.getFolder("f3");
+		
+		IPackageFragment packageFragment3= (IPackageFragment)JavaCore.create(f3);
+		LogicalPackage logicalPackage3= new LogicalPackage(packageFragment3);
+		ResourceMapping resourceMapping= (ResourceMapping)logicalPackage3.getAdapter(ResourceMapping.class);
+		ResourceTraversal[] traversals= resourceMapping.getTraversals(ResourceMappingContext.LOCAL_CONTEXT, null);
+		assertEquals(1, traversals.length);
+		assertEqualSets("", new IResource[] { f3 }, traversals[0].getResources());
+		assertEquals(IResource.DEPTH_ONE, traversals[0].getDepth());
+		assertEquals(0, traversals[0].getFlags());
+		
+		// Children of project
+		Object[] expectedChildren = new Object[] { f3 };
+		Object[] children = fProvider.getChildren(fJProject1);
+		assertEqualSets("Expected children of project does not match actual children", expectedChildren, children);
 	}
 	
 	public void testIncomingAddition159884() {

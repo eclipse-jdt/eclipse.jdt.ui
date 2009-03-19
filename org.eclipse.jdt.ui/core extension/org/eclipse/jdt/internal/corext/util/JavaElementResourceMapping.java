@@ -192,12 +192,13 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		
 		if (container != null) {
 			res.add(new ResourceTraversal(new IResource[] { container }, IResource.DEPTH_ONE, 0));
-			
-			Object[] nonJavaResources= pack.getNonJavaResources();
-			for (int i= 0; i < nonJavaResources.length; i++) {
-				Object resource= nonJavaResources[i];
-				if (resource instanceof IFolder) {
-					res.add(new ResourceTraversal(new IResource[] { (IResource)resource }, IResource.DEPTH_INFINITE, 0));
+			if (pack.exists()) { // folder may not exist any more, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=269167
+				Object[] nonJavaResources= pack.getNonJavaResources();
+				for (int i= 0; i < nonJavaResources.length; i++) {
+					Object resource= nonJavaResources[i];
+					if (resource instanceof IFolder) {
+						res.add(new ResourceTraversal(new IResource[] { (IResource)resource }, IResource.DEPTH_INFINITE, 0));
+					}
 				}
 			}
 		}
