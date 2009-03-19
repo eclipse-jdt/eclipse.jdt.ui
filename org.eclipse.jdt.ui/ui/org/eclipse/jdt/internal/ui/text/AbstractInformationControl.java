@@ -480,9 +480,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		// First search at same level
 		for (int i= 0; i < items.length; i++) {
 			final TreeItem item= items[i];
-			if (canSkip(item, toBeSkipped))
-				continue;
-
 			IJavaElement element= (IJavaElement)item.getData();
 			if (element != null) {
 				String label= labelProvider.getText(element);
@@ -494,10 +491,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		// Go one level down for each item
 		for (int i= 0; i < items.length; i++) {
 			final TreeItem item= items[i];
-			if (canSkip(item, toBeSkipped))
-				continue;
-			
-			TreeItem foundItem= findElement(item.getItems(), null, false);
+			TreeItem foundItem= findElement(selectItems(item.getItems(), toBeSkipped), null, false);
 			if (foundItem != null)
 				return foundItem;
 		}
@@ -509,8 +503,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		TreeItem parentItem= items[0].getParentItem();
 		if (parentItem != null)
 			return findElement(new TreeItem[] { parentItem }, items, true);
-		else
-			return findElement(items[0].getParent().getItems(), items, true);
+
+		// Check root elements
+		return findElement(selectItems(items[0].getParent().getItems(), items), null, false);
 	}
 	
 	private boolean canSkip(TreeItem item, TreeItem[] toBeSkipped) {
@@ -523,6 +518,25 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		}
 		return false;
 	}
+
+	private TreeItem[] selectItems(TreeItem[] items, TreeItem[] toBeSkipped) {
+		if (toBeSkipped == null || toBeSkipped.length == 0)
+			return items;
+
+		int j= 0;
+		for (int i= 0; i < items.length; i++) {
+			TreeItem item= items[i];
+			if (!canSkip(item, toBeSkipped))
+				items[j++]= item;
+		}
+		if (j == items.length)
+			return items;
+
+		TreeItem[] result= new TreeItem[j];
+		System.arraycopy(items, 0, result, 0, j);
+		return result;
+	}
+
 
 	/**
 	 * {@inheritDoc}
