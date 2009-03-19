@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
@@ -389,7 +390,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			for (int index= 0; index < members.length; index++) {
 				IResource child = members[index];
 				if (isVisible(context, child)) {
-					if (hasPhantomFolder(tree, child)) {
+					if (hasPhantomFolder(tree, child) && ! containsAsResource(list, child)) {
 						// Add any phantom resources that are visible
 						list.add(child);
 					}
@@ -410,6 +411,25 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 		}
 		return list.toArray(new Object[list.size()]);
+	}
+
+	private boolean containsAsResource(List list, IResource child) {
+		for (Iterator iter= list.iterator(); iter.hasNext(); ) {
+			Object element= iter.next();
+			if (child.equals(element))
+				return true;
+			if (element instanceof IJavaElement) {
+				IJavaElement javaChild = (IJavaElement)element;
+				try {
+					if (child.equals(javaChild.getCorrespondingResource()))
+						return true;
+				} catch (JavaModelException e) {
+					continue;
+				}
+			}
+			
+		}
+		return false;
 	}
 
 	private boolean hasPhantomFolder(IResourceDiffTree tree, IResource child) {
