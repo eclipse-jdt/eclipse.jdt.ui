@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -263,8 +263,9 @@ public class GetterSetterCorrectionSubProcessor {
 	}
 
 	/**
-	 * Proposes a getter for this field
-	 * @param context
+	 * Proposes a getter for this field.
+	 * 
+	 * @param context the proposal parameter
 	 * @param relevance relevance of this proposal
 	 * @return the proposal if available or null
 	 */
@@ -326,8 +327,9 @@ public class GetterSetterCorrectionSubProcessor {
 	}
 
 	/**
-	 * Proposes a setter for this field
-	 * @param context
+	 * Proposes a setter for this field.
+	 * 
+	 * @param context the proposal parameter
 	 * @param relevance relevance of this proposal
 	 * @return the proposal if available or null
 	 */

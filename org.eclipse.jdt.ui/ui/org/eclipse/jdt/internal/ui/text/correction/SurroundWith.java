@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -175,10 +175,12 @@ public abstract class SurroundWith {
 	}
 
 	/**
-	 * Selected nodes in <code>context</code> under <code>selection</code> or null if no valid selection.
-	 * @param context The context in which the proposal is applyed.
+	 * Selected nodes in <code>context</code> under <code>selection</code> or null if no valid
+	 * selection.
+	 * 
+	 * @param context The context in which the proposal is applied.
 	 * @return Selected nodes or null if no valid selection.
-	 * @throws CoreException
+	 * @throws CoreException if the analyzer cannot be created
 	 */
 	public static Statement[] getSelectedStatements(IInvocationContext context) throws CoreException {
 		Selection selection= Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength());
@@ -480,9 +482,10 @@ public abstract class SurroundWith {
 	}
 
 	/**
-	 * Make statement final
-	 * @param statement
-	 * @param rewrite
+	 * Makes the given statement final.
+	 * 
+	 * @param statement the statment
+	 * @param rewrite the AST rewrite
 	 */
 	protected static void makeFinal(VariableDeclarationStatement statement, ASTRewrite rewrite) {
 		VariableDeclaration fragment= (VariableDeclaration)statement.fragments().get(0);
@@ -529,8 +532,9 @@ public abstract class SurroundWith {
 
 	/**
 	 * Get a list rewrite for statement sequence node is element
-	 * @param node
-	 * @param rewrite
+	 * 
+	 * @param node the AST node
+	 * @param rewrite AST rewrite
 	 * @return The list rewrite
 	 */
 	private ListRewrite getListRewrite(ASTNode node, ASTRewrite rewrite) {

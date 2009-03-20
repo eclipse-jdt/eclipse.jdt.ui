@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -673,10 +673,12 @@ public class ASTResolving {
 	}
 
 	/**
-	 * Returns the method binding of the node's parent method declaration or <code>null</code> if the node
-	 * is not inside a method
-	 * @param node
-	 * @return CompilationUnit
+	 * Returns the method binding of the node's parent method declaration or <code>null</code> if
+	 * the node is not inside a method.
+	 * 
+	 * @param node the ast node
+	 * @return the method binding of the node's parent method declaration or <code>null</code> if
+	 *         the node
 	 */
 	public static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
 		while (node != null) {
@@ -1093,7 +1095,7 @@ public class ASTResolving {
 		return BindingLabelProvider.getBindingLabel(type, BindingLabelProvider.DEFAULT_TEXTFLAGS);
 	}
 
-	public static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
+	public static String getMethodSignature(IMethodBinding binding) {
 		return BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS);
 	}
 

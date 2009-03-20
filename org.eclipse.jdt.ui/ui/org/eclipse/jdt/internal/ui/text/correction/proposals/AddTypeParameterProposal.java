@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,8 +62,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		fBounds= bounds;
 
 		if (binding instanceof IMethodBinding) {
-			boolean isSameCU= fAstRoot.findDeclaringNode(binding) != null;
-			String[] args= { BasicElementLabels.getJavaElementName(fTypeParamName), ASTResolving.getMethodSignature((IMethodBinding) binding, isSameCU) };
+			String[] args= { BasicElementLabels.getJavaElementName(fTypeParamName), ASTResolving.getMethodSignature((IMethodBinding) binding) };
 			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_method_label, args));
 		} else {
 			String[] args= { BasicElementLabels.getJavaElementName(fTypeParamName), ASTResolving.getTypeSignature((ITypeBinding) binding) };
