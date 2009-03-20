@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
  * 	 Vincent Massol: vmassol@octo.com
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.io.File;
@@ -246,6 +245,20 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			super.stop(context);
 		}
 		fBundleContext= null;
+	}
+
+	/**
+	 * Returns a service with the specified name or <code>null</code> if none.
+	 * 
+	 * @param serviceName name of service
+	 * @return service object or <code>null</code> if none
+	 * @since 3.5
+	 */
+	public Object getService(String serviceName) {
+		ServiceReference reference= fBundleContext.getServiceReference(serviceName);
+		if (reference == null)
+			return null;
+		return fBundleContext.getService(reference);
 	}
 
 	public static JUnitModel getModel() {
