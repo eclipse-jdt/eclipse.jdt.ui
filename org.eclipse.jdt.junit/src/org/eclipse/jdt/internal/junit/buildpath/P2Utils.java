@@ -22,6 +22,7 @@ import org.eclipse.equinox.internal.provisional.simpleconfigurator.manipulator.S
 import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -189,8 +190,8 @@ class P2Utils {
 			return null;
 	
 		try {
-			return new Path(URIUtil.toURL(bundleInfo.getLocation()).getFile());
-		} catch (MalformedURLException e) {
+			return new Path(FileLocator.toFileURL(URIUtil.toURL(bundleInfo.getLocation())).getFile());
+		} catch (IOException e) {
 			JUnitPlugin.log(e);
 			return null;
 		}
