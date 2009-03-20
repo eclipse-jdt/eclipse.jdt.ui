@@ -54,21 +54,17 @@ class P2Utils {
 	 * area, or <code>null</code> if none. The "bundles.info" file is assumed to be at a fixed
 	 * location relative to the configuration area URL.
 	 * 
-	 * @param platformHome absolute path in the local file system to an installation
-	 * @param configurationArea URL location of the configuration directory to search for
-	 *            bundles.info
 	 * @return all bundles in the installation or <code>null</code> if not able to locate a
 	 *         bundles.info
 	 */
-	private static BundleInfo[] readBundles(String platformHome, URL configurationArea) {
-		IPath basePath = new Path(platformHome);
+	private static BundleInfo[] readBundles() {
+		URL configurationArea= Platform.getConfigurationLocation().getURL();
 		if (configurationArea == null)
 			return null;
 
 		try {
 			URL bundlesTxt = new URL(configurationArea.getProtocol(), configurationArea.getHost(), new File(configurationArea.getFile(), BUNDLE_INFO_PATH).getAbsolutePath());
-			File home = basePath.toFile();
-			BundleInfo bundles[] = getBundlesFromFile(bundlesTxt, home);
+			BundleInfo bundles[]= getBundlesFromFile(bundlesTxt);
 			if (bundles == null || bundles.length == 0) {
 				return null;
 			}
@@ -87,21 +83,17 @@ class P2Utils {
 	 * <code>null</code> if none. The "source.info" file is assumed to be at a fixed location
 	 * relative to the configuration area URL.
 	 * 
-	 * @param platformHome absolute path in the local file system to an installation
-	 * @param configurationArea URL location of the configuration directory to search for
-	 *            bundles.info and source.info
 	 * @return all source bundles in the installation or <code>null</code> if not able to locate a
 	 *         source.info
 	 */
-	private static BundleInfo[] readSourceBundles(String platformHome, URL configurationArea) {
-		IPath basePath = new Path(platformHome);
+	private static BundleInfo[] readSourceBundles() {
+		URL configurationArea= Platform.getConfigurationLocation().getURL();
 		if (configurationArea == null)
 			return null;
 
 		try {
-			File home = basePath.toFile();
 			URL srcBundlesTxt = new URL(configurationArea.getProtocol(), configurationArea.getHost(), configurationArea.getFile().concat(SRC_INFO_PATH));
-			BundleInfo srcBundles[] = getBundlesFromFile(srcBundlesTxt, home);
+			BundleInfo srcBundles[]= getBundlesFromFile(srcBundlesTxt);
 			if (srcBundles == null || srcBundles.length == 0) {
 				return null;
 			}
@@ -120,15 +112,15 @@ class P2Utils {
 	 * problem reading the file.
 	 * 
 	 * @param fileURL the URL of the file to read
-	 * @param home the path describing the base location of the platform install
 	 * @return list containing URL locations or <code>null</code>
 	 * @throws IOException if loading the configuration fails
 	 */
-	private static BundleInfo[] getBundlesFromFile(URL fileURL, File home) throws IOException {
+	private static BundleInfo[] getBundlesFromFile(URL fileURL) throws IOException {
 		SimpleConfiguratorManipulator manipulator= (SimpleConfiguratorManipulator)JUnitPlugin.getDefault().getService(SimpleConfiguratorManipulator.class.getName());
 		if (manipulator == null)
 			return null;
 
+		File home= new File(Platform.getInstallLocation().getURL().getFile());
 		return manipulator.loadConfiguration(fileURL, home);
 	}
 
@@ -167,9 +159,9 @@ class P2Utils {
 
 		BundleInfo[] bundles;
 		if (isSourceBundle)
-			bundles= P2Utils.readSourceBundles(Platform.getInstallLocation().toString(), Platform.getConfigurationLocation().getURL());
+			bundles= P2Utils.readSourceBundles();
 		else
-			bundles= P2Utils.readBundles(Platform.getInstallLocation().toString(), Platform.getConfigurationLocation().getURL());
+			bundles= P2Utils.readBundles();
 
 		for (int i= 0; i < bundles.length; i++) {
 			if (symbolicName.equals(bundles[i].getSymbolicName()) && versionRange.isIncluded(new Version(bundles[i].getVersion())))
