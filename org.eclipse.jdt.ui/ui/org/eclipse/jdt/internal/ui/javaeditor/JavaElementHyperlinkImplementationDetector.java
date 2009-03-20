@@ -15,11 +15,12 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -53,15 +54,10 @@ public class JavaElementHyperlinkImplementationDetector extends JavaElementHyper
 	 */
 	private boolean canBeOverridden(IMethod method) {
 		try {
-			int flags= method.getFlags();
-			if (Flags.isFinal(flags) || Flags.isStatic(flags) || method.isConstructor()
-					|| Flags.isFinal(((IMember)method.getParent()).getFlags())) {
-				return false;
-			}
+			return !(JdtFlags.isPrivate(method) || JdtFlags.isFinal(method) || JdtFlags.isStatic(method) || method.isConstructor() || JdtFlags.isFinal((IMember)method.getParent()));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return false;
 		}
-		return true;
 	}
 }
