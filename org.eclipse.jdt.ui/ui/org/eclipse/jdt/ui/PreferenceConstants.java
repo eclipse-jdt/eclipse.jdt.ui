@@ -3148,16 +3148,16 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>String</code>, a "\0"-separated list with categoryId:cycleState where
 	 * <ul>
-	 * 	<li>categoryId is the <code>String</code> holding the category ID</li>
-	 * 	<li>cycleState is an <code>int</code> which specifies the rank and the enablement:
-	 * 	<ul>
-	 * 		<li>enabled= cycleState < 65535</li>
-	 * 		<li>rank= cycleState > 65535 ? cycleState - 65535 : cycleState)</li>
-	 *  </ul></li>
+	 * <li>categoryId is the <code>String</code> holding the category ID</li>
+	 * <li>cycleState is an <code>int</code> which specifies the rank and the enablement:
+	 * <ul>
+	 *		<li>enabled= cycleState < 65535</li>
+	 *		<li>rank= enabled ? cycleState : cycleState - 65535)</li>
+	 * </ul></li>
 	 * </ul>
-	 *
+	 * 
 	 * </p>
-	 *
+	 * 
 	 * @since 3.2
 	 */
 	public static final String CODEASSIST_CATEGORY_ORDER= "content_assist_category_order"; //$NON-NLS-1$

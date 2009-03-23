@@ -255,7 +255,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
     			if (idAndRank[0].equals(cat.getId()))
     				return Integer.parseInt(idAndRank[1]);
     		}
-    		return LIMIT + 1;
+			return LIMIT - 1;
     	}
 
         public void update() {

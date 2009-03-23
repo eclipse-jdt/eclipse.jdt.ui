@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,7 @@ public final class CompletionProposalCategory {
 	private boolean fIsIncluded= true;
 	private final CompletionProposalComputerRegistry fRegistry;
 
-	private int fSortOrder= 0x10000;
+	private int fSortOrder= 0xffff - 1;
 	private String fLastError= null;
 
 	CompletionProposalCategory(IConfigurationElement element, CompletionProposalComputerRegistry registry) throws CoreException {
