@@ -567,9 +567,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(supercomposite, IJavaHelpContextIds.EXTERNALIZE_WIZARD_KEYVALUE_PAGE);
 	}
 
-	/**
-	 * @param supercomposite
-	 */
 	private void createAccessorInfoComposite(Composite supercomposite) {
 		Composite accessorComposite= new Composite(supercomposite, SWT.NONE);
 		accessorComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -1147,10 +1144,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		buttonComp.pack();
 	}
 
-	/**
-	 * @param widget
-	 */
 	protected void handleButtonPressed(Widget widget) {
+		fTableViewer.getTable().forceFocus(); // make sure cell editor is applied on all platforms, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=269611
 		if (widget == fExternalizeButton) {
 			setSelectedTasks(NLSSubstitution.EXTERNALIZED);
 		} else if (widget == fIgnoreButton) {
