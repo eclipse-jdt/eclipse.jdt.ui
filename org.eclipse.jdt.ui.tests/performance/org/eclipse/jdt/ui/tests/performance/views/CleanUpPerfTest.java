@@ -34,7 +34,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -439,7 +438,11 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 	}
 
-	private void performRefactoring(Refactoring refactoring, boolean measure, int maxSeverity, boolean checkUndo) throws CoreException {
+	private void performRefactoring(CleanUpRefactoring refactoring, boolean measure, int maxSeverity, boolean checkUndo) throws CoreException {
+
+		// Need to clear the options field as we reuse the clean ups, which is not expected
+		clearOptions(refactoring.getCleanUps());
+
 		PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
 		joinBackgroudActivities();
 		// Flush the undo manager to not count any already existing undo objects
@@ -461,6 +464,16 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		RefactoringCore.getUndoManager().flush();
 		System.gc();
 		joinBackgroudActivities();
+	}
+
+	private void clearOptions(ICleanUp[] cleanUps) {
+		for (int i= 0; i < cleanUps.length; i++) {
+			ICleanUp cleanUp= cleanUps[i];
+			if (cleanUp instanceof AbstractCleanUp) {
+				Accessor accessor= new Accessor(cleanUp, AbstractCleanUp.class);
+				accessor.set("fOptions", null);
+			}
+		}
 	}
 
 }
