@@ -32,6 +32,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IEditingSupport;
@@ -41,6 +42,7 @@ import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
@@ -56,6 +58,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -160,21 +163,20 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 
 	public static void fillMenu(IMenuManager menu, CompilationUnitEditor editor, SurroundWithTryCatchAction surroundWithTryCatchAction) {
 		IAction[] actions= getTemplateActions(editor);
-		surroundWithTryCatchAction.update(editor.getSelectionProvider().getSelection());
 
-		if (actions == null && !surroundWithTryCatchAction.isEnabled()) {
+		surroundWithTryCatchAction.update(editor.getSelectionProvider().getSelection());
+		boolean addSurroundWithAction= surroundWithTryCatchAction.isEnabled() && !isInJavadoc(editor);
+
+		if ((actions == null || actions.length == 0) && !addSurroundWithAction) {
 			menu.add(NONE_APPLICABLE_ACTION);
 		} else {
-    		menu.add(surroundWithTryCatchAction);
-    		menu.add(new Separator(TEMPLATE_GROUP));
+			if (addSurroundWithAction)
+				menu.add(surroundWithTryCatchAction);
 
-    		if (actions == null) {
-    			menu.add(NONE_APPLICABLE_ACTION);
-    		} else {
-    			for (int i= 0; i < actions.length; i++) {
-    				menu.add(actions[i]);
-    			}
-    		}
+			menu.add(new Separator(TEMPLATE_GROUP));
+			for (int i= 0; actions != null && i < actions.length; i++)
+				menu.add(actions[i]);
+
 		}
 
 		menu.add(new Separator(CONFIG_GROUP));
@@ -257,17 +259,24 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 
 		IAction[] actions= getTemplateActions(editor);
 
-		SurroundWithTryCatchAction surroundAction= createSurroundWithTryCatchAction(editor);
-		ActionContributionItem surroundItem= new ActionContributionItem(surroundAction);
-		surroundItem.fill(menu, -1);
+		boolean addSurroundWith= !isInJavadoc(editor);
+		if (addSurroundWith) {
+			SurroundWithTryCatchAction surroundAction= createSurroundWithTryCatchAction(editor);
+			ActionContributionItem surroundItem= new ActionContributionItem(surroundAction);
+			surroundItem.fill(menu, -1);
+		}
 
-		Separator templateGroup= new Separator(TEMPLATE_GROUP);
-		templateGroup.fill(menu, -1);
 
-		if (actions == null || actions.length == 0) {
+		boolean hasTemplateActions= actions != null && actions.length > 0;
+		if (!hasTemplateActions && !addSurroundWith) {
 			ActionContributionItem item= new ActionContributionItem(NONE_APPLICABLE_ACTION);
 			item.fill(menu, -1);
-		} else {
+		} else if (hasTemplateActions) {
+			if (addSurroundWith) {
+				Separator templateGroup= new Separator(TEMPLATE_GROUP);
+				templateGroup.fill(menu, -1);
+			}
+
 			for (int i= 0; i < actions.length; i++) {
 				ActionContributionItem item= new ActionContributionItem(actions[i]);
 				item.fill(menu, -1);
@@ -311,16 +320,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	}
 
 	private static IAction[] getTemplateActions(JavaEditor editor) {
-		ISelectionProvider selectionProvider= editor.getSelectionProvider();
-		if (selectionProvider == null)
-			return null;
-
-		ISelection selection= selectionProvider.getSelection();
-		if (!(selection instanceof ITextSelection))
-			return null;
-
-		ITextSelection textSelection= (ITextSelection)selection;
-		if (textSelection.getLength() == 0)
+		ITextSelection textSelection= getTextSelection(editor);
+		if (textSelection == null || textSelection.getLength() == 0)
 			return null;
 
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
@@ -340,6 +341,32 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 			JavaPlugin.log(e);
 		}
 		return null;
+	}
+
+	private static ITextSelection getTextSelection(JavaEditor editor) {
+		ISelectionProvider selectionProvider= editor.getSelectionProvider();
+		if (selectionProvider == null)
+			return null;
+
+		ISelection selection= selectionProvider.getSelection();
+		if (!(selection instanceof ITextSelection))
+			return null;
+
+		return (ITextSelection)selection;
+	}
+
+	private static boolean isInJavadoc(JavaEditor editor) {
+		ITextSelection selection= getTextSelection(editor);
+		if (selection == null)
+			return false;
+		
+		IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+		try {
+			String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, selection.getOffset(), true);
+			return contentType.equals(IJavaPartitions.JAVA_DOC);
+		} catch (BadLocationException e) {
+			return false;
+		}
 	}
 
 	private static IAction[] getActionsFromProposals(IJavaCompletionProposal[] proposals, final int offset, final ITextViewer viewer) {
