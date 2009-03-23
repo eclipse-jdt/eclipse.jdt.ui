@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -321,7 +321,13 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (entryKind == IClasspathEntry.CPE_CONTAINER) {
 				// all ClassPathContainers are added later
 			} else if (fShowLibrariesNode && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
-				// skip: will add the referenced library node later
+				IResource resource= root.getResource();
+				if (resource != null && project.getResource().equals(resource.getParent())) {
+					// show resource as child of project, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=141906
+					result.add(resource);
+				} else {
+					// skip: will add the referenced library node later
+				}
 			} else {
 				if (isProjectPackageFragmentRoot(root)) {
 					// filter out package fragments that correspond to projects and
@@ -340,7 +346,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			result.add(new LibraryContainer(project));
 		}
 
-		// separate loop to make sure all containers are on the classpath
+		// separate loop to make sure all containers are on the classpath (even empty ones)
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
 		for (int i= 0; i < rawClasspath.length; i++) {
 			IClasspathEntry classpathEntry= rawClasspath[i];
@@ -634,6 +640,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				if (fViewer.testFindItem(parent) != null)
 					postRefresh(parent, PARENT, element, runnables);
 				return true;
+				
+			} else if (element instanceof IPackageFragmentRoot) {
+				// PFR can show up twice (in library container and as resource at original location)
+				IResource resource= element.getResource();
+				if (resource != null)
+					postRemove(resource, runnables);
 			}
 
 			postRemove(element, runnables);
@@ -669,6 +681,19 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				}
 				return true;
 			} else {
+				if (element instanceof IPackageFragmentRoot) {
+					// PFR can show up twice (in library container or under project, and as resource at original location)
+					IResource resource= element.getResource();
+					if (resource != null) {
+						Object resourceParent= super.internalGetParent(resource);
+						if (resourceParent != null) {
+							IJavaProject proj= element.getJavaProject();
+							if (fShowLibrariesNode || !resourceParent.equals(proj)) {
+								postAdd(resourceParent, resource, runnables);
+							}
+						}
+					}
+				}
 				postAdd(parent, element, runnables);
 			}
 		}
