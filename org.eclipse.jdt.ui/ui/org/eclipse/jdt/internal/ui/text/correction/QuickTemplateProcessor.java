@@ -226,10 +226,10 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	private boolean canEvaluate(TemplateContext context, Template template) {
 		String contextId= context.getContextType().getId();
 		if (JavaDocContextType.ID.equals(contextId)) {
-			if (template.getPattern().indexOf($_LINE_SELECTION) == -1 && template.getPattern().indexOf($_WORD_SELECTION) == -1)
+			if (!template.matches("", contextId) || template.getPattern().indexOf($_LINE_SELECTION) == -1 && template.getPattern().indexOf($_WORD_SELECTION) == -1) //$NON-NLS-1$
 				return false;
 		} else {
-			if (template.getPattern().indexOf($_LINE_SELECTION) == -1)
+			if (template.matches("", JavaDocContextType.ID) || template.getPattern().indexOf($_LINE_SELECTION) == -1) //$NON-NLS-1$
 				return false;
 		}
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());
