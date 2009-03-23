@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
@@ -101,7 +100,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 				return;
 			Change change= refactoring.createChange(new NullProgressMonitor());
 			change.initializeValidationData(new NullProgressMonitor());
-			PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
+			PerformChangeOperation op= new PerformChangeOperation(change);
 			// must be fork == false since file buffers can't be manipulated in a different thread.
 			WorkbenchRunnableAdapter adapter= new WorkbenchRunnableAdapter(op);
 			PlatformUI.getWorkbench().getProgressService().runInUI(
