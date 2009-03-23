@@ -32,10 +32,16 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.keys.IBindingService;
+
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
@@ -113,7 +119,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		}
 	}
 
-	private static final long JAVA_CODE_ASSIST_TIMEOUT= Long.getLong("org.eclipse.jdt.ui.codeAssistTimeout", 500).longValue(); // ms //$NON-NLS-1$
+	private static final long JAVA_CODE_ASSIST_TIMEOUT= Long.getLong("org.eclipse.jdt.ui.codeAssistTimeout", 5000).longValue(); // ms //$NON-NLS-1$
 
 	private String fErrorMessage;
 
@@ -235,7 +241,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 				collector.setReplacementLength(selection.y);
 			unit.codeComplete(offset, collector, fTimeoutProgressMonitor);
 		} catch (OperationCanceledException x) {
-			fErrorMessage= JavaTextMessages.CompletionProcessor_error_javaCompletion_took_too_long_message;
+			IBindingService bindingSvc= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+			String keyBinding= bindingSvc.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.EDIT_CONTENTASSIST);
+			fErrorMessage= Messages.format(JavaTextMessages.CompletionProcessor_error_javaCompletion_took_too_long_message, keyBinding);
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();
 			if (x.isDoesNotExist() && !unit.getJavaProject().isOnClasspath(unit))
