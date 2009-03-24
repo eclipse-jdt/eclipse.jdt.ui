@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,19 @@ public class ExceptionHandler {
 	}
 
 	/**
+	 * Handles the given <code>IStatus</code>. The workbench shell is used as a parent for the
+	 * dialog window.
+	 * 
+	 * @param status the <code>IStatus</code> to be handled
+	 * @param title the dialog window's window title
+	 * @param message message to be displayed by the dialog window
+	 * @since 3.5
+	 */
+	public static void handle(IStatus status, String title, String message) {
+		fgInstance.perform(status, JavaPlugin.getActiveWorkbenchShell(), title, message);
+	}
+
+	/**
 	 * Handles the given <code>CoreException</code>.
 	 *
 	 * @param e the <code>CoreException</code> to be handled
@@ -97,6 +110,11 @@ public class ExceptionHandler {
 	}
 
 	//---- Hooks for subclasses to control exception handling ------------------------------------
+
+	protected void perform(IStatus status, Shell shell, String title, String message) {
+		JavaPlugin.log(status);
+		ErrorDialog.openError(shell, title, message, status);
+	}
 
 	protected void perform(CoreException e, Shell shell, String title, String message) {
 		JavaPlugin.log(e);

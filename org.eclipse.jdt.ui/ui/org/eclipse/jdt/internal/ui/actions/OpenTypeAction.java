@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,22 +31,29 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IActionDelegate2;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.MultiPartInitException;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.NewProjectAction;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate, IActionDelegate2 {
@@ -73,17 +86,52 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 			return;
 
 		Object[] types= dialog.getResult();
-		if (types != null && types.length > 0) {
-			IType type= null;
-			for (int i= 0; i < types.length; i++) {
-				type= (IType) types[i];
-				try {
-					JavaUI.openInEditor(type, true, true);
-				} catch (CoreException x) {
-					ExceptionHandler.handle(x, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
-				}
+		if (types == null || types.length == 0)
+			return;
+
+		if (types.length == 1) {
+			try {
+				JavaUI.openInEditor((IJavaElement)types[0], true, true);
+			} catch (CoreException x) {
+				ExceptionHandler.handle(x, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
+			}
+			return;
+		}
+
+		final IWorkbenchPage workbenchPage= JavaPlugin.getActivePage();
+		if (workbenchPage == null) {
+			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaUIMessages.OpenTypeAction_no_active_WorkbenchPage);
+			ExceptionHandler.handle(status, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
+			return;
+		}
+
+		MultiStatus multiStatus= new MultiStatus(JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.OpenTypeAction_multiStatusMessage, null);
+		List editorInputs= new ArrayList(types.length);
+		List editorIDs= new ArrayList(types.length);
+		for (int i= 0; i < types.length; i++) {
+			IType type= (IType)types[i];
+			try {
+				IEditorInput editorInput= EditorUtility.getEditorInput(type);
+				String editorID= EditorUtility.getEditorID(editorInput);
+				editorInputs.add(editorInput);
+				editorIDs.add(editorID);
+			} catch (CoreException x) {
+				multiStatus.merge(x.getStatus());
 			}
 		}
+		IEditorInput[] editorInputArray= (IEditorInput[])editorInputs.toArray(new IEditorInput[editorInputs.size()]);
+		String[] editorIDArray= (String[])editorIDs.toArray(new String[editorIDs.size()]);
+		try {
+			workbenchPage.openEditors(editorInputArray, editorIDArray, IWorkbenchPage.MATCH_INPUT);
+		} catch (MultiPartInitException x) {
+			PartInitException[] excpetions= x.getExceptions();
+			for (int i= 0; i < excpetions.length; i++) {
+				if (excpetions[i] != null)
+					multiStatus.merge(excpetions[i].getStatus());
+			}
+		}
+		if (!multiStatus.isOK())
+			ExceptionHandler.handle(multiStatus, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
 	}
 
 	/**
