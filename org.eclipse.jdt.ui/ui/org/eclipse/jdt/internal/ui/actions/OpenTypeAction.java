@@ -124,10 +124,10 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		try {
 			workbenchPage.openEditors(editorInputArray, editorIDArray, IWorkbenchPage.MATCH_INPUT);
 		} catch (MultiPartInitException x) {
-			PartInitException[] excpetions= x.getExceptions();
-			for (int i= 0; i < excpetions.length; i++) {
-				if (excpetions[i] != null)
-					multiStatus.merge(excpetions[i].getStatus());
+			PartInitException[] exceptions= x.getExceptions();
+			for (int i= 0; i < exceptions.length; i++) {
+				if (exceptions[i] != null)
+					multiStatus.merge(exceptions[i].getStatus());
 			}
 		}
 		if (!multiStatus.isOK())
