@@ -728,12 +728,12 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		if (fWorkingSetModel != null) {
 			return fWorkingSetModel.getActiveWorkingSets();
 		} else {
+			WorkingSetModel model= null;
 			PackageExplorerPart activePart= getActivePackageExplorer();
 			if (activePart != null)
-				return activePart.getWorkingSetModel().getActiveWorkingSets();
+				model= activePart.getWorkingSetModel();
+			return model == null ? null : model.getActiveWorkingSets();
 		}
-		return null;
-
 	}
 
 	private IWorkingSet[] getAllWorkingSets() {
