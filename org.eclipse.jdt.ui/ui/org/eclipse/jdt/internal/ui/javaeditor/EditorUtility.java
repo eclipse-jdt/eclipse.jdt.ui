@@ -415,10 +415,7 @@ public class EditorUtility {
 		if (input instanceof IFileEditorInput)
 			editorDescriptor= IDE.getEditorDescriptor(((IFileEditorInput)input).getFile());
 		else {
-			String name= input.getName();
-			if (name == null)
-				throwPartInitException(JavaEditorMessages.EditorUtility_could_not_find_editorId);
-			editorDescriptor= IDE.getEditorDescriptor(name);
+			editorDescriptor= IDE.getEditorDescriptor(input.getName());
 		}
 		return editorDescriptor.getId();
 	}
