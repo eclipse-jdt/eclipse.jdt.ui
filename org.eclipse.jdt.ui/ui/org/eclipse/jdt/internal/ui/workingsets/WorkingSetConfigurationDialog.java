@@ -103,25 +103,26 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 	}
 
+
 	private class Filter extends ViewerFilter {
+
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			IWorkingSet ws= (IWorkingSet)element;
 			String id= ws.getId();
 			return OthersWorkingSetUpdater.ID.equals(id) || JavaWorkingSetUpdater.ID.equals(id) || "org.eclipse.ui.resourceWorkingSetPage".equals(id) || isCompatible(ws); //$NON-NLS-1$
 		}
+
 		private boolean isCompatible(IWorkingSet set) {
 			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
 				return false;
 			IAdaptable[] elements= set.getElements();
-			if (elements.length == 0)
-				return false;
 			for (int i= 0; i < elements.length; i++) {
 				IAdaptable element= elements[i];
 				IProject p= (IProject)element.getAdapter(IProject.class);
-				if (p == null || !p.exists())
+				if (p != null && p.exists())
+					return true;
+			}
 			return false;
-		}
-			return true;
 		}
 
 	}
