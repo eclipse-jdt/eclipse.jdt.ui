@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,25 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ILightweightLabelDecorator;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IType;
@@ -43,98 +32,7 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
-
-	private class IntefaceIndicatorChangeListener implements IElementChangedListener {
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void elementChanged(ElementChangedEvent event) {
-			List changed= new ArrayList();
-			processDelta(event.getDelta(), changed);
-			if (changed.size() == 0)
-				return;
-
-			fireChange((IJavaElement[])changed.toArray(new IJavaElement[changed.size()]));
-		}
-
-	}
-
-	private ListenerList fListeners;
-	private IElementChangedListener fChangeListener;
-
-	public InterfaceIndicatorLabelDecorator() {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Image decorateImage(Image image, Object element) {
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String decorateText(String text, Object element) {
-		return text;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void addListener(ILabelProviderListener listener) {
-		if (fChangeListener == null) {
-			fChangeListener= new IntefaceIndicatorChangeListener();
-			JavaCore.addElementChangedListener(fChangeListener);
-		}
-
-		if (fListeners == null) {
-			fListeners= new ListenerList();
-		}
-
-		fListeners.add(listener);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void dispose() {
-		if (fChangeListener != null) {
-			JavaCore.removeElementChangedListener(fChangeListener);
-			fChangeListener= null;
-		}
-		if (fListeners != null) {
-			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				fListeners.remove(listeners[i]);
-			}
-			fListeners= null;
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeListener(ILabelProviderListener listener) {
-		if (fListeners == null)
-			return;
-
-		fListeners.remove(listener);
-
-		if (fListeners.isEmpty() && fChangeListener != null) {
-			JavaCore.removeElementChangedListener(fChangeListener);
-			fChangeListener= null;
-		}
-	}
+public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDecorator {
 
 	/**
 	 * {@inheritDoc}
@@ -220,17 +118,7 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		return null;
 	}
 
-	private void fireChange(IJavaElement[] elements) {
-		if (fListeners != null && !fListeners.isEmpty()) {
-			LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, elements);
-			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				((ILabelProviderListener) listeners[i]).labelProviderChanged(event);
-			}
-		}
-	}
-
-	private void processDelta(IJavaElementDelta delta, List result) {
+	protected void processDelta(IJavaElementDelta delta, List result) {
 		IJavaElement elem= delta.getElement();
 
 		boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;
@@ -281,14 +169,6 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 				// fields, methods, imports ect
 				return;
 		}
-	}
-
-	private boolean processChildrenDelta(IJavaElementDelta delta, List result) {
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			processDelta(children[i], result);
-		}
-		return false;
 	}
 
 }

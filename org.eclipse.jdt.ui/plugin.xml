@@ -62,6 +62,22 @@
 			</objectClass>
 		</enablement>
 	</decorator>
+	<decorator
+		label="%BuildpathIndicatorLabelDecorator.label"
+		lightweight="true"
+		location="BOTTOM_LEFT"
+		state="true"
+		class="org.eclipse.jdt.internal.ui.BuildpathIndicatorLabelDecorator"
+		id="org.eclipse.jdt.ui.buildpath.decorator">
+		<description>
+			%BuildpathIndicatorLabelDecorator.description
+		</description>
+		<enablement>
+			<objectClass
+				name="org.eclipse.core.resources.IResource">
+			</objectClass>
+		</enablement>
+	</decorator>
 </extension>
 
    <extension point="org.eclipse.core.runtime.adapters">

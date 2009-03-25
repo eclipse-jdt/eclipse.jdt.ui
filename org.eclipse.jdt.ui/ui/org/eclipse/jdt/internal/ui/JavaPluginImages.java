@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -388,6 +388,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_INTERFACE= createUnManagedCached(T_OVR, "interface_tsk.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_CLASS= createUnManagedCached(T_OVR, "class_tsk.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManagedCached(T_OVR, "class_abs_tsk.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_LIBRARY= createUnManagedCached(T_OVR, "library_ovr.gif"); //$NON-NLS-1$
 
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.gif");              //$NON-NLS-1$
