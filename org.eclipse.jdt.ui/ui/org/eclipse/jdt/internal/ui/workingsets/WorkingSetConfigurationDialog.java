@@ -107,8 +107,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			IWorkingSet ws= (IWorkingSet)element;
 			String id= ws.getId();
-			return OthersWorkingSetUpdater.ID.equals(id) ||
-				JavaWorkingSetUpdater.ID.equals(id) || isCompatible(ws) || isActive(ws);
+			return OthersWorkingSetUpdater.ID.equals(id) || JavaWorkingSetUpdater.ID.equals(id) || "org.eclipse.ui.resourceWorkingSetPage".equals(id) || isCompatible(ws); //$NON-NLS-1$
 		}
 		private boolean isCompatible(IWorkingSet set) {
 			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
@@ -120,17 +119,14 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				IAdaptable element= elements[i];
 				IProject p= (IProject)element.getAdapter(IProject.class);
 				if (p == null || !p.exists())
-					return false;
-			}
+			return false;
+		}
 			return true;
 		}
-		private boolean isActive(IWorkingSet workingSet) {
-			return fActiveWorkingSets.contains(workingSet);
-		}
+
 	}
 
 	private List fAllWorkingSets;
-	private List fActiveWorkingSets;
 	private CheckboxTableViewer fTableViewer;
 
 	private Button fNewButton;
@@ -170,12 +166,11 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	private Comparator fComparator;
 
-	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, IWorkingSet[] activeWorkingSets, boolean isSortingEnabled) {
+	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, boolean isSortingEnabled) {
 		super(parentShell);
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
 		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message);
 		fAllWorkingSets= new ArrayList(allWorkingSets.length);
-		fActiveWorkingSets= Arrays.asList(activeWorkingSets);
 		Filter filter= new Filter();
 		for (int i= 0; i < allWorkingSets.length; i++) {
 			if (filter.select(null, null, allWorkingSets[i]))

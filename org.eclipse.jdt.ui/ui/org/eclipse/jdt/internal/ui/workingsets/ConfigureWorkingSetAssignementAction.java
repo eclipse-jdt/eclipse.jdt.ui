@@ -504,13 +504,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				public void widgetSelected(SelectionEvent e) {
 
 					List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
-					IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
 					boolean isSortingEnabled= fWorkingSetModel.isSortingEnabled();
-					WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(
-						getShell(),
-						(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]),
-							activeWorkingSets, isSortingEnabled);
-					dialog.setSelection(activeWorkingSets);
+					WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(getShell(), (IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]), isSortingEnabled);
+					dialog.setSelection(fWorkingSetModel.getActiveWorkingSets());
 					if (dialog.open() == IDialogConstants.OK_ID) {
 						isSortingEnabled= dialog.isSortingEnabled();
 						IWorkingSet[] selection= dialog.getSelection();
