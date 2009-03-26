@@ -279,7 +279,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				if (!isValidWorkingSet(set))
 					return false;
 
-				if (fWorkingSetModel == null)
+				PackageExplorerPart activePart= getActivePackageExplorer();
+				if (fWorkingSetModel == null || activePart != null && activePart.getRootMode() == PackageExplorerPart.PROJECTS_AS_ROOTS)
 					return true;
 
 				if (fShowVisibleOnly && !fWorkingSetModel.isActiveWorkingSet(set))
@@ -478,7 +479,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 
 		private void createShowVisibleOnly(Composite parent) {
-			if (fWorkingSetModel == null)
+			PackageExplorerPart activePart= getActivePackageExplorer();
+			if (fWorkingSetModel == null || activePart != null && activePart.getRootMode() == PackageExplorerPart.PROJECTS_AS_ROOTS)
 				return;
 
 			final Button showVisibleOnly= new Button(parent, SWT.CHECK);
