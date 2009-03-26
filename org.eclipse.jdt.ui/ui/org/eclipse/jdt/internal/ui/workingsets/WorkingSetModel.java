@@ -240,7 +240,7 @@ public class WorkingSetModel {
 
 		if (memento == null || ! restoreState(memento)) {
 			IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]);
-			others.setId(OthersWorkingSetUpdater.ID);
+			others.setId(IWorkingSetIDs.OTHERS);
 			fLocalWorkingSetManager.addWorkingSet(others);
 			fActiveWorkingSets.add(others);
 		}
@@ -311,7 +311,7 @@ public class WorkingSetModel {
 
 	public boolean needsConfiguration() {
 		return !fConfigured && fActiveWorkingSets.size() == 1 &&
-		OthersWorkingSetUpdater.ID.equals(((IWorkingSet)fActiveWorkingSets.get(0)).getId());
+			IWorkingSetIDs.OTHERS.equals(((IWorkingSet)fActiveWorkingSets.get(0)).getId());
 	}
 
 	public void configured() {

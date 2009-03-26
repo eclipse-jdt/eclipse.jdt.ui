@@ -109,7 +109,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			IWorkingSet ws= (IWorkingSet)element;
 			String id= ws.getId();
-			return OthersWorkingSetUpdater.ID.equals(id) || JavaWorkingSetUpdater.ID.equals(id) || "org.eclipse.ui.resourceWorkingSetPage".equals(id) || isCompatible(ws); //$NON-NLS-1$
+			return IWorkingSetIDs.OTHERS.equals(id) || IWorkingSetIDs.JAVA.equals(id) || IWorkingSetIDs.RESOURCE.equals(id) || isCompatible(ws);
 		}
 
 		private boolean isCompatible(IWorkingSet set) {
@@ -422,7 +422,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private void createWorkingSet() {
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-		IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(new String[] {JavaWorkingSetUpdater.ID});
+		IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(new String[] {IWorkingSetIDs.JAVA});
 		// the wizard can't be null since we have at least the Java working set.
 		WizardDialog dialog= new WizardDialog(getShell(), wizard);
 		dialog.create();

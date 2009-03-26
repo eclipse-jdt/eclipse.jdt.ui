@@ -67,7 +67,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 /**
  * Helper class to detect whether a certain refactoring can be enabled on a
@@ -324,7 +324,7 @@ public final class RefactoringAvailabilityTester {
 				}
 			} else if (element instanceof IWorkingSet) {
 				IWorkingSet workingSet= (IWorkingSet) element;
-				return JavaWorkingSetUpdater.ID.equals(workingSet.getId());
+				return IWorkingSetIDs.JAVA.equals(workingSet.getId());
 			}
 		}
 		return false;

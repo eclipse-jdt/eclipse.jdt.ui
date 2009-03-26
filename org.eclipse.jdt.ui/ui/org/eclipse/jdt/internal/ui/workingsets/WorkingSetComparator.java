@@ -66,7 +66,7 @@ public class WorkingSetComparator implements Comparator {
 
 		if (o1 instanceof IWorkingSet) {
 			IWorkingSet workingSet= (IWorkingSet)o1;
-			if (fIsOtherWorkingSetOnTop && OthersWorkingSetUpdater.ID.equals(workingSet.getId())) {
+			if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(workingSet.getId())) {
 				return -1;
 			}
 			name1= workingSet.getLabel();
@@ -74,7 +74,7 @@ public class WorkingSetComparator implements Comparator {
 
 		if (o2 instanceof IWorkingSet) {
 			IWorkingSet workingSet= (IWorkingSet)o2;
-			if (fIsOtherWorkingSetOnTop && OthersWorkingSetUpdater.ID.equals(workingSet.getId())) {
+			if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(workingSet.getId())) {
 				return 1;
 			}
 			name2= workingSet.getLabel();

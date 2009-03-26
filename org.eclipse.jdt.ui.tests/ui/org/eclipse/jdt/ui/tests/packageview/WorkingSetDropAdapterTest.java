@@ -41,7 +41,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.packageview.WorkingSetDropAdapter;
-import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 public class WorkingSetDropAdapterTest extends TestCase {
 
@@ -140,7 +140,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[0]);
-		target.setId(OthersWorkingSetUpdater.ID);
+		target.setId(IWorkingSetIDs.OTHERS);
 		performDnD(DND.DROP_MOVE, selection, target);
 		IAdaptable[] elements= target.getElements();
 		// assert that the target doesn't have an element yet. The others working set

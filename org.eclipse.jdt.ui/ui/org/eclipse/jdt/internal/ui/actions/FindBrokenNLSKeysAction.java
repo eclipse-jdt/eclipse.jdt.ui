@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.nls.search.SearchBrokenNLSKeysUtil;
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
@@ -232,7 +232,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 						return true;
 				} else if (selected[i] instanceof IWorkingSet) {
 					IWorkingSet workingSet= (IWorkingSet) selected[i];
-					return JavaWorkingSetUpdater.ID.equals(workingSet.getId());
+					return IWorkingSetIDs.JAVA.equals(workingSet.getId());
 				}
 			} catch (JavaModelException e) {
 				if (!e.isDoesNotExist()) {
@@ -438,7 +438,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		return null;
 	}
 
-	private SearchPatternData tryIfPropertyFileSelected(IFile file) throws JavaModelException {
+	private SearchPatternData tryIfPropertyFileSelected(IFile file) {
 		if (!"properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
 			return null;
 

@@ -96,7 +96,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 /**
  * The first page of the New Java Project wizard. This page is typically used in combination with
@@ -787,7 +787,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private WorkingSetConfigurationBlock fWorkingSetBlock;
 
 		public WorkingSetGroup() {
-			String[] workingSetIds= new String[] {JavaWorkingSetUpdater.ID, "org.eclipse.ui.resourceWorkingSetPage"}; //$NON-NLS-1$
+			String[] workingSetIds= new String[] { IWorkingSetIDs.JAVA, IWorkingSetIDs.RESOURCE };
 			fWorkingSetBlock= new WorkingSetConfigurationBlock(workingSetIds, JavaPlugin.getDefault().getDialogSettings());
 			//fWorkingSetBlock.setDialogMessage(NewWizardMessages.NewJavaProjectWizardPageOne_WorkingSetSelection_message);
 		}
@@ -1486,7 +1486,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 	private static boolean isValidWorkingSet(IWorkingSet workingSet) {
 		String id= workingSet.getId();
-		if (!JavaWorkingSetUpdater.ID.equals(id) && !"org.eclipse.ui.resourceWorkingSetPage".equals(id)) //$NON-NLS-1$
+		if (!IWorkingSetIDs.JAVA.equals(id) && !IWorkingSetIDs.RESOURCE.equals(id))
 			return false;
 
 		if (workingSet.isAggregateWorkingSet())

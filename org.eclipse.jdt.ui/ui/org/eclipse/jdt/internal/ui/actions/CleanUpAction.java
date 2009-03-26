@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 public abstract class CleanUpAction extends SelectionDispatchAction {
 
@@ -144,7 +144,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 					return true;
 				} else if (selected[i] instanceof IWorkingSet) {
 					IWorkingSet workingSet= (IWorkingSet) selected[i];
-					return JavaWorkingSetUpdater.ID.equals(workingSet.getId());
+					return IWorkingSetIDs.JAVA.equals(workingSet.getId());
 				}
 			} catch (JavaModelException e) {
 				if (!e.isDoesNotExist()) {

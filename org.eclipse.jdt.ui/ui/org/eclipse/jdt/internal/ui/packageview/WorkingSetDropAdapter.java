@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
-import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
@@ -171,7 +171,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 					return DND.DROP_COPY;
 				if (paths.length == 1) {
 					IWorkingSet ws= (IWorkingSet)path.getSegment(0);
-					if (OthersWorkingSetUpdater.ID.equals(ws.getId()))
+					if (isOthersWorkingSet(ws))
 						return DND.DROP_MOVE;
 				}
 			}
@@ -190,7 +190,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	}
 
 	private boolean isOthersWorkingSet(IWorkingSet ws) {
-		return OthersWorkingSetUpdater.ID.equals(ws.getId());
+		return IWorkingSetIDs.OTHERS.equals(ws.getId());
 	}
 
 	private void initializeState(Object target, ISelection s) {

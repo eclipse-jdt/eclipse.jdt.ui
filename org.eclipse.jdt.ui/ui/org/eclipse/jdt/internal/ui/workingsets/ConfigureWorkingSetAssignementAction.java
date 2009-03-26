@@ -559,8 +559,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	}
 
 	private static final String[] VALID_WORKING_SET_IDS= new String[] {
-			JavaWorkingSetUpdater.ID,
-			"org.eclipse.ui.resourceWorkingSetPage" //$NON-NLS-1$
+			IWorkingSetIDs.JAVA,
+			IWorkingSetIDs.RESOURCE
 	};
 
 	private WorkingSetModel fWorkingSetModel;

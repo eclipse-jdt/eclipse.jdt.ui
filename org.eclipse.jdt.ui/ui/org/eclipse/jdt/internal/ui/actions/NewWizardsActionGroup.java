@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,8 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
-import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 
 /**
@@ -104,9 +103,9 @@ public class NewWizardsActionGroup extends ActionGroup {
 		if (element instanceof IWorkingSet) {
 			String workingSetId= ((IWorkingSet)element).getId();
 			return
-				JavaWorkingSetUpdater.ID.equals(workingSetId) ||
-				"org.eclipse.ui.resourceWorkingSetPage".equals(workingSetId) || //$NON-NLS-1$
-				OthersWorkingSetUpdater.ID.equals(workingSetId);
+				IWorkingSetIDs.JAVA.equals(workingSetId) ||
+				IWorkingSetIDs.RESOURCE.equals(workingSetId) ||
+				IWorkingSetIDs.OTHERS.equals(workingSetId);
 		}
 		return false;
 	}

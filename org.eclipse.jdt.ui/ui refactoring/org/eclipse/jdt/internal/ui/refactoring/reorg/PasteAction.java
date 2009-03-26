@@ -167,7 +167,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
-import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 
 public class PasteAction extends SelectionDispatchAction{
@@ -1121,7 +1121,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (selectedResources.length != 0 || selectedJavaElements.length != 0 || selectedWorkingSets.length != 1)
 				return false;
 			IWorkingSet ws= selectedWorkingSets[0];
-			return !OthersWorkingSetUpdater.ID.equals(ws.getId());
+			return !IWorkingSetIDs.OTHERS.equals(ws.getId());
 		}
 	}
 

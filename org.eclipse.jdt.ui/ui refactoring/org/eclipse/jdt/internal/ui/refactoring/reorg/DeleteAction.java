@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 
@@ -118,7 +118,7 @@ public class DeleteAction extends SelectionDispatchAction {
 					 */
 					protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
 						Button button= super.createButton(parent, id, label, defaultButton);
-					if (id == REMOVE_BUTTON && OthersWorkingSetUpdater.ID.equals(workingSetID))
+					if (id == REMOVE_BUTTON && IWorkingSetIDs.OTHERS.equals(workingSetID))
 							button.setEnabled(false);
 						return button;
 					}
@@ -136,7 +136,7 @@ public class DeleteAction extends SelectionDispatchAction {
 			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 			while (iter.hasNext()) {
 				IWorkingSet workingSet= (IWorkingSet)iter.next();
-				if (!(OthersWorkingSetUpdater.ID.equals(workingSet.getId())))
+				if (!(IWorkingSetIDs.OTHERS.equals(workingSet.getId())))
 					manager.removeWorkingSet(workingSet);
 			}
 		} else if (dialogResponse == HIDE_BUTTON) {
