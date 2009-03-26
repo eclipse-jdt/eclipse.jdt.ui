@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 
 	final private static String PAGE_TITLE= WorkingSetMessages.JavaWorkingSetPage_title;
-	final private static String PAGE_ID= "javaWorkingSetPage"; //$NON-NLS-1$
+	final private static String PAGE_NAME= "javaWorkingSetPage"; //$NON-NLS-1$
 
 	private IStructuredSelection fInitialSelection;
 
@@ -70,7 +70,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	 * Default constructor.
 	 */
 	public JavaWorkingSetPage() {
-		super(PAGE_ID, PAGE_TITLE, JavaPluginImages.DESC_WIZBAN_JAVA_WORKINGSET);
+		super(PAGE_NAME, PAGE_TITLE, JavaPluginImages.DESC_WIZBAN_JAVA_WORKINGSET);
 		setDescription(WorkingSetMessages.JavaWorkingSetPage_workingSet_description);
 		IWorkbenchWindow activeWorkbenchWindow= JavaPlugin.getActiveWorkbenchWindow();
 		if (activeWorkbenchWindow != null) {
