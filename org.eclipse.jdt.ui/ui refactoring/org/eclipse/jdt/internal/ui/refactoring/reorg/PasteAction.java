@@ -1036,13 +1036,29 @@ public class PasteAction extends SelectionDispatchAction{
 			IExecutionEnvironment bestEE= null;
 
 			IExecutionEnvironment[] ees= eeManager.getExecutionEnvironments();
-			for (int j= 0; j < ees.length; j++) {
+			outer: for (int j= 0; j < ees.length; j++) {
 				IExecutionEnvironment ee= ees[j];
 				IVMInstall vm= ee.getDefaultVM();
 				String ver= getVMVersion(vm);
-				if (ver != null && (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver))) {
-					bestVersion= ver;
-					bestEE= ee;
+				if (ver != null) {
+					if (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver) || bestVersion.equals(ver)) {
+						bestVersion= ver;
+						bestEE= ee;
+					}
+				} else {
+					String eeVer= JavaModelUtil.getExecutionEnvironmentCompliance(ee);
+					IVMInstall[] compatibleVMs= ee.getCompatibleVMs();
+					for (int i= 0; i < compatibleVMs.length; i++) {
+						vm= compatibleVMs[i];
+						ver= getVMVersion(vm);
+						if (!eeVer.equals(ver))
+							continue; // don't want to set an EE where there's no strictly compatible VM
+						if (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver) || bestVersion.equals(ver)) {
+							bestVersion= ver;
+							bestEE= ee;
+							continue outer;
+						}
+					}
 				}
 			}
 
