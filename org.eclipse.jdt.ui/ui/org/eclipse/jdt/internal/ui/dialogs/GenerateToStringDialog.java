@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Template edit dialog has usability issues - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267916
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
@@ -23,7 +24,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -38,9 +38,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
@@ -296,7 +296,145 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		}
 	}
 
-	private class ToStringTemplatesDialog extends Dialog {
+	private class ToStringTemplatesDialog extends StatusDialog {
+
+		private class TemplateEditionDialog extends StatusDialog {
+			private Text templateName;
+
+			private Text template;
+
+			private final int templateNumber;
+
+			private final String fInitialTemplateName;
+			
+			private String resultTemplateName;
+
+			private String resultTemplate;
+
+			private StatusInfo nameValidationStatus= new StatusInfo();
+
+
+			public TemplateEditionDialog(Shell parent, int templateNumber) {
+				super(parent);
+				this.templateNumber= templateNumber;
+				fInitialTemplateName= (String)templateNames.get(templateNumber);
+				setHelpAvailable(false);
+			}
+			
+			protected boolean isResizable() {
+				return true;
+			}
+
+			protected Control createDialogArea(Composite parent) {
+				getShell().setText(templateNumber >= 0 ? JavaUIMessages.GenerateToStringDialog_templateEdition_WindowTitle : JavaUIMessages.GenerateToStringDialog_templateEdition_NewWindowTitle);
+
+				Composite composite= (Composite)super.createDialogArea(parent);
+
+				GridLayout layout= (GridLayout)composite.getLayout();
+				layout.numColumns= 2;
+				layout.horizontalSpacing= 8;
+
+				Label label= new Label(composite, SWT.LEFT);
+				label.setText(JavaUIMessages.GenerateToStringDialog_template_name);
+				label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+				templateName= new Text(composite, SWT.BORDER | SWT.SINGLE);
+				templateName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+				label= new Label(composite, SWT.LEFT);
+				label.setText(JavaUIMessages.GenerateToStringDialog_template_content);
+				label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+
+				template= new Text(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+				GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+				gridData.heightHint= 80;
+				gridData.widthHint= 480;
+				template.setLayoutData(gridData);
+				new ContentAssistCommandAdapter(template, new TextContentAdapter(), new ToStringTemplateProposalProvider(), null, new char[] { '$' }, true).setPropagateKeys(false);
+
+				if (templateNumber >= 0) {
+					templateName.setText(fInitialTemplateName);
+					template.setText((String)templates.get(templateNumber));
+				} else {
+					templateName.setText(createNewTemplateName());
+					template.setText(ToStringTemplateParser.DEFAULT_TEMPLATE);
+				}
+				templateName.setSelection(0, templateName.getText().length());
+
+				templateName.addModifyListener(new ModifyListener() {
+					public void modifyText(ModifyEvent e) {
+						validate(templateName.getText());
+					}
+				});
+
+				//Ctrl+Enter should execute the default button, workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=145959
+				template.addTraverseListener(new TraverseListener() {
+					public void keyTraversed(TraverseEvent e) {
+			            if (e.detail == SWT.TRAVERSE_RETURN && (e.stateMask & SWT.MODIFIER_MASK) != 0) {
+							buttonPressed(((Integer)getShell().getDefaultButton().getData()).intValue());
+						}
+					}
+				});
+
+				return composite;
+			}
+
+			private void validate(String newName) {
+				if (newName.length() == 0) {
+					nameValidationStatus.setError(JavaUIMessages.GenerateToStringDialog_templateEdition_TemplateNameEmptyErrorMessage);
+				} else if (!newName.equals(fInitialTemplateName) && templateNames.contains(newName)) {
+					nameValidationStatus.setError(JavaUIMessages.GenerateToStringDialog_templateEdition_TemplateNameDuplicateErrorMessage);
+				} else {
+					nameValidationStatus.setOK();
+				}
+				updateStatus(nameValidationStatus);
+			}
+
+			private String createNewTemplateName() {
+				if (!templateNames.contains(JavaUIMessages.GenerateToStringDialog_newTemplateName))
+					return JavaUIMessages.GenerateToStringDialog_newTemplateName;
+				
+				int copyCount= 2;
+				String newName;
+				do {
+					newName= Messages.format(JavaUIMessages.GenerateToStringDialog_newTemplateNameArg, new Integer(copyCount));
+					copyCount++;
+				} while (templateNames.contains(newName));
+				return newName;
+			}
+
+			public boolean close() {
+				resultTemplateName= templateName.getText();
+				resultTemplate= fixLineBreaks(template.getText());
+				return super.close();
+			}
+
+			public String getTemplateName() {
+				return resultTemplateName;
+			}
+
+			public String getTemplate() {
+				return resultTemplate;
+			}
+
+			private String fixLineBreaks(String input) {
+				String systemLineDelimiter= Text.DELIMITER;
+				final String javaLineDelimiter= "\n"; //$NON-NLS-1$
+				if (!systemLineDelimiter.equals(javaLineDelimiter)) {
+					StringBuffer outputBuffer= new StringBuffer(input);
+					int pos= outputBuffer.indexOf(systemLineDelimiter);
+					while (pos >= 0) {
+						outputBuffer.delete(pos, pos + systemLineDelimiter.length());
+						outputBuffer.insert(pos, javaLineDelimiter);
+						pos= outputBuffer.indexOf(systemLineDelimiter, pos + javaLineDelimiter.length());
+					}
+					return outputBuffer.toString();
+				}
+				return input;
+			}
+
+		}
+
 
 		private class ToStringTemplateProposalProvider implements IContentProposalProvider {
 			private class Proposal implements IContentProposal {
@@ -359,9 +497,11 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 		private final int APPLY_BUTTON= IDialogConstants.CLIENT_ID + 3;
 
+		private final int EDIT_BUTTON= IDialogConstants.CLIENT_ID + 4;
+
 		private Text templateTextControl;
 
-		private Combo templateNameControl;
+		private org.eclipse.swt.widgets.List templateNameControl;
 
 		private ToStringTemplateParser parser;
 
@@ -371,12 +511,15 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 		private int selectedTemplateNumber;
 
-		private boolean controlsRefreshing= false;
+		private boolean somethingChanged= false;
+
+		private StatusInfo validationStatus= new StatusInfo();
 
 		protected ToStringTemplatesDialog(Shell parentShell, ToStringTemplateParser parser) {
 			super(parentShell);
 			this.parser= parser;
 			this.setShellStyle(this.getShellStyle() | SWT.RESIZE);
+			this.setHelpAvailable(false);
 			this.create();
 		}
 
@@ -384,115 +527,62 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			getShell().setText(JavaUIMessages.GenerateToStringDialog_templatesManagerTitle);
 
 			Composite composite= (Composite)super.createDialogArea(parent);
-			((GridLayout)composite.getLayout()).numColumns= 2;
 
-			Composite leftComposite= new Composite(composite, SWT.NONE);
-			leftComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			Label label= new Label(composite, SWT.LEFT);
+			label.setText(JavaUIMessages.GenerateToStringDialog_templatesManagerTemplatesList);
+
+			Composite templatesComposite= new Composite(composite, SWT.NONE);
+			templatesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			GridLayout gl= new GridLayout(2, false);
 			gl.marginWidth= gl.marginHeight= 0;
-			leftComposite.setLayout(gl);
+			templatesComposite.setLayout(gl);
 
-			Label label= new Label(leftComposite, SWT.RIGHT);
-			label.setText(JavaUIMessages.GenerateToStringDialog_template_name);
+			templateNameControl= new org.eclipse.swt.widgets.List(templatesComposite, SWT.BORDER | SWT.SINGLE);
+			templateNameControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-			templateNameControl= new Combo(leftComposite, SWT.FILL);
-			templateNameControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			SWTUtil.setDefaultVisibleItemCount(templateNameControl);
-			templateNameControl.addSelectionListener(new SelectionListener() {
-				public void widgetDefaultSelected(SelectionEvent e) {
-				}
-
-				public void widgetSelected(SelectionEvent e) {
-					if (templateNameControl.getSelectionIndex() >= 0) {
-						selectedTemplateNumber= templateNameControl.getSelectionIndex();
-						templateTextControl.setText((String)templates.get(fGenerationSettings.stringFormatTemplateNumber));
-					}
-				}
-			});
-
-			label= new Label(leftComposite, SWT.LEFT);
-			label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-			label.setText(JavaUIMessages.GenerateToStringDialog_template_content);
-
-			templateTextControl= new Text(leftComposite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-			new ContentAssistCommandAdapter(templateTextControl, new TextContentAdapter(), new ToStringTemplateProposalProvider(), null, new char[] { '$' }, true).setPropagateKeys(false);
-
-			//Ctrl+Enter should execute the default button
-			templateTextControl.addTraverseListener(new TraverseListener() {
-				public void keyTraversed(TraverseEvent e) {
-					if (e.stateMask == SWT.CTRL) {
-						buttonPressed(((Integer)getShell().getDefaultButton().getData()).intValue());
-					}
-				}
-			});
-
-			GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-			gd.heightHint= 80;
-			gd.widthHint= 450;
-			templateTextControl.setLayoutData(gd);
-
-			Composite rightComposite= new Composite(composite, SWT.NONE);
+			Composite rightComposite= new Composite(templatesComposite, SWT.NONE);
 			gl= new GridLayout();
 			gl.marginWidth= gl.marginHeight= 0;
 			rightComposite.setLayout(gl);
 			rightComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			createButton(rightComposite, ADD_BUTTON, JavaUIMessages.GenerateToStringDialog_templatesManagerNewButton, false);
 			createButton(rightComposite, REMOVE_BUTTON, JavaUIMessages.GenerateToStringDialog_templatesManagerRemoveButton, false);
+			createButton(rightComposite, EDIT_BUTTON, JavaUIMessages.GenerateToStringDialog_teplatesManagerEditButton, false);
 			((GridLayout)rightComposite.getLayout()).numColumns= 1;
 
+			label= new Label(composite, SWT.LEFT);
+			label.setText(JavaUIMessages.GenerateToStringDialog_templatesManagerPreview);
+
+			templateTextControl= new Text(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.READ_ONLY);
+			GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
+			gd.heightHint= 80;
+			gd.widthHint= 450;
+			templateTextControl.setLayoutData(gd);
 
 			templateNames= new ArrayList(Arrays.asList(getTemplateNames()));
 			templates= new ArrayList(Arrays.asList(getTemplates(getDialogSettings())));
 			selectedTemplateNumber= fGenerationSettings.stringFormatTemplateNumber;
 			refreshControls();
 
-			templateNameControl.addModifyListener(new ModifyListener() {
-				private boolean selfRefreshing= false;
+			templateNameControl.addSelectionListener(new SelectionListener() {
+				public void widgetDefaultSelected(SelectionEvent e) {
+					onEdit();
+				}
 
-				public void modifyText(ModifyEvent e) {
-					if (selectedTemplateNumber >= 0 && !controlsRefreshing && !selfRefreshing
-							&& (templateNameControl.getSelectionIndex() == -1 || !templateNameControl.getText().equals(templateNames.get(templateNameControl.getSelectionIndex())))) {
-						templateNames.set(selectedTemplateNumber, templateNameControl.getText());
-						Point textSelection= templateNameControl.getSelection();
-						selfRefreshing= true;
-						templateNameControl.setItem(selectedTemplateNumber, templateNameControl.getText());
-						templateNameControl.select(selectedTemplateNumber);
-						templateNameControl.setSelection(textSelection);
-						selfRefreshing= false;
-						getButton(APPLY_BUTTON).setEnabled(true);
+				public void widgetSelected(SelectionEvent e) {
+					if (templateNameControl.getSelectionIndex() >= 0) {
+						selectedTemplateNumber= templateNameControl.getSelectionIndex();
+						templateTextControl.setText((String)templates.get(selectedTemplateNumber));
 					}
 				}
 			});
-			templateTextControl.addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					String newTemplate= fixLineBreaks(templateTextControl.getText());
-					if (selectedTemplateNumber >= 0 && !newTemplate.equals(templates.get(selectedTemplateNumber))) {
-						templates.set(selectedTemplateNumber, newTemplate);
-						getButton(APPLY_BUTTON).setEnabled(true);
-					}
-				}
-			});
-			
+
 			applyDialogFont(composite);
 
 			return composite;
 		}
-		
-		private String fixLineBreaks(String input) {
-			String systemLineDelimiter= Text.DELIMITER;
-			final String javaLineDelimiter= "\n"; //$NON-NLS-1$
-			if (!systemLineDelimiter.equals(javaLineDelimiter)) {
-				StringBuffer outputBuffer= new StringBuffer(input);
-				int pos= outputBuffer.indexOf(systemLineDelimiter);
-				while (pos >= 0) {
-					outputBuffer.delete(pos, pos+systemLineDelimiter.length());
-					outputBuffer.insert(pos, javaLineDelimiter);
-					pos= outputBuffer.indexOf(systemLineDelimiter, pos + javaLineDelimiter.length());
-				}
-				return outputBuffer.toString();
-			}
-			return input;
-		}
+
+
 
 		protected void createButtonsForButtonBar(Composite parent) {
 			super.createButtonsForButtonBar(parent);
@@ -503,6 +593,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			getDialogSettings().put(ToStringGenerationSettings.SETTINGS_TEMPLATE_NAMES, (String[])templateNames.toArray(new String[0]));
 			getDialogSettings().put(ToStringGenerationSettings.SETTINGS_TEMPLATES, (String[])templates.toArray(new String[0]));
 			fGenerationSettings.stringFormatTemplateNumber= Math.max(selectedTemplateNumber, 0);
+			somethingChanged= false;
 			getButton(APPLY_BUTTON).setEnabled(false);
 		}
 
@@ -519,11 +610,15 @@ public class GenerateToStringDialog extends SourceActionDialog {
 					close();
 					break;
 				case ADD_BUTTON:
-					templateNames.add(JavaUIMessages.GenerateToStringDialog_newTemplateName);
-					templates.add(ToStringTemplateParser.DEFAULT_TEMPLATE);
-					selectedTemplateNumber= templateNames.size() - 1;
-					getButton(APPLY_BUTTON).setEnabled(true);
-					refreshControls();
+					TemplateEditionDialog dialog= new TemplateEditionDialog(getShell(), -1);
+					dialog.open();
+					if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
+						templateNames.add(dialog.getTemplateName());
+						templates.add(dialog.getTemplate());
+						selectedTemplateNumber= templateNames.size() - 1;
+						somethingChanged= true;
+						refreshControls();
+					}
 					break;
 				case REMOVE_BUTTON:
 					if (templateNames.size() > 0) {
@@ -532,14 +627,27 @@ public class GenerateToStringDialog extends SourceActionDialog {
 					}
 					if (selectedTemplateNumber >= templateNames.size())
 						selectedTemplateNumber= templateNames.size() - 1;
-					getButton(APPLY_BUTTON).setEnabled(true);
+					somethingChanged= true;
 					refreshControls();
 					break;
+				case EDIT_BUTTON:
+					onEdit();
+			}
+		}
+
+		private void onEdit() {
+			TemplateEditionDialog dialog;
+			dialog= new TemplateEditionDialog(getShell(), selectedTemplateNumber);
+			dialog.open();
+			if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
+				templateNames.set(selectedTemplateNumber, dialog.getTemplateName());
+				templates.set(selectedTemplateNumber, dialog.getTemplate());
+				somethingChanged= true;
+				refreshControls();
 			}
 		}
 
 		public void refreshControls() {
-			controlsRefreshing= true;
 			templateNameControl.setItems((String[])templateNames.toArray(new String[0]));
 			if (templateNames.size() > 0) {
 				templateNameControl.select(selectedTemplateNumber);
@@ -547,7 +655,21 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			} else {
 				templateTextControl.setText(""); //$NON-NLS-1$
 			}
-			controlsRefreshing= false;
+			revalidate();
+			if (getButton(APPLY_BUTTON) != null)
+				getButton(APPLY_BUTTON).setEnabled(somethingChanged && getButton(IDialogConstants.OK_ID).getEnabled());
+			if (getButton(REMOVE_BUTTON) != null)
+				getButton(REMOVE_BUTTON).setEnabled(templateNames.size() > 0);
+			if (getButton(EDIT_BUTTON) != null)
+				getButton(EDIT_BUTTON).setEnabled(templateNames.size() > 0);
+		}
+
+		private void revalidate() {
+			if (templateNames.size() > 0)
+				validationStatus.setOK();
+			else
+				validationStatus.setError(JavaUIMessages.GenerateToStringDialog_templateManagerNoTemplateErrorMessage);
+			updateStatus(validationStatus);
 		}
 	}
 

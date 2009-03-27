@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Template edit dialog has usability issues - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267916
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
@@ -101,14 +102,23 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateToStringDialog_ignore_default_button;
 	public static String GenerateToStringDialog_limit_elements_button;
 	public static String GenerateToStringDialog_newTemplateName;
+	public static String GenerateToStringDialog_newTemplateNameArg;
 	public static String GenerateToStringDialog_skip_null_button;
 	public static String GenerateToStringDialog_template_content;
 	public static String GenerateToStringDialog_template_name;
+	public static String GenerateToStringDialog_templateEdition_NewWindowTitle;
+	public static String GenerateToStringDialog_templateEdition_TemplateNameDuplicateErrorMessage;
+	public static String GenerateToStringDialog_templateEdition_TemplateNameEmptyErrorMessage;
+	public static String GenerateToStringDialog_templateEdition_WindowTitle;
 	public static String GenerateToStringDialog_templateManagerApplyButton;
+	public static String GenerateToStringDialog_templateManagerNoTemplateErrorMessage;
 	public static String GenerateToStringDialog_down_button;
 	public static String GenerateToStringDialog_templatesManagerNewButton;
+	public static String GenerateToStringDialog_templatesManagerPreview;
 	public static String GenerateToStringDialog_templatesManagerRemoveButton;
+	public static String GenerateToStringDialog_templatesManagerTemplatesList;
 	public static String GenerateToStringDialog_templatesManagerTitle;
+	public static String GenerateToStringDialog_teplatesManagerEditButton;
 	public static String GenerateToStringDialog_up_button;
 
 	public static String JavaImageLabelprovider_assert_wrongImage;
