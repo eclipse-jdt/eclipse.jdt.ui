@@ -299,14 +299,20 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	private class ToStringTemplatesDialog extends StatusDialog {
 
 		private class TemplateEditionDialog extends StatusDialog {
+			/**
+			 * Template number, -1 for new template.
+			 */
+			private final int templateNumber;
+			
+			/**
+			 * Initial template name, can be <code>null</code>.
+			 */
+			private final String fInitialTemplateName;
+			
 			private Text templateName;
 
 			private Text template;
 
-			private final int templateNumber;
-
-			private final String fInitialTemplateName;
-			
 			private String resultTemplateName;
 
 			private String resultTemplate;
@@ -317,7 +323,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			public TemplateEditionDialog(Shell parent, int templateNumber) {
 				super(parent);
 				this.templateNumber= templateNumber;
-				fInitialTemplateName= (String)templateNames.get(templateNumber);
+				fInitialTemplateName= templateNumber < 0 ? null : (String)templateNames.get(templateNumber);
 				setHelpAvailable(false);
 			}
 			
