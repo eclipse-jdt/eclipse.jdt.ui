@@ -109,13 +109,13 @@ public class ToStringTemplateParser {
 
 	/** Descriptions of variables in toString format template **/
 	private final static String[] VARIABLE_DESCRIPTIONS= {
-			CodeGenerationMessages.GenerateToStringOperation_objectClassNameVariableDescritpion,
+			CodeGenerationMessages.GenerateToStringOperation_objectClassNameVariableDescription,
 			CodeGenerationMessages.GenerateToStringOperation_objectClassGetNameVariableDescription,
 			CodeGenerationMessages.GenerateToStringOperation_objectSuperToStringVariableDescription,
 			CodeGenerationMessages.GenerateToStringOperation_objectHashCodeVariableDescription,
 			CodeGenerationMessages.GenerateToStringOperation_objectIdentityHashCodeVariableDescription,
 			CodeGenerationMessages.GenerateToStringOperation_memberNameVariableDescription,
-			CodeGenerationMessages.GenerateToStringOperation_memberNameParenthesisVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_memberNameParenthesesVariableDescription,
 			CodeGenerationMessages.GenerateToStringOperation_memberValueVariableDescription,
 			CodeGenerationMessages.GenerateToStringOperation_otherFieldsVariableDescription };
 
