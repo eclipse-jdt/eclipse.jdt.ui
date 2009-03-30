@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
@@ -883,14 +884,21 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	protected Composite createCommentSelection(Composite parentComposite) {
 		Composite composite= super.createCommentSelection(parentComposite);
 
-		Composite composite2= new Composite(composite, SWT.NONE);
+		Group group= new Group(parentComposite, SWT.NONE);
+		group.setText(JavaUIMessages.GenerateToStringDialog_generated_code_group);
+		GridLayout groupLayout= new GridLayout();
+		group.setLayout(groupLayout);
+		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		Composite composite2= new Composite(group, SWT.NONE);
 		GridLayout layout= new GridLayout(3, false);
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		composite2.setLayout(layout);
 		composite2.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
 
-		formatLabel= new Label(composite2, SWT.RIGHT);
+		formatLabel= new Label(composite2, SWT.NONE);
 		formatLabel.setText(JavaUIMessages.GenerateToStringDialog_string_format_combo);
 		GridData gridData= new GridData(SWT.FILL, SWT.CENTER, false, false);
 		formatLabel.setLayoutData(gridData);
@@ -898,7 +906,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		formatCombo= new Combo(composite2, SWT.READ_ONLY);
 		formatCombo.setItems(getTemplateNames());
 		formatCombo.select(fGenerationSettings.stringFormatTemplateNumber);
-		formatCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		formatCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		SWTUtil.setDefaultVisibleItemCount(formatCombo);
 		formatCombo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -908,20 +916,20 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 		final Button formatButton= new Button(composite2, SWT.NONE);
 		formatButton.setText(JavaUIMessages.GenerateToStringDialog_manage_templates_button);
-		formatButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		setButtonLayoutData(formatButton);
 		formatButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				manageTemplatesButtonSelected();
 			}
 		});
 
-		final Label styleLabel= new Label(composite2, SWT.RIGHT);
+		final Label styleLabel= new Label(composite2, SWT.NONE);
 		styleLabel.setText(JavaUIMessages.GenerateToStringDialog_code_style_combo);
 		gridData= new GridData(SWT.FILL, SWT.CENTER, false, false);
 		styleLabel.setLayoutData(gridData);
-
+		
 		final Combo styleCombo= new Combo(composite2, SWT.READ_ONLY);
-		styleCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		styleCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		styleCombo.setItems(GenerateToStringOperation.getStyleNames());
 		styleCombo.select(Math.min(fGenerationSettings.toStringStyle, styleCombo.getItemCount() - 1));
 		SWTUtil.setDefaultVisibleItemCount(styleCombo);
@@ -931,7 +939,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 		});
 
-		skipNullsButton= new Button(composite, SWT.CHECK);
+		skipNullsButton= new Button(group, SWT.CHECK);
 		skipNullsButton.setText(JavaUIMessages.GenerateToStringDialog_skip_null_button);
 		skipNullsButton.setSelection(fGenerationSettings.skipNulls);
 		skipNullsButton.addSelectionListener(new SelectionAdapter() {
@@ -940,7 +948,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 		});
 
-		final Button arrayButton= new Button(composite, SWT.CHECK);
+		final Button arrayButton= new Button(group, SWT.CHECK);
 		arrayButton.setText(JavaUIMessages.GenerateToStringDialog_ignore_default_button);
 		arrayButton.setSelection(fGenerationSettings.customArrayToString);
 		arrayButton.addSelectionListener(new SelectionAdapter() {
@@ -949,13 +957,13 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 		});
 
-		composite2= new Composite(composite, SWT.NONE);
+		Composite limitRow= new Composite(group, SWT.NONE);
 		RowLayout rowLayout= new RowLayout();
 		rowLayout.center= true;
 		rowLayout.marginLeft= rowLayout.marginRight= rowLayout.marginTop= rowLayout.marginBottom= 0;
-		composite2.setLayout(rowLayout);
+		limitRow.setLayout(rowLayout);
 
-		final Button limitButton= new Button(composite2, SWT.CHECK);
+		final Button limitButton= new Button(limitRow, SWT.CHECK);
 		limitButton.setText(JavaUIMessages.GenerateToStringDialog_limit_elements_button);
 		limitButton.setSelection(fGenerationSettings.limitElements);
 		limitButton.addSelectionListener(new SelectionAdapter() {
@@ -964,7 +972,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 		});
 
-		final Spinner limitSpinner= new Spinner(composite2, SWT.BORDER);
+		final Spinner limitSpinner= new Spinner(limitRow, SWT.BORDER);
 		limitSpinner.setMinimum(0);
 		limitSpinner.setSelection(fGenerationSettings.limitValue);
 		limitSpinner.addSelectionListener(new SelectionAdapter() {

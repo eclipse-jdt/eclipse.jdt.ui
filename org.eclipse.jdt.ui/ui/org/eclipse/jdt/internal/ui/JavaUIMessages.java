@@ -113,6 +113,7 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateToStringDialog_templateManagerApplyButton;
 	public static String GenerateToStringDialog_templateManagerNoTemplateErrorMessage;
 	public static String GenerateToStringDialog_down_button;
+	public static String GenerateToStringDialog_generated_code_group;
 	public static String GenerateToStringDialog_templatesManagerNewButton;
 	public static String GenerateToStringDialog_templatesManagerPreview;
 	public static String GenerateToStringDialog_templatesManagerRemoveButton;
