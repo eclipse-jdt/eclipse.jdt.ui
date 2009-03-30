@@ -83,28 +83,41 @@ public class ToStringTemplateParser {
 	public final static String MEMBER_VALUE_VARIABLE= "${member.value}"; //$NON-NLS-1$
 
 	/** The variable used for determining separator between members **/
-	public final static String OTHER_MEMBERS_VARIABLE= "${otherMembers}"; //$NON-NLS-1$
+	private final static String OTHER_MEMBERS_VARIABLE= "${otherMembers}"; //$NON-NLS-1$
 
-	public final static String[] OBJECT_RELAED_VARIABLE= { OBJECT_NAME_VARIABLE, OBJECT_GET_NAME_VARIABLE, OBJECT_SUPER_TOSTRING_VARIABLE, OBJECT_HASHCODE_VARIABLE, OBJECT_SYSTEM_HASHCODE_VARIABLE };
+	private final static String[] OBJECT_RELAED_VARIABLE= { OBJECT_NAME_VARIABLE, OBJECT_GET_NAME_VARIABLE, OBJECT_SUPER_TOSTRING_VARIABLE, OBJECT_HASHCODE_VARIABLE, OBJECT_SYSTEM_HASHCODE_VARIABLE };
 
-	public final static String[] MEMBER_RELATED_VARIABLE= { MEMBER_NAME_VARIABLE, MEMBER_NAME_PARENTHESIS_VARIABLE, MEMBER_VALUE_VARIABLE };
+	private final static String[] MEMBER_RELATED_VARIABLE= { MEMBER_NAME_VARIABLE, MEMBER_NAME_PARENTHESIS_VARIABLE, MEMBER_VALUE_VARIABLE };
 
-	public final static String[] OBJECT_AND_MEMBER_RELATED_VARIABLES= { OBJECT_NAME_VARIABLE, OBJECT_GET_NAME_VARIABLE, OBJECT_SUPER_TOSTRING_VARIABLE, OBJECT_HASHCODE_VARIABLE,
+	private final static String[] OBJECT_AND_MEMBER_RELATED_VARIABLES= { OBJECT_NAME_VARIABLE, OBJECT_GET_NAME_VARIABLE, OBJECT_SUPER_TOSTRING_VARIABLE, OBJECT_HASHCODE_VARIABLE,
 			OBJECT_SYSTEM_HASHCODE_VARIABLE, MEMBER_NAME_VARIABLE, MEMBER_NAME_PARENTHESIS_VARIABLE, MEMBER_VALUE_VARIABLE };
 
 	/** A default template for toString() format **/
 	public final static String DEFAULT_TEMPLATE= "${object.className} [${member.name()}=${member.value}, ${otherMembers}]"; //$NON-NLS-1$
 
 	/** Variables that can be used in toSting() format template **/
-	public final static String[] variables= { OBJECT_NAME_VARIABLE, OBJECT_GET_NAME_VARIABLE, OBJECT_SUPER_TOSTRING_VARIABLE, OBJECT_HASHCODE_VARIABLE, OBJECT_SYSTEM_HASHCODE_VARIABLE,
-			MEMBER_NAME_VARIABLE, MEMBER_NAME_PARENTHESIS_VARIABLE, MEMBER_VALUE_VARIABLE, OTHER_MEMBERS_VARIABLE };
+	private final static String[] VARIABLES= {
+			OBJECT_NAME_VARIABLE,
+			OBJECT_GET_NAME_VARIABLE,
+			OBJECT_SUPER_TOSTRING_VARIABLE,
+			OBJECT_HASHCODE_VARIABLE,
+			OBJECT_SYSTEM_HASHCODE_VARIABLE,
+			MEMBER_NAME_VARIABLE,
+			MEMBER_NAME_PARENTHESIS_VARIABLE,
+			MEMBER_VALUE_VARIABLE,
+			OTHER_MEMBERS_VARIABLE };
 
 	/** Descriptions of variables in toString format template **/
-	public final static String[] variableDescriptions= { CodeGenerationMessages.GenerateToStringOperation_objectClassNameVariableDescritpion,
-			CodeGenerationMessages.GenerateToStringOperation_objectClassGetNameVariableDescription, CodeGenerationMessages.GenerateToStringOperation_objectSuperToStringVariableDescription,
-			CodeGenerationMessages.GenerateToStringOperation_objectHashCodeVariableDescription, CodeGenerationMessages.GenerateToStringOperation_objectIdentityHashCodeVariableDescription,
-			CodeGenerationMessages.GenerateToStringOperation_memberNameVariableDescription, CodeGenerationMessages.GenerateToStringOperation_memberNameParenthesisVariableDescription,
-			CodeGenerationMessages.GenerateToStringOperation_memberValueVariableDescription, CodeGenerationMessages.GenerateToStringOperation_otherFieldsVariableDescription };
+	private final static String[] VARIABLE_DESCRIPTIONS= {
+			CodeGenerationMessages.GenerateToStringOperation_objectClassNameVariableDescritpion,
+			CodeGenerationMessages.GenerateToStringOperation_objectClassGetNameVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_objectSuperToStringVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_objectHashCodeVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_objectIdentityHashCodeVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_memberNameVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_memberNameParenthesisVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_memberValueVariableDescription,
+			CodeGenerationMessages.GenerateToStringOperation_otherFieldsVariableDescription };
 
 	/**
 	 * This method is used in {@link #parseTemplate(String)} to determine what member specific
@@ -220,13 +233,13 @@ public class ToStringTemplateParser {
 	public Map getVariableDescriptions() {
 		if (descriptions == null) {
 			descriptions= new HashMap();
-			for (int i= 0; i < ToStringTemplateParser.variables.length; i++)
-				descriptions.put(ToStringTemplateParser.variables[i], ToStringTemplateParser.variableDescriptions[i]);
+			for (int i= 0; i < ToStringTemplateParser.VARIABLES.length; i++)
+				descriptions.put(ToStringTemplateParser.VARIABLES[i], ToStringTemplateParser.VARIABLE_DESCRIPTIONS[i]);
 		}
 		return descriptions;
 	}
 
 	public String[] getVariables() {
-		return ToStringTemplateParser.variables;
+		return ToStringTemplateParser.VARIABLES;
 	}
 }
