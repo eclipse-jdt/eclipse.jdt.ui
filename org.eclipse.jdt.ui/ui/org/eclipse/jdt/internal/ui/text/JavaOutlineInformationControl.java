@@ -273,6 +273,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			Object selectedElement= getSelectedElement();
 			if (selectedElement != null)
 				getTreeViewer().reveal(selectedElement);
+			else
+				selectFirstMatch();
 
 			tree.setRedraw(true);
 		}
