@@ -136,7 +136,7 @@ public class ResourceTestHelper {
 
 	public static void write(String dest, final String content) throws CoreException {
 		InputStream stream= new InputStream() {
-			private Reader fReader= new StringReader(content);
+			private final Reader fReader= new StringReader(content);
 			public int read() throws IOException {
 				return fReader.read();
 			}
@@ -215,8 +215,14 @@ public class ResourceTestHelper {
 	public static boolean setAutoBuilding(boolean value) {
 		IWorkspaceDescription workspaceDescription= ResourcesPlugin.getWorkspace().getDescription();
 		boolean oldValue= workspaceDescription.isAutoBuilding();
-		if (value != oldValue)
+		if (value != oldValue) {
 			workspaceDescription.setAutoBuilding(value);
+			try {
+				ResourcesPlugin.getWorkspace().setDescription(workspaceDescription);
+			} catch (CoreException e) {
+				// XXX will be fixed after I-build
+			}
+		}
 		return oldValue;
 	}
 
