@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,6 @@ import junit.framework.Test;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,6 +30,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 public class SurroundWithTestSetup extends TestSetup {
 
@@ -67,10 +65,7 @@ public class SurroundWithTestSetup extends TestSetup {
 		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, CONTAINER);
 
 		RefactoringCore.getUndoManager().flush();
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IWorkspaceDescription description= workspace.getDescription();
-		description.setAutoBuilding(false);
-		workspace.setDescription(description);
+		CoreUtility.setAutoBuilding(false);
 
 		fTryCatchPackage= getRoot().createPackageFragment("trycatch_in", true, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CATCHBLOCK_ID, "", null);

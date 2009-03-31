@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,8 +41,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -64,6 +62,7 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 /**
  * Helper methods to set up a IJavaProject.
@@ -700,22 +699,6 @@ public class JavaProjectHelper {
 		}
 		IClasspathEntry[] newEntries= (IClasspathEntry[])list.toArray(new IClasspathEntry[list.size()]);
 		jproject.setRawClasspath(newEntries, null);
-	}
-
-	/**
-	 * Sets auto-building state for the test workspace.
-	 * @param state The new auto building state
-	 * @return The previous state
-	 * @throws CoreException Change failed
-	 */
-	public static boolean setAutoBuilding(boolean state) throws CoreException {
-		// disable auto build
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IWorkspaceDescription desc= workspace.getDescription();
-		boolean result= desc.isAutoBuilding();
-		desc.setAutoBuilding(state);
-		workspace.setDescription(desc);
-		return result;
 	}
 
 	public static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {

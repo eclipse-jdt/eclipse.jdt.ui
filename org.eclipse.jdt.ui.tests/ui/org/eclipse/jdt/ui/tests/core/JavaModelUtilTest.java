@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
-
 
 import java.io.File;
 
@@ -38,6 +37,9 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 public class JavaModelUtilTest extends TestCase {
 
@@ -77,7 +79,7 @@ public class JavaModelUtilTest extends TestCase {
 		IWorkspaceDescription workspaceDesc= workspace.getDescription();
 		if (workspaceDesc.isAutoBuilding()) {
 			fEnableAutoBuildAfterTesting= true;
-			JavaProjectHelper.setAutoBuilding(false);
+			CoreUtility.setAutoBuilding(false);
 		}
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -113,7 +115,7 @@ public class JavaModelUtilTest extends TestCase {
 		JavaProjectHelper.delete(fJProject2);
 
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(true);
+			CoreUtility.setAutoBuilding(true);
 	}
 
 

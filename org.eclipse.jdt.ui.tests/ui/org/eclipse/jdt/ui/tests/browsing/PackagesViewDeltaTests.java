@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,10 +44,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-/**
- * @author jthorsley
- */
+
 public class PackagesViewDeltaTests extends TestCase {
 
 	public static Test suite() {
@@ -468,7 +467,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(false);
+			CoreUtility.setAutoBuilding(false);
 
 		//------------set up project ------------------------------
 		fJProject= JavaProjectHelper.createJavaProject("TestProject2", "bin"); //$NON-NLS-1$//$NON-NLS-2$
@@ -558,15 +557,16 @@ public class PackagesViewDeltaTests extends TestCase {
 		fPage.hideView(fMyPart);
 
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(true);
+			CoreUtility.setAutoBuilding(true);
 
 		super.tearDown();
 	}
 
 	/**
 	 * Method compareArrays. Both arrays must be of IPackageFragments or compare will fail.
-	 * @param children
-	 * @param expectedChildren
+	 * 
+	 * @param children the children
+	 * @param expectedChildren the expected children
 	 * @return boolean returns true if the arrays contain the same elements
 	 */
 	private boolean compareArrays(Object[] children, Object[] expectedChildren) {

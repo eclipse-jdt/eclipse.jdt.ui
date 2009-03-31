@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.ui.tests.packageview;
 
 import java.io.File;
@@ -41,6 +40,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -202,7 +204,7 @@ public class ContentProviderTests4 extends TestCase{
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(false);
+			CoreUtility.setAutoBuilding(false);
 
 		//create project
 		fJProject3 = JavaProjectHelper.createJavaProject("TestProject3", "bin");//$NON-NLS-1$//$NON-NLS-2$
@@ -303,7 +305,7 @@ public class ContentProviderTests4 extends TestCase{
 		page.hideView(fMyPart);
 
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(true);
+			CoreUtility.setAutoBuilding(true);
 
 		super.tearDown();
 	}

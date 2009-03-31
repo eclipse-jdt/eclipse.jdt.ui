@@ -306,7 +306,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 							if (project != null) {
 								final IFolder folder= project.getProject().getFolder(SOURCE_FOLDER + String.valueOf(System.currentTimeMillis()));
 								try {
-									fAutoBuild= CoreUtility.enableAutoBuild(false);
+									fAutoBuild= CoreUtility.setAutoBuilding(false);
 									final RefactoringHistory history= getRefactoringHistory();
 									if (history != null && !history.isEmpty())
 										configureClasspath(project, root, folder, new SubProgressMonitor(monitor, 300, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
@@ -643,7 +643,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					status.addError(exception.getLocalizedMessage());
 				} finally {
 					try {
-						CoreUtility.enableAutoBuild(fAutoBuild);
+						CoreUtility.setAutoBuilding(fAutoBuild);
 					} catch (CoreException exception) {
 						JavaPlugin.log(exception);
 					}

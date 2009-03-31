@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,12 +15,11 @@ import junit.framework.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 public class ExtensionPointTestSetup extends TestSetup {
 
@@ -43,10 +42,7 @@ public class ExtensionPointTestSetup extends TestSetup {
 		JavaProjectHelper.addRTJar(fJavaProject);
 		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, CONTAINER);
 
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IWorkspaceDescription description= workspace.getDescription();
-		description.setAutoBuilding(false);
-		workspace.setDescription(description);
+		CoreUtility.setAutoBuilding(false);
 
 		getRoot().createPackageFragment("test", true, null);
 	}

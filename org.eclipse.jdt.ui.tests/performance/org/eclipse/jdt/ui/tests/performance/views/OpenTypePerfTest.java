@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.tests.performance.views;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.OrderedTestSuite;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 import org.eclipse.test.performance.Dimension;
@@ -37,6 +36,7 @@ import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 public class OpenTypePerfTest extends JdtPerformanceTestCase {
 
@@ -53,13 +53,13 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 
 		protected void setUp() throws Exception {
 			super.setUp();
-			fAutoBuilding= JavaProjectHelper.setAutoBuilding(false);
+			fAutoBuilding= CoreUtility.setAutoBuilding(false);
 			fTestProject= new SWTTestProject();
 		}
 
 		protected void tearDown() throws Exception {
 			fTestProject.delete();
-			JavaProjectHelper.setAutoBuilding(fAutoBuilding);
+			CoreUtility.setAutoBuilding(fAutoBuilding);
 			super.tearDown();
 		}
 	}

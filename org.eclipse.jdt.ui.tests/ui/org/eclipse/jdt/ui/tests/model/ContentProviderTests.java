@@ -47,6 +47,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 public class ContentProviderTests extends TestCase {
 
@@ -73,7 +75,7 @@ public class ContentProviderTests extends TestCase {
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(false);
+			CoreUtility.setAutoBuilding(false);
 
 		assertNotNull(fWorkspace);
 
@@ -100,7 +102,7 @@ public class ContentProviderTests extends TestCase {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(true);
+			CoreUtility.setAutoBuilding(true);
 		tearDownMockView();
 		super.tearDown();
 	}

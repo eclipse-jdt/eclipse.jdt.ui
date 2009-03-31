@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.ui.tests.packageview;
 
 import java.io.ByteArrayInputStream;
@@ -50,6 +49,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
+
 /**
  * Tests for the PackageExplorerContentProvider. Bugs:
  * <ul>
@@ -86,7 +86,7 @@ public class ContentProviderTests5 extends TestCase{
 		IWorkspaceDescription workspaceDesc= workspace.getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(false);
+			CoreUtility.setAutoBuilding(false);
 
 		//create project
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
@@ -141,7 +141,7 @@ public class ContentProviderTests5 extends TestCase{
 		JavaProjectHelper.delete(fJProject);
 
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(true);
+			CoreUtility.setAutoBuilding(true);
 	}
 
 	private ByteArrayInputStream asInputStream(String string) throws UnsupportedEncodingException {

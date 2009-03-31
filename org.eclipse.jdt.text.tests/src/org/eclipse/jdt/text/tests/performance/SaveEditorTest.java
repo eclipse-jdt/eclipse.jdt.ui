@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
@@ -21,6 +20,9 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 /**
  * @since 3.1
@@ -59,7 +61,7 @@ public abstract class SaveEditorTest extends TextPerformanceTestCase {
 		ResourceTestHelper.replicate(PREFIX + FILE_SUFFIX, PREFIX, FILE_SUFFIX, getNumberOfEditors(), FILE_PREFIX, FILE_PREFIX, ResourceTestHelper.SKIP_IF_EXISTS);
 		fEditors= EditorTestHelper.openInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getNumberOfEditors()), getEditorId());
 		EditorTestHelper.joinBackgroundActivities();
-		fWasAutobuilding= ResourceTestHelper.setAutoBuilding(false);
+		fWasAutobuilding= CoreUtility.setAutoBuilding(false);
 	}
 
 	protected int getNumberOfEditors() {
@@ -75,7 +77,7 @@ public abstract class SaveEditorTest extends TextPerformanceTestCase {
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=72633
 			ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, getNumberOfEditors());
 		} finally {
-			ResourceTestHelper.setAutoBuilding(fWasAutobuilding);
+			CoreUtility.setAutoBuilding(fWasAutobuilding);
 			EditorTestHelper.joinBackgroundActivities();
 		}
 	}

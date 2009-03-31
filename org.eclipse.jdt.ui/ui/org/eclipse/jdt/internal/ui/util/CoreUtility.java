@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -191,14 +191,15 @@ public class CoreUtility {
 	}
 
 	/**
-     * Set the autobuild to the value of the parameter and
-     * return the old one.
-     *
-     * @param state the value to be set for autobuilding.
-     * @return the old value of the autobuild state
+	 * Sets whether building automatically is enabled in the workspace or not and returns the old
+	 * value.
+	 * 
+	 * @param state <code>true</code> if automatically building is enabled, <code>false</code>
+	 *            otherwise
+	 * @return the old state
 	 * @throws CoreException thrown if the operation failed
-     */
-    public static boolean enableAutoBuild(boolean state) throws CoreException {
+	 */
+    public static boolean setAutoBuilding(boolean state) throws CoreException {
         IWorkspace workspace= ResourcesPlugin.getWorkspace();
         IWorkspaceDescription desc= workspace.getDescription();
         boolean isAutoBuilding= desc.isAutoBuilding();

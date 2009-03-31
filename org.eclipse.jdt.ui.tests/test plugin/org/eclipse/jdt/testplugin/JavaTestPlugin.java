@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 
@@ -41,14 +40,6 @@ public class JavaTestPlugin extends Plugin {
 
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
-	}
-
-	public static void enableAutobuild(boolean enable) throws CoreException {
-		// disable auto build
-		IWorkspace workspace= JavaTestPlugin.getWorkspace();
-		IWorkspaceDescription desc= workspace.getDescription();
-		desc.setAutoBuilding(enable);
-		workspace.setDescription(desc);
 	}
 
 	public File getFileInPlugin(IPath path) throws CoreException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.ui.tests.core;
 
 import junit.extensions.TestSetup;
@@ -28,6 +27,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 /**
  * Sets up an 1.5 project with rtstubs15.jar and compiler, code formatting, code generation, and template options.
@@ -66,7 +67,7 @@ public class ProjectTestSetup extends TestSetup {
 			return;
 		}
 
-		fAutobuilding = JavaProjectHelper.setAutoBuilding(false);
+		fAutobuilding = CoreUtility.setAutoBuilding(false);
 
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		fJProject.setRawClasspath(getDefaultClasspath(), null);
@@ -81,7 +82,7 @@ public class ProjectTestSetup extends TestSetup {
 	protected void tearDown() throws Exception {
 		if (fJProject != null) {
 			JavaProjectHelper.delete(fJProject);
-			JavaProjectHelper.setAutoBuilding(fAutobuilding);
+			CoreUtility.setAutoBuilding(fAutobuilding);
 		}
 	}
 

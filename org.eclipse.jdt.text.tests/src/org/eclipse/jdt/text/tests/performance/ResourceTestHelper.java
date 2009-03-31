@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.text.tests.performance;
 
 import java.io.File;
@@ -33,10 +32,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+
 
 public class ResourceTestHelper {
 
@@ -136,7 +135,7 @@ public class ResourceTestHelper {
 
 	public static void write(String dest, final String content) throws CoreException {
 		InputStream stream= new InputStream() {
-			private final Reader fReader= new StringReader(content);
+			private Reader fReader= new StringReader(content);
 			public int read() throws IOException {
 				return fReader.read();
 			}
@@ -202,28 +201,6 @@ public class ResourceTestHelper {
 
 	public static void fullBuild() throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
-	}
-
-	public static boolean disableAutoBuilding() {
-		return setAutoBuilding(false);
-	}
-
-	public static boolean enableAutoBuilding() {
-		return setAutoBuilding(true);
-	}
-
-	public static boolean setAutoBuilding(boolean value) {
-		IWorkspaceDescription workspaceDescription= ResourcesPlugin.getWorkspace().getDescription();
-		boolean oldValue= workspaceDescription.isAutoBuilding();
-		if (value != oldValue) {
-			workspaceDescription.setAutoBuilding(value);
-			try {
-				ResourcesPlugin.getWorkspace().setDescription(workspaceDescription);
-			} catch (CoreException e) {
-				// XXX will be fixed after I-build
-			}
-		}
-		return oldValue;
 	}
 
 	public static IProject createExistingProject(String projectName) throws CoreException {

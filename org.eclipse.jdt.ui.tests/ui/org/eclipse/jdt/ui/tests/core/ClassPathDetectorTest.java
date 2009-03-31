@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,10 +36,10 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 
-/**
-  */
+
 public class ClassPathDetectorTest extends TestCase {
 
 	private static final Class THIS= ClassPathDetectorTest.class;
@@ -76,7 +76,7 @@ public class ClassPathDetectorTest extends TestCase {
 		IWorkspaceDescription workspaceDesc= workspace.getDescription();
 		if (workspaceDesc.isAutoBuilding()) {
 			fEnableAutoBuildAfterTesting= true;
-			JavaProjectHelper.setAutoBuilding(false);
+			CoreUtility.setAutoBuilding(false);
 		}
 
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
@@ -91,7 +91,7 @@ public class ClassPathDetectorTest extends TestCase {
 		}
 
 		if (fEnableAutoBuildAfterTesting)
-			JavaProjectHelper.setAutoBuilding(true);
+			CoreUtility.setAutoBuilding(true);
 	}
 
 	private boolean hasSamePaths(IPath[] a, IPath[] b) {

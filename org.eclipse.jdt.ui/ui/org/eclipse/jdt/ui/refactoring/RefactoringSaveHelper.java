@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -49,6 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -131,11 +130,7 @@ public class RefactoringSaveHelper {
 			return false;
 		try {
 			// Save isn't cancelable.
-			IWorkspace workspace= ResourcesPlugin.getWorkspace();
-			IWorkspaceDescription description= workspace.getDescription();
-			boolean autoBuild= description.isAutoBuilding();
-			description.setAutoBuilding(false);
-			workspace.setDescription(description);
+			boolean autoBuild= CoreUtility.setAutoBuilding(false);
 			try {
 				if (fSaveMode == SAVE_ALL_ALWAYS_ASK || fSaveMode == SAVE_ALL
 						|| RefactoringSavePreferences.getSaveAllEditors()) {
@@ -167,8 +162,7 @@ public class RefactoringSaveHelper {
 				}
 				fFilesSaved= true;
 			} finally {
-				description.setAutoBuilding(autoBuild);
-				workspace.setDescription(description);
+				CoreUtility.setAutoBuilding(autoBuild);
 			}
 			return true;
 		} catch (CoreException e) {

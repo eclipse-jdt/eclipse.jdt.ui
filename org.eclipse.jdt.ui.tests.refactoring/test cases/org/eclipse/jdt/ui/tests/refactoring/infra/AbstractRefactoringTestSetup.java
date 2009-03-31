@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import java.util.Hashtable;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -25,6 +24,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
 
 public class AbstractRefactoringTestSetup extends TestSetup {
 
@@ -36,7 +37,7 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		fWasAutobuild= JavaProjectHelper.setAutoBuilding(false);
+		fWasAutobuild= CoreUtility.setAutoBuilding(false);
 		if (JavaPlugin.getActivePage() != null)
 			JavaPlugin.getActivePage().close();
 
@@ -58,7 +59,7 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.setAutoBuilding(fWasAutobuild);
+		CoreUtility.setAutoBuilding(fWasAutobuild);
 		/*
 		 * ensure the workbench state gets saved when running with the Automated Testing Framework
          * TODO: remove when https://bugs.eclipse.org/bugs/show_bug.cgi?id=71362 is fixed
