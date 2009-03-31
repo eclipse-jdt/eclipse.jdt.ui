@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.testplugin;
 
 import java.lang.reflect.Method;
@@ -20,16 +19,13 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+
 /**
  * Test suite with user-specified test order.
  * Fails if not all test methods are listed.
  */
 public class OrderedTestSuite extends TestSuite {
 
-	/**
-	 * @param testClass test class
-	 * @param testMethods all test methods of the given class, in the requested order
-	 */
 	public OrderedTestSuite(final Class testClass, String[] testMethods) throws Exception {
 		super(testClass.getName());
 
