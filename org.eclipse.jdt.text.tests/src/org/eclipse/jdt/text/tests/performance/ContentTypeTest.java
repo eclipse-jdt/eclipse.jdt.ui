@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,7 +129,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	public void testPluginXMLDirty() throws Exception {
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns(), PLUGIN_XML_ITERATIONS);
 		final PerformanceMeter performanceMeter= createPerformanceMeter();
-//		explainDegradation("Test is slower because a new XML content type got added.", performanceMeter);
+		explainDegradation("Test is slower because a new XML content types got added. See: https://bugs.eclipse.org/bugs/show_bug.cgi?id=182337", performanceMeter);
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, performanceMeter, getMeasuredRuns(), PLUGIN_XML_ITERATIONS);
 		commitAllMeasurements();
 		assertAllPerformance();
