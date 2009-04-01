@@ -836,7 +836,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		bars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 		
 		IHandlerService handlerService= (IHandlerService) getViewSite().getService(IHandlerService.class);
-		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR, new ActionHandler(fLinkWithEditor));
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fLinkWithEditor));
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
@@ -1025,7 +1025,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fLinkWithEditor.setChecked(fDoLinkWithEditor);
 		fLinkWithEditor.setText("&Link with Editor"); //$NON-NLS-1$
 		fLinkWithEditor.setToolTipText("Link With Editor"); //$NON-NLS-1$
-		fLinkWithEditor.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
+		fLinkWithEditor.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {

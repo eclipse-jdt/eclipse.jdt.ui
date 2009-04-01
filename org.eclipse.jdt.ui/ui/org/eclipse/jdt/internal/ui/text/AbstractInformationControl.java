@@ -818,7 +818,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			}
 		};
 		fShowViewMenuAction.setEnabled(true);
-		fShowViewMenuAction.setActionDefinitionId(IWorkbenchCommandConstants.WINDOW_SHOWVIEWMENU);
+		fShowViewMenuAction.setActionDefinitionId(IWorkbenchCommandConstants.WINDOW_SHOW_VIEW_MENU);
 
 		return fViewMenuButtonComposite;
 	}

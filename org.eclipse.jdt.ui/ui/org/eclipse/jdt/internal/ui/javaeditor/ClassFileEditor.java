@@ -797,7 +797,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						copyAction.setEnabled(true);
 					}
 				};
-				selectAllAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_SELECTALL);
+				selectAllAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_SELECT_ALL);
 				setAction(ITextEditorActionConstants.SELECT_ALL, selectAllAction);
 				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
 				copyQualifiedName.setEnabled(false);

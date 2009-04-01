@@ -30,7 +30,6 @@ import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.Page;
 
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -271,7 +270,7 @@ public class OpenViewActionGroup extends ActionGroup {
 
 		IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		if (bindingService != null)
-			keyBinding= bindingService.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.NAVIGATE_SHOWINQUICKMENU);
+			keyBinding= bindingService.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN_QUICK_MENU);
 
 		if (keyBinding == null)
 			keyBinding= ""; //$NON-NLS-1$

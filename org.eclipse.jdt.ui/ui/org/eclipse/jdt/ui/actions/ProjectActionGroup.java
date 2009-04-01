@@ -93,13 +93,13 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelection selection= selectionProvider.getSelection();
 
 		fCloseAction= new CloseResourceAction(site);
-		fCloseAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_CLOSEPROJECT);
+		fCloseAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_CLOSE_PROJECT);
 
 		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(site);
-		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_CLOSEUNRELATEDPROJECTS);
+		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_CLOSE_UNRELATED_PROJECTS);
 
 		fOpenAction= new OpenProjectAction(site);
-		fOpenAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_OPENPROJECT);
+		fOpenAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_OPEN_PROJECT);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;
 			fOpenAction.selectionChanged(s);

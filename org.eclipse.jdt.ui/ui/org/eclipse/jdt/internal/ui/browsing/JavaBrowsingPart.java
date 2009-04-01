@@ -466,7 +466,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected void activateHandlers(IHandlerService handlerService) {
-		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR, new ActionHandler(fToggleLinkingAction));
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 	}
 
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -585,7 +585,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
 
 		fToggleLinkingAction= new ToggleLinkingAction(this);
-		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 	}
 
 	private void doWorkingSetChanged(PropertyChangeEvent event) {

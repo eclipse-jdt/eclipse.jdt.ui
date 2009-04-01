@@ -123,7 +123,7 @@ public class BuildActionGroup extends ActionGroup {
 
 		fBuildAction= new BuildAction(new ShellProviderAdapter(site.getShell()), IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
-		fBuildAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_BUILDPROJECT);
+		fBuildAction.setActionDefinitionId(IWorkbenchCommandConstants.PROJECT_BUILD_PROJECT);
 
 		fRefreshAction= refreshAction;
 		fRefreshAction.setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH);

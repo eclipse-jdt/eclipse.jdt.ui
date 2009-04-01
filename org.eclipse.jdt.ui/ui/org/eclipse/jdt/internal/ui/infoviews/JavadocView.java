@@ -669,7 +669,7 @@ public class JavadocView extends AbstractInfoView {
 		fForthAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_FORWARD);
 
 		fToggleLinkAction= new LinkAction();
-		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
+		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 
 		fInputSelectionProvider= new SimpleSelectionProvider();
 		fOpenExternalBrowserAction= new OpenExternalBrowserAction(getSite().getShell().getDisplay(), fInputSelectionProvider);
@@ -703,7 +703,7 @@ public class JavadocView extends AbstractInfoView {
 		});
 
 		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
-		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR, new ActionHandler(fToggleLinkAction));
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkAction));
 	}
 
 	/* (non-Javadoc)

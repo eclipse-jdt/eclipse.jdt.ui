@@ -176,7 +176,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		fLinkWithEditorListener= new LinkWithEditorListener();
 		fLinkingEnabled= false;
 		fToggleLinkingAction= new ToggleLinkingAction();
-		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 	}
 
 	public void init(IPageSite pageSite) {
@@ -205,7 +205,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		menu.add(fToggleLinkingAction);
 
 		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
-		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR, new ActionHandler(fToggleLinkingAction));
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 	}
 
 	/*

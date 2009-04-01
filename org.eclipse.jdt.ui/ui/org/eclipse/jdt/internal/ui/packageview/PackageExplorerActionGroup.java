@@ -179,7 +179,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fCollapseAllAction= new CollapseAllAction(fPart.getTreeViewer());
 		fCollapseAllAction.setActionDefinitionId(CollapseAllHandler.COMMAND_ID);
 		fToggleLinkingAction = new ToggleLinkingAction(fPart);
-		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 
 		fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
 		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
@@ -225,7 +225,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fRefactorActionGroup.retargetFileMenuActions(actionBars);
 
 		IHandlerService handlerService= (IHandlerService) fPart.getViewSite().getService(IHandlerService.class);
-		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR, new ActionHandler(fToggleLinkingAction));
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 	}
 

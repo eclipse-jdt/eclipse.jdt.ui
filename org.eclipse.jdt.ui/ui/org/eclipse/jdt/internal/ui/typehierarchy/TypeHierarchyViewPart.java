@@ -295,7 +295,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 
 		fToggleLinkingAction= new ToggleLinkingAction(this);
-		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 
 		fPaneLabelProvider= new JavaUILabelProvider();
 
@@ -931,7 +931,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
 
 		IHandlerService handlerService= (IHandlerService) getViewSite().getService(IHandlerService.class);
-		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLELINKWITHEDITOR, new ActionHandler(fToggleLinkingAction));
+		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 	}
 
 	private void addResizeListener(Composite parent) {

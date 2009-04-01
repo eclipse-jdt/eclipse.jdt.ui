@@ -288,12 +288,12 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 
 		fAddBookmark= new AddBookmarkAction(site, true);
-		fAddBookmark.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADDBOOKMARK);
+		fAddBookmark.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADD_BOOKMARK);
 
 		// context-menu only -> no action definition ids
 
 		fAddTaskAction= new AddTaskAction(site);
-		fAddTaskAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADDTASK);
+		fAddTaskAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADD_TASK);
 
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
