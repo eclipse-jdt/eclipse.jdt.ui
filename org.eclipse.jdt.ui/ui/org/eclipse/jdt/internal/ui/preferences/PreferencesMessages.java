@@ -282,6 +282,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationBlock_validate_button;
 	public static String JavadocConfigurationBlock_InvalidLocation_message;
 	public static String JavadocConfigurationBlock_ValidLocation_message;
+	public static String JavadocConfigurationBlock_OK_label;
+	public static String JavadocConfigurationBlock_Open_label;
 	public static String JavadocConfigurationBlock_UnableToValidateLocation_message;
 	public static String JavadocConfigurationBlock_MessageDialog_title;
 	public static String JavadocConfigurationBlock_location_type_path_label;

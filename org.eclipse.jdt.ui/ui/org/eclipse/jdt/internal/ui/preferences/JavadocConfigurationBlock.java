@@ -318,9 +318,9 @@ public class JavadocConfigurationBlock {
 	private class EntryValidator implements Runnable {
 
 		private String fInvalidMessage= PreferencesMessages.JavadocConfigurationBlock_InvalidLocation_message;
-		private String fValidMessage= PreferencesMessages.JavadocConfigurationBlock_ValidLocation_message;
 		private String fTitle=  PreferencesMessages.JavadocConfigurationBlock_MessageDialog_title;
 		private String fUnable= PreferencesMessages.JavadocConfigurationBlock_UnableToValidateLocation_message;
+
 		public void run() {
 
 			URL location= getJavadocLocation();
@@ -355,9 +355,7 @@ public class JavadocConfigurationBlock {
 				if (indexFile.isFile()) {
 					File packageList= new File(folder, "package-list"); //$NON-NLS-1$
 					if (packageList.exists()) {
-						if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) {
-							spawnInBrowser(indexFile.toURL());
-						}
+						showConfirmValidationDialog(indexFile.toURL());
 						return;
 					}
 				}
@@ -374,11 +372,19 @@ public class JavadocConfigurationBlock {
 
 			boolean suc= checkURLConnection(indexURL) && checkURLConnection(packagelistURL);
 			if (suc) {
-				if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage))
-					spawnInBrowser(indexURL);
+				showConfirmValidationDialog(indexURL);
 			} else {
 				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
 			}
+		}
+
+		private void showConfirmValidationDialog(URL url) {
+			String message= PreferencesMessages.JavadocConfigurationBlock_ValidLocation_message;
+			String okLabel= PreferencesMessages.JavadocConfigurationBlock_OK_label;
+			String openLabel= PreferencesMessages.JavadocConfigurationBlock_Open_label;
+			MessageDialog dialog= new MessageDialog(fShell, fTitle, null, message, MessageDialog.INFORMATION, new String[] { okLabel, openLabel }, 0);
+			if (dialog.open() == 1)
+				spawnInBrowser(url);
 		}
 	}
 
