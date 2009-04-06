@@ -30,7 +30,7 @@ public class OrderedTestSuite extends TestSuite {
 	 * @param testClass test class
 	 * @param testMethods all test methods of the given class, in the requested order
 	 */
-	public OrderedTestSuite(final Class testClass, String[] testMethods) throws Exception {
+	public OrderedTestSuite(final Class testClass, String[] testMethods) {
 		super(testClass.getName());
 		
 		Set existingMethods= new HashSet();
