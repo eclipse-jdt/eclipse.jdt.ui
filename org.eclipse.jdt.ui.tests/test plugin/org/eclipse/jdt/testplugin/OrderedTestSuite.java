@@ -26,7 +26,7 @@ import junit.framework.TestSuite;
  */
 public class OrderedTestSuite extends TestSuite {
 
-	public OrderedTestSuite(final Class testClass, String[] testMethods) throws Exception {
+	public OrderedTestSuite(final Class testClass, String[] testMethods) {
 		super(testClass.getName());
 
 		Set existingMethods= new HashSet();
