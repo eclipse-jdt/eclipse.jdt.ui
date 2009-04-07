@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 
 public class PackageExplorerOpenActionProvider extends CommonActionProvider {
-	
+
 
 	private IAction fOpenAndExpand;
 	private OpenEditorActionGroup fOpenGroup;
@@ -78,6 +78,16 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 		if (fInViewPart) {
 			fOpenGroup.setContext(context); 
 		}
+	}
+
+	/*
+	 * @see org.eclipse.ui.actions.ActionGroup#dispose()
+	 * @since 3.4.3
+	 */
+	public void dispose() {
+		if (fOpenGroup != null)
+			fOpenGroup.dispose();
+		super.dispose();
 	}
 
 }

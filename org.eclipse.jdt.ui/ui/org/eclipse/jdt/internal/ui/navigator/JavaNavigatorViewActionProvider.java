@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 /**
  * Contributes the following actions to the menu on behalf of the JDT content
  * extension.
- * 
+ *
  * <ul>
  * <li>{@link CommonLayoutActionGroup}. Contributes the "Package Presentation>" submenu in the View's drop down menu (not right-click).</li>
  * </ul>
@@ -40,7 +40,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 	private static final int FLAT_LAYOUT= 0x2;
 
-	private static final String TAG_LAYOUT= "org.eclipse.jdt.internal.ui.navigator.layout"; //$NON-NLS-1$ 
+	private static final String TAG_LAYOUT= "org.eclipse.jdt.internal.ui.navigator.layout"; //$NON-NLS-1$
 
 	private IExtensionStateModel fStateModel;
 
@@ -114,8 +114,9 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 	}
 
 	public void dispose() {
-		super.dispose();
+		fLayoutActionGroup.dispose();
 		fExtensionSite.getContentService().getActivationService().removeExtensionActivationListener(fMenuUpdater);
+		super.dispose();
 	}
 
 	public void setContext(ActionContext context) {
