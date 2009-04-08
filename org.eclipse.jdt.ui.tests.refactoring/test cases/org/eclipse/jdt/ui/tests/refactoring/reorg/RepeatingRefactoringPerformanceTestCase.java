@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,8 @@ public abstract class RepeatingRefactoringPerformanceTestCase extends Refactorin
 		return fTestProject;
 	}
 
-	protected void executeRefactoring(int numberOfCus, int numberOfRefs, boolean measure, int redos) throws Exception {
-		for (int i= 0; i < redos; i++) {
+	protected void executeRefactoring(int numberOfCus, int numberOfRefs, boolean measure, int sampleCount) throws Exception {
+		for (int i= 0; i < sampleCount; i++) {
 			try {
 				fTestProject= new TestProject();
 				doExecuteRefactoring(numberOfCus, numberOfRefs, measure);
