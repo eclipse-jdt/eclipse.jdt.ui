@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,10 +77,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
@@ -786,6 +788,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * {@inheritDoc}
 	 */
     public Object getAdapter(Class adapter) {
+    	if (adapter == IShowInSource.class) {
+    		return getShowInSource();
+    	}
     	if (adapter == IContextProvider.class) {
     		return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
     	}
@@ -799,6 +804,17 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     	return super.getAdapter(adapter);
     }
 
+	/**
+	 * @return the <code>IShowInSource</code> for this view.
+	 */
+	private IShowInSource getShowInSource() {
+		return new IShowInSource() {
+			public ShowInContext getShowInContext() {
+				return new ShowInContext(null, fSelectionProviderMediator.getSelection());
+			}
+		};
+	}
+	
     /**
      * Returns the current selection.
      * @return selection
