@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,14 +84,38 @@ public class ModifierRewrite {
 		return fModifierRewrite;
 	}
 
-	public void setModifiers(int modfiers, TextEditGroup editGroup) {
-		internalSetModifiers(modfiers, -1, editGroup);
+	/**
+	 * Sets the given modifiers. Removes all other flags, but leaves annotations in place.
+	 * 
+	 * @param modifiers the modifiers to set
+	 * @param editGroup the edit group in which to collect the corresponding text edits, or
+	 *            <code>null</code> if ungrouped
+	 */
+	public void setModifiers(int modifiers, TextEditGroup editGroup) {
+		internalSetModifiers(modifiers, -1, editGroup);
 	}
 
+	/**
+	 * Sets the included modifiers and removes the excluded modifiers. Does not touch other flags
+	 * and leaves annotations in place.
+	 * 
+	 * @param included the modifiers to set
+	 * @param excluded the modifiers to remove
+	 * @param editGroup the edit group in which to collect the corresponding text edits, or
+	 *            <code>null</code> if ungrouped
+	 */
 	public void setModifiers(int included, int excluded, TextEditGroup editGroup) {
 		internalSetModifiers(included, included | excluded, editGroup);
 	}
 
+	/**
+	 * Sets the included visibility modifiers and removes existing visibility modifiers. Does not
+	 * touch other flags and leaves annotations in place.
+	 * 
+	 * @param visibilityFlags the new visibility modifiers
+	 * @param editGroup the edit group in which to collect the corresponding text edits, or
+	 *            <code>null</code> if ungrouped
+	 */
 	public void setVisibility(int visibilityFlags, TextEditGroup editGroup) {
 		internalSetModifiers(visibilityFlags, VISIBILITY_MODIFIERS, editGroup);
 	}
@@ -121,10 +145,19 @@ public class ModifierRewrite {
 		}
 	}
 
-	private void internalSetModifiers(int modfiers, int consideredFlags, TextEditGroup editGroup) {
-		// remove modifiers
-		int newModifiers= modfiers & consideredFlags;
+	/**
+	 * Sets the given modifiers and removes all other modifiers that match the consideredFlags mask.
+	 * Does not touch other flags and leaves annotations in place.
+	 * 
+	 * @param modifiers the modifiers to set
+	 * @param consideredFlags mask of modifiers to consider
+	 * @param editGroup the edit group in which to collect the corresponding text edits, or
+	 *            <code>null</code> if ungrouped
+	 */
+	private void internalSetModifiers(int modifiers, int consideredFlags, TextEditGroup editGroup) {
+		int newModifiers= modifiers & consideredFlags;
 
+		// remove modifiers
 		List originalList= fModifierRewrite.getOriginalList();
 		for (int i= 0; i < originalList.size(); i++) {
 			ASTNode curr= (ASTNode) originalList.get(i);
