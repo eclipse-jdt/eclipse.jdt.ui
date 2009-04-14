@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -174,7 +174,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				IAdaptable adaptable= (IAdaptable) selectedElement;
 
 				jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
-				if (jelem == null) {
+				if (jelem == null || !jelem.exists()) {
+					jelem= null;
 					IResource resource= (IResource) adaptable.getAdapter(IResource.class);
 					if (resource != null && resource.getType() != IResource.ROOT) {
 						while (jelem == null && resource.getType() != IResource.PROJECT) {
