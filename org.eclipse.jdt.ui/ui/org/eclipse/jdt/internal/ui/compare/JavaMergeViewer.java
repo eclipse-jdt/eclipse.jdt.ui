@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IResource;
@@ -470,21 +471,18 @@ public class JavaMergeViewer extends TextMergeViewer {
 	 * @since 3.5
 	 */
 	protected SourceViewer createSourceViewer(Composite parent, int textOrientation) {
-		SourceViewer sourceViewer= null;
+		SourceViewer sourceViewer;
 		if (getSite() != null) {
 			CompilationUnitEditorAdapter editor= new CompilationUnitEditorAdapter(textOrientation);
 			editor.createPartControl(parent);
 
 			ISourceViewer iSourceViewer= editor.getViewer();
-			if (iSourceViewer instanceof SourceViewer) {
-				sourceViewer= (SourceViewer)iSourceViewer;
-				if (fEditor == null)
-					fEditor= new HashMap(3);
-				fEditor.put(sourceViewer, editor);
-			}
-		}
-
-		if (sourceViewer == null)
+			Assert.isTrue(iSourceViewer instanceof SourceViewer);
+			sourceViewer= (SourceViewer)iSourceViewer;
+			if (fEditor == null)
+				fEditor= new HashMap(3);
+			fEditor.put(sourceViewer, editor);
+		} else
 			sourceViewer= super.createSourceViewer(parent, textOrientation);
 
 		if (fSourceViewer == null)
