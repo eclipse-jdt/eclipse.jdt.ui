@@ -465,20 +465,27 @@ public class JavaMergeViewer extends TextMergeViewer {
 		}
 	}
 	
-	protected ISourceViewer createSourceViewer(Composite parent, int textOrientation) {
-		ISourceViewer sourceViewer;
+	/*
+	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#createSourceViewer(org.eclipse.swt.widgets.Composite, int)
+	 * @since 3.5
+	 */
+	protected SourceViewer createSourceViewer(Composite parent, int textOrientation) {
+		SourceViewer sourceViewer= null;
 		if (getSite() != null) {
 			CompilationUnitEditorAdapter editor= new CompilationUnitEditorAdapter(textOrientation);
 			editor.createPartControl(parent);
 
-			sourceViewer= editor.getViewer();
-
-			if (fEditor == null)
-				fEditor= new HashMap(3);
-			fEditor.put(sourceViewer, editor);
-		} else {
-			sourceViewer= super.createSourceViewer(parent, textOrientation);
+			ISourceViewer iSourceViewer= editor.getViewer();
+			if (iSourceViewer instanceof SourceViewer) {
+				sourceViewer= (SourceViewer)iSourceViewer;
+				if (fEditor == null)
+					fEditor= new HashMap(3);
+				fEditor.put(sourceViewer, editor);
+			}
 		}
+
+		if (sourceViewer == null)
+			sourceViewer= super.createSourceViewer(parent, textOrientation);
 
 		if (fSourceViewer == null)
 			fSourceViewer= new ArrayList();
