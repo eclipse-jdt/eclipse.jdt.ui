@@ -13,8 +13,6 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.test.performance.Dimension;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 
@@ -51,7 +49,8 @@ public class RenamePackagePerfTests1 extends AbstractRenamePackagePerfTest {
 	}
 
 	public void test_1000_10() throws Exception {
-		tagAsSummary("Rename package - 1000 CUs, 10 Refs", Dimension.ELAPSED_PROCESS);
+		// XXX: Removing from fingerprint due to: https://bugs.eclipse.org/bugs/show_bug.cgi?id=266886
+//		tagAsSummary("Rename package - 1000 CUs, 10 Refs", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(1000, 10, true, 10);
 	}
 }
