@@ -163,6 +163,9 @@ class P2Utils {
 		else
 			bundles= P2Utils.readBundles();
 
+		if (bundles == null)
+			return null;
+
 		for (int i= 0; i < bundles.length; i++) {
 			if (symbolicName.equals(bundles[i].getSymbolicName()) && versionRange.isIncluded(new Version(bundles[i].getVersion())))
 				return bundles[i];
