@@ -20,7 +20,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -97,7 +96,10 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	public void testOrganizeImport() throws Exception {
 		measure(Performance.getDefault().getNullPerformanceMeter(), 10);
 		measure(fPerformanceMeter, 10);
-		tagAsSummary("Organize Imports", Dimension.ELAPSED_PROCESS);
+		
+		// test is too short and hence the relative numbers spread too far (but still in an acceptable absolute band) 
+//		tagAsSummary("Organize Imports", Dimension.ELAPSED_PROCESS);
+		
 		commitMeasurements();
 		Performance.getDefault().assertPerformance(fPerformanceMeter);
 	}
