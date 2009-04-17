@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Eric Rizzo - Externalize Strings wizard always defaults to the "legacy" mechanism - http://bugs.eclipse.org/271375
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
@@ -90,7 +91,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
@@ -897,23 +897,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 	}
 
-	private boolean isEclipseNLSAvailable() {
-		if (fNLSRefactoring == null || fNLSRefactoring.getCu() == null)
-			return false;
-
-		IJavaProject jp= fNLSRefactoring.getCu().getJavaProject();
-		if (jp == null || !jp.exists())
-			return false;
-
-		try {
-			return jp.findType("org.eclipse.osgi.util.NLS") != null; //$NON-NLS-1$
-		} catch (JavaModelException e) {
-			return false;
-		}
-	}
-
 	private void createIsEclipseNLSCheckbox(Composite parent) {
-		if (fNLSRefactoring.isEclipseNLS() || isEclipseNLSAvailable()) {
+		if (fNLSRefactoring.isEclipseNLS() || fNLSRefactoring.isEclipseNLSAvailable()) {
 			fIsEclipseNLS= new Button(parent, SWT.CHECK);
 			fIsEclipseNLS.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fIsEclipseNLS.setText(NLSUIMessages.ExternalizeWizardPage_isEclipseNLSCheckbox);

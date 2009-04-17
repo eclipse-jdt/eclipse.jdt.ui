@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Eric Rizzo - Externalize Strings wizard always defaults to the "legacy" mechanism - http://bugs.eclipse.org/271375
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
@@ -32,6 +33,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -89,6 +91,7 @@ public class NLSRefactoring extends Refactoring {
 		fSubstitutions= nlsHint.getSubstitutions();
 		setAccessorClassName(nlsHint.getAccessorClassName());
 		setAccessorClassPackage(nlsHint.getAccessorClassPackage());
+
 		setIsEclipseNLS(detectIsEclipseNLS());
 		setResourceBundleName(nlsHint.getResourceBundleName());
 		setResourceBundlePackage(nlsHint.getResourceBundlePackage());
@@ -106,6 +109,22 @@ public class NLSRefactoring extends Refactoring {
 			return null;
 		return new NLSRefactoring(cu);
 	}
+
+	public boolean isEclipseNLSAvailable() {
+		if (getCu() == null)
+			return false;
+
+		IJavaProject javaProject= getCu().getJavaProject();
+		if (javaProject == null || !javaProject.exists())
+			return false;
+
+		try {
+			return javaProject.findType("org.eclipse.osgi.util.NLS") != null; //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			return false;
+		}
+	}
+
 
 	/**
 	 * no validation is done
@@ -492,22 +511,21 @@ public class NLSRefactoring extends Refactoring {
 	 * @since 3.1
 	 */
 	public boolean detectIsEclipseNLS() {
-		if (getAccessorClassPackage() != null) {
-			ICompilationUnit accessorCU= getAccessorClassPackage().getCompilationUnit(getAccessorCUName());
-			IType type= accessorCU.getType(getAccessorClassName());
-			if (type.exists()) {
-				try {
-					String superclassName= type.getSuperclassName();
-					if (!"NLS".equals(superclassName) && !NLS.class.getName().equals(superclassName)) //$NON-NLS-1$
-						return false;
-					IType superclass= type.newSupertypeHierarchy(null).getSuperclass(type);
-					return superclass != null && NLS.class.getName().equals(superclass.getFullyQualifiedName());
-				} catch (JavaModelException e) {
+		ICompilationUnit accessorCU= getAccessorClassPackage().getCompilationUnit(getAccessorCUName());
+		IType type= accessorCU.getType(getAccessorClassName());
+		if (type.exists()) {
+			try {
+				String superclassName= type.getSuperclassName();
+				if (!"NLS".equals(superclassName) && !NLS.class.getName().equals(superclassName)) //$NON-NLS-1$
 					return false;
-				}
+				IType superclass= type.newSupertypeHierarchy(null).getSuperclass(type);
+				return superclass != null && NLS.class.getName().equals(superclass.getFullyQualifiedName());
+			} catch (JavaModelException e) {
+				// use default
 			}
 		}
-		return fIsEclipseNLS;
+		// Bug 271375: Make the default be to use Eclipse's NLS mechanism if it's available.
+		return isEclipseNLSAvailable();
 	}
 
 	/**
