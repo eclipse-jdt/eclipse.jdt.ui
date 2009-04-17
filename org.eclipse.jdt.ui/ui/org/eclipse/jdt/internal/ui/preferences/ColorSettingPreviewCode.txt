@@ -4,7 +4,7 @@
  * @author author
  * @deprecated use <code>OtherClass</code>
  */
-public class ClassName<E> implements Interface<String> {
+public class ClassName<E> implements InterfaceName<String> {
 	enum Color { RED, GREEN, BLUE };
 	/* This comment may span multiple lines. */
 	static Object staticField;
