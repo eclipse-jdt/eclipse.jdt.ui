@@ -408,6 +408,18 @@ public class WorkingSetModel {
 
 		fConfigured= Boolean.valueOf(configured).booleanValue();
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
+		IWorkingSet[] allLocalWorkingSets= fLocalWorkingSetManager.getAllWorkingSets();
+		for (int i= 0; i < allLocalWorkingSets.length; i++) {
+			IWorkingSet ws= allLocalWorkingSets[i];
+			if (IWorkingSetIDs.OTHERS.equals(ws.getId())) {
+				// have to set the label again, since the locale could have been changed (bug 272737)
+				String otherProjectsLabel= WorkingSetMessages.WorkingSetModel_others_name;
+				if (! otherProjectsLabel.equals(ws.getLabel())) {
+					ws.setLabel(otherProjectsLabel);
+				}
+			}
+		}
+		
 		String isSortingEnabled= memento.getString(TAG_SORT_WORKING_SETS);
 		if (isSortingEnabled == null) {
 			fIsSortingEnabled= false;
