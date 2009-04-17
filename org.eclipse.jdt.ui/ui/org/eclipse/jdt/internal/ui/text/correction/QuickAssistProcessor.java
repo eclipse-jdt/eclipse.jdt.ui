@@ -1430,7 +1430,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 			proposal.setCommandId(ADD_BLOCK_ID);
 			proposal.setEndPosition(rewrite.track(child));
 			resultingCollections.add(proposal);
@@ -1483,7 +1483,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (missingBlockFound && foundElse) {
 				String label = CorrectionMessages.QuickAssistProcessor_replacethenelsewithblock_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
 				resultingCollections.add(proposal);
 			}
 		}
