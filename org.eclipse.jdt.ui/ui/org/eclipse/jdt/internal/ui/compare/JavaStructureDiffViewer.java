@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ToolBar;
@@ -29,6 +32,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareViewerPane;
+import org.eclipse.compare.IContentChangeNotifier;
 import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
@@ -37,12 +41,18 @@ import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.compare.structuremergeviewer.IDiffContainer;
 import org.eclipse.compare.structuremergeviewer.StructureDiffViewer;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 // XXX: StructuredDiffViewer should allow subclassing, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=258907
-class JavaStructureDiffViewer extends StructureDiffViewer {
+class JavaStructureDiffViewer extends StructureDiffViewer implements IElementChangedListener {
 
 	/**
 	 * Toggles a boolean property of an <code>CompareConfiguration</code>.
@@ -91,6 +101,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 		super(parent, configuration);
 		fStructureCreator= new JavaStructureCreator();
 		setStructureCreator(fStructureCreator);
+		JavaCore.addElementChangedListener(this);
 	}
 
 	/**
@@ -150,15 +161,29 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 	}
 
 	private Map getCompilerOptions(ITypedElement input) {
-		if (input instanceof IResourceProvider) {
-			IResource resource= ((IResourceProvider) input).getResource();
+		IJavaElement element= findJavaElement(input);
+		if (element != null) {
+			IJavaProject javaProject= element.getJavaProject();
+			if (javaProject != null)
+				return javaProject.getOptions(true);
+		}
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.compare.structuremergeviewer.StructureDiffViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
+	 * @since 3.5
+	 */
+	protected void handleDispose(DisposeEvent event) {
+		JavaCore.removeElementChangedListener(this);
+		super.handleDispose(event);
+	}
+
+	private IJavaElement findJavaElement(ITypedElement element) {
+		if (element instanceof IResourceProvider) {
+			IResource resource= ((IResourceProvider)element).getResource();
 			if (resource != null) {
-				IJavaElement element= JavaCore.create(resource);
-				if (element != null) {
-					IJavaProject javaProject= element.getJavaProject();
-					if (javaProject != null)
-						return javaProject.getOptions(true);
-				}
+				return JavaCore.create(resource);
 			}
 		}
 		return null;
@@ -191,9 +216,10 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 	}
 
 	/**
-	 * Tracks property changes of the configuration object.
-	 * Clients may override to track their own property changes.
-	 * In this case they must call the inherited method.
+	 * Tracks property changes of the configuration object. Clients may override to track their own
+	 * property changes. In this case they must call the inherited method.
+	 * 
+	 * @param event the property change event
 	 */
 	protected void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(SMART))
@@ -217,5 +243,118 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 			if (!tb.isDisposed())
 				tb.getParent().layout(true);
 		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
+	 * @since 3.5
+	 */
+	public void elementChanged(ElementChangedEvent event) {
+		ITypedElement[] elements= findAffectedElement(event);
+		for (int i= 0; i < elements.length; i++) {
+			ITypedElement e= elements[i];
+			if (e == null || !(e instanceof IContentChangeNotifier))
+				continue;
+			contentChanged((IContentChangeNotifier)e);
+		}
+	}
+
+	/**
+	 * Tells which elements of the comparison are affected by the change.
+	 * 
+	 * @param event element changed event
+	 * @return array of typed elements affected by the event. May return an empty array.
+	 * @since 3.5
+	 */
+	private ITypedElement[] findAffectedElement(ElementChangedEvent event) {
+		Object input= getInput();
+		if (!(input instanceof ICompareInput))
+			return new ITypedElement[0];
+
+		Set affectedElements= new HashSet();
+		ICompareInput ci= (ICompareInput)input;
+		IJavaElementDelta delta= event.getDelta();
+		addAffectedElement(ci.getAncestor(), delta, affectedElements);
+		addAffectedElement(ci.getLeft(), delta, affectedElements);
+		addAffectedElement(ci.getRight(), delta, affectedElements);
+
+		return (ITypedElement[])affectedElements.toArray(new ITypedElement[affectedElements.size()]);
+	}
+
+	/**
+	 * Tests whether the given element is affected by the change and if so, adds it to given set.
+	 * 
+	 * @param element the element to test
+	 * @param delta the Java element delta
+	 * @param affectedElements the set of affected elements
+	 * @since 3.5
+	 */
+	private void addAffectedElement(ITypedElement element, IJavaElementDelta delta, Set affectedElements) {
+		IJavaElement javaElement= findJavaElement(element);
+		if (isEditable(javaElement) && findJavaElementDelta(javaElement, delta) != null)
+			affectedElements.add(element);
+	}
+	
+	/**
+	 * Tells whether the given Java element can be edited.
+	 * 
+	 * @param javaElement the element to test
+	 * @return <code>true</code> if the element can be edited, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	private boolean isEditable(IJavaElement javaElement) {
+		return (javaElement instanceof ICompilationUnit) && JavaModelUtil.isEditable((ICompilationUnit)javaElement);
+	}
+
+	/*
+	 * This is a copy of the internal JavaOutlinePage.ElementChangedListener#isPossibleStructuralChange method.
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage.ElementChangedListener#isPossibleStructuralChange(IJavaElementDelta)
+	 * @since 3.5
+	 */
+	private boolean isPossibleStructuralChange(IJavaElementDelta cuDelta) {
+		if (cuDelta.getKind() != IJavaElementDelta.CHANGED) {
+			return true; // add or remove
+		}
+		int flags= cuDelta.getFlags();
+		if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
+			return true;
+		}
+		return (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
+	}
+	
+	/*
+	 * This is a copy of the internal JavaOutlinePage.ElementChangedListener#findElement method.
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage.ElementChangedListener#findElement(IJavaElement, IJavaElementDelta)
+	 * @since 3.5
+	 */
+	protected IJavaElementDelta findJavaElementDelta(IJavaElement unit, IJavaElementDelta delta) {
+
+		if (delta == null || unit == null)
+			return null;
+
+		IJavaElement element= delta.getElement();
+
+		if (unit.equals(element)) {
+			if (isPossibleStructuralChange(delta)) {
+				return delta;
+			}
+			return null;
+		}
+
+
+		if (element.getElementType() > IJavaElement.CLASS_FILE)
+			return null;
+
+		IJavaElementDelta[] children= delta.getAffectedChildren();
+		if (children == null || children.length == 0)
+			return null;
+
+		for (int i= 0; i < children.length; i++) {
+			IJavaElementDelta d= findJavaElementDelta(unit, children[i]);
+			if (d != null)
+				return d;
+		}
+
+		return null;
 	}
 }
