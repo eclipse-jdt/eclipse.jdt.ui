@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,7 +110,7 @@ public class DeleteAction extends SelectionDispatchAction {
 			IWorkingSet workingSet= (IWorkingSet)selection.getFirstElement();
 			final String workingSetID= workingSet.getId();
 				dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_single, null, MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_single,
-						new Object[] { workingSet.getName() }), MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide, ReorgMessages.DeleteWorkingSet_Remove,
+						new Object[] { workingSet.getLabel() }), MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide, ReorgMessages.DeleteWorkingSet_Remove,
 						IDialogConstants.CANCEL_LABEL }, 0) {
 					/*
 					 * @see org.eclipse.jface.dialogs.MessageDialog#createButton(org.eclipse.swt.widgets.Composite, int, java.lang.String, boolean)
