@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -115,9 +115,10 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	/**
-	 * Removes contents of {@link #getPackageP()}, of {@link #getRoot()} (except for p) and
-	 * of the Java project (except for src and the JRE library).
-	 * @throws Exception
+	 * Removes contents of {@link #getPackageP()}, of {@link #getRoot()} (except for p) and of the
+	 * Java project (except for src and the JRE library).
+	 * 
+	 * @throws Exception in case of errors
 	 */
 	protected void tearDown() throws Exception {
 		refreshFromLocal();
@@ -175,12 +176,7 @@ public abstract class RefactoringTest extends TestCase {
 				if (kid instanceof IResource) {
 					IResource resource= (IResource) kid;
 					if (! PROJECT_RESOURCE_CHILDREN.contains(resource.getName())) {
-						try {
-							resource.delete(true, null);
-						} catch (CoreException e) {
-							//try to delete'em all
-							e.printStackTrace();
-						}
+						resource.delete(true, null);
 					}
 				}
 			}
@@ -463,8 +459,7 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	public static ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
-		if (pack.getCompilationUnit(name).exists())
-			return pack.getCompilationUnit(name);
+		assertTrue(!pack.getCompilationUnit(name).exists());
 		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
 		cu.save(null, true);
 		return cu;
