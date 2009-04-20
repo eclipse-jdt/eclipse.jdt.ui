@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -72,7 +73,11 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 
 	private void performCu(int expectedInitialStatus, int expectedFinalStatus) throws Exception {
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IPackageFragment packageP= getPackageP();
+		String cuName="A";
+		ICompilationUnit cu= packageP.getCompilationUnit(cuName + ".java");
+		if (!cu.exists())
+			cu= createCUfromTestFile(packageP, cuName);
 		IJavaElement[] elements= { cu };
 		boolean performed= perform(elements, expectedInitialStatus, expectedFinalStatus);
 		if (! performed)
