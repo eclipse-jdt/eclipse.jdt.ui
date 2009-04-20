@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,9 +116,13 @@ public class ImagesOnFileSystemRegistry {
 	private File getNewFile() {
 		File file;
 		do {
-			file= new File(fTempDir, String.valueOf(fImageCount++) + ".png"); //$NON-NLS-1$
+			file= new File(fTempDir, String.valueOf(getImageCount()) + ".png"); //$NON-NLS-1$
 		} while (file.exists());
 		return file;
+	}
+
+	private synchronized int getImageCount() {
+		return fImageCount++;
 	}
 
 	public void dispose() {
