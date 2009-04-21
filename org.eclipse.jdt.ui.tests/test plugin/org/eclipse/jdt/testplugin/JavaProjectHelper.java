@@ -274,7 +274,7 @@ public class JavaProjectHelper {
 		emptyDisplayLoop();
 	}
 
-	private static void delete(IResource resource) throws CoreException {
+	public static void delete(IResource resource) throws CoreException {
 		for (int i= 0; i < MAX_RETRY; i++) {
 			try {
 				resource.delete(true, null);
