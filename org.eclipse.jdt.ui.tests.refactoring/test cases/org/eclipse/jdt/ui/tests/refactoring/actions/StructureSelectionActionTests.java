@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,7 +65,11 @@ public class StructureSelectionActionTests extends RefactoringTest{
 
 	//------------
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean input) throws Exception {
-		return createCU(pack, getSimpleTestFileName(input), getFileContents(getTestFileName(input)));
+		String cuName= getSimpleTestFileName(input);
+		ICompilationUnit cu= pack.getCompilationUnit(cuName);
+		if (cu.exists())
+			return cu;
+		return createCU(pack, cuName, getFileContents(getTestFileName(input)));
 	}
 
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception{
