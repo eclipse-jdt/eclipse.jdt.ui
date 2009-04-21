@@ -23,6 +23,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -132,17 +134,12 @@ public abstract class RefactoringTest extends TestCase {
 		if (getRoot().exists()){
 			IJavaElement[] packages= getRoot().getChildren();
 			for (int i= 0; i < packages.length; i++){
-				try{
-					IPackageFragment pack= (IPackageFragment)packages[i];
-					if (! pack.equals(getPackageP()) && pack.exists() && ! pack.isReadOnly())
-						if (pack.isDefaultPackage())
-							pack.delete(true, null);
-						else
-							pack.getResource().delete(true, null); // also delete packages with subpackages
-				}	catch (JavaModelException e){
-					//try to delete'em all
-					e.printStackTrace();
-				}
+				IPackageFragment pack= (IPackageFragment)packages[i];
+				if (!pack.equals(getPackageP()) && pack.exists() && !pack.isReadOnly())
+					if (pack.isDefaultPackage())
+						pack.delete(true, null);
+					else
+						JavaProjectHelper.delete(pack.getResource()); // also delete packages with subpackages
 			}
 		}
 
@@ -176,7 +173,7 @@ public abstract class RefactoringTest extends TestCase {
 				if (kid instanceof IResource) {
 					IResource resource= (IResource) kid;
 					if (! PROJECT_RESOURCE_CHILDREN.contains(resource.getName())) {
-						resource.delete(true, null);
+						JavaProjectHelper.delete(resource);
 					}
 				}
 			}
@@ -190,32 +187,22 @@ public abstract class RefactoringTest extends TestCase {
 			getPackageP().getResource().refreshLocal(IResource.DEPTH_INFINITE, null);
 	}
 
-	private static void tryDeletingAllNonJavaChildResources(IPackageFragment pack) throws JavaModelException {
+	private static void tryDeletingAllNonJavaChildResources(IPackageFragment pack) throws CoreException {
 		Object[] nonJavaKids= pack.getNonJavaResources();
 		for (int i= 0; i < nonJavaKids.length; i++) {
 			if (nonJavaKids[i] instanceof IResource) {
 				IResource resource= (IResource)nonJavaKids[i];
-				try {
-					resource.delete(true, null);
-				} catch (CoreException e) {
-					//try to delete'em all
-					e.printStackTrace();
-				}
+				JavaProjectHelper.delete(resource);
 			}
 		}
 	}
 
-	private static void tryDeletingAllJavaChildren(IPackageFragment pack) throws JavaModelException {
+	private static void tryDeletingAllJavaChildren(IPackageFragment pack) throws CoreException {
 		IJavaElement[] kids= pack.getChildren();
 		for (int i= 0; i < kids.length; i++){
 			if (kids[i] instanceof ISourceManipulation){
-				try{
-					if (kids[i].exists() && ! kids[i].isReadOnly())
-						((ISourceManipulation)kids[i]).delete(true, null);
-				}	catch (JavaModelException e){
-					//try to delete'em all
-					e.printStackTrace();
-				}
+				if (kids[i].exists() && !kids[i].isReadOnly())
+					JavaProjectHelper.delete(kids[i]);
 			}
 		}
 	}
