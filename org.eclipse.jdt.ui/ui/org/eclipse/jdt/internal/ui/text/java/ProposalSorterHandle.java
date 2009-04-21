@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,12 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.Collections;
 import java.util.List;
 
-import org.osgi.framework.Bundle;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.PerformanceStats;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -45,8 +42,6 @@ public final class ProposalSorterHandle {
 	private static final String NAME= "name"; //$NON-NLS-1$
 	/** The extension schema name of the class attribute. */
 	private static final String CLASS= "class"; //$NON-NLS-1$
-	/** The extension schema name of the activate attribute. */
-	private static final String ACTIVATE= "activate"; //$NON-NLS-1$
 	/** The name of the performance event used to trace extensions. */
 	private static final String PERFORMANCE_EVENT= JavaPlugin.getPluginId() + "/perf/content_assist_sorters/extensions"; //$NON-NLS-1$
 	/**
@@ -63,8 +58,6 @@ public final class ProposalSorterHandle {
 	private final String fName;
 	/** The class name of the provided <code>AbstractProposalSorter</code>. */
 	private final String fClass;
-	/** The activate attribute value. */
-	private final boolean fActivate;
 	/** The configuration element of this extension. */
 	private final IConfigurationElement fElement;
 	/** The computer, if instantiated, <code>null</code> otherwise. */
@@ -89,9 +82,6 @@ public final class ProposalSorterHandle {
 			fName= fId;
 		else
 			fName= name;
-
-		String activateAttribute= element.getAttribute(ACTIVATE);
-		fActivate= Boolean.valueOf(activateAttribute).booleanValue();
 
 		fClass= element.getAttribute(CLASS);
 		checkNotNull(fClass, CLASS);
@@ -142,20 +132,9 @@ public final class ProposalSorterHandle {
 	 *         plug-in unloading)
 	 */
 	private synchronized AbstractProposalSorter getSorter() throws CoreException, InvalidRegistryObjectException {
-		if (fSorter == null && (fActivate || isPluginLoaded()))
+		if (fSorter == null)
 			fSorter= createSorter();
 		return fSorter;
-	}
-
-	private boolean isPluginLoaded() throws InvalidRegistryObjectException {
-		Bundle bundle= getBundle();
-		return bundle != null && bundle.getState() == Bundle.ACTIVE;
-	}
-
-	private Bundle getBundle() throws InvalidRegistryObjectException {
-		String symbolicName= fElement.getContributor().getName();
-		Bundle bundle= Platform.getBundle(symbolicName);
-		return bundle;
 	}
 
 	/**
