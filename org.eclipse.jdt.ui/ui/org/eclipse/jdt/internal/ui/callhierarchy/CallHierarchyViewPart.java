@@ -96,6 +96,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -228,6 +229,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private FocusOnSelectionAction fFocusOnSelectionAction;
     private CopyCallHierarchyAction fCopyAction;
     private CancelSearchAction fCancelSearchAction;
+    private ExpandWithConstructorsAction fExpandWithConstructorsAction;
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
@@ -355,6 +357,17 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             updateView();
         }
     }
+
+	/**
+	 * Returns the current call mode.
+	 * 
+	 * @return the current call mode: CALL_MODE_CALLERS or CALL_MODE_CALLEES
+	 * @since 3.5
+	 */
+	int getCallMode() {
+		return fCurrentCallMode;
+	}
+
 
     /**
      * called from SelectFieldModeAction.
@@ -937,6 +950,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         	menu.appendToGroup(GROUP_FOCUS, fCopyAction);
         }
 
+        if (fExpandWithConstructorsAction.canActionBeAdded()) {
+        	menu.appendToGroup(GROUP_FOCUS, fExpandWithConstructorsAction);
+        }
         fActionGroups.setContext(new ActionContext(getSelection()));
         fActionGroups.fillContextMenu(menu);
         fActionGroups.setContext(null);
@@ -988,6 +1004,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fHistoryDropDownAction.setEnabled(false);
         fCancelSearchAction = new CancelSearchAction(this);
         setCancelEnabled(false);
+        fExpandWithConstructorsAction= new ExpandWithConstructorsAction(this, fCallHierarchyViewer);
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
@@ -1054,7 +1071,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			// set input to null so that setComparator does not cause a refresh on the old contents:
 			fCallHierarchyViewer.setInput(null);
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
-				fCallHierarchyViewer.setComparator(new ViewerComparator()); // bug 111423: sort caller hierarchy alphabetically
+				// sort caller hierarchy alphabetically (bug 111423) and make RealCallers the last in 'Expand With Constructors' mode
+				fCallHierarchyViewer.setComparator(new ViewerComparator() {
+					public int category(Object element) {
+						return element instanceof RealCallers ? 1 : 0;
+					}
+				}); 
     			fCallHierarchyViewer.setMethodWrappers(getCallerRoots());
 			} else {
 				fCallHierarchyViewer.setComparator(null);

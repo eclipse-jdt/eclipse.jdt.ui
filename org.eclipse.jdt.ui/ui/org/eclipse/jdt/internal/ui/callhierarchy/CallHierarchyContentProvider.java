@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,13 +23,21 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodCall;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CallHierarchyContentProvider implements ITreeContentProvider {
-    private final static Object[] EMPTY_ARRAY = new Object[0];
+	private final static Object[] EMPTY_ARRAY= new Object[0];
 
     private DeferredTreeContentManager fManager;
     private CallHierarchyViewPart fPart;
@@ -62,26 +70,66 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     /**
      * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
      */
-    public Object[] getChildren(Object parentElement) {
-        if (parentElement instanceof TreeRoot) {
-            TreeRoot dummyRoot = (TreeRoot) parentElement;
-            return dummyRoot.getRoots();
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof TreeRoot) {
+			TreeRoot dummyRoot= (TreeRoot)parentElement;
+			return dummyRoot.getRoots();
 
-        } else if (parentElement instanceof MethodWrapper) {
-            MethodWrapper methodWrapper = ((MethodWrapper) parentElement);
+		} else if (parentElement instanceof RealCallers) {
+			MethodWrapper parentWrapper= ((RealCallers)parentElement).getParent();
+			RealCallers element= ((RealCallers)parentElement);
+			if (fManager != null) {
+				Object[] children= fManager.getChildren(new DeferredMethodWrapper(this, element));
+				if (children != null)
+					return children;
+			}
+			return fetchChildren(parentWrapper);
 
-            if (shouldStopTraversion(methodWrapper)) {
-                return EMPTY_ARRAY;
-            } else {
-                if (fManager != null) {
-                    Object[] children = fManager.getChildren(new DeferredMethodWrapper(this, methodWrapper));
-                    if (children != null)
-                        return children;
-                }
-                return fetchChildren(methodWrapper);
-            }
-        }
+		} else if (parentElement instanceof MethodWrapper) {
+			MethodWrapper methodWrapper= ((MethodWrapper)parentElement);
 
+			if (shouldStopTraversion(methodWrapper)) {
+				return EMPTY_ARRAY;
+			} else {
+				if (parentElement instanceof CallerMethodWrapper) {
+					CallerMethodWrapper caller= (CallerMethodWrapper)parentElement;
+					if (caller.getExpandWithConstructors()) {
+						IType type= caller.getMember().getDeclaringType();
+						try {
+							if (type.isAnonymous()) {
+								IMember anonymousClass= type;
+								MethodCall anonymousConstructor= new MethodCall(anonymousClass);
+								CallerMethodWrapper anonymousWrapper= (CallerMethodWrapper)caller.createMethodWrapper(anonymousConstructor);
+								return new Object[] { anonymousWrapper, new RealCallers(methodWrapper, caller.getMethodCall()) };
+							} else {
+								IMember[] constructors= JavaElementUtil.getAllConstructors(type);
+								if (constructors.length == 0) {
+									constructors= new IType[] { type }; // type stands for the default constructor
+								}
+								Object children[]= new Object[constructors.length + 1];
+								for (int j= 0; j < constructors.length; j++) {
+									MethodCall constructor= new MethodCall(constructors[j]);
+									CallerMethodWrapper constructorWrapper= (CallerMethodWrapper)caller.createMethodWrapper(constructor);
+									children[j]= constructorWrapper;
+								}
+								children[constructors.length]= new RealCallers(methodWrapper, caller.getMethodCall());
+								return children;
+							}
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
+							return null;
+						}
+
+					}
+				}
+				if (fManager != null) {
+					Object[] children= fManager.getChildren(new DeferredMethodWrapper(this, methodWrapper));
+					if (children != null)
+						return children;
+				}
+				return fetchChildren(methodWrapper);
+			}
+		}
         return EMPTY_ARRAY;
     }
 

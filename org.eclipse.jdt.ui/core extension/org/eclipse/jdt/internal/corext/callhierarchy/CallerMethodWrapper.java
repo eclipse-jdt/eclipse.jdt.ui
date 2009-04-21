@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,10 +40,17 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-class CallerMethodWrapper extends MethodWrapper {
-    public CallerMethodWrapper(MethodWrapper parent, MethodCall methodCall) {
-        super(parent, methodCall);
-    }
+public class CallerMethodWrapper extends MethodWrapper {
+	/**
+	 * Value of the expand with constructors mode.
+	 * 
+	 * @since 3.5
+	 */
+	private boolean fExpandWithConstructors;
+
+	public CallerMethodWrapper(MethodWrapper parent, MethodCall methodCall) {
+		super(parent, methodCall);
+	}
 
     protected IJavaSearchScope getSearchScope() {
         return CallHierarchy.getDefault().getSearchScope();
@@ -56,7 +63,7 @@ class CallerMethodWrapper extends MethodWrapper {
     /* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#createMethodWrapper(org.eclipse.jdt.internal.corext.callhierarchy.MethodCall)
 	 */
-	protected MethodWrapper createMethodWrapper(MethodCall methodCall) {
+	public MethodWrapper createMethodWrapper(MethodCall methodCall) {
         return new CallerMethodWrapper(this, methodCall);
     }
 
@@ -150,6 +157,28 @@ class CallerMethodWrapper extends MethodWrapper {
 		} else {
 			return defaultSearchScope;
 		}
+	}
+
+	/**
+	 * Returns the value of expand with constructors mode.
+	 * 
+	 * @return <code>true</code> if in expand with constructors mode, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	public boolean getExpandWithConstructors() {
+		return fExpandWithConstructors;
+	}
+
+	/**
+	 * Sets the expand with constructors mode.
+	 * 
+	 * @param value <code>true</code> if in expand with constructors mode, <code>false</code>
+	 *            otherwise
+	 * @since 3.5
+	 */
+	public void setExpandWithConstructors(boolean value) {
+		fExpandWithConstructors= value;
+
 	}
 
 }
