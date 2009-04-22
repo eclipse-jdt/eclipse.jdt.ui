@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -373,10 +373,11 @@ public class JavaStructureCreator extends StructureCreator {
 	}
 
 	/**
-	 * Tries to detect certain combinations of additions and deletions
-	 * as renames or signature changes and folders them into a single node.
-	 * @param differencer
-	 * @param root
+	 * Tries to detect certain combinations of additions and deletions as renames or signature
+	 * changes and folders them into a single node.
+	 * 
+	 * @param differencer the differencer
+	 * @param root the diff container root
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 
