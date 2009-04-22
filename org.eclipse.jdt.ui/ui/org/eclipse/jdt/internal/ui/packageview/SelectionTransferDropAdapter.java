@@ -211,20 +211,24 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	public boolean performDrop(Object data) {
 		try{
 			switch(getCurrentOperation()) {
-				case DND.DROP_MOVE: handleDropMove(getCurrentTarget()); break;
-				case DND.DROP_COPY: handleDropCopy(getCurrentTarget()); break;
+				case DND.DROP_MOVE:
+					handleDropMove(getCurrentTarget());
+					break;
+				case DND.DROP_COPY:
+					handleDropCopy(getCurrentTarget());
+					break;
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message);
+			return false;
 		} catch(InvocationTargetException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception);
+			return false;
 		} catch (InterruptedException e) {
-			//ok
+			return false;
 		}
-		// The drag source listener must not perform any operation
-		// since this drop adapter did the remove of the source even
-		// if we moved something.
-		return false;
+
+		return true;
 
 	}
 

@@ -217,8 +217,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		} else {
 			performElementRearrange(getCurrentOperation());
 		}
-		// drag adapter has nothing to do, even on move.
-		return false;
+		return true;
 	}
 
 	private void performWorkingSetReordering() {

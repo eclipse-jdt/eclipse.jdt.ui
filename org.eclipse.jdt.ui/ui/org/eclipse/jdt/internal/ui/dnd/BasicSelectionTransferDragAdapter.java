@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
-import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
@@ -77,8 +76,6 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished
 	 */
 	public void dragFinished(DragSourceEvent event) {
-		// Make sure we don't have to do any remaining work
-		Assert.isTrue(event.detail != DND.DROP_MOVE);
 		LocalSelectionTransfer.getInstance().setSelection(null);
 		LocalSelectionTransfer.getInstance().setSelectionSetTime(0);
 	}
