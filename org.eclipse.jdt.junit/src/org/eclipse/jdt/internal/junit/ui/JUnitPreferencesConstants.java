@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,11 @@ public class JUnitPreferencesConstants {
 	 */
 	public static final String JUNIT4_JAVADOC= JUnitPlugin.PLUGIN_ID + ".junit4.javadoclocation"; //$NON-NLS-1$
 
+	/**
+	 * Javadoc location for org.hamcrest.core (JUnit 4)
+	 */
+	public static final String HAMCREST_CORE_JAVADOC= JUnitPlugin.PLUGIN_ID + ".junit4.hamcrest.core.javadoclocation"; //$NON-NLS-1$
+	
 
 	private static final String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$

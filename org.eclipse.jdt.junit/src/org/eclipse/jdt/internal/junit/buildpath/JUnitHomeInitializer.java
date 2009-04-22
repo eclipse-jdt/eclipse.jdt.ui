@@ -34,7 +34,7 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 
 	private void initializeHome() {
 		try {
-			IPath location= BuildPathSupport.getBundleLocation(BuildPathSupport.JUNIT3_PLUGIN);
+			IPath location= BuildPathSupport.JUNIT3_PLUGIN.getBundleLocation();
 			if (location != null) {
 				JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, location, null);
 			} else {
@@ -47,7 +47,7 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 
 	private void initializeSource() {
 		try {
-			IPath sourceLocation= BuildPathSupport.getSourceBundleLocation(BuildPathSupport.JUNIT3_PLUGIN);
+			IPath sourceLocation= BuildPathSupport.JUNIT3_PLUGIN.getSourceBundleLocation();
 			if (sourceLocation != null) {
 				JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, sourceLocation, null);
 			} else {

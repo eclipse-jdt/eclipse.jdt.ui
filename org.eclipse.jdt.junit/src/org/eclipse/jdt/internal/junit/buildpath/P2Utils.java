@@ -177,7 +177,7 @@ class P2Utils {
 	/**
 	 * Returns the bundle location.
 	 * 
-	 * @param bundleInfo the bundle info
+	 * @param bundleInfo the bundle info or <code>null</code>
 	 * @return the bundle location or <code>null</code> if it is not possible to convert to a path
 	 */
 	public static IPath getBundleLocationPath(BundleInfo bundleInfo) {

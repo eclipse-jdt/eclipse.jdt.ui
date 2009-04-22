@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,18 +95,21 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 	private static JUnitContainer getNewContainer(IPath containerPath) {
 		IClasspathEntry entry= null;
+		IClasspathEntry entry2= null;
 		String version= containerPath.segment(1);
 		if (JUNIT3_8_1.equals(version) || JUNIT3.equals(version)) {
 			entry= BuildPathSupport.getJUnit3LibraryEntry();
 		} else if (JUNIT4.equals(version)) {
 			entry= BuildPathSupport.getJUnit4LibraryEntry();
+			entry2= BuildPathSupport.getHamcrestCoreLibraryEntry();
 		}
-
 		IClasspathEntry[] entries;
-		if (entry != null) {
+		if (entry == null) {
+			entries= new IClasspathEntry[] { };
+		} else if (entry2 == null) {
 			entries= new IClasspathEntry[] { entry };
 		} else {
-			entries= new IClasspathEntry[] { };
+			entries= new IClasspathEntry[] { entry, entry2 };
 		}
 		return new JUnitContainer(containerPath, entries);
 	}
@@ -152,27 +155,57 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#requestClasspathContainerUpdate(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathContainer)
 	 */
 	public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
+		IPreferenceStore preferenceStore= JUnitPlugin.getDefault().getPreferenceStore();
+		
 		IClasspathEntry[] entries= containerSuggestion.getClasspathEntries();
-		if (entries.length == 1 && isValidJUnitContainerPath(containerPath)) {
+		if (entries.length >= 1 && isValidJUnitContainerPath(containerPath)) {
 			String version= containerPath.segment(1);
-
-			// only modifiable entry in Javadoc location
-			IClasspathAttribute[] extraAttributes= entries[0].getExtraAttributes();
-			for (int i= 0; i < extraAttributes.length; i++) {
-				IClasspathAttribute attrib= extraAttributes[i];
-				if (attrib.getName().equals(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME)) {
-
-					IPreferenceStore preferenceStore= JUnitPlugin.getDefault().getPreferenceStore();
-					if (JUNIT3.equals(version)) {
-						preferenceStore.setValue(JUnitPreferencesConstants.JUNIT3_JAVADOC, attrib.getValue());
-					} else if (JUNIT4.equals(version)) {
-						preferenceStore.setValue(JUnitPreferencesConstants.JUNIT4_JAVADOC, attrib.getValue());
+			
+			// only modifiable entry is Javadoc location
+			for (int i= 0; i < entries.length; i++) {
+				IClasspathEntry entry= entries[i];
+				String preferenceKey= getPreferenceKey(entry, version);
+				
+				IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+				if (extraAttributes.length == 0) {
+					// Revert to default
+					if (!preferenceStore.isDefault(preferenceKey)) {
+						preferenceStore.setToDefault(preferenceKey);
 					}
-					break;
+					
+					/* 
+					 * The following would be correct, but would not allow to revert to the default.
+					 * There's no concept of "default value" for a classpath attribute, see
+					 * org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock.performDefaults()
+					 */
+					// preferenceStore.setValue(preferenceKey, "");
+				} else {
+					for (int j= 0; j < extraAttributes.length; j++) {
+						IClasspathAttribute attrib= extraAttributes[j];
+						if (attrib.getName().equals(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME)) {
+							if (preferenceKey != null) {
+								preferenceStore.setValue(preferenceKey, attrib.getValue());
+							}
+							break;
+						}
+					}
 				}
 			}
 			rebindClasspathEntries(project.getJavaModel(), containerPath);
 		}
+	}
+
+	private String getPreferenceKey(IClasspathEntry entry, String version) {
+		if (JUNIT3.equals(version)) {
+			return JUnitPreferencesConstants.JUNIT3_JAVADOC;
+		} else if (JUNIT4.equals(version)) {
+			if (entry.getPath().lastSegment().indexOf("junit") != -1) { //$NON-NLS-1$
+				return JUnitPreferencesConstants.JUNIT4_JAVADOC;
+			} else {
+				return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
+			}
+		}
+		return null;
 	}
 
 	private static void rebindClasspathEntries(IJavaModel model, IPath containerPath) throws JavaModelException {
