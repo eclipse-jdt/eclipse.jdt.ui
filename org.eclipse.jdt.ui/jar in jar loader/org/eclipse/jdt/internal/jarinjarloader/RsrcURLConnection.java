@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+
 
 /**
  * This class will be compiled into the binary jar-in-jar-loader.zip. This ZIP is used for the
@@ -37,7 +39,7 @@ public class RsrcURLConnection extends URLConnection {
 	}
 
 	public InputStream getInputStream() throws IOException {
-		String file= url.getFile();
+		String file= URLDecoder.decode(url.getFile(), "UTF-8"); //$NON-NLS-1$
 		InputStream result= classLoader.getResourceAsStream(file);
 		if (result == null) {
 			throw new MalformedURLException("Could not open InputStream for URL '" + url + "'"); //$NON-NLS-1$ //$NON-NLS-2$
