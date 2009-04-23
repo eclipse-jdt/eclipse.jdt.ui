@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -53,112 +54,82 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 	 */
 	public Image getImage(Object element) {
-		Image result= null;
 		if (element instanceof MethodWrapper) {
 			MethodWrapper methodWrapper;
 			if (element instanceof RealCallers) {
 				methodWrapper= ((RealCallers)element).getParent();
-
 			} else {
 				methodWrapper= (MethodWrapper)element;
 			}
 
-			if (methodWrapper.getMember() != null) {
-				result= fDecorator.decorateImage(super.getImage(methodWrapper.getMember()), methodWrapper);
+			IMember member= methodWrapper.getMember();
+			if (member != null) {
+				return fDecorator.decorateImage(super.getImage(member), methodWrapper);
+			} else {
+				return null;
 			}
 		} else if (isPendingUpdate(element)) {
 			return null;
 		} else {
-			result= super.getImage(element);
+			return super.getImage(element);
 		}
-
-		return result;
 	}
 
 	/*
 	 * @see ILabelProvider#getText(Object)
 	 */
 	public String getText(Object element) {
-		if (element instanceof CallerMethodWrapper) {
-			if (element instanceof RealCallers)
-				return getSpecialLabel(element);
-			String text= getDecoratedText(element);
-			if (text != null)
-				return text;
-		}
-		if (element instanceof MethodWrapper && ((MethodWrapper)element).getMember() != null) {
-			return getElementLabel((MethodWrapper)element);
+		if (isNormalMethodWrapper(element)) {
+			MethodWrapper wrapper= (MethodWrapper)element;
+			String decorated= getElementLabel(wrapper);
+			
+			if (isSpecialConstructorNode(wrapper)) {
+				decorated= Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, decorated);
+			}
+			return decorated;
 		}
 		return getSpecialLabel(element);
-	}
-
-	/**
-	 * Returns the decorated text for constructors in expand with constructors.
-	 * 
-	 * @param element the element to provide the text
-	 * @return the decorated text if in the expand with constructors mode, <code>null</code>
-	 *         otherwise
-	 * @since 3.5
-	 */
-	private String getDecoratedText(Object element) {
-		CallerMethodWrapper parentWrapper= (CallerMethodWrapper)((CallerMethodWrapper)element).getParent();
-		IMember member= ((MethodWrapper)element).getMember();
-		boolean isClass= false, isConstructor= false;
-		if (member instanceof IType) {
-			isClass= true;
-		} else
-			try {
-				if (member instanceof IMethod && ((IMethod)member).isConstructor()) {
-					isConstructor= true;
-				}
-			} catch (JavaModelException e) {
-
-			}
-		if (parentWrapper != null && parentWrapper.getExpandWithConstructors() && (isClass || isConstructor)) {
-			return fDecorator.decorateText(Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, getElementLabel((MethodWrapper)element)),
-					element);
-		}
-		return null;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
 	public StyledString getStyledText(Object element) {
-		if (element instanceof CallerMethodWrapper) {
-			StyledString text= getStyledConstructorText(element); //TODO: after instanceof, always cast the object before passing it on 
-			if (text != null)
-				return text;
-		}
-		if (element instanceof MethodWrapper && ((MethodWrapper)element).getMember() != null) {
+		if (isNormalMethodWrapper(element)) {
 			MethodWrapper wrapper= (MethodWrapper)element;
 			String decorated= getElementLabel(wrapper);
-			StyledString text= super.getStyledText(wrapper.getMember());
-			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, text);
+			
+			StyledString styledLabel= super.getStyledText(wrapper.getMember());
+			if (isSpecialConstructorNode(wrapper)) {
+				decorated= Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, decorated);
+			}
+			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, styledLabel);
 		}
-		return new StyledString(getSpecialLabel(element));
+		
+		String specialLabel= getSpecialLabel(element);
+		Styler styler= element instanceof RealCallers ? StyledString.COUNTER_STYLER : null;
+		return new StyledString(specialLabel, styler);
 	}
 
-	/**
-	 * Returns the styled decorated text for constructors in expand with constructors.
-	 * 
-	 * @param element the element to provide the text
-	 * @return the styled text with constructor decorator in the expand with constructors mode,
-	 *         <code>null</code> otherwise
-	 * @since 3.5
-	 */
-	private StyledString getStyledConstructorText(Object element) {
-		if (element instanceof RealCallers)
-			return new StyledString(getSpecialLabel(element), StyledString.COUNTER_STYLER);
-
-		String decoratedString= getDecoratedText(element);
-		if (decoratedString == null)
-			return null;
-		//		StyledString text= super.getStyledText(parentWrapper.getMember()); //TODO wrong, replaced by next line
-		StyledString text= super.getStyledText(((CallerMethodWrapper)element).getMember()); //TODO: should not compute label a second time
-		return StyledCellLabelProvider.styleDecoratedString(decoratedString, StyledString.COUNTER_STYLER, text);
-
-
+	
+	private boolean isNormalMethodWrapper(Object element) {
+		return element instanceof MethodWrapper && ((MethodWrapper)element).getMember() != null && !(element instanceof RealCallers);
+	}
+	
+	private boolean isSpecialConstructorNode(MethodWrapper wrapper) {
+		CallerMethodWrapper parentWrapper= (CallerMethodWrapper) wrapper.getParent();
+		if (parentWrapper == null || ! parentWrapper.getExpandWithConstructors())
+			return false;
+		
+		IMember member= wrapper.getMember();
+		if (member instanceof IType)
+			return true;
+		
+		try {
+			return member instanceof IMethod && ((IMethod)member).isConstructor();
+		} catch (JavaModelException e) {
+			return false; // assume it's not a constructor
+		}
 	}
 
 	private String getSpecialLabel(Object element) {
