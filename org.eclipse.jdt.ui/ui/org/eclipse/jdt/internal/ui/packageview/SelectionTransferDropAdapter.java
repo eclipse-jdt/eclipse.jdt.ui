@@ -212,11 +212,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		try{
 			switch(getCurrentOperation()) {
 				case DND.DROP_MOVE:
-					handleDropMove(getCurrentTarget());
-					break;
+					return handleDropMove(getCurrentTarget());
 				case DND.DROP_COPY:
-					handleDropCopy(getCurrentTarget());
-					break;
+					return handleDropCopy(getCurrentTarget());
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message);
@@ -271,13 +269,14 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return fCanMoveElements == 2;
 	}
 
-	private void handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
+	private boolean handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
 		ReorgMoveStarter starter= ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target, getCurrentLocation()));
 
 		if (starter != null)
-			starter.run(getShell());
+			return starter.run(getShell());
+		return false;
 	}
 
 	private int handleValidateCopy(Object target) throws JavaModelException{
@@ -308,13 +307,16 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return fCanCopyElements == 2;
 	}
 
-	private void handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
+	private boolean handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
 		ReorgCopyStarter starter= ReorgCopyStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target, getCurrentLocation()));
 
-		if (starter != null)
+		if (starter != null) {
 			starter.run(getShell());
+			return true;
+		}
+		return false;
 	}
 
 	private Shell getShell() {

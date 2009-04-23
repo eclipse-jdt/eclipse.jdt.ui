@@ -199,7 +199,7 @@ public class RefactoringExecutionHelper {
 								Messages.format(
 										RefactoringMessages.RefactoringExecutionHelper_cannot_execute,
 										validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
-						return;
+						throw new InterruptedException();
 					}
 				}
 			} catch (InvocationTargetException e) {

@@ -61,13 +61,14 @@ public class ReorgMoveStarter {
 		return new ReorgMoveStarter(processor);
 	}
 
-	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
+	public boolean run(Shell parent) throws InterruptedException, InvocationTargetException {
 		Refactoring ref= new MoveRefactoring(fMoveProcessor);
 		if (fMoveProcessor.hasAllInputSet()) {
 			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
 			fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
 			new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), fMoveProcessor.getSaveMode(), parent, context).perform(false, false);
+			return true;
 		} else {
 			RefactoringWizard wizard= new ReorgMoveWizard(fMoveProcessor, ref);
 			/*
@@ -76,7 +77,7 @@ public class ReorgMoveStarter {
 			 */
 			fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 			fMoveProcessor.setReorgQueries(new ReorgQueries(wizard));
-			new RefactoringStarter().activate(wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, fMoveProcessor.getSaveMode());
+			return new RefactoringStarter().activate(wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, fMoveProcessor.getSaveMode());
 		}
 	}
 }
