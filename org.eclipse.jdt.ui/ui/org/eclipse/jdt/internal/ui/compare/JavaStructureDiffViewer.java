@@ -306,20 +306,15 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		return (javaElement instanceof ICompilationUnit) && JavaModelUtil.isEditable((ICompilationUnit)javaElement);
 	}
 
-	/*
-	 * This is a copy of the internal JavaOutlinePage.ElementChangedListener#isPossibleStructuralChange method.
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage.ElementChangedListener#isPossibleStructuralChange(IJavaElementDelta)
+	/**
+	 * Test whether the given delta represents a significant change.
+	 * 
+	 * @param cuDelta the Java element delta
+	 * @return <code>true</code> if the delta represents a content change
 	 * @since 3.5
 	 */
-	private boolean isPossibleStructuralChange(IJavaElementDelta cuDelta) {
-		if (cuDelta.getKind() != IJavaElementDelta.CHANGED) {
-			return true; // add or remove
-		}
-		int flags= cuDelta.getFlags();
-		if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
-			return true;
-		}
-		return (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
+	private boolean isContentChange(IJavaElementDelta cuDelta) {
+		return cuDelta.getKind() == IJavaElementDelta.CHANGED || (cuDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0;
 	}
 	
 	/*
@@ -335,7 +330,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		IJavaElement element= delta.getElement();
 
 		if (unit.equals(element)) {
-			if (isPossibleStructuralChange(delta)) {
+			if (isContentChange(delta)) {
 				return delta;
 			}
 			return null;
