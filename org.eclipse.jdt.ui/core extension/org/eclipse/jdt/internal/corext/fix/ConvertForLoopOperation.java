@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -648,7 +649,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			VariableDeclarationStatement declaration= (VariableDeclarationStatement)fragement.getParent();
 			ModifierRewrite.create(rewrite, result).copyAllModifiers(declaration, group);
 		}
-		if (makeFinal) {
+		if (makeFinal && (fragement == null || ASTNodes.findModifierNode(Modifier.FINAL, ASTNodes.getModifiers(fragement)) == null)) {
 			ModifierRewrite.create(rewrite, result).setModifiers(Modifier.FINAL, 0, group);
 		}
 
