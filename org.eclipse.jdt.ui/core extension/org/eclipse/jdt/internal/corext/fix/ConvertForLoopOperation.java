@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -576,8 +575,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private void convertBody(Statement body, final IBinding indexBinding, final IBinding arrayBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroup pg) {
 		final AST ast= body.getAST();
 
-		final HashSet assignedBindings= new HashSet();
-
 		body.accept(new GenericVisitor() {
 			public boolean visit(ArrayAccess node) {
 				IBinding binding= getBinding(node.getArray());
@@ -591,20 +588,11 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 				return super.visit(node);
 			}
 
-			public boolean visit(SimpleName node) {
-				if (assignedBindings.contains(node.resolveBinding())) {
-					replaceAccess(node);
-				}
-				return super.visit(node);
-			}
-
 			private void replaceAccess(ASTNode node) {
 				if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.getParent();
 					IBinding targetBinding= fragment.getName().resolveBinding();
 					if (targetBinding != null) {
-						assignedBindings.add(targetBinding);
-
 						VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
 
 						if (statement.fragments().size() == 1) {
