@@ -2211,7 +2211,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		ISourceReference element= computeHighlightRangeSourceReference();
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
 			synchronizeOutlinePage(element);
-		if (fIsBreadcrumbVisible && !fBreadcrumb.isActive())
+		if (fIsBreadcrumbVisible && fBreadcrumb != null && !fBreadcrumb.isActive())
 			setBreadcrumbInput(element);
 		setSelection(element, false);
 		if (!fSelectionChangedViaGotoAnnotation)
