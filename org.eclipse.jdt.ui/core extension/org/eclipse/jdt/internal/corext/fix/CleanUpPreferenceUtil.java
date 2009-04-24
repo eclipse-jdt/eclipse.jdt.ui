@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -164,7 +164,7 @@ public class CleanUpPreferenceUtil {
         }
     }
 
-    private static boolean hasSettingsInScope(IScopeContext context) {
+	public static boolean hasSettingsInScope(IScopeContext context) {
     	IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
 
     	Set keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();

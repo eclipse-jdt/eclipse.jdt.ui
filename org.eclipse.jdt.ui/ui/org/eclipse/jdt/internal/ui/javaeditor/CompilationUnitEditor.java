@@ -36,6 +36,8 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -108,6 +110,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -127,6 +130,7 @@ import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.actions.SurroundWithActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
+import org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
@@ -1297,12 +1301,21 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	private void openSaveListenerWarningDialog(String title, String message, CoreException exception) {
 		final String linkText;
+		final IJavaProject javaProject= getInputJavaElement().getJavaProject();
+		IProject project= javaProject != null ? javaProject.getProject() : null;
+		final boolean hasProjectSettings= project != null && CleanUpPreferenceUtil.hasSettingsInScope(new ProjectScope(project));
 		if (exception.getStatus().getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION) {
 			message= JavaEditorMessages.CompilationUnitEditor_error_saving_participant_message;
-			linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_participant_link;
+			if (hasProjectSettings)
+				linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_participant_property_link;
+			else
+				linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_participant_link;
 		} else {
 			message= JavaEditorMessages.CompilationUnitEditor_error_saving_editedLines_calculation_message;
-			linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_editedLines_calculation_link;
+			if (hasProjectSettings)
+				linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_editedLines_calculation_property_link;
+			else
+				linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_editedLines_calculation_link;
 		}
 
 		IStatus status= exception.getStatus();
@@ -1318,7 +1331,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				link.setFont(parent.getFont());
 				link.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
-						PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage", null, null).open(); //$NON-NLS-1$
+						if (hasProjectSettings)
+							PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, SaveParticipantPreferencePage.PROPERTY_PAGE_ID, null, null).open();
+						else
+							PreferencesUtil.createPreferenceDialogOn(getShell(), SaveParticipantPreferencePage.PREFERENCE_PAGE_ID, null, null).open();
 					}
 				});
 				GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
