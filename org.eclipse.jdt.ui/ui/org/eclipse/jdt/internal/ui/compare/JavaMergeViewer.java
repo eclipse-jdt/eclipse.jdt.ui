@@ -88,7 +88,6 @@ public class JavaMergeViewer extends TextMergeViewer {
 	private Map /*<JavaSourceViewerConfiguration>*/ fSourceViewerConfiguration;
 	private Map /*<CompilationUnitEditorAdapter>*/ fEditor;
 	private ArrayList /*<SourceViewer>*/ fSourceViewer;
-	private IWorkbenchPartSite fSavedSite;
 
 
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
@@ -251,13 +250,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private IWorkbenchPartSite getSite() {
 		IWorkbenchPart workbenchPart= getCompareConfiguration().getContainer().getWorkbenchPart();
-		IWorkbenchPartSite site= null;
-		if (workbenchPart != null)
-			site = workbenchPart.getSite();
-		if (fSavedSite == null)
-			fSavedSite = site;
-		// TODO: this is a hack
-		return fSavedSite;
+		return workbenchPart != null ? workbenchPart.getSite() : null;
 	}
 
 	private JavaSourceViewerConfiguration getSourceViewerConfiguration(SourceViewer sourceViewer, IEditorInput editorInput) {
