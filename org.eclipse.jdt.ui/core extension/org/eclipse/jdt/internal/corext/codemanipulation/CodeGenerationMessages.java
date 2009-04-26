@@ -45,8 +45,7 @@ public final class CodeGenerationMessages extends NLS {
 	public static String GenerateHashCodeEqualsOperation_hash_code_argument;
 	public static String GenerateHashCodeEqualsOperation_tag_return;
 	public static String GenerateHashCodeEqualsOperation_return_comment;
-	public static String GenerateToStringOperation_apache_ToStringBilder_chained_style_name;
-	public static String GenerateToStringOperation_apache_ToStringBuilder_style_name;
+	public static String GenerateToStringOperation_customStringBuilder_style_name;
 	public static String GenerateToStringOperation_objectClassGetNameVariableDescription;
 	public static String GenerateToStringOperation_objectClassNameVariableDescription;
 	public static String GenerateToStringOperation_objectHashCodeVariableDescription;
@@ -59,8 +58,6 @@ public final class CodeGenerationMessages extends NLS {
 	public static String GenerateToStringOperation_memberNameVariableDescription;
 	public static String GenerateToStringOperation_memberValueVariableDescription;
 	public static String GenerateToStringOperation_otherFieldsVariableDescription;
-	public static String GenerateToStringOperation_spring_ToStringCreator_chained_style_name;
-	public static String GenerateToStringOperation_spring_ToStringCreator_style_name;
 	public static String GenerateToStringOperation_string_format_style_name;
 	public static String GenerateToStringOperation_StringBuilder_chained_style_name;
 	public static String GenerateToStringOperation_stringBuilder_style_name;

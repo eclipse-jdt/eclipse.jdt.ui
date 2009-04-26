@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -22,6 +23,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.GenerateToStringOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringTemplateParser;
+import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings.CustomBuilderSettings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -71,6 +74,26 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.useBlocks= true;
 		fSettings2.is50orHigher= true;
 		fSettings2.is60orHigher= true;
+		fSettings2.customBuilderSettings= new CustomBuilderSettings();
+		fSettings2.customBuilderSettings.className= "com.pack.ToStringBuilder";
+		fSettings2.customBuilderSettings.variableName= "builder";
+		fSettings2.customBuilderSettings.appendMethod= "append";
+		fSettings2.customBuilderSettings.resultMethod= "toString";
+		fSettings2.customBuilderSettings.chainCalls= false;
+
+		IPackageFragment packageFragment= fRoot.createPackageFragment("com.pack", true, null);
+		ICompilationUnit compilationUnit= packageFragment.getCompilationUnit("ToStringBuilder.java");
+		compilationUnit
+				.createType(
+						"package com.pack;\npublic class ToStringBuilder {\npublic ToStringBuilder(Object o){\n}\npublic ToStringBuilder append(String s, Object o){\nreturn null;\n}\npublic String toString(){\nreturn null;\n}\n}\n",
+						null, true, null);
+
+		packageFragment= fRoot.createPackageFragment("org.another.pack", true, null);
+		compilationUnit= packageFragment.getCompilationUnit("AnotherToStringCreator.java");
+		compilationUnit
+				.createType(
+						"package org.another.pack;\npublic class AnotherToStringCreator {\npublic AnotherToStringCreator(java.lang.Object o) {\n}\npublic AnotherToStringCreator addSth(Object o, String s) {\n return null;\n}\npublic String addSth(String s, int i){\nreturn null;\n}\npublic void addSth(boolean b, String s){\n}\npublic String getResult(){\nreturn null;\n}\n}\n",
+						null, true, null);
 	}
 
 	public void runOperation(IType type, IMember[] members, IJavaElement insertBefore) throws CoreException {
@@ -2136,11 +2159,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder - basic case
+	 * Custom ToString() builder - basic case
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilder() throws Exception {
+	public void testCustomBuilder() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
@@ -2150,7 +2173,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
+		String expected= "package p;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
 				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
 				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
 				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		builder.append(\"aStringMethod()\", aStringMethod());\r\n"
@@ -2161,11 +2184,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder - skip nulls
+	 * Custom ToString() builder - skip nulls
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilderNulls() throws Exception {
+	public void testCustomBuilderNulls() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
@@ -2176,7 +2199,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
+		String expected= "package p;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
 				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
 				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
 				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		if (aStringMethod() != null) {\r\n" + "			builder.append(\"aStringMethod()\", aStringMethod());\r\n" + "		}\r\n"
@@ -2188,11 +2211,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder - custom array toString without limit of elements
+	 * Custom ToString() builder - custom array toString without limit of elements
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilderArray() throws Exception {
+	public void testCustomBuilderArray() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
@@ -2202,7 +2225,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "\r\n" + "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n"
+		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n"
 				+ "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n"
 				+ "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	java.util.List<Boolean> list;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
 				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		builder.append(\"AArray\", Arrays.toString(AArray));\r\n" + "		builder.append(\"aBool\", aBool);\r\n"
@@ -2214,11 +2237,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder - limit of elements but not arrays
+	 * Custom ToString() builder - limit of elements but not arrays
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilderLimit() throws Exception {
+	public void testCustomBuilderLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
@@ -2232,7 +2255,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
+				+ "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n"
@@ -2252,11 +2275,11 @@ public class GenerateToStringTest extends SourceTestCase {
 
 
 	/**
-	 * Apache ToStringbuilder - custom array toString and limit of elements
+	 * Custom ToString() builder - custom array toString and limit of elements
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilderArrayLimit() throws Exception {
+	public void testCustomBuilderArrayLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
@@ -2271,7 +2294,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
+				+ "import java.util.List;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
 				+ "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n"
 				+ "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n"
 				+ "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n"
@@ -2296,11 +2319,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder - custom array toString and limit of elements, unique names needed
+	 * Custom ToString() builder - custom array toString and limit of elements, unique names needed
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilderArrayLimitUnique() throws Exception {
+	public void testCustomBuilderArrayLimitUnique() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
 				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
@@ -2314,7 +2337,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
+				+ "import java.util.List;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
 				+ "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n"
 				+ "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n" + "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n"
 				+ "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen2 = 10;\r\n" + "		ToStringBuilder builder2 = new ToStringBuilder(this);\r\n"
@@ -2337,11 +2360,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder - skip nulls, use keyword this, no one-line blocks
+	 * Custom ToString() builder - skip nulls, use keyword this, no one-line blocks
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilderNullsThisNoBlocks() throws Exception {
+	public void testCustomBuilderNullsThisNoBlocks() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
@@ -2358,7 +2381,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
+				+ "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		ToStringBuilder builder = new ToStringBuilder(this);\r\n"
@@ -2375,11 +2398,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder - custom array, limit elements, skip nulls
+	 * Custom ToString() builder - custom array, limit elements, skip nulls
 	 * 
 	 * @throws Exception
 	 */
-	public void testApacheBuilderArrayLimitNulls() throws Exception {
+	public void testCustomBuilderArrayLimitNulls() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
@@ -2396,7 +2419,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
+				+ "import java.util.List;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
 				+ " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n"
 				+ "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n"
 				+ "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n"
@@ -2422,23 +2445,24 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder, chained calls - basic case
+	 * Custom ToString() builder - chained calls
 	 * 
 	 * @throws Exception
 	 */
-	public void testChainedApacheBuilder() throws Exception {
+	public void testChainedCustomBuilder() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
-		fSettings2.toStringStyle= 5;
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
 				+ "\r\n"
-				+ "import org.apache.commons.lang.builder.ToStringBuilder;\r\n"
+				+ "import com.pack.ToStringBuilder;\r\n"
 				+ "\r\n"
 				+ "public class A {\r\n"
 				+ "	\r\n"
@@ -2465,11 +2489,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder, chained calls - skip nulls
+	 * Custom ToString() builder - chained calls, skip nulls
 	 * 
 	 * @throws Exception
 	 */
-	public void testChainedApacheBuilderNulls() throws Exception {
+	public void testChainedCustomBuilderNulls() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
@@ -2477,10 +2501,11 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
 		fSettings2.skipNulls= true;
-		fSettings2.toStringStyle= 5;
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import org.apache.commons.lang.builder.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
+		String expected= "package p;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
 				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
 				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
 				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		if (aStringMethod() != null) {\r\n" + "			builder.append(\"aStringMethod()\", aStringMethod());\r\n" + "		}\r\n"
@@ -2492,11 +2517,11 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Apache ToStringbuilder, chained calls - add comment
+	 * Custom ToString() builder - chained calls, add comment
 	 * 
 	 * @throws Exception
 	 */
-	public void testChainedApacheBuilderComments() throws Exception {
+	public void testChainedCustomBuilderComments() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
@@ -2504,12 +2529,13 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
 		fSettings2.createComments= true;
-		fSettings2.toStringStyle= 5;
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
 				+ "\r\n"
-				+ "import org.apache.commons.lang.builder.ToStringBuilder;\r\n"
+				+ "import com.pack.ToStringBuilder;\r\n"
 				+ "\r\n"
 				+ "public class A {\r\n"
 				+ "	\r\n"
@@ -2539,106 +2565,27 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
-	 * Spring ToStringCreator - basic case
+	 * Custom toString() builder - alternative class, basic case
 	 * 
 	 * @throws Exception
 	 */
-	public void testSpringCreator() throws Exception {
+	public void testAlternativeCustomBuilder() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
-		fSettings2.toStringStyle= 6;
-		runOperation(a.getType("A"), members, null);
-
-		String expected= "package p;\r\n" + "\r\n" + "import org.springframework.core.style.ToStringCreator;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
-				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
-				+ "		ToStringCreator creator = new ToStringCreator(this);\r\n" + "		creator.append(\"aStringMethod()\", aStringMethod());\r\n"
-				+ "		creator.append(\"aFloatMethod()\", aFloatMethod());\r\n" + "		creator.append(\"anArrayMethod()\", anArrayMethod());\r\n" + "		creator.append(\"aBool\", aBool);\r\n"
-				+ "		creator.append(\"aString\", aString);\r\n" + "		creator.append(\"anInt\", anInt);\r\n" + "		return creator.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
-
-		compareSource(expected, a.getSource());
-	}
-
-	/**
-	 * Spring ToStringCreator - unique names needed
-	 * 
-	 * @throws Exception
-	 */
-	public void testSpringCreatorUnique() throws Exception {
-
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
-				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "	Object creator;\r\n" + "}\r\n" + "", true, null);
-
-		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
-				"maxLen", "len", "collection", "array", "creator" });
-		fSettings2.toStringStyle= 6;
-		runOperation(a.getType("A"), members, null);
-
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "import org.springframework.core.style.ToStringCreator;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n"
-				+ "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n" + "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "	Object creator;\r\n"
-				+ "	@Override\r\n" + "	public String toString() {\r\n" + "		ToStringCreator creator2 = new ToStringCreator(this);\r\n" + "		creator2.append(\"aBool\", aBool);\r\n"
-				+ "		creator2.append(\"intArray\", intArray);\r\n" + "		creator2.append(\"stringArray\", stringArray);\r\n" + "		creator2.append(\"AArray\", AArray);\r\n"
-				+ "		creator2.append(\"list\", list);\r\n" + "		creator2.append(\"hashMap\", hashMap);\r\n" + "		creator2.append(\"wildCollection\", wildCollection);\r\n"
-				+ "		creator2.append(\"integerCollection\", integerCollection);\r\n" + "		creator2.append(\"builder\", builder);\r\n" + "		creator2.append(\"buffer\", buffer);\r\n"
-				+ "		creator2.append(\"maxLen\", maxLen);\r\n" + "		creator2.append(\"len\", len);\r\n" + "		creator2.append(\"collection\", collection);\r\n"
-				+ "		creator2.append(\"array\", array);\r\n" + "		creator2.append(\"creator\", creator);\r\n" + "		return creator2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
-
-		compareSource(expected, a.getSource());
-	}
-
-	/**
-	 * String ToStringCreator - skip nulls
-	 * 
-	 * @throws Exception
-	 */
-	public void testSpringCreatorNulls() throws Exception {
-
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
-
-		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
-		fSettings2.skipNulls= true;
-		fSettings2.toStringStyle= 6;
-		runOperation(a.getType("A"), members, null);
-
-		String expected= "package p;\r\n" + "\r\n" + "import org.springframework.core.style.ToStringCreator;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
-				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
-				+ "		ToStringCreator creator = new ToStringCreator(this);\r\n" + "		if (aStringMethod() != null) {\r\n" + "			creator.append(\"aStringMethod()\", aStringMethod());\r\n" + "		}\r\n"
-				+ "		creator.append(\"aFloatMethod()\", aFloatMethod());\r\n" + "		if (anArrayMethod() != null) {\r\n" + "			creator.append(\"anArrayMethod()\", anArrayMethod());\r\n" + "		}\r\n"
-				+ "		if (aString != null) {\r\n" + "			creator.append(\"aString\", aString);\r\n" + "		}\r\n" + "		creator.append(\"aBool\", aBool);\r\n" + "		creator.append(\"anInt\", anInt);\r\n"
-				+ "		return creator.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
-
-		compareSource(expected, a.getSource());
-	}
-
-	/**
-	 * Spring ToStringCreator, chained calls - basic case
-	 * 
-	 * @throws Exception
-	 */
-	public void testChainedSpringCreator() throws Exception {
-
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
-
-		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
-		fSettings2.toStringStyle= 7;
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.className= "org.another.pack.AnotherToStringCreator";
+		fSettings2.customBuilderSettings.variableName= "creator";
+		fSettings2.customBuilderSettings.appendMethod= "addSth";
+		fSettings2.customBuilderSettings.resultMethod= "getResult";
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
 				+ "\r\n"
-				+ "import org.springframework.core.style.ToStringCreator;\r\n"
+				+ "import org.another.pack.AnotherToStringCreator;\r\n"
 				+ "\r\n"
 				+ "public class A {\r\n"
 				+ "	\r\n"
@@ -2657,19 +2604,99 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	}\r\n"
 				+ "	@Override\r\n"
 				+ "	public String toString() {\r\n"
-				+ "		ToStringCreator creator = new ToStringCreator(this);\r\n"
-				+ "		creator.append(\"aStringMethod()\", aStringMethod()).append(\"aFloatMethod()\", aFloatMethod()).append(\"anArrayMethod()\", anArrayMethod()).append(\"aBool\", aBool).append(\"aString\", aString).append(\"anInt\", anInt);\r\n"
-				+ "		return creator.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+				+ "		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n"
+				+ "		creator.addSth(aStringMethod(), \"aStringMethod()\");\r\n"
+				+ "		creator.addSth(aFloatMethod(), \"aFloatMethod()\");\r\n"
+				+ "		creator.addSth(anArrayMethod(), \"anArrayMethod()\");\r\n"
+				+ "		creator.addSth(aBool, \"aBool\");\r\n"
+				+ "		creator.addSth(aString, \"aString\");\r\n"
+				+ "		creator.addSth(\"anInt\", anInt);\r\n"
+				+ "		return creator.getResult();\r\n"
+				+ "	}\r\n"
+				+ "\r\n"
+				+ "}";
 
 		compareSource(expected, a.getSource());
 	}
 
 	/**
-	 * String ToStringCreator, chained calls - skip nulls
+	 * Custom toString() builder - alternative class, unique names needed
 	 * 
 	 * @throws Exception
 	 */
-	public void testChainedSpringCreatorNulls() throws Exception {
+	public void testAlternativeCustomBuilderUnique() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
+				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
+				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
+				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "	Object creator;\r\n" + "}\r\n" + "", true, null);
+
+		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
+				"maxLen", "len", "collection", "array", "creator" });
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.className= "org.another.pack.AnotherToStringCreator";
+		fSettings2.customBuilderSettings.variableName= "creator";
+		fSettings2.customBuilderSettings.appendMethod= "addSth";
+		fSettings2.customBuilderSettings.resultMethod= "getResult";
+		runOperation(a.getType("A"), members, null);
+
+		String expected= "package p;\r\n"
+				+ "\r\n"
+				+ "import java.util.Collection;\r\n"
+				+ "import java.util.HashMap;\r\n"
+				+ "import java.util.List;\r\n"
+				+ "\r\n"
+				+ "import org.another.pack.AnotherToStringCreator;\r\n"
+				+ "\r\n"
+				+ "public class A {\r\n"
+				+ "\r\n"
+				+ "	boolean aBool;\r\n"
+				+ "	int[] intArray;\r\n"
+				+ "	String[] stringArray;\r\n"
+				+ "	A[] AArray;\r\n"
+				+ "	List list;\r\n"
+				+ "	HashMap hashMap;\r\n"
+				+ "	Collection wildCollection;\r\n"
+				+ "	Collection integerCollection;\r\n"
+				+ "	Object builder;\r\n"
+				+ "	Object buffer;\r\n"
+				+ "	Object maxLen;\r\n"
+				+ "	Object len;\r\n"
+				+ "	Object collection;\r\n"
+				+ "	Object array;\r\n"
+				+ "	Object creator;\r\n"
+				+ "	@Override\r\n"
+				+ "	public String toString() {\r\n"
+				+ "		AnotherToStringCreator creator2 = new AnotherToStringCreator(this);\r\n"
+				+ "		creator2.addSth(aBool, \"aBool\");\r\n"
+				+ "		creator2.addSth(intArray, \"intArray\");\r\n"
+				+ "		creator2.addSth(stringArray, \"stringArray\");\r\n"
+				+ "		creator2.addSth(AArray, \"AArray\");\r\n"
+				+ "		creator2.addSth(list, \"list\");\r\n"
+				+ "		creator2.addSth(hashMap, \"hashMap\");\r\n"
+				+ "		creator2.addSth(wildCollection, \"wildCollection\");\r\n"
+				+ "		creator2.addSth(integerCollection, \"integerCollection\");\r\n"
+				+ "		creator2.addSth(builder, \"builder\");\r\n"
+				+ "		creator2.addSth(buffer, \"buffer\");\r\n"
+				+ "		creator2.addSth(maxLen, \"maxLen\");\r\n"
+				+ "		creator2.addSth(len, \"len\");\r\n"
+				+ "		creator2.addSth(collection, \"collection\");\r\n"
+				+ "		creator2.addSth(array, \"array\");\r\n"
+				+ "		creator2.addSth(creator, \"creator\");\r\n"
+				+ "		return creator2.getResult();\r\n"
+				+ "	}\r\n"
+				+ "}\r\n"
+				+ "";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Custom toString() builder - alternative class, skip nulls
+	 * 
+	 * @throws Exception
+	 */
+	public void testAlternativeCustomBuilderNulls() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
@@ -2677,16 +2704,232 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
 		fSettings2.skipNulls= true;
-		fSettings2.toStringStyle= 7;
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.className= "org.another.pack.AnotherToStringCreator";
+		fSettings2.customBuilderSettings.variableName= "creator";
+		fSettings2.customBuilderSettings.appendMethod= "addSth";
+		fSettings2.customBuilderSettings.resultMethod= "getResult";
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import org.springframework.core.style.ToStringCreator;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
-				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
-				+ "		ToStringCreator creator = new ToStringCreator(this);\r\n" + "		if (aStringMethod() != null) {\r\n" + "			creator.append(\"aStringMethod()\", aStringMethod());\r\n" + "		}\r\n"
-				+ "		creator.append(\"aFloatMethod()\", aFloatMethod());\r\n" + "		if (anArrayMethod() != null) {\r\n" + "			creator.append(\"anArrayMethod()\", anArrayMethod());\r\n" + "		}\r\n"
-				+ "		if (aString != null) {\r\n" + "			creator.append(\"aString\", aString);\r\n" + "		}\r\n" + "		creator.append(\"aBool\", aBool).append(\"anInt\", anInt);\r\n"
-				+ "		return creator.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= "package p;\r\n"
+				+ "\r\n"
+				+ "import org.another.pack.AnotherToStringCreator;\r\n"
+				+ "\r\n"
+				+ "public class A {\r\n"
+				+ "	\r\n"
+				+ "	boolean aBool;\r\n"
+				+ "	int anInt;\r\n"
+				+ "	String aString;\r\n"
+				+ "	A anA;\r\n"
+				+ "	float aFloatMethod() {\r\n"
+				+ "		return 3.3f;\r\n"
+				+ "	}\r\n"
+				+ "	String aStringMethod() {\r\n"
+				+ "		return \"\";\r\n"
+				+ "	}\r\n"
+				+ "	int[] anArrayMethod() {\r\n"
+				+ "		return new int[0];\r\n"
+				+ "	}\r\n"
+				+ "	@Override\r\n"
+				+ "	public String toString() {\r\n"
+				+ "		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n"
+				+ "		if (aStringMethod() != null) {\r\n"
+				+ "			creator.addSth(aStringMethod(), \"aStringMethod()\");\r\n"
+				+ "		}\r\n"
+				+ "		creator.addSth(aFloatMethod(), \"aFloatMethod()\");\r\n"
+				+ "		if (anArrayMethod() != null) {\r\n"
+				+ "			creator.addSth(anArrayMethod(), \"anArrayMethod()\");\r\n"
+				+ "		}\r\n"
+				+ "		if (aString != null) {\r\n"
+				+ "			creator.addSth(aString, \"aString\");\r\n"
+				+ "		}\r\n"
+				+ "		creator.addSth(aBool, \"aBool\");\r\n"
+				+ "		creator.addSth(\"anInt\", anInt);\r\n"
+				+ "		return creator.getResult();\r\n"
+				+ "	}\r\n"
+				+ "\r\n"
+				+ "}";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Custom toString() builder - alternative class, chained calls
+	 * 
+	 * @throws Exception
+	 */
+	public void testChainedAlternativeCustomBuilderCreator() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
+				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
+				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+
+		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.className= "org.another.pack.AnotherToStringCreator";
+		fSettings2.customBuilderSettings.variableName= "creator";
+		fSettings2.customBuilderSettings.appendMethod= "addSth";
+		fSettings2.customBuilderSettings.resultMethod= "getResult";
+		fSettings2.customBuilderSettings.chainCalls= true;
+		runOperation(a.getType("A"), members, null);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import org.another.pack.AnotherToStringCreator;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	\r\n" +
+				"	boolean aBool;\r\n" +
+				"	int anInt;\r\n" +
+				"	String aString;\r\n" +
+				"	A anA;\r\n" +
+				"	float aFloatMethod() {\r\n" +
+				"		return 3.3f;\r\n" +
+				"	}\r\n" +
+				"	String aStringMethod() {\r\n" +
+				"		return \"\";\r\n" +
+				"	}\r\n" +
+				"	int[] anArrayMethod() {\r\n" +
+				"		return new int[0];\r\n" +
+				"	}\r\n" +
+				"	@Override\r\n" +
+				"	public String toString() {\r\n" +
+				"		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n" +
+				"		creator.addSth(aStringMethod(), \"aStringMethod()\").addSth(aFloatMethod(), \"aFloatMethod()\").addSth(anArrayMethod(), \"anArrayMethod()\").addSth(aBool, \"aBool\");\r\n" +
+				"		creator.addSth(aString, \"aString\").addSth(\"anInt\", anInt);\r\n" +
+				"		return creator.getResult();\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Custom toString() builder - alternative class, chained calls, skip nulls
+	 * 
+	 * @throws Exception
+	 */
+	public void testChainedAlternativeCustomBuilderNulls() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
+				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
+				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+
+		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "anArrayMethod", "aString", "aFloatMethod", "aBool", "anInt" });
+		fSettings2.skipNulls= true;
+		fSettings2.toStringStyle= 4;
+		fSettings2.customBuilderSettings.className= "org.another.pack.AnotherToStringCreator";
+		fSettings2.customBuilderSettings.variableName= "creator";
+		fSettings2.customBuilderSettings.appendMethod= "addSth";
+		fSettings2.customBuilderSettings.resultMethod= "getResult";
+		fSettings2.customBuilderSettings.chainCalls= true;
+		runOperation(a.getType("A"), members, null);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import org.another.pack.AnotherToStringCreator;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	\r\n" +
+				"	boolean aBool;\r\n" +
+				"	int anInt;\r\n" +
+				"	String aString;\r\n" +
+				"	A anA;\r\n" +
+				"	float aFloatMethod() {\r\n" +
+				"		return 3.3f;\r\n" +
+				"	}\r\n" +
+				"	String aStringMethod() {\r\n" +
+				"		return \"\";\r\n" +
+				"	}\r\n" +
+				"	int[] anArrayMethod() {\r\n" +
+				"		return new int[0];\r\n" +
+				"	}\r\n" +
+				"	@Override\r\n" +
+				"	public String toString() {\r\n" +
+				"		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n" +
+				"		if (aStringMethod() != null) {\r\n" +
+				"			creator.addSth(aStringMethod(), \"aStringMethod()\");\r\n" +
+				"		}\r\n" +
+				"		if (anArrayMethod() != null) {\r\n" +
+				"			creator.addSth(anArrayMethod(), \"anArrayMethod()\");\r\n" +
+				"		}\r\n" +
+				"		if (aString != null) {\r\n" +
+				"			creator.addSth(aString, \"aString\");\r\n" +
+				"		}\r\n" +
+				"		creator.addSth(aFloatMethod(), \"aFloatMethod()\").addSth(aBool, \"aBool\");\r\n" +
+				"		creator.addSth(\"anInt\", anInt);\r\n" +
+				"		return creator.getResult();\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Custom toString() builder - alternative class with append method that takes only one argument
+	 * for most of the types
+	 * 
+	 * @throws Exception
+	 */
+	public void testChainedOneArgumentCustomBuilders() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
+				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
+				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+
+		IPackageFragment packageFragment= fRoot.createPackageFragment("com.simple.pack", true, null);
+		ICompilationUnit compilationUnit= packageFragment.getCompilationUnit("ToStringBuilder.java");
+		compilationUnit
+				.createType(
+						"package com.simple.pack;\npublic class ToStringBuilder {\npublic ToStringBuilder(Object o){\n}\npublic ToStringBuilder append(Object o){\nreturn null;\n}\npublic ToStringBuilder append(String s1, String s2) {\nreturn null;\n}\npublic String toString(){\nreturn null;\n}\n}\n",
+						null, true, null);
+
+		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "anArrayMethod", "aString", "aFloatMethod", "aBool", "anInt" });
+		fSettings2.skipNulls= true;
+		fSettings2.customBuilderSettings.className= "com.simple.pack.ToStringBuilder";
+		fSettings2.toStringStyle= 4;
+		runOperation(a.getType("A"), members, null);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import com.simple.pack.ToStringBuilder;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	\r\n" +
+				"	boolean aBool;\r\n" +
+				"	int anInt;\r\n" +
+				"	String aString;\r\n" +
+				"	A anA;\r\n" +
+				"	float aFloatMethod() {\r\n" +
+				"		return 3.3f;\r\n" +
+				"	}\r\n" +
+				"	String aStringMethod() {\r\n" +
+				"		return \"\";\r\n" +
+				"	}\r\n" +
+				"	int[] anArrayMethod() {\r\n" +
+				"		return new int[0];\r\n" +
+				"	}\r\n" +
+				"	@Override\r\n" +
+				"	public String toString() {\r\n" +
+				"		ToStringBuilder builder = new ToStringBuilder(this);\r\n" +
+				"		if (aStringMethod() != null) {\r\n" +
+				"			builder.append(\"aStringMethod()\", aStringMethod());\r\n" +
+				"		}\r\n" +
+				"		if (anArrayMethod() != null) {\r\n" +
+				"			builder.append(anArrayMethod());\r\n" +
+				"		}\r\n" +
+				"		if (aString != null) {\r\n" +
+				"			builder.append(\"aString\", aString);\r\n" +
+				"		}\r\n" +
+				"		builder.append(aFloatMethod());\r\n" +
+				"		builder.append(aBool);\r\n" +
+				"		builder.append(anInt);\r\n" +
+				"		return builder.toString();\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}";
 
 		compareSource(expected, a.getSource());
 	}

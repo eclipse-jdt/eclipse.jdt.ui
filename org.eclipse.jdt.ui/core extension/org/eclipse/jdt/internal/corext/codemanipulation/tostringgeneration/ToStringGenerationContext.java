@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 
@@ -28,6 +29,8 @@ class ToStringGenerationContext {
 	private ITypeBinding fType;
 
 	private ToStringGenerationSettings fSettings;
+	
+	private ToStringGenerationSettings.CustomBuilderSettings fCustomBuilderSettings;
 
 	private CompilationUnitRewrite fRewrite;
 
@@ -36,6 +39,7 @@ class ToStringGenerationContext {
 		fParser= parser;
 		fSelectedMembers= selectedMembers;
 		fSettings= settings;
+		fCustomBuilderSettings= settings.getCustomBuilderSettings();
 		fType= type;
 		fRewrite= rewrite;
 	}
@@ -106,6 +110,26 @@ class ToStringGenerationContext {
 
 	public boolean isSkipNulls() {
 		return fSettings.skipNulls;
+	}
+	
+	public String getCustomBuilderClass() {
+		return fCustomBuilderSettings.className;
+	}
+	
+	public String getCustomBuilderVariableName() {
+		return fCustomBuilderSettings.variableName;
+	}
+	
+	public String getCustomBuilderAppendMethod() {
+		return fCustomBuilderSettings.appendMethod;
+	}
+	
+	public String getCustomBuilderResultMethod() {
+		return fCustomBuilderSettings.resultMethod;
+	}
+	
+	public boolean isCustomBuilderChainedCalls() {
+		return fCustomBuilderSettings.chainCalls;
 	}
 
 }

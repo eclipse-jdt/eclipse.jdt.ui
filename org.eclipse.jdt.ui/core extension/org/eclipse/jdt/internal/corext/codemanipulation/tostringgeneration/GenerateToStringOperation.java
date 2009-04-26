@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Mateusz Matela and others.
+ * Copyright (c) 2009 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 
@@ -171,28 +172,15 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 
 	public static final int STRING_FORMAT= 3;
 
-	public static final int APACHE_BUILDER= 4;
-
-	public static final int APACHE_BUILDER_CHAINED= 5;
-
-	public static final int SPRING_CREATOR= 6;
-
-	public static final int SPRING_CREATOR_CHAINED= 7;
-
-//	public static final int ID_START= 8;
+	public static final int CUSTOM_BUILDER= 4;
 
 	private final static String[] hardcoded_styles= {
 			CodeGenerationMessages.GenerateToStringOperation_stringConcatenation_style_name,
 			CodeGenerationMessages.GenerateToStringOperation_stringBuilder_style_name,
 			CodeGenerationMessages.GenerateToStringOperation_StringBuilder_chained_style_name,
 			CodeGenerationMessages.GenerateToStringOperation_string_format_style_name,
-//			CodeGenerationMessages.GenerateToStringOperation_apache_ToStringBuilder_style_name,
-//			CodeGenerationMessages.GenerateToStringOperation_apache_ToStringBilder_chained_style_name,
-//			CodeGenerationMessages.GenerateToStringOperation_spring_ToStringCreator_style_name,
-//			CodeGenerationMessages.GenerateToStringOperation_spring_ToStringCreator_chained_style_name
-	};
-
-
+			CodeGenerationMessages.GenerateToStringOperation_customStringBuilder_style_name
+			};
 
 	/**
 	 * @return Array containing names of implemented code styles
@@ -217,17 +205,10 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 				return new StringBuilderChainGenerator();
 			case STRING_FORMAT:
 				return new StringFormatGenerator();
-			case APACHE_BUILDER:
-				return new ApacheBuilderSpringCreatorGenerator("org.apache.commons.lang.builder.ToStringBuilder", "builder", false); //$NON-NLS-1$ //$NON-NLS-2$ 
-			case APACHE_BUILDER_CHAINED:
-				return new ApacheBuilderSpringCreatorGenerator("org.apache.commons.lang.builder.ToStringBuilder", "builder", true); //$NON-NLS-1$ //$NON-NLS-2$ 
-			case SPRING_CREATOR:
-				return new ApacheBuilderSpringCreatorGenerator("org.springframework.core.style.ToStringCreator", "creator", false); //$NON-NLS-1$ //$NON-NLS-2$ 
-			case SPRING_CREATOR_CHAINED:
-				return new ApacheBuilderSpringCreatorGenerator("org.springframework.core.style.ToStringCreator", "creator", true); //$NON-NLS-1$ //$NON-NLS-2$ 
+			case CUSTOM_BUILDER:
+				return new CustomBuilderGenerator();
 			default:
-				//unknown style
-				return null;
+				throw new IllegalArgumentException("Undefined toString() code style: " + toStringStyle); //$NON-NLS-1$
 		}
 	}
 
@@ -244,10 +225,10 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 	 * Creates new <code>GenerateToStringOperation</code>, using <code>settings.toStringStyle</code>
 	 * field to choose the right subclass.
 	 * 
-	 * @param typeBinding binding for the type for which the toString() method will be created 
+	 * @param typeBinding binding for the type for which the toString() method will be created
 	 * @param selectedBindings bindings for the typetype's members to be used in created method
 	 * @param unit a compilation unit containing the type
-	 * @param elementPosition at this position in the compilation unit created method will be added 
+	 * @param elementPosition at this position in the compilation unit created method will be added
 	 * @param settings the settings for toString() generator
 	 * @return a ready to use <code>GenerateToStringOperation</code> object
 	 */

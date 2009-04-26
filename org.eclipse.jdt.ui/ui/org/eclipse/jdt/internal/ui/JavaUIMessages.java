@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Template edit dialog has usability issues - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267916
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
@@ -91,6 +92,7 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateToStringDialog_defaultTemplateName;
 	public static String GenerateToStringDialog_dialog_title;
 	public static String GenerateToStringDialog_select_fields_to_include;
+	public static String GenerateToStringDialog_selectioninfo_customBuilderConfigError;
 	public static String GenerateToStringDialog_selectioninfo_more;
 	public static String GenerateToStringDialog_methods_node;
 	public static String GenerateToStringDialog_fields_node;
@@ -99,6 +101,27 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateToStringDialog_string_format_combo;
 	public static String GenerateToStringDialog_manage_templates_button;
 	public static String GenerateToStringDialog_code_style_combo;
+	public static String GenerateToStringDialog_codeStyleConfigureButton;
+	public static String GenerateToStringDialog_customBuilderConfig_appendMethodField;
+	public static String GenerateToStringDialog_customBuilderConfig_applyButton;
+	public static String GenerateToStringDialog_customBuilderConfig_browseButton;
+	public static String GenerateToStringDialog_customBuilderConfig_builderClassField;
+	public static String GenerateToStringDialog_customBuilderConfig_chainedCallsCheckbox;
+	public static String GenerateToStringDialog_customBuilderConfig_classSelection_message;
+	public static String GenerateToStringDialog_customBuilderConfig_classSelection_windowTitle;
+	public static String GenerateToStringDialog_customBuilderConfig_dataValidationError;
+	public static String GenerateToStringDialog_customBuilderConfig_invalidAppendMethodError;
+	public static String GenerateToStringDialog_customBuilderConfig_invalidClassError;
+	public static String GenerateToStringDialog_customBuilderConfig_invalidVariableNameError;
+	public static String GenerateToStringDialog_customBuilderConfig_invalidResultMethodError;
+	public static String GenerateToStringDialog_customBuilderConfig_varNameField;
+	public static String GenerateToStringDialog_customBuilderConfig_noAppendMethodError;
+	public static String GenerateToStringDialog_customBuilderConfig_noBuilderClassError;
+	public static String GenerateToStringDialog_customBuilderConfig_noConstructorError;
+	public static String GenerateToStringDialog_customBuilderConfig_noResultMethodError;
+	public static String GenerateToStringDialog_customBuilderConfig_resultMethodField;
+	public static String GenerateToStringDialog_customBuilderConfig_typeValidationError;
+	public static String GenerateToStringDialog_customBuilderConfig_windowTitle;
 	public static String GenerateToStringDialog_ignore_default_button;
 	public static String GenerateToStringDialog_limit_elements_button;
 	public static String GenerateToStringDialog_newTemplateName;
