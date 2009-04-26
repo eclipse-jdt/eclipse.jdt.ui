@@ -1195,4 +1195,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     void setCancelEnabled(boolean enabled) {
         fCancelSearchAction.setEnabled(enabled);
     }
+
+    /**
+     * Returns the call hierarchy viewer.
+     * 
+     * @return the call hierarchy viewer
+     * @since 3.5
+     */
+    public CallHierarchyViewer getViewer() {
+    	return fCallHierarchyViewer;
+    }
 }

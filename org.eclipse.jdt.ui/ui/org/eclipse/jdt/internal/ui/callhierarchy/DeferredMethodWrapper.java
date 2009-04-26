@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -18,6 +20,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -71,13 +74,21 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
      *      org.eclipse.core.runtime.IProgressMonitor)
      */
     public void fetchDeferredChildren(Object object, IElementCollector collector, IProgressMonitor monitor) {
-        try {
+    	final DeferredMethodWrapper methodWrapper= (DeferredMethodWrapper)object;
+    	try {
             fProvider.startFetching();
-            DeferredMethodWrapper methodWrapper = (DeferredMethodWrapper) object;
             collector.add((Object[]) methodWrapper.getCalls(monitor), monitor);
             collector.done();
         } catch (OperationCanceledException e) {
-            collector.add(new Object[] { TreeTermination.SEARCH_CANCELED }, monitor);
+        	Display.getDefault().asyncExec(new Runnable(){
+        		public void run(){
+        			CallHierarchyViewPart part= fProvider.getViewPart();
+        			if (part.getCallMode() == CallHierarchyViewPart.CALL_MODE_CALLERS) {
+        				CallerMethodWrapper element= (CallerMethodWrapper)methodWrapper.getMethodWrapper();
+        				fProvider.cancelSearchForElement(element);
+        			}
+        		}
+        	});
         } catch (Exception e) {
             JavaPlugin.log(e);
         } finally {

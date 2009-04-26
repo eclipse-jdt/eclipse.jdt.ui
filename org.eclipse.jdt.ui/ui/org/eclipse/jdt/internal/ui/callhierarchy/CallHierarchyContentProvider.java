@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
@@ -133,7 +135,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         return EMPTY_ARRAY;
     }
 
-    protected Object[] fetchChildren(MethodWrapper methodWrapper) {
+    protected Object[] fetchChildren(final MethodWrapper methodWrapper) {
         IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
         MethodWrapperRunnable runnable= new MethodWrapperRunnable(methodWrapper);
         try {
@@ -142,13 +144,52 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             ExceptionHandler.handle(e, CallHierarchyMessages.CallHierarchyContentProvider_searchError_title, CallHierarchyMessages.CallHierarchyContentProvider_searchError_message);
             return EMPTY_ARRAY;
         } catch (InterruptedException e) {
-            return new Object[] { TreeTermination.SEARCH_CANCELED };
+            Display.getDefault().asyncExec(new Runnable() {
+            	public void run() {
+            		CallHierarchyViewPart part= getViewPart();
+            		if (part.getCallMode() == CallHierarchyViewPart.CALL_MODE_CALLERS) {
+            			CallerMethodWrapper element= (CallerMethodWrapper)methodWrapper;
+            			cancelSearchForElement(element);
+            		}
+            	}
+            });
         }
 
         return runnable.getCalls();
     }
 
-    private boolean shouldStopTraversion(MethodWrapper methodWrapper) {
+
+    /**
+     * Refresh and collapses the given element or its parent on search cancel.
+     * 
+     * @param element the element on which search has been canceled and has to be collapsed
+     * @since 3.5
+     */
+    protected void cancelSearchForElement(CallerMethodWrapper element) {
+    	CallerMethodWrapper parent= (CallerMethodWrapper)element.getParent();
+    	CallHierarchyViewer viewer= fPart.getViewer();
+    	if (parent != null) {
+    		viewer.refresh(parent);
+    	} else {
+    		IMember[] members= fPart.getInputElements();
+    		viewer.setAutoExpandLevel(1); // set to 1 for root collapse on cancel
+    		fPart.setInputElements(members);
+    		viewer.setAutoExpandLevel(2); // set back to 2 for all other cases(bug 271446).
+    	}
+    	viewer.setExpandedState(element, false);
+    }
+
+	/**
+     * Returns the call hierarchy view part.
+	 * 
+	 * @return the call hierarchy view part
+	 * @since 3.5
+	 */
+    public CallHierarchyViewPart getViewPart() {    	
+    	return fPart;
+    }
+
+	private boolean shouldStopTraversion(MethodWrapper methodWrapper) {
         return (methodWrapper.getLevel() > CallHierarchyUI.getDefault().getMaxCallDepth()) || methodWrapper.isRecursive();
     }
 

@@ -215,7 +215,7 @@ public abstract class MethodWrapper extends PlatformObject {
     private void doFindChildren(IProgressMonitor progressMonitor) {
         Map existingResults = lookupMethod(getMethodCall());
 
-        if (existingResults != null) {
+        if (existingResults != null && !existingResults.isEmpty()) {
             fElements = new HashMap();
             fElements.putAll(existingResults);
         } else {
