@@ -8,6 +8,7 @@
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString wizard generates wrong code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=270462
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -2150,7 +2151,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	Collection<Integer> integerCollection;\r\n"
 				+ "	public String toString() {\r\n"
 				+ "		final int maxLen = 10;\r\n"
-				+ "		return MessageFormat.format(\"A [AArray={1}, aBool={2}, anA={3}, floatArray={4}, hashMap={5}, intArray={6}, integerCollection={7}, list={8}, object={9}, stringArray={10}, wildCollection={11}, charArrayMethod()={12}, floatArrayMethod()={13}]\", new Object[]{AArray, Boolean.valueOf(aBool), anA, floatArray, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod(), floatArrayMethod()});\r\n"
+				+ "		return MessageFormat.format(\"A [AArray={0}, aBool={1}, anA={2}, floatArray={3}, hashMap={4}, intArray={5}, integerCollection={6}, list={7}, object={8}, stringArray={9}, wildCollection={10}, charArrayMethod()={11}, floatArrayMethod()={12}]\", new Object[]{AArray, new Boolean(aBool), anA, floatArray, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod(), floatArrayMethod()});\r\n"
 				+ "	}\r\n" + "	private String toString(Collection collection, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		buffer.append(\"[\");\r\n"
 				+ "		int i = 0;\r\n" + "		for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n"
 				+ "			}\r\n" + "			buffer.append(iterator.next());\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";

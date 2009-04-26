@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString wizard generates wrong code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=270462
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 
@@ -17,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -94,7 +96,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 			if (getContext().is50orHigher()) {
 				buffer.append("%s"); //$NON-NLS-1$
 			} else {
-				buffer.append("{" + arguments.size() + "}"); //$NON-NLS-1$ //$NON-NLS-2$
+				buffer.append("{" + (arguments.size() - 1) + "}"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -112,7 +114,10 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 			if (typeName.equals("float"))nonPrimitiveType= "java.lang.Float"; //$NON-NLS-1$ //$NON-NLS-2$
 			if (typeName.equals("double"))nonPrimitiveType= "java.lang.Double"; //$NON-NLS-1$ //$NON-NLS-2$
 			if (typeName.equals("boolean"))nonPrimitiveType= "java.lang.Boolean"; //$NON-NLS-1$ //$NON-NLS-2$
-			return createMethodInvocation(addImport(nonPrimitiveType), "valueOf", super.createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
+			ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
+			classInstance.setType(fAst.newSimpleType(fAst.newSimpleName(addImport(nonPrimitiveType))));
+			classInstance.arguments().add(super.createMemberAccessExpression(member, true, true));
+			return classInstance;
 		}
 		return super.createMemberAccessExpression(member, ignoreArraysCollections, ignoreNulls);
 	}
