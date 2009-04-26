@@ -45,6 +45,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -57,6 +58,7 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITextViewerExtension7;
 import org.eclipse.jface.text.ITypedRegion;
@@ -402,6 +404,15 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 							|| identifier.startsWith("protected") //$NON-NLS-1$
 							|| identifier.startsWith("private")); //$NON-NLS-1$
 		}
+		
+		private boolean isMultilineSelection() {
+			ISelection selection= getSelectionProvider().getSelection();
+			if (selection instanceof ITextSelection) {
+				ITextSelection ts= (ITextSelection) selection;
+				return  ts.getStartLine() != ts.getEndLine();
+			}
+			return false;
+		}
 
 		/*
 		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
@@ -409,7 +420,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		public void verifyKey(VerifyEvent event) {
 
 			// early pruning to slow down normal typing as little as possible
-			if (!event.doit || getInsertMode() != SMART_INSERT)
+			if (!event.doit || getInsertMode() != SMART_INSERT || isBlockSelectionModeEnabled() && isMultilineSelection())
 				return;
 			switch (event.character) {
 				case '(':
