@@ -28,12 +28,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -94,7 +96,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 	 */
 	private class AppendMethodInformation {
 		/**
-		 * Type of method in raltion to taken parameter types. Possible values:
+		 * Type of method with respect to taken parameter types. Possible values:
 		 * <ol>
 		 * <li>method takes one type parameter</li>
 		 * <li>method takes one type parameter and one string</li>
@@ -144,12 +146,12 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 		VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
 		fragment.setName(fAst.newSimpleName(builderVariableName));
 		ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
-		String typeName= addImport(getContext().getCustomBuilderClass());
-		classInstance.setType(fAst.newSimpleType(fAst.newSimpleName(typeName)));
+		Name typeName= addImport(getContext().getCustomBuilderClass());
+		classInstance.setType(fAst.newSimpleType(typeName));
 		classInstance.arguments().add(fAst.newThisExpression());
 		fragment.setInitializer(classInstance);
 		VariableDeclarationStatement vStatement= fAst.newVariableDeclarationStatement(fragment);
-		vStatement.setType(fAst.newSimpleType(fAst.newName(typeName)));
+		vStatement.setType(fAst.newSimpleType((Name)ASTNode.copySubtree(fAst, typeName)));
 		toStringMethod.getBody().statements().add(vStatement);
 
 		/* expression for accumulating chained calls */
@@ -273,7 +275,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 			ami= (AppendMethodInformation)appendMethodSpecificTypes.get(memberTypeName);
 			if (!getContext().is50orHigher()) {
 				ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
-				classInstance.setType(fAst.newSimpleType(fAst.newSimpleName(addImport(memberTypeName))));
+				classInstance.setType(fAst.newSimpleType(addImport(memberTypeName)));
 				classInstance.arguments().add(createMemberAccessExpression(member, true, true));
 				memberAccessExpression= classInstance;
 			}

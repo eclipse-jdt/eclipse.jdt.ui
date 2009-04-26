@@ -70,7 +70,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 			formatInvocation.arguments().addAll(arguments);
 		} else {
 			ArrayCreation arrayCreation= fAst.newArrayCreation();
-			arrayCreation.setType(fAst.newArrayType(fAst.newSimpleType(fAst.newSimpleName(addImport("java.lang.Object"))))); //$NON-NLS-1$
+			arrayCreation.setType(fAst.newArrayType(fAst.newSimpleType(addImport("java.lang.Object")))); //$NON-NLS-1$
 			ArrayInitializer initializer= fAst.newArrayInitializer();
 			arrayCreation.setInitializer(initializer);
 			initializer.expressions().addAll(arguments);
@@ -115,7 +115,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 			if (typeName.equals("double"))nonPrimitiveType= "java.lang.Double"; //$NON-NLS-1$ //$NON-NLS-2$
 			if (typeName.equals("boolean"))nonPrimitiveType= "java.lang.Boolean"; //$NON-NLS-1$ //$NON-NLS-2$
 			ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
-			classInstance.setType(fAst.newSimpleType(fAst.newSimpleName(addImport(nonPrimitiveType))));
+			classInstance.setType(fAst.newSimpleType(addImport(nonPrimitiveType)));
 			classInstance.arguments().add(super.createMemberAccessExpression(member, true, true));
 			return classInstance;
 		}

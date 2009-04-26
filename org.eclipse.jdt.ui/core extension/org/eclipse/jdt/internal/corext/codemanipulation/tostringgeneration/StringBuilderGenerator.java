@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -75,11 +76,11 @@ public class StringBuilderGenerator extends AbstractToStringGenerator {
 		VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
 		fragment.setName(fAst.newSimpleName(fBuilderVariableName));
 		ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
-		String typeName= addImport(getContext().is50orHigher() ? "java.lang.StringBuilder" : "java.lang.StringBuffer"); //$NON-NLS-1$ //$NON-NLS-2$
-		classInstance.setType(fAst.newSimpleType(fAst.newSimpleName(typeName)));
+		Name typeName= addImport(getContext().is50orHigher() ? "java.lang.StringBuilder" : "java.lang.StringBuffer"); //$NON-NLS-1$ //$NON-NLS-2$
+		classInstance.setType(fAst.newSimpleType(typeName));
 		fragment.setInitializer(classInstance);
 		VariableDeclarationStatement vStatement= fAst.newVariableDeclarationStatement(fragment);
-		vStatement.setType(fAst.newSimpleType(fAst.newName(typeName)));
+		vStatement.setType(fAst.newSimpleType((Name)ASTNode.copySubtree(fAst, typeName)));
 		toStringMethod.getBody().statements().add(vStatement);
 	}
 

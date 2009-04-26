@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -279,7 +280,7 @@ public abstract class AbstractToStringGenerator {
 			//(Objec array, int length, ...)
 			paramName= createNameSuggestion("array", NamingConventions.VK_PARAMETER); //$NON-NLS-1$
 			SingleVariableDeclaration param= fAst.newSingleVariableDeclaration();
-			param.setType(fAst.newSimpleType(fAst.newName(addImport("java.lang.Object")))); //$NON-NLS-1$
+			param.setType(fAst.newSimpleType(addImport("java.lang.Object"))); //$NON-NLS-1$
 			param.setName(fAst.newSimpleName(paramName));
 			arrayToStringMethod.parameters().add(param);
 
@@ -291,7 +292,7 @@ public abstract class AbstractToStringGenerator {
 			//(Collection<?> collection, ...)
 			paramName= createNameSuggestion("collection", NamingConventions.VK_PARAMETER); //$NON-NLS-1$
 			SingleVariableDeclaration param= fAst.newSingleVariableDeclaration();
-			Type collectionType= fAst.newSimpleType(fAst.newName(addImport("java.util.Collection"))); //$NON-NLS-1$
+			Type collectionType= fAst.newSimpleType(addImport("java.util.Collection")); //$NON-NLS-1$
 			if (fContext.is50orHigher()) {
 				ParameterizedType genericType= fAst.newParameterizedType(collectionType);
 				genericType.typeArguments().add(fAst.newWildcardType());
@@ -316,10 +317,10 @@ public abstract class AbstractToStringGenerator {
 		VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
 		fragment.setName(fAst.newSimpleName(stringBuilderName));
 		ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
-		classInstance.setType(fAst.newSimpleType(fAst.newSimpleName(addImport(stringBuilderTypeName))));
+		classInstance.setType(fAst.newSimpleType(addImport(stringBuilderTypeName)));
 		fragment.setInitializer(classInstance);
 		VariableDeclarationStatement vStatement= fAst.newVariableDeclarationStatement(fragment);
-		vStatement.setType(fAst.newSimpleType(fAst.newName(addImport(stringBuilderTypeName))));
+		vStatement.setType(fAst.newSimpleType(addImport(stringBuilderTypeName)));
 		body.statements().add(vStatement);
 
 		if (array && fContext.isLimitItems()) {
@@ -385,14 +386,14 @@ public abstract class AbstractToStringGenerator {
 				if (code == null && !typeName.equals("Object"))continue; //$NON-NLS-1$
 				InstanceofExpression instanceOf= fAst.newInstanceofExpression();
 				instanceOf.setLeftOperand(fAst.newSimpleName(paramName));
-				instanceOf.setRightOperand(fAst.newArrayType(code != null ? (Type)fAst.newPrimitiveType(code) : fAst.newSimpleType(fAst.newSimpleName(addImport("java.lang.Object"))))); //$NON-NLS-1$
+				instanceOf.setRightOperand(fAst.newArrayType(code != null ? (Type)fAst.newPrimitiveType(code) : fAst.newSimpleType(addImport("java.lang.Object")))); //$NON-NLS-1$
 				ifStatement= fAst.newIfStatement();
 				ifStatement.setExpression(instanceOf);
 
 				//builder.append(((int[]) array)[i]);
 				CastExpression arrayCast= fAst.newCastExpression();
 				arrayCast.setExpression(fAst.newSimpleName(paramName));
-				arrayCast.setType(fAst.newArrayType(code != null ? (Type)fAst.newPrimitiveType(code) : fAst.newSimpleType(fAst.newSimpleName(addImport("java.lang.Object"))))); //$NON-NLS-1$
+				arrayCast.setType(fAst.newArrayType(code != null ? (Type)fAst.newPrimitiveType(code) : fAst.newSimpleType(addImport("java.lang.Object")))); //$NON-NLS-1$
 				ParenthesizedExpression parenthesizedCast= fAst.newParenthesizedExpression();
 				parenthesizedCast.setExpression(arrayCast);
 				ArrayAccess arrayAccess= fAst.newArrayAccess();
@@ -410,7 +411,7 @@ public abstract class AbstractToStringGenerator {
 			fragment.setName(fAst.newSimpleName(iteratorName));
 			fragment.setInitializer(createMethodInvocation(paramName, "iterator", null)); //$NON-NLS-1$
 			VariableDeclarationExpression vExpression= fAst.newVariableDeclarationExpression(fragment);
-			SimpleType iteratorType= fAst.newSimpleType(fAst.newName(addImport("java.util.Iterator"))); //$NON-NLS-1$
+			SimpleType iteratorType= fAst.newSimpleType(addImport("java.util.Iterator")); //$NON-NLS-1$
 			if (fContext.is50orHigher()) {
 				ParameterizedType pType= fAst.newParameterizedType(iteratorType);
 				pType.typeArguments().add(fAst.newWildcardType());
@@ -618,15 +619,27 @@ public abstract class AbstractToStringGenerator {
 	 * @param argument the argument, can be <code>null</code> if the method does not take any arguments
 	 * @return MethodInvocation in following form: <code>expression.methodName(argument)</code>
 	 */
-	protected MethodInvocation createMethodInvocation(String expression, String methodName, Expression argument) {
+	protected MethodInvocation createMethodInvocation(Expression expression, String methodName, Expression argument) {
 		MethodInvocation invocation= fAst.newMethodInvocation();
-		invocation.setExpression(fAst.newSimpleName(expression));
+		invocation.setExpression(expression);
 		invocation.setName(fAst.newSimpleName(methodName));
 		if (argument != null)
 			invocation.arguments().add(argument);
 		return invocation;
 	}
 
+	/**
+	 * Creates an invocation of a method that takes zero or one argument
+	 * 
+	 * @param receiver the receiver name
+	 * @param methodName the method name
+	 * @param argument the argument, can be <code>null</code> if the method does not take any arguments
+	 * @return MethodInvocation in following form: <code>expression.methodName(argument)</code>
+	 */
+	protected MethodInvocation createMethodInvocation(String receiver, String methodName, Expression argument) {
+		return createMethodInvocation(fAst.newName(receiver), methodName, argument);
+	}
+	
 	/**
 	 * Creates a statement that can be used as for/while/if-then-else block
 	 * 
@@ -728,13 +741,14 @@ public abstract class AbstractToStringGenerator {
 							} else {
 								if (fContext.is60orHigher()) {
 									// Arrays.toString( Arrays.copyOf ( member, Math.min (maxLen, member.length) )
-									String arraysImport= addImport("java.util.Arrays"); //$NON-NLS-1$
+									Name arraysImport= addImport("java.util.Arrays"); //$NON-NLS-1$
 									MethodInvocation minInvocation= createMethodInvocation(addImport("java.lang.Math"), "min", lengthAccess); //$NON-NLS-1$ //$NON-NLS-2$
 									minInvocation.arguments().add(fAst.newSimpleName(fMaxLenVariableName));
 									needMaxLenVariable= true;
 									MethodInvocation copyOfInvocation= createMethodInvocation(arraysImport, "copyOf", createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
 									copyOfInvocation.arguments().add(minInvocation);
-									accessExpression= createMethodInvocation(arraysImport, "toString", copyOfInvocation); //$NON-NLS-1$
+									Name arraysImportCopy= (Name)ASTNode.copySubtree(fAst, arraysImport);
+									accessExpression= createMethodInvocation(arraysImportCopy, "toString", copyOfInvocation); //$NON-NLS-1$
 								} else {
 									// arrayToString(member, member.length, maxLen)
 									MethodInvocation arrayToStringInvocation= fAst.newMethodInvocation();
@@ -830,12 +844,13 @@ public abstract class AbstractToStringGenerator {
 	 * Adds an import to the class. This method should be used for every class reference added to
 	 * the generated code.
 	 * 
-	 * @param importString a fully qualified name of a class
+	 * @param typeName a fully qualified name of a type
 	 * @return simple name of a class if the import was added and fully qualified name if there was
 	 *         a conflict
 	 */
-	protected String addImport(String importString) {
-		return fContext.getImportRewrite().addImport(importString);
+	protected Name addImport(String typeName) {
+		String importedName= fContext.getImportRewrite().addImport(typeName);
+		return fAst.newName(importedName);
 	}
 	
 	private Set excluded;
