@@ -117,8 +117,8 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	}
 	
 	private boolean isSpecialConstructorNode(MethodWrapper wrapper) {
-		CallerMethodWrapper parentWrapper= (CallerMethodWrapper) wrapper.getParent();
-		if (parentWrapper == null || ! parentWrapper.getExpandWithConstructors())
+		MethodWrapper parentWrapper= wrapper.getParent();
+		if (!(parentWrapper instanceof CallerMethodWrapper && ((CallerMethodWrapper)parentWrapper).getExpandWithConstructors()))
 			return false;
 		
 		IMember member= wrapper.getMember();
