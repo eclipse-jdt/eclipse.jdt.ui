@@ -231,6 +231,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	protected final JavaContentAssistInvocationContext fInvocationContext;
 
+	/**
+	 * Cache to store last validation state.
+	 * @since 3.5
+	 */
+	private boolean fIsValidated= true;
+
 	protected AbstractJavaCompletionProposal() {
 		fInvocationContext= null;
 	}
@@ -436,7 +442,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
 		// don't apply the proposal if for some reason we're not valid any longer
 		if (!isInJavadoc() && !validate(document, offset, null)) {
-			setCursorPosition(getReplacementOffset());
+			setCursorPosition(offset);
 			if (trigger != '\0') {
 				try {
 					document.replace(offset, 0, String.valueOf(trigger));
@@ -487,6 +493,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @see ICompletionProposal#getSelection
 	 */
 	public Point getSelection(IDocument document) {
+		if (!fIsValidated)
+			return null;
 		return new Point(getReplacementOffset() + getCursorPosition(), 0);
 	}
 
@@ -706,18 +714,18 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 
 		if (!isOffsetValid(offset))
-			return false;
+			return fIsValidated= false;
 
-		boolean validated= isValidPrefix(getPrefix(document, offset));
+		fIsValidated= isValidPrefix(getPrefix(document, offset));
 
-		if (validated && event != null) {
+		if (fIsValidated && event != null) {
 			// adapt replacement range to document change
 			int delta= (event.fText == null ? 0 : event.fText.length()) - event.fLength;
 			final int newLength= Math.max(getReplacementLength() + delta, 0);
 			setReplacementLength(newLength);
 		}
 
-		return validated;
+		return fIsValidated;
 	}
 
 	/**
