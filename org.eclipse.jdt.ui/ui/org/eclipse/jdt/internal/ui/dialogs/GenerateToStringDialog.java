@@ -1340,7 +1340,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		composite2.setLayout(layout);
-		composite2.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
+		composite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		formatLabel= new Label(composite2, SWT.NONE);
 		formatLabel.setText(JavaUIMessages.GenerateToStringDialog_string_format_combo);
