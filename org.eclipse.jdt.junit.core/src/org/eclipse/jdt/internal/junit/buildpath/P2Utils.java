@@ -13,7 +13,9 @@ package org.eclipse.jdt.internal.junit.buildpath;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import org.osgi.framework.Version;
 
@@ -92,7 +94,7 @@ class P2Utils {
 			return null;
 
 		try {
-			URL srcBundlesTxt = new URL(configurationArea.getProtocol(), configurationArea.getHost(), configurationArea.getFile().concat(SRC_INFO_PATH));
+			URL srcBundlesTxt= new URL(configurationArea.getProtocol(), configurationArea.getHost(), new File(configurationArea.getFile(), SRC_INFO_PATH).getAbsolutePath());
 			BundleInfo srcBundles[]= getBundlesFromFile(srcBundlesTxt);
 			if (srcBundles == null || srcBundles.length == 0) {
 				return null;
@@ -159,9 +161,9 @@ class P2Utils {
 
 		BundleInfo[] bundles;
 		if (isSourceBundle)
-			bundles= P2Utils.readSourceBundles();
+			bundles= readSourceBundles();
 		else
-			bundles= P2Utils.readBundles();
+			bundles= readBundles();
 
 		if (bundles == null)
 			return null;
@@ -184,8 +186,14 @@ class P2Utils {
 		if (bundleInfo == null)
 			return null;
 	
+		URI bundleLocation= bundleInfo.getLocation();
+		if (bundleLocation == null)
+			return null;
+		
 		try {
-			return new Path(FileLocator.toFileURL(URIUtil.toURL(bundleInfo.getLocation())).getFile());
+			String fileStr= FileLocator.toFileURL(URIUtil.toURL(bundleLocation)).getFile();
+			fileStr= URLDecoder.decode(fileStr, "UTF-8"); //$NON-NLS-1$
+			return new Path(fileStr);
 		} catch (IOException e) {
 			JUnitPlugin.log(e);
 			return null;
