@@ -26,6 +26,8 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 
 	public static final Styler HIGHLIGHT_STYLE= StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
 	public static final Styler HIGHLIGHT_WRITE_STYLE= StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
+	
+	public static final Styler INHERITED_STYLER= StyledString.createColorRegistryStyler(ColoredViewersManager.INHERITED_COLOR_NAME, null);
 
 	public ColoringLabelProvider(IStyledLabelProvider labelProvider) {
 		this(labelProvider, null, null);

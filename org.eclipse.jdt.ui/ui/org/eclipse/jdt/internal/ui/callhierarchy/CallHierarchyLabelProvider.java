@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
@@ -103,11 +104,11 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			if (isSpecialConstructorNode(wrapper)) {
 				decorated= Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, decorated);
 			}
-			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, styledLabel);
+			return StyledCellLabelProvider.styleDecoratedString(decorated, ColoringLabelProvider.INHERITED_STYLER, styledLabel);
 		}
 		
 		String specialLabel= getSpecialLabel(element);
-		Styler styler= element instanceof RealCallers ? StyledString.COUNTER_STYLER : null;
+		Styler styler= element instanceof RealCallers ? ColoringLabelProvider.INHERITED_STYLER : null;
 		return new StyledString(specialLabel, styler);
 	}
 
