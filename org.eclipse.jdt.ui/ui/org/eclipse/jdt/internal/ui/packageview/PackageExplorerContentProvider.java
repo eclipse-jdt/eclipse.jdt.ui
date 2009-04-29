@@ -641,8 +641,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					postRefresh(parent, PARENT, element, runnables);
 				return true;
 				
-			} else if (element instanceof IPackageFragmentRoot) {
-				// PFR can show up twice (in library container and as resource at original location)
+			} else if (element instanceof IPackageFragmentRoot
+					&& ((IPackageFragmentRoot)element).getKind() != IPackageFragmentRoot.K_SOURCE) {
+				// libs and class folders can show up twice (in library container and as resource at original location)
 				IResource resource= element.getResource();
 				if (resource != null)
 					postRemove(resource, runnables);
@@ -681,8 +682,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				}
 				return true;
 			} else {
-				if (element instanceof IPackageFragmentRoot) {
-					// PFR can show up twice (in library container or under project, and as resource at original location)
+				if (element instanceof IPackageFragmentRoot
+						&& ((IPackageFragmentRoot)element).getKind() != IPackageFragmentRoot.K_SOURCE) {
+					// libs and class folders can show up twice (in library container or under project, and as resource at original location)
 					IResource resource= element.getResource();
 					if (resource != null) {
 						Object resourceParent= super.internalGetParent(resource);

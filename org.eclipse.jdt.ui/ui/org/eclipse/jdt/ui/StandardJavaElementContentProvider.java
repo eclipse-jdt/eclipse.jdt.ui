@@ -362,8 +362,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			} else {
 				IJavaElement element= JavaCore.create(member, javaProject);
 				if (element instanceof IPackageFragmentRoot
-						&& javaProject.equals(element.getJavaProject())) {
-					// don't skip PFRs on the classpath of their project
+						&& javaProject.equals(element.getJavaProject())
+						&& ((IPackageFragmentRoot)element).getKind() != IPackageFragmentRoot.K_SOURCE) {
+					// don't skip libs and class folders on the classpath of their project
 					nonJavaResources.add(member);
 				}
 			}
