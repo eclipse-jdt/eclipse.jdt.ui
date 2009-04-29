@@ -66,37 +66,13 @@ class ExpandWithConstructorsAction extends Action {
 	public void run() {
 		boolean isChecked= isChecked();
 
-		CallerMethodWrapper[] members= getSelectedInputElements();
-		for (int i= 0; i < members.length; i++) {
-			members[i].setExpandWithConstructors(isChecked);
-			fCallHierarchyViewer.refresh(members[i]);
-			fCallHierarchyViewer.setExpandedState(members[i], isChecked);
+		IStructuredSelection selection= (IStructuredSelection)getSelection();
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			CallerMethodWrapper member= (CallerMethodWrapper)iter.next();
+			member.setExpandWithConstructors(isChecked);
+			fCallHierarchyViewer.refresh(member);
+			fCallHierarchyViewer.setExpandedState(member, isChecked);
 		}
-	}
-
-	/**
-	 * Return array of selected elements as caller method wrappers.
-	 * 
-	 * @return array of selected elements as caller method wrapper elements, <code>null</code> in
-	 *         case of invalid selection
-	 */
-	private CallerMethodWrapper[] getSelectedInputElements() {
-		ISelection selection= getSelection();
-		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection= (IStructuredSelection)selection;
-			CallerMethodWrapper[] wrappers= new CallerMethodWrapper[((IStructuredSelection)selection).size()];
-			int i= 0;
-			for (Iterator iter= structuredSelection.iterator(); iter.hasNext();) {
-				Object elem= iter.next();
-				if (elem instanceof CallerMethodWrapper) {
-					wrappers[i++]= (CallerMethodWrapper)elem;
-				} else {
-					return null;
-				}
-			}
-			return wrappers;
-		}
-		return null;
 	}
 
 	/**
@@ -121,13 +97,16 @@ class ExpandWithConstructorsAction extends Action {
 			return false;
 		
 		boolean allElementsChecked= true;
-		for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
+		IStructuredSelection structuredSelection= (IStructuredSelection)selection;
+		CallerMethodWrapper[] wrappers= new CallerMethodWrapper[structuredSelection.size()];
+		int i= 0;
+		for (Iterator iter= structuredSelection.iterator(); iter.hasNext(); i++) {
 			Object element= iter.next();
 			if (!(element instanceof CallerMethodWrapper) || element instanceof RealCallers)
 				return false;
 			
-			CallerMethodWrapper wrapper= (CallerMethodWrapper)element;
-			IMember member= wrapper.getMember();
+			wrappers[i]= (CallerMethodWrapper)element;
+			IMember member= wrappers[i].getMember();
 			if (!(member instanceof IMethod))
 				return false;
 			IMethod method= (IMethod)member;
@@ -137,7 +116,24 @@ class ExpandWithConstructorsAction extends Action {
 			} catch (JavaModelException e) {
 				return false; // don't try to work with inexistent elements
 			}
-			if (wrapper.getExpandWithConstructors() != true) {
+			for (int j= 0; j < i; j++) {
+				CallerMethodWrapper parent= (CallerMethodWrapper)wrappers[j].getParent();
+				while (parent != null) {
+					if (wrappers[i] == parent) {
+						return false;// disable if element is a parent of other selected elements
+					}
+					parent= (CallerMethodWrapper)parent.getParent();
+				}
+				CallerMethodWrapper parentElement= (CallerMethodWrapper)wrappers[i].getParent();
+				while (parentElement != null) {
+					if (parentElement == wrappers[j]) {
+						return false;// disable if element is a child of other selected elements
+					}
+					parentElement= (CallerMethodWrapper)parentElement.getParent();
+				}
+
+			}
+			if (wrappers[i].getExpandWithConstructors() != true) {
 				allElementsChecked= false;
 			}
 		}
