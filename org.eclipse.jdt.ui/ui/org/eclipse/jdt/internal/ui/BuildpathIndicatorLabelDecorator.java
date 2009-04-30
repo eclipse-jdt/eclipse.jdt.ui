@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDecorator {
 
@@ -45,8 +46,14 @@ public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 				if (javaProject != null) {
 					if (javaProject.isOnClasspath(resource)) {
 						IJavaElement javaElement= JavaCore.create(resource, javaProject);
-						if (javaElement instanceof IPackageFragmentRoot)
-							return JavaPluginImages.DESC_OVR_LIBRARY;
+						try {
+							if (javaElement instanceof IPackageFragmentRoot
+									&& ((IPackageFragmentRoot)javaElement).getKind() != IPackageFragmentRoot.K_SOURCE) {
+								return JavaPluginImages.DESC_OVR_LIBRARY;
+							}
+						} catch (JavaModelException e) {
+							return null;
+						}
 					}
 				}
 			}
@@ -76,9 +83,14 @@ public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 				if (isRemoved) {
 					return;
 				}
-				if (((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) ||
-						((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0)) {
-					result.add(elem);
+				try {
+					if ((((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) ||
+							((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0))
+							&& ((IPackageFragmentRoot)elem).getKind() != IPackageFragmentRoot.K_SOURCE) {
+						result.add(elem);
+					}
+				} catch (JavaModelException e) {
+					// don't update
 				}
 				return;
 			default:
