@@ -41,6 +41,6 @@ public class ActivateTextEditorTest extends ActivateEditorTest {
 	 * @since 3.5
 	 */
 	protected String getDegradationComment() {
-		return "This test is slower than in 3.4 due the changes in Platform UI, see bug 258253 for details.";
+		return "This test is slower than in 3.5 due the changes in Platform UI, see bug 258253 for details.";
 	}
 }
