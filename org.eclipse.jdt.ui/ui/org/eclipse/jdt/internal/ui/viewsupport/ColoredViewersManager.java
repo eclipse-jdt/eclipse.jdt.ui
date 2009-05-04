@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,20 +65,26 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
-		if (property.equals(JFacePreferences.QUALIFIER_COLOR) || property.equals(JFacePreferences.COUNTER_COLOR) || property.equals(JFacePreferences.DECORATIONS_COLOR)
-				|| property.equals(HIGHLIGHT_BG_COLOR_NAME) || property.equals(IWorkbenchPreferenceConstants.USE_COLORED_LABELS) || property.equals(HIGHLIGHT_WRITE_BG_COLOR_NAME)) {
+		if (property.equals(JFacePreferences.QUALIFIER_COLOR)
+				|| property.equals(JFacePreferences.COUNTER_COLOR)
+				|| property.equals(JFacePreferences.DECORATIONS_COLOR)
+				|| property.equals(HIGHLIGHT_BG_COLOR_NAME)
+				|| property.equals(HIGHLIGHT_WRITE_BG_COLOR_NAME)
+				|| property.equals(INHERITED_COLOR_NAME)
+				|| property.equals(IWorkbenchPreferenceConstants.USE_COLORED_LABELS)
+		) {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-					refreshAllViewers();
+					updateAllViewers();
 				}
 			});
 		}
 	}
 
-	protected final void refreshAllViewers() {
+	protected final void updateAllViewers() {
 		for (Iterator iterator= fManagedLabelProviders.iterator(); iterator.hasNext();) {
 			ColoringLabelProvider lp= (ColoringLabelProvider) iterator.next();
-			lp.refresh();
+			lp.update();
 		}
 	}
 

@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.jface.viewers.StyledString.Styler;
@@ -49,18 +50,24 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		ColoredViewersManager.uninstall(this);
 	}
 
-	public void refresh() {
+	public void update() {
 		ColumnViewer viewer= getViewer();
 
 		if (viewer == null) {
 			return;
 		}
+		
+		boolean needsUpdate= false;
+		
 		boolean showColoredLabels= ColoredViewersManager.showColoredLabels();
 		if (showColoredLabels != isOwnerDrawEnabled()) {
 			setOwnerDrawEnabled(showColoredLabels);
-			viewer.refresh();
+			needsUpdate= true;
 		} else if (showColoredLabels) {
-			viewer.refresh();
+			needsUpdate= true;
+		}
+		if (needsUpdate) {
+			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 		}
 	}
 
