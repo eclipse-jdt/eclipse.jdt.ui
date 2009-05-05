@@ -281,8 +281,11 @@ public class CompletionProposalLabelProvider {
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 
 		if (methodProposal.getRequiredProposals() != null) {
-			nameBuffer.append(Signature.getQualifier(declaringType), StyledString.QUALIFIER_STYLER);
-			nameBuffer.append('.', StyledString.QUALIFIER_STYLER);
+			String qualifier= Signature.getQualifier(declaringType);
+			if (qualifier.length() > 0) {
+				nameBuffer.append(qualifier, StyledString.QUALIFIER_STYLER);
+				nameBuffer.append('.', StyledString.QUALIFIER_STYLER);
+			}
 		}
 
 		declaringType= Signature.getSimpleName(declaringType);
@@ -514,8 +517,11 @@ public class CompletionProposalLabelProvider {
 		buffer.append(JavaTextMessages.ResultCollector_anonymous_type);
 
 		if (proposal.getRequiredProposals() != null) {
-			buffer.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
-			buffer.append(Signature.getSignatureQualifier(declaringTypeSignature), StyledString.QUALIFIER_STYLER);
+			char[] signatureQualifier= Signature.getSignatureQualifier(declaringTypeSignature);
+			if (signatureQualifier.length > 0) {
+				buffer.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
+				buffer.append(signatureQualifier, StyledString.QUALIFIER_STYLER);
+			}
 		}
 
 		return Strings.markLTR(buffer, JavaElementLabelComposer.ADDITIONAL_DELIMITERS);
