@@ -319,10 +319,11 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		}
 
 		if (pos < document.getLength() && document.getChar(pos) == ')') {
+			int currentLength= getReplacementLength();
 			if (replacementStringEndsWithParentheses)
-				setReplacementLength(pos - offset);
+				setReplacementLength(currentLength + pos - offset);
 			else
-				setReplacementLength(pos - offset + 1);
+				setReplacementLength(currentLength + pos - offset + 1);
 		}
 		return true;
 	}
