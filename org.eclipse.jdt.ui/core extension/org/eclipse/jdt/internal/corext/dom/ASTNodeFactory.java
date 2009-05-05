@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,7 +111,7 @@ public class ASTNodeFactory {
 	 * including the extra dimensions.
 	 * @param ast The AST to create the resulting type with.
 	 * @param declaration The variable declaration to get the type from
-	 * @return A new type node created with the given AST.
+	 * @return a new type node created with the given AST.
 	 */
 	public static Type newType(AST ast, VariableDeclaration declaration) {
 		Type type= ASTNodes.getType(declaration);
@@ -131,7 +131,7 @@ public class ASTNodeFactory {
 	 * @param ast The AST to create the expression for
 	 * @param type The type of the returned expression
 	 * @param extraDimensions Extra dimensions to the type
-	 * @return Returns the Null-literal for reference types, a boolen-literal for a boolean type, a number
+	 * @return the Null-literal for reference types, a boolean-literal for a boolean type, a number
 	 * literal for primitive types or <code>null</code> if the type is void.
 	 */
 	public static Expression newDefaultExpression(AST ast, Type type, int extraDimensions) {
@@ -149,12 +149,12 @@ public class ASTNodeFactory {
 	}
 
 	/**
-	 * Returns an expression that is assignable to the given typebinding. <code>null</code> is
+	 * Returns an expression that is assignable to the given type binding. <code>null</code> is
 	 * returned if the type is the 'void' type.
 	 *
 	 * @param ast The AST to create the expression for
 	 * @param type The type binding to which the returned expression is compatible to
-	 * @return Returns the Null-literal for reference types, a boolen-literal for a boolean type, a number
+	 * @return the Null-literal for reference types, a boolean-literal for a boolean type, a number
 	 * literal for primitive types or <code>null</code> if the type is void.
 	 */
 	public static Expression newDefaultExpression(AST ast, ITypeBinding type) {
@@ -172,8 +172,8 @@ public class ASTNodeFactory {
 	}
 
 	/**
-	 * Returns a list of newly created Modifier nodes corresponding to the given modfier flags.
-	 * @param ast The ast to create the nodes for.
+	 * Returns a list of newly created Modifier nodes corresponding to the given modifier flags.
+	 * @param ast The AST to create the nodes for.
 	 * @param modifiers The modifier flags describing the modifier nodes to create.
 	 * @return Returns a list of nodes of type {@link Modifier}.
 	 */
@@ -183,7 +183,7 @@ public class ASTNodeFactory {
 
 	/**
 	 * Returns a list of newly created Modifier nodes corresponding to a given list of existing modifiers.
-	 * @param ast The ast to create the nodes for.
+	 * @param ast The AST to create the nodes for.
 	 * @param modifierNodes The modifier nodes describing the modifier nodes to create. Only
 	 * nodes of type {@link Modifier} are looked at and cloned. To create a full copy of the list consider
 	 * to use {@link ASTNode#copySubtrees(AST, List)}.
