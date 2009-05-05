@@ -266,6 +266,63 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	}
 
 	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isOffsetValid(int)
+	 * @since 3.5
+	 */
+	protected boolean isOffsetValid(int offset) {
+		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
+		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
+			return super.isOffsetValid(offset);
+
+		return coreProposal.getRequiredProposals()[0].getReplaceStart() <= offset;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefixCompletionStart(org.eclipse.jface.text.IDocument, int)
+	 * @since 3.5
+	 */
+	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
+		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
+		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
+			return super.getPrefixCompletionStart(document, completionOffset);
+
+		return coreProposal.getRequiredProposals()[0].getReplaceStart();
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#getPrefixCompletionText(org.eclipse.jface.text.IDocument, int)
+	 * @since 3.5
+	 */
+	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
+		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
+			return super.getPrefixCompletionText(document, completionOffset);
+
+		return String.valueOf(coreProposal.getName());
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefix(org.eclipse.jface.text.IDocument, int)
+	 * @since 3.5
+	 */
+	protected String getPrefix(IDocument document, int offset) {
+		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
+		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
+			return super.getPrefix(document, offset);
+
+		int replacementOffset= coreProposal.getRequiredProposals()[0].getReplaceStart();
+
+		try {
+			int length= offset - replacementOffset;
+			if (length > 0)
+				return document.get(replacementOffset, length);
+		} catch (BadLocationException x) {
+		}
+		return ""; //$NON-NLS-1$
+
+	}
+
+	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 * @since 3.5
 	 */
@@ -275,6 +332,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	}
 
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#updateReplacementString(org.eclipse.jface.text.IDocument, char, int, org.eclipse.jdt.core.dom.rewrite.ImportRewrite)
+	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		fImportRewrite= impRewrite;
 		String replacementString= getReplacementString();
@@ -327,7 +387,6 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		}
 		return true;
 	}
-
 	/*
 	 * @see ICompletionProposalExtension#getContextInformationPosition()
 	 * @since 3.4
@@ -351,12 +410,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 	protected IContextInformation computeContextInformation() {
 		try {
-			ProposalInfo proposalInfo= getProposalInfo();
 			fContextInformationPosition= getReplacementOffset() - 1;
-			if (!(proposalInfo instanceof MemberProposalInfo))
-				return null;
 
-			CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
+			CompletionProposal proposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 			// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
 			if (hasParameters() && (getReplacementString().endsWith(")") || getReplacementString().length() == 0)) { //$NON-NLS-1$
@@ -380,11 +436,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 * @since 3.4
 	 */
 	private boolean hasParameters() {
-		ProposalInfo proposalInfo= getProposalInfo();
-		if (!(proposalInfo instanceof MemberProposalInfo))
-			return false;
-
-		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
+		CompletionProposal proposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 		return Signature.getParameterCount(proposal.getSignature()) > 0;
 	}
 
