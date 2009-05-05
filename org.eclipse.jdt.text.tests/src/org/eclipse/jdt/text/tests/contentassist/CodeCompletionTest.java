@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -189,8 +189,8 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("package test1;\n" +
 				"public class A {\n" +
 				"    public void foo() {\n" +
-				"        Runnable run= new Runnable(){\n" +
-				"        \n" +
+				"        Runnable run= new Runnable() {\n" +
+				"            \n" +
 				"            public void run() {\n" +
 				"                //TODO\n" +
 				"                \n" +
@@ -239,10 +239,10 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"public class A {\n" +
 				"    public void foo() {\n" +
 				"        Runnable run= new Runnable() {\n" +
-				"        \n" +
+				"            \n" +
 				"            public void run() {\n" +
 				"                //TODO\n" +
-				"        \n" +
+				"                \n" +
 				"            }\n" +
 				"        };\n" +
 				"    }\n" +
@@ -294,10 +294,10 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    }\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        Inner inner= new Inner() {\n");
-		buf.append("        \n");
+		buf.append("            \n");
 		buf.append("            public void doIt() {\n");
 		buf.append("                //TODO\n");
-		buf.append("        \n");
+		buf.append("                \n");
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
@@ -348,11 +348,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("            abstract void doIt();\n");
 		buf.append("        }\n");
 		buf.append("        Local loc= new Local() {\n");
-		buf.append("        \n");
+		buf.append("            \n");
 		buf.append("            @Override\n");
 		buf.append("            void doIt() {\n");
 		buf.append("                //TODO\n");
-		buf.append("        \n");
+		buf.append("                \n");
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
@@ -403,13 +403,13 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("        abstract E doIt();\n");
 		buf.append("    }\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        new Local<String>(){\n");
-		buf.append("        \n");
-		buf.append("                @Override\n");
-		buf.append("                String doIt() {\n");
-		buf.append("                    //TODO\n");
-		buf.append("                    return null;\n");
-		buf.append("                }\n");
+		buf.append("        new Local<String>() {\n");
+		buf.append("            \n");
+		buf.append("            @Override\n");
+		buf.append("            String doIt() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                return null;\n");
+		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -456,7 +456,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"//BUG\n"+
 				"public class A {\n" +
 				"    public void foo() {\n" +
-				"        Serializable run= new Serializable(){\n" +
+				"        Serializable run= new Serializable() {\n" +
 				"        };\n" +
 				"    }\n" +
 				"}\n" +

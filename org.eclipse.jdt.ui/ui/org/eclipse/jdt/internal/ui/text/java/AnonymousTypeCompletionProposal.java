@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -55,6 +57,7 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
@@ -279,10 +282,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 		// construct replacement text: an expression to be formatted
 		StringBuffer buf= new StringBuffer("new A("); //$NON-NLS-1$
-		buf.append(replacementString);
 
 		boolean replacementStringEndsWithParentheses= replacementString.endsWith(")"); //$NON-NLS-1$
-		if (!replacementStringEndsWithParentheses)
+		boolean needsBrackets= "()".equals(replacementString); //$NON-NLS-1$
+		if (!replacementStringEndsWithParentheses || needsBrackets)
 			buf.append(')');
 
 		String newBody= createNewBody(impRewrite);
@@ -291,18 +294,24 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 		buf.append(newBody);
 
-		if (document.getChar(offset) != ')')
-			buf.append(';');
-
 		// use the code formatter
 		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 		final IJavaProject project= fCompilationUnit.getJavaProject();
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
 
-		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, project);
+		Map options= project != null ? project.getOptions(true) : JavaCore.getOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
+		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, options);
+
+		if (document.getChar(offset) != ')')
+			replacement= replacement + ';';
+
 		replacement= Strings.changeIndent(replacement, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
-		setReplacementString(replacement.substring(replacement.indexOf('(') + 1));
+		if (needsBrackets)
+			setReplacementString(replacement.substring(replacement.indexOf('(')));
+		else
+			setReplacementString(replacement.substring(replacement.indexOf('(') + 1));
 
 		int pos= offset;
 		while (pos < document.getLength() && Character.isWhitespace(document.getChar(pos))) {
