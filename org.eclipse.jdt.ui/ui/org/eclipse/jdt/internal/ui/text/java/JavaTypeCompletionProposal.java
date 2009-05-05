@@ -70,7 +70,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	 * @param trigger the trigger
 	 * @param offset the offset
 	 * @param impRewrite the import rewrite
-	 * @return <code>true</code> if the string got updated
+	 * @return <code>true</code> if the cursor position should be updated, <code>false</code> otherwise
 	 * @throws BadLocationException if accessing the document fails
 	 * @throws CoreException if something else fails
 	 */
@@ -103,14 +103,14 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 				impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
 			}
 
-			boolean importAdded= updateReplacementString(document, trigger, offset, impRewrite);
+			boolean updateCursorPosition= updateReplacementString(document, trigger, offset, impRewrite);
 
-			if (importAdded)
+			if (updateCursorPosition)
 				setCursorPosition(getReplacementString().length());
 
 			super.apply(document, trigger, offset);
 
-			if (importAdded && impRewrite != null) {
+			if (impRewrite != null) {
 				int oldLen= document.getLength();
 				impRewrite.rewriteImports(new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);

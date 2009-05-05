@@ -210,6 +210,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	private boolean fIsInJavadoc;
 
 	private StyleRange fRememberedStyleRange;
+
 	private boolean fToggleEating;
 	private ITextViewer fTextViewer;
 
@@ -471,12 +472,21 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	/**
-	 * Returns <code>true</code> if the proposal is within javadoc, <code>false</code>
-	 * otherwise.
-	 *
+	 * Tells whether the user toggled the insert mode by pressing the 'Ctrl' key.
+	 * 
+	 * @return <code>true</code> if the insert mode is toggled, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	protected boolean isInsertModeToggled() {
+		return fToggleEating;
+	}
+
+	/**
+	 * Returns <code>true</code> if the proposal is within javadoc, <code>false</code> otherwise.
+	 * 
 	 * @return <code>true</code> if the proposal is within javadoc, <code>false</code> otherwise
 	 */
-	protected boolean isInJavadoc(){
+	protected boolean isInJavadoc() {
 		return fIsInJavadoc;
 	}
 
@@ -867,7 +877,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return JavaCore.ENABLED.equals(value);
 	}
 
-	private static boolean insertCompletion() {
+	protected static boolean insertCompletion() {
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
 		return preference.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 	}

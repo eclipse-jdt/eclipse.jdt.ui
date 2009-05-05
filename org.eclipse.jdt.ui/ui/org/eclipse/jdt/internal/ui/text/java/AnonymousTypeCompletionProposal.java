@@ -323,6 +323,18 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	}
 
 	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#isValidPrefix(java.lang.String)
+	 * @since 3.5
+	 */
+	protected boolean isValidPrefix(String prefix) {
+		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
+		if (coreProposal.getKind() != CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION)
+			return super.isValidPrefix(prefix);
+
+		return super.isValidPrefix(prefix) || isPrefix(prefix, String.valueOf(coreProposal.getName()));
+	}
+
+	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 * @since 3.5
 	 */
@@ -337,46 +349,63 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		fImportRewrite= impRewrite;
-		String replacementString= getReplacementString();
-
-
-		// construct replacement text: an expression to be formatted
-		StringBuffer buf= new StringBuffer("new A("); //$NON-NLS-1$
-
-		boolean replacementStringEndsWithParentheses= replacementString.endsWith(")"); //$NON-NLS-1$
-		boolean needsBrackets= "()".equals(replacementString); //$NON-NLS-1$
-		if (!replacementStringEndsWithParentheses || needsBrackets)
-			buf.append(')');
-
 		String newBody= createNewBody(impRewrite);
 		if (newBody == null)
 			return false;
 
+		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
+		boolean isAnonymousConstructorInvoc= coreProposal.getKind() == CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION;
+
+		boolean replacementStringEndsWithParentheses= isAnonymousConstructorInvoc || getReplacementString().endsWith(")"); //$NON-NLS-1$
+
+		// construct replacement text: an expression to be formatted
+		StringBuffer buf= new StringBuffer("new A("); //$NON-NLS-1$
+		if (!replacementStringEndsWithParentheses || isAnonymousConstructorInvoc)
+			buf.append(')');
 		buf.append(newBody);
 
 		// use the code formatter
 		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 		final IJavaProject project= fCompilationUnit.getJavaProject();
-		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
-		int indent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
+		IRegion lineInfo= document.getLineInformationOfOffset(getReplacementOffset());
+		int indent= Strings.computeIndentUnits(document.get(lineInfo.getOffset(), lineInfo.getLength()), project);
 
 		Map options= project != null ? project.getOptions(true) : JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
-		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, options);
+		String replacementString= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, options);
 
 		if (document.getChar(offset) != ')')
-			replacement= replacement + ';';
+			replacementString= replacementString + ';';
 
-		replacement= Strings.changeIndent(replacement, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
-		if (needsBrackets)
-			setReplacementString(replacement.substring(replacement.indexOf('(')));
-		else
-			setReplacementString(replacement.substring(replacement.indexOf('(') + 1));
+		replacementString= Strings.changeIndent(replacementString, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
+		
+		int beginIndex= replacementString.indexOf('(');
+		if (!isAnonymousConstructorInvoc)
+			beginIndex++;
+		replacementString= replacementString.substring(beginIndex);
 
+		int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
 		int pos= offset;
-		while (pos < document.getLength() && Character.isWhitespace(document.getChar(pos))) {
+		while (pos < lineEndOffset && Character.isWhitespace(document.getChar(pos))) {
 			pos++;
 		}
+
+		if (isAnonymousConstructorInvoc && (insertCompletion() ^ isInsertModeToggled())) {
+			// Keep existing code
+			int endPos= pos;
+			while (endPos < lineEndOffset && document.getChar(endPos) != '(') {
+				endPos++;
+			}
+			int keepLength= endPos - pos;
+			if (keepLength > 0) {
+				String keepStr= document.get(pos, keepLength);
+				replacementString= replacementString + keepStr;
+				setCursorPosition(replacementString.length() - keepLength);
+			}
+		} else
+			setCursorPosition(replacementString.length());
+		
+		setReplacementString(replacementString);
 
 		if (pos < document.getLength() && document.getChar(pos) == ')') {
 			int currentLength= getReplacementLength();
@@ -385,8 +414,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			else
 				setReplacementLength(currentLength + pos - offset + 1);
 		}
-		return true;
+		return false;
 	}
+
 	/*
 	 * @see ICompletionProposalExtension#getContextInformationPosition()
 	 * @since 3.4
