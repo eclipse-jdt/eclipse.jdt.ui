@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -482,11 +482,14 @@ public class ModifierCorrectionSubProcessor {
 				Block newBody= ast.newBlock();
 				rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 
-				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
-				if (expr != null) {
-					ReturnStatement returnStatement= ast.newReturnStatement();
-					returnStatement.setExpression(expr);
-					newBody.statements().add(returnStatement);
+				Type returnType= decl.getReturnType2();
+				if (returnType != null) {
+					Expression expr= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
+					if (expr != null) {
+						ReturnStatement returnStatement= ast.newReturnStatement();
+						returnStatement.setExpression(expr);
+						newBody.statements().add(returnStatement);
+					}
 				}
 			}
 
@@ -578,11 +581,14 @@ public class ModifierCorrectionSubProcessor {
 			Block newBody= ast.newBlock();
 			rewrite.set(decl, MethodDeclaration.BODY_PROPERTY, newBody, null);
 
-			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
-			if (expr != null) {
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(expr);
-				newBody.statements().add(returnStatement);
+			Type returnType= decl.getReturnType2();
+			if (returnType != null) {
+				Expression expr= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
+				if (expr != null) {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expr);
+					newBody.statements().add(returnStatement);
+				}
 			}
 
 			String label= CorrectionMessages.ModifierCorrectionSubProcessor_removenative_description;
@@ -626,11 +632,13 @@ public class ModifierCorrectionSubProcessor {
 
 			if (!decl.isConstructor()) {
 				Type returnType= decl.getReturnType2();
-				Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
-				if (expression != null) {
-					ReturnStatement returnStatement= ast.newReturnStatement();
-					returnStatement.setExpression(expression);
-					body.statements().add(returnStatement);
+				if (returnType != null) {
+					Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
+					if (expression != null) {
+						ReturnStatement returnStatement= ast.newReturnStatement();
+						returnStatement.setExpression(expression);
+						body.statements().add(returnStatement);
+					}
 				}
 			}
 
