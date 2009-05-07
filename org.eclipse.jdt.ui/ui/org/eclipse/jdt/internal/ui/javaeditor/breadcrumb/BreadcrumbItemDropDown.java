@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Item;
@@ -520,13 +521,14 @@ class BreadcrumbItemDropDown {
 			public void handleEvent(Event event) {
 				Widget focusElement= event.widget;
 				boolean isFocusBreadcrumbTreeFocusWidget= focusElement == shell || focusElement instanceof Tree && ((Tree)focusElement).getShell() == shell;
+				boolean isFocusWidgetParentShell= focusElement instanceof Control && ((Control)focusElement).getShell().getParent() == shell;
 
 				switch (event.type) {
 					case SWT.FocusIn:
 						if (DEBUG)
 							System.out.println("focusIn - is breadcrumb tree: " + isFocusBreadcrumbTreeFocusWidget); //$NON-NLS-1$
 
-						if (!isFocusBreadcrumbTreeFocusWidget) {
+						if (!isFocusBreadcrumbTreeFocusWidget && !isFocusWidgetParentShell) {
 							if (DEBUG)
 								System.out.println("==> closing shell since focus in other widget"); //$NON-NLS-1$
 							shell.close();
