@@ -249,6 +249,8 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_DELEGATE_METHODS_SELECTION_DIALOG= PREFIX + "add_delegate_methods_selection_dialog_context"; //$NON-NLS-1$
 	public static final String GENERATE_HASHCODE_EQUALS_SELECTION_DIALOG= PREFIX + "hash_code_equals_tree_selection_dialog_context"; //$NON-NLS-1$
 	public static final String GENERATE_TOSTRING_SELECTION_DIALOG= PREFIX + "to_string_tree_selection_dialog_context"; //$NON-NLS-1$
+	public static final String GENERATE_TOSTRING_MANAGE_TEMPLATES_DIALOG= PREFIX + "to_string_manage_templates_dialog_context"; //$NON-NLS-1$
+	public static final String GENERATE_TOSTRING_CONFIGURE_CUSTOM_BUILDER_DIALOG= PREFIX + "to_string_configure_custom_builder_dialog_context"; //$NON-NLS-1$
 	public static final String GENERATE_CONSTRUCTOR_USING_FIELDS_SELECTION_DIALOG= PREFIX + "generate_constructor_using_fields_selection_dialog_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_DIALOG= PREFIX + "add_unimplemented_constructors_dialog_context"; //$NON-NLS-1$
 

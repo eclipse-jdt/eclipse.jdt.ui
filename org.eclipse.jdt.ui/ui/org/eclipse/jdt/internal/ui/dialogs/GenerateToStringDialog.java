@@ -576,8 +576,8 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			super(parentShell);
 			this.parser= parser;
 			this.setShellStyle(this.getShellStyle() | SWT.RESIZE);
-			this.setHelpAvailable(false);
 			this.create();
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getShell(), IJavaHelpContextIds.GENERATE_TOSTRING_MANAGE_TEMPLATES_DIALOG);
 		}
 
 		protected Control createDialogArea(Composite parent) {
@@ -942,9 +942,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		public CustomBuilderConfigurationDialog(Shell parent) {
 			super(parent);
 			this.setShellStyle(this.getShellStyle() | SWT.RESIZE);
-			this.setHelpAvailable(false);
 			fBuilderSettings= getGenerationSettings().getCustomBuilderSettings();
-
 		}
 
 		public CustomBuilderValidator getValidator() {
@@ -1018,6 +1016,8 @@ public class GenerateToStringDialog extends SourceActionDialog {
 					enableApplyButton();
 				}
 			});
+
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getShell(), IJavaHelpContextIds.GENERATE_TOSTRING_CONFIGURE_CUSTOM_BUILDER_DIALOG);
 
 			return composite;
 		}
