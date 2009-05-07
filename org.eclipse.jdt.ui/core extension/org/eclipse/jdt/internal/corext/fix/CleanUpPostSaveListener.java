@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -279,26 +280,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			if (!ActionUtil.isOnBuildPath(unit))
 				return;
 
-			IProject project= unit.getJavaProject().getProject();
-			Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new ProjectScope(project));
-			if (settings == null) {
-				IEclipsePreferences contextNode= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
-				String id= contextNode.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
-				if (id == null) {
-					id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
-				}
-				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
-			}
-
-			ICleanUp[] cleanUps;
-			if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
-				cleanUps= getCleanUps(settings);
-			} else {
-				HashMap filteredSettins= new HashMap();
-				filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE));
-				filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
-				cleanUps= getCleanUps(filteredSettins);
-			}
+			ICleanUp[] cleanUps= getCleanUps(unit.getJavaProject().getProject());
 
 			long oldFileValue= unit.getResource().getModificationStamp();
 			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), new SubProgressMonitor(monitor, 2));
@@ -416,20 +398,23 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 
 		if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
-			cleanUps= getCleanUps(settings);
+			cleanUps= getCleanUps(settings, null);
 		} else {
 			HashMap filteredSettins= new HashMap();
 			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE));
 			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY));
 			filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
-			cleanUps= getCleanUps(filteredSettins);
+			Set ids= new HashSet(2);
+			ids.add("org.eclipse.jdt.ui.cleanup.format"); //$NON-NLS-1$
+			ids.add("org.eclipse.jdt.ui.cleanup.imports"); //$NON-NLS-1$
+			cleanUps= getCleanUps(filteredSettins, ids);
 		}
 
 		return cleanUps;
 	}
 
-	private static ICleanUp[] getCleanUps(Map settings) {
-		ICleanUp[] result= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
+	private static ICleanUp[] getCleanUps(Map settings, Set ids) {
+		ICleanUp[] result= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps(ids);
 
 		for (int i= 0; i < result.length; i++) {
 			result[i].setOptions(new MapCleanUpOptions(settings));

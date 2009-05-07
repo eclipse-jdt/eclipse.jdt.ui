@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Set;
 
 import com.ibm.icu.text.Collator;
 
@@ -240,12 +241,25 @@ public class CleanUpRegistry {
 	 * @return an array of clean ups
 	 */
 	public synchronized ICleanUp[] createCleanUps() {
+		return createCleanUps(null);
+	}
+
+	/**
+	 * Creates and returns the registered clean ups that don't fail upon creation.
+	 * 
+	 * @param ids the ids of the clean ups to create, or <code>null</code> to create all
+	 * @return an array of clean ups
+	 * @since 3.5
+	 */
+	public synchronized ICleanUp[] createCleanUps(Set ids) {
 		ensureCleanUpsRegistered();
 		ArrayList result= new ArrayList(fCleanUpDescriptors.length);
 		for (int i= 0; i < fCleanUpDescriptors.length; i++) {
-			ICleanUp cleanUp= fCleanUpDescriptors[i].createCleanUp();
-			if (cleanUp != null)
-				result.add(cleanUp);
+			if (ids == null || ids.contains(fCleanUpDescriptors[i].getId())) {
+				ICleanUp cleanUp= fCleanUpDescriptors[i].createCleanUp();
+				if (cleanUp != null)
+					result.add(cleanUp);
+			}
 		}
 		return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
 	}
