@@ -26,7 +26,13 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.util.SafeRunnable;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -35,6 +41,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
 import org.eclipse.jdt.ui.cleanup.ICleanUpOptionsInitializer;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
@@ -102,7 +109,8 @@ public class CleanUpRegistry {
 			String kind= fElement.getAttribute(ATTRIBUTE_NAME_KIND);
 			fKind= getCleanUpKind(kind);
 			if (fKind == -1)
-				JavaPlugin.logErrorMessage(Messages.format(FixMessages.CleanUpRegistry_WrongKindForConfigurationUI_error, new String[] { element.getContributor().getName(), kind }));
+				JavaPlugin.logErrorMessage(Messages.format(FixMessages.CleanUpRegistry_WrongKindForConfigurationUI_error, new String[] { fName, element.getContributor().getName(),
+						kind }));
 		}
 
 		/**
@@ -171,13 +179,14 @@ public class CleanUpRegistry {
 		}
 
 		/**
-		 * @return the clean up or <strong>null</strong> if the clean up could not be instantiated
+		 * @return the clean up or <code>null</code> if the clean up could not be instantiated
 		 */
 		public ICleanUp createCleanUp() {
 			try {
 				return (ICleanUp)fElement.createExecutableExtension(ATTRIBUTE_ID_CLASS);
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				String msg= Messages.format(FixMessages.CleanUpRegistry_cleanUpCreation_error, new String[] { fElement.getAttribute(ATTRIBUTE_ID_ID), fElement.getContributor().getName() });
+				JavaPlugin.logErrorStatus(msg, e.getStatus());
 				return null;
 			}
 		}
@@ -223,7 +232,7 @@ public class CleanUpRegistry {
 	}
 	
 	private static final String EXTENSION_POINT_NAME= "cleanUps"; //$NON-NLS-1$
-	private static final String CLEANUP_CONFIGURATION_ELEMENT_NAME= "cleanUp"; //$NON-NLS-1$
+	private static final String CLEAN_UP_CONFIGURATION_ELEMENT_NAME= "cleanUp"; //$NON-NLS-1$
 	private static final String TABPAGE_CONFIGURATION_ELEMENT_NAME= "cleanUpConfigurationUI"; //$NON-NLS-1$
 
 	private static final String CLEAN_UP_INITIALIZER_CONFIGURATION_ELEMENT_NAME= "cleanUpOptionsInitializer"; //$NON-NLS-1$
@@ -311,28 +320,58 @@ public class CleanUpRegistry {
 		if (fCleanUpDescriptors != null)
 			return;
 
-		ArrayList descriptors= new ArrayList();
+
+		final ArrayList descriptors= new ArrayList();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
 		IConfigurationElement[] elements= point.getConfigurationElements();
 		for (int i= 0; i < elements.length; i++) {
 			IConfigurationElement element= elements[i];
 
-			if (CLEANUP_CONFIGURATION_ELEMENT_NAME.equals(element.getName())) {
+			if (CLEAN_UP_CONFIGURATION_ELEMENT_NAME.equals(element.getName())) {
 				descriptors.add(new CleanUpDescriptor(element));
 			}
 		}
 
 
-		// Make sure we filter those who fail
+		// Make sure we filter those who fail or misbehave
 		for (int i= 0; i < descriptors.size(); i++) {
-			ICleanUp cleanUp= ((CleanUpDescriptor)descriptors.get(i)).createCleanUp();
-			if (cleanUp == null)
+			final CleanUpDescriptor cleanUpDescriptor= (CleanUpDescriptor)descriptors.get(i);
+			final boolean disable[]= new boolean[1];
+			ISafeRunnable runnable= new SafeRunnable() {
+				
+				public void run() throws Exception {
+					ICleanUp cleanUp= cleanUpDescriptor.createCleanUp();
+					if (cleanUp == null)
+						disable[0]= true;
+					else {
+						cleanUp.setOptions(new CleanUpOptions());
+						String[] enbledSteps= cleanUp.getStepDescriptions();
+						if (enbledSteps != null && enbledSteps.length > 0) {
+							JavaPlugin.logErrorMessage(
+									Messages.format(FixMessages.CleanUpRegistry_cleanUpAlwaysEnabled_error, new String[] { cleanUpDescriptor.getId(),
+									cleanUpDescriptor.fElement.getContributor().getName() }));
+							disable[0]= true;
+						}
+					}
+				}
+				public void handleException(Throwable t) {
+					disable[0]= true;
+					String message= Messages.format(FixMessages.CleanUpRegistry_cleanUpCreation_error, new String[] { cleanUpDescriptor.getId(),
+							cleanUpDescriptor.fElement.getContributor().getName() });
+					IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, t);
+					JavaPlugin.log(status);
+				}
+
+			};
+			SafeRunner.run(runnable);
+			if (disable[0])
 				descriptors.remove(i--);
 		}
 
 		fCleanUpDescriptors= (CleanUpDescriptor[])descriptors.toArray(new CleanUpDescriptor[descriptors.size()]);
 		sort(fCleanUpDescriptors);
+
 	}
 
 	private static void sort(CleanUpDescriptor[] data) {
