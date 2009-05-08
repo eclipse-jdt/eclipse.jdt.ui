@@ -14,13 +14,16 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
@@ -33,10 +36,10 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 
 import org.eclipse.ui.texteditor.IEditorStatusLine;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -47,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -128,62 +132,77 @@ public class NLSKeyHyperlink implements IHyperlink {
 		}
 
 		// Reveal the key in the editor
-		IEditorInput input = editor.getEditorInput();
-		if (input instanceof IFileEditorInput) {
-			IPath path= ((IFileEditorInput)input).getFile().getFullPath();
-			ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(
-					path, LocationKind.IFILE);
-			if (buffer != null) {
-				// Find key in document
-				IDocument document= buffer.getDocument();
-				boolean found= false;
-				IRegion region= null;
-				if (document != null) {
-					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
-					PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector();
-					detector.setContext(editor);
-					String key= PropertyFileDocumentModel.unwindEscapeChars(keyName);
-					int offset= document.getLength() - 1;
+		IEditorInput editorInput = editor.getEditorInput();
+		IDocument document= null;
+		if (editor instanceof ITextEditor)
+			document= ((ITextEditor)editor).getDocumentProvider().getDocument(editorInput);
+		else {
+			IFile file= (IFile)editorInput.getAdapter(IFile.class);
+			if (file != null) {
+				IPath path= file.getFullPath();
+				ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+				try {
+					manager.connect(path, LocationKind.IFILE, null);
 					try {
-						while (!found && offset >= 0) {
-							region= finder.find(offset, key, false, true, false, false);
-							if (region == null)
-								offset= -1;
-							else {
-								// test whether it's the key
-								IHyperlink[] hyperlinks= detector.detectHyperlinks(null, region, false);
-								if (hyperlinks != null) {
-									for (int i= 0; i < hyperlinks.length; i++) {
-										IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
-										found= key.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
-									}
-								} else if (document instanceof IDocumentExtension3) {
-									// test using properties file partitioning
-									ITypedRegion partition= null;
-									partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
-									found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
-											&& key.equals(document.get(partition.getOffset(), partition.getLength()).trim());
-								}
-								// Prevent endless loop (panic code, shouldn't be needed)
-								if (offset == region.getOffset())
-									offset= -1;
-								else
-									offset= region.getOffset();
-							}
-						}
-					} catch (BadLocationException ex) {
-						found= false;
-					} catch (BadPartitioningException e1) {
-						found= false;
+						ITextFileBuffer buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
+						if (buffer != null)
+							document= buffer.getDocument();
+					} finally {
+						manager.disconnect(path, LocationKind.IFILE, null);
 					}
-				}
-				if (found)
-					EditorUtility.revealInEditor(editor, region);
-				else {
-					EditorUtility.revealInEditor(editor, 0, 0);
-					showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, keyName));
+				} catch (CoreException ex) {
+					JavaPlugin.log(ex);
 				}
 			}
+		}
+
+		// Find key in document
+		boolean found= false;
+		IRegion region= null;
+		if (document != null) {
+			FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
+			PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector();
+			detector.setContext(editor);
+			String key= PropertyFileDocumentModel.unwindEscapeChars(keyName);
+			int offset= document.getLength() - 1;
+			try {
+				while (!found && offset >= 0) {
+					region= finder.find(offset, key, false, true, false, false);
+					if (region == null)
+						offset= -1;
+					else {
+						// test whether it's the key
+						IHyperlink[] hyperlinks= detector.detectHyperlinks(null, region, false);
+						if (hyperlinks != null) {
+							for (int i= 0; i < hyperlinks.length; i++) {
+								IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
+								found= key.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
+							}
+						} else if (document instanceof IDocumentExtension3) {
+							// Fall back: test using properties file partitioning
+							ITypedRegion partition= null;
+							partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
+							found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
+							&& key.equals(document.get(partition.getOffset(), partition.getLength()).trim());
+						}
+						// Prevent endless loop (panic code, shouldn't be needed)
+						if (offset == region.getOffset())
+							offset= -1;
+						else
+							offset= region.getOffset();
+					}
+				}
+			} catch (BadLocationException ex) {
+				found= false;
+			} catch (BadPartitioningException e1) {
+				found= false;
+			}
+		}
+		if (found)
+			EditorUtility.revealInEditor(editor, region);
+		else {
+			EditorUtility.revealInEditor(editor, 0, 0);
+			showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, keyName));
 		}
 	}
 
@@ -219,16 +238,16 @@ public class NLSKeyHyperlink implements IHyperlink {
 		showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, BasicElementLabels.getPathLabel(propertiesFile.getFullPath(), true)));
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
-	 */
+/*
+ * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
+ */
 	public String getTypeLabel() {
 		return null;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
-	 */
+/*
+ * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
+ */
 	public String getHyperlinkText() {
 		String bundleName= fAccessorClassReference.getResourceBundleName();
 		String propertyFileName= BasicElementLabels.getResourceName((bundleName.substring(bundleName.lastIndexOf('.') + 1, bundleName.length()) + NLSRefactoring.PROPERTY_FILE_EXT));
