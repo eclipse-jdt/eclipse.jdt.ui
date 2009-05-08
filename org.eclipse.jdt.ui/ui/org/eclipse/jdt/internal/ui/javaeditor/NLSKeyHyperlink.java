@@ -7,12 +7,18 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Florian Albrecht <florian.albrecht@clintworld.de> - make NLSKeyHyperlink work with non-text editors - https://bugs.eclipse.org/bugs/show_bug.cgi?id=97228
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IStorage;
 
@@ -27,10 +33,10 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 
 import org.eclipse.ui.texteditor.IEditorStatusLine;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -121,58 +127,62 @@ public class NLSKeyHyperlink implements IHyperlink {
 			return;
 		}
 
-		// Reveal the key in the properties file
-		if (editor instanceof ITextEditor) {
-			IRegion region= null;
-			boolean found= false;
-
-			// Find key in document
-			IEditorInput editorInput= editor.getEditorInput();
-			IDocument document= ((ITextEditor)editor).getDocumentProvider().getDocument(editorInput);
-			if (document != null) {
-				FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
-				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector();
-				detector.setContext(editor);
-				String key= PropertyFileDocumentModel.unwindEscapeChars(keyName);
-				int offset= document.getLength() - 1;
-				try {
-					while (!found && offset >= 0) {
-						region= finder.find(offset, key, false, true, false, false);
-						if (region == null)
-							offset= -1;
-						else {
-							// test whether it's the key
-							IHyperlink[] hyperlinks= detector.detectHyperlinks(null, region, false);
-							if (hyperlinks != null) {
-								for (int i= 0; i < hyperlinks.length; i++) {
-									IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
-									found= key.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
-								}
-							} else if (document instanceof IDocumentExtension3) {
-								// Fall back: test using properties file partitioning
-								ITypedRegion partition= null;
-								partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
-								found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
-										&& key.equals(document.get(partition.getOffset(), partition.getLength()).trim());
-							}
-							// Prevent endless loop (panic code, shouldn't be needed)
-							if (offset == region.getOffset())
+		// Reveal the key in the editor
+		IEditorInput input = editor.getEditorInput();
+		if (input instanceof IFileEditorInput) {
+			IPath path= ((IFileEditorInput)input).getFile().getFullPath();
+			ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(
+					path, LocationKind.IFILE);
+			if (buffer != null) {
+				// Find key in document
+				IDocument document= buffer.getDocument();
+				boolean found= false;
+				IRegion region= null;
+				if (document != null) {
+					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
+					PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector();
+					detector.setContext(editor);
+					String key= PropertyFileDocumentModel.unwindEscapeChars(keyName);
+					int offset= document.getLength() - 1;
+					try {
+						while (!found && offset >= 0) {
+							region= finder.find(offset, key, false, true, false, false);
+							if (region == null)
 								offset= -1;
-							else
-								offset= region.getOffset();
+							else {
+								// test whether it's the key
+								IHyperlink[] hyperlinks= detector.detectHyperlinks(null, region, false);
+								if (hyperlinks != null) {
+									for (int i= 0; i < hyperlinks.length; i++) {
+										IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
+										found= key.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
+									}
+								} else if (document instanceof IDocumentExtension3) {
+									// test using properties file partitioning
+									ITypedRegion partition= null;
+									partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
+									found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
+											&& key.equals(document.get(partition.getOffset(), partition.getLength()).trim());
+								}
+								// Prevent endless loop (panic code, shouldn't be needed)
+								if (offset == region.getOffset())
+									offset= -1;
+								else
+									offset= region.getOffset();
+							}
 						}
+					} catch (BadLocationException ex) {
+						found= false;
+					} catch (BadPartitioningException e1) {
+						found= false;
 					}
-				} catch (BadLocationException ex) {
-					found= false;
-				} catch (BadPartitioningException e1) {
-					found= false;
 				}
-			}
-			if (found)
-				EditorUtility.revealInEditor(editor, region);
-			else {
-				EditorUtility.revealInEditor(editor, 0, 0);
-				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, keyName));
+				if (found)
+					EditorUtility.revealInEditor(editor, region);
+				else {
+					EditorUtility.revealInEditor(editor, 0, 0);
+					showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, keyName));
+				}
 			}
 		}
 	}
