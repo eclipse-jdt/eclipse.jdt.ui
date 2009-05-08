@@ -227,14 +227,14 @@ public abstract class MethodWrapper extends PlatformObject {
 
             try {
                 performSearch(progressMonitor);
+            } catch (OperationCanceledException e){
+            	fElements= null;
+            	throw e;
             } finally {
                 if (progressMonitor != null) {
                     progressMonitor.done();
                 }
             }
-
-            //                ModalContext.run(getRunnableWithProgress(), true, getProgressMonitor(),
-            //                    Display.getCurrent());
         }
     }
 

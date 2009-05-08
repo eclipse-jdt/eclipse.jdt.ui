@@ -144,15 +144,14 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             ExceptionHandler.handle(e, CallHierarchyMessages.CallHierarchyContentProvider_searchError_title, CallHierarchyMessages.CallHierarchyContentProvider_searchError_message);
             return EMPTY_ARRAY;
         } catch (InterruptedException e) {
-            Display.getDefault().asyncExec(new Runnable() {
-            	public void run() {
-            		CallHierarchyViewPart part= getViewPart();
-            		if (part.getCallMode() == CallHierarchyViewPart.CALL_MODE_CALLERS) {
-            			CallerMethodWrapper element= (CallerMethodWrapper)methodWrapper;
-            			cancelSearchForElement(element);
-            		}
-            	}
-            });
+        	final CallerMethodWrapper element= (CallerMethodWrapper)methodWrapper;
+        	if (!isExpandWithConstructors(element)) {
+        		Display.getDefault().asyncExec(new Runnable() {
+        			public void run() {
+    					collapseAndRefresh(element);
+        			}
+        		});
+        	}
         }
 
         return runnable.getCalls();
@@ -160,23 +159,45 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
 
     /**
-     * Refresh and collapses the given element or its parent on search cancel.
+     * Returns whether the given element is an "Expand witch Constructors" node.
      * 
-     * @param element the element on which search has been canceled and has to be collapsed
+	 * @param element a method wrapped
+	 * @return <code>true</code> iff the element is an "Expand witch Constructors" node 
+	 * @since 3.5
+	 */
+	static boolean isExpandWithConstructors(MethodWrapper element) {
+		return element instanceof CallerMethodWrapper && ((CallerMethodWrapper)element).getExpandWithConstructors();
+	}
+
+	/**
+     * Collapses and refreshes the given element when search has been canceled.
+     * 
+     * @param element the element on which search has been canceled and which has to be collapsed
      * @since 3.5
      */
-    protected void cancelSearchForElement(CallerMethodWrapper element) {
-    	CallerMethodWrapper parent= (CallerMethodWrapper)element.getParent();
+    protected void collapseAndRefresh(MethodWrapper element) {
     	CallHierarchyViewer viewer= fPart.getViewer();
-    	if (parent != null) {
-    		viewer.refresh(parent);
-    	} else {
-    		IMember[] members= fPart.getInputElements();
-    		viewer.setAutoExpandLevel(1); // set to 1 for root collapse on cancel
-    		fPart.setInputElements(members);
-    		viewer.setAutoExpandLevel(2); // set back to 2 for all other cases(bug 271446).
+    	
+		/* Problem case: The user expands the RealCallers node and then unchecks "Expand with Constructors"
+		 * while the search for the real callers is still in progress.
+		 * 
+		 * In this scenario, the RealCallers is not even part of the current tree any more, since the
+		 * ExpandWithConstructorsAction already toggled the flag and refreshed the tree.
+    	 * 
+    	 * But since setExpandedState(element, false) walks up the getParent() chain of the given element,
+    	 * this causes the parent's children to be created, which would wrongly start a deferred search.
+    	 * 
+    	 * The fix is to do nothing when the RealCaller's parent is expandWithConstructors.
+		 */
+    	boolean elementStays= true;
+    	if (element instanceof RealCallers) {
+    		elementStays= isExpandWithConstructors(element.getParent());
     	}
-    	viewer.setExpandedState(element, false);
+		if (elementStays) {
+    		viewer.setExpandedState(element, false);
+    	}
+    	
+    	viewer.refresh(element);
     }
 
 	/**

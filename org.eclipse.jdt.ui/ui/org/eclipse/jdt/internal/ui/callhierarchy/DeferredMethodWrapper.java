@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
 
-import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -74,21 +73,20 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
      *      org.eclipse.core.runtime.IProgressMonitor)
      */
     public void fetchDeferredChildren(Object object, IElementCollector collector, IProgressMonitor monitor) {
-    	final DeferredMethodWrapper methodWrapper= (DeferredMethodWrapper)object;
+    	final DeferredMethodWrapper deferredMethodWrapper= (DeferredMethodWrapper)object;
     	try {
             fProvider.startFetching();
-            collector.add((Object[]) methodWrapper.getCalls(monitor), monitor);
+            collector.add((Object[]) deferredMethodWrapper.getCalls(monitor), monitor);
             collector.done();
         } catch (OperationCanceledException e) {
-        	Display.getDefault().asyncExec(new Runnable(){
-        		public void run(){
-        			CallHierarchyViewPart part= fProvider.getViewPart();
-        			if (part.getCallMode() == CallHierarchyViewPart.CALL_MODE_CALLERS) {
-        				CallerMethodWrapper element= (CallerMethodWrapper)methodWrapper.getMethodWrapper();
-        				fProvider.cancelSearchForElement(element);
-        			}
-        		}
-        	});
+        	final MethodWrapper methodWrapper= deferredMethodWrapper.getMethodWrapper();
+			if (!CallHierarchyContentProvider.isExpandWithConstructors(methodWrapper)) {
+	        	Display.getDefault().asyncExec(new Runnable(){
+	        		public void run(){
+        				fProvider.collapseAndRefresh(methodWrapper);
+	        		}
+	        	});
+        	}
         } catch (Exception e) {
             JavaPlugin.log(e);
         } finally {

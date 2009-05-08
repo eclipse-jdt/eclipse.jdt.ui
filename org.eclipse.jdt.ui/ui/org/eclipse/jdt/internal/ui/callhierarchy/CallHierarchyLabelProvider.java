@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -119,7 +118,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	
 	private boolean isSpecialConstructorNode(MethodWrapper wrapper) {
 		MethodWrapper parentWrapper= wrapper.getParent();
-		if (!(parentWrapper instanceof CallerMethodWrapper && ((CallerMethodWrapper)parentWrapper).getExpandWithConstructors()))
+		if (!CallHierarchyContentProvider.isExpandWithConstructors(parentWrapper))
 			return false;
 		
 		IMember member= wrapper.getMember();
