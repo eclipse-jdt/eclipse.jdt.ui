@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,9 @@ public interface ICleanUp {
 
 	/**
 	 * Human readable description for each step this clean up will execute.
+	 * <p>
+	 * <strong>Note:</strong> This method must only be called after the options have been set.
+	 * </p>
 	 * 
 	 * @return descriptions an array of {@linkplain String strings} or <code>null</code>
 	 */
@@ -56,6 +59,9 @@ public interface ICleanUp {
 
 	/**
 	 * The requirements of this clean up.
+	 * <p>
+	 * <strong>Note:</strong> This method must only be called after the options have been set.
+	 * </p>
 	 * 
 	 * @return the requirements used for {@link #createFix(CleanUpContext)} to work
 	 */
