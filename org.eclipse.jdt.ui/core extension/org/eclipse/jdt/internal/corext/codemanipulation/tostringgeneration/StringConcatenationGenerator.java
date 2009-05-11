@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Mateusz Matela and others.
+ * Copyright (c) 2008, 2009 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Wrong code generated with String concatenation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 
@@ -98,7 +99,13 @@ public class StringConcatenationGenerator extends AbstractToStringGenerator {
 			builder.addString((String)element);
 		}
 		if (element instanceof Expression) {
-			builder.addExpression((Expression)element);
+			Expression expr= (Expression)element;
+			if (expr instanceof ConditionalExpression) {
+				ParenthesizedExpression expr2= fAst.newParenthesizedExpression();
+				expr2.setExpression(expr);
+				expr= expr2;
+			}
+			builder.addExpression(expr);
 		}
 	}
 
