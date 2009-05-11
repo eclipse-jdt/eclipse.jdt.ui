@@ -314,9 +314,37 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	 * @since 3.5
 	 */
 	private boolean isContentChange(IJavaElementDelta cuDelta) {
-		return cuDelta.getKind() == IJavaElementDelta.CHANGED || (cuDelta.getFlags() & IJavaElementDelta.F_CONTENT) != 0;
+		int flags= cuDelta.getFlags();
+		return flags != IJavaElementDelta.F_AST_AFFECTED && (cuDelta.getKind() == IJavaElementDelta.CHANGED || (flags & IJavaElementDelta.F_CONTENT) != 0);
 	}
-	
+
+	/**
+	 * Check whether the given delta has been sent when saving this reconciler's editor.
+	 * 
+	 * @param cu the compilation unit
+	 * @param delta the deltas
+	 * @return <code>true</code> if the given delta
+	 * @since 3.5
+	 */
+	private boolean canIgnore(IJavaElement cu, IJavaElementDelta[] delta) {
+		if (delta.length != 1)
+			return false;
+
+		int flags= delta[0].getFlags();
+
+		// become working copy
+		if (flags == IJavaElementDelta.F_PRIMARY_WORKING_COPY)
+			return true;
+
+		// save
+		if (flags == IJavaElementDelta.F_PRIMARY_RESOURCE && delta[0].getElement().equals(cu))
+			return true;
+
+		return canIgnore(cu, delta[0].getAffectedChildren());
+	}
+
+
+
 	/*
 	 * This is a copy of the internal JavaOutlinePage.ElementChangedListener#findElement method.
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage.ElementChangedListener#findElement(IJavaElement, IJavaElementDelta)
@@ -328,6 +356,9 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 			return null;
 
 		IJavaElement element= delta.getElement();
+
+		if (canIgnore(unit, delta.getAffectedChildren()))
+			return null;
 
 		if (unit.equals(element)) {
 			if (isContentChange(delta)) {
