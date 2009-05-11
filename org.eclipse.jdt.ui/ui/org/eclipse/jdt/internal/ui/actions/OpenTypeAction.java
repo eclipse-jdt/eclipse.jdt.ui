@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
@@ -31,12 +28,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IActionDelegate2;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.MultiPartInitException;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.NewProjectAction;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -53,8 +47,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 
 public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate, IActionDelegate2 {
 
@@ -106,30 +100,16 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		}
 
 		MultiStatus multiStatus= new MultiStatus(JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.OpenTypeAction_multiStatusMessage, null);
-		List editorInputs= new ArrayList(types.length);
-		List editorIDs= new ArrayList(types.length);
+
 		for (int i= 0; i < types.length; i++) {
 			IType type= (IType)types[i];
 			try {
-				IEditorInput editorInput= EditorUtility.getEditorInput(type);
-				String editorID= EditorUtility.getEditorID(editorInput);
-				editorInputs.add(editorInput);
-				editorIDs.add(editorID);
+				JavaUI.openInEditor(type, true, true);
 			} catch (CoreException x) {
 				multiStatus.merge(x.getStatus());
 			}
 		}
-		IEditorInput[] editorInputArray= (IEditorInput[])editorInputs.toArray(new IEditorInput[editorInputs.size()]);
-		String[] editorIDArray= (String[])editorIDs.toArray(new String[editorIDs.size()]);
-		try {
-			workbenchPage.openEditors(editorInputArray, editorIDArray, IWorkbenchPage.MATCH_INPUT);
-		} catch (MultiPartInitException x) {
-			PartInitException[] exceptions= x.getExceptions();
-			for (int i= 0; i < exceptions.length; i++) {
-				if (exceptions[i] != null)
-					multiStatus.merge(exceptions[i].getStatus());
-			}
-		}
+
 		if (!multiStatus.isOK())
 			ExceptionHandler.handle(multiStatus, JavaUIMessages.OpenTypeAction_errorTitle, JavaUIMessages.OpenTypeAction_errorMessage);
 	}
