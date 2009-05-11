@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Mateusz Matela and others.
+ * Copyright (c) 2008, 2009 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Generator uses wrong suffixes and prefixes - https://bugs.eclipse.org/bugs/show_bug.cgi?id=275370
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 
@@ -258,6 +259,7 @@ public abstract class AbstractToStringGenerator {
 		final String appendMethodName= "append"; //$NON-NLS-1$
 		final String indexName= createNameSuggestion("i", NamingConventions.VK_LOCAL); //$NON-NLS-1$
 		final String lengthParamName= createNameSuggestion("len", NamingConventions.VK_PARAMETER); //$NON-NLS-1$
+		final String maxLenParamName= createNameSuggestion(MAX_LEN_VARIABLE_NAME, NamingConventions.VK_PARAMETER);
 		String paramName;
 		String stringBuilderName;
 		String stringBuilderTypeName;
@@ -306,7 +308,7 @@ public abstract class AbstractToStringGenerator {
 		if (fContext.isLimitItems()) {
 			SingleVariableDeclaration param= fAst.newSingleVariableDeclaration();
 			param.setType(fAst.newPrimitiveType(PrimitiveType.INT));
-			param.setName(fAst.newSimpleName(fMaxLenVariableName));
+			param.setName(fAst.newSimpleName(maxLenParamName));
 			arrayToStringMethod.parameters().add(param);
 		}
 
@@ -326,7 +328,7 @@ public abstract class AbstractToStringGenerator {
 		if (array && fContext.isLimitItems()) {
 			//length = Math.min(length, maxLen);
 			MethodInvocation minInvocation= createMethodInvocation(addImport("java.lang.Math"), "min", fAst.newSimpleName(lengthParamName)); //$NON-NLS-1$ //$NON-NLS-2$
-			minInvocation.arguments().add(fAst.newSimpleName(fMaxLenVariableName));
+			minInvocation.arguments().add(fAst.newSimpleName(maxLenParamName));
 			Assignment lengthAssignment= fAst.newAssignment();
 			lengthAssignment.setLeftHandSide(fAst.newSimpleName(lengthParamName));
 			lengthAssignment.setRightHandSide(minInvocation);
@@ -423,7 +425,7 @@ public abstract class AbstractToStringGenerator {
 			forStatement.initializers().add(vExpression);
 
 			//iterator.hasNext() && i < maxLen;
-			Expression indexExpression= createInfixExpression(fAst.newSimpleName(indexName), Operator.LESS, fAst.newSimpleName(fMaxLenVariableName));
+			Expression indexExpression= createInfixExpression(fAst.newSimpleName(indexName), Operator.LESS, fAst.newSimpleName(maxLenParamName));
 			forStatement.setExpression(createInfixExpression(createMethodInvocation(iteratorName, "hasNext", null), Operator.CONDITIONAL_AND, indexExpression)); //$NON-NLS-1$
 
 			//if (i > 0) 
@@ -471,7 +473,7 @@ public abstract class AbstractToStringGenerator {
 		Block body= fAst.newBlock();
 		toStringMethod.setBody(body);
 		
-		fMaxLenVariableName= createNameSuggestion(MAX_LEN_VARIABLE_NAME, NamingConventions.VK_PARAMETER);
+		fMaxLenVariableName= createNameSuggestion(MAX_LEN_VARIABLE_NAME, NamingConventions.VK_LOCAL);
 	}
 
 	/**

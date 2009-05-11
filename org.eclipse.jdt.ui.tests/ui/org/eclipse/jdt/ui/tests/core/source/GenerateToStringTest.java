@@ -10,6 +10,7 @@
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString wizard generates wrong code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=270462
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Wrong code generated with String concatenation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=275360
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Generator uses wrong suffixes and prefixes - https://bugs.eclipse.org/bugs/show_bug.cgi?id=275370
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.codeassist.impl.AssistOptions;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.GenerateToStringOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringTemplateParser;
@@ -2908,6 +2910,111 @@ public class GenerateToStringTest extends SourceTestCase {
 				"	}\r\n" +
 				"\r\n" +
 				"}";
+
+		compareSourceAssertCompilation(expected, a, oldCUNode);
+	}
+	
+	/**
+	 * string builder - custom array, limit elements, JDK1.4, use prefixes and suffixes for local variables and parameters
+	 * 
+	 * @throws Exception if test failed
+	 */
+	public void testBuilderArrayLimit1_4Prefixes() throws Exception {
+		setCompilerLevels(false, false);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
+				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	int[] intArray;\r\n"
+				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n"
+				+ "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
+		
+		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "hashMap", "intArray", "integerCollection", "list", "wildCollection", "charArrayMethod"});
+		fSettings2.customArrayToString= true;
+		fSettings2.limitElements= true;
+		fSettings2.toStringStyle= 1;
+
+		IJavaProject project= fRoot.getJavaProject();
+		project.setOption(AssistOptions.OPTION_LocalPrefixes, "l_");
+		project.setOption(AssistOptions.OPTION_LocalSuffixes, "_l");
+		project.setOption(AssistOptions.OPTION_ArgumentPrefixes, "a_");
+		project.setOption(AssistOptions.OPTION_ArgumentSuffixes, "_a");
+
+		runOperation(a.getType("A"), members, null);
+
+		String expected= "package p;\r\n"
+				+ "\r\n"
+				+ "import java.util.Collection;\r\n"
+				+ "import java.util.HashMap;\r\n"
+				+ "import java.util.Iterator;\r\n"
+				+ "import java.util.List;\r\n"
+				+ "\r\n"
+				+ "public class A {\r\n"
+				+ "\r\n"
+				+ "	int[] intArray;\r\n"
+				+ "	A[] AArray;\r\n"
+				+ "	char[] charArrayMethod() {\r\n"
+				+ "		return new char[0];\r\n"
+				+ "	}\r\n"
+				+ "	List<Boolean> list;\r\n"
+				+ "	HashMap<Integer, String> hashMap;\r\n"
+				+ "	Collection<?> wildCollection;\r\n"
+				+ "	Collection<Integer> integerCollection;\r\n"
+				+ "	public String toString() {\r\n"
+				+ "		final int l_maxLen_l = 10;\r\n"
+				+ "		StringBuffer l_buffer_l = new StringBuffer();\r\n"
+				+ "		l_buffer_l.append(\"A [AArray=\");\r\n"
+				+ "		l_buffer_l.append(AArray != null ? arrayToString(AArray, AArray.length, l_maxLen_l) : null);\r\n"
+				+ "		l_buffer_l.append(\", hashMap=\");\r\n"
+				+ "		l_buffer_l.append(hashMap != null ? toString(hashMap.entrySet(), l_maxLen_l) : null);\r\n"
+				+ "		l_buffer_l.append(\", intArray=\");\r\n"
+				+ "		l_buffer_l.append(intArray != null ? arrayToString(intArray, intArray.length, l_maxLen_l) : null);\r\n"
+				+ "		l_buffer_l.append(\", integerCollection=\");\r\n"
+				+ "		l_buffer_l.append(integerCollection != null ? toString(integerCollection, l_maxLen_l) : null);\r\n"
+				+ "		l_buffer_l.append(\", list=\");\r\n"
+				+ "		l_buffer_l.append(list != null ? toString(list, l_maxLen_l) : null);\r\n"
+				+ "		l_buffer_l.append(\", wildCollection=\");\r\n"
+				+ "		l_buffer_l.append(wildCollection != null ? toString(wildCollection, l_maxLen_l) : null);\r\n"
+				+ "		l_buffer_l.append(\", charArrayMethod()=\");\r\n"
+				+ "		l_buffer_l.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, l_maxLen_l) : null);\r\n"
+				+ "		l_buffer_l.append(\"]\");\r\n"
+				+ "		return l_buffer_l.toString();\r\n"
+				+ "	}\r\n"
+				+ "	private String toString(Collection a_collection_a, int a_maxLen_a) {\r\n"
+				+ "		StringBuffer l_buffer_l = new StringBuffer();\r\n"
+				+ "		l_buffer_l.append(\"[\");\r\n"
+				+ "		int l_i_l = 0;\r\n"
+				+ "		for (Iterator l_iterator_l = a_collection_a.iterator(); l_iterator_l.hasNext() && l_i_l < a_maxLen_a; l_i_l++) {\r\n"
+				+ "			if (l_i_l > 0) {\r\n"
+				+ "				l_buffer_l.append(\", \");\r\n"
+				+ "			}\r\n"
+				+ "			l_buffer_l.append(l_iterator_l.next());\r\n"
+				+ "		}\r\n"
+				+ "		l_buffer_l.append(\"]\");\r\n"
+				+ "		return l_buffer_l.toString();\r\n"
+				+ "	}\r\n"
+				+ "	private String arrayToString(Object a_array_a, int a_len_a, int a_maxLen_a) {\r\n"
+				+ "		StringBuffer l_buffer_l = new StringBuffer();\r\n"
+				+ "		a_len_a = Math.min(a_len_a, a_maxLen_a);\r\n"
+				+ "		l_buffer_l.append(\"[\");\r\n"
+				+ "		for (int l_i_l = 0; l_i_l < a_len_a; l_i_l++) {\r\n"
+				+ "			if (l_i_l > 0) {\r\n"
+				+ "				l_buffer_l.append(\", \");\r\n"
+				+ "			}\r\n"
+				+ "			if (a_array_a instanceof int[]) {\r\n"
+				+ "				l_buffer_l.append(((int[]) a_array_a)[l_i_l]);\r\n"
+				+ "			}\r\n"
+				+ "			if (a_array_a instanceof char[]) {\r\n"
+				+ "				l_buffer_l.append(((char[]) a_array_a)[l_i_l]);\r\n"
+				+ "			}\r\n"
+				+ "			if (a_array_a instanceof Object[]) {\r\n"
+				+ "				l_buffer_l.append(((Object[]) a_array_a)[l_i_l]);\r\n"
+				+ "			}\r\n"
+				+ "		}\r\n"
+				+ "		l_buffer_l.append(\"]\");\r\n"
+				+ "		return l_buffer_l.toString();\r\n"
+				+ "	}\r\n"
+				+ "	\r\n"
+				+ "}\r\n"
+				+ "";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
