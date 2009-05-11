@@ -174,7 +174,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @param expected source
 	 * @param cu compilation unit
 	 * @param oldCUNode the old AST root
-	 * @throws Exception if test failed
+	 * @throws Exception if test failed if test failed
 	 * 
 	 * @since 3.5
 	 */
@@ -198,7 +198,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - basic functionality and comment
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatComment() throws Exception {
 
@@ -242,7 +242,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatNulls() throws Exception {
 
@@ -283,7 +283,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom array toString without limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArray() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
@@ -323,7 +323,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - limit of elements but not in arrays
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -378,7 +378,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom array toString and limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -436,7 +436,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom Array, limit elements, java 1.4 compatibility
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
@@ -499,7 +499,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string concatenation - custom Array, limit elements, java 1.4 compatibility, unique variable
 	 * names needed
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_4Unique() throws Exception {
 		setCompilerLevels(false, false);
@@ -555,7 +555,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom Array, limit elements, java 1.5 compatibility
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_5() throws Exception {
 		setCompilerLevels(true, false);
@@ -620,7 +620,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string concatenation - custom Array, limit elements, java 1.5 compatibility, unique names
 	 * needed
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_5Unique() throws Exception {
 		setCompilerLevels(true, false);
@@ -677,7 +677,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom Array, limit elements to 0
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitZero() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -730,7 +730,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom Array, limit elements to 0, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitZeroNulls() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -784,7 +784,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - 'use keyword this' and no one-line blocks
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitThisNoBlock() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -845,7 +845,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom array, limit elements, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitNulls() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -906,7 +906,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom array, limit elements, no members require helper method
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitNoHelpers() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -964,7 +964,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - different template
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatTemplate() throws Exception {
 
@@ -1006,7 +1006,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string concatenation - replacing existing toString() and arrayToString(array,int), leaving
 	 * toString(Collection)
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testConcatReplace() throws Exception {
 		setCompilerLevels(true, false);
@@ -1059,7 +1059,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderNulls() throws Exception {
 
@@ -1089,7 +1089,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array toString without limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArray() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
@@ -1118,7 +1118,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - limit of elements but not in arrays
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1158,7 +1158,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array toString and limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1205,7 +1205,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array, limit of elements, without java 5.0 compatibility
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
@@ -1257,7 +1257,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string builder - custom array, limit of elements, without java 5.0 compatibility, unique
 	 * names needed
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimit1_4Unique() throws Exception {
 		setCompilerLevels(false, false);
@@ -1304,7 +1304,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string builder - custom array, limit of elements, skip nulls, use keyword this, no one-line
 	 * blocks
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitNullsThisNoBlocks() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1357,7 +1357,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array, limit elements, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitNulls() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1410,7 +1410,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array, limit elements, no members require helper methods
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitNoHelpers() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1452,7 +1452,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array, limit elements to 0
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitZero() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1492,7 +1492,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array, limit elements to 0, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitZeroNulls() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1534,7 +1534,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder, chained calls - skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderNulls() throws Exception {
 
@@ -1563,7 +1563,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder, chained calls - custom array toString without limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArray() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
@@ -1606,7 +1606,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string builder, chained calls - custom array toString without limit of elements, unique names
 	 * needed
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArrayUnique() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1657,7 +1657,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string builder, chained calls - custom array, limit of elements, without java 5.0
 	 * compatibility
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArrayLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
@@ -1723,7 +1723,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder, chained calls - custom array, JDK 1.5 compatybility
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArray1_5() throws Exception {
 		setCompilerLevels(true, false);
@@ -1781,7 +1781,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * string builder, chained calls - custom array, limit of elements, skip nulls, use keyword
 	 * this, no one-line blocks
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArrayLimitNullsThisNoBlocks() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1831,7 +1831,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - basic test
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormat() throws Exception {
 
@@ -1872,7 +1872,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - custom array toString without limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormatArray() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
@@ -1913,7 +1913,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - limit of elements but not arrays
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormatLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -1969,7 +1969,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - custom array toString and limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormatArrayLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2029,7 +2029,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * String.format() - custom array toString, limit of elements, JDK 1.5, no members require
 	 * helper methods
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormatArrayLimit1_5NoHelpers() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2083,7 +2083,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - custom array toString and limit number of elements to 0
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormatArrayLimitZero() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2137,7 +2137,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - custom array, limit of elements, 'use keyword this'
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormatLimitThis() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2195,7 +2195,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - custom array, limit of elements, jdk 1.4
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testFormatLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
@@ -2253,7 +2253,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - basic case
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilder() throws Exception {
 
@@ -2279,7 +2279,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderNulls() throws Exception {
 
@@ -2307,7 +2307,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - custom array toString without limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArray() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
@@ -2334,7 +2334,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - limit of elements but not arrays
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2373,7 +2373,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - custom array toString and limit of elements
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArrayLimit() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2418,7 +2418,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - custom array toString and limit of elements, unique names needed
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArrayLimitUnique() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2460,7 +2460,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - skip nulls, use keyword this, no one-line blocks
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderNullsThisNoBlocks() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2499,7 +2499,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - custom array, limit elements, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArrayLimitNulls() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
@@ -2547,7 +2547,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - chained calls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedCustomBuilder() throws Exception {
 
@@ -2592,7 +2592,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - chained calls, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedCustomBuilderNulls() throws Exception {
 
@@ -2621,7 +2621,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom ToString() builder - chained calls, add comment
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedCustomBuilderComments() throws Exception {
 
@@ -2670,7 +2670,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom toString() builder - alternative class, basic case
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testAlternativeCustomBuilder() throws Exception {
 
@@ -2726,7 +2726,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom toString() builder - alternative class, unique names needed
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testAlternativeCustomBuilderUnique() throws Exception {
 
@@ -2799,7 +2799,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom toString() builder - alternative class, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testAlternativeCustomBuilderNulls() throws Exception {
 
@@ -2862,7 +2862,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom toString() builder - alternative class, chained calls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedAlternativeCustomBuilderCreator() throws Exception {
 
@@ -2915,7 +2915,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom toString() builder - alternative class, chained calls, skip nulls
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedAlternativeCustomBuilderNulls() throws Exception {
 
@@ -2979,7 +2979,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * Custom toString() builder - alternative class with append method that takes only one argument
 	 * for most of the types
 	 * 
-	 * @throws Exception
+	 * @throws Exception if test failed
 	 */
 	public void testChainedOneArgumentCustomBuilders() throws Exception {
 
