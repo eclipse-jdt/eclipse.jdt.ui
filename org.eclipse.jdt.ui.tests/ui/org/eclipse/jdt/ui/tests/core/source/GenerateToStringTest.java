@@ -13,21 +13,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
+import java.util.ArrayList;
+
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -38,6 +46,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.Gener
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringTemplateParser;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings.CustomBuilderSettings;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -74,8 +83,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= false;
 		fSettings2.limitValue= 10;
 		fSettings2.useBlocks= true;
-		fSettings2.is50orHigher= true;
-		fSettings2.is60orHigher= true;
+		setCompilerLevels(true, true);
 		fSettings2.customBuilderSettings= new CustomBuilderSettings();
 		fSettings2.customBuilderSettings.className= "com.pack.ToStringBuilder";
 		fSettings2.customBuilderSettings.variableName= "builder";
@@ -96,6 +104,29 @@ public class GenerateToStringTest extends SourceTestCase {
 				.createType(
 						"package org.another.pack;\npublic class AnotherToStringCreator {\npublic AnotherToStringCreator(java.lang.Object o) {\n}\npublic AnotherToStringCreator addSth(Object o, String s) {\n return null;\n}\npublic String addSth(String s, int i){\nreturn null;\n}\npublic void addSth(boolean b, String s){\n}\npublic String getResult(){\nreturn null;\n}\n}\n",
 						null, true, null);
+	}
+
+	private void setCompilerLevels(boolean is50orHigher, boolean is60orHigher) throws CoreException {
+		fSettings2.is50orHigher= is50orHigher;
+		fSettings2.is60orHigher= is60orHigher;
+		IJavaProject jp= fRoot.getJavaProject();
+		if (is60orHigher || ! is50orHigher) {
+			IClasspathEntry[] cp= jp.getRawClasspath();
+			ArrayList newCP= new ArrayList();
+			for (int i= 0; i < cp.length; i++) {
+				IClasspathEntry cpe= cp[i];
+				if (cpe.getEntryKind() != IClasspathEntry.CPE_LIBRARY) {
+					newCP.add(cpe);
+				}
+			}
+			jp.setRawClasspath((IClasspathEntry[]) newCP.toArray(new IClasspathEntry[newCP.size()]), null);
+		}
+		if (is60orHigher) {
+			JavaProjectHelper.addRTJar16(jp);
+		}
+		if (!is50orHigher) {
+			JavaProjectHelper.addRTJar13(jp);
+		}
 	}
 
 	public void runOperation(IType type, IMember[] members, IJavaElement insertBefore) throws CoreException {
@@ -138,6 +169,33 @@ public class GenerateToStringTest extends SourceTestCase {
 	}
 
 	/**
+	 * Compares source with expected and asserts that no new compile errors have been created.
+	 * 
+	 * @param expected source
+	 * @param cu compilation unit
+	 * @param oldCUNode the old AST root
+	 * @throws Exception if test failed
+	 * 
+	 * @since 3.5
+	 */
+	private void compareSourceAssertCompilation(String expected, ICompilationUnit cu, CompilationUnit oldCUNode) throws Exception {
+		compareSource(expected, cu.getSource());
+		CompilationUnit newCUNode= getCUNode(cu);
+		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, oldCUNode);
+		for (int i= 0; i < problems.length; i++) {
+			IProblem problem= problems[i];
+			assertFalse(problem.toString(), problem.isError());
+		}
+	}
+
+	private static CompilationUnit getCUNode(ICompilationUnit cu) throws Exception {
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setResolveBindings(true);
+		parser.setSource(cu);
+		return (CompilationUnit)parser.createAST(null);
+	}
+
+	/**
 	 * string concatenation - basic functionality and comment
 	 * 
 	 * @throws Exception
@@ -147,6 +205,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	byte aByte;\r\n" + "	char aChar;\r\n"
 				+ "	int anInt;\r\n" + "	double aDouble;\r\n" + "	float aFloat;\r\n" + "	long aLong;\r\n" + "	int aFloatMethod() {\r\n" + "		return 3.3;\r\n" + "	}\r\n" + "	int aStringMethod() {\r\n"
 				+ "		return \"\";\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aFloatMethod", "aStringMethod" });
 		fSettings2.createComments= true;
@@ -177,7 +236,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return \"A [aBool=\" + aBool + \", aByte=\" + aByte + \", aChar=\" + aChar + \", anInt=\" + anInt + \", aDouble=\" + aDouble + \", aFloat=\" + aFloat + \", aLong=\" + aLong + \", aFloatMethod()=\" + aFloatMethod() + \", aStringMethod()=\" + aStringMethod() + \"]\";\r\n"
 				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -190,6 +249,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.skipNulls= true;
@@ -217,7 +277,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return \"A [\" + (aStringMethod() != null ? \"aStringMethod()=\" + aStringMethod() + \", \" : \"\") + \"aFloatMethod()=\" + aFloatMethod() + \", \" + (anArrayMethod() != null ? \"anArrayMethod()=\" + anArrayMethod() + \", \" : \"\") + \"aBool=\" + aBool + \", \" + (aString != null ? \"aString=\" + aString + \", \" : \"\") + \"anInt=\" + anInt + \"]\";\r\n"
 				+ "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -229,6 +289,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
 		fSettings2.customArrayToString= true;
@@ -256,7 +317,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return \"A [AArray=\" + Arrays.toString(AArray) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + Arrays.toString(floatArray) + \", intArray=\" + Arrays.toString(intArray) + \", list=\" + list + \", object=\" + object + \", stringArray=\" + Arrays.toString(stringArray) + \", anArrayMethod()=\" + Arrays.toString(anArrayMethod()) + \"]\";\r\n"
 				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -270,6 +331,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -310,7 +372,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
 				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -324,6 +386,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -367,7 +430,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
 				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -376,18 +439,18 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testConcatArrayLimit1_4() throws Exception {
+		setCompilerLevels(false, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
 				true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= false;
-		fSettings2.is60orHigher= false;
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
@@ -429,7 +492,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			if (array instanceof Object[]) {\r\n" + "				buffer.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n"
 				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -439,17 +502,17 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testConcatArrayLimit1_4Unique() throws Exception {
+		setCompilerLevels(false, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
 				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
 				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
 				"maxLen", "len", "collection", "array" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= false;
-		fSettings2.is60orHigher= false;
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
@@ -486,7 +549,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			if (array2 instanceof int[]) {\r\n" + "				buffer2.append(((int[]) array2)[i]);\r\n" + "			}\r\n" + "			if (array2 instanceof Object[]) {\r\n"
 				+ "				buffer2.append(((Object[]) array2)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer2.append(\"]\");\r\n" + "		return buffer2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -495,18 +558,18 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testConcatArrayLimit1_5() throws Exception {
+		setCompilerLevels(true, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
 				true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= true;
-		fSettings2.is60orHigher= false;
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
@@ -550,7 +613,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			if (array instanceof Object[]) {\r\n" + "				builder.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -560,17 +623,17 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testConcatArrayLimit1_5Unique() throws Exception {
+		setCompilerLevels(true, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
 				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
 				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
 				"maxLen", "len", "collection", "array" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= true;
-		fSettings2.is60orHigher= false;
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
@@ -608,7 +671,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			}\r\n" + "			if (array2 instanceof int[]) {\r\n" + "				builder2.append(((int[]) array2)[i]);\r\n" + "			}\r\n" + "			if (array2 instanceof Object[]) {\r\n"
 				+ "				builder2.append(((Object[]) array2)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		builder2.append(\"]\");\r\n" + "		return builder2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -622,6 +685,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
 				true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -660,7 +724,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return \"A [AArray=\" + (AArray != null ? \"[]\" : null) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + (floatArray != null ? \"[]\" : null) + \", hashMap=\" + (hashMap != null ? \"[]\" : null) + \", intArray=\" + (intArray != null ? \"[]\" : null) + \", integerCollection=\" + (integerCollection != null ? \"[]\" : null) + \", list=\" + (list != null ? \"[]\" : null) + \", object=\" + object + \", stringArray=\" + (stringArray != null ? \"[]\" : null) + \", wildCollection=\" + (wildCollection != null ? \"[]\" : null) + \", charArrayMethod()=\" + (charArrayMethod() != null ? \"[]\" : null) + \", floatArrayMethod()=\" + (floatArrayMethod() != null ? \"[]\" : null) + \"]\";\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -674,6 +738,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
 				true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -713,7 +778,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return \"A [\" + (AArray != null ? \"AArray=[], \" : \"\") + \"aBool=\" + aBool + \", \" + (anA != null ? \"anA=\" + anA + \", \" : \"\") + (floatArray != null ? \"floatArray=[], \" : \"\") + (hashMap != null ? \"hashMap=[], \" : \"\") + (intArray != null ? \"intArray=[], \" : \"\") + (integerCollection != null ? \"integerCollection=[], \" : \"\") + (list != null ? \"list=[], \" : \"\") + (object != null ? \"object=\" + object + \", \" : \"\") + (stringArray != null ? \"stringArray=[], \" : \"\") + (wildCollection != null ? \"wildCollection=[], \" : \"\") + (charArrayMethod() != null ? \"charArrayMethod()=[], \" : \"\") + (floatArrayMethod() != null ? \"floatArrayMethod()=[]\" : \"\") + \"]\";\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -727,6 +792,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -773,7 +839,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0)\r\n" + "				builder.append(\", \");\r\n"
 				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -787,6 +853,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -833,7 +900,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
 				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -847,6 +914,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "intArray", "list", "object", "stringArray", "charArrayMethod",
 				"floatArrayMethod" });
@@ -890,7 +958,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				+ (floatArrayMethod() != null ? \"floatArrayMethod()=\" + Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : \"\") + \"]\";\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -903,6 +971,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.stringFormatTemplate= "ABCD${object.className}(${object.getClassName})\nEFG\n{\n\t${member.name} == ${member.value}\n\t${otherMembers}\n}(${object.className}|${object.hashCode}|${object.superToString}|${object.identityHashCode})\nGoodbye!";
@@ -930,7 +999,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return \"ABCDA(\" + getClass().getName() + \")\\nEFG\\n{\\n\\taStringMethod == \" + aStringMethod() + \"\\n\\taFloatMethod == \" + aFloatMethod() + \"\\n\\tanArrayMethod == \" + anArrayMethod() + \"\\n\\taBool == \" + aBool + \"\\n\\taString == \" + aString + \"\\n\\tanInt == \" + anInt + \"\\n}(A|\" + hashCode() + \"|\" + super.toString() + \"|\" + System.identityHashCode(this) + \")\\nGoodbye!\";\r\n"
 				+ "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -940,6 +1009,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testConcatReplace() throws Exception {
+		setCompilerLevels(true, false);
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	A anA;\r\n" + "	float[] floatArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
@@ -947,11 +1017,11 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	public String toString() {\r\n" + "		return \"A []\";\r\n" + "	}\r\n" + "	private String arrayToString(Object array, int len, int maxLen) {\r\n"
 				+ "		return array[0].toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		return collection.toString();\r\n" + "	}\r\n" + "	\r\n"
 				+ "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "anA", "floatArray", "hashMap", "list", "charArrayMethod", "floatArrayMethod" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is60orHigher= false;
 		runOperation(a.getType("A"), members, null);
 
 		String expected= "package p;\r\n"
@@ -983,7 +1053,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				builder.append(((char[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n"
 				+ "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		return collection.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -996,6 +1066,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.skipNulls= true;
@@ -1012,7 +1083,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			builder.append(aString);\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n" + "		builder.append(\"anInt=\");\r\n" + "		builder.append(anInt);\r\n"
 				+ "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1024,6 +1095,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
 		fSettings2.customArrayToString= true;
@@ -1040,7 +1112,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\", anArrayMethod()=\");\r\n" + "		builder.append(Arrays.toString(anArrayMethod()));\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
 				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1054,6 +1126,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1079,7 +1152,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1093,6 +1166,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1125,7 +1199,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n" + "			}\r\n"
 				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1134,18 +1208,18 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testBuilderArrayLimit1_4() throws Exception {
+		setCompilerLevels(false, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
 				true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= false;
-		fSettings2.is60orHigher= false;
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
@@ -1176,7 +1250,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			if (array instanceof Object[]) {\r\n" + "				buffer.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n"
 				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1186,17 +1260,17 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testBuilderArrayLimit1_4Unique() throws Exception {
+		setCompilerLevels(false, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
 				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
 				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
 				"maxLen", "len", "collection", "array" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= false;
-		fSettings2.is60orHigher= false;
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
@@ -1223,7 +1297,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			if (array2 instanceof int[]) {\r\n" + "				buffer2.append(((int[]) array2)[i]);\r\n" + "			}\r\n" + "			if (array2 instanceof Object[]) {\r\n"
 				+ "				buffer2.append(((Object[]) array2)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer2.append(\"]\");\r\n" + "		return buffer2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1238,6 +1312,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1276,7 +1351,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				builder.append(\", \");\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n"
 				+ "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1290,6 +1365,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1328,7 +1404,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1342,6 +1418,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "intArray", "list", "object", "stringArray", "charArrayMethod",
 				"floatArrayMethod" });
@@ -1369,7 +1446,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r\n"
 				+ "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1383,6 +1460,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1408,7 +1486,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(charArrayMethod() != null ? \"[]\" : null);\r\n" + "		builder.append(\", floatArrayMethod()=\");\r\n"
 				+ "		builder.append(floatArrayMethod() != null ? \"[]\" : null);\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1422,6 +1500,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1449,7 +1528,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		if (floatArrayMethod() != null) {\r\n" + "			builder.append(\"floatArrayMethod()=[]\");\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1462,6 +1541,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.skipNulls= true;
@@ -1477,7 +1557,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		if (aString != null) {\r\n" + "			builder.append(\"aString=\").append(aString).append(\", \");\r\n" + "		}\r\n" + "		builder.append(\"anInt=\").append(anInt).append(\"]\");\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1489,6 +1569,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
 		fSettings2.customArrayToString= true;
@@ -1518,7 +1599,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\"A [AArray=\").append(Arrays.toString(AArray)).append(\", aBool=\").append(aBool).append(\", anA=\").append(anA).append(\", floatArray=\").append(Arrays.toString(floatArray)).append(\", intArray=\").append(Arrays.toString(intArray)).append(\", list=\").append(list).append(\", object=\").append(object).append(\", stringArray=\").append(Arrays.toString(stringArray)).append(\", anArrayMethod()=\").append(Arrays.toString(anArrayMethod())).append(\"]\");\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1532,6 +1613,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
 				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
 				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
 				"maxLen", "len", "collection", "array" });
@@ -1568,7 +1650,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder2.append(\"A [aBool=\").append(aBool).append(\", intArray=\").append(Arrays.toString(intArray)).append(\", stringArray=\").append(Arrays.toString(stringArray)).append(\", AArray=\").append(Arrays.toString(AArray)).append(\", list=\").append(list).append(\", hashMap=\").append(hashMap).append(\", wildCollection=\").append(wildCollection).append(\", integerCollection=\").append(integerCollection).append(\", builder=\").append(builder).append(\", buffer=\").append(buffer).append(\", maxLen=\").append(maxLen).append(\", len=\").append(len).append(\", collection=\").append(collection).append(\", array=\").append(array).append(\"]\");\r\n"
 				+ "		return builder2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1578,18 +1660,18 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testChainedBuilderArrayLimit1_4() throws Exception {
+		setCompilerLevels(false, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
 				true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= false;
-		fSettings2.is60orHigher= false;
 		fSettings2.toStringStyle= 2;
 		runOperation(a.getType("A"), members, null);
 
@@ -1634,7 +1716,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "			if (array instanceof Object[]) {\r\n" + "				buffer.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n"
 				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 
@@ -1644,17 +1726,18 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testChainedBuilderArray1_5() throws Exception {
+		setCompilerLevels(true, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
 		fSettings2.customArrayToString= true;
 		fSettings2.toStringStyle= 2;
-		fSettings2.is60orHigher= false;
 		fSettings2.stringFormatTemplate= "${object.className}[ ${member.value}, ${otherMembers}]";
 
 		runOperation(a.getType("A"), members, null);
@@ -1691,7 +1774,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\"A[ \").append(Arrays.toString(AArray)).append(\", \").append(aBool).append(\", \").append(anA).append(\", \").append(Arrays.toString(floatArray)).append(\", \").append(hashMap).append(\", \").append(Arrays.toString(intArray)).append(\", \").append(integerCollection).append(\", \").append(list).append(\", \").append(object).append(\", \").append(Arrays.toString(stringArray)).append(\", \").append(wildCollection).append(\", \").append(Arrays.toString(charArrayMethod())).append(\", \").append(Arrays.toString(floatArrayMethod())).append(\"]\");\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1706,6 +1789,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1741,7 +1825,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0)\r\n" + "				builder.append(\", \");\r\n"
 				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1754,6 +1838,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.toStringStyle= 3;
@@ -1781,7 +1866,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return String.format(\"A [aStringMethod()=%s, aFloatMethod()=%s, anArrayMethod()=%s, aBool=%s, aString=%s, anInt=%s]\", aStringMethod(), aFloatMethod(), anArrayMethod(), aBool, aString, anInt);\r\n"
 				+ "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1793,6 +1878,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
 		fSettings2.customArrayToString= true;
@@ -1821,7 +1907,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, intArray=%s, list=%s, object=%s, stringArray=%s, anArrayMethod()=%s]\", Arrays.toString(AArray), aBool, anA, Arrays.toString(floatArray), Arrays.toString(intArray), list, object, Arrays.toString(stringArray), Arrays.toString(anArrayMethod()));\r\n"
 				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1835,6 +1921,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1876,7 +1963,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
 				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1890,6 +1977,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -1934,7 +2022,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
 				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -1949,6 +2037,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "list", "object", "stringArray" });
 		fSettings2.customArrayToString= true;
@@ -1988,7 +2077,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, list=%s, object=%s, stringArray=%s]\", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null, aBool, anA, list != null ? list.subList(0, Math.min(list.size(), maxLen)) : null, object, stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2002,6 +2091,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -2041,7 +2131,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]\", AArray != null ? \"[]\" : null, aBool, anA, floatArray != null ? \"[]\" : null, hashMap != null ? \"[]\" : null, intArray != null ? \"[]\" : null, integerCollection != null ? \"[]\" : null, list != null ? \"[]\" : null, object, stringArray != null ? \"[]\" : null, wildCollection != null ? \"[]\" : null, charArrayMethod() != null ? \"[]\" : null, floatArrayMethod() != null ? \"[]\" : null);\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2055,6 +2145,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -2098,7 +2189,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
 				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2107,17 +2198,17 @@ public class GenerateToStringTest extends SourceTestCase {
 	 * @throws Exception
 	 */
 	public void testFormatLimit1_4() throws Exception {
+		setCompilerLevels(false, false);
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
 		fSettings2.limitElements= true;
-		fSettings2.is50orHigher= false;
-		fSettings2.is60orHigher= false;
 		fSettings2.toStringStyle= 3;
 
 		runOperation(a.getType("A"), members, null);
@@ -2156,7 +2247,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		int i = 0;\r\n" + "		for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n"
 				+ "			}\r\n" + "			buffer.append(iterator.next());\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2169,6 +2260,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.toStringStyle= 4;
@@ -2181,7 +2273,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\"aFloatMethod()\", aFloatMethod());\r\n" + "		builder.append(\"anArrayMethod()\", anArrayMethod());\r\n" + "		builder.append(\"aBool\", aBool);\r\n"
 				+ "		builder.append(\"aString\", aString);\r\n" + "		builder.append(\"anInt\", anInt);\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2194,6 +2286,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.skipNulls= true;
@@ -2208,7 +2301,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\"aBool\", aBool);\r\n" + "		if (aString != null) {\r\n" + "			builder.append(\"aString\", aString);\r\n" + "		}\r\n" + "		builder.append(\"anInt\", anInt);\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2220,6 +2313,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
 				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
 				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
 		fSettings2.customArrayToString= true;
@@ -2234,7 +2328,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\"list\", list);\r\n" + "		builder.append(\"object\", object);\r\n" + "		builder.append(\"stringArray\", Arrays.toString(stringArray));\r\n"
 				+ "		builder.append(\"anArrayMethod()\", Arrays.toString(anArrayMethod()));\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2248,6 +2342,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -2271,7 +2366,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n" + "			}\r\n"
 				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 
@@ -2286,6 +2381,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -2316,7 +2412,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2329,6 +2425,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
 				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
 				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
 				"maxLen", "len", "collection", "array" });
@@ -2357,7 +2454,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				builder2.append(\", \");\r\n" + "			}\r\n" + "			builder2.append(iterator.next());\r\n" + "		}\r\n" + "		builder2.append(\"]\");\r\n" + "		return builder2.toString();\r\n"
 				+ "	}\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2371,6 +2468,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -2395,7 +2493,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		if (this.charArrayMethod() != null)\r\n" + "			builder.append(\"charArrayMethod()\", this.charArrayMethod());\r\n" + "		if (this.floatArrayMethod() != null)\r\n"
 				+ "			builder.append(\"floatArrayMethod()\", this.floatArrayMethod());\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2409,6 +2507,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
 				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
 				"wildCollection", "charArrayMethod", "floatArrayMethod" });
@@ -2442,7 +2541,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
 				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2455,6 +2554,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.toStringStyle= 4;
@@ -2486,7 +2586,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\"aStringMethod()\", aStringMethod()).append(\"aFloatMethod()\", aFloatMethod()).append(\"anArrayMethod()\", anArrayMethod()).append(\"aBool\", aBool).append(\"aString\", aString).append(\"anInt\", anInt);\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2499,6 +2599,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
 		fSettings2.skipNulls= true;
@@ -2514,7 +2615,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		if (aString != null) {\r\n" + "			builder.append(\"aString\", aString);\r\n" + "		}\r\n" + "		builder.append(\"aBool\", aBool).append(\"anInt\", anInt);\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2527,6 +2628,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
 		fSettings2.createComments= true;
@@ -2562,7 +2664,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "		builder.append(\"aStringMethod()\", aStringMethod()).append(\"aFloatMethod()\", aFloatMethod()).append(\"anArrayMethod()\", anArrayMethod()).append(\"aString\", aString).append(\"aBool\", aBool).append(\"anInt\", anInt);\r\n"
 				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2575,6 +2677,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.toStringStyle= 4;
@@ -2617,7 +2720,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "\r\n"
 				+ "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2631,6 +2734,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
 				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
 				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "	Object creator;\r\n" + "}\r\n" + "", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
 				"maxLen", "len", "collection", "array", "creator" });
@@ -2689,7 +2793,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "}\r\n"
 				+ "";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2702,6 +2806,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
 		fSettings2.skipNulls= true;
@@ -2751,7 +2856,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "\r\n"
 				+ "}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2764,6 +2869,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.toStringStyle= 4;
@@ -2803,7 +2909,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				"\r\n" +
 				"}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2816,6 +2922,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "anArrayMethod", "aString", "aFloatMethod", "aBool", "anInt" });
 		fSettings2.skipNulls= true;
@@ -2865,7 +2972,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				"\r\n" +
 				"}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 
 	/**
@@ -2879,6 +2986,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
 				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
 				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		CompilationUnit oldCUNode= getCUNode(a);
 
 		IPackageFragment packageFragment= fRoot.createPackageFragment("com.simple.pack", true, null);
 		ICompilationUnit compilationUnit= packageFragment.getCompilationUnit("ToStringBuilder.java");
@@ -2932,6 +3040,6 @@ public class GenerateToStringTest extends SourceTestCase {
 				"\r\n" +
 				"}";
 
-		compareSource(expected, a.getSource());
+		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
 }
