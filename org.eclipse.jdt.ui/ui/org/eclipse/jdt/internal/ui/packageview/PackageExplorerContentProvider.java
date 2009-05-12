@@ -902,7 +902,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private void postRefresh(Object root, int relation, Object affectedElement, Collection runnables) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
-		if (isParent(root, fInput))
+		if (isParent(root, fInput) || root instanceof IJavaModel)
 			root= fInput;
 		List toRefresh= new ArrayList(1);
 		toRefresh.add(root);
