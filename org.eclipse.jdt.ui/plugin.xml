@@ -5691,6 +5691,7 @@
 					<instanceof	value="org.eclipse.core.resources.IResource" />
 					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
 					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
+					<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 				</or>
 			</possibleChildren> 
 			<actionProvider
