@@ -195,7 +195,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 	/**
 	 * Tells whether the expand with constructors mode has been set.
 	 * 
-	 * @return <code>true</code> if in expand with constructors mode, <code>false</code> otherwise
+	 * @return <code>true</code> if expand with constructors mode has been set explicitly, <code>false</code> otherwise
 	 * @see #setExpandWithConstructors(boolean)
 	 * @since 3.5
 	 */
