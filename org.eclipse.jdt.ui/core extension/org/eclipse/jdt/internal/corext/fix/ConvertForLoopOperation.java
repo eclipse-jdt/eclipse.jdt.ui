@@ -444,7 +444,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 							throw new InvalidBodyError();
 						} else if (fElementDeclaration != null && nameBinding.equals(fElementDeclaration.getName().resolveBinding())) {
 							if (isAssigned(node))
-								fMakeFinal= false;
+								throw new InvalidBodyError();
 						}
 					}
 

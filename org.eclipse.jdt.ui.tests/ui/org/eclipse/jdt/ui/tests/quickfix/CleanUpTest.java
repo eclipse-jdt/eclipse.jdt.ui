@@ -4192,6 +4192,64 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testJava50ForLoop274199() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        for (int i = 0; i < args.length; i++) {\n");
+		buf.append("            String output = args[i];\n");
+		buf.append("            if (output.length() == 1) {\n");
+		buf.append("                output = output + \"-XXX\";\n");
+		buf.append("            }\n");
+		buf.append("\n");
+		buf.append("            String s = \"path=\" + args[i] + \",output=\" + output;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        for (int i = 0; i < args.length; i++) {\n");
+		buf.append("            String output = args[i];\n");
+		buf.append("            String output1 = output;\n");
+		buf.append("            if (output1.length() == 1) {\n");
+		buf.append("                output1 = output1 + \"-XXX\";\n");
+		buf.append("            }\n");
+		buf.append("\n");
+		buf.append("            String s = \"path=\" + args[i] + \",output=\" + output1;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        for (int i = 0; i < args.length; i++) {\n");
+		buf.append("            String output = args[i];\n");
+		buf.append("            if (output.length() == 1) {\n");
+		buf.append("                output = output + \"-XXX\";\n");
+		buf.append("            }\n");
+		buf.append("\n");
+		buf.append("            String s = \"path=\" + args[i] + \",output=\" + output;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        for (String output : args) {\n");
+		buf.append("            String output1 = output;\n");
+		buf.append("            if (output1.length() == 1) {\n");
+		buf.append("                output1 = output1 + \"-XXX\";\n");
+		buf.append("            }\n");
+		buf.append("\n");
+		buf.append("            String s = \"path=\" + output + \",output=\" + output1;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
 	public void testCombination01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -4458,7 +4516,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("    public void method(String[] arr) {\n");
 		buf.append("        for (int i = 0; i < arr.length; i++) {\n");
 		buf.append("            String item = arr[i];\n");
-		buf.append("            item = item + \"a\";\n");
+		buf.append("            String item2 = item + \"a\";\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -4472,8 +4530,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void method(String[] arr) {\n");
-		buf.append("        for (String item : arr) {\n");
-		buf.append("            item = item + \"a\";\n");
+		buf.append("        for (final String item : arr) {\n");
+		buf.append("            final String item2 = item + \"a\";\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
