@@ -4226,13 +4226,13 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        for (int i = 0; i < args.length; i++) {\n");
-		buf.append("            String output = args[i];\n");
+		buf.append("        for (String arg : args) {\n");
+		buf.append("            String output = arg;\n");
 		buf.append("            if (output.length() == 1) {\n");
 		buf.append("                output = output + \"-XXX\";\n");
 		buf.append("            }\n");
 		buf.append("\n");
-		buf.append("            String s = \"path=\" + args[i] + \",output=\" + output;\n");
+		buf.append("            String s = \"path=\" + arg + \",output=\" + output;\n");
 		buf.append("        }\n");
 		buf.append("        \n");
 		buf.append("        for (String output : args) {\n");

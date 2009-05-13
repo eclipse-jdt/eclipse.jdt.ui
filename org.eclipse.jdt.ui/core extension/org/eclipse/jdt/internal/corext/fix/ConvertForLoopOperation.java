@@ -444,7 +444,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 							throw new InvalidBodyError();
 						} else if (fElementDeclaration != null && nameBinding.equals(fElementDeclaration.getName().resolveBinding())) {
 							if (isAssigned(node))
-								throw new InvalidBodyError();
+								fElementDeclaration= null;
 						}
 					}
 
@@ -589,7 +589,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			}
 
 			private void replaceAccess(ASTNode node) {
-				if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+				if (fElementDeclaration != null && node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.getParent();
 					IBinding targetBinding= fragment.getName().resolveBinding();
 					if (targetBinding != null) {
