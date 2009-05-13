@@ -139,7 +139,8 @@ class ExpandWithConstructorsAction extends Action {
 				}
 
 			}
-			if (wrappers[i].getExpandWithConstructors() != true) {
+			CallHierarchyContentProvider.ensureDefaultExpandWithConstructors(wrappers[i]);
+			if (!wrappers[i].getExpandWithConstructors()) {
 				allElementsChecked= false;
 			}
 		}

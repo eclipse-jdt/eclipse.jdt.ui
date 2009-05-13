@@ -95,6 +95,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 			} else {
 				if (parentElement instanceof CallerMethodWrapper) {
 					CallerMethodWrapper caller= (CallerMethodWrapper)parentElement;
+					ensureDefaultExpandWithConstructors(caller);
 					if (caller.getExpandWithConstructors()) {
 						IType type= caller.getMember().getDeclaringType();
 						try {
@@ -135,7 +136,66 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         return EMPTY_ARRAY;
     }
 
-    protected Object[] fetchChildren(final MethodWrapper methodWrapper) {
+	/**
+	 * Sets the default "expand with constructors" mode for the method wrapper. Does nothing if the
+	 * mode has already been set.
+	 * 
+	 * 
+	 * @param wrapper the caller method wrapper
+	 * @since 3.5
+	 */
+	static void ensureDefaultExpandWithConstructors(CallerMethodWrapper wrapper) {
+
+		if (!wrapper.isExpandWithConstructorsSet()) {
+			try {
+				IType type= wrapper.getMember().getDeclaringType();
+				if (type.isAnonymous() || isInTheDefaultExpandWithConstructorList(type)) {
+					wrapper.setExpandWithConstructors(true);
+				} else {
+					wrapper.setExpandWithConstructors(false);
+				}
+			} catch (JavaModelException e) {
+				// ignore: expand mode will be off
+			}
+		}
+
+	}
+
+	/**
+	 * Checks if declaring type matches the pre-defined array of types for default expand with
+	 * constructors.
+	 * 
+	 * @param type the declaring type of the caller method wrapper
+	 * @return <code>true</code> if type matches the pre-defined list, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	private static boolean isInTheDefaultExpandWithConstructorList(IType type) {
+		String[] defaultTypes= { "java.lang.Runnable", "java.util.concurrent.Callable", "org.eclipse.swt.widgets.Listener" }; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		String typeName= type.getFullyQualifiedName('.');
+		String superClass;
+		String[] superInterfaces;
+		try {
+			superClass= type.getSuperclassName();
+			superInterfaces= type.getSuperInterfaceNames();
+		} catch (JavaModelException e) {
+			return false;
+		}
+		for (int i= 0; i < defaultTypes.length; i++) {
+			String defaultType= defaultTypes[i];
+			if (typeName.equals(defaultType) || (superClass != null && superClass.equals(defaultType))) {
+				return true;
+			}
+			if (superInterfaces.length > 0) {
+				for (int j= 0; j < superInterfaces.length; j++) {
+					if (superInterfaces[j].equals(defaultType))
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	protected Object[] fetchChildren(final MethodWrapper methodWrapper) {
         IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
         MethodWrapperRunnable runnable= new MethodWrapperRunnable(methodWrapper);
         try {
@@ -162,7 +222,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * Returns whether the given element is an "Expand witch Constructors" node.
      * 
 	 * @param element a method wrapped
-	 * @return <code>true</code> iff the element is an "Expand witch Constructors" node 
+	 * @return <code>true</code> iff the element is an "Expand witch Constructors" node
 	 * @since 3.5
 	 */
 	static boolean isExpandWithConstructors(MethodWrapper element) {
@@ -206,7 +266,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 * @return the call hierarchy view part
 	 * @since 3.5
 	 */
-    public CallHierarchyViewPart getViewPart() {    	
+    public CallHierarchyViewPart getViewPart() {
     	return fPart;
     }
 
