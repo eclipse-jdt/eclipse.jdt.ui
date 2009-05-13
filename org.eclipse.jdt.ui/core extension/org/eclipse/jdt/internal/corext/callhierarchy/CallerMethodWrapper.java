@@ -170,7 +170,9 @@ public class CallerMethodWrapper extends MethodWrapper {
 	/**
 	 * Returns the value of expand with constructors mode.
 	 * 
-	 * @return <code>true</code> if in expand with constructors mode, <code>false</code> otherwise
+	 * @return <code>true</code> if in expand with constructors mode, <code>false</code> otherwise or if not yet set
+	 * @see #isExpandWithConstructorsSet()
+	 * 
 	 * @since 3.5
 	 */
 	public boolean getExpandWithConstructors() {
