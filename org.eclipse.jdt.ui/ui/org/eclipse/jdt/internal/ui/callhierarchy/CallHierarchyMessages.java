@@ -58,6 +58,7 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ToggleOrientationAction_single_label;
 	public static String ToggleOrientationAction_single_tooltip;
 	public static String ToggleOrientationAction_single_description;
+	public static String ShowExpandWithConstructorsDialogAction_text;
 	public static String ShowFilterDialogAction_text;
 	public static String FiltersDialog_filter;
 	public static String FiltersDialog_filterOnNames;
@@ -134,6 +135,11 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ExpandWithConstructorsAction_expandWithConstructors_text;
 	public static String ExpandWithConstructorsAction_expandWithConstructors_description;
 	public static String ExpandWithConstructorsAction_expandWithConstructors_tooltip;
+	public static String ExpandWithConstructorsDialog_anonymousTypes_label;
+	public static String ExpandWithConstructorsDialog_explanation_label;
+	public static String ExpandWithConstructorsDialog_not_a_valid_type_name;
+	public static String ExpandWithConstructorsDialog_title;
+	public static String ExpandWithConstructorsDialog_typeNames_label;
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CallHierarchyMessages.class);
 	}

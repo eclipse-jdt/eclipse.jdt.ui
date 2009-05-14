@@ -37,10 +37,35 @@ import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CallHierarchyContentProvider implements ITreeContentProvider {
+
+	/**
+	 * A named preference that holds the types whose methods are by default expanded with
+	 * constructors in the Call Hierarchy.
+	 * <p>
+	 * Value is of type <code>String</code>: semicolon separated list of fully qualified type names.
+	 * </p>
+	 * 
+	 * @since 3.5
+	 */
+	public static final String PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.defaultExpandWithConstructors"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether methods from anonymous types are by default expanded
+	 * with constructors in the Call Hierarchy.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.5
+	 */
+	public static final String PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.anonymousExpandWithConstructors"; //$NON-NLS-1$
+
 	private final static Object[] EMPTY_ARRAY= new Object[0];
 
     private DeferredTreeContentManager fManager;
@@ -149,10 +174,19 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	static void ensureDefaultExpandWithConstructors(CallerMethodWrapper wrapper) {
 
 		if (!wrapper.isExpandWithConstructorsSet()) {
-			if (canExpandWithConstructors(wrapper)) {
+			if (CallHierarchyContentProvider.canExpandWithConstructors(wrapper)) {
 				IType type= wrapper.getMember().getDeclaringType();
 				try {
-					wrapper.setExpandWithConstructors(type != null && (type.isAnonymous() || isInTheDefaultExpandWithConstructorList(type)));
+					boolean withConstructors= false;
+					if (type != null) {
+						boolean anonymousPref= PreferenceConstants.getPreferenceStore().getBoolean(PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS);
+						if (anonymousPref && type.isAnonymous()) {
+							withConstructors= true;
+						} else if (isInTheDefaultExpandWithConstructorList(type)) {
+							withConstructors= true;
+						}
+					}
+					wrapper.setExpandWithConstructors(withConstructors);
 				} catch (JavaModelException e) {
 					// ignore: expand mode will be off
 				}
@@ -190,8 +224,13 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 * @return <code>true</code> if type matches the pre-defined list, <code>false</code> otherwise
 	 * @since 3.5
 	 */
-	private static boolean isInTheDefaultExpandWithConstructorList(IType type) {
-		String[] defaultTypes= { "java.lang.Runnable", "java.util.concurrent.Callable", "org.eclipse.swt.widgets.Listener" }; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	static boolean isInTheDefaultExpandWithConstructorList(IType type) {
+		String serializedTypes= PreferenceConstants.getPreferenceStore().getString(PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS);
+		if (serializedTypes.length() == 0)
+			return false;
+		
+		String[] defaultTypes= serializedTypes.split(";"); //$NON-NLS-1$
+		
 		String typeName= type.getFullyQualifiedName('.');
 		String superClass;
 		String[] superInterfaces;
@@ -203,16 +242,36 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		}
 		for (int i= 0; i < defaultTypes.length; i++) {
 			String defaultType= defaultTypes[i];
-			if (typeName.equals(defaultType) || (superClass != null && superClass.equals(defaultType))) {
+			if (typeName.equals(defaultType) || (superClass != null && typeNameMatches(superClass, defaultType))) {
 				return true;
 			}
 			if (superInterfaces.length > 0) {
 				for (int j= 0; j < superInterfaces.length; j++) {
-					if (superInterfaces[j].equals(defaultType))
+					if (typeNameMatches(superInterfaces[j], defaultType))
 						return true;
 				}
 			}
 		}
+		return false;
+	}
+
+	/**
+	 * Checks whether the two type names match. They match if they
+	 * are equal, or if could be the same type but one is missing the package.
+	 * 
+	 * @param nameA type name (can be qualified) 
+	 * @param nameB type name (can be qualified)
+	 * @return <code>true</code> iff the given type names match
+	 * @since 3.5
+	 */
+	private static boolean typeNameMatches(String nameA, String nameB) {
+		if (nameA.equals(nameB))
+			return true;
+		if (nameB.endsWith(nameA) && nameB.lastIndexOf('.') == nameB.length() - nameA.length() - 1)
+			return true;
+		if (nameA.endsWith(nameB) && nameA.lastIndexOf('.') == nameA.length() - nameB.length() - 1)
+			return true;
+		
 		return false;
 	}
 

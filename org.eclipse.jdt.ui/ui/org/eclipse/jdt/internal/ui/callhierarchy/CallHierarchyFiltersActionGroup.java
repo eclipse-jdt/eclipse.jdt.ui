@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *          (report 36180: Callers/Callees view)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -25,7 +27,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
- * Action group to add the filter action to a view part's toolbar
+ * Action group to add the filter actions to a view part's toolbar
  * menu.
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -41,10 +43,20 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
         }
 
         public void run() {
-            openDialog();
+            openFiltersDialog();
         }
     }
 
+    class ShowExpandWithConstructorsDialogAction extends Action {
+    	ShowExpandWithConstructorsDialogAction() {
+    		setText(CallHierarchyMessages.ShowExpandWithConstructorsDialogAction_text);
+    	}
+    	
+    	public void run() {
+    		openExpandWithConstructorsDialog();
+    	}
+    }
+    
     private IViewPart fPart;
 
     /**
@@ -69,6 +81,7 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     private void fillViewMenu(IMenuManager viewMenu) {
         viewMenu.add(new Separator("filters")); //$NON-NLS-1$
         viewMenu.add(new ShowFilterDialogAction());
+        viewMenu.add(new ShowExpandWithConstructorsDialogAction());
     }
 
     /* (non-Javadoc)
@@ -80,10 +93,15 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
 
     // ---------- dialog related code ----------
 
-    private void openDialog() {
+    private void openFiltersDialog() {
         FiltersDialog dialog= new FiltersDialog(
             fPart.getViewSite().getShell());
 
         dialog.open();
+    }
+    
+    private void openExpandWithConstructorsDialog() {
+    	Shell parentShell= fPart.getViewSite().getShell();
+		new ExpandWithConstructorsDialog(parentShell).open();
     }
 }

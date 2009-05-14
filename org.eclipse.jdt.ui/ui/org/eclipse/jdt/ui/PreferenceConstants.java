@@ -43,6 +43,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer;
+import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
@@ -3874,6 +3875,9 @@ public class PreferenceConstants {
 
 		// Colors that are set by the current theme
 		JavaUIPreferenceInitializer.setThemeBasedPreferences(store, false);
+		
+		store.setDefault(CallHierarchyContentProvider.PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS, true);
+		store.setDefault(CallHierarchyContentProvider.PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS, "java.lang.Runnable;java.util.concurrent.Callable;org.eclipse.swt.widgets.Listener"); //$NON-NLS-1$
 	}
 
 	/**
