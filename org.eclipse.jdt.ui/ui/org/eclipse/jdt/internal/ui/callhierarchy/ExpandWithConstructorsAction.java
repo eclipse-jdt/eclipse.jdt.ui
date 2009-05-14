@@ -16,13 +16,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -112,16 +107,9 @@ class ExpandWithConstructorsAction extends Action {
 				return false;
 			
 			wrappers[i]= (CallerMethodWrapper)element;
-			IMember member= wrappers[i].getMember();
-			if (!(member instanceof IMethod))
+			if (!CallHierarchyContentProvider.canExpandWithConstructors(wrappers[i]))
 				return false;
-			IMethod method= (IMethod)member;
-			try {
-				if (JdtFlags.isStatic(method) || method.isConstructor())
-					return false;
-			} catch (JavaModelException e) {
-				return false; // don't try to work with inexistent elements
-			}
+
 			for (int j= 0; j < i; j++) {
 				CallerMethodWrapper parent= (CallerMethodWrapper)wrappers[j].getParent();
 				while (parent != null) {

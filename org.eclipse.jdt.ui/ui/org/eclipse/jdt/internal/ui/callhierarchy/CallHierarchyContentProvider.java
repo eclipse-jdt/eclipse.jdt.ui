@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -34,6 +35,7 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodCall;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -147,20 +149,39 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	static void ensureDefaultExpandWithConstructors(CallerMethodWrapper wrapper) {
 
 		if (!wrapper.isExpandWithConstructorsSet()) {
-			try {
+			if (canExpandWithConstructors(wrapper)) {
 				IType type= wrapper.getMember().getDeclaringType();
-				if (type.isAnonymous() || isInTheDefaultExpandWithConstructorList(type)) {
-					wrapper.setExpandWithConstructors(true);
-				} else {
-					wrapper.setExpandWithConstructors(false);
+				try {
+					wrapper.setExpandWithConstructors(type != null && (type.isAnonymous() || isInTheDefaultExpandWithConstructorList(type)));
+				} catch (JavaModelException e) {
+					// ignore: expand mode will be off
 				}
-			} catch (JavaModelException e) {
-				// ignore: expand mode will be off
 			}
 		}
 
 	}
 
+	/**
+	 * Checks whether given caller method wrapper can be expanded with constructors.
+	 * 
+	 * @param wrapper the caller method wrapper
+	 * @return <code> true</code> if the wrapper can be expanded with constructors, <code>false</code> otherwise
+	 * @since 3.5
+	 */
+	static boolean canExpandWithConstructors(CallerMethodWrapper wrapper) {
+		IMember member= wrapper.getMember();
+		if (!(member instanceof IMethod))
+			return false;
+		IMethod method= (IMethod)member;
+		try {
+			if (JdtFlags.isStatic(method) || method.isConstructor())
+				return false;
+		} catch (JavaModelException e) {
+			return false; // don't try to work with inexistent elements
+		}
+		return true;
+	}
+	
 	/**
 	 * Checks if declaring type matches the pre-defined array of types for default expand with
 	 * constructors.
