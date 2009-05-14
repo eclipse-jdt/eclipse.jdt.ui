@@ -172,6 +172,8 @@ import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 public class PasteAction extends SelectionDispatchAction{
 
+	public static final String ID= "org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction.id"; //$NON-NLS-1$
+
 	private final Clipboard fClipboard;
 
 	public PasteAction(IWorkbenchSite site) {
@@ -182,6 +184,7 @@ public class PasteAction extends SelectionDispatchAction{
 		super(site);
 		fClipboard= clipboard;
 
+		setId(ID);
 		setText(ReorgMessages.PasteAction_4);
 		setDescription(ReorgMessages.PasteAction_5);
 

@@ -118,6 +118,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
@@ -946,16 +947,18 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fFocusOnSelectionAction.canActionBeAdded()) {
             menu.appendToGroup(GROUP_FOCUS, fFocusOnSelectionAction);
         }
-        if (fCopyAction.canActionBeAdded()) {
-        	menu.appendToGroup(GROUP_FOCUS, fCopyAction);
-        }
-
         if (fExpandWithConstructorsAction.canActionBeAdded()) {
         	menu.appendToGroup(GROUP_FOCUS, fExpandWithConstructorsAction);
         }
+
+
         fActionGroups.setContext(new ActionContext(getSelection()));
         fActionGroups.fillContextMenu(menu);
         fActionGroups.setContext(null);
+
+		if (fCopyAction.canActionBeAdded()) {
+			menu.insertBefore(PasteAction.ID, fCopyAction);
+		}
     }
 
     private void fillActionBars() {
@@ -1076,7 +1079,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 					public int category(Object element) {
 						return element instanceof RealCallers ? 1 : 0;
 					}
-				}); 
+				});
     			fCallHierarchyViewer.setMethodWrappers(getCallerRoots());
 			} else {
 				fCallHierarchyViewer.setComparator(null);
