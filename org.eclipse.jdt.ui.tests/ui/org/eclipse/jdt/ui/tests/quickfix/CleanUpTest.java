@@ -6675,7 +6675,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("    \n");
 		buf.append("    private void foo() {\n");
 		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        @Deprecated final\n");
+		buf.append("        @Deprecated\n");
+		buf.append("        final\n");
 		buf.append("        int i= 10;\n");
 		buf.append("        @SuppressWarnings(\"unused\")\n");
 		buf.append("        @Deprecated\n");
