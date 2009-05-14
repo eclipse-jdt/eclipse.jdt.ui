@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,9 +63,11 @@ public class VariableDeclarationRewrite {
 		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
 		ASTNode lastStatement= declarationNode;
 
+		boolean modifiersModified= false;
 		if (fragmentsToChange.contains(lastFragment)) {
 			ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, declarationNode);
 			modifierRewrite.setModifiers(includedModifiers, excludedModifiers, group);
+			modifiersModified= true;
 		}
 
 		ListRewrite fragmentsRewrite= null;
@@ -80,9 +82,10 @@ public class VariableDeclarationRewrite {
 					ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, newStatement);
 					if (fragmentsToChange.contains(currentFragment)) {
 						modifierRewrite.copyAllAnnotations(declarationNode, group);
-						modifierRewrite.setModifiers(includedModifiers, excludedModifiers, group);
+						int newModifiers= (declarationNode.getModifiers() & ~excludedModifiers) | includedModifiers;
+						modifierRewrite.setModifiers(newModifiers, excludedModifiers, group);
 					} else {
-						modifierRewrite.copyAllModifiers(declarationNode, group);
+						modifierRewrite.copyAllModifiers(declarationNode, group, modifiersModified);
 					}
 					blockRewrite.insertAfter(newStatement, lastStatement, group);
 
@@ -117,9 +120,11 @@ public class VariableDeclarationRewrite {
 		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
 		ASTNode lastStatement= declarationNode;
 
+		boolean modifiersModified= false;
 		if (fragmentsToChange.contains(lastFragment)) {
 			ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, declarationNode);
 			modifierRewrite.setModifiers(includedModifiers, excludedModifiers, group);
+			modifiersModified= true;
 		}
 
 		ListRewrite fragmentsRewrite= null;
@@ -134,9 +139,10 @@ public class VariableDeclarationRewrite {
 					ModifierRewrite modifierRewrite= ModifierRewrite.create(rewrite, newStatement);
 					if (fragmentsToChange.contains(currentFragment)) {
 						modifierRewrite.copyAllAnnotations(declarationNode, group);
-						modifierRewrite.setModifiers(includedModifiers, excludedModifiers, group);
+						int newModifiers= (declarationNode.getModifiers() & ~excludedModifiers) | includedModifiers;
+						modifierRewrite.setModifiers(newModifiers, excludedModifiers, group);
 					} else {
-						modifierRewrite.copyAllModifiers(declarationNode, group);
+						modifierRewrite.copyAllModifiers(declarationNode, group, modifiersModified);
 					}
 					blockRewrite.insertAfter(newStatement, lastStatement, group);
 

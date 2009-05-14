@@ -121,15 +121,29 @@ public class ModifierRewrite {
 	}
 
 	public void copyAllModifiers(ASTNode otherDecl, TextEditGroup editGroup) {
+		copyAllModifiers(otherDecl, editGroup, false);
+	}
+	
+	public void copyAllModifiers(ASTNode otherDecl, TextEditGroup editGroup, boolean copyIndividually) {
 		ListRewrite modifierList= evaluateListRewrite(fModifierRewrite.getASTRewrite(), otherDecl);
 		List originalList= modifierList.getOriginalList();
 		if (originalList.isEmpty()) {
 			return;
 		}
 
-		ASTNode copy= modifierList.createCopyTarget((ASTNode) originalList.get(0), (ASTNode) originalList.get(originalList.size() - 1));
-		if (copy != null) {
-			fModifierRewrite.insertLast(copy, editGroup);
+		if (copyIndividually) {
+			for (Iterator iterator= originalList.iterator(); iterator.hasNext();) {
+				ASTNode modifier= (ASTNode) iterator.next();
+				ASTNode copy= fModifierRewrite.getASTRewrite().createCopyTarget(modifier);
+				if (copy != null) { //paranoia check (only left here because we're in RC1)
+					fModifierRewrite.insertLast(copy, editGroup);
+				}
+			}
+		} else {
+			ASTNode copy= modifierList.createCopyTarget((ASTNode) originalList.get(0), (ASTNode) originalList.get(originalList.size() - 1));
+			if (copy != null) { //paranoia check (only left here because we're in RC1)
+				fModifierRewrite.insertLast(copy, editGroup);
+			}
 		}
 	}
 
