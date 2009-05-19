@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,6 +83,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 
 	private class HashCodeEqualsGenerationSettings extends CodeGenerationSettings {
 		public boolean useInstanceOf= false;
+		public boolean useBlocks= false;
 	}
 
 	private List allFields;
@@ -191,7 +192,9 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		HashCodeEqualsGenerationSettings settings= new HashCodeEqualsGenerationSettings();
 		super.createSettings(type, dialog).setSettings(settings);
 		settings.createComments= dialog.getGenerateComment();
-		settings.useInstanceOf= ((GenerateHashCodeEqualsDialog) dialog).isUseInstanceOf();
+		GenerateHashCodeEqualsDialog generateHashCodeEqualsDialog= (GenerateHashCodeEqualsDialog)dialog;
+		settings.useInstanceOf= generateHashCodeEqualsDialog.isUseInstanceOf();
+		settings.useBlocks= generateHashCodeEqualsDialog.isUseBlocks();
 		return settings;
 	}
 
@@ -254,9 +257,10 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 
 	IWorkspaceRunnable createOperation(Object[] selectedBindings, CodeGenerationSettings settings, boolean regenerate, IJavaElement type, IJavaElement elementPosition) {
 		final IVariableBinding[] selectedVariableBindings= (IVariableBinding[]) Arrays.asList(selectedBindings).toArray(new IVariableBinding[0]);
+		HashCodeEqualsGenerationSettings hashCodeEqualsGenerationSettings= (HashCodeEqualsGenerationSettings)settings;
 		GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedVariableBindings, fUnit, elementPosition, settings,
-				((HashCodeEqualsGenerationSettings) settings).useInstanceOf, regenerate, true, false);
-		operation.setUseBlocksForThen(useBlocks(type.getJavaProject()));
+				hashCodeEqualsGenerationSettings.useInstanceOf, regenerate, true, false);
+		operation.setUseBlocksForThen(hashCodeEqualsGenerationSettings.useBlocks);
 		return operation;
 	}
 
