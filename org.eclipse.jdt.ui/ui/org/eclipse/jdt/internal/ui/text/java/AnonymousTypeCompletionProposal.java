@@ -393,7 +393,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		if (isAnonymousConstructorInvoc && (insertCompletion() ^ isInsertModeToggled())) {
 			// Keep existing code
 			int endPos= pos;
-			while (endPos < lineEndOffset && document.getChar(endPos) != '(') {
+			while (endPos < lineEndOffset && document.getChar(endPos) != '(' && document.getChar(endPos) != ')') {
 				endPos++;
 			}
 			int keepLength= endPos - pos;
