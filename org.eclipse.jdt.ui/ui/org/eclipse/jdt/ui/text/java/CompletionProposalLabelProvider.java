@@ -507,6 +507,7 @@ public class CompletionProposalLabelProvider {
 
 	StyledString createAnonymousTypeLabel(CompletionProposal proposal) {
 		char[] declaringTypeSignature= proposal.getDeclarationSignature();
+		declaringTypeSignature= Signature.getTypeErasure(declaringTypeSignature);
 
 		StyledString buffer= new StyledString();
 		buffer.append(Signature.getSignatureSimpleName(declaringTypeSignature));

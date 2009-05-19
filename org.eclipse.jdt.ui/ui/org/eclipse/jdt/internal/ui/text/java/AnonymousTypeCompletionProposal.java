@@ -172,6 +172,17 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				return null;
 
 			IMethodBinding[] bindings= StubUtility2.getOverridableMethods(astRoot.getAST(), dummyTypeBinding, true);
+			
+			if (fSuperType.isInterface()) {
+				ITypeBinding[] dummySuperInterfaces= dummyTypeBinding.getInterfaces();
+				if (dummySuperInterfaces.length == 0 || dummySuperInterfaces.length == 1 && dummySuperInterfaces[0].isRawType())
+					bindings= new IMethodBinding[0];
+			} else {
+				ITypeBinding dummySuperclass= dummyTypeBinding.getSuperclass();
+				if (dummySuperclass == null || dummySuperclass.isRawType())
+					bindings= new IMethodBinding[0];
+			}
+			
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fSuperType.getJavaProject());
 
 			IMethodBinding[] methodsToOverride= null;
