@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -284,7 +284,8 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 			if (fLabelProvider == null)
 				fLabelProvider= collector.getLabelProvider();
 		} catch (JavaModelException x) {
-			JavaPlugin.log(x);
+			if (!x.isDoesNotExist() || cu.getJavaProject() == null || cu.getJavaProject().isOnClasspath(cu))
+				JavaPlugin.log(x);
 			if (fKeywordProposals == null)
 				fKeywordProposals= new IJavaCompletionProposal[0];
 		}
