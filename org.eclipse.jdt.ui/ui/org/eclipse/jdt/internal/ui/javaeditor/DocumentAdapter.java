@@ -571,7 +571,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * <strong>Note:<strong> This implementation applies the edits in a rewrite session.
+	 * <strong>Note:</strong> This implementation applies the edits in a rewrite session.
 	 * 
 	 * @since 3.4
 	 */
