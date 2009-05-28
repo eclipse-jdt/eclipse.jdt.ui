@@ -374,7 +374,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		 */
 		fSortWorkingSet= new Button(parent, SWT.CHECK);
 		fSortWorkingSet.setText(WorkingSetMessages.WorkingSetConfigurationDialog_sort_working_sets);
-		fSortWorkingSet.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, true));
+		fSortWorkingSet.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 		fSortWorkingSet.setSelection(fIsSortingEnabled);
 		fSortWorkingSet.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

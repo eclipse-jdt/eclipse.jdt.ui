@@ -495,7 +495,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			final Button showVisibleOnly= new Button(parent, SWT.CHECK);
 			showVisibleOnly.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_OnlyShowVisible_check);
 			showVisibleOnly.setSelection(fShowVisibleOnly);
-			showVisibleOnly.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, true));
+			showVisibleOnly.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 			showVisibleOnly.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fShowVisibleOnly= showVisibleOnly.getSelection();
@@ -509,7 +509,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 			Link ppwsLink= new Link(parent, SWT.NONE);
 			ppwsLink.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_OnlyShowVisible_link);
-			ppwsLink.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, true));
+			ppwsLink.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, true, false));
 			ppwsLink.addSelectionListener(new SelectionAdapter() {
 
 				public void widgetSelected(SelectionEvent e) {
