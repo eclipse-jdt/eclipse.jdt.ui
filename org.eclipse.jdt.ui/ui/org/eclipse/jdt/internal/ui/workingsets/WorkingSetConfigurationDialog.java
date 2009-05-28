@@ -66,6 +66,7 @@ import org.eclipse.ui.dialogs.IWorkingSetEditWizard;
 import org.eclipse.ui.dialogs.IWorkingSetNewWizard;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class WorkingSetConfigurationDialog extends SelectionDialog {
@@ -178,6 +179,14 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				fAllWorkingSets.add(allWorkingSets[i]);
 		}
 		fIsSortingEnabled= isSortingEnabled;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void configureShell(Shell shell) {
+		super.configureShell(shell);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.WORKING_SET_CONFIGURATION_DIALOG);
 	}
 
 	/**

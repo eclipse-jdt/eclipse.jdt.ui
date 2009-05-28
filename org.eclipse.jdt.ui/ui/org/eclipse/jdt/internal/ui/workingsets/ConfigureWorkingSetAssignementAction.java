@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -305,8 +306,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			super(shell);
 
 			setTitle(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSetAssignments_title);
-			setHelpAvailable(false);
-
 			fModel= model;
 			fElements= elements;
 			fCreatedWorkingSets= new ArrayList();
@@ -315,6 +314,16 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				fSettings.put(SETTINGS_SHOW_VISIBLE_ONLY, true);
 			}
 			fShowVisibleOnly= fSettings.getBoolean(SETTINGS_SHOW_VISIBLE_ONLY);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 * 
+		 * @since 3.5
+		 */
+		protected void configureShell(Shell shell) {
+			super.configureShell(shell);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.WORKING_SET_ASSIGNMENTS_DIALOG);
 		}
 
 		public IWorkingSet[] getGrayed() {
@@ -572,6 +581,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		super(site);
 		fSite= site;
 		setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSets_actionLabel);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ASSIGN_WORKING_SETS_ACTION);
 		setEnabled(false);
 	}
 

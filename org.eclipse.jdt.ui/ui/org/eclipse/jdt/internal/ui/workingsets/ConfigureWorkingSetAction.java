@@ -19,6 +19,10 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 
 public class ConfigureWorkingSetAction extends Action {
 
@@ -28,6 +32,7 @@ public class ConfigureWorkingSetAction extends Action {
 	public ConfigureWorkingSetAction(IWorkbenchPartSite site) {
 		super(WorkingSetMessages.ConfigureWorkingSetAction_label);
 		fSite= site;
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CONFIGURE_WORKING_SETS_ACTION);
 	}
 
 	public void setWorkingSetModel(WorkingSetModel model) {

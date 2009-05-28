@@ -278,6 +278,10 @@ public interface IJavaHelpContextIds {
 	public static final String REPLACE_ELEMENT_WITH_HISTORY_DIALOG= PREFIX + "replace_element_with_history_dialog_context"; //$NON-NLS-1$
 
 	public static final String SORT_MEMBERS_DIALOG= PREFIX + "sort_members_dialog_context"; //$NON-NLS-1$
+	public static final String WORKING_SET_CONFIGURATION_DIALOG = PREFIX + "configure_working_set_dialog_context"; //$NON-NLS-1$
+	public static final String WORKING_SET_ASSIGNMENTS_DIALOG= PREFIX + "working_set_assignments_dialog_context"; //$NON-NLS-1$
+	public static final String ASSIGN_WORKING_SETS_ACTION = PREFIX + "assign_working_sets_action_context"; //$NON-NLS-1$
+	public static final String CONFIGURE_WORKING_SETS_ACTION= PREFIX + "configure_working_sets_action_context"; //$NON-NLS-1$
 
 	// view parts
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
@@ -437,6 +441,7 @@ public interface IJavaHelpContextIds {
     public static final String CALL_HIERARCHY_OPEN_ACTION= PREFIX + "call_hierarchy_open_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_CANCEL_SEARCH_ACTION= PREFIX + "call_hierarchy_cancel_search_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_ACTION= PREFIX + "call_hierarchy_expand_with_constructors_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_DIALOG= PREFIX + "call_hierarchy_expand_with_constructors_dialog_context"; //$NON-NLS-1$
     /**
      * @since 3.2
      */
