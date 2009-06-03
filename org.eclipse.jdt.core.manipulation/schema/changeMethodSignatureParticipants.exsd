@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.jdt.core.manipulation">
+<schema targetNamespace="org.eclipse.jdt.core.manipulation" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
          <meta.schema plugin="org.eclipse.jdt.core.manipulation" id="changeMethodSignatureParticipants" name="Change Method Signature Participants"/>
@@ -24,6 +24,11 @@ The default variable used during expression evaluation is bound to the element v
    <include schemaLocation="schema://org.eclipse.core.expressions/schema/expressionLanguage.exsd"/>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="changeMethodSignatureParticipant" minOccurs="0" maxOccurs="unbounded"/>
@@ -80,7 +85,7 @@ The default variable used during expression evaluation is bound to the element v
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  the name of the class that provides the participant implementation.
+                  the name of the class that provides the participant implementation. Must extend &lt;code&gt;org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureParticipant&lt;/code&gt;
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureParticipant:"/>
