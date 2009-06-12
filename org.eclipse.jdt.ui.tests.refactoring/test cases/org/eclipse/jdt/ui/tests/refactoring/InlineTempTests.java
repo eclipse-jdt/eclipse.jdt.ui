@@ -280,6 +280,21 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(8, 21, 8, 24);
 	}
 	
+	public void test37() throws Exception{
+		// parameterized method invocation needs class expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
+		helper1(5, 16, 5, 17);
+	}
+	
+	public void test38() throws Exception{
+		// parameterized method invocation needs this expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
+		helper1(5, 16, 5, 17);
+	}
+	
+	public void test39() throws Exception{
+		// parameterized method invocation needs to keep super expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
+		helper1(5, 16, 5, 17);
+	}
+	
 	//------
 
 	public void testFail0() throws Exception{

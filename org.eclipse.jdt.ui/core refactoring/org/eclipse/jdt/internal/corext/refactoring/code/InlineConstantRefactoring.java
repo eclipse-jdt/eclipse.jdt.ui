@@ -267,6 +267,14 @@ public class InlineConstantRefactoring extends Refactoring {
 							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
 							typeArgsRewrite.insertLast(typeArgument, null);
 						}
+						
+						if (invocation instanceof MethodInvocation) {
+							Expression expression= ((MethodInvocation)invocation).getExpression();
+							if (expression == null) {
+								expression= fNewLocationCuRewrite.getAST().newName(fNewLocationCuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration()));
+								fInitializerRewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+							}
+						}
 					}
 				}
 			}

@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -351,13 +352,10 @@ public class InlineTempRefactoring extends Refactoring {
 						|| referenceContext instanceof SingleVariableDeclaration
 						|| referenceContext instanceof Assignment)) {
 					IMethodBinding methodBinding= Invocations.resolveBinding(initializer);
-					ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
-					Type[] typeArgumentNodes= new Type[typeArguments.length];
-					for (int i= 0; i < typeArguments.length; i++) {
-						typeArgumentNodes[i]= rewrite.getImportRewrite().addImport(typeArguments[i], rewrite.getAST());
+					if (methodBinding != null) {
+						String newSource= createParameterizedInvocation(initializer, methodBinding, rewrite);
+						return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
 					}
-					String newSource= createParameterizedInvocation(initializer, typeArgumentNodes);
-					return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
 				}
 			}
 		}
@@ -388,11 +386,26 @@ public class InlineTempRefactoring extends Refactoring {
 		return copy;
 	}
 
-	private String createParameterizedInvocation(Expression invocation, Type[] typeArgumentNodes) throws JavaModelException {
+	private String createParameterizedInvocation(Expression invocation, IMethodBinding methodBinding, CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
 		ListRewrite typeArgsRewrite= rewrite.getListRewrite(invocation, Invocations.getTypeArgumentsProperty(invocation));
-		for (int i= 0; i < typeArgumentNodes.length; i++) {
-			typeArgsRewrite.insertLast(typeArgumentNodes[i], null);
+		
+		ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
+		for (int i= 0; i < typeArguments.length; i++) {
+			Type typeArgumentNode= cuRewrite.getImportRewrite().addImport(typeArguments[i], cuRewrite.getAST());
+			typeArgsRewrite.insertLast(typeArgumentNode, null);
+		}
+		
+		if (invocation instanceof MethodInvocation) {
+			Expression expression= ((MethodInvocation)invocation).getExpression();
+			if (expression == null) {
+				if (Modifier.isStatic(methodBinding.getModifiers())) {
+					expression= cuRewrite.getAST().newName(cuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration()));
+				} else {
+					expression= invocation.getAST().newThisExpression();
+				}
+				rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+			}
 		}
 
 		IDocument document= new Document(fCu.getBuffer().getContents());
