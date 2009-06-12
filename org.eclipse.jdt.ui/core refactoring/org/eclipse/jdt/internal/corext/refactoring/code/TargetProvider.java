@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -254,61 +255,60 @@ abstract class TargetProvider {
 			return visitType();
 		}
 		public void endVisit(TypeDeclaration node) {
-			endVisitType();
+			endVisitBodyDeclaration();
 		}
 		public boolean visit(EnumDeclaration node) {
 			return visitType();
 		}
 		public void endVisit(EnumDeclaration node) {
-			endVisitType();
+			endVisitBodyDeclaration();
 		}
 		public boolean visit(AnnotationTypeDeclaration node) {
 			return visitType();
 		}
 		public void endVisit(AnnotationTypeDeclaration node) {
-			endVisitType();
+			endVisitBodyDeclaration();
 		}
 		private boolean visitType() {
 			fBodies.add(fCurrent);
 			fCurrent= null;
 			return true;
 		}
-		private void endVisitType() {
-			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
-		}
-		public boolean visit(FieldDeclaration node) {
+		protected boolean visitNonTypeBodyDeclaration() {
 			fBodies.add(fCurrent);
 			fCurrent= new BodyData();
 			return true;
+		}
+		protected void endVisitBodyDeclaration() {
+			fCurrent= (BodyData)fBodies.remove(fBodies.size() - 1);
+		}
+		public boolean visit(FieldDeclaration node) {
+			return visitNonTypeBodyDeclaration();
 		}
 		public void endVisit(FieldDeclaration node) {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
 			}
-			endVisitType();
+			endVisitBodyDeclaration();
 		}
 		public boolean visit(MethodDeclaration node) {
-			fBodies.add(fCurrent);
-			fCurrent= new BodyData();
-			return true;
+			return visitNonTypeBodyDeclaration();
 		}
 		public void endVisit(MethodDeclaration node) {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
 			}
-			endVisitType();
+			endVisitBodyDeclaration();
 
 		}
 		public boolean visit(Initializer node) {
-			fBodies.add(fCurrent);
-			fCurrent= new BodyData();
-			return true;
+			return visitNonTypeBodyDeclaration();
 		}
 		public void endVisit(Initializer node) {
 			if (fCurrent.hasInvocations()) {
 				result.put(node, fCurrent);
 			}
-			endVisitType();
+			endVisitBodyDeclaration();
 		}
 		private boolean matches(IBinding binding) {
 			if (!(binding instanceof IMethodBinding))
@@ -328,9 +328,28 @@ abstract class TargetProvider {
 			fDeclaration= declaration;
 		}
 		public void initialize() {
-			InvocationFinder finder= new InvocationFinder(fDeclaration.resolveBinding());
+			IMethodBinding methodBinding= fDeclaration.resolveBinding();
+			InvocationFinder finder;
 			ASTNode type= ASTNodes.getParent(fDeclaration, AbstractTypeDeclaration.class);
-			type.accept(finder);
+			if (methodBinding.getDeclaringClass().isAnonymous()) {
+				finder= new InvocationFinder(methodBinding);
+				type.accept(finder);
+			} else {
+				//scope of local class is enclosing block
+				ASTNode block= type.getParent().getParent();
+				finder= new InvocationFinder(methodBinding) {
+					public boolean visit(Block node) {
+						return visitNonTypeBodyDeclaration();
+					}
+					public void endVisit(Block node) {
+						if (fCurrent.hasInvocations()) {
+							result.put(ASTNodes.getParent(node, BodyDeclaration.class), fCurrent);
+						}
+						endVisitBodyDeclaration();
+					}
+				};
+				block.accept(finder);
+			}
 			fBodies= finder.result;
 		}
 		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) {
