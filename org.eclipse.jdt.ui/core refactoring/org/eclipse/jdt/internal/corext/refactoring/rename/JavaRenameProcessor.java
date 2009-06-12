@@ -37,10 +37,12 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	private RenameModifications fRenameModifications;
 
 	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
-		return getRenameModifications().loadParticipants(status, this, getAffectedProjectNatures(), shared);
+		return fRenameModifications.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 
 	public final RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
+		fRenameModifications= null;
+		
 		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 		RefactoringStatus result= doCheckFinalConditions(pm, context);
@@ -50,16 +52,10 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 		for (int i= 0; i < changed.length; i++) {
 			deltaFactory.change(changed[i]);
 		}
-		RenameModifications renameModifications= getRenameModifications();
-		renameModifications.buildDelta(deltaFactory);
-		renameModifications.buildValidateEdits((ValidateEditChecker)context.getChecker(ValidateEditChecker.class));
+		fRenameModifications= computeRenameModifications();
+		fRenameModifications.buildDelta(deltaFactory);
+		fRenameModifications.buildValidateEdits((ValidateEditChecker)context.getChecker(ValidateEditChecker.class));
 		return result;
-	}
-
-	private RenameModifications getRenameModifications() throws CoreException {
-		if (fRenameModifications == null)
-			fRenameModifications= computeRenameModifications();
-		return fRenameModifications;
 	}
 
 	protected abstract RenameModifications computeRenameModifications() throws CoreException;
