@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,11 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
-
+/*
+ * NOTE: Running this example will open the dialog but elements will appear
+ * because the dialog internally uses a FilteredTree which only works when the
+ * workbench is running.
+ */
 public class MultiElementListSelectorExample {
 
 
@@ -55,16 +59,16 @@ public class MultiElementListSelectorExample {
 			}
 		};
 
-		int nLists= 3;
-
-		Object[][] elements= new Object[nLists][];
-		for (int i= 0; i < nLists; i++) {
+		int nPages= 3;
+		Object[][] elements= new Object[nPages][];
+		for (int i= 0; i < nPages; i++) {
 			int size= random.nextInt(15);
 			elements[i]= new String[size];
 			for (int k= 0; k < size; k++) {
 				elements[i][k]= "elem-" + i + "-" + k;
 			}
 		}
+		
 		Display display= new Display();
 		MultiElementListSelectionDialog d= new MultiElementListSelectionDialog(new Shell(display), elementRenderer);
 		d.setTitle("Title");
@@ -76,7 +80,9 @@ public class MultiElementListSelectorExample {
 		d.open();
 
 		Object[] res= d.getResult();
-		for (int i= 0; i < res.length; i++)
-			System.out.println(res[i]);
+		if (res != null) {
+			for (int i= 0; i < res.length; i++)
+				System.out.println(res[i]);
+		}
 	}
 }
