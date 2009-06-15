@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] remember selected access modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=101233
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
@@ -18,7 +19,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -84,6 +84,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private static final String DESCRIPTION = RefactoringMessages.ExtractMethodInputPage_description;
 	private static final String THROW_RUNTIME_EXCEPTIONS= "ThrowRuntimeExceptions"; //$NON-NLS-1$
 	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
+	private static final String ACCESS_MODIFIER= "AccessModifier"; //$NON-NLS-1$
 
 	public ExtractMethodInputPage() {
 		super(PAGE_NAME);
@@ -127,12 +128,9 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			}
 			combo.select(0);
 			combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			combo.addSelectionListener(new SelectionListener() {
+			combo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fRefactoring.setDestination(combo.getSelectionIndex());
-				}
-				public void widgetDefaultSelected(SelectionEvent e) {
-					// nothing
 				}
 			});
 		}
@@ -162,7 +160,9 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				radio.setSelection(true);
 			radio.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
-					setVisibility((Integer)event.widget.getData());
+					final Integer selectedModifier= (Integer)event.widget.getData();
+					fSettings.put(ACCESS_MODIFIER, selectedModifier.intValue());
+					setVisibility(selectedModifier);
 				}
 			});
 		}
@@ -348,8 +348,13 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			fSettings= getDialogSettings().addNewSection(ExtractMethodWizard.DIALOG_SETTING_SECTION);
 			fSettings.put(THROW_RUNTIME_EXCEPTIONS, false);
 			fSettings.put(GENERATE_JAVADOC, JavaPreferencesSettings.getCodeGenerationSettings(fRefactoring.getCompilationUnit().getJavaProject()).createComments);
+			fSettings.put(ACCESS_MODIFIER, Modifier.PRIVATE);
 		}
 		fRefactoring.setThrowRuntimeExceptions(fSettings.getBoolean(THROW_RUNTIME_EXCEPTIONS));
+		final String accessModifier= fSettings.get(ACCESS_MODIFIER);
+		if (accessModifier != null) {
+			fRefactoring.setVisibility(Integer.parseInt(accessModifier));
+		}
 	}
 
 	//---- Input validation ------------------------------------------------------
