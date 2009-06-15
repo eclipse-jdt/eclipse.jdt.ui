@@ -41,8 +41,6 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	}
 
 	public final RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
-		fRenameModifications= null;
-		
 		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 		RefactoringStatus result= doCheckFinalConditions(pm, context);
