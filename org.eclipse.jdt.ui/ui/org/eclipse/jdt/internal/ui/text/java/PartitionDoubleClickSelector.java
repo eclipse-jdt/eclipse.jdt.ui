@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ public class PartitionDoubleClickSelector extends DefaultTextDoubleClickStrategy
 
 	int fLeftBorder;
 	int fRightBorder;
+	int fHitDelta;
 
 
 	/**
@@ -41,9 +42,24 @@ public class PartitionDoubleClickSelector extends DefaultTextDoubleClickStrategy
 	 * @param rightBorder number of characters to ignore from the right border of the partition
 	 */
 	public PartitionDoubleClickSelector(String partitioning, int leftBorder, int rightBorder) {
+		this(partitioning, leftBorder, rightBorder, 1);
+	}
+
+	/**
+	 * Creates a new partition double click selector for the given document partitioning.
+	 * 
+	 * @param partitioning the document partitioning
+	 * @param leftBorder number of characters to ignore from the left border of the partition
+	 * @param rightBorder number of characters to ignore from the right border of the partition
+	 * @param hitDeltaOffset character offset delta relative to partition borders used to define the
+	 *            trigger character
+	 * @since 3.6
+	 */
+	public PartitionDoubleClickSelector(String partitioning, int leftBorder, int rightBorder, int hitDeltaOffset) {
 		fPartitioning= partitioning;
 		fLeftBorder= leftBorder;
 		fRightBorder= rightBorder;
+		fHitDelta= hitDeltaOffset;
 	}
 
 	/*
@@ -57,7 +73,7 @@ public class PartitionDoubleClickSelector extends DefaultTextDoubleClickStrategy
 
 		try {
 			ITypedRegion region= TextUtilities.getPartition(document, fPartitioning, offset, true);
-			if (offset == region.getOffset() + 1 || offset == region.getOffset() + region.getLength() - 1) {
+			if (offset == region.getOffset() + fHitDelta || offset == region.getOffset() + region.getLength() - fHitDelta) {
 				if (fLeftBorder == 0 && fRightBorder == 0)
 					return region;
 				if (fRightBorder == -1) {
