@@ -6387,7 +6387,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 
-	public void testTypePrametersToRawTypeReference01() throws Exception {
+	public void testTypeParametersToRawTypeReference01() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
@@ -6435,7 +6435,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-	public void testTypePrametersToRawTypeReference02() throws Exception {
+	public void testTypeParametersToRawTypeReference02() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
@@ -6484,7 +6484,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	//Disabled depends on bug Bug 124626 Infer Type Arguments infers ? instaed of more precise type
-//	public void testTypePrametersToRawTypeReference03() throws Exception {
+//	public void testTypeParametersToRawTypeReference03() throws Exception {
 //		Hashtable options= JavaCore.getOptions();
 //		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 //		JavaCore.setOptions(options);
@@ -6535,7 +6535,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		assertExpectedExistInProposals(proposals, expected);
 //	}
 //
-//	public void testTypePrametersToRawTypeReference04() throws Exception {
+//	public void testTypeParametersToRawTypeReference04() throws Exception {
 //		Hashtable options= JavaCore.getOptions();
 //		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 //		JavaCore.setOptions(options);
@@ -6586,7 +6586,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		assertExpectedExistInProposals(proposals, expected);
 //	}
 //
-//	public void testTypePrametersToRawTypeReference05() throws Exception {
+//	public void testTypeParametersToRawTypeReference05() throws Exception {
 //		Hashtable options= JavaCore.getOptions();
 //		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 //		JavaCore.setOptions(options);
@@ -6640,7 +6640,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		assertExpectedExistInProposals(proposals, expected);
 //	}
 
-	public void testTypePrametersToRawTypeReference06() throws Exception {
+	public void testTypeParametersToRawTypeReference06() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
@@ -6685,7 +6685,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-	public void testTypePrametersToRawTypeReference07() throws Exception {
+	public void testTypeParametersToRawTypeReference07() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
@@ -6736,7 +6736,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-	public void testTypePrametersToRawTypeReference08() throws Exception {
+	public void testTypeParametersToRawTypeReference08() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
@@ -6792,6 +6792,79 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testTypeParametersToRawTypeReferenceBug212557() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public Class[] get() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public Class[] get() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testTypeParametersToRawTypeReferenceBug280193() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<List> list) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public void foo(List<List> list) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
