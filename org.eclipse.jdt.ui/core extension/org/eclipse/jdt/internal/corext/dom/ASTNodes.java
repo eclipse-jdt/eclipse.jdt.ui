@@ -450,7 +450,7 @@ public class ASTNodes {
 
     	ASTNode parent= location.getParent();
     	StructuralPropertyDescriptor locationInParent= location.getLocationInParent();
-		if (locationInParent instanceof ChildListPropertyDescriptor) {
+		if (locationInParent instanceof ChildListPropertyDescriptor && locationInParent != InfixExpression.EXTENDED_OPERANDS_PROPERTY) {
 			// e.g. argument lists of MethodInvocation, ClassInstanceCreation, ...
    			return false;
     	} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {

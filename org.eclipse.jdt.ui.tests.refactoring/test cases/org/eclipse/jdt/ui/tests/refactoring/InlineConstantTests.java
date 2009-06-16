@@ -292,6 +292,10 @@ public class InlineConstantTests extends RefactoringTest {
 		helper1("p.A", 4, 23, 4, 28, true, true);
 	}
 	
+	public void test33() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=279715
+		helper1("p.A", 5, 29, 5, 30, true, true);
+	}
+	
 	// -- testing failing preconditions
 
 	public void testFail0() throws Exception {
