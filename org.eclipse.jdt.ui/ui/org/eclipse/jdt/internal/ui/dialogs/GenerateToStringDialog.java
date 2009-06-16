@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Mateusz Matela and others.
+ * Copyright (c) 2008, 2009 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,13 +9,17 @@
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Template edit dialog has usability issues - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267916
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString() generator: Fields in declaration order - https://bugs.eclipse.org/bugs/show_bug.cgi?id=279924
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+
+import com.ibm.icu.text.Collator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -70,6 +74,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -197,6 +202,19 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			array[position + direction]= temp;
 			tree.setSelection(new StructuredSelection(element));
 			tree.refresh();
+		}
+
+		public void sort() {
+			Comparator comparator= new Comparator() {
+				Collator collator= Collator.getInstance();
+				public int compare(Object o1, Object o2) {
+					return collator.compare(((IBinding)o1).getName(), ((IBinding)o2).getName());
+				}
+			};
+			Arrays.sort(fFields, comparator);
+			Arrays.sort(fMethods, comparator);
+			Arrays.sort(fInheritedFields, comparator);
+			Arrays.sort(fInheritedMethods, comparator);
 		}
 
 		/*
@@ -1127,6 +1145,8 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
 
 	private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
+	
+	private static final int SORT_BUTTON= IDialogConstants.CLIENT_ID + 3;
 
 	protected Button[] fButtonControls;
 
@@ -1274,6 +1294,8 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		buttonComposite.setLayout(layout);
 
 		createUpDownButtons(buttonComposite);
+		
+		createButton(buttonComposite, SORT_BUTTON, JavaUIMessages.GenerateToStringDialog_sort_button, false);
 
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -1298,6 +1320,13 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				List selection= ((IStructuredSelection)getTreeViewer().getSelection()).toList();
 				if (selection.size() > 0)
 					contentProvider.down(selection.get(0), getTreeViewer());
+				updateOKStatus();
+				break;
+			}
+			case SORT_BUTTON: {
+				GenerateToStringContentProvider contentProvider= (GenerateToStringContentProvider)getTreeViewer().getContentProvider();
+				contentProvider.sort();
+				getTreeViewer().refresh();
 				updateOKStatus();
 				break;
 			}

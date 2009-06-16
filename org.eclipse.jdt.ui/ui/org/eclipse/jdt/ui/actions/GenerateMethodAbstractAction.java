@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation 
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString() generator: Fields in declaration order - https://bugs.eclipse.org/bugs/show_bug.cgi?id=279924
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
@@ -365,8 +366,9 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	 * Returns false, if there are no such members and the method cannot
 	 * be generated
 	 * @return true, if the method can be generated (i.e. there are appropriate member fields)
+	 * @throws JavaModelException if an error in java model occurs
 	 */
-	abstract boolean generateCandidates();
+	abstract boolean generateCandidates() throws JavaModelException;
 
 	/**
 	 * 

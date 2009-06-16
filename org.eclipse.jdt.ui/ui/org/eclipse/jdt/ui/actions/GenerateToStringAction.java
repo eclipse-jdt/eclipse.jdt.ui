@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Mateusz Matela and others.
+ * Copyright (c) 2008, 2009 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,10 +7,12 @@
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString() generator: Fields in declaration order - https://bugs.eclipse.org/bugs/show_bug.cgi?id=279924
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,10 +25,13 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -174,53 +179,83 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		return settings;
 	}
 
-	boolean generateCandidates() {
+	boolean generateCandidates() throws JavaModelException {
 		IVariableBinding[] candidateFields= fTypeBinding.getDeclaredFields();
-		fFields= new ArrayList();
-		fSelectedFields= new ArrayList();
+		HashMap fieldsToBindings= new HashMap();
+		HashMap selectedFieldsToBindings= new HashMap();
 		for (int i= 0; i < candidateFields.length; i++) {
 			if (!Modifier.isStatic(candidateFields[i].getModifiers())) {
-				fFields.add(candidateFields[i]);
+				fieldsToBindings.put(candidateFields[i].getJavaElement(), candidateFields[i]);
 				if (!Modifier.isTransient(candidateFields[i].getModifiers()))
-					fSelectedFields.add(candidateFields[i]);
+					selectedFieldsToBindings.put(candidateFields[i].getJavaElement(), candidateFields[i]);
 			}
 		}
+		IType type= (IType)fTypeBinding.getJavaElement();
+		IField[] allFields= type.getFields();
+		fFields= new ArrayList();
+		populateMembers(fFields, allFields, fieldsToBindings);
+		fSelectedFields= new ArrayList();
+		populateMembers(fSelectedFields, allFields, selectedFieldsToBindings);
 
 		IMethodBinding[] candidateMethods= fTypeBinding.getDeclaredMethods();
-		fMethods= new ArrayList();
+		HashMap methodsToBindings= new HashMap();
 		for (int i= 0; i < candidateMethods.length; i++) {
 			if (!Modifier.isStatic(candidateMethods[i].getModifiers()) && candidateMethods[i].getParameterTypes().length == 0
 					&& !candidateMethods[i].getReturnType().getName().equals("void") && !candidateMethods[i].getName().equals("toString") && !candidateMethods[i].getName().equals("clone")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				fMethods.add(candidateMethods[i]);
+				methodsToBindings.put(candidateMethods[i].getJavaElement(), candidateMethods[i]);
 			}
 		}
+		fMethods= new ArrayList();
+		populateMembers(fMethods, type.getMethods(), methodsToBindings);
 
 		fInheritedFields= new ArrayList();
 		fInheritedMethods= new ArrayList();
 		ITypeBinding typeBinding= fTypeBinding;
 		while ((typeBinding= typeBinding.getSuperclass()) != null) {
+			type = (IType)typeBinding.getJavaElement();
 			candidateFields= typeBinding.getDeclaredFields();
 			for (int i= 0; i < candidateFields.length; i++) {
 				if (!Modifier.isPrivate(candidateFields[i].getModifiers()) && !Modifier.isStatic(candidateFields[i].getModifiers()) && !contains(fFields, candidateFields[i])
 						&& !contains(fInheritedFields, candidateFields[i])) {
-					fInheritedFields.add(candidateFields[i]);
+					fieldsToBindings.put(candidateFields[i].getJavaElement(), candidateFields[i]);
 				}
 			}
+			populateMembers(fInheritedFields, type.getFields(), fieldsToBindings);
+			
 			candidateMethods= typeBinding.getDeclaredMethods();
 			for (int i= 0; i < candidateMethods.length; i++) {
 				if (!Modifier.isPrivate(candidateMethods[i].getModifiers())
 						&& !Modifier.isStatic(candidateMethods[i].getModifiers())
 						&& candidateMethods[i].getParameterTypes().length == 0
 						&& !candidateMethods[i].getReturnType().getName().equals("void") && !contains(fMethods, candidateMethods[i]) && !contains(fInheritedMethods, candidateMethods[i]) && !candidateMethods[i].getName().equals("clone")) { //$NON-NLS-1$ //$NON-NLS-2$
-					fInheritedMethods.add(candidateMethods[i]);
+					methodsToBindings.put(candidateMethods[i].getJavaElement(), candidateMethods[i]);
 				}
 			}
+			populateMembers(fInheritedMethods, type.getMethods(), methodsToBindings);
 		}
 		
 		return true;
 	}
 
-	private boolean contains(List inheritedFields, Object member) {
+	/**
+	 * Populates <code>result</code> with the bindings from <code>membersToBindings</code>, sorted
+	 * in the order of <code>allMembers</code>.
+	 * 
+	 * @param result list of bindings from membersToBindings, sorted in source order
+	 * @param allMembers all member elements in source order
+	 * @param membersToBindings map from {@link IMember} to {@link IBinding}
+	 * @since 3.6
+	 */
+	private static void populateMembers(List result, IMember[] allMembers, HashMap membersToBindings) {
+		for (int i= 0; i < allMembers.length; i++) {
+			Object memberBinding= membersToBindings.remove(allMembers[i]);
+			if (memberBinding != null) {
+				result.add(memberBinding);
+			}
+		}
+	}
+
+	private static boolean contains(List inheritedFields, Object member) {
 		for (Iterator iterator= inheritedFields.iterator(); iterator.hasNext();) {
 			Object object= iterator.next();
 			if (object instanceof IVariableBinding && member instanceof IVariableBinding)

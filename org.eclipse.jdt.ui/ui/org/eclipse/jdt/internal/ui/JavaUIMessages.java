@@ -10,6 +10,7 @@
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] Template edit dialog has usability issues - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267916
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString() generator: Fields in declaration order - https://bugs.eclipse.org/bugs/show_bug.cgi?id=279924
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
@@ -127,6 +128,7 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateToStringDialog_newTemplateName;
 	public static String GenerateToStringDialog_newTemplateNameArg;
 	public static String GenerateToStringDialog_skip_null_button;
+	public static String GenerateToStringDialog_sort_button;
 	public static String GenerateToStringDialog_template_content;
 	public static String GenerateToStringDialog_template_name;
 	public static String GenerateToStringDialog_templateEdition_NewWindowTitle;
