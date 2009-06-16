@@ -647,7 +647,8 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				return;
 			int peerOffset= getPeerPosition(document, command);
 			peerOffset= indenter.findReferencePosition(peerOffset);
-			refOffset= Math.min(refOffset, peerOffset);
+			if (peerOffset != JavaHeuristicScanner.NOT_FOUND)
+				refOffset= Math.min(refOffset, peerOffset);
 
 			// eat any WS before the insertion to the beginning of the line
 			int firstLine= 1; // don't format the first line per default, as it has other content before it
