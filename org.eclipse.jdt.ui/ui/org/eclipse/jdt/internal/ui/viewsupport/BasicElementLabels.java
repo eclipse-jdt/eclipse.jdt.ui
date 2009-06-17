@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,7 +56,7 @@ public class BasicElementLabels {
 	 * @return the label of the file path to be used in the UI.
 	 */
 	public static String getPathLabel(File file) {
-		return Strings.markLTR(file.getAbsolutePath(), "");  //$NON-NLS-1$
+		return Strings.markLTR(file.getAbsolutePath());
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class BasicElementLabels {
 	 * @return the label of the working set
 	 */
 	public static String getWorkingSetLabel(IWorkingSet set) {
-		return Strings.markLTR(set.getLabel(), "");  //$NON-NLS-1$
+		return Strings.markLTR(set.getLabel());
 	}
 
 
