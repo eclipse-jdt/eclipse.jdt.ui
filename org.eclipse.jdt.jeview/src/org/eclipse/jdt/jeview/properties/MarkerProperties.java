@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2001, 2007 IBM Corporation and others.
+ * Copyright (c) 2001, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.properties;
 
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -21,6 +22,9 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 public class MarkerProperties implements IPropertySource {
 
@@ -39,10 +43,12 @@ public class MarkerProperties implements IPropertySource {
 			return fPropertyDescriptors;
 		
 		Map<String, Object> attributes= null;
+		boolean isJavaMarker= false;
 		try {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> uncheckedAttributes= fMarker.getAttributes();
 			attributes= uncheckedAttributes;
+			isJavaMarker= IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(fMarker.getType());
 		} catch (CoreException e) {
 			// no attributes today
 		}
@@ -52,7 +58,14 @@ public class MarkerProperties implements IPropertySource {
 			fPropertyDescriptors= new AttributeDescriptor[attributes.size() + 4];
 			int i= 0;
 			for (Entry<String, Object> entry : attributes.entrySet()) {
-				AttributeDescriptor propertyDescriptor= new AttributeDescriptor(entry.getKey(), entry.getValue());
+				String key= entry.getKey();
+				Object value= entry.getValue();
+				AttributeDescriptor propertyDescriptor;
+				if (isJavaMarker && IJavaModelMarker.ID.equals(key)) {
+					propertyDescriptor= new ProblemIdAttributeDescriptor(key, value);
+				} else {
+					propertyDescriptor= new AttributeDescriptor(key, value);
+				}
 				propertyDescriptor.setAlwaysIncompatible(true);
 				propertyDescriptor.setCategory("Attributes");
 				fPropertyDescriptors[i++]= propertyDescriptor;
@@ -133,6 +146,70 @@ public class MarkerProperties implements IPropertySource {
 		public Object getValue() {
 			return fValue;
 		}
+	}
+	
+	private static class ProblemIdAttributeDescriptor extends AttributeDescriptor {
+		public ProblemIdAttributeDescriptor(String key, Object value) {
+			super(key, value);
+		}
+		
+		@Override
+		public Object getValue() {
+			return getErrorLabel();
+		}
+		
+		private String getErrorLabel() {
+			int id= (Integer) super.getValue();
+			StringBuffer buf= new StringBuffer(getConstantName(id)).append(" = ");
+				
+			if ((id & IProblem.TypeRelated) != 0) {
+				buf.append("TypeRelated + ");
+			}
+			if ((id & IProblem.FieldRelated) != 0) {
+				buf.append("FieldRelated + ");
+			}
+			if ((id & IProblem.ConstructorRelated) != 0) {
+				buf.append("ConstructorRelated + ");
+			}
+			if ((id & IProblem.MethodRelated) != 0) {
+				buf.append("MethodRelated + ");
+			}
+			if ((id & IProblem.ImportRelated) != 0) {
+				buf.append("ImportRelated + ");
+			}
+			if ((id & IProblem.Internal) != 0) {
+				buf.append("Internal + ");
+			}
+			if ((id & IProblem.Syntax) != 0) {
+				buf.append("Syntax + ");
+			}
+			if ((id & IProblem.Javadoc) != 0) {
+				buf.append("Javadoc + ");
+			}
+			buf.append(id & IProblem.IgnoreCategoriesMask);
+			
+			buf.append(" = 0x").append(Integer.toHexString(id)).append(" = ").append(id);
+			
+			return buf.toString();
+		}
+		
+		private static String getConstantName(int id) {
+			Field[] fields= IProblem.class.getFields();
+			for (int i= 0; i < fields.length; i++) {
+				Field f= fields[i];
+				try {
+					if (f.getType() == int.class && f.getInt(f) == id) {
+						return "IProblem." + f.getName();
+					}
+				} catch (IllegalArgumentException e) {
+					// does not happen
+				} catch (IllegalAccessException e) {
+					// does not happen
+				}
+			}
+			return "<UNKNOWN CONSTANT>";
+		}
+		
 	}
 	
 	private static class MarkerPropertyDescriptor extends AttributeDescriptor {
