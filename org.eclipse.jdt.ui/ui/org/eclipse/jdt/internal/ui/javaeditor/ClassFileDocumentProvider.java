@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -71,6 +69,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 		/**
 		 * Default constructor.
+		 * 
+		 * @param input the class file editor input
 		 */
 		public ClassFileSynchronizer(IClassFileEditorInput input) {
 
@@ -106,7 +106,10 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 		/**
 		 * Recursively check whether the class file has been deleted.
-		 * Returns true if delta processing can be stopped.
+		 * 
+		 * @param input the package fragment root
+		 * @param delta the Java element delta
+		 * @return <code>true</code> if delta processing can be stopped
 		 */
 		protected boolean check(IPackageFragmentRoot input, IJavaElementDelta delta) {
 			IJavaElement element= delta.getElement();
@@ -310,13 +313,6 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	}
 
 	/*
-	 * @see AbstractDocumentProvider#doSaveDocument(IProgressMonitor, Object, IDocument)
-	 */
-	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document) throws CoreException {
-	}
-
-
-	/*
 	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension3#isSynchronized(java.lang.Object)
 	 * @since 3.0
 	 */
@@ -345,6 +341,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 	/**
 	 * Fires input changes to input change listeners.
+	 * 
+	 * @param input the class file editor input
 	 */
 	protected void fireInputChanged(IClassFileEditorInput input) {
 		List list= new ArrayList(fInputListeners);
@@ -354,6 +352,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 	/**
 	 * Adds an input change listener.
+	 * 
+	 * @param listener the input change listener
 	 */
 	public void addInputChangeListener(InputChangeListener listener) {
 		fInputListeners.add(listener);
@@ -361,6 +361,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 	/**
 	 * Removes an input change listener.
+	 * 
+	 * @param listener the input change listener
 	 */
 	public void removeInputChangeListener(InputChangeListener listener) {
 		fInputListeners.remove(listener);
