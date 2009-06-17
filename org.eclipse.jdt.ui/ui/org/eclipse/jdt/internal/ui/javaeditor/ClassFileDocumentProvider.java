@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -336,7 +337,34 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * @param input the editor input
 	 */
 	protected void handleDeleted(IClassFileEditorInput input) {
+		if (input == null) {
+			fireElementDeleted(input);
+			return;
+		}
+
+		if (input.exists())
+			return;
+
+		IClassFile cf= input.getClassFile();
+		try {
+			/*
+			 * Let's try to find the class file - maybe the JAR changed
+			 */
+			IType type= cf.getType();
+			IJavaProject project= cf.getJavaProject();
+			if (project != null) {
+				type= project.findType(type.getFullyQualifiedName());
+				if (type != null) {
+					fireInputChanged((IClassFileEditorInput)EditorUtility.getEditorInput(type.getParent()));
+					return;
+				}
+			}
+		} catch (JavaModelException x) {
+			// Don't log and fall through: element deleted
+		}
+
 		fireElementDeleted(input);
+
 	}
 
 	/**
