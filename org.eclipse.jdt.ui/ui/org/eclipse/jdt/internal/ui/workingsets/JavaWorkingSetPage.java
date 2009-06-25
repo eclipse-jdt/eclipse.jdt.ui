@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -170,19 +172,18 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				IProject project= ((IResource)element).getProject();
 				if (!project.isAccessible())
 					elements[i]= project;
-			}
-
-			if (element instanceof PackageFragmentRootContainer) {
+			} else if (element instanceof PackageFragmentRootContainer) {
 				for (int j= i; j < elements.length - 1; j++)
 					elements[j]= elements[j + 1];
 				deletedElements++;
-				continue;
-			}
-
-			if (element instanceof IJavaElement) {
+			} else if (element instanceof IJavaElement) {
 				IJavaProject jProject= ((IJavaElement)element).getJavaProject();
 				if (jProject != null && !jProject.getProject().isAccessible())
 					elements[i]= jProject.getProject();
+			} else if (!(element instanceof IAdaptable) || ((IAdaptable)element).getAdapter(IProject.class) == null) {
+				for (int j= i; j < elements.length - 1; j++)
+					elements[j]= elements[j + 1];
+				deletedElements++;
 			}
 		}
 
