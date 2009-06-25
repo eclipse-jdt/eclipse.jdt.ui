@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -132,9 +132,24 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		fBackButton= createButton(parent, IDialogConstants.BACK_ID, IDialogConstants.BACK_LABEL, false);
-		fNextButton= createButton(parent, IDialogConstants.NEXT_ID, IDialogConstants.NEXT_LABEL, true);
-		fFinishButton= createButton(parent, IDialogConstants.OK_ID, IDialogConstants.FINISH_LABEL, false);
+		
+		// XXX: Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=279425
+		boolean HAS_BUG_279425= true;
+		fNextButton= createButton(parent, IDialogConstants.NEXT_ID, IDialogConstants.NEXT_LABEL, !HAS_BUG_279425);
+		fFinishButton= createButton(parent, IDialogConstants.OK_ID, IDialogConstants.FINISH_LABEL, HAS_BUG_279425);
+		
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+	}
+
+	/*
+	 * XXX: Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=279425
+	 * 		The whole method can be removed once that bug is fixed.
+	 * @see org.eclipse.jface.dialogs.Dialog#initializeBounds()
+	 * @since 3.5.1
+	 */
+	protected void initializeBounds() {
+		super.initializeBounds();
+		fNextButton.getShell().setDefaultButton(fNextButton);
 	}
 
 	/*
