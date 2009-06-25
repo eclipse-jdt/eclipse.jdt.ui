@@ -21,6 +21,7 @@ import org.osgi.framework.Version;
 
 import org.eclipse.equinox.internal.provisional.frameworkadmin.BundleInfo;
 import org.eclipse.equinox.internal.provisional.simpleconfigurator.manipulator.SimpleConfiguratorManipulator;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.core.runtime.Assert;
@@ -44,6 +45,8 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
  */
 class P2Utils {
 
+	private static final String CONFIG_FOLDER = "configuration"; //$NON-NLS-1$
+	
 	private static final String SRC_INFO_FOLDER = "org.eclipse.equinox.source"; //$NON-NLS-1$
 	private static final String SRC_INFO_PATH= SRC_INFO_FOLDER + File.separator + "source.info"; //$NON-NLS-1$
 
@@ -52,21 +55,41 @@ class P2Utils {
 
 
 	/**
-	 * Returns bundles defined by the 'bundles.info' relative to the given home and configuration
-	 * area, or <code>null</code> if none. The "bundles.info" file is assumed to be at a fixed
-	 * location relative to the configuration area URL.
+	 * Returns bundles defined by the 'bundles.info'.
 	 * 
+	 * @param isSourceBundle <code>true</code> if source bundles should be read <code>false</code>
+	 *            otherwise
+	 * @param useConfigArea <code>true</code> if the bundles are read from the config area, or
+	 *            <code>false</code> if the install location should be used
 	 * @return all bundles in the installation or <code>null</code> if not able to locate a
 	 *         bundles.info
 	 */
-	private static BundleInfo[] readBundles() {
-		URL configurationArea= Platform.getConfigurationLocation().getURL();
-		if (configurationArea == null)
+	private static BundleInfo[] readBundles(boolean isSourceBundle, boolean useConfigArea) {
+		final Location bundlesLocation;
+		final String bundleInfoPath;
+		if (useConfigArea) {
+			bundlesLocation= Platform.getConfigurationLocation();
+			if (isSourceBundle)
+				bundleInfoPath= SRC_INFO_PATH;
+			else
+				bundleInfoPath= BUNDLE_INFO_PATH;
+		} else {
+			bundlesLocation= Platform.getInstallLocation();
+			if (isSourceBundle)
+				bundleInfoPath= CONFIG_FOLDER + File.separator + SRC_INFO_PATH;
+			else
+				bundleInfoPath= CONFIG_FOLDER + File.separator + BUNDLE_INFO_PATH;
+		}
+		if (bundlesLocation == null)
+			return null;
+
+		URL bundlesLocationURL= bundlesLocation.getURL();
+		if (bundleInfoPath == null)
 			return null;
 
 		try {
-			URL bundlesTxt = new URL(configurationArea.getProtocol(), configurationArea.getHost(), new File(configurationArea.getFile(), BUNDLE_INFO_PATH).getAbsolutePath());
-			BundleInfo bundles[]= getBundlesFromFile(bundlesTxt);
+			URL bundlesTxt= new URL(bundlesLocationURL.getProtocol(), bundlesLocationURL.getHost(), new File(bundlesLocationURL.getFile(), bundleInfoPath).getAbsolutePath());
+			BundleInfo bundles[]= getBundlesFromFile(bundlesLocationURL, bundlesTxt);
 			if (bundles == null || bundles.length == 0) {
 				return null;
 			}
@@ -81,48 +104,20 @@ class P2Utils {
 	}
 
 	/**
-	 * Returns source bundles defined by the 'source.info' file in the specified location, or
-	 * <code>null</code> if none. The "source.info" file is assumed to be at a fixed location
-	 * relative to the configuration area URL.
-	 * 
-	 * @return all source bundles in the installation or <code>null</code> if not able to locate a
-	 *         source.info
-	 */
-	private static BundleInfo[] readSourceBundles() {
-		URL configurationArea= Platform.getConfigurationLocation().getURL();
-		if (configurationArea == null)
-			return null;
-
-		try {
-			URL srcBundlesTxt= new URL(configurationArea.getProtocol(), configurationArea.getHost(), new File(configurationArea.getFile(), SRC_INFO_PATH).getAbsolutePath());
-			BundleInfo srcBundles[]= getBundlesFromFile(srcBundlesTxt);
-			if (srcBundles == null || srcBundles.length == 0) {
-				return null;
-			}
-			return srcBundles;
-		} catch (MalformedURLException e) {
-			JUnitPlugin.log(e);
-			return null;
-		} catch (IOException e) {
-			JUnitPlugin.log(e);
-			return null;
-		}
-	}
-
-	/**
-	 * Returns a list of {@link BundleInfo} for each bundle entry or <code>null</code> if there is a
+	 * Returns an array of {@link BundleInfo} for each bundle entry or <code>null</code> if there is a
 	 * problem reading the file.
 	 * 
-	 * @param fileURL the URL of the file to read
-	 * @return list containing URL locations or <code>null</code>
+	 * @param bundlesLocation the URL of the bundle location
+	 * @param fileURL the URL of the info file
+	 * @return array of bundle infos or <code>null</code>
 	 * @throws IOException if loading the configuration fails
 	 */
-	private static BundleInfo[] getBundlesFromFile(URL fileURL) throws IOException {
+	private static BundleInfo[] getBundlesFromFile(URL bundlesLocation, URL fileURL) throws IOException {
 		SimpleConfiguratorManipulator manipulator= (SimpleConfiguratorManipulator)JUnitPlugin.getDefault().getService(SimpleConfiguratorManipulator.class.getName());
 		if (manipulator == null)
 			return null;
 
-		File home= new File(Platform.getInstallLocation().getURL().getFile());
+		File home= new File(bundlesLocation.getFile());
 		return manipulator.loadConfiguration(fileURL, home);
 	}
 
@@ -159,25 +154,45 @@ class P2Utils {
 		Assert.isLegal(symbolicName != null);
 		Assert.isLegal(versionRange != null);
 
-		BundleInfo[] bundles;
-		if (isSourceBundle)
-			bundles= readSourceBundles();
-		else
-			bundles= readBundles();
+		// First try to find the bundle in the config area
+		BundleInfo bundleInfo= findBundle(symbolicName, versionRange, isSourceBundle, true);
+		if (bundleInfo != null)
+			return bundleInfo;
 
+		// Use install location if not found in config area
+		return findBundle(symbolicName, versionRange, isSourceBundle, false);
+	}
+
+	/**
+	 * Finds the bundle info for the given arguments.
+	 * 
+	 * @param symbolicName the symbolic name
+	 * @param versionRange the version range for the bundle version
+	 * @param isSourceBundle <code>true</code> if source bundles should be read <code>false</code>
+	 *            otherwise
+	 * @param useConfigArea <code>true</code> if the bundles are read from the config area, or
+	 *            <code>false</code> if the install location should be used
+	 * @return the bundle info or <code>null</code> if not found
+	 * @since 3.5
+	 */
+	private static BundleInfo findBundle(String symbolicName, VersionRange versionRange, boolean isSourceBundle, boolean useConfigArea) {
+		BundleInfo[] bundles= readBundles(isSourceBundle, useConfigArea);
 		if (bundles == null)
 			return null;
-
+		
 		for (int i= 0; i < bundles.length; i++) {
-			if (symbolicName.equals(bundles[i].getSymbolicName()) && versionRange.isIncluded(new Version(bundles[i].getVersion())))
-				return bundles[i];
+			if (symbolicName.equals(bundles[i].getSymbolicName()) && versionRange.isIncluded(new Version(bundles[i].getVersion()))) {
+				IPath path= getBundleLocationPath(bundles[i]);
+				if (path.toFile().exists())
+					return bundles[i];
+			}
 		}
-
+		
 		return null;
 	}
 
 	/**
-	 * Returns the bundle location.
+	 * Returns the bundle location path.
 	 * 
 	 * @param bundleInfo the bundle info or <code>null</code>
 	 * @return the bundle location or <code>null</code> if it is not possible to convert to a path
