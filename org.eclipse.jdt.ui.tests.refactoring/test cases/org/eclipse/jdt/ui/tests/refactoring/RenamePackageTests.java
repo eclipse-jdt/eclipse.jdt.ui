@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1111,7 +1111,27 @@ public class RenamePackageTests extends RefactoringTest {
 
 	public void test2() throws Exception{
 		fIsPreDeltaTest= true;
-		helper2(new String[]{"r", "fred"}, new String[][]{{"A"}, {"A"}}, "p1");
+		RenamePackageProcessor processor= helper2(new String[]{"r", "fred"}, new String[][]{{"A"}, {"A"}}, "p1");
+		
+		// test that participants are correctly informed after '< Back': https://bugs.eclipse.org/bugs/show_bug.cgi?id=280068
+		performUndo();
+		
+		ParticipantTesting.reset();
+		String secondName= "pipapo";
+		processor.setNewElementName(secondName);
+		String[] renameHandles= ParticipantTesting.createHandles(new Object[] {
+				processor.getPackage(),
+				processor.getPackage().getResource()
+		});
+		
+		RenameRefactoring refactoring= (RenameRefactoring)processor.getRefactoring();
+		refactoring.checkFinalConditions(new NullProgressMonitor());
+		refactoring.createChange(new NullProgressMonitor());
+
+		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
+				new RenameArguments(secondName, true),
+				new RenameArguments(secondName, true)
+		});
 	}
 
 	public void test3() throws Exception{
