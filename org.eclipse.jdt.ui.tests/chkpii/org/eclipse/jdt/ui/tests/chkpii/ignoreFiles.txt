@@ -117,6 +117,7 @@ org.apache.lucene.analysis/*
 org.junit4/*
 org.objectweb.asm/*
 
+www*eclipse.org-eclipse-root/*
 www*eclipse.org-development/*
 www*platform-search/*
 www*platform-UI/*
