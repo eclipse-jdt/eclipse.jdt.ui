@@ -231,6 +231,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private CopyCallHierarchyAction fCopyAction;
     private CancelSearchAction fCancelSearchAction;
     private ExpandWithConstructorsAction fExpandWithConstructorsAction;
+    private RemoveFromViewAction fRemoveFromViewAction;
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
@@ -950,7 +951,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fExpandWithConstructorsAction.canActionBeAdded()) {
         	menu.appendToGroup(GROUP_FOCUS, fExpandWithConstructorsAction);
         }
-
+        
+        if (fRemoveFromViewAction.canActionBeAdded()){
+        	menu.appendToGroup(GROUP_FOCUS, fRemoveFromViewAction);
+        }
 
         fActionGroups.setContext(new ActionContext(getSelection()));
         fActionGroups.fillContextMenu(menu);
@@ -1008,6 +1012,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fCancelSearchAction = new CancelSearchAction(this);
         setCancelEnabled(false);
         fExpandWithConstructorsAction= new ExpandWithConstructorsAction(this, fCallHierarchyViewer);
+        fRemoveFromViewAction= new RemoveFromViewAction(this, fCallHierarchyViewer);
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),

@@ -131,6 +131,10 @@ public final class CallHierarchyMessages extends NLS {
 	public static String LocationViewer_ColumnLine_header;
 	public static String LocationViewer_ColumnInfo_header;
 	public static String LocationLabelProvider_unknown;
+	
+	public static String RemoveFromViewAction_removeFromView_text;
+	public static String RemoveFromViewAction_removeFromView_description;
+	public static String RemoveFromViewAction_removeFromView_tooltip;
 
 	public static String ExpandWithConstructorsAction_expandWithConstructors_text;
 	public static String ExpandWithConstructorsAction_expandWithConstructors_description;

@@ -442,6 +442,7 @@ public interface IJavaHelpContextIds {
     public static final String CALL_HIERARCHY_CANCEL_SEARCH_ACTION= PREFIX + "call_hierarchy_cancel_search_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_ACTION= PREFIX + "call_hierarchy_expand_with_constructors_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_DIALOG= PREFIX + "call_hierarchy_expand_with_constructors_dialog_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_REMOVE_FROM_VIEW_ACTION= PREFIX + "call_hierarchy_remove_from_view_action_context"; //$NON-NLS-1$
     /**
      * @since 3.2
      */
