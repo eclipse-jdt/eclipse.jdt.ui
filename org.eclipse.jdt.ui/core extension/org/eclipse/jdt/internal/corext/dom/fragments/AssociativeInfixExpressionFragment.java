@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -29,7 +31,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
@@ -39,11 +41,11 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	private final List/*<Expression>*/ fOperands;
 	private final InfixExpression fGroupRoot;
 
-	public static IExpressionFragment createSubPartFragmentBySourceRange(InfixExpression node, SourceRange range, ICompilationUnit cu) throws JavaModelException {
+	public static IExpressionFragment createSubPartFragmentBySourceRange(InfixExpression node, ISourceRange range, ICompilationUnit cu) throws JavaModelException {
 		Assert.isNotNull(node);
 		Assert.isNotNull(range);
-		Assert.isTrue(!range.covers(node));
-		Assert.isTrue(new SourceRange(node).covers(range));
+		Assert.isTrue(!Util.covers(range, node));
+		Assert.isTrue(Util.covers(SourceRangeFactory.create(node), range));
 
 		if(!isAssociativeInfix(node))
 			return null;
@@ -89,7 +91,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		return node;
 	}
 
-	private static List findSubGroupForSourceRange(List/*<Expression>*/ group, SourceRange range) {
+	private static List findSubGroupForSourceRange(List/*<Expression>*/group, ISourceRange range) {
 		Assert.isTrue(!group.isEmpty());
 
 		List subGroup= new ArrayList();
@@ -114,7 +116,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 			}
 		}
 		ASTNode lastGroupMember= (ASTNode)group.get(group.size() - 1);
-		if(range.getEndExclusive() == new SourceRange(lastGroupMember).getEndExclusive()) {
+		if (Util.getEndExclusive(range) == Util.getEndExclusive(SourceRangeFactory.create(lastGroupMember))) {
 			subGroup.add(lastGroupMember);
 			exited= true;
 		}
@@ -124,23 +126,24 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		return subGroup;
 	}
 
-	private static boolean rangeStartsBetween(SourceRange range, ASTNode first, ASTNode next) {
+
+	private static boolean rangeStartsBetween(ISourceRange range, ASTNode first, ASTNode next) {
 		int pos= range.getOffset();
 		return    first.getStartPosition() + first.getLength() <= pos
 		        && pos <= next.getStartPosition();
 	}
 
-	private static boolean rangeEndsBetween(SourceRange range, ASTNode first, ASTNode next) {
-		int pos= range.getEndExclusive();
+	private static boolean rangeEndsBetween(ISourceRange range, ASTNode first, ASTNode next) {
+		int pos= Util.getEndExclusive(range);
 		return    first.getStartPosition() + first.getLength() <= pos
 		        && pos <= next.getStartPosition();
 	}
 
-	private static boolean rangeIncludesExtraNonWhitespace(SourceRange range, List/*<Expression>*/ operands, ICompilationUnit cu) throws JavaModelException {
+	private static boolean rangeIncludesExtraNonWhitespace(ISourceRange range, List/*<Expression>*/operands, ICompilationUnit cu) throws JavaModelException {
 		return Util.rangeIncludesNonWhitespaceOutsideRange(range, getRangeOfOperands(operands), cu.getBuffer());
 	}
 
-	private static SourceRange getRangeOfOperands(List/*<Expression>*/ operands) {
+	private static ISourceRange getRangeOfOperands(List/*<Expression>*/operands) {
 		Expression first= (Expression) operands.get(0);
 		Expression last= (Expression) operands.get(operands.size() - 1);
 		return new SourceRange(first.getStartPosition(), last.getStartPosition() + last.getLength() - first.getStartPosition());

@@ -48,7 +48,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -205,7 +205,7 @@ class AccessAnalyzer extends ASTVisitor {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof ExpressionStatement)) {
 			fStatus.addError(RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_cannot_convert_postfix_expression,
-				JavaStatusContext.create(fCUnit, new SourceRange(node)));
+				JavaStatusContext.create(fCUnit, SourceRangeFactory.create(node)));
 			return false;
 		}
 		fRewriter.replace(node,

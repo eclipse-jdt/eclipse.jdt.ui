@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 public final class CompilationUnitRange {
@@ -33,7 +33,7 @@ public final class CompilationUnitRange {
 	}
 
 	public CompilationUnitRange(ICompilationUnit unit, ASTNode node) {
-		this(unit, new SourceRange(node));
+		this(unit, SourceRangeFactory.create(node));
 	}
 
 	public ICompilationUnit getCompilationUnit() {

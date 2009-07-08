@@ -19,8 +19,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.core.SourceRange;
 
 import org.eclipse.jdt.ui.tests.refactoring.AbstractSelectionTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;

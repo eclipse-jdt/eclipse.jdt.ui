@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,15 @@ package org.eclipse.jdt.internal.corext.dom.fragments;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.SourceRangeFactory;
+
 
 /**
  * This class houses a collection of static methods which do not refer to,
@@ -28,8 +31,8 @@ import org.eclipse.jdt.internal.corext.SourceRange;
  * they could be moved to some less specialized package.
  */
 class Util {
-	static boolean rangeIncludesNonWhitespaceOutsideRange(SourceRange selection, SourceRange nodes, IBuffer buffer) {
-		if(!selection.covers(nodes))
+	static boolean rangeIncludesNonWhitespaceOutsideRange(ISourceRange selection, ISourceRange nodes, IBuffer buffer) {
+		if (!covers(selection, nodes))
 			return false;
 
 		//TODO: skip leading comments. Consider that leading line comment must be followed by newline!
@@ -62,4 +65,22 @@ class Util {
 			}
 		}
 	}
+
+	public static int getEndExclusive(ISourceRange sourceRange) {
+		return sourceRange.getOffset() + sourceRange.getLength();
+	}
+
+	public static int getEndInclusive(ISourceRange sourceRange) {
+		return getEndExclusive(sourceRange) - 1;
+	}
+
+	public static boolean covers(ISourceRange sourceRange, ASTNode astNode) {
+		return covers(sourceRange, SourceRangeFactory.create(astNode));
+	}
+
+	public static boolean covers(ISourceRange thisRange, ISourceRange otherRange) {
+		return thisRange.getOffset() <= otherRange.getOffset()
+				&& getEndInclusive(thisRange) >= getEndInclusive(otherRange);
+	}
+
 }
