@@ -19,7 +19,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
-import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -62,16 +61,8 @@ class RemoveFromViewAction extends Action{
 	 */
 	public void run() {
 		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
-		for (int i= 0; i < items.length; i++) {
-			TreeItem parent= items[i].getParentItem();
-				if (!items[i].isDisposed())
-					items[i].dispose();
-				while (parent != null && parent.getItems().length  == 0) {// remove all the parent nodes whose children are disposed.
-						TreeItem item= parent;
-						parent= parent.getParentItem();
-						item.dispose();
-				}
-			}
+		for (int i= 0; i < items.length; i++)
+			items[i].dispose();
 	}
 
 	/**
@@ -92,30 +83,13 @@ class RemoveFromViewAction extends Action{
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
 		if (selection.isEmpty())
 			return false;
-		MethodWrapper[] wrappers= new MethodWrapper[selection.size()];
-		int i= 0;
-		for (Iterator iter= selection.iterator(); iter.hasNext();i++) {
-			Object element= iter.next();
-			if (element instanceof RealCallers || !(element instanceof MethodWrapper))//takes care of '...' node
-				return false;
-			wrappers[i]= (MethodWrapper)element;
-			for (int j= 0; j < i; j++) {
-				MethodWrapper parent= wrappers[j].getParent();
-				while (parent != null) {
-					if (wrappers[i] == parent) {
-						return false;// disable if element is a parent of other selected elements
-					}
-					parent= parent.getParent();
-				}
-				MethodWrapper parentElement= wrappers[i].getParent();
-				while (parentElement != null) {
-					if (parentElement == wrappers[j]) {
-						return false;// disable if element is a child of other selected elements
-					}
-					parentElement= parentElement.getParent();
-				}
 
-			}
+		Iterator iter= selection.iterator();
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			if (!(element instanceof MethodWrapper))//takes care of '...' node
+				return false;
+			
 			TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
 			for (int k= 0; k < items.length; k++) {
 				if (items[k].getExpanded()){
