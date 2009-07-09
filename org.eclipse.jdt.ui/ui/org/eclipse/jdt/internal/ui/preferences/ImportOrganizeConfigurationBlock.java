@@ -373,7 +373,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_title);
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		dialog.setFileName("example.importorder"); //$NON-NLS-1$
+		dialog.setFileName("example"); //$NON-NLS-1$
 		String lastPath= dialogSettings.get(DIALOGSETTING_LASTSAVEPATH);
 		if (lastPath != null) {
 			dialog.setFilterPath(lastPath);
