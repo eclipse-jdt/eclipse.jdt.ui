@@ -119,14 +119,14 @@ public abstract class FlowInfo {
 
 	protected void mergeConditional(FlowInfo info, FlowContext context) {
 		mergeAccessModeConditional(info, context);
-		mergeExecutionFlowConditional(info, context);
-		mergeTypeVariablesConditional(info, context);
+		mergeExecutionFlowConditional(info);
+		mergeTypeVariablesConditional(info);
 	}
 
 	protected void mergeSequential(FlowInfo info, FlowContext context) {
 		mergeAccessModeSequential(info, context);
-		mergeExecutionFlowSequential(info, context);
-		mergeTypeVariablesSequential(info, context);
+		mergeExecutionFlowSequential(info);
+		mergeTypeVariablesSequential(info);
 	}
 
 	//---- Return Kind ------------------------------------------------------------------
@@ -213,7 +213,7 @@ public abstract class FlowInfo {
 		List catchClauses= node.catchClauses();
 		if (catchClauses.isEmpty())
 			return;
-		// Make sure we have a copy since we are modifing the fExceptions list
+		// Make sure we have a copy since we are modifying the fExceptions list
 		ITypeBinding[] exceptions= (ITypeBinding[]) fExceptions.toArray(new ITypeBinding[fExceptions.size()]);
 		for (int i= 0; i < exceptions.length; i++) {
 			handleException(catchClauses, exceptions[i]);
@@ -252,36 +252,36 @@ public abstract class FlowInfo {
 		fTypeVariables.add(typeParameter);
 	}
 
-	private void mergeTypeVariablesSequential(FlowInfo otherInfo, FlowContext context) {
+	private void mergeTypeVariablesSequential(FlowInfo otherInfo) {
 		fTypeVariables= mergeSets(fTypeVariables, otherInfo.fTypeVariables);
 	}
 
-	private void mergeTypeVariablesConditional(FlowInfo otherInfo, FlowContext context) {
+	private void mergeTypeVariablesConditional(FlowInfo otherInfo) {
 		fTypeVariables= mergeSets(fTypeVariables, otherInfo.fTypeVariables);
 	}
 
 	//---- Execution flow -------------------------------------------------------------------
 
-	private void mergeExecutionFlowSequential(FlowInfo otherInfo, FlowContext context) {
+	private void mergeExecutionFlowSequential(FlowInfo otherInfo) {
 		int other= otherInfo.fReturnKind;
 		if (branches() && other == VALUE_RETURN)
 			other= PARTIAL_RETURN;
 		fReturnKind= RETURN_KIND_SEQUENTIAL_TABLE[fReturnKind][other];
-		mergeBranches(otherInfo, context);
-		mergeExceptions(otherInfo, context);
+		mergeBranches(otherInfo);
+		mergeExceptions(otherInfo);
 	}
 
-	private void mergeExecutionFlowConditional(FlowInfo otherInfo, FlowContext context) {
+	private void mergeExecutionFlowConditional(FlowInfo otherInfo) {
 		fReturnKind= RETURN_KIND_CONDITIONAL_TABLE[fReturnKind][otherInfo.fReturnKind];
-		mergeBranches(otherInfo, context);
-		mergeExceptions(otherInfo, context);
+		mergeBranches(otherInfo);
+		mergeExceptions(otherInfo);
 	}
 
-	private void mergeBranches(FlowInfo otherInfo, FlowContext context) {
+	private void mergeBranches(FlowInfo otherInfo) {
 		fBranches= mergeSets(fBranches, otherInfo.fBranches);
 	}
 
-	private void mergeExceptions(FlowInfo otherInfo, FlowContext context) {
+	private void mergeExceptions(FlowInfo otherInfo) {
 		fExceptions= mergeSets(fExceptions, otherInfo.fExceptions);
 	}
 
@@ -326,6 +326,10 @@ public abstract class FlowInfo {
 	/**
 	 * Checks whether the given local variable binding has the given access
 	 * mode.
+	 * 
+	 * @param context the flow context used during flow analysis
+	 * @param local local variable of interest
+	 * @param mode the access mode of the local variable
 	 *
 	 * @return <code>true</code> if the binding has the given access mode.
 	 * 	<code>False</code> otherwise
