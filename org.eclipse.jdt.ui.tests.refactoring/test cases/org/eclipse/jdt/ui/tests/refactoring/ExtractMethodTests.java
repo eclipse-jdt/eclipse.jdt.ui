@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extracting code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] missing return type when code can throw exception - https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -1579,6 +1580,16 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		returnTest();
 	}
 
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413	
+	public void test733() throws Exception {
+		returnTest();
+	}
+	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413	
+	public void test734() throws Exception {
+		returnTest();
+	}
+	
 	//---- Branch statements
 
 	public void test750() throws Exception {

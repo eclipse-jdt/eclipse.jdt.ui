@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] missing return type when code can throw exception - https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
@@ -76,10 +77,10 @@ public abstract class FlowInfo {
 	/* NOT_POSSIBLE */		{ NOT_POSSIBLE,		NOT_POSSIBLE,	NOT_POSSIBLE, 	NOT_POSSIBLE,	NOT_POSSIBLE,	NOT_POSSIBLE,	NOT_POSSIBLE	},
 	/* UNDEFINED */			{ NOT_POSSIBLE,		UNDEFINED,		NO_RETURN,		PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			},
 	/* NO_RETURN */			{ NOT_POSSIBLE,		NO_RETURN,		NO_RETURN,		PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			},
-	/* PARTIAL_RETURN */	{ NOT_POSSIBLE,		PARTIAL_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			},
+	/* PARTIAL_RETURN */	{ NOT_POSSIBLE,		PARTIAL_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	VALUE_RETURN	},
 	/* VOID_RETURN */		{ NOT_POSSIBLE,		VOID_RETURN,	VOID_RETURN,	PARTIAL_RETURN,	VOID_RETURN,	NOT_POSSIBLE,	NOT_POSSIBLE	},
 	/* VALUE_RETURN */		{ NOT_POSSIBLE,		VALUE_RETURN,	VALUE_RETURN,	PARTIAL_RETURN,	NOT_POSSIBLE,	VALUE_RETURN,	NOT_POSSIBLE	},
-	/* THROW */				{ NOT_POSSIBLE,		THROW,			THROW,			PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			}
+	/* THROW */				{ NOT_POSSIBLE,		THROW,			THROW,			VALUE_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			}
 	};
 
 	protected static final String UNLABELED = "@unlabeled"; //$NON-NLS-1$
