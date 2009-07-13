@@ -10,7 +10,7 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       o inline call that is used in a field initializer
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
- *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extractiong code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extracting code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 

@@ -7,8 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extractiong code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extracting code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
