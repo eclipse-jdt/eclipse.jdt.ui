@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       o inline call that is used in a field initializer
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extractiong code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
@@ -172,7 +173,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 
 	private void createLoopReentranceVisitor(ASTNode node) {
-		if (fLoopReentranceVisitor == null && fDoLoopReentrance)
+		if (fLoopReentranceVisitor == null && fDoLoopReentrance && fSelection.coveredBy(node))
 			fLoopReentranceVisitor= new LoopReentranceVisitor(fFlowContext, fSelection, node);
 	}
 
@@ -257,7 +258,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 
 	private void handleLoopReentrance(ASTNode node) {
-		if (!fSelection.coveredBy(node) || fLoopReentranceVisitor == null || fLoopReentranceVisitor.getLoopNode() != node)
+		if (fLoopReentranceVisitor == null || fLoopReentranceVisitor.getLoopNode() != node)
 			return;
 
 		fLoopReentranceVisitor.process(node);

@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extractiong code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
@@ -1555,6 +1556,26 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void test728() throws Exception {
+		returnTest();
+	}
+	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
+	public void test729() throws Exception {
+		returnTest();
+	}
+
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519	
+	public void test730() throws Exception {
+		returnTest();
+	}
+	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
+	public void test731() throws Exception {
+		returnTest();
+	}
+
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519	
+	public void test732() throws Exception {
 		returnTest();
 	}
 
