@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -662,7 +663,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	private void initializeDuplicates() {
 		ASTNode start= fAnalyzer.getEnclosingBodyDeclaration();
-		while(!(start instanceof AbstractTypeDeclaration) && !(start instanceof AnonymousClassDeclaration)) {
+		while (!(start instanceof AbstractTypeDeclaration)) {
 			start= start.getParent();
 		}
 
@@ -798,10 +799,20 @@ public class ExtractMethodRefactoring extends Refactoring {
 		for (int d= 0; d < fDuplicates.length; d++) {
 			SnippetFinder.Match duplicate= fDuplicates[d];
 			if (!duplicate.isMethodBody()) {
-				ASTNode[] callNodes= createCallNodes(duplicate);
-				new StatementRewrite(fRewriter, duplicate.getNodes()).replace(callNodes, description);
+				if (isDestinationReachable(duplicate.getEnclosingMethod())) {
+					ASTNode[] callNodes= createCallNodes(duplicate);
+					new StatementRewrite(fRewriter, duplicate.getNodes()).replace(callNodes, description);
+				}
 			}
 		}
+	}
+
+	private boolean isDestinationReachable(MethodDeclaration methodDeclaration) {
+		ASTNode start= methodDeclaration;
+		while (start != null && start != fDestination) {
+			start= start.getParent();
+		}
+		return start == fDestination;
 	}
 
 	private MethodDeclaration createNewMethod(ASTNode[] selectedNodes, String lineDelimiter, TextEditGroup substitute) throws CoreException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -1723,6 +1724,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	public void test970() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=186061
+	}
+
+	public void test971() throws Exception {
+		performTest(fgTestSetup.getDuplicatesPackage(), "A", COMPARE_WITH_OUTPUT, "duplicates_out", null, null, 1); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
+	}
+
+	public void test972() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
 	}
 
 	//---- Test code in initializers -----------------------------------------------
