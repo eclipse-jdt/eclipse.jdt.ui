@@ -105,7 +105,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	private class Filter extends ViewerFilter {
 
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			return WorkingSetModel.isSupportedAsToplevelElement((IWorkingSet)element);
+			return WorkingSetModel.isSupportedAsTopLevelElement((IWorkingSet)element);
 		}
 	}
 

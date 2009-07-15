@@ -456,7 +456,7 @@ public class WorkingSetModel {
 		// Add new working set to the list of active working sets
 		if (IWorkingSetManager.CHANGE_WORKING_SET_ADD.equals(property)) {
 			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
-			if (isSupportedAsToplevelElement(workingSet)) {
+			if (isSupportedAsTopLevelElement(workingSet)) {
 				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 				List allWorkingSets= new ArrayList(Arrays.asList(manager.getAllWorkingSets()));
 				if (workingSet.isVisible() && allWorkingSets.contains(workingSet) && !fActiveWorkingSets.contains(workingSet)) {
@@ -501,7 +501,7 @@ public class WorkingSetModel {
 	 * @return <code>true</code> if the given working set is supported as top-level element
 	 * @since 3.6
 	 */
-	public static boolean isSupportedAsToplevelElement(IWorkingSet workingSet) {
+	public static boolean isSupportedAsTopLevelElement(IWorkingSet workingSet) {
 		Object id= workingSet.getId();
 		if (IWorkingSetIDs.OTHERS.equals(id) || IWorkingSetIDs.JAVA.equals(id) || IWorkingSetIDs.RESOURCE.equals(id))
 			return true;
