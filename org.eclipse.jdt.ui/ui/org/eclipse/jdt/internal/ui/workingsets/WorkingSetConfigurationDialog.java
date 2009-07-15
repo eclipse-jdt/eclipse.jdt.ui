@@ -35,9 +35,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -108,24 +105,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	private class Filter extends ViewerFilter {
 
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			IWorkingSet ws= (IWorkingSet)element;
-			String id= ws.getId();
-			return IWorkingSetIDs.OTHERS.equals(id) || IWorkingSetIDs.JAVA.equals(id) || IWorkingSetIDs.RESOURCE.equals(id) || isCompatible(ws);
+			return WorkingSetModel.isSupportedAsToplevelElement((IWorkingSet)element);
 		}
-
-		private boolean isCompatible(IWorkingSet set) {
-			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
-				return false;
-			IAdaptable[] elements= set.getElements();
-			for (int i= 0; i < elements.length; i++) {
-				IAdaptable element= elements[i];
-				IProject p= (IProject)element.getAdapter(IProject.class);
-				if (p != null && p.exists())
-					return true;
-			}
-			return false;
-		}
-
 	}
 
 	private List fAllWorkingSets;

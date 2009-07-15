@@ -455,13 +455,15 @@ public class WorkingSetModel {
 
 		// Add new working set to the list of active working sets
 		if (IWorkingSetManager.CHANGE_WORKING_SET_ADD.equals(property)) {
-			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
-			List allWorkingSets= new ArrayList(Arrays.asList(manager.getAllWorkingSets()));
-			if (workingSet.isVisible() && allWorkingSets.contains(workingSet) && !fActiveWorkingSets.contains(workingSet)) {
-				List elements= new ArrayList(fActiveWorkingSets);
-				elements.add(workingSet);
-				setActiveWorkingSets((IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
+			if (isSupportedAsToplevelElement(workingSet)) {
+				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+				List allWorkingSets= new ArrayList(Arrays.asList(manager.getAllWorkingSets()));
+				if (workingSet.isVisible() && allWorkingSets.contains(workingSet) && !fActiveWorkingSets.contains(workingSet)) {
+					List elements= new ArrayList(fActiveWorkingSets);
+					elements.add(workingSet);
+					setActiveWorkingSets((IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]));
+				}
 			}
 		}
 
@@ -491,6 +493,32 @@ public class WorkingSetModel {
 		}
 
 	}
+
+	/**
+	 * Tells whether the given working set is supported as top-level element
+	 * 
+	 * @param workingSet the working set to test
+	 * @return <code>true</code> if the given working set is supported as top-level element
+	 * @since 3.6
+	 */
+	public static boolean isSupportedAsToplevelElement(IWorkingSet workingSet) {
+		Object id= workingSet.getId();
+		if (IWorkingSetIDs.OTHERS.equals(id) || IWorkingSetIDs.JAVA.equals(id) || IWorkingSetIDs.RESOURCE.equals(id))
+			return true;
+
+		if (!workingSet.isSelfUpdating() || workingSet.isAggregateWorkingSet())
+			return false;
+
+		IAdaptable[] elements= workingSet.getElements();
+		for (int i= 0; i < elements.length; i++) {
+			IAdaptable element= elements[i];
+			IProject p= (IProject)element.getAdapter(IProject.class);
+			if (p != null && p.exists())
+				return true;
+		}
+		return false;
+	}
+
 
 	private void fireEvent(PropertyChangeEvent event) {
 		Object[] listeners= fListeners.getListeners();
