@@ -690,7 +690,7 @@ public class ModifierCorrectionSubProcessor {
 			Map options= new Hashtable();
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), 5, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), 15, image, context);
 			proposals.add(proposal);
 		}
 	}
@@ -702,7 +702,7 @@ public class ModifierCorrectionSubProcessor {
 			Map options= new Hashtable();
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), 5, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), 15, image, context);
 			proposals.add(proposal);
 		}
 	}
