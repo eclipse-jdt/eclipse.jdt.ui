@@ -269,8 +269,8 @@ public class TestRunSession implements ITestRunSession {
 		return fTestRoot;
 	}
 
-	/**
-	 * @return the Java project, or <code>null</code>
+	/*
+	 * @see org.eclipse.jdt.junit.model.ITestRunSession#getJavaProject()
 	 */
 	public IJavaProject getLaunchedProject() {
 		return fProject;
