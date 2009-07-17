@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -420,15 +420,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestContainerRadioButton.setSelection(false);
 		fTestText.setText(testTypeName);
 		fContainerText.setText(""); //$NON-NLS-1$
-		setTestMethodLabel(fOriginalTestMethodName);
-	}
-
-	private void setTestMethodLabel(String testMethodName) {
-		if (!"".equals(testMethodName)) { //$NON-NLS-1$
-			fTestMethodLabel.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_method+fOriginalTestMethodName);
-		} else {
-			fTestMethodLabel.setText(""); //$NON-NLS-1$
-		}
+		String methodLabelText= "".equals(fOriginalTestMethodName) ? "" : //$NON-NLS-1$//$NON-NLS-2$
+				Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_label_method, fOriginalTestMethodName);
+		fTestMethodLabel.setText(methodLabelText);
 	}
 
 	private void updateTestContainerFromConfig(ILaunchConfiguration config) {
