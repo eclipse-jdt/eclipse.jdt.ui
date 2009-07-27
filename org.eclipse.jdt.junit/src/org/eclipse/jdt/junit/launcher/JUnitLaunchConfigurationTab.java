@@ -14,6 +14,7 @@ package org.eclipse.jdt.junit.launcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -77,6 +78,8 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
@@ -85,7 +88,6 @@ import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants
 import org.eclipse.jdt.internal.junit.launcher.JUnitMigrationDelegate;
 import org.eclipse.jdt.internal.junit.launcher.TestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.launcher.TestSelectionDialog;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -98,9 +100,14 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
+import org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor;
+import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -525,7 +532,39 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			fTestContainerRadioButton.setSelection(radioSetting[1]);
 		}
 
-		SelectionDialog dialog = new TestSelectionDialog(shell, types);
+		final HashSet typeLookup= new HashSet();
+		for (int i= 0; i < types.length; i++) {
+			IType type= types[i];
+			typeLookup.add(type.getPackageFragment().getElementName() + '/' + type.getTypeQualifiedName('.'));
+		}
+		SelectionDialog dialog= null;
+		try {
+			dialog= JavaUI.createTypeDialog(shell,
+					getLaunchConfigurationDialog(),
+					SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProject }, IJavaSearchScope.SOURCES),
+					IJavaElementSearchConstants.CONSIDER_ALL_TYPES,
+					false,
+					"**", //$NON-NLS-1$
+					new TypeSelectionExtension() {
+						public ITypeInfoFilterExtension getFilterExtension() {
+							return new ITypeInfoFilterExtension() {
+								public boolean select(ITypeInfoRequestor requestor) {
+									StringBuffer buf= new StringBuffer();
+									buf.append(requestor.getPackageName()).append('/');
+									String enclosingName= requestor.getEnclosingName();
+									if (enclosingName.length() > 0)
+										buf.append(enclosingName).append('.');
+									buf.append(requestor.getTypeName());
+									return typeLookup.contains(buf.toString());
+								}
+							};
+						}
+					});
+		} catch (JavaModelException e) {
+			JUnitPlugin.log(e);
+			return;
+		}
+		
 		dialog.setTitle(JUnitMessages.JUnitLaunchConfigurationTab_testdialog_title);
 		dialog.setMessage(JUnitMessages.JUnitLaunchConfigurationTab_testdialog_message);
 		if (dialog.open() == Window.CANCEL) {
