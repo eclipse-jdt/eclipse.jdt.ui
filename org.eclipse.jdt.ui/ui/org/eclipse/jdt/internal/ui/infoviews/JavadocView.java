@@ -75,6 +75,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
@@ -104,6 +105,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -825,6 +827,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @see AbstractInfoView#computeInput(Object)
 	 */
 	protected Object computeInput(Object input) {
+		//TODO: never used?
 		if (getControl() == null || ! (input instanceof IJavaElement))
 			return null;
 
@@ -943,7 +946,7 @@ public class JavadocView extends AbstractInfoView {
 			Rectangle size=  fText.getClientArea();
 
 			try {
-				javadocHtml= fPresenter.updatePresentation(fBrowser, javadocHtml, fPresentation, size.width, size.height);
+				javadocHtml= fPresenter.updatePresentation(fText, javadocHtml, fPresentation, size.width, size.height);
 			} catch (IllegalArgumentException ex) {
 				// the javadoc might no longer be valid
 				return;
@@ -993,6 +996,16 @@ public class JavadocView extends AbstractInfoView {
 						constantValue= HTMLPrinter.convertToHTMLContent(constantValue);
 				}
 
+				ISourceRange nameRange;
+				try {
+					nameRange= ((IMember)curr).getNameRange();
+					if (nameRange != null) {
+						//TODO
+						JavadocHover.addAnnotations(buffer, curr, ((IMember)curr).getTypeRoot(), new Region(nameRange.getOffset(), nameRange.getLength()));
+					}
+				} catch (JavaModelException e) {
+					// TODO Auto-generated catch block
+				}
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
 				Reader reader;
 				try {
@@ -1028,6 +1041,7 @@ public class JavadocView extends AbstractInfoView {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER) {
+//TODO				JavadocHover.addAnnotations(buffer, curr);
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
 			}
 		}
@@ -1069,7 +1083,7 @@ public class JavadocView extends AbstractInfoView {
 		}
 
 		StringBuffer buf= new StringBuffer();
-		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, 8, 5, label.toString(), 22, 0);
+		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, label.toString(), 20, 2);
 		return buf.toString();
 	}
 
@@ -1220,6 +1234,8 @@ public class JavadocView extends AbstractInfoView {
 					return null;
 
 				VariableDeclarationFragment fieldDecl= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(constantField, ast);
+				if (fieldDecl == null)
+					return null;
 				Expression initializer= fieldDecl.getInitializer();
 				if (initializer == null)
 					return null;
