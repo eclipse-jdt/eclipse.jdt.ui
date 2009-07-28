@@ -24,19 +24,24 @@ import java.util.Map;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.text.edits.InsertEdit;
+
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -393,12 +398,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(anonymTypeDecl);
-		String extTypeName= BasicElementLabels.getJavaElementName(ASTNodes.getSimpleNameIdentifier((Name) node));
-		if (anonymTypeDecl.resolveBinding().getInterfaces().length == 0) {
-			refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_interface, extTypeName));
+		
+		String extTypeName= ASTNodes.getSimpleNameIdentifier((Name) node);
+		ITypeBinding anonymTypeBinding= anonymTypeDecl.resolveBinding();
+		String className;
+		if (anonymTypeBinding.getInterfaces().length == 0) {
+			className= Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_interface, extTypeName);
 		} else {
-			refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_class, extTypeName));
+			className= Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_class, extTypeName);
 		}
+		String[][] existingTypes= ((IType) anonymTypeBinding.getJavaElement()).resolveType(className);
+		int i= 1;
+		while (existingTypes != null) {
+			i++;
+			existingTypes= ((IType) anonymTypeBinding.getJavaElement()).resolveType(className + i);
+		}
+		refactoring.setClassName(i == 1 ? className : className + i);
 
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
@@ -1828,6 +1843,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static class RefactoringCorrectionProposal extends CUCorrectionProposal {
 		private final Refactoring fRefactoring;
+		private RefactoringStatus fRefactoringStatus;
 
 		public RefactoringCorrectionProposal(String name, ICompilationUnit cu, Refactoring refactoring, int relevance, Image image) {
 			super(name, cu, null, relevance, image);
@@ -1845,10 +1861,24 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		protected TextChange createTextChange() throws CoreException {
 			init(fRefactoring);
-			if (fRefactoring.checkFinalConditions(new NullProgressMonitor()).hasFatalError()) {
-				return new TextFileChange("fatal error", (IFile) getCompilationUnit().getResource()); //$NON-NLS-1$
+			fRefactoringStatus= fRefactoring.checkFinalConditions(new NullProgressMonitor());
+			if (fRefactoringStatus.hasFatalError()) {
+				TextFileChange dummyChange= new TextFileChange("fatal error", (IFile) getCompilationUnit().getResource()); //$NON-NLS-1$
+				dummyChange.setEdit(new InsertEdit(0, "")); //$NON-NLS-1$
+				return dummyChange;
 			}
 			return (TextChange) fRefactoring.createChange(new NullProgressMonitor());
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
+		 * @since 3.6
+		 */
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			if (fRefactoringStatus != null && fRefactoringStatus.hasFatalError()) {
+				return fRefactoringStatus.getEntryWithHighestSeverity().getMessage();
+			}
+			return super.getAdditionalProposalInfo(monitor);
 		}
 	}
 }

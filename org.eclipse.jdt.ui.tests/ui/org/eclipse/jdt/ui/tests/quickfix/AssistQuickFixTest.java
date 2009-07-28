@@ -4978,9 +4978,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		buf.append("class ArrayListExtension {\n");
+		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		int offset= buf.toString().lastIndexOf("ArrayList");
+		int offset= buf.toString().indexOf("ArrayList(lVar)");
 		AssistContext context= getCorrectionContext(cu, offset, 1);
 		List proposals= collectAssists(context, false);
 
@@ -4991,10 +4993,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
-		buf.append("    private final class ArrayListExtension extends ArrayList {\n");
+		buf.append("    private final class ArrayListExtension2 extends ArrayList {\n");
 		buf.append("        private final String fName;\n");
 		buf.append("        String fExisting;\n");
-		buf.append("        private ArrayListExtension(int pArg0, String pName) {\n");
+		buf.append("        private ArrayListExtension2(int pArg0, String pName) {\n");
 		buf.append("            super(pArg0);\n");
 		buf.append("            fName = pName;\n");
 		buf.append("            fExisting = fName;\n");
@@ -5006,8 +5008,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("    public Object foo(final String pName) {\n");
 		buf.append("        int lVar= 8;\n");
-		buf.append("        return new ArrayListExtension(lVar, pName);\n");
+		buf.append("        return new ArrayListExtension2(lVar, pName);\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class ArrayListExtension {\n");
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
