@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,13 +43,14 @@ public interface ICompilationUnitDocumentProvider extends IDocumentProvider, IDo
 	ICompilationUnit getWorkingCopy(Object element);
 
 	/**
-	 * Saves the content of the given document to the given element. This method has
-	 * only an effect if it is called when directly or indirectly inside <code>saveDocument</code>.
-	 *
+	 * Saves the content of the given document to the given element. This method has only an effect
+	 * if it is called when directly or indirectly inside <code>saveDocument</code>.
+	 * 
 	 * @param monitor the progress monitor
 	 * @param element the element to which to save
 	 * @param document the document to save
 	 * @param overwrite <code>true</code> if the save should be enforced
+	 * @throws CoreException if the document content could not be saved
 	 */
 	void saveDocumentContent(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite) throws CoreException;
 
