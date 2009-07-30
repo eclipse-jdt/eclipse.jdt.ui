@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,24 +44,23 @@ class TextSelectionConverter {
 
 	/**
 	 * Finds and returns the Java elements for the given editor selection.
-	 *
+	 * 
 	 * @param editor the Java editor
 	 * @param selection the text selection
-	 * @return	the Java elements for the given editor selection
-	 * @throws JavaModelException
+	 * @return the Java elements for the given editor selection
+	 * @throws JavaModelException if accessing the type root fails
 	 */
 	public static IJavaElement[] codeResolve(JavaEditor editor, ITextSelection selection) throws JavaModelException {
 		return codeResolve(getInput(editor), selection);
 	}
 
 	/**
-	 * Finds and returns the Java element that contains the
-	 * text selection in the given editor.
-	 *
+	 * Finds and returns the Java element that contains the text selection in the given editor.
+	 * 
 	 * @param editor the Java editor
 	 * @param selection the text selection
-	 * @return	the Java elements for the given editor selection
-	 * @throws JavaModelException
+	 * @return the Java elements for the given editor selection
+	 * @throws JavaModelException if accessing the type root fails
 	 */
 	public static IJavaElement getElementAtOffset(JavaEditor editor, ITextSelection selection) throws JavaModelException {
 		return getElementAtOffset(getInput(editor), selection);
