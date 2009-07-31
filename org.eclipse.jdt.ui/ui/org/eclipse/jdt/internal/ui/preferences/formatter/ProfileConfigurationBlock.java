@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -32,6 +33,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -58,6 +61,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public abstract class ProfileConfigurationBlock {
@@ -146,6 +150,7 @@ public abstract class ProfileConfigurationBlock {
 			fEditButton.addSelectionListener(this);
 			fDeleteButton.addSelectionListener(this);
 			fLoadButton.addSelectionListener(this);
+			fExportAllButton.addSelectionListener(this);
 			update(fProfileManager, null);
 		}
 
@@ -165,6 +170,47 @@ public abstract class ProfileConfigurationBlock {
 				newButtonPressed();
 			else if (button == fLoadButton)
 				loadButtonPressed();
+			else if(button == fExportAllButton)
+				exportAllButtonPressed();
+		}
+
+		/**
+		 * Exports all the profiles to a file.
+		 * 
+		 * @since 3.6
+		 */
+		private void exportAllButtonPressed() {
+			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.SAVE);
+			dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_export_profiles_dialog_title);
+			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
+			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(fLastSaveLoadPathKey + ".loadpath"); //$NON-NLS-1$
+			if (lastPath != null) {
+				dialog.setFilterPath(lastPath);
+			}
+			final String path= dialog.open();
+			if (path == null)
+				return;
+
+			JavaPlugin.getDefault().getDialogSettings().put(fLastSaveLoadPathKey + ".savepath", dialog.getFilterPath()); //$NON-NLS-1$
+
+			final File file= new File(path);
+			if (file.exists() && !MessageDialog.openQuestion(fComposite.getShell(), FormatterMessages.CodingStyleConfigurationBlock_export_profiles_overwrite_title, Messages.format(FormatterMessages.CodingStyleConfigurationBlock_export_profiles_overwrite_message, BasicElementLabels.getPathLabel(file)))) {
+				return;
+			}
+			String encoding= ProfileStore.ENCODING;
+			final IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
+			if (type != null)
+				encoding= type.getDefaultCharset();
+			final Collection profiles= new ArrayList();
+			profiles.addAll(fProfileManager.getSortedProfiles());
+			try {
+				fProfileStore.writeProfilesToFile(profiles, file, encoding);
+			} catch (CoreException e) {
+				final String title= FormatterMessages.CodingStyleConfigurationBlock_export_profiles_error_title;
+				final String message= FormatterMessages.CodingStyleConfigurationBlock_export_profiles_error_message;
+				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
+			}
+
 		}
 
 		public void widgetDefaultSelected(SelectionEvent e) {
@@ -218,29 +264,32 @@ public abstract class ProfileConfigurationBlock {
 			}
 			if (profiles == null || profiles.isEmpty())
 				return;
+			Iterator iter=profiles.iterator();
+			while (iter.hasNext()) {
+				final CustomProfile profile= (CustomProfile)iter.next();
 
-			final CustomProfile profile= (CustomProfile)profiles.iterator().next();
-
-			if (!fProfileVersioner.getProfileKind().equals(profile.getKind())) {
-				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title;
-				final String message= Messages.format(FormatterMessages.ProfileConfigurationBlock_load_profile_wrong_profile_message, new String[] {fProfileVersioner.getProfileKind(), profile.getKind()});
-				MessageDialog.openError(fComposite.getShell(), title, message);
-				return;
-			}
-
-			if (profile.getVersion() > fProfileVersioner.getCurrentVersion()) {
-				final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_title;
-				final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_message;
-				MessageDialog.openWarning(fComposite.getShell(), title, message);
-			}
-
-			if (fProfileManager.containsName(profile.getName())) {
-				final AlreadyExistsDialog aeDialog= new AlreadyExistsDialog(fComposite.getShell(), profile, fProfileManager);
-				if (aeDialog.open() != Window.OK)
+				if (!fProfileVersioner.getProfileKind().equals(profile.getKind())) {
+					final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_title;
+					final String message= Messages.format(FormatterMessages.ProfileConfigurationBlock_load_profile_wrong_profile_message, new String[] { fProfileVersioner.getProfileKind(),
+							profile.getKind() });
+					MessageDialog.openError(fComposite.getShell(), title, message);
 					return;
+				}
+
+				if (profile.getVersion() > fProfileVersioner.getCurrentVersion()) {
+					final String title= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_title;
+					final String message= FormatterMessages.CodingStyleConfigurationBlock_load_profile_error_too_new_message;
+					MessageDialog.openWarning(fComposite.getShell(), title, message);
+				}
+
+				if (fProfileManager.containsName(profile.getName())) {
+					final AlreadyExistsDialog aeDialog= new AlreadyExistsDialog(fComposite.getShell(), profile, fProfileManager);
+					if (aeDialog.open() != Window.OK)
+						return;
+				}
+				fProfileVersioner.update(profile);
+				fProfileManager.addProfile(profile);
 			}
-			fProfileVersioner.update(profile);
-			fProfileManager.addProfile(profile);
 		}
 	}
 
@@ -253,6 +302,7 @@ public abstract class ProfileConfigurationBlock {
 	private Button fDeleteButton;
 	private Button fNewButton;
 	private Button fLoadButton;
+	private Button fExportAllButton;
 
 	private PixelConverter fPixConv;
 	/**
@@ -316,6 +366,11 @@ public abstract class ProfileConfigurationBlock {
 
 	}
 
+	/**
+	 * Notifies that a preference has been changed.
+	 * 
+	 * @param event the preference change event
+	 */
 	protected void preferenceChanged(PreferenceChangeEvent event) {
 
 	}
@@ -365,6 +420,7 @@ public abstract class ProfileConfigurationBlock {
 
 		fNewButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
 		fLoadButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END);
+		fExportAllButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_export_all_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
 		createLabel(fComposite, "", 3); //$NON-NLS-1$
 
 		configurePreview(fComposite, numColumns, fProfileManager);

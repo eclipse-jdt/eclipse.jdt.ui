@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -456,6 +456,12 @@ final class FormatterMessages extends NLS {
 	public static String CodingStyleConfigurationBlock_load_profile_error_too_new_message;
 	public static String CodingStyleConfigurationBlock_save_profile_overwrite_title;
 	public static String CodingStyleConfigurationBlock_save_profile_overwrite_message;
+	public static String CodingStyleConfigurationBlock_export_all_button_desc;
+	public static String CodingStyleConfigurationBlock_export_profiles_dialog_title;
+	public static String CodingStyleConfigurationBlock_export_profiles_error_title;	
+	public static String CodingStyleConfigurationBlock_export_profiles_error_message;
+	public static String CodingStyleConfigurationBlock_export_profiles_overwrite_title;
+	public static String CodingStyleConfigurationBlock_export_profiles_overwrite_message;
 	public static String CodingStyleConfigurationBlock_edit_button_desc;
 	public static String CodingStyleConfigurationBlock_remove_button_desc;
 	public static String CodingStyleConfigurationBlock_new_button_desc;
