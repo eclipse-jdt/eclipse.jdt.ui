@@ -10,6 +10,7 @@
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extracting code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] missing return type when code can throw exception - https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -649,6 +650,12 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//---- more than one value to return
 
 	public void test196() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	//---- continue not possible
+	
+	public void test197() throws Exception {
 		invalidSelectionTest();
 	}
 
@@ -1616,6 +1623,62 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		branchTest();
 	}
 
+	public void test756() throws Exception {
+		branchTest();
+	}
+
+	public void test757() throws Exception {
+		branchTest();
+	}
+
+	public void test758() throws Exception {
+		branchTest();
+	}
+	
+	public void test759() throws Exception {
+		branchTest();
+	}
+	
+	public void test760() throws Exception {
+		branchTest();
+	}
+	
+	public void test761() throws Exception {
+		branchTest();
+	}
+	
+	public void test762() throws Exception {
+		branchTest();
+	}
+	
+	public void test763() throws Exception {
+		branchTest();
+	}
+	
+	public void test764() throws Exception {
+		branchTest();
+	}
+	
+	public void test765() throws Exception {
+		branchTest();
+	}
+	
+	public void test766() throws Exception {
+		branchTest();
+	}
+	
+	public void test767() throws Exception {
+		branchTest();
+	}
+	
+	public void test768() throws Exception {
+		branchTest();
+	}
+	
+	public void test769() throws Exception {
+		branchTest();
+	}
+	
 	//---- Test for CUs with compiler errors
 
 	public void test800() throws Exception {

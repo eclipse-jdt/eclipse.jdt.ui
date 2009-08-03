@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -25,14 +26,18 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -40,12 +45,14 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -55,6 +62,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -110,7 +118,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 	private boolean fForceStatic;
 	private boolean fIsLastStatementSelected;
-
+	private SimpleName fEnclosingLoopLabel;
+	
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection, false);
 	}
@@ -314,9 +323,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		fInputFlowInfo= flowAnalyzer.perform(getSelectedNodes());
 
 		if (fInputFlowInfo.branches()) {
-			status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch, JavaStatusContext.create(fCUnit, getSelection()));
-			fReturnKind= ERROR;
-			return status;
+			String canHandleBranchesProblem= canHandleBranches();
+			if (canHandleBranchesProblem != null) {
+				status.addFatalError(canHandleBranchesProblem, JavaStatusContext.create(fCUnit, getSelection()));
+				fReturnKind= ERROR;
+				return status;
+			}
 		}
 		if (fInputFlowInfo.isValueReturn()) {
 			fReturnKind= RETURN_STATEMENT_VALUE;
@@ -339,6 +351,88 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		adjustArgumentsAndMethodLocals();
 		compressArrays();
 		return status;
+	}
+
+	private String canHandleBranches() {
+		if (fReturnValue != null)
+			return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
+		
+		ASTNode[] selectedNodes= getSelectedNodes();
+		final ASTNode lastSelectedNode= selectedNodes[selectedNodes.length - 1];
+		Statement body= getParentLoopBody(lastSelectedNode.getParent());
+		if (!(body instanceof Block))
+			return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
+		
+		if (body != lastSelectedNode) {
+			Block block= (Block)body;
+			List statements= block.statements();
+			ASTNode lastStatementInLoop= (ASTNode)statements.get(statements.size() - 1);
+			if (lastSelectedNode != lastStatementInLoop)
+				return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
+		}
+		
+		final String continueMatchesLoopProblem[]= { null };
+		for (int i= 0; i < selectedNodes.length; i++) {
+			final ASTNode astNode= selectedNodes[i];
+			astNode.accept(new ASTVisitor() {
+				ArrayList fLocalLoopLabels= new ArrayList();
+				
+				public boolean visit(BreakStatement node) {
+					SimpleName label= node.getLabel();
+					if (label != null && !fLocalLoopLabels.contains(label.getIdentifier())) {
+						continueMatchesLoopProblem[0]= Messages.format(
+								RefactoringCoreMessages.ExtractMethodAnalyzer_branch_break_mismatch,
+								new Object[] { ("break " + label.getIdentifier()) }); //$NON-NLS-1$
+					}
+					return false;
+				}
+				
+				public boolean visit(LabeledStatement node) {
+					SimpleName label= node.getLabel();
+					if (label != null)
+						fLocalLoopLabels.add(label.getIdentifier());
+					return true;
+				}
+				
+				public void endVisit(ContinueStatement node) {
+					SimpleName label= node.getLabel();
+					if (label != null && !fLocalLoopLabels.contains(label.getIdentifier())) {
+						if (fEnclosingLoopLabel == null || ! label.getIdentifier().equals(fEnclosingLoopLabel.getIdentifier())) {
+							continueMatchesLoopProblem[0]= Messages.format(
+									RefactoringCoreMessages.ExtractMethodAnalyzer_branch_continue_mismatch,
+									new Object[] { "continue " + label.getIdentifier() }); //$NON-NLS-1$
+						}
+					}
+				}
+			});
+		}
+		return continueMatchesLoopProblem[0];
+	}
+
+	private Statement getParentLoopBody(ASTNode node) {
+		Statement stmt= null;
+		ASTNode start= node;
+		while (start != null
+				&& !(start instanceof ForStatement)
+				&& !(start instanceof DoStatement)
+				&& !(start instanceof WhileStatement)
+				&& !(start instanceof EnhancedForStatement)) {
+			start= start.getParent();
+		}
+		if (start instanceof ForStatement) {
+			stmt= ((ForStatement)start).getBody();
+		} else if (start instanceof DoStatement) {
+			stmt= ((DoStatement)start).getBody();
+		} else if (start instanceof WhileStatement) {
+			stmt= ((WhileStatement)start).getBody();
+		} else if (start instanceof EnhancedForStatement) {
+			stmt= ((EnhancedForStatement)start).getBody();
+		}
+		if (start.getParent() instanceof LabeledStatement) {
+			LabeledStatement labeledStatement= (LabeledStatement)start.getParent();
+			fEnclosingLoopLabel= labeledStatement.getLabel();
+		}
+		return stmt;
 	}
 
 	private boolean isVoidMethod() {

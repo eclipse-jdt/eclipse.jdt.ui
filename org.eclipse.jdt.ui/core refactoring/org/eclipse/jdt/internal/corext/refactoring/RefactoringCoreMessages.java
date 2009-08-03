@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
@@ -558,6 +559,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_assignments_to_local;
 
+	public static String ExtractMethodAnalyzer_branch_break_mismatch;
+
+	public static String ExtractMethodAnalyzer_branch_continue_mismatch;
+
 	public static String ExtractMethodAnalyzer_branch_mismatch;
 
 	public static String ExtractMethodAnalyzer_cannot_determine_return_type;
@@ -633,6 +638,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodRefactoring_no_set_of_statements;
 
 	public static String ExtractMethodRefactoring_organize_imports;
+
+	public static String ExtractMethodRefactoring_replace_continue;
 
 	public static String ExtractMethodRefactoring_replace_occurrences;
 

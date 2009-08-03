@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -16,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,16 +56,21 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -71,12 +78,14 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -506,6 +515,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			}
 
 			replaceDuplicates(result);
+			replaceBranches(result); //TODO: move into createNewMethod()??
 
 			if (fImportRewriter.hasRecordedChanges()) {
 				TextEdit edit= fImportRewriter.rewriteImports(null);
@@ -521,6 +531,79 @@ public class ExtractMethodRefactoring extends Refactoring {
 			pm.done();
 		}
 
+	}
+
+	private void replaceBranches(final CompilationUnitChange result) {
+		ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
+		for (int i= 0; i < selectedNodes.length; i++) {
+			ASTNode astNode= selectedNodes[i];
+			astNode.accept(new ASTVisitor() {
+				private LinkedList fOpenLoopLabels= new LinkedList();
+
+				private void registerLoopLabel(Statement node) {
+					String identifier;
+					if (node.getParent() instanceof LabeledStatement) {
+						LabeledStatement labeledStatement= (LabeledStatement)node.getParent();
+						identifier= labeledStatement.getLabel().getIdentifier();
+					} else {
+						identifier= null;
+					}
+					fOpenLoopLabels.add(identifier);
+				}
+				
+				public boolean visit(ForStatement node) {
+					registerLoopLabel(node);
+					return super.visit(node);
+				}
+
+				public void endVisit(ForStatement node) {
+					fOpenLoopLabels.removeLast();
+				}
+
+				public boolean visit(WhileStatement node) {
+					registerLoopLabel(node);
+					return super.visit(node);
+				}
+
+				public void endVisit(WhileStatement node) {
+					fOpenLoopLabels.removeLast();
+				}
+
+				public boolean visit(EnhancedForStatement node) {
+					registerLoopLabel(node);
+					return super.visit(node);
+				}
+
+				public void endVisit(EnhancedForStatement node) {
+					fOpenLoopLabels.removeLast();
+				}
+
+				public boolean visit(DoStatement node) {
+					registerLoopLabel(node);
+					return super.visit(node);
+				}
+
+				public void endVisit(DoStatement node) {
+					fOpenLoopLabels.removeLast();
+				}
+
+				public void endVisit(ContinueStatement node) {
+					final SimpleName label= node.getLabel();
+					if (fOpenLoopLabels.isEmpty() || (label != null && !fOpenLoopLabels.contains(label.getIdentifier()))) {
+						TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.ExtractMethodRefactoring_replace_continue);
+						result.addTextEditGroup(description);
+
+						ReturnStatement rs= fAST.newReturnStatement();
+						IVariableBinding returnValue= fAnalyzer.getReturnValue();
+						if (returnValue != null) {
+							rs.setExpression(fAST.newSimpleName(getName(returnValue)));
+						}
+
+						fRewriter.replace(node, rs, description);
+					}
+				}
+			});
+		}
 	}
 
 	private ExtractMethodDescriptor getRefactoringDescriptor() {
