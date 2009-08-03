@@ -419,7 +419,7 @@ public final class RefactoringAvailabilityTester {
 				if (!isExtractSupertypeAvailable(members[index]))
 					return false;
 			}
-			return isCommonDeclaringType(members);
+			return members.length == 1 || isCommonDeclaringType(members);
 		}
 		return false;
 	}
