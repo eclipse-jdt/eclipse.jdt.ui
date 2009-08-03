@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Name ambiguous return value in error message - https://bugs.eclipse.org/bugs/show_bug.cgi?id=50607
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.ibm.icu.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -80,7 +83,10 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /* package */ class ExtractMethodAnalyzer extends CodeAnalyzer {
 
@@ -521,21 +527,21 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 		IRegion region= getSelectedNodeRange();
 		Selection selection= Selection.createFromStartLength(region.getOffset(), region.getLength());
 
-		int counter= 0;
+		List localReads= new ArrayList();
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
 		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, selection, true).perform(fEnclosingBodyDeclaration);
 		IVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
-		outer: for (int i= 0; i < returnValues.length && counter <= 1; i++) {
+		outer: for (int i= 0; i < returnValues.length && localReads.size() < returnValues.length; i++) {
 			IVariableBinding binding= returnValues[i];
 			for (int x= 0; x < reads.length; x++) {
 				if (reads[x] == binding) {
-					counter++;
+					localReads.add(binding);
 					fReturnValue= binding;
 					continue outer;
 				}
 			}
 		}
-		switch (counter) {
+		switch (localReads.size()) {
 			case 0:
 				fReturnValue= null;
 				break;
@@ -543,7 +549,17 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 				break;
 			default:
 				fReturnValue= null;
-				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_assignments_to_local, JavaStatusContext.create(fCUnit, getSelection()));
+				StringBuffer affectedLocals= new StringBuffer();
+				for (int i= 0; i < localReads.size(); i++) {
+					IVariableBinding binding= (IVariableBinding)localReads.get(i);
+					String bindingName= BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
+					affectedLocals.append(bindingName);
+					if (i != localReads.size() - 1) {
+						affectedLocals.append('\n');
+					}
+				}
+				String message= MessageFormat.format(RefactoringCoreMessages.ExtractMethodAnalyzer_assignments_to_local, new Object[] { affectedLocals.toString() });
+				status.addFatalError(message, JavaStatusContext.create(fCUnit, getSelection()));
 				return;
 		}
 		List callerLocals= new ArrayList(5);
