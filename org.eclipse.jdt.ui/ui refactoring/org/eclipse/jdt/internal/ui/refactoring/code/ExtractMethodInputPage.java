@@ -131,6 +131,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			combo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fRefactoring.setDestination(combo.getSelectionIndex());
+					updatePreview(getText());
 				}
 			});
 		}

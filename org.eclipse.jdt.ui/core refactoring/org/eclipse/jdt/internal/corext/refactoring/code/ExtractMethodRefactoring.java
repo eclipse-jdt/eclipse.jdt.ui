@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Does not replace similar code in parent class of anonymous class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] should declare method static if extracted from anonymous in static method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -515,7 +516,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			}
 
 			replaceDuplicates(result);
-			replaceBranches(result); //TODO: move into createNewMethod()??
+			replaceBranches(result);
 
 			if (fImportRewriter.hasRecordedChanges()) {
 				TextEdit edit= fImportRewriter.rewriteImports(null);
@@ -762,7 +763,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (decl instanceof MethodDeclaration || decl instanceof Initializer || decl instanceof FieldDeclaration) {
 			ITypeBinding binding= ASTNodes.getEnclosingType(current);
 			ASTNode next= getNextParent(current);
-			while (next != null && binding != null && binding.isNested() && !Modifier.isStatic(binding.getDeclaredModifiers())) {
+			while (next != null && binding != null && binding.isNested()) {
 				result.add(next);
 				current= next;
 				binding= ASTNodes.getEnclosingType(current);
@@ -917,8 +918,16 @@ public class ExtractMethodRefactoring extends Refactoring {
 		MethodDeclaration result= fAST.newMethodDeclaration();
 
 		int modifiers= fVisibility;
-		if (Modifier.isStatic(fAnalyzer.getEnclosingBodyDeclaration().getModifiers()) || fAnalyzer.getForceStatic()) {
-			modifiers|= Modifier.STATIC;
+		ASTNode enclosingBodyDeclaration= fAnalyzer.getEnclosingBodyDeclaration();
+		while (enclosingBodyDeclaration != null && enclosingBodyDeclaration.getParent() != fDestination) {
+			enclosingBodyDeclaration= enclosingBodyDeclaration.getParent();
+		}
+		if (enclosingBodyDeclaration instanceof BodyDeclaration) { // should always be the case
+			int enclosingModifiers= ((BodyDeclaration)enclosingBodyDeclaration).getModifiers();
+			boolean shouldBeStatic= Modifier.isStatic(enclosingModifiers) || fAnalyzer.getForceStatic();
+			if (shouldBeStatic) {
+				modifiers|= Modifier.STATIC;
+			}
 		}
 
 		ITypeBinding[] typeVariables= computeLocalTypeVariables();

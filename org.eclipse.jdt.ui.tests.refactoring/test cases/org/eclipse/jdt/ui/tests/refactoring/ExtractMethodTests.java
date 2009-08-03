@@ -11,6 +11,7 @@
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Missing return value, while extracting code out of a loop - https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] missing return type when code can throw exception - https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] should declare method static if extracted from anonymous in static method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -1857,6 +1858,16 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		destinationTest(1);
 	}
 
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
+	public void test1052() throws Exception {
+		destinationTest(1);
+	}
+
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
+	public void test1053() throws Exception {
+		destinationTest(1);
+	}
+	
 	//---- Test Generics --------------------------------------------------
 
 	public void test1100() throws Exception {
