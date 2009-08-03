@@ -89,6 +89,11 @@ public final class ActionMessages extends NLS {
 	public static String OpenSuperImplementationAction_error_message;
 	public static String OpenSuperImplementationAction_not_applicable;
 	public static String OpenSuperImplementationAction_no_super_implementation;
+	public static String OpenImplementationAction_label;
+	public static String OpenImplementationAction_tooltip;
+	public static String OpenImplementationAction_description;
+	public static String OpenImplementationAction_error_title;
+	public static String OpenImplementationAction_not_applicable;
 	public static String OpenTypeHierarchyAction_label;
 	public static String OpenTypeHierarchyAction_tooltip;
 	public static String OpenTypeHierarchyAction_description;

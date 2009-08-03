@@ -139,15 +139,32 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * </p>
 	 */
 	public void open() {
-		ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		openImplementations(fEditor, fRegion, fElement, fOpenAction);
+	}
+
+	/**
+	 * Finds the implementations for the method.
+	 * <p>
+	 * If there's only one implementor that java element is opened in the editor, otherwise the
+	 * Quick Hierarchy is opened.
+	 * </p>
+	 * 
+	 * @param openAction the action to use to open the java elements
+	 * @param javaElement the java element
+	 * @param region the region of the selection
+	 * @param editor the active java editor
+	 * @since 3.6
+	 */
+	public static void openImplementations(ITextEditor editor, IRegion region, final IJavaElement javaElement, SelectionDispatchAction openAction) {
+		ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
 
 		CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (ast == null) {
-			openQuickHierarchy();
+			openQuickHierarchy(editor);
 			return;
 		}
 
-		ASTNode node= NodeFinder.perform(ast, fRegion.getOffset(), fRegion.getLength());
+		ASTNode node= NodeFinder.perform(ast, region.getOffset(), region.getLength());
 		ITypeBinding parentTypeBinding= null;
 		if (node instanceof SimpleName) {
 			ASTNode parent= node.getParent();
@@ -160,7 +177,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 				}
 			} else if (parent instanceof SuperMethodInvocation) {
 				// Directly go to the super method definition
-				fOpenAction.run(new StructuredSelection(fElement));
+				openAction.run(new StructuredSelection(javaElement));
 				return;
 			} else if (parent instanceof MethodDeclaration) {
 				parentTypeBinding= Bindings.getBindingOfParentType(node);
@@ -168,7 +185,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 		}
 		final IType type= parentTypeBinding != null ? (IType) parentTypeBinding.getJavaElement() : null;
 		if (type == null) {
-			openQuickHierarchy();
+			openQuickHierarchy(editor);
 			return;
 		}
 
@@ -181,7 +198,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					monitor= new NullProgressMonitor();
 				}
 				try {
-					String methodLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.DEFAULT_QUALIFIED);
+					String methodLabel= JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.DEFAULT_QUALIFIED);
 					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 100);
 					SearchRequestor requestor= new SearchRequestor() {
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
@@ -197,7 +214,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 						}
 					};
 					int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
-					SearchPattern pattern= SearchPattern.createPattern(fElement, limitTo);
+					SearchPattern pattern= SearchPattern.createPattern(javaElement, limitTo);
 					Assert.isNotNull(pattern);
 					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 					SearchEngine engine= new SearchEngine();
@@ -215,11 +232,11 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 		};
 
 		try {
-			IRunnableContext context= fEditor.getSite().getWorkbenchWindow();
+			IRunnableContext context= editor.getSite().getWorkbenchWindow();
 			context.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
 			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK,
-					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, fElement.getElementName()), e.getCause());
+					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, javaElement.getElementName()), e.getCause());
 			JavaPlugin.log(status);
 			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
@@ -231,17 +248,19 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 		}
 
 		if (links.size() == 1) {
-			fOpenAction.run(new StructuredSelection(links.get(0)));
+			openAction.run(new StructuredSelection(links.get(0)));
 		} else {
-			openQuickHierarchy();
+			openQuickHierarchy(editor);
 		}
 	}
 
 	/**
-	 * Opens a quick type hierarchy for the editor's current input.
+	 * Opens the quick type hierarchy for the given editor.
+	 *
+	 * @param editor the editor for which to open the quick hierarchy
 	 */
-	private void openQuickHierarchy() {
-		ITextOperationTarget textOperationTarget= (ITextOperationTarget)fEditor.getAdapter(ITextOperationTarget.class);
+	private static void openQuickHierarchy(ITextEditor editor) {
+		ITextOperationTarget textOperationTarget= (ITextOperationTarget)editor.getAdapter(ITextOperationTarget.class);
 		textOperationTarget.doOperation(JavaSourceViewer.SHOW_HIERARCHY);
 	}
 }

@@ -481,6 +481,13 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String OPEN_EDITOR= "org.eclipse.jdt.ui.edit.text.java.open.editor"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the navigate -> open implementation action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.open.implementation"</code>).
+	 * @since 3.6
+	 */
+	public static final String OPEN_IMPLEMENTATION= "org.eclipse.jdt.ui.edit.text.java.open.implementation"; //$NON-NLS-1$
+	
+	/**
 	 * Action definition ID of the navigate -> open super implementation action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.open.super.implementation"</code>).
 	 */

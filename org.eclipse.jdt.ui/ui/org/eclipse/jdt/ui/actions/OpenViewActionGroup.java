@@ -57,6 +57,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	private ISelectionProvider fSelectionProvider;
 
 	private OpenSuperImplementationAction fOpenSuperImplementation;
+	private OpenImplementationAction fOpenImplementation;
 	private OpenExternalJavadocAction fOpenExternalJavadoc;
 	private OpenTypeHierarchyAction fOpenTypeHierarchy;
     private OpenCallHierarchyAction fOpenCallHierarchy;
@@ -145,6 +146,10 @@ public class OpenViewActionGroup extends ActionGroup {
 	public OpenViewActionGroup(JavaEditor part) {
 		fEditorIsOwner= true;
 		fShowShowInMenu= false;
+		
+		fOpenImplementation= new OpenImplementationAction(part);
+		fOpenImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_IMPLEMENTATION);
+		part.setAction("OpenImplementation", fOpenImplementation); //$NON-NLS-1$
 
 		fOpenSuperImplementation= new OpenSuperImplementationAction(part);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
@@ -158,9 +163,9 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenTypeHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_TYPE_HIERARCHY);
 		part.setAction("OpenTypeHierarchy", fOpenTypeHierarchy); //$NON-NLS-1$
 
-        fOpenCallHierarchy= new OpenCallHierarchyAction(part);
-        fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
-        part.setAction("OpenCallHierarchy", fOpenCallHierarchy); //$NON-NLS-1$
+		fOpenCallHierarchy= new OpenCallHierarchyAction(part);
+		fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
+		part.setAction("OpenCallHierarchy", fOpenCallHierarchy); //$NON-NLS-1$
 
 		initialize(part.getEditorSite().getSelectionProvider());
 	}
@@ -188,6 +193,10 @@ public class OpenViewActionGroup extends ActionGroup {
 	}
 
 	private void createSiteActions(IWorkbenchSite site, ISelectionProvider specialProvider) {
+		fOpenImplementation= new OpenImplementationAction(site);
+		fOpenImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_IMPLEMENTATION);
+		fOpenImplementation.setSpecialSelectionProvider(specialProvider);
+		
 		fOpenSuperImplementation= new OpenSuperImplementationAction(site);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
 		fOpenSuperImplementation.setSpecialSelectionProvider(specialProvider);
@@ -201,24 +210,25 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenTypeHierarchy.setSpecialSelectionProvider(specialProvider);
 
 		fOpenCallHierarchy= new OpenCallHierarchyAction(site);
-        fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
-        fOpenCallHierarchy.setSpecialSelectionProvider(specialProvider);
+		fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
+		fOpenCallHierarchy.setSpecialSelectionProvider(specialProvider);
 
-        ISelectionProvider provider= specialProvider != null ? specialProvider : site.getSelectionProvider();
+		ISelectionProvider provider= specialProvider != null ? specialProvider : site.getSelectionProvider();
 
-        fOpenPropertiesDialog= new PropertyDialogAction(site, provider);
-        fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchCommandConstants.FILE_PROPERTIES);
+		fOpenPropertiesDialog= new PropertyDialogAction(site, provider);
+		fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchCommandConstants.FILE_PROPERTIES);
 
-        initialize(provider);
+		initialize(provider);
 	}
 
 	private void initialize(ISelectionProvider provider) {
 		fSelectionProvider= provider;
 		ISelection selection= provider.getSelection();
+		fOpenImplementation.update(selection);
 		fOpenSuperImplementation.update(selection);
 		fOpenExternalJavadoc.update(selection);
 		fOpenTypeHierarchy.update(selection);
-        fOpenCallHierarchy.update(selection);
+		fOpenCallHierarchy.update(selection);
 		if (!fEditorIsOwner) {
 			if (fShowOpenPropertiesAction) {
 				if (selection instanceof IStructuredSelection) {
@@ -227,10 +237,11 @@ public class OpenViewActionGroup extends ActionGroup {
 					fOpenPropertiesDialog.selectionChanged(selection);
 				}
 			}
+			provider.addSelectionChangedListener(fOpenImplementation);
 			provider.addSelectionChangedListener(fOpenSuperImplementation);
 			provider.addSelectionChangedListener(fOpenExternalJavadoc);
 			provider.addSelectionChangedListener(fOpenTypeHierarchy);
-            provider.addSelectionChangedListener(fOpenCallHierarchy);
+			provider.addSelectionChangedListener(fOpenCallHierarchy);
 			// no need to register the open properties dialog action since it registers itself
 		}
 	}
@@ -282,6 +293,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
+		fSelectionProvider.removeSelectionChangedListener(fOpenImplementation);
 		fSelectionProvider.removeSelectionChangedListener(fOpenSuperImplementation);
 		fSelectionProvider.removeSelectionChangedListener(fOpenExternalJavadoc);
 		fSelectionProvider.removeSelectionChangedListener(fOpenTypeHierarchy);
@@ -290,13 +302,14 @@ public class OpenViewActionGroup extends ActionGroup {
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBars) {
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_IMPLEMENTATION, fOpenImplementation);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_SUPER_IMPLEMENTATION, fOpenSuperImplementation);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalJavadoc);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_TYPE_HIERARCHY, fOpenTypeHierarchy);
-        actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_CALL_HIERARCHY, fOpenCallHierarchy);
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_CALL_HIERARCHY, fOpenCallHierarchy);
 
-        if (!fEditorIsOwner && fShowOpenPropertiesAction)
-        	actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);
+		if (!fEditorIsOwner && fShowOpenPropertiesAction)
+			actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);
 	}
 
 	private void appendToGroup(IMenuManager menu, IAction action) {

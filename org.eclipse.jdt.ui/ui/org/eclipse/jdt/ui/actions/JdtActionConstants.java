@@ -48,6 +48,13 @@ public class JdtActionConstants {
 	public static final String OPEN= "org.eclipse.jdt.ui.actions.Open"; //$NON-NLS-1$
 
 	/**
+	 * Navigate menu: name of standard Open Implementation global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.OpenImplementation"</code>).
+	 * @since 3.6
+	 */
+	public static final String OPEN_IMPLEMENTATION= "org.eclipse.jdt.ui.actions.OpenImplementation"; //$NON-NLS-1$
+
+	/**
 	 * Navigate menu: name of standard Open Super Implementation global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.OpenSuperImplementation"</code>).
 	 */

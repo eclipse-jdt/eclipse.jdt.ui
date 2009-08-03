@@ -169,8 +169,14 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_ACTION= 														PREFIX + "open_action"; //$NON-NLS-1$
 	public static final String OPEN_EXTERNAL_JAVADOC_ACTION= 							PREFIX + "open_external_javadoc_action"; //$NON-NLS-1$
 	public static final String OPEN_INPUT_ACTION= 														PREFIX + "open_input_action"; //$NON-NLS-1$
-	public static final String OPEN_SUPER_IMPLEMENTATION_ACTION= 					PREFIX + "open_super_implementation_action"; //$NON-NLS-1$
+	public static final String OPEN_SUPER_IMPLEMENTATION_ACTION= 					PREFIX + "open_super_implementation_action"; //$NON-NLS-1$	
 	public static final String PULL_UP_ACTION= 													PREFIX + "pull_up_action"; //$NON-NLS-1$
+	
+	/**
+	 * @since 3.6
+	 */
+	public static final String OPEN_IMPLEMENTATION_ACTION= 					PREFIX + "open_implementation_action"; //$NON-NLS-1$
+	
 	/**
 	 * @since 3.2
 	 */

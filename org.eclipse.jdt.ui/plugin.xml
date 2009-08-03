@@ -2354,6 +2354,14 @@
                id="org.eclipse.jdt.ui.actions.OpenSuperImplementation">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.open.implementation"
+               label="%OpenImplementationAction.label"
+               tooltip="%OpenImplementationAction.tooltip"
+               retarget="true"
+               menubarPath="navigate/open.ext"
+               id="org.eclipse.jdt.ui.actions.OpenImplementation">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.navigate.gotopackage"
                label="%GoToPackageAction.label"
                retarget="true"
@@ -3898,6 +3906,12 @@
             description="%ActionDefinition.openEditor.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.open.editor">
+      </command>
+      <command
+            name="%ActionDefinition.openImplementation.name"
+            description="%ActionDefinition.openImplementation.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="org.eclipse.jdt.ui.edit.text.java.open.implementation">
       </command>
       <command
             name="%ActionDefinition.openSuperImplementation.name"
