@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
+ *     Robert Konigsberg <konigsberg@google.com> - [JUnit] Leverage AbstractJavaLaunchConfigurationDelegate.getMainTypeName in JUnitLaunchConfigurationDelegate - https://bugs.eclipse.org/bugs/show_bug.cgi?id=280114
  *******************************************************************************/
 package org.eclipse.jdt.junit.launcher;
 
@@ -28,8 +29,6 @@ import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.variables.VariablesPlugin;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -454,9 +453,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			 }
 			 return element;
 		}
-		String testTypeName= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
-		if (testTypeName.length() != 0) {
-			testTypeName= performStringSubstitution(testTypeName);
+		String testTypeName= super.getMainTypeName(configuration);
+		if (testTypeName != null && testTypeName.length() != 0) {
 			IType type= javaProject.findType(testTypeName);
 			if (type != null && type.exists()) {
 				return type;
@@ -464,10 +462,6 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		}
 		informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_input_type_does_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 		return null; // not reachable
-	}
-
-	private final String performStringSubstitution(String testTypeName) throws CoreException {
-		return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(testTypeName);
 	}
 
 	private boolean showStatusMessage(final IStatus status) {
