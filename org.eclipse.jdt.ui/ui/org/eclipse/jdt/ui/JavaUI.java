@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -268,13 +268,12 @@ public final class JavaUI {
 
 
 	/**
-	 * The class org.eclipse.debug.core.model.IProcess allows attaching
-	 * String properties to processes. The Java UI contributes a property
-	 * page for IProcess that will show the contents of the property
-	 * with this key.
-	 * The intent of this property is to show the command line a process
-	 * was launched with.
-	 * @deprecated
+	 * The class org.eclipse.debug.core.model.IProcess allows attaching String properties to
+	 * processes. The Java UI contributes a property page for IProcess that will show the contents
+	 * of the property with this key. The intent of this property is to show the command line a
+	 * process was launched with.
+	 * 
+	 * @deprecated As of 1.0
 	 */
 	public static final String ATTR_CMDLINE= "org.eclipse.jdt.ui.launcher.cmdLine"; //$NON-NLS-1$
 
