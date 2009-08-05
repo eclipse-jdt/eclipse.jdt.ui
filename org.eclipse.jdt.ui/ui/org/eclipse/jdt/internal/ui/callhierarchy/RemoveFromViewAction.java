@@ -89,14 +89,31 @@ class RemoveFromViewAction extends Action{
 			Object element= iter.next();
 			if (!(element instanceof MethodWrapper))//takes care of '...' node
 				return false;
-			
-			TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
-			for (int k= 0; k < items.length; k++) {
-				if (items[k].getExpanded()){
-					TreeItem[] children= items[k].getItems();
-					if (children.length == 1 && !(children[0].getData() instanceof MethodWrapper))
-						return false;// Do not add action if children are still being fetched for that node
-				}
+		}
+
+		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
+		for (int k= 0; k < items.length; k++) {
+			if (!checkForChildren(items[k]))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks whether the children are being fetched for a node recursively.
+	 * 
+	 * @param item the parent node
+	 * @return <code>false</code> when children are currently being fetched for a node,
+	 *         <code>true</code> otherwise
+	 */
+	private boolean checkForChildren(TreeItem item) {
+		if (item.getExpanded()) {
+			TreeItem[] children= item.getItems();
+			if (children.length == 1 && !(children[0].getData() instanceof MethodWrapper))
+				return false;// Do not add action if children are still being fetched for that node	
+			for (int i= 0; i < children.length; i++) {
+				if (!checkForChildren(children[i]))
+					return false;
 			}
 		}
 		return true;
