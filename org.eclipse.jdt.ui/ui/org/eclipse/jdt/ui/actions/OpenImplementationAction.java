@@ -13,19 +13,17 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -36,10 +34,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaElementImplementationHyperlink;
-import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
@@ -56,14 +52,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class OpenImplementationAction extends SelectionDispatchAction {
 
 	/**
-	 * The text editor.
+	 * The Java editor.
 	 */
-	private ITextEditor fEditor;
-
-	/**
-	 * The selection region.
-	 */
-	private IRegion fRegion;
+	private JavaEditor fEditor;
 
 
 	/**
@@ -86,10 +77,10 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	 * @param editor the editor
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
-	public OpenImplementationAction(ITextEditor editor) {
+	public OpenImplementationAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
-		setEnabled(SelectionConverter.canOperateOn((JavaEditor)fEditor) && fEditor.getSelectionProvider().getSelection() instanceof ITextSelection);
+		setEnabled(SelectionConverter.canOperateOn(fEditor) && fEditor.getSelectionProvider().getSelection() instanceof ITextSelection);
 	}
 
 	/*
@@ -109,11 +100,10 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable((JavaEditor)fEditor))
+		if (!ActionUtil.isProcessable(fEditor))
 			return;
-		IJavaElement element= elementAtOffset(selection.getOffset());
+		IJavaElement element= elementAtOffset();
 		if (element == null) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OpenImplementationAction_not_applicable);
 			return;
 		}
 		run(element);
@@ -132,30 +122,16 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	 * Returns the java element corresponding to the selection offset or <code>null</code> if no
 	 * java element was found.
 	 * 
-	 * @param offset the selection offset
 	 * @return the java element that corresponds to the selection, <code>null</code> if no java
 	 *         element was found
 	 */
-	private IJavaElement elementAtOffset(int offset) {
-
-		IJavaElement input= EditorUtility.getEditorInputJavaElement(fEditor, false);
-		if (input == null)
-			return null;
-
-		IDocument document= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-		fRegion= JavaWordFinder.findWord(document, offset);
-		if (fRegion == null || fRegion.getLength() == 0)
-			return null;
-
-		IJavaElement[] elements= null;
+	private IJavaElement elementAtOffset() {
 		try {
-			elements= ((ICodeAssist)input).codeSelect(fRegion.getOffset(), fRegion.getLength());
+			return SelectionConverter.getElementAtOffset(fEditor);
 		} catch (JavaModelException e) {
-			return null;
 		}
-		return elements.length == 0 ? null : elements[0];
+		return null;
 	}
-
 
 	/**
 	 * Checks if the selected java element is an overridable method, and finds the implementations
@@ -174,7 +150,18 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 		SelectionDispatchAction openAction= (SelectionDispatchAction)fEditor.getAction("OpenEditor"); //$NON-NLS-1$
 		if (openAction == null)
 			return;
-		JavaElementImplementationHyperlink.openImplementations(fEditor, fRegion, element, openAction);
+
+		ISourceRange nameRange;
+		try {
+			nameRange= ((IMethod)element).getNameRange();
+			if (nameRange == null) // Panic code (should not happen for methods)
+				return;
+		} catch (JavaModelException e) {
+			return;
+		}
+
+		IRegion region= new Region(nameRange.getOffset(), nameRange.getLength());
+		JavaElementImplementationHyperlink.openImplementations(fEditor, region, element, openAction);
 	}
 
 	/**

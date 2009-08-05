@@ -31,6 +31,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -155,7 +156,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * @param editor the active java editor
 	 * @since 3.6
 	 */
-	public static void openImplementations(ITextEditor editor, IRegion region, final IJavaElement javaElement, SelectionDispatchAction openAction) {
+	public static void openImplementations(IEditorPart editor, IRegion region, final IJavaElement javaElement, SelectionDispatchAction openAction) {
 		ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
 
 		CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -259,7 +260,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 *
 	 * @param editor the editor for which to open the quick hierarchy
 	 */
-	private static void openQuickHierarchy(ITextEditor editor) {
+	private static void openQuickHierarchy(IEditorPart editor) {
 		ITextOperationTarget textOperationTarget= (ITextOperationTarget)editor.getAdapter(ITextOperationTarget.class);
 		textOperationTarget.doOperation(JavaSourceViewer.SHOW_HIERARCHY);
 	}
