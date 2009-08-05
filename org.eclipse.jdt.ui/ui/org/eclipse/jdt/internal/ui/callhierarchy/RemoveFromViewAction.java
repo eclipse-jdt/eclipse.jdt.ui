@@ -107,14 +107,15 @@ class RemoveFromViewAction extends Action{
 	 *         <code>true</code> otherwise
 	 */
 	private boolean checkForChildren(TreeItem item) {
-		if (item.getExpanded()) {
-			TreeItem[] children= item.getItems();
-			if (children.length == 1 && !(children[0].getData() instanceof MethodWrapper))
-				return false;// Do not add action if children are still being fetched for that node	
-			for (int i= 0; i < children.length; i++) {
-				if (!checkForChildren(children[i]))
-					return false;
-			}
+		TreeItem[] children= item.getItems();
+		if (children.length == 1) {
+			Object data= children[0].getData();
+			if (!(data instanceof MethodWrapper) && data != null)
+				return false; // Do not add action if children are still being fetched for that node or if it's only JFace's dummy node.
+		}
+		for (int i= 0; i < children.length; i++) {
+			if (!checkForChildren(children[i]))
+				return false;
 		}
 		return true;
 	}
