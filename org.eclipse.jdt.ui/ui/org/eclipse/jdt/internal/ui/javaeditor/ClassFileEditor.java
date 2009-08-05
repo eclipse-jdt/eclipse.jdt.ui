@@ -459,13 +459,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			synchronized(this) {
 				if (fPosted) {
-					if (hasInputChanged(input, fClassFileEditorInput))
+					if (isEqualInput(input, fClassFileEditorInput))
 						fClassFileEditorInput= input;
 					return;
 				}
 			}
 
-			if (hasInputChanged(input, getEditorInput())) {
+			if (isEqualInput(input, getEditorInput())) {
 				ISourceViewer viewer= getSourceViewer();
 				if (viewer != null) {
 					StyledText textWidget= viewer.getTextWidget();
@@ -480,8 +480,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			}
 		}
 
-		private boolean hasInputChanged(IEditorInput input1, IEditorInput input2) {
-			return input1 != null && !input1.equals(input2) || input1 == null & input2 != null;
+		private boolean isEqualInput(IEditorInput input1, IEditorInput input2) {
+			return input1 != null && input1.equals(input2);
 		}
 	}
 
