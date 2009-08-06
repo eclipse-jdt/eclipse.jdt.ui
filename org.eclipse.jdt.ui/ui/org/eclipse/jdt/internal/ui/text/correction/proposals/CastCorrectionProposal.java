@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -44,6 +43,15 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 	private final Expression fNodeToCast;
 	private final ITypeBinding fCastType;
 
+	/**
+	 * Creates a cast correction proposal.
+	 * 
+	 * @param label the display name of the proposal
+	 * @param targetCU the compilation unit that is modified
+	 * @param nodeToCast the node to cast
+	 * @param castType the type to cast to, may be <code>null</code>
+	 * @param relevance the relevance of this proposal
+	 */
 	public CastCorrectionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, ITypeBinding castType, int relevance) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST));
 		fNodeToCast= nodeToCast;
@@ -51,24 +59,13 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 		setCommandId(ADD_CAST_ID);
 	}
 
-	public static ITypeBinding getBoxedTypeBindingIfNeeded(ITypeBinding castType, ITypeBinding toCast, AST ast) {
-		// e.g: m(toCast var) { castType i= var; } 
-		if (castType.isPrimitive() && !toCast.isPrimitive()) {
-			ITypeBinding boxedTypeBinding= Bindings.getBoxedTypeBinding(castType, ast);
-			return boxedTypeBinding;
-		} else {
-			return castType;
-		}
-	}
-	
 	private Type getNewCastTypeNode(ASTRewrite rewrite, ImportRewrite importRewrite) {
 		AST ast= rewrite.getAST();
 
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fNodeToCast.getRoot(), fNodeToCast.getStartPosition(), importRewrite);
 
-		ITypeBinding nodeToCastBinding= fNodeToCast.resolveTypeBinding();
 		if (fCastType != null) {
-			return importRewrite.addImport(getBoxedTypeBindingIfNeeded(fCastType, nodeToCastBinding, ast), ast,context);
+			return importRewrite.addImport(fCastType, ast,context);
 		}
 
 		ASTNode node= fNodeToCast;
@@ -87,7 +84,7 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 				IBinding targetContext= ASTResolving.getParentMethodOrTypeBinding(node);
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), invocation.getName().getIdentifier(), invocation.arguments(), targetContext);
 				if (bindings.length > 0) {
-					ITypeBinding first= getCastFavorite(bindings, nodeToCastBinding);
+					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
 
 					Type newTypeNode= importRewrite.addImport(first, ast, context);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$

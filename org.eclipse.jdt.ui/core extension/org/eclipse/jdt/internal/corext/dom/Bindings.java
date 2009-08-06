@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1287,6 +1287,55 @@ public class Bindings {
 			return null;
 	}
 
+	/**
+	 * Returns the unboxed type binding according to JLS3 5.1.7, or the original binding if
+	 * the given type is not a boxed type.
+	 *
+	 * @param type a type binding
+	 * @param ast an AST to resolve the unboxed type
+	 * @return the unboxed type, or the original type if no unboxed type found
+	 */
+	public static ITypeBinding getUnboxedTypeBinding(ITypeBinding type, AST ast) {
+		if (!type.isClass())
+			return type;
+		String unboxedTypeName= getUnboxedTypeName(type.getQualifiedName());
+		if (unboxedTypeName == null)
+			return type;
+		ITypeBinding unboxed= ast.resolveWellKnownType(unboxedTypeName);
+		if (unboxed == null)
+			return type;
+		return unboxed;
+	}
+	
+	private static String getUnboxedTypeName(String boxedName) {
+		if ("java.lang.Long".equals(boxedName)) //$NON-NLS-1$
+			return "long"; //$NON-NLS-1$
+		
+		else if ("java.lang.Integer".equals(boxedName)) //$NON-NLS-1$
+			return "int"; //$NON-NLS-1$
+		
+		else if ("java.lang.Short".equals(boxedName)) //$NON-NLS-1$
+			return "short"; //$NON-NLS-1$
+		
+		else if ("java.lang.Character".equals(boxedName)) //$NON-NLS-1$
+			return "char"; //$NON-NLS-1$
+		
+		else if ("java.lang.Byte".equals(boxedName)) //$NON-NLS-1$
+			return "byte"; //$NON-NLS-1$
+		
+		else if ("java.lang.Boolean".equals(boxedName)) //$NON-NLS-1$
+			return "boolean"; //$NON-NLS-1$
+		
+		else if ("java.lang.Float".equals(boxedName)) //$NON-NLS-1$
+			return "float"; //$NON-NLS-1$
+		
+		else if ("java.lang.Double".equals(boxedName)) //$NON-NLS-1$
+			return "double"; //$NON-NLS-1$
+		
+		else
+			return null;
+	}
+	
 	/**
 	 * Resolve the binding (<em>not</em> the type binding) for the expression or a nested expression
 	 * (e.g. nested in parentheses, cast, ...).

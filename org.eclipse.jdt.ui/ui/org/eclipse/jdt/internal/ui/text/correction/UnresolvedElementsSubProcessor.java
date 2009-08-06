@@ -1289,16 +1289,27 @@ public class UnresolvedElementsSubProcessor {
 			}
 			if (castType != null) {
 				ITypeBinding binding= nodeToCast.resolveTypeBinding();
-				if (binding == null || binding.isCastCompatible(castType)) {
-					ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castType, nodeToCast, 6);
-					String castTypeName= BindingLabelProvider.getBindingLabel(castType, JavaElementLabels.ALL_DEFAULT);
+				ITypeBinding castFixType= null;
+				if (binding == null || castType.isCastCompatible(binding)) {
+					castFixType= castType;
+				} else if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+					ITypeBinding boxUnboxedTypeBinding= TypeMismatchSubProcessor.boxUnboxPrimitives(castType, binding, nodeToCast.getAST());
+					if (boxUnboxedTypeBinding != castType && boxUnboxedTypeBinding.isCastCompatible(binding)) {
+						castFixType= boxUnboxedTypeBinding;
+					}
+				}
+				if (castFixType != null) {
+					ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castFixType, nodeToCast, 6);
+					String castTypeName= BindingLabelProvider.getBindingLabel(castFixType, JavaElementLabels.ALL_DEFAULT);
 					String[] arg= new String[] { getArgumentName(arguments, idx), castTypeName};
 					proposal.setDisplayName(Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_addargumentcast_description, arg));
 					proposals.add(proposal);
 				}
+				
 				TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, nodeToCast, castType, false, 5, proposals);
 			}
 		}
+		
 		if (nDiffs == 2) { // try to swap
 			int idx1= indexOfDiff[0];
 			int idx2= indexOfDiff[1];

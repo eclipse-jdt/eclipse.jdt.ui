@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -125,14 +126,22 @@ public class TypeMismatchSubProcessor {
 			return;
 		}
 
+		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
+		
 		if (!(nodeToCast instanceof ArrayInitializer)) {
-			ITypeBinding binding= nodeToCast.resolveTypeBinding();
-			if (binding == null || binding.isCastCompatible(castTypeBinding) || nodeToCast instanceof CastExpression) {
-				proposals.add(createCastProposal(context, castTypeBinding, nodeToCast, 7));
+			ITypeBinding castFixType= null;
+			if (currBinding == null || castTypeBinding.isCastCompatible(currBinding) || nodeToCast instanceof CastExpression) {
+				castFixType= castTypeBinding;
+			} else if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+				ITypeBinding boxUnboxedTypeBinding= boxUnboxPrimitives(castTypeBinding, currBinding, ast);
+				if (boxUnboxedTypeBinding != castTypeBinding && boxUnboxedTypeBinding.isCastCompatible(currBinding)) {
+					castFixType= boxUnboxedTypeBinding;
+				}
+			}
+			if (castFixType != null) {
+				proposals.add(createCastProposal(context, castFixType, nodeToCast, 7));
 			}
 		}
-
-		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
 
 		boolean nullOrVoid= currBinding == null || "void".equals(currBinding.getName()); //$NON-NLS-1$
 
@@ -185,7 +194,7 @@ public class TypeMismatchSubProcessor {
 
 		addChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, false, 5, proposals);
 
-		if (castTypeBinding == ast.resolveWellKnownType(CorrectionMessages.TypeMismatchSubProcessor_0) && currBinding != null && !currBinding.isPrimitive() && !Bindings.isVoidType(currBinding)) {
+		if (castTypeBinding == ast.resolveWellKnownType("boolean") && currBinding != null && !currBinding.isPrimitive() && !Bindings.isVoidType(currBinding)) { //$NON-NLS-1$
 			String label= CorrectionMessages.TypeMismatchSubProcessor_insertnullcheck_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
@@ -199,6 +208,22 @@ public class TypeMismatchSubProcessor {
 			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image));
 		}
 
+	}
+
+	public static ITypeBinding boxUnboxPrimitives(ITypeBinding castType, ITypeBinding toCast, AST ast) {
+		/*
+		 * e.g:
+		 * 	void m(toCast var) {
+		 * 		castType i= var;
+		 * 	}
+		 */
+		if (castType.isPrimitive() && !toCast.isPrimitive()) {
+			return Bindings.getBoxedTypeBinding(castType, ast);
+		} else if (!castType.isPrimitive() && toCast.isPrimitive()) {
+			return Bindings.getUnboxedTypeBinding(castType, ast);
+		} else {
+			return castType;
+		}
 	}
 
 	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection proposals) throws JavaModelException {
@@ -264,9 +289,7 @@ public class TypeMismatchSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		String label;
-		ITypeBinding toCastBinding= nodeToCast.resolveTypeBinding();
-		ITypeBinding resultingTypeBinding= CastCorrectionProposal.getBoxedTypeBindingIfNeeded(castTypeBinding, toCastBinding, nodeToCast.getAST());
-		String castType= BindingLabelProvider.getBindingLabel(resultingTypeBinding, JavaElementLabels.ALL_DEFAULT);
+		String castType= BindingLabelProvider.getBindingLabel(castTypeBinding, JavaElementLabels.ALL_DEFAULT);
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changecast_description, castType);
 		} else {
