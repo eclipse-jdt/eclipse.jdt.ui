@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,12 +60,6 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String SortByDefiningTypeAction_label;
 	public static String SortByDefiningTypeAction_tooltip;
 	public static String SortByDefiningTypeAction_description;
-	public static String SubTypeHierarchyViewer_title;
-	public static String SubTypeHierarchyViewer_filtered_title;
-	public static String SuperTypeHierarchyViewer_title;
-	public static String SuperTypeHierarchyViewer_filtered_title;
-	public static String TraditionalHierarchyViewer_title;
-	public static String TraditionalHierarchyViewer_filtered_title;
 	public static String TypeHierarchyViewPart_createinput;
 	public static String TypeHierarchyViewPart_error_title;
 	public static String TypeHierarchyViewPart_error_message;
@@ -73,9 +67,8 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String TypeHierarchyViewPart_nodecl;
 	public static String TypeHierarchyViewPart_exception_title;
 	public static String TypeHierarchyViewPart_exception_message;
-	public static String TypeHierarchyViewPart_title;
 	public static String TypeHierarchyViewPart_tooltip;
-	public static String TypeHierarchyViewPart_ws_title;
+	public static String TypeHierarchyViewPart_ws_description;
 	public static String TypeHierarchyViewPart_ws_tooltip;
 	public static String TypeHierarchyViewPart_restoreinput;
 	public static String TypeHierarchyViewPart_layout_submenu;

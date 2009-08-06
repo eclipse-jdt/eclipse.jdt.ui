@@ -350,7 +350,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
 			updateHierarchyViewer(true);
-			updateTitle();
+			updateToolTipAndDescription();
 		}
 	}
 
@@ -558,7 +558,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			internalSelectType(root, true);
 			updateMethodViewer(root);
 			updateToolbarButtons();
-			updateTitle();
+			updateToolTipAndDescription();
 			showMembersInHierarchy(false);
 			fPagebook.showPage(fTypeMethodsSplitter);
 			fSelectInEditor= true;
@@ -577,6 +577,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		updateHierarchyViewer(false);
 		updateToolbarButtons();
+		updateToolTipAndDescription();
 	}
 
 	/*
@@ -1196,7 +1197,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				}
 				setMemberFilter(memberFilter);
 				updateHierarchyViewer(true);
-				updateTitle();
+				updateToolTipAndDescription();
 				internalSelectType(fSelectedType, true);
 			}
 			if (nSelected == 1 && fSelectInEditor) {
@@ -1270,27 +1271,25 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		return false;
 	}
 
-	private void updateTitle() {
-		String viewerTitle= getCurrentViewer().getTitle();
-
+	private void updateToolTipAndDescription() {
 		String tooltip;
-		String title;
+		String description;
 		if (fInputElement != null) {
 			IWorkingSet workingSet= fWorkingSetActionGroup.getWorkingSet();
+			String elementName= JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT);
 			if (workingSet == null) {
-				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT) };
-				title= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_title, args);
-				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, args);
+				description= elementName;
+				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, elementName);
 			} else {
-				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT), workingSet.getLabel() };
-				title= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_title, args);
+				String[] args= new String[] { elementName, workingSet.getLabel() };
+				description= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_description, args);
 				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip, args);
 			}
 		} else {
-			title= ""; //$NON-NLS-1$
-			tooltip= viewerTitle;
+			description= ""; //$NON-NLS-1$
+			tooltip= getPartName();
 		}
-		setContentDescription(title);
+		setContentDescription(description);
 		setTitleToolTip(tooltip);
 	}
 
@@ -1324,7 +1323,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					typeSelectionChanged(currSelection);
 				}
 			}
-			updateTitle();
+			updateToolTipAndDescription();
 
 			fDialogSettings.put(DIALOGSTORE_HIERARCHYVIEW, viewerIndex);
 			getCurrentViewer().getTree().setFocus();
@@ -1377,7 +1376,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				IType methodViewerInput= (IType) fMethodsViewer.getInput();
 				setMemberFilter(null);
 				updateHierarchyViewer(true);
-				updateTitle();
+				updateToolTipAndDescription();
 
 				if (methodViewerInput != null && getCurrentViewer().isElementShown(methodViewerInput)) {
 					// avoid that the method view changes content by selecting the previous input

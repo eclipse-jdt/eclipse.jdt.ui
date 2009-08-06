@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,17 +26,6 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 
 	public SuperTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle) {
 		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), lifeCycle);
-	}
-
-	/*
-	 * @see TypeHierarchyViewer#getTitle
-	 */
-	public String getTitle() {
-		if (isMethodFiltering()) {
-			return TypeHierarchyMessages.SuperTypeHierarchyViewer_filtered_title;
-		} else {
-			return TypeHierarchyMessages.SuperTypeHierarchyViewer_title;
-		}
 	}
 
 	/*
