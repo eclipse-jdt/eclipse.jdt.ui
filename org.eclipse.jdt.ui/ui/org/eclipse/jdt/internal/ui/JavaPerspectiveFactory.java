@@ -25,6 +25,7 @@ import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
 
 	// located in 'org.eclipse.ui.navigator.resources (ProjectExplorer)' which we don't need to import at the moment
