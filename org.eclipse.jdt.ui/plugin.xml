@@ -1746,6 +1746,16 @@
          </action>
       </actionSet>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="*">
+         <hiddenToolBarItem
+               id="org.eclipse.jdt.ui.actions.OpenProjectWizard">
+         </hiddenToolBarItem>
+      </perspectiveExtension>
+   </extension>
+   
 <!-- =========================================================================== -->
 <!-- Java Search Page                                                            -->
 <!-- =========================================================================== -->
