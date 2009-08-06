@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [quick fix] proposes wrong cast from Object to primitive int - https://bugs.eclipse.org/bugs/show_bug.cgi?id=100593
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -263,7 +264,9 @@ public class TypeMismatchSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		String label;
-		String castType= BindingLabelProvider.getBindingLabel(castTypeBinding, JavaElementLabels.ALL_DEFAULT);
+		ITypeBinding toCastBinding= nodeToCast.resolveTypeBinding();
+		ITypeBinding resultingTypeBinding= CastCorrectionProposal.getBoxedTypeBindingIfNeeded(castTypeBinding, toCastBinding, nodeToCast.getAST());
+		String castType= BindingLabelProvider.getBindingLabel(resultingTypeBinding, JavaElementLabels.ALL_DEFAULT);
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changecast_description, castType);
 		} else {

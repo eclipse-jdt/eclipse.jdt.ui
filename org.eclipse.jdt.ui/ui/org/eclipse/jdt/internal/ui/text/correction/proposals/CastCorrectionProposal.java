@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [quick fix] proposes wrong cast from Object to primitive int - https://bugs.eclipse.org/bugs/show_bug.cgi?id=100593
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -57,14 +59,26 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 		setCommandId(ADD_CAST_ID);
 	}
 
+	public static ITypeBinding getBoxedTypeBindingIfNeeded(ITypeBinding castType, ITypeBinding toCast, AST ast) {
+		// e.g: m(toCast var) { castType i= var; } 
+		if (castType.isPrimitive() && !toCast.isPrimitive()) {
+			ITypeBinding boxedTypeBinding= Bindings.getBoxedTypeBinding(castType, ast);
+			return boxedTypeBinding;
+		} else {
+			return castType;
+		}
+	}
+	
 	private Type getNewCastTypeNode(ASTRewrite rewrite, ImportRewrite importRewrite) {
 		AST ast= rewrite.getAST();
 
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fNodeToCast.getRoot(), fNodeToCast.getStartPosition(), importRewrite);
 
+		ITypeBinding nodeToCastBinding= fNodeToCast.resolveTypeBinding();
 		if (fCastType != null) {
 			if (fCastType instanceof ITypeBinding) {
-				return importRewrite.addImport((ITypeBinding) fCastType, ast, context);
+				ITypeBinding typeBinding= (ITypeBinding)fCastType;
+				return importRewrite.addImport(getBoxedTypeBindingIfNeeded(typeBinding, nodeToCastBinding, ast), ast,context);
 			} else {
 				String string= importRewrite.addImport((String) fCastType, context);
 				return ASTNodeFactory.newType(ast, string);
@@ -87,7 +101,7 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 				IBinding targetContext= ASTResolving.getParentMethodOrTypeBinding(node);
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), invocation.getName().getIdentifier(), invocation.arguments(), targetContext);
 				if (bindings.length > 0) {
-					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
+					ITypeBinding first= getCastFavorite(bindings, nodeToCastBinding);
 
 					Type newTypeNode= importRewrite.addImport(first, ast, context);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
