@@ -943,7 +943,7 @@ public class JavadocView extends AbstractInfoView {
 			Rectangle size=  fText.getClientArea();
 
 			try {
-				javadocHtml= fPresenter.updatePresentation(fBrowser, javadocHtml, fPresentation, size.width, size.height);
+				javadocHtml= fPresenter.updatePresentation(fText, javadocHtml, fPresentation, size.width, size.height);
 			} catch (IllegalArgumentException ex) {
 				// the javadoc might no longer be valid
 				return;
