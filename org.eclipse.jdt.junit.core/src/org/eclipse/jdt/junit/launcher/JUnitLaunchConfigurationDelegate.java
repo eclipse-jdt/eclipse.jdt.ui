@@ -453,7 +453,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			 }
 			 return element;
 		}
-		String testTypeName= super.getMainTypeName(configuration);
+		String testTypeName= getMainTypeName(configuration);
 		if (testTypeName != null && testTypeName.length() != 0) {
 			IType type= javaProject.findType(testTypeName);
 			if (type != null && type.exists()) {
