@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -42,15 +41,8 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 
 	public static final String ADD_CAST_ID= "org.eclipse.jdt.ui.correction.addCast"; //$NON-NLS-1$
 
-	private Expression fNodeToCast;
-	private final Object fCastType; // String or ITypeBinding or null: Should become ITypeBinding
-
-	public CastCorrectionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, String castType, int relevance) {
-		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST));
-		fNodeToCast= nodeToCast;
-		fCastType= castType;
-		setCommandId(ADD_CAST_ID);
-	}
+	private final Expression fNodeToCast;
+	private final ITypeBinding fCastType;
 
 	public CastCorrectionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, ITypeBinding castType, int relevance) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST));
@@ -76,13 +68,7 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 
 		ITypeBinding nodeToCastBinding= fNodeToCast.resolveTypeBinding();
 		if (fCastType != null) {
-			if (fCastType instanceof ITypeBinding) {
-				ITypeBinding typeBinding= (ITypeBinding)fCastType;
-				return importRewrite.addImport(getBoxedTypeBindingIfNeeded(typeBinding, nodeToCastBinding, ast), ast,context);
-			} else {
-				String string= importRewrite.addImport((String) fCastType, context);
-				return ASTNodeFactory.newType(ast, string);
-			}
+			return importRewrite.addImport(getBoxedTypeBindingIfNeeded(fCastType, nodeToCastBinding, ast), ast,context);
 		}
 
 		ASTNode node= fNodeToCast;
