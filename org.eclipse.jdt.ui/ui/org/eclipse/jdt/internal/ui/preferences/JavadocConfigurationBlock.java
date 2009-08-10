@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.URIUtil;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -340,6 +343,8 @@ public class JavadocConfigurationBlock {
 				}
 			} catch (MalformedURLException e) {
 				MessageDialog.openWarning(fShell, fTitle, fUnable);
+			} catch (URISyntaxException e) {
+				MessageDialog.openWarning(fShell, fTitle, fUnable);
 			}
 
 		}
@@ -363,13 +368,13 @@ public class JavadocConfigurationBlock {
 			MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
 		}
 
-		private void validateURL(URL location) throws MalformedURLException {
-			IPath path= new Path(location.toExternalForm());
-			IPath index = path.append("index.html"); //$NON-NLS-1$
-			IPath packagelist = path.append("package-list"); //$NON-NLS-1$
-			URL indexURL = new URL(index.toString());
-			URL packagelistURL = new URL(packagelist.toString());
-
+		private void validateURL(URL location) throws MalformedURLException, URISyntaxException {
+			URI path= URIUtil.toURI(location);
+			URI index = URIUtil.append(path, "index.html"); //$NON-NLS-1$
+			URI packagelist = URIUtil.append(path, "package-list"); //$NON-NLS-1$
+			URL indexURL = URIUtil.toURL(index);
+			URL packagelistURL = URIUtil.toURL(packagelist);
+			
 			boolean suc= checkURLConnection(indexURL) && checkURLConnection(packagelistURL);
 			if (suc) {
 				showConfirmValidationDialog(indexURL);
@@ -408,7 +413,9 @@ public class JavadocConfigurationBlock {
 					is.close();
 			}
 		} catch (IllegalArgumentException e) {
-			return false; // bug 91072
+			return false; // workaround for bug 91072
+		} catch (NullPointerException e) {
+			return false; // workaround for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6536522
 		} catch (IOException e) {
 			return false;
 		}
