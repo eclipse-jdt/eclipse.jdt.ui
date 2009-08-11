@@ -370,7 +370,11 @@ public class JavaLeakTest extends LeakTestCase {
 		IEditorPart part= internalTestEditorOpen(cu, CompilationUnitEditor.class);
 
 		IWorkbenchWindow workbenchWindow= part.getSite().getWorkbenchWindow();
-		workbenchWindow.getShell().forceActive();
+		Shell shell= workbenchWindow.getShell();
+		shell.forceActive();
+		// run display loop, such that GTK can send shell activate events, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=286244
+		DisplayHelper.sleep(shell.getDisplay(), 0);
+		
 		IWorkbench workbench= workbenchWindow.getWorkbench();
 		part.getEditorSite().getPage().activate(part);
 		IHandlerService handlerService= (IHandlerService) workbench.getService(IHandlerService.class);
