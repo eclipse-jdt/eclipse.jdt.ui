@@ -168,12 +168,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			try {
 
 				URL newURL= fDestination.toFile().toURI().toURL();
+				String newExternalForm= newURL.toExternalForm();
 				List projs= new ArrayList();
 				//get javadoc locations for all projects
 				for (int i= 0; i < checkedProjects.length; i++) {
 					IJavaProject curr= checkedProjects[i];
 					URL currURL= JavaUI.getProjectJavadocLocation(curr);
-					if (!newURL.equals(currURL)) { // currURL can be null
+					if (currURL == null || !newExternalForm.equals(currURL.toExternalForm())) {
 						//if not all projects have the same javadoc location ask if you want to change
 						//them to have the same javadoc location
 						projs.add(curr);
