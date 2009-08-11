@@ -314,8 +314,13 @@ public class JarPackageData {
 			// reverse of AbstractJarDestinationWizardPage#handleDestinationBrowseButtonPressed()
 			IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fJarLocation);
 			IPath absolutePath= file.getLocation();
-			if (absolutePath != null)
+			if (absolutePath != null) {
 				return absolutePath;
+			} else {
+				// The path does not exist in the workspace (e.g. because there's no such project).
+				// Fallback is to just append the path to the workspace root.
+				return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(fJarLocation);
+			}
 		}
 		return fJarLocation;
 	}
