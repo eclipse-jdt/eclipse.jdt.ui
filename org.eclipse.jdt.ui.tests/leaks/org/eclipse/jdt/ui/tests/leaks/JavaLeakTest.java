@@ -373,7 +373,7 @@ public class JavaLeakTest extends LeakTestCase {
 		Shell shell= workbenchWindow.getShell();
 		shell.forceActive();
 		// run display loop, such that GTK can send shell activate events, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=286244
-		DisplayHelper.sleep(shell.getDisplay(), 0);
+		DisplayHelper.sleep(shell.getDisplay(), 5000);
 		
 		IWorkbench workbench= workbenchWindow.getWorkbench();
 		part.getEditorSite().getPage().activate(part);
