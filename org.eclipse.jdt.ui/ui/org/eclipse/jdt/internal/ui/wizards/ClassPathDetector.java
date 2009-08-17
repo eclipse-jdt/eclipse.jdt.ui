@@ -43,12 +43,12 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
@@ -285,57 +285,25 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	private void visitCompilationUnit(IFile file) {
 		ICompilationUnit cu= JavaCore.createCompilationUnitFrom(file);
 		if (cu != null) {
-			ICompilationUnit workingCopy= null;
-			try {
-				workingCopy= cu.getWorkingCopy(null);
-				IPath relPath= getPackagePath(workingCopy.getSource());
-				IPath packPath= file.getParent().getFullPath();
-				String cuName= file.getName();
-				if (relPath == null) {
-					addToMap(fSourceFolders, packPath, new Path(cuName));
-				} else {
-					IPath folderPath= getFolderPath(packPath, relPath);
-					if (folderPath != null) {
-						addToMap(fSourceFolders, folderPath, relPath.append(cuName));
-					}
-				}
-			} catch (JavaModelException e) {
-				// ignore
-			} catch (InvalidInputException e) {
-				// ignore
-			} finally {
-				if (workingCopy != null) {
-					try {
-						workingCopy.discardWorkingCopy();
-					} catch (JavaModelException ignore) {
-					}
-				}
-			}
-		}
-	}
-
-	private IPath getPackagePath(String source) throws InvalidInputException {
-		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-		scanner.setSource(source.toCharArray());
-		scanner.resetTo(0, source.length() - 1);
-		int tok= scanner.getNextToken();
-		if (tok != ITerminalSymbols.TokenNamepackage) {
-			return null;
-		}
-		IPath res= Path.EMPTY;
-		do {
-			tok= scanner.getNextToken();
-			if (tok == ITerminalSymbols.TokenNameIdentifier) {
-				res= res.append(new String(scanner.getCurrentTokenSource()));
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setSource(cu);
+			parser.setFocalPosition(0);
+			CompilationUnit root= (CompilationUnit)parser.createAST(null);
+			PackageDeclaration packDecl= root.getPackage();
+			
+			IPath packPath= file.getParent().getFullPath();
+			String cuName= file.getName();
+			if (packDecl == null) {
+				addToMap(fSourceFolders, packPath, new Path(cuName));
 			} else {
-				return res;
+				IPath relPath= new Path(packDecl.getName().getFullyQualifiedName().replace('.', '/'));
+				IPath folderPath= getFolderPath(packPath, relPath);
+				if (folderPath != null) {
+					addToMap(fSourceFolders, folderPath, relPath.append(cuName));
+				}
 			}
-			tok= scanner.getNextToken();
-		} while (tok == ITerminalSymbols.TokenNameDOT);
-
-		return res;
+		}
 	}
-
 
 	private void addToMap(HashMap map, IPath folderPath, IPath relPath) {
 		List list= (List) map.get(folderPath);
