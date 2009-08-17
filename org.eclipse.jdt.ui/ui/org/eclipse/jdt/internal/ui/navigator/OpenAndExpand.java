@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -261,9 +261,7 @@ public class OpenAndExpand extends SelectionDispatchAction {
 	}
 
 	private void expand(Object target) {
-		if (! fOpenAction.isEnabled())
+		if (! fOpenAction.isEnabled() && target != null)
 			fViewer.setExpandedState(target, !fViewer.getExpandedState(target));
 	}
-
-
 }
