@@ -1189,7 +1189,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			IMethod method= null;
 			for (int index= 0; index < methods.length; index++) {
 				method= methods[index];
-				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == fMethod.getParameterTypes().length - 1)
+				int newParamCount= fMethod.getParameterTypes().length;
+				if (needsTargetNode())
+					newParamCount--;
+				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == newParamCount)
 					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(method)));
 				monitor.worked(1);
 			}
