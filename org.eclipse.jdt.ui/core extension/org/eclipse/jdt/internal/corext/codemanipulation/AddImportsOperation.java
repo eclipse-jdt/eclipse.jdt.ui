@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -252,6 +252,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 					String res= importRewrite.addImport(typeBinding);
 					if (containerName.length() > 0 && !res.equals(simpleName)) {
 						// adding import failed
+						return null;
+					}
+					if (containerName.length() == 0 && res.equals(simpleName)) {
+						// no change necessary
 						return null;
 					}
 					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, new String());
