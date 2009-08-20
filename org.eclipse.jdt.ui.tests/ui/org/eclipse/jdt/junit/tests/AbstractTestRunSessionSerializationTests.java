@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,9 @@ import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
 public class AbstractTestRunSessionSerializationTests extends TestCase {
 
+	private static final int TIMEOUT= 10 * 1000;
+
+
 	private static class SerializationResult {
 		TestRunSession fTestRunSession;
 		String fSerialized;
@@ -77,7 +80,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 				protected boolean condition() {
 					return result.fTestRunSession != null;
 				}
-			}.waitForCondition(Display.getCurrent(), 10 * 1000, 100));
+			}.waitForCondition(Display.getCurrent(), TIMEOUT, 100));
 		} finally {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
