@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [quick fix] proposes wrong cast from Object to primitive int - https://bugs.eclipse.org/bugs/show_bug.cgi?id=100593
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [quick fix] "Add exceptions to..." quickfix does nothing - https://bugs.eclipse.org/bugs/show_bug.cgi?id=107924
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -381,7 +382,7 @@ public class TypeMismatchSubProcessor {
 		}
 
 		ITypeBinding declaringType= overridden.getDeclaringClass();
-		ICompilationUnit targetCu= cu;
+		ICompilationUnit targetCu= null;
 		if (declaringType.isFromSource()) {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 		}
