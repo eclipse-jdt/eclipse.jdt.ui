@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,9 +135,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
 			listRewriter.insertLast(newDecl, null);
 
-			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			addLinkedPosition(rewrite.track(node), true, KEY_NAME);
-			addLinkedPosition(rewrite.track(newDecl.getName()), false, KEY_NAME);
 
 			// add javadoc tag
 			Javadoc javadoc= methodDeclaration.getJavadoc();
@@ -155,12 +153,15 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 				TextElement commentStart= ast.newTextElement();
 				newTagElement.fragments().add(commentStart);
 
-				addLinkedPosition(rewrite.track(newTagRef), true, KEY_NAME);
+				addLinkedPosition(rewrite.track(newTagRef), false, KEY_NAME);
 				addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
 
 				ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 				JavadocTagsSubProcessor.insertTag(tagsRewriter, newTagElement, leadingNames);
 			}
+			
+			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+			addLinkedPosition(rewrite.track(newDecl.getName()), false, KEY_NAME);
 
 			return rewrite;
 		}
