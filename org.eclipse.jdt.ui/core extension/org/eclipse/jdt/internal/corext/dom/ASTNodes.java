@@ -499,6 +499,16 @@ public class ASTNodes {
 		return false;
 	}
 
+	/**
+	 * Returns the closest ancestor of <code>node</code> that is an instance of <code>parentClass</code>, or <code>null</code> if none.
+	 * <p>
+	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
+	 * The resulting node may be in a totally different scope than the given node.
+	 * </p>
+	 * @param node the node
+	 * @param parentClass the class of the sought ancestor node
+	 * @return the closest ancestor of <code>node</code> that is an instance of <code>parentClass</code>, or <code>null</code> if none
+	 */
 	public static ASTNode getParent(ASTNode node, Class parentClass) {
 		do {
 			node= node.getParent();
@@ -506,6 +516,16 @@ public class ASTNodes {
 		return node;
 	}
 
+	/**
+	 * Returns the closest ancestor of <code>node</code> whose type is <code>nodeType</code>, or <code>null</code> if none.
+	 * <p>
+	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
+	 * The resulting node may be in a totally different scope than the given node.
+	 * </p>
+	 * @param node the node
+	 * @param nodeType the node type constant from {@link ASTNode}
+	 * @return the closest ancestor of <code>node</code> whose type is <code>nodeType</code>, or <code>null</code> if none
+	 */
 	public static ASTNode getParent(ASTNode node, int nodeType) {
 		do {
 			node= node.getParent();
@@ -548,6 +568,14 @@ public class ASTNodes {
 		return current;
 	}
 
+	/**
+	 * Returns <code>true</code> iff <code>parent</code> is a true ancestor of <code>node</code>
+	 * (i.e. returns <code>false</code> if <code>parent == node</code>).
+	 * 
+	 * @param node node to test
+	 * @param parent assumed parent
+	 * @return <code>true</code> iff <code>parent</code> is a true ancestor of <code>node</code>
+	 */
 	public static boolean isParent(ASTNode node, ASTNode parent) {
 		Assert.isNotNull(parent);
 		do {
