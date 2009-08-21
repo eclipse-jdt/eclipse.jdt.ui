@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
+
 /**
  * Add imports to a compilation unit.
  * The input is an array of full qualified type names. No elimination of unnecessary
@@ -149,8 +150,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Runs the operation.
+	 * 
 	 * @param monitor The progress monitor
-	 * @throws CoreException
+	 * @throws CoreException if accessing the CU or rewritting the imports fails
 	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
