@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -811,6 +811,9 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * Does it.\n");
+		buf.append("     */\n");
 		buf.append("    public void foo() {\n");
 		buf.append("    }\n");
 		buf.append("    public int goo() {\n");
@@ -830,6 +833,10 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * Does it.\n");
+		buf.append("     * @return \n");
+		buf.append("     */\n");
 		buf.append("    public int foo() {\n");
 		buf.append("    }\n");
 		buf.append("    public int goo() {\n");
