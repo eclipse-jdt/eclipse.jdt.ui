@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -352,11 +351,6 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		LayoutUtil.setHorizontalSpan(fList.getLabelControl(null), 2);
 		LayoutUtil.setWidthHint(fList.getLabelControl(null), pixelConverter.convertWidthInCharsToPixels(60));
 		LayoutUtil.setHorizontalGrabbing(fList.getListControl(null));
-
-		Control listControl= fList.getListControl(null);
-		GridData gd= (GridData)listControl.getLayoutData();
-		gd.verticalAlignment= GridData.BEGINNING;
-		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(7);
 	}
 
 	public void initialize() {
