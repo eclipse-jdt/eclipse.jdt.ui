@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.ui.PlatformUI;
@@ -134,14 +132,5 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 		}
 		super.dispose();
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
-	 */
-	public void setElement(IAdaptable element) {
-		super.setElement(element);
-		setDescription(null); // no description for property page
-	}
-
 
 }

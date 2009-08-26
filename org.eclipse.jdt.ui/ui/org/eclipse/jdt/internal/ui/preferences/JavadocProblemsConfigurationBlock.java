@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.PixelConverter;
 
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -145,6 +146,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
+//		layout.marginTop= 5;
 		outer.setLayout(layout);
 
 		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label;
@@ -160,6 +162,14 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		composite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, true));
 
 		fJavadocComposite= composite;
+		
+		Label note= new Label(composite, SWT.WRAP);
+//		note.setText("Note: Javadoc processing not only affects compiler errors and warnings, but also includes search, refactoring, content assist, organize imports, ...");
+		note.setText("Note: This also affects search, refactoring, content assist, missing/unused imports, etc.");
+		GridDataFactory.generate(note, nColumns, 1);
+		
+		Composite spacer= new Composite(composite, SWT.NONE);
+		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
 		Label description= new Label(composite, SWT.WRAP);
 		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description);

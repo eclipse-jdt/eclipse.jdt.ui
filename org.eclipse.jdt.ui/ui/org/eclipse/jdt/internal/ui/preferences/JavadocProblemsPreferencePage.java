@@ -45,8 +45,8 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 
 	public JavadocProblemsPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		//setDescription(PreferencesMessages.getString("JavadocProblemsPreferencePage.description")); //$NON-NLS-1$
-
+//		setDescription("Note: Disabling Javadoc processing will also ignore references in Javadoc comments for search, refactorings, content assist, organize imports, etc.");
+		
 		// only used when page is shown programmatically
 		setTitle(PreferencesMessages.JavadocProblemsPreferencePage_title);
 	}
@@ -141,8 +141,8 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
 	 */
 	public void setElement(IAdaptable element) {
+		//TODO: remove
 		super.setElement(element);
-		setDescription(null); // no description for property page
 	}
 
 	/* (non-Javadoc)
