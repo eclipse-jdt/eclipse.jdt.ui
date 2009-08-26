@@ -163,9 +163,13 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName;
 		Button master= addCheckBox(composite, label, PREF_CODEASSIST_ADDIMPORT, trueFalse, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports;
-		Button slave= addCheckBox(composite, label, PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS, enabledDisabled, 20);
-		createSelectionDependency(master, slave);
+		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports; //TODO: &Use <a>static imports</a> (only 1.5 or higher)
+		Button slave= addCheckBoxWithLink(composite, label, PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS, enabledDisabled, 20, SWT.DEFAULT, new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				openStaticImportFavoritesPage();
+			}
+		});
+		createSelectionDependency(master, slave.getParent());
 
 
 		label= PreferencesMessages.JavaEditorPreferencePage_fillArgumentsOnMethodCompletion;
@@ -204,6 +208,14 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		createSelectionDependency(master, fInsertBestGuessRadioButton);
 	}
 
+	protected final void openStaticImportFavoritesPage() {
+		if (getPreferenceContainer() != null) {
+			getPreferenceContainer().openPage(CodeAssistFavoritesPreferencePage.PAGE_ID, null);
+		} else {
+			PreferencesUtil.createPreferenceDialogOn(getShell(), CodeAssistFavoritesPreferencePage.PAGE_ID, null, null).open();
+		}
+	}
+
 	/**
 	 * Creates a selection dependency between a master and a slave control.
 	 *
@@ -214,15 +226,20 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	 *                   selected
 	 */
 	protected static void createSelectionDependency(final Button master, final Control slave) {
-
-		master.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent event) {
-				// Do nothing
+		master.addSelectionListener(new SelectionAdapter() {
+			
+			public void widgetSelected(SelectionEvent event) {
+				deepSetEnabled(slave, master.getSelection());
 			}
 
-			public void widgetSelected(SelectionEvent event) {
-				slave.setEnabled(master.getSelection());
+			private void deepSetEnabled(final Control control, boolean enabled) {
+				control.setEnabled(enabled);
+				if (control instanceof Composite) {
+					Control[] children= ((Composite)control).getChildren();
+					for (int i= 0; i < children.length; i++) {
+						deepSetEnabled(children[i], enabled);
+					}
+				}
 			}
 		});
 		slave.setEnabled(master.getSelection());

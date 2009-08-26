@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,13 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  */
 public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage {
 
+	/**
+	 * The ID of this preference page.
+	 * 
+	 * @since 3.6
+	 */
+	public static final String PAGE_ID= "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceFavorites"; //$NON-NLS-1$
+
 	private CodeAssistFavoritesConfigurationBlock fConfigurationBlock;
 
 	public void createControl(Composite parent) {
@@ -50,7 +57,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 	}
 
 	protected String getPreferencePageID() {
-		return "org.eclipse.jdt.ui.preferences.CodeAssistStaticMembersPreferencePage"; //$NON-NLS-1$
+		return PAGE_ID;
 	}
 
 	protected String getPropertyPageID() {
