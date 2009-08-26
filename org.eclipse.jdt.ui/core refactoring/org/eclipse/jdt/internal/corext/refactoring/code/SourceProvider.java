@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -602,7 +602,7 @@ public class SourceProvider {
 				if (node.getNodeType() == ASTNode.RETURN_STATEMENT) {
 					rs= (ReturnStatement)node;
 				} else {
-					result.add(new Region(node.getStartPosition(), node.getLength()));
+					result.add(createRange(node, node));
 				}
 				break;
 			default: {
@@ -618,24 +618,27 @@ public class SourceProvider {
 		}
 		if (rs != null) {
 			Expression exp= rs.getExpression();
-			result.add(new Region(exp.getStartPosition(), exp.getLength()));
+			result.add(createRange(exp, exp));
 		}
 		return result;
 	}
 
 	private IRegion createRange(List statements, int end) {
 		ASTNode first= (ASTNode)statements.get(0);
+		ASTNode last= (ASTNode)statements.get(end);
+		return createRange(first, last);
+	}
+
+	private IRegion createRange(ASTNode first, ASTNode last) {
 		ASTNode root= first.getRoot();
 		if (root instanceof CompilationUnit) {
 			CompilationUnit unit= (CompilationUnit)root;
 			int start= unit.getExtendedStartPosition(first);
-			ASTNode last= (ASTNode)statements.get(end);
 			int length = unit.getExtendedStartPosition(last) - start + unit.getExtendedLength(last);
 			IRegion range= new Region(start, length);
 			return range;
 		} else {
 			int start= first.getStartPosition();
-			ASTNode last= (ASTNode)statements.get(end);
 			int length = last.getStartPosition() - start + last.getLength();
 			IRegion range= new Region(start, length);
 			return range;
