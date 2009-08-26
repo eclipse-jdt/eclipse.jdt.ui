@@ -12,6 +12,7 @@
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] missing return type when code can throw exception - https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] should declare method static if extracted from anonymous in static method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] extracting return value results in compile error - https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -1828,6 +1829,38 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	public void test972() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=160853
+	}
+
+	public void test980() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+	
+	public void test981() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+	
+	public void test982() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+	
+	public void test983() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+	
+	public void test984() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+
+	public void test985() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+
+	public void test986() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
+	}
+
+	public void test987() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
 	}
 
 	//---- Test code in initializers -----------------------------------------------

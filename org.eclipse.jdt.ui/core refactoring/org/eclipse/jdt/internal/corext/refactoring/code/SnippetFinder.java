@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] extracting return value results in compile error - https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -25,10 +26,14 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -164,8 +169,28 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	}
 
 	private static boolean isLeftHandSideOfAssignment(ASTNode node) {
-		ASTNode parent= node.getParent();
-		return parent != null && parent.getNodeType() == ASTNode.ASSIGNMENT && ((Assignment)parent).getLeftHandSide() == node;
+		Assignment assignment= (Assignment)ASTNodes.getParent(node, ASTNode.ASSIGNMENT);
+		if (assignment != null) {
+			Expression leftHandSide= assignment.getLeftHandSide();
+			if (leftHandSide == node) {
+				return true;
+			}
+			if (ASTNodes.isParent(node, leftHandSide)) {
+				switch (leftHandSide.getNodeType()) {
+					case ASTNode.SIMPLE_NAME:
+						return true;
+					case ASTNode.FIELD_ACCESS:
+						return node == ((FieldAccess)leftHandSide).getName();
+					case ASTNode.QUALIFIED_NAME:
+						return node == ((QualifiedName)leftHandSide).getName();
+					case ASTNode.SUPER_FIELD_ACCESS:
+						return node == ((SuperFieldAccess)leftHandSide).getName();
+					default:
+						return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	public boolean visit(TypeDeclaration node) {
