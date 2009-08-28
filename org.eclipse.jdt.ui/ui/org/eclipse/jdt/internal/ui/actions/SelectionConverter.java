@@ -125,6 +125,13 @@ public class SelectionConverter {
 		return result;
 	}
 
+	/**
+	 * Perform a code resolve at the current selection of an editor
+	 * 
+	 * @param editor the editor
+	 * @return the resolved elements (only from primary working copies)
+	 * @throws JavaModelException when the type root can not be accessed
+	 */
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {
 		return codeResolve(editor, true);
 	}
@@ -164,6 +171,14 @@ public class SelectionConverter {
 		return EMPTY_RESULT;
 	}
 
+	/**
+	 * Returns the element surrounding the selection of the given editor.
+	 * 
+	 * @param editor the editor
+	 * @return the element surrounding the current selection (only from primary working copies), or <code>null</code> if none
+	 * @throws JavaModelException if the Java type root does not exist or if an exception occurs
+	 *             while accessing its corresponding resource
+	 */
 	public static IJavaElement getElementAtOffset(JavaEditor editor) throws JavaModelException {
 		return getElementAtOffset(editor, true);
 	}
@@ -173,7 +188,7 @@ public class SelectionConverter {
 	 * 
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
-	 * @return the element surrounding the current selection
+	 * @return the element surrounding the current selection, or <code>null</code> if none
 	 * @throws JavaModelException if the Java type root does not exist or if an exception occurs
 	 *             while accessing its corresponding resource
 	 * @since 3.2
@@ -196,26 +211,28 @@ public class SelectionConverter {
 		return type;
 	}
 
+	/**
+	 * Returns the input element of the given editor.
+	 *
+	 * @param editor the Java editor
+	 * @return the type root which is the editor input (only primary working copies), or <code>null</code> if none
+	 */
 	public static ITypeRoot getInput(JavaEditor editor) {
 		return getInput(editor, true);
 	}
 
 	/**
-	 * Returns the input element of the given editor
+	 * Returns the input element of the given editor.
 	 *
 	 * @param editor the Java editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
-	 * @return the type root which is the editor input
+	 * @return the type root which is the editor input, or <code>null</code> if none
 	 * @since 3.2
 	 */
 	private static ITypeRoot getInput(JavaEditor editor, boolean primaryOnly) {
 		if (editor == null)
 			return null;
 		return EditorUtility.getEditorInputJavaElement(editor, primaryOnly);
-	}
-
-	public static ITypeRoot getInputAsTypeRoot(JavaEditor editor) {
-		return SelectionConverter.getInput(editor);
 	}
 
 	public static ICompilationUnit getInputAsCompilationUnit(JavaEditor editor) {
@@ -270,17 +287,6 @@ public class SelectionConverter {
 			return input;
 		return ref;
 	}
-
-//	public static IJavaElement[] resolveSelectedElements(IJavaElement input, ITextSelection selection) throws JavaModelException {
-//		IJavaElement enclosing= resolveEnclosingElement(input, selection);
-//		if (enclosing == null)
-//			return EMPTY_RESULT;
-//		if (!(enclosing instanceof ISourceReference))
-//			return EMPTY_RESULT;
-//		ISourceRange sr= ((ISourceReference)enclosing).getSourceRange();
-//		if (selection.getOffset() == sr.getOffset() && selection.getLength() == sr.getLength())
-//			return new IJavaElement[] {enclosing};
-//	}
 
 	public static IJavaElement resolveEnclosingElement(JavaEditor editor, ITextSelection selection) throws JavaModelException {
 		ITypeRoot input= getInput(editor);
