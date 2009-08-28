@@ -104,7 +104,7 @@ public class InlineAction extends SelectionDispatchAction {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
 
-		ITypeRoot typeRoot= SelectionConverter.getInputAsTypeRoot(fEditor);
+		ITypeRoot typeRoot= SelectionConverter.getInput(fEditor);
 		if (typeRoot == null)
 			return;
 

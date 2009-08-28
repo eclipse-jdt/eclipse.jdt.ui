@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,9 +107,8 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		setEnabled(true);
 	}
 
-	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
-	 * @param selection
+	/*
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection)
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -119,11 +118,11 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
+	/*
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
-		ITypeRoot typeRoot= SelectionConverter.getInputAsTypeRoot(fEditor);
+		ITypeRoot typeRoot= SelectionConverter.getInput(fEditor);
 		if (typeRoot == null)
 			return;
 		if (! JavaElementUtil.isSourceAvailable(typeRoot))
