@@ -14,7 +14,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
@@ -52,18 +51,15 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 	}
 
 	public void test_10_10() throws Exception {
-		explainDegradation();
 		executeRefactoring(10, 10, true, 10);
 	}
 
 	public void test_100_10() throws Exception {
 		tagAsSummary("Rename method with overloading", Dimension.ELAPSED_PROCESS);
-		explainDegradation();
 		executeRefactoring(100, 10, true, 10);
 	}
 
 	public void test_1000_10() throws Exception {
-		explainDegradation();
 		executeRefactoring(1000, 10, true, 10);
 	}
 
@@ -112,11 +108,6 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 
 	protected void assertMeasurements() {
 		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
-	}
-
-	private void explainDegradation() {
-		Performance performance= Performance.getDefault();
-		performance.setComment(fPerformanceMeter, Performance.EXPLAINS_DEGRADATION_COMMENT, "The degradation is a consequence of fixing bug 250454 in JDT Core.");
 	}
 
 }
