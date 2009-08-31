@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -23,11 +25,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaElementImplementationHyperlink;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -102,11 +102,27 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
 			return;
-		IJavaElement element= elementAtOffset();
-		if (element == null) {
+		IJavaElement element;
+		try {
+			element= elementAtOffset();
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message);
 			return;
 		}
-		run(element);
+
+		if (element == null || !((element instanceof IMethod) && canBeOverriddenMethod((IMethod)element))) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OpenImplementationAction_not_applicable);
+			return;
+		}
+		if (!ActionUtil.isProcessable(getShell(), element))
+			return;
+		SelectionDispatchAction openAction= (SelectionDispatchAction)fEditor.getAction("OpenEditor"); //$NON-NLS-1$
+		if (openAction == null)
+			return;
+
+		IRegion region= new Region(selection.getOffset(), 0);
+		JavaElementImplementationHyperlink.openImplementations(fEditor, region, element, openAction);
+
 	}
 
 	/**
@@ -119,49 +135,21 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Returns the java element corresponding to the selection offset or <code>null</code> if no
-	 * java element was found.
+	 * Returns the java element corresponding to the selection offset.
 	 * 
-	 * @return the java element that corresponds to the selection, <code>null</code> if no java
+	 * @return the java element that corresponds to the selection, <code>null</code> if no Java
 	 *         element was found
+	 * @throws InvocationTargetException in case code resolve failed
 	 */
-	private IJavaElement elementAtOffset() {
+	private IJavaElement elementAtOffset() throws InvocationTargetException {
 		try {
-			return SelectionConverter.getElementAtOffset(fEditor);
-		} catch (JavaModelException e) {
+			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
+			if (elements.length == 1)
+				return elements[0];
+		} catch (InterruptedException e) {
+			// Ignore
 		}
 		return null;
-	}
-
-	/**
-	 * Checks if the selected java element is an overridable method, and finds the implementations
-	 * for the method.
-	 * 
-	 * @param element the java element
-	 */
-	private void run(IJavaElement element) {
-		if (!((element instanceof IMethod) && canBeOverriddenMethod((IMethod)element))) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(),
-					Messages.format(ActionMessages.OpenImplementationAction_not_applicable, BasicElementLabels.getJavaElementName(element.getElementName())));
-			return;
-		}
-		if (!ActionUtil.isProcessable(getShell(), element))
-			return;
-		SelectionDispatchAction openAction= (SelectionDispatchAction)fEditor.getAction("OpenEditor"); //$NON-NLS-1$
-		if (openAction == null)
-			return;
-
-		ISourceRange nameRange;
-		try {
-			nameRange= ((IMethod)element).getNameRange();
-			if (nameRange == null) // Panic code (should not happen for methods)
-				return;
-		} catch (JavaModelException e) {
-			return;
-		}
-
-		IRegion region= new Region(nameRange.getOffset(), nameRange.getLength());
-		JavaElementImplementationHyperlink.openImplementations(fEditor, region, element, openAction);
 	}
 
 	/**
