@@ -102,11 +102,15 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
 			return;
-		IJavaElement element;
+		IJavaElement element= null;
 		try {
-			element= elementAtOffset();
+			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
+			if (elements.length == 1)
+				element= elements[0];
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message);
+			return;
+		} catch (InterruptedException e) {
 			return;
 		}
 
@@ -132,24 +136,6 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	 */
 	private String getDialogTitle() {
 		return ActionMessages.OpenImplementationAction_error_title;
-	}
-
-	/**
-	 * Returns the java element corresponding to the selection offset.
-	 * 
-	 * @return the java element that corresponds to the selection, <code>null</code> if no Java
-	 *         element was found
-	 * @throws InvocationTargetException in case code resolve failed
-	 */
-	private IJavaElement elementAtOffset() throws InvocationTargetException {
-		try {
-			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
-			if (elements.length == 1)
-				return elements[0];
-		} catch (InterruptedException e) {
-			// Ignore
-		}
-		return null;
 	}
 
 	/**
