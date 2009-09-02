@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.ClasspathVariableInitializer;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 
@@ -25,9 +25,9 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 	 * @see ClasspathVariableInitializer#initialize(String)
 	 */
 	public void initialize(String variable) {
-		if (JUnitPlugin.JUNIT_HOME.equals(variable)) {
+		if (JUnitCorePlugin.JUNIT_HOME.equals(variable)) {
 			initializeHome();
-		} else if (JUnitPlugin.JUNIT_SRC_HOME.equals(variable)) {
+		} else if (JUnitCorePlugin.JUNIT_SRC_HOME.equals(variable)) {
 			initializeSource();
 		}
 	}
@@ -36,12 +36,12 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 		try {
 			IPath location= BuildPathSupport.JUNIT3_PLUGIN.getBundleLocation();
 			if (location != null) {
-				JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, location, null);
+				JavaCore.setClasspathVariable(JUnitCorePlugin.JUNIT_HOME, location, null);
 			} else {
-				JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
+				JavaCore.removeClasspathVariable(JUnitCorePlugin.JUNIT_HOME, null);
 			}
 		} catch (JavaModelException e1) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
+			JavaCore.removeClasspathVariable(JUnitCorePlugin.JUNIT_HOME, null);
 		}
 	}
 
@@ -49,12 +49,12 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 		try {
 			IPath sourceLocation= BuildPathSupport.JUNIT3_PLUGIN.getSourceBundleLocation();
 			if (sourceLocation != null) {
-				JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, sourceLocation, null);
+				JavaCore.setClasspathVariable(JUnitCorePlugin.JUNIT_SRC_HOME, sourceLocation, null);
 			} else {
-				JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
+				JavaCore.removeClasspathVariable(JUnitCorePlugin.JUNIT_SRC_HOME, null);
 			}
 		} catch (JavaModelException e1) {
-			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
+			JavaCore.removeClasspathVariable(JUnitCorePlugin.JUNIT_SRC_HOME, null);
 		}
 	}
 }

@@ -7,16 +7,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *   Julien Ruaux: jruaux@octo.com
- * 	 Vincent Massol: vmassol@octo.com
+ *     Julien Ruaux: jruaux@octo.com
+ * 	   Vincent Massol: vmassol@octo.com
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
+ *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
@@ -25,16 +24,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -45,10 +42,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -61,42 +58,9 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	private static JUnitPlugin fgPlugin= null;
 
 	public static final String PLUGIN_ID= "org.eclipse.jdt.junit"; //$NON-NLS-1$
-	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
 	public static final String ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS= PLUGIN_ID + "." + "junitLaunchConfigs"; //$NON-NLS-1$ //$NON-NLS-2$
-	public static final String ID_EXTENSION_POINT_TEST_KINDS= PLUGIN_ID + "." + "internal_testKinds"; //$NON-NLS-1$ //$NON-NLS-2$
-
-	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
-	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
-
-	public final static String JUNIT4_ANNOTATION_NAME= "org.junit.Test"; //$NON-NLS-1$
-	public static final String SIMPLE_TEST_INTERFACE_NAME= "Test"; //$NON-NLS-1$
-
-	/**
-	 * The class path variable referring to the junit home location
-	 */
-	public final static String JUNIT_HOME= "JUNIT_HOME"; //$NON-NLS-1$
-
-	/**
-	 * The class path variable referring to the junit source location
-     * @since 3.2
-	 */
-	public static final String JUNIT_SRC_HOME= "JUNIT_SRC_HOME";  //$NON-NLS-1$
 
 	private static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
-	private static final String HISTORY_DIR_NAME= "history"; //$NON-NLS-1$
-
-	private final JUnitModel fJUnitModel= new JUnitModel();
-
-
-	/**
-	 * List storing the registered test run listeners
-	 */
-	private List/*<ITestRunListener>*/ fLegacyTestRunListeners;
-
-	/**
-	 * List storing the registered test run listeners
-	 */
-	private ListenerList/*<TestRunListener>*/ fNewTestRunListeners;
 
 	/**
 	 * List storing the registered JUnit launch configuration types
@@ -110,7 +74,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	public JUnitPlugin() {
 		fgPlugin= this;
-		fNewTestRunListeners= new ListenerList();
 	}
 
 	public static JUnitPlugin getDefault() {
@@ -231,7 +194,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fBundleContext= context;
-		fJUnitModel.start();
 	}
 
 	/**
@@ -239,11 +201,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		fIsStopped= true;
-		try {
-			fJUnitModel.stop();
-		} finally {
-			super.stop(context);
-		}
+		super.stop(context);
 		fBundleContext= null;
 	}
 
@@ -261,38 +219,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		return fBundleContext.getService(reference);
 	}
 
-	public static JUnitModel getModel() {
-		return getDefault().fJUnitModel;
-	}
-
-	/**
-	 * Initializes TestRun Listener extensions
-	 * @deprecated to avoid deprecation warning
-	 */
-	private void loadTestRunListeners() {
-		fLegacyTestRunListeners= new ArrayList();
-		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
-		if (extensionPoint == null) {
-			return;
-		}
-		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
-		MultiStatus status= new MultiStatus(PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$
-
-		for (int i= 0; i < configs.length; i++) {
-			try {
-				Object testRunListener= configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-				if (testRunListener instanceof org.eclipse.jdt.junit.ITestRunListener) {
-					fLegacyTestRunListeners.add(testRunListener);
-				}
-			} catch (CoreException e) {
-				status.add(e.getStatus());
-			}
-		}
-		if (!status.isOK()) {
-			JUnitPlugin.log(status);
-		}
-	}
-
 	/**
 	 * Loads the registered JUnit launch configurations
 	 */
@@ -308,17 +234,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			String configTypeID= configs[i].getAttribute("configTypeID"); //$NON-NLS-1$
 			fJUnitLaunchConfigTypeIDs.add(configTypeID);
 		}
-	}
-
-	/**
-	 * @return an array of all TestRun listeners
-	 * @deprecated to avoid deprecation warnings
-	 */
-	public org.eclipse.jdt.junit.ITestRunListener[] getTestRunListeners() {
-		if (fLegacyTestRunListeners == null) {
-			loadTestRunListeners();
-		}
-		return (org.eclipse.jdt.junit.ITestRunListener[]) fLegacyTestRunListeners.toArray(new org.eclipse.jdt.junit.ITestRunListener[fLegacyTestRunListeners.size()]);
 	}
 
 	/**
@@ -367,40 +282,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		return null;
 	}
 
-	/**
-	 * Adds a TestRun listener to the collection of listeners
-	 * @param newListener the listener to add
-	 * @deprecated to avoid deprecation warnings
-	 */
-	public void addTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
-		if (fLegacyTestRunListeners == null)
-			loadTestRunListeners();
-
-		for (Iterator iter= fLegacyTestRunListeners.iterator(); iter.hasNext();) {
-			Object o= iter.next();
-			if (o == newListener)
-				return;
-		}
-		fLegacyTestRunListeners.add(newListener);
-	}
-
-	/**
-	 * Removes a TestRun listener to the collection of listeners
-	 * @param newListener the listener to remove
-	 * @deprecated to avoid deprecation warnings
-	 */
-	public void removeTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
-		if (fLegacyTestRunListeners != null)
-			fLegacyTestRunListeners.remove(newListener);
-	}
-
-	/**
-	 * @return a <code>ListenerList</code> of all <code>TestRunListener</code>s
-	 */
-	public ListenerList/*<TestRunListener>*/ getNewTestRunListeners() {
-		return fNewTestRunListeners;
-	}
-
 	public static boolean isStopped() {
 		return fIsStopped;
 	}
@@ -413,13 +294,56 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		}
 		return section;
 	}
-
-	public static File getHistoryDirectory() throws IllegalStateException {
-		File historyDir= getDefault().getStateLocation().append(HISTORY_DIR_NAME).toFile();
-		if (! historyDir.isDirectory()) {
-			historyDir.mkdir();
-		}
-		return historyDir;
+	
+	public static void asyncShowTestRunnerViewPart() {
+		getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				showTestRunnerViewPartInActivePage();
+			}
+		});
 	}
 
+	public static TestRunnerViewPart showTestRunnerViewPartInActivePage() {
+		TestRunnerViewPart testRunner= findTestRunnerViewPartInActivePage();
+		IWorkbenchPart activePart= null;
+		IWorkbenchPage page= null;
+		try {
+			// TODO: have to force the creation of view part contents
+			// otherwise the UI will not be updated
+			if (testRunner != null && testRunner.isCreated())
+				return testRunner;
+			page= JUnitPlugin.getActivePage();
+			if (page == null)
+				return null;
+			activePart= page.getActivePart();
+			//	show the result view if it isn't shown yet.
+			return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
+		} catch (PartInitException pie) {
+			JUnitPlugin.log(pie);
+			return null;
+		} finally {
+			//restore focus stolen by the creation of the result view
+			if (page != null && activePart != null)
+				page.activate(activePart);
+		}
+	}
+	
+	private static TestRunnerViewPart findTestRunnerViewPartInActivePage() {
+		IWorkbenchPage page= JUnitPlugin.getActivePage();
+		if (page == null)
+			return null;
+		return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
+	}
+	
+	private static Display getDisplay() {
+//			Shell shell= getActiveWorkbenchShell();
+//			if (shell != null) {
+//				return shell.getDisplay();
+//			}
+		Display display= Display.getCurrent();
+		if (display == null) {
+			display= Display.getDefault();
+		}
+		return display;
+	}
 }

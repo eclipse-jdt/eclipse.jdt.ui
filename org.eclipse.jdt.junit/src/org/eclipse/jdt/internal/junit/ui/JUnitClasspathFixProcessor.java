@@ -25,6 +25,7 @@ import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 
@@ -83,7 +84,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 						}
 					} else if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 						IPath path= curr.getPath();
-						if (path.segmentCount() > 0 && JUnitPlugin.JUNIT_HOME.equals(path.segment(0))) {
+						if (path.segmentCount() > 0 && JUnitCorePlugin.JUNIT_HOME.equals(path.segment(0))) {
 							if (!added) {
 								curr= entry; // replace
 								added= true;

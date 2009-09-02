@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.UITestSearchEngine;
 
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
@@ -202,7 +202,7 @@ public class TestTestSearchEngine extends TestCase {
 
 	private IType[] findTests(IJavaElement element) throws InvocationTargetException, InterruptedException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(fProject);
-		return TestSearchEngine.findTests(new BusyIndicatorRunnableContext(), element, testKind);
+		return UITestSearchEngine.findTests(new BusyIndicatorRunnableContext(), element, testKind);
 	}
 
 	private IType[] findTests(IJavaElement[] elements) throws InvocationTargetException, InterruptedException {

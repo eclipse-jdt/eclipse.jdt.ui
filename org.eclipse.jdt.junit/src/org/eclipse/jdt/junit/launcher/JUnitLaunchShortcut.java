@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.UITestSearchEngine;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -209,7 +209,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private IType[] findTypesToLaunch(ICompilationUnit cu) throws InterruptedException, InvocationTargetException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(cu);
-		return TestSearchEngine.findTests(PlatformUI.getWorkbench().getActiveWorkbenchWindow(), cu, testKind);
+		return UITestSearchEngine.findTests(PlatformUI.getWorkbench().getActiveWorkbenchWindow(), cu, testKind);
 	}
 
 	private void performLaunch(IJavaElement element, String mode) throws InterruptedException, CoreException {

@@ -11,13 +11,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -80,13 +81,11 @@ public class AssertionVMArg {
 	}
 
 	public static boolean getEnableAssertionsPreference() {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(JUnitPreferencesConstants.ENABLE_ASSERTIONS);
+		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.ENABLE_ASSERTIONS, false, null);
 	}
 
 	public static void setEnableAssertionsPreference(boolean preference) {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		store.setValue(JUnitPreferencesConstants.ENABLE_ASSERTIONS, preference);
+		new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(JUnitPreferencesConstants.ENABLE_ASSERTIONS, preference);
 	}
 
 	/* not needed unless you're manipulating already entered configurations

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -58,6 +57,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
@@ -192,7 +192,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				IAnnotationBinding[] annotations= binding.getAnnotations();
 				for (int i= 0; i < annotations.length; i++) {
 					final ITypeBinding annotationType= annotations[i].getAnnotationType();
-					if (annotationType != null && JUnitPlugin.JUNIT4_ANNOTATION_NAME.equals(annotationType.getQualifiedName()))
+					if (annotationType != null && JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(annotationType.getQualifiedName()))
 						return true;
 				}
 			}
@@ -233,7 +233,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 						try {
 							Change change= createChange();
 							change.initializeValidationData(new NullProgressMonitor());
-							PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
+							PerformChangeOperation op= new PerformChangeOperation(change);
 							op.setUndoManager(RefactoringCore.getUndoManager(), getDisplayString());
 							op.setSchedulingRule(fJavaProject.getProject().getWorkspace().getRoot());
 							op.run(monitor);

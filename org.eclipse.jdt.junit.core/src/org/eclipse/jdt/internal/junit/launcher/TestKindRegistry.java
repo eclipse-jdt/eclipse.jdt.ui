@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class TestKindRegistry {
@@ -37,7 +37,7 @@ public class TestKindRegistry {
 		if (fgRegistry != null)
 			return fgRegistry;
 
-		fgRegistry= new TestKindRegistry(Platform.getExtensionRegistry().getExtensionPoint(JUnitPlugin.ID_EXTENSION_POINT_TEST_KINDS));
+		fgRegistry= new TestKindRegistry(Platform.getExtensionRegistry().getExtensionPoint(JUnitCorePlugin.ID_EXTENSION_POINT_TEST_KINDS));
 		return fgRegistry;
 	}
 

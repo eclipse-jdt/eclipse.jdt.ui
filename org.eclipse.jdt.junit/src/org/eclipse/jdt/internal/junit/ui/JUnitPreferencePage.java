@@ -40,9 +40,11 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -66,6 +68,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -74,6 +77,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
@@ -316,7 +321,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	public JUnitPreferencePage() {
 		super();
 		setDescription(JUnitMessages.JUnitPreferencePage_description);
-		setPreferenceStore(JUnitPlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(new ScopedPreferenceStore(new InstanceScope(),JUnitCorePlugin.CORE_PLUGIN_ID));
 	}
 
 	protected Control createContents(Composite parent) {
@@ -770,18 +775,15 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	public static String[] getFilterPatterns() {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return JUnitPreferencePage.parseList(store.getString(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST));
+		return JUnitPreferencePage.parseList(Platform.getPreferencesService().getString(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, null, null));
 	}
 
 	public static boolean getFilterStack() {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(JUnitPreferencesConstants.DO_FILTER_STACK);
+		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.DO_FILTER_STACK, true, null);
 	}
 
 	public static void setFilterStack(boolean filter) {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		store.setValue(JUnitPreferencesConstants.DO_FILTER_STACK, filter);
+		new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(JUnitPreferencesConstants.DO_FILTER_STACK, filter);
 	}
 
 	/*

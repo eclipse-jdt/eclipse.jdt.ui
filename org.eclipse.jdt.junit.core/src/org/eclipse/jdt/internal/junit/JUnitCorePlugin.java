@@ -11,10 +11,9 @@
  * 	 Vincent Massol: vmassol@octo.com
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
-package org.eclipse.jdt.internal.junit.ui;
+package org.eclipse.jdt.internal.junit;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,45 +23,34 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jdt.junit.TestRunListener;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
 /**
- * The plug-in runtime class for the JUnit plug-in.
+ * The plug-in runtime class for the JUnit core plug-in.
  */
-public class JUnitPlugin extends AbstractUIPlugin {
+public class JUnitCorePlugin extends Plugin {
 
 	/**
 	 * The single instance of this plug-in runtime class.
 	 */
-	private static JUnitPlugin fgPlugin= null;
+	private static JUnitCorePlugin fgPlugin= null;
 
+	public static final String CORE_PLUGIN_ID= "org.eclipse.jdt.junit.core"; //$NON-NLS-1$
+	
 	public static final String PLUGIN_ID= "org.eclipse.jdt.junit"; //$NON-NLS-1$
 	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
-	public static final String ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS= PLUGIN_ID + "." + "junitLaunchConfigs"; //$NON-NLS-1$ //$NON-NLS-2$
 	public static final String ID_EXTENSION_POINT_TEST_KINDS= PLUGIN_ID + "." + "internal_testKinds"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
@@ -82,7 +70,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 */
 	public static final String JUNIT_SRC_HOME= "JUNIT_SRC_HOME";  //$NON-NLS-1$
 
-	private static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
 	private static final String HISTORY_DIR_NAME= "history"; //$NON-NLS-1$
 
 	private final JUnitModel fJUnitModel= new JUnitModel();
@@ -98,55 +85,22 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 */
 	private ListenerList/*<TestRunListener>*/ fNewTestRunListeners;
 
-	/**
-	 * List storing the registered JUnit launch configuration types
-	 */
-	private List fJUnitLaunchConfigTypeIDs;
-
 	private BundleContext fBundleContext;
 
 	private static boolean fIsStopped= false;
 
 
-	public JUnitPlugin() {
+	public JUnitCorePlugin() {
 		fgPlugin= this;
 		fNewTestRunListeners= new ListenerList();
 	}
 
-	public static JUnitPlugin getDefault() {
+	public static JUnitCorePlugin getDefault() {
 		return fgPlugin;
 	}
 
-	public static Shell getActiveWorkbenchShell() {
-		IWorkbenchWindow workBenchWindow= getActiveWorkbenchWindow();
-		if (workBenchWindow == null)
-			return null;
-		return workBenchWindow.getShell();
-	}
-
-	/**
-	 * Returns the active workbench window
-	 *
-	 * @return the active workbench window
-	 */
-	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		if (fgPlugin == null)
-			return null;
-		IWorkbench workBench= fgPlugin.getWorkbench();
-		if (workBench == null)
-			return null;
-		return workBench.getActiveWorkbenchWindow();
-	}
-
-	public static IWorkbenchPage getActivePage() {
-		IWorkbenchWindow activeWorkbenchWindow= getActiveWorkbenchWindow();
-		if (activeWorkbenchWindow == null)
-			return null;
-		return activeWorkbenchWindow.getActivePage();
-	}
-
 	public static String getPluginId() {
-		return PLUGIN_ID;
+		return CORE_PLUGIN_ID;
 	}
 
 	public static void log(Throwable e) {
@@ -157,76 +111,8 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		getDefault().getLog().log(status);
 	}
 
-	public static ImageDescriptor getImageDescriptor(String relativePath) {
-		IPath path= ICONS_PATH.append(relativePath);
-		return createImageDescriptor(getDefault().getBundle(), path, true);
-	}
-
-	public static Image createImage(String path) {
-		return getImageDescriptor(path).createImage();
-	}
-
 	/**
-	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
-	 * are retrieved from the *lcl16 folders.
-	 *
-	 * @param action the action
-	 * @param iconName the icon name
-	 */
-	public static void setLocalImageDescriptors(IAction action, String iconName) {
-		setImageDescriptors(action, "lcl16", iconName); //$NON-NLS-1$
-	}
-
-	private static void setImageDescriptors(IAction action, String type, String relPath) {
-		ImageDescriptor id= createImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
-		if (id != null)
-			action.setDisabledImageDescriptor(id);
-
-		ImageDescriptor descriptor= createImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
-		action.setHoverImageDescriptor(descriptor);
-		action.setImageDescriptor(descriptor);
-	}
-
-	/*
-	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle. The path can
-	 * contain variables like $NL$.
-	 * If no image could be found, <code>useMissingImageDescriptor</code> decides if either
-	 * the 'missing image descriptor' is returned or <code>null</code>.
-	 * or <code>null</code>.
-	 */
-	private static ImageDescriptor createImageDescriptor(String pathPrefix, String imageName, boolean useMissingImageDescriptor) {
-		IPath path= ICONS_PATH.append(pathPrefix).append(imageName);
-		return createImageDescriptor(JUnitPlugin.getDefault().getBundle(), path, useMissingImageDescriptor);
-	}
-
-	/**
-	 * Creates an image descriptor for the given path in a bundle. The path can
-	 * contain variables like $NL$. If no image could be found,
-	 * <code>useMissingImageDescriptor</code> decides if either the 'missing
-	 * image descriptor' is returned or <code>null</code>.
-	 *
-	 * @param bundle a bundle
-	 * @param path path in the bundle
-	 * @param useMissingImageDescriptor if <code>true</code>, returns the shared image descriptor
-	 *            for a missing image. Otherwise, returns <code>null</code> if the image could not
-	 *            be found
-	 * @return an {@link ImageDescriptor}, or <code>null</code> iff there's
-	 *         no image at the given location and
-	 *         <code>useMissingImageDescriptor</code> is <code>true</code>
-	 */
-	private static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
-		URL url= FileLocator.find(bundle, path, null);
-		if (url != null) {
-			return ImageDescriptor.createFromURL(url);
-		}
-		if (useMissingImageDescriptor) {
-			return ImageDescriptor.getMissingImageDescriptor();
-		}
-		return null;
-	}
-
-	/**
-	 * @see AbstractUIPlugin#start(BundleContext)
+	 * @see Plugin#start(BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
@@ -235,7 +121,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * @see AbstractUIPlugin#stop(BundleContext)
+	 * @see Plugin#stop(BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		fIsStopped= true;
@@ -269,19 +155,24 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * Initializes TestRun Listener extensions
 	 * @deprecated to avoid deprecation warning
 	 */
-	private void loadTestRunListeners() {
+	private synchronized void loadTestRunListeners() {
+		if (fLegacyTestRunListeners != null)
+			return;
+
 		fLegacyTestRunListeners= new ArrayList();
 		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
 		if (extensionPoint == null) {
 			return;
 		}
 		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
-		MultiStatus status= new MultiStatus(PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$
+		MultiStatus status= new MultiStatus(CORE_PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$
 
 		for (int i= 0; i < configs.length; i++) {
 			try {
 				Object testRunListener= configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-				if (testRunListener instanceof org.eclipse.jdt.junit.ITestRunListener) {
+				if (testRunListener instanceof TestRunListener) {
+					fNewTestRunListeners.add(testRunListener);
+				} else if (testRunListener instanceof org.eclipse.jdt.junit.ITestRunListener) {
 					fLegacyTestRunListeners.add(testRunListener);
 				}
 			} catch (CoreException e) {
@@ -289,24 +180,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			}
 		}
 		if (!status.isOK()) {
-			JUnitPlugin.log(status);
-		}
-	}
-
-	/**
-	 * Loads the registered JUnit launch configurations
-	 */
-	private void loadLaunchConfigTypeIDs() {
-		fJUnitLaunchConfigTypeIDs= new ArrayList();
-		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS);
-		if (extensionPoint == null) {
-			return;
-		}
-		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
-
-		for (int i= 0; i < configs.length; i++) {
-			String configTypeID= configs[i].getAttribute("configTypeID"); //$NON-NLS-1$
-			fJUnitLaunchConfigTypeIDs.add(configTypeID);
+			JUnitCorePlugin.log(status);
 		}
 	}
 
@@ -315,20 +189,8 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * @deprecated to avoid deprecation warnings
 	 */
 	public org.eclipse.jdt.junit.ITestRunListener[] getTestRunListeners() {
-		if (fLegacyTestRunListeners == null) {
-			loadTestRunListeners();
-		}
+		loadTestRunListeners();
 		return (org.eclipse.jdt.junit.ITestRunListener[]) fLegacyTestRunListeners.toArray(new org.eclipse.jdt.junit.ITestRunListener[fLegacyTestRunListeners.size()]);
-	}
-
-	/**
-	 * @return a list of all JUnit launch configuration types
-	 */
-	public List/*<String>*/ getJUnitLaunchConfigTypeIDs() {
-		if (fJUnitLaunchConfigTypeIDs == null) {
-			loadLaunchConfigTypeIDs();
-		}
-		return fJUnitLaunchConfigTypeIDs;
 	}
 
 	/**
@@ -373,8 +235,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * @deprecated to avoid deprecation warnings
 	 */
 	public void addTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
-		if (fLegacyTestRunListeners == null)
-			loadTestRunListeners();
+		loadTestRunListeners();
 
 		for (Iterator iter= fLegacyTestRunListeners.iterator(); iter.hasNext();) {
 			Object o= iter.next();
@@ -398,20 +259,13 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * @return a <code>ListenerList</code> of all <code>TestRunListener</code>s
 	 */
 	public ListenerList/*<TestRunListener>*/ getNewTestRunListeners() {
+		loadTestRunListeners();
+		
 		return fNewTestRunListeners;
 	}
 
 	public static boolean isStopped() {
 		return fIsStopped;
-	}
-
-	public IDialogSettings getDialogSettingsSection(String name) {
-		IDialogSettings dialogSettings= getDialogSettings();
-		IDialogSettings section= dialogSettings.getSection(name);
-		if (section == null) {
-			section= dialogSettings.addNewSection(name);
-		}
-		return section;
 	}
 
 	public static File getHistoryDirectory() throws IllegalStateException {

@@ -24,6 +24,7 @@ import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.URIUtil;
 
 import org.eclipse.jdt.core.IAccessRule;
@@ -31,8 +32,8 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 
 
 public class BuildPathSupport {
@@ -79,7 +80,7 @@ public class BuildPathSupport {
 				
 				IAccessRule[] accessRules= { };
 
-				String javadocLocation= JUnitPlugin.getDefault().getPreferenceStore().getString(javadocPreferenceKey);
+				String javadocLocation= Platform.getPreferencesService().getString(JUnitCorePlugin.CORE_PLUGIN_ID, javadocPreferenceKey, "", null); //$NON-NLS-1$
 				IClasspathAttribute[] attributes;
 				if (javadocLocation.length() == 0) {
 					attributes= new IClasspathAttribute[0];

@@ -18,8 +18,6 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 
 /**
  * A label provider for basic elements like paths. The label provider will make sure that the labels are correctly
@@ -123,7 +121,7 @@ public class BasicElementLabels {
 	/**
 	 * Returns a label for Java element name. Example is 'new Test<? extends List>() { ...}'.
 	 * This method should only be used for simple element names. Use
-	 * {@link JavaElementLabels} to create a label from a Java element.
+	 * JavaElementLabels to create a label from a Java element.
 	 *
 	 * @param name the Java element name.
 	 * @return the label for the Java element

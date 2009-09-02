@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
-package org.eclipse.jdt.internal.junit.ui;
+package org.eclipse.jdt.internal.junit;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,52 +22,52 @@ public class JUnitPreferencesConstants {
 	 * Boolean preference controlling whether the failure stack should be
 	 * filtered.
 	 */
-	public static final String DO_FILTER_STACK= JUnitPlugin.PLUGIN_ID + ".do_filter_stack"; //$NON-NLS-1$
+	public static final String DO_FILTER_STACK= JUnitCorePlugin.PLUGIN_ID + ".do_filter_stack"; //$NON-NLS-1$
 
 	/**
 	 * Boolean preference controlling whether the JUnit view should be shown on
 	 * errors only.
 	 */
-	public static final String SHOW_ON_ERROR_ONLY= JUnitPlugin.PLUGIN_ID + ".show_on_error"; //$NON-NLS-1$
+	public static final String SHOW_ON_ERROR_ONLY= JUnitCorePlugin.PLUGIN_ID + ".show_on_error"; //$NON-NLS-1$
 
 	/**
 	 * Boolean preference controlling whether the JUnit view should be shown on
 	 * errors only.
 	 */
-	public static final String ENABLE_ASSERTIONS= JUnitPlugin.PLUGIN_ID + ".enable_assertions"; //$NON-NLS-1$
+	public static final String ENABLE_ASSERTIONS= JUnitCorePlugin.PLUGIN_ID + ".enable_assertions"; //$NON-NLS-1$
 
 	/**
 	 * List of active stack filters. A String containing a comma separated list
 	 * of fully qualified type names/patterns.
 	 */
-	public static final String PREF_ACTIVE_FILTERS_LIST = JUnitPlugin.PLUGIN_ID + ".active_filters"; //$NON-NLS-1$
+	public static final String PREF_ACTIVE_FILTERS_LIST = JUnitCorePlugin.PLUGIN_ID + ".active_filters"; //$NON-NLS-1$
 
 	/**
 	 * List of inactive stack filters. A String containing a comma separated
 	 * list of fully qualified type names/patterns.
 	 */
-	public static final String PREF_INACTIVE_FILTERS_LIST = JUnitPlugin.PLUGIN_ID + ".inactive_filters"; //$NON-NLS-1$
+	public static final String PREF_INACTIVE_FILTERS_LIST = JUnitCorePlugin.PLUGIN_ID + ".inactive_filters"; //$NON-NLS-1$
 
 	/**
 	 * Maximum number of remembered test runs.
 	 */
-	public static final String MAX_TEST_RUNS= JUnitPlugin.PLUGIN_ID + ".max_test_runs"; //$NON-NLS-1$
+	public static final String MAX_TEST_RUNS= JUnitCorePlugin.PLUGIN_ID + ".max_test_runs"; //$NON-NLS-1$
 
 	/**
 	 * Javadoc location for JUnit 3
 	 */
-	public static final String JUNIT3_JAVADOC= JUnitPlugin.PLUGIN_ID + ".junit3.javadoclocation"; //$NON-NLS-1$
+	public static final String JUNIT3_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit3.javadoclocation"; //$NON-NLS-1$
 
 
 	/**
 	 * Javadoc location for JUnit 4
 	 */
-	public static final String JUNIT4_JAVADOC= JUnitPlugin.PLUGIN_ID + ".junit4.javadoclocation"; //$NON-NLS-1$
+	public static final String JUNIT4_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit4.javadoclocation"; //$NON-NLS-1$
 
 	/**
 	 * Javadoc location for org.hamcrest.core (JUnit 4)
 	 */
-	public static final String HAMCREST_CORE_JAVADOC= JUnitPlugin.PLUGIN_ID + ".junit4.hamcrest.core.javadoclocation"; //$NON-NLS-1$
+	public static final String HAMCREST_CORE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit4.hamcrest.core.javadoclocation"; //$NON-NLS-1$
 	
 
 	private static final String[] fgDefaultFilterPatterns= new String[] {

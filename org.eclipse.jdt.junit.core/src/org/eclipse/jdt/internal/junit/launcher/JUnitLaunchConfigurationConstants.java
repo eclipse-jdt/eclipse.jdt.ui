@@ -20,7 +20,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -33,26 +33,26 @@ public class JUnitLaunchConfigurationConstants {
 	public static final String MODE_RUN_QUIETLY_MODE = "runQuietly"; //$NON-NLS-1$
 	public static final String ID_JUNIT_APPLICATION= "org.eclipse.jdt.junit.launchconfig"; //$NON-NLS-1$
 
-	public static final String ATTR_NO_DISPLAY = JUnitPlugin.PLUGIN_ID + ".NO_DISPLAY"; //$NON-NLS-1$
+	public static final String ATTR_NO_DISPLAY = JUnitCorePlugin.PLUGIN_ID + ".NO_DISPLAY"; //$NON-NLS-1$
 
 
 
-	public static final String ATTR_PORT= JUnitPlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
+	public static final String ATTR_PORT= JUnitCorePlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
 
 	/**
 	 * The test method, or "" iff running the whole test type.
 	 */
-	public static final String ATTR_TEST_METHOD_NAME= JUnitPlugin.PLUGIN_ID+".TESTNAME"; //$NON-NLS-1$
+	public static final String ATTR_TEST_METHOD_NAME= JUnitCorePlugin.PLUGIN_ID+".TESTNAME"; //$NON-NLS-1$
 
-	public static final String ATTR_KEEPRUNNING = JUnitPlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
+	public static final String ATTR_KEEPRUNNING = JUnitCorePlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
 	/**
 	 * The launch container, or "" iff running a single test type.
 	 */
-	public static final String ATTR_TEST_CONTAINER= JUnitPlugin.PLUGIN_ID+".CONTAINER"; //$NON-NLS-1$
+	public static final String ATTR_TEST_CONTAINER= JUnitCorePlugin.PLUGIN_ID+".CONTAINER"; //$NON-NLS-1$
 
-	public static final String ATTR_FAILURES_NAMES= JUnitPlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
+	public static final String ATTR_FAILURES_NAMES= JUnitCorePlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
 
-	public static final String ATTR_TEST_RUNNER_KIND= JUnitPlugin.PLUGIN_ID+".TEST_KIND"; //$NON-NLS-1$
+	public static final String ATTR_TEST_RUNNER_KIND= JUnitCorePlugin.PLUGIN_ID+".TEST_KIND"; //$NON-NLS-1$
 
 	public static ITestKind getTestRunnerKind(ILaunchConfiguration launchConfiguration) {
 		try {

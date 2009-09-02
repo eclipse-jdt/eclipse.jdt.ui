@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak (brockj@tpg.com.au)
  *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
+ *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
  *******************************************************************************/
 
 package org.eclipse.jdt.junit.tests;
@@ -100,6 +101,9 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		try {
 			resultFile.create(new ByteArrayInputStream(serializationResult.fSerialized.getBytes()), true, null);
 			TestRunSession imported= JUnitModel.importTestRunSession(resultFile.getLocation().toFile());
+			// swap out the test run session because it may not have been done earlier
+			// due to lingering TestRunnerViewPart$TestSessionListeners
+			serializationResult.fTestRunSession.swapOut();
 			assertEqualSessions(serializationResult.fTestRunSession, imported);
 		} finally {
 			if (resultFile.exists())

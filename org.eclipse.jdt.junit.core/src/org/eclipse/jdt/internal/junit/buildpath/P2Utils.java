@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.URIUtil;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 
 /**
@@ -95,10 +95,10 @@ class P2Utils {
 			}
 			return bundles;
 		} catch (MalformedURLException e) {
-			JUnitPlugin.log(e);
+			JUnitCorePlugin.log(e);
 			return null;
 		} catch (IOException e) {
-			JUnitPlugin.log(e);
+			JUnitCorePlugin.log(e);
 			return null;
 		}
 	}
@@ -113,7 +113,7 @@ class P2Utils {
 	 * @throws IOException if loading the configuration fails
 	 */
 	private static BundleInfo[] getBundlesFromFile(URL bundlesLocation, URL fileURL) throws IOException {
-		SimpleConfiguratorManipulator manipulator= (SimpleConfiguratorManipulator)JUnitPlugin.getDefault().getService(SimpleConfiguratorManipulator.class.getName());
+		SimpleConfiguratorManipulator manipulator= (SimpleConfiguratorManipulator)JUnitCorePlugin.getDefault().getService(SimpleConfiguratorManipulator.class.getName());
 		if (manipulator == null)
 			return null;
 
@@ -210,7 +210,7 @@ class P2Utils {
 			fileStr= URLDecoder.decode(fileStr, "UTF-8"); //$NON-NLS-1$
 			return new Path(fileStr);
 		} catch (IOException e) {
-			JUnitPlugin.log(e);
+			JUnitCorePlugin.log(e);
 			return null;
 		}
 	}

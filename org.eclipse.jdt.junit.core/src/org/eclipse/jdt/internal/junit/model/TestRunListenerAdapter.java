@@ -14,7 +14,7 @@ import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 
 /**
@@ -29,7 +29,7 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	}
 
 	private Object[] getListeners() {
-		return JUnitPlugin.getDefault().getNewTestRunListeners().getListeners();
+		return JUnitCorePlugin.getDefault().getNewTestRunListeners().getListeners();
 	}
 
 	private void fireSessionStarted() {

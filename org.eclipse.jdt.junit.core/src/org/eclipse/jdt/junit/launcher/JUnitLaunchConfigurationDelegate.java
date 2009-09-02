@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *     Robert Konigsberg <konigsberg@google.com> - [JUnit] Leverage AbstractJavaLaunchConfigurationDelegate.getMainTypeName in JUnitLaunchConfigurationDelegate - https://bugs.eclipse.org/bugs/show_bug.cgi?id=280114
+ *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
  *******************************************************************************/
 package org.eclipse.jdt.junit.launcher;
 
@@ -27,9 +28,6 @@ import java.util.Map;
 
 import org.osgi.framework.Bundle;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -39,8 +37,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -53,13 +49,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.JUnitRuntimeClasspathEntry;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
@@ -189,7 +185,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	private int evaluatePort() throws CoreException {
 		int port= SocketUtil.findFreePort();
 		if (port == -1) {
-			informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_no_socket, null, IJavaLaunchConfigurationConstants.ERR_NO_SOCKET_AVAILABLE);
+			abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_no_socket, null, IJavaLaunchConfigurationConstants.ERR_NO_SOCKET_AVAILABLE);
 		}
 		return port;
 	}
@@ -207,16 +203,16 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		try {
 			IJavaProject javaProject= getJavaProject(configuration);
 			if ((javaProject == null) || !javaProject.exists()) {
-				informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
+				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
 			}
 			if (!TestSearchEngine.hasTestCaseType(javaProject)) {
-				informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 
 			ITestKind testKind= getTestRunnerKind(configuration);
 			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
 			if (isJUnit4Configuration && ! TestSearchEngine.hasTestAnnotation(javaProject)) {
-				informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 		} finally {
 			monitor.done();
@@ -263,24 +259,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		testKind.getFinder().findTestsInContainer(testTarget, result, monitor);
 		if (result.isEmpty()) {
 			String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_notests_kind, testKind.getDisplayName());
-			informAndAbort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+			abort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 		}
 		return (IMember[]) result.toArray(new IMember[result.size()]);
-	}
-
-	private void informAndAbort(String message, Throwable exception, int code) throws CoreException {
-		IStatus status= new Status(IStatus.INFO, JUnitPlugin.PLUGIN_ID, code, message, exception);
-		if (showStatusMessage(status)) {
-			// Status message successfully shown
-			// -> Abort with INFO exception
-			// -> Worker.run() will not write to log
-			throw new CoreException(status);
-		} else {
-			// Status message could not be shown
-			// -> Abort with original exception
-			// -> Will write WARNINGs and ERRORs to log
-			abort(message, exception, code);
-		}
 	}
 
 	/**
@@ -331,7 +312,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				programArguments.add("-classNames"); //$NON-NLS-1$
 				programArguments.add(type.getFullyQualifiedName());
 			} else {
-				informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 			}
 		} else if (testElements.length > 1) {
 			String fileName= createTestNamesFile(testElements);
@@ -358,7 +339,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 						bw.write(testName);
 						bw.newLine();
 					} else {
-						informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+						abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 					}
 				}
 			} finally {
@@ -368,7 +349,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 			return file.getAbsolutePath();
 		} catch (IOException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
 		}
 	}
 
@@ -432,7 +413,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		}
 
 		private String localURL(JUnitRuntimeClasspathEntry jar) throws IOException, MalformedURLException {
-			Bundle bundle= JUnitPlugin.getDefault().getBundle(jar.getPluginId());
+			Bundle bundle= JUnitCorePlugin.getDefault().getBundle(jar.getPluginId());
 			URL url;
 			if (jar.getPluginRelativePath() == null)
 				url= bundle.getEntry("/"); //$NON-NLS-1$
@@ -449,7 +430,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		if (containerHandle.length() != 0) {
 			 IJavaElement element= JavaCore.create(containerHandle);
 			 if (element == null || !element.exists()) {
-				 informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_input_element_deosn_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+				 abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_input_element_deosn_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 			 }
 			 return element;
 		}
@@ -460,41 +441,15 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				return type;
 			}
 		}
-		informAndAbort(JUnitMessages.JUnitLaunchConfigurationDelegate_input_type_does_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+		abort(JUnitMessages.JUnitLaunchConfigurationDelegate_input_type_does_not_exist, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 		return null; // not reachable
-	}
-
-	private boolean showStatusMessage(final IStatus status) {
-		final boolean[] success= new boolean[] { false };
-		getDisplay().syncExec(
-				new Runnable() {
-					public void run() {
-						Shell shell= JUnitPlugin.getActiveWorkbenchShell();
-						if (shell == null)
-							shell= getDisplay().getActiveShell();
-						if (shell != null) {
-							MessageDialog.openInformation(shell, JUnitMessages.JUnitLaunchConfigurationDelegate_dialog_title, status.getMessage());
-							success[0]= true;
-						}
-					}
-				}
-		);
-		return success[0];
-	}
-
-	private Display getDisplay() {
-		Display display;
-		display= Display.getCurrent();
-		if (display == null)
-			display= Display.getDefault();
-		return display;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestFindingAbortHandler#abort(java.lang.String, java.lang.Throwable, int)
 	 */
 	protected void abort(String message, Throwable exception, int code) throws CoreException {
-		throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, code, message, exception));
+		throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, code, message, exception));
 	}
 
 }

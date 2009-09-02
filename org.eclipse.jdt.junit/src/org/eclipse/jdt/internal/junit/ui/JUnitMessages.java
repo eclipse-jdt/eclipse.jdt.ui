@@ -51,8 +51,6 @@ public final class JUnitMessages extends NLS {
 	public static String GotoReferencedTestAction_dialog_title;
 	public static String GotoReferencedTestAction_selectdialog_title;
 
-	public static String JUnit4TestFinder_searching_description;
-
 	public static String JUnitAddLibraryProposa_junit4_label;
 
 	public static String JUnitAddLibraryProposal_info;
@@ -61,19 +59,6 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitAddLibraryProposal_junit4_info;
 	public static String JUnitAddLibraryProposal_label;
-
-	public static String JUnitBaseLaunchConfiguration_error_notests;
-	public static String JUnitBaseLaunchConfiguration_error_novmrunner;
-
-	public static String JUnitContainerInitializer_description_initializer_junit3;
-
-	public static String JUnitContainerInitializer_description_initializer_junit4;
-
-	public static String JUnitContainerInitializer_description_initializer_unresolved;
-
-	public static String JUnitContainerInitializer_description_junit3;
-
-	public static String JUnitContainerInitializer_description_junit4;
 
 	public static String JUnitContainerWizardPage_combo_label;
 
@@ -103,29 +88,7 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitContainerWizardPage_wizard_title;
 
-	public static String JUnitLaunchConfigurationDelegate_create_source_locator_description;
-
 	public static String JUnitLaunchConfigurationDelegate_dialog_title;
-
-	public static String JUnitLaunchConfigurationDelegate_erro_unknowtestrunner;
-
-	public static String JUnitLaunchConfigurationDelegate_error_input_element_deosn_not_exist;
-
-	public static String JUnitLaunchConfigurationDelegate_error_invalidproject;
-
-	public static String JUnitLaunchConfigurationDelegate_error_junit4notonpath;
-
-	public static String JUnitLaunchConfigurationDelegate_error_junitnotonpath;
-
-	public static String JUnitLaunchConfigurationDelegate_error_no_socket;
-
-	public static String JUnitLaunchConfigurationDelegate_error_notests_kind;
-
-	public static String JUnitLaunchConfigurationDelegate_error_wrong_input;
-
-	public static String JUnitLaunchConfigurationDelegate_input_type_does_not_exist;
-
-	public static String JUnitLaunchConfigurationDelegate_verifying_attriburtes_description;
 
 	public static String JUnitLaunchConfigurationTab_error_invalidProjectName;
 
@@ -315,10 +278,6 @@ public final class JUnitMessages extends NLS {
 
 	public static String TestRunnerViewPart_show_failures_only;
 	public static String TestRunnerViewPart_hierarchical_layout;
-
-	public static String TestRunSession_unrootedTests;
-
-	public static String TestSearchEngine_message_searching;
 
 	public static String TestSessionLabelProvider_testName_elapsedTimeInSeconds;
 

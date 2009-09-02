@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.UITestSearchEngine;
 
 import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -520,7 +521,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			radioSetting[0]= fTestRadioButton.getSelection();
 			radioSetting[1]= fTestContainerRadioButton.getSelection();
 
-			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaProject, getSelectedTestKind());
+			types= UITestSearchEngine.findTests(getLaunchConfigurationDialog(), javaProject, getSelectedTestKind());
 		} catch (InterruptedException e) {
 			setErrorMessage(e.getMessage());
 			return;
@@ -846,7 +847,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				ITestKind testKind= TestKindRegistry.getContainerTestKind(javaElement);
 				testKindId= testKind.getId();
 
-				IType[] types = TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaElement, testKind);
+				IType[] types = UITestSearchEngine.findTests(getLaunchConfigurationDialog(), javaElement, testKind);
 				if ((types == null) || (types.length < 1)) {
 					return;
 				}

@@ -50,8 +50,8 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 
@@ -151,7 +151,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			}
 
 			// add all classes implementing JUnit 3.8's Test interface in the region
-			IType testInterface= element.getJavaProject().findType(JUnitPlugin.TEST_INTERFACE_NAME);
+			IType testInterface= element.getJavaProject().findType(JUnitCorePlugin.TEST_INTERFACE_NAME);
 			if (testInterface != null) {
 				TestSearchEngine.findTestImplementorClasses(hierarchy, testInterface, region, result);
 			}

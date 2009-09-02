@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.model;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,16 +37,11 @@ import javax.xml.transform.stream.StreamResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PartInitException;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -55,12 +52,11 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
-import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 
 /**
  * Central registry for JUnit test runs.
@@ -120,74 +116,15 @@ public final class JUnitModel {
 			try {
 				final int port= Integer.parseInt(portStr);
 				fTrackedLaunches.remove(launch);
-				getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						connectTestRunner(launch, javaProject, port);
-					}
-				});
+				connectTestRunner(launch, javaProject, port);
 			} catch (NumberFormatException e) {
 				return;
 			}
 		}
 
 		private void connectTestRunner(ILaunch launch, IJavaProject javaProject, int port) {
-			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
-
-			//TODO: Do notifications have to be sent in UI thread?
-			// Check concurrent access to fTestRunSessions (no problem inside asyncExec())
-			int maxCount= JUnitPlugin.getDefault().getPreferenceStore().getInt(JUnitPreferencesConstants.MAX_TEST_RUNS);
-			int toDelete= fTestRunSessions.size() - maxCount;
-			while (toDelete > 0) {
-				toDelete--;
-				TestRunSession session= (TestRunSession) fTestRunSessions.removeLast();
-				notifyTestRunSessionRemoved(session);
-			}
-
 			TestRunSession testRunSession= new TestRunSession(launch, javaProject, port);
 			addTestRunSession(testRunSession);
-		}
-
-		private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
-			IWorkbenchPart activePart= null;
-			IWorkbenchPage page= null;
-			try {
-				// TODO: have to force the creation of view part contents
-				// otherwise the UI will not be updated
-				if (testRunner != null && testRunner.isCreated())
-					return testRunner;
-				page= JUnitPlugin.getActivePage();
-				if (page == null)
-					return null;
-				activePart= page.getActivePart();
-				//	show the result view if it isn't shown yet
-				return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
-			} catch (PartInitException pie) {
-				JUnitPlugin.log(pie);
-				return null;
-			} finally{
-				//restore focus stolen by the creation of the result view
-				if (page != null && activePart != null)
-					page.activate(activePart);
-			}
-		}
-
-		private TestRunnerViewPart findTestRunnerViewPartInActivePage() {
-			IWorkbenchPage page= JUnitPlugin.getActivePage();
-			if (page == null)
-				return null;
-			return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
-		}
-
-		private Display getDisplay() {
-//			Shell shell= getActiveWorkbenchShell();
-//			if (shell != null) {
-//				return shell.getDisplay();
-//			}
-			Display display= Display.getCurrent();
-			if (display == null) {
-				display= Display.getDefault();
-			}
-			return display;
 		}
 	}
 
@@ -210,27 +147,27 @@ public final class JUnitModel {
 				}
 
 				public void sessionStarted() {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testRunStarted(fActiveTestRunSession.getTotalCount());
 					}
 				}
 				public void sessionTerminated() {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testRunTerminated();
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
 				public void sessionStopped(long elapsedTime) {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testRunStopped(elapsedTime);
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
 				public void sessionEnded(long elapsedTime) {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testRunEnded(elapsedTime);
 					}
@@ -240,28 +177,28 @@ public final class JUnitModel {
 					// ignore
 				}
 				public void testStarted(TestCaseElement testCaseElement) {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testStarted(testCaseElement.getId(), testCaseElement.getTestName());
 					}
 				}
 
 				public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testFailed(status.getOldCode(), testElement.getId(), testElement.getTestName(), trace);
 					}
 				}
 
 				public void testEnded(TestCaseElement testCaseElement) {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testEnded(testCaseElement.getId(), testCaseElement.getTestName());
 					}
 				}
 
 				public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
-					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testReran(testCaseElement.getId(), testCaseElement.getClassName(), testCaseElement.getTestMethodName(), status.getOldCode(), trace);
 					}
@@ -291,7 +228,7 @@ public final class JUnitModel {
 	private final ILaunchListener fLaunchListener= new JUnitLaunchListener();
 
 	/**
-	 * Starts the model (called by the {@link JUnitPlugin} on startup).
+	 * Starts the model (called by the {@link JUnitCorePlugin} on startup).
 	 */
 	public void start() {
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
@@ -329,13 +266,13 @@ public final class JUnitModel {
 	}
 
 	/**
-	 * Stops the model (called by the {@link JUnitPlugin} on shutdown).
+	 * Stops the model (called by the {@link JUnitCorePlugin} on shutdown).
 	 */
 	public void stop() {
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.removeLaunchListener(fLaunchListener);
 
-		File historyDirectory= JUnitPlugin.getHistoryDirectory();
+		File historyDirectory= JUnitCorePlugin.getHistoryDirectory();
 		File[] swapFiles= historyDirectory.listFiles();
 		if (swapFiles != null) {
 			for (int i= 0; i < swapFiles.length; i++) {
@@ -371,23 +308,42 @@ public final class JUnitModel {
 	 *         the internal data structure and modifications do not affect the
 	 *         global list of active sessions. The list is sorted by age, youngest first.
 	 */
-	public List getTestRunSessions() {
+	public synchronized List getTestRunSessions() {
 		return new ArrayList(fTestRunSessions);
 	}
 
 	/**
 	 * Adds the given {@link TestRunSession} and notifies all registered
 	 * {@link ITestRunSessionListener}s.
-	 * <p>
-	 * <b>To be called in the UI thread only!</b>
-	 * </p>
 	 *
 	 * @param testRunSession the session to add
 	 */
 	public void addTestRunSession(TestRunSession testRunSession) {
 		Assert.isNotNull(testRunSession);
-		Assert.isLegal(! fTestRunSessions.contains(testRunSession));
-		fTestRunSessions.addFirst(testRunSession);
+		ArrayList toRemove= new ArrayList();
+		
+		synchronized (this) {
+			Assert.isLegal(! fTestRunSessions.contains(testRunSession));
+			fTestRunSessions.addFirst(testRunSession);
+			
+			int maxCount = Platform.getPreferencesService().getInt(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null);
+			int size= fTestRunSessions.size();
+			if (size > maxCount) {
+				List excess= fTestRunSessions.subList(maxCount, size);
+				for (Iterator iter= excess.iterator(); iter.hasNext();) {
+					TestRunSession oldSession= (TestRunSession) iter.next();
+					if (!(oldSession.isStarting() || oldSession.isRunning() || oldSession.isKeptAlive())) {
+						toRemove.add(oldSession);
+						iter.remove();
+					}
+				}
+			}
+		}
+		
+		for (int i= 0; i < toRemove.size(); i++) {
+			TestRunSession oldSession= (TestRunSession) toRemove.get(i);
+			notifyTestRunSessionRemoved(oldSession);
+		}
 		notifyTestRunSessionAdded(testRunSession);
 	}
 
@@ -406,7 +362,7 @@ public final class JUnitModel {
 			TestRunHandler handler= new TestRunHandler();
 			parser.parse(file, handler);
 			TestRunSession session= handler.getTestRunSession();
-			JUnitPlugin.getModel().addTestRunSession(session);
+			JUnitCorePlugin.getModel().addTestRunSession(session);
 			return session;
 		} catch (ParserConfigurationException e) {
 			throwImportError(file, e);
@@ -458,7 +414,7 @@ public final class JUnitModel {
 				try {
 					out.close();
 				} catch (IOException e2) {
-					JUnitPlugin.log(e2);
+					JUnitCorePlugin.log(e2);
 				}
 			}
 		}
@@ -490,14 +446,14 @@ public final class JUnitModel {
 
 	private static void throwExportError(File file, Exception e) throws CoreException {
 		throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-				JUnitPlugin.getPluginId(),
+				JUnitCorePlugin.getPluginId(),
 				Messages.format(ModelMessages.JUnitModel_could_not_write, BasicElementLabels.getPathLabel(file)),
 				e));
 	}
 
 	private static void throwImportError(File file, Exception e) throws CoreException {
 		throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-				JUnitPlugin.getPluginId(),
+				JUnitCorePlugin.getPluginId(),
 				Messages.format(ModelMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file)),
 				e));
 	}
@@ -505,14 +461,14 @@ public final class JUnitModel {
 	/**
 	 * Removes the given {@link TestRunSession} and notifies all registered
 	 * {@link ITestRunSessionListener}s.
-	 * <p>
-	 * <b>To be called in the UI thread only!</b>
-	 * </p>
 	 *
 	 * @param testRunSession the session to remove
 	 */
 	public void removeTestRunSession(TestRunSession testRunSession) {
-		boolean existed= fTestRunSessions.remove(testRunSession);
+		boolean existed;
+		synchronized (this) {
+			existed= fTestRunSessions.remove(testRunSession);
+		}
 		if (existed) {
 			notifyTestRunSessionRemoved(testRunSession);
 		}

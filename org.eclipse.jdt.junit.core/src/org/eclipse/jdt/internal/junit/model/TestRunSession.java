@@ -7,10 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.model;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,13 +37,13 @@ import org.eclipse.debug.core.ILaunchesListener2;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -264,7 +266,7 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 
-	public TestRoot getTestRoot() {
+	public synchronized TestRoot getTestRoot() {
 		swapIn(); //TODO: TestRoot should stay (e.g. for getTestRoot().getStatus())
 		return fTestRoot;
 	}
@@ -323,7 +325,7 @@ public class TestRunSession implements ITestRunSession {
 		return fIsStopped;
 	}
 
-	public void addTestSessionListener(ITestSessionListener listener) {
+	public synchronized void addTestSessionListener(ITestSessionListener listener) {
 		swapIn();
 		fSessionListeners.add(listener);
 	}
@@ -332,7 +334,7 @@ public class TestRunSession implements ITestRunSession {
 		fSessionListeners.remove(listener);
 	}
 
-	public void swapOut() {
+	public synchronized void swapOut() {
 		if (fTestRoot == null)
 			return;
 		if (isRunning() || isStarting() || isKeptAlive())
@@ -357,9 +359,9 @@ public class TestRunSession implements ITestRunSession {
 			fUnrootedSuite= null;
 
 		} catch (IllegalStateException e) {
-			JUnitPlugin.log(e);
+			JUnitCorePlugin.log(e);
 		} catch (CoreException e) {
-			JUnitPlugin.log(e);
+			JUnitCorePlugin.log(e);
 		}
 	}
 
@@ -375,25 +377,25 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 	private File getSwapFile() throws IllegalStateException {
-		File historyDir= JUnitPlugin.getHistoryDirectory();
+		File historyDir= JUnitCorePlugin.getHistoryDirectory();
 		String isoTime= new SimpleDateFormat("yyyyMMdd-HHmmss.SSS").format(new Date(getStartTime())); //$NON-NLS-1$
 		String swapFileName= isoTime + ".xml"; //$NON-NLS-1$
 		return new File(historyDir, swapFileName);
 	}
 
 
-	public void swapIn() {
+	public synchronized void swapIn() {
 		if (fTestRoot != null)
 			return;
 
 		try {
 			JUnitModel.importIntoTestRunSession(getSwapFile(), this);
 		} catch (IllegalStateException e) {
-			JUnitPlugin.log(e);
+			JUnitCorePlugin.log(e);
 			fTestRoot= new TestRoot(this);
 			fTestResult= null;
 		} catch (CoreException e) {
-			JUnitPlugin.log(e);
+			JUnitCorePlugin.log(e);
 			fTestRoot= new TestRoot(this);
 			fTestResult= null;
 		}
@@ -741,7 +743,7 @@ public class TestRunSession implements ITestRunSession {
 		}
 
 		private void logUnexpectedTest(String testId, TestElement testElement) {
-			JUnitPlugin.log(new Exception("Unexpected TestElement type for testId '" + testId + "': " + testElement)); //$NON-NLS-1$ //$NON-NLS-2$
+			JUnitCorePlugin.log(new Exception("Unexpected TestElement type for testId '" + testId + "': " + testElement)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -813,4 +815,7 @@ public class TestRunSession implements ITestRunSession {
 		return fTestRoot.getElapsedTimeInSeconds();
 	}
 
+	public String toString() {
+		return fTestRunName + " " + DateFormat.getDateTimeInstance().format(new Date(fStartTime)); //$NON-NLS-1$
+	}
 }

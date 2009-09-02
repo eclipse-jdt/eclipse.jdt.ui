@@ -29,8 +29,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 public class JUnit3TestFinder implements ITestFinder {
@@ -75,7 +75,7 @@ public class JUnit3TestFinder implements ITestFinder {
 	private static void findTestCases(IJavaElement element, Set result, IProgressMonitor pm) throws JavaModelException {
 		IJavaProject javaProject= element.getJavaProject();
 
-		IType testCaseType= javaProject.findType(JUnitPlugin.TEST_INTERFACE_NAME);
+		IType testCaseType= javaProject.findType(JUnitCorePlugin.TEST_INTERFACE_NAME);
 		if (testCaseType == null)
 			return;
 

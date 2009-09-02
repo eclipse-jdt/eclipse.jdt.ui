@@ -17,8 +17,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -29,16 +30,16 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 
 public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 	public static final String JUNIT_CONTAINER_ID= "org.eclipse.jdt.junit.JUNIT_CONTAINER"; //$NON-NLS-1$
 
-	private static final IStatus NOT_SUPPORTED= new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED, new String(), null);
-	private static final IStatus READ_ONLY= new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY, new String(), null);
+	private static final IStatus NOT_SUPPORTED= new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED, new String(), null);
+	private static final IStatus READ_ONLY= new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY, new String(), null);
 
 	/**
 	 * @deprecated just for compatibility
@@ -155,7 +156,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#requestClasspathContainerUpdate(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathContainer)
 	 */
 	public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
-		IPreferenceStore preferenceStore= JUnitPlugin.getDefault().getPreferenceStore();
+		IEclipsePreferences preferences= new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
 		
 		IClasspathEntry[] entries= containerSuggestion.getClasspathEntries();
 		if (entries.length >= 1 && isValidJUnitContainerPath(containerPath)) {
@@ -169,8 +170,9 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 				IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
 				if (extraAttributes.length == 0) {
 					// Revert to default
-					if (!preferenceStore.isDefault(preferenceKey)) {
-						preferenceStore.setToDefault(preferenceKey);
+					String defaultValue = new DefaultScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).get(preferenceKey, ""); //$NON-NLS-1$
+					if (!defaultValue.equals(preferences.get(preferenceKey, defaultValue))) {
+						preferences.put(preferenceKey, defaultValue);
 					}
 					
 					/* 
@@ -184,7 +186,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 						IClasspathAttribute attrib= extraAttributes[j];
 						if (attrib.getName().equals(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME)) {
 							if (preferenceKey != null) {
-								preferenceStore.setValue(preferenceKey, attrib.getValue());
+								preferences.put(preferenceKey, attrib.getValue());
 							}
 							break;
 						}

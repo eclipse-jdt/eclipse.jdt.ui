@@ -22,8 +22,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * Class for accessing JUnit support; all functionality is provided by
@@ -46,7 +46,7 @@ public class JUnitCore {
 	 * @deprecated As of 3.3, replaced by {@link #addTestRunListener(TestRunListener)}
 	 */
 	public static void addTestRunListener(ITestRunListener listener) {
-		JUnitPlugin.getDefault().addTestRunListener(listener);
+		JUnitCorePlugin.getDefault().addTestRunListener(listener);
 	}
 
 	/**
@@ -56,17 +56,21 @@ public class JUnitCore {
 	 * @deprecated As of 3.3, replaced by {@link #removeTestRunListener(TestRunListener)}
 	 */
 	public static void removeTestRunListener(ITestRunListener listener) {
-		JUnitPlugin.getDefault().removeTestRunListener(listener);
+		JUnitCorePlugin.getDefault().removeTestRunListener(listener);
 	}
 
 	/**
 	 * Adds a listener for test runs.
+	 * <p>
+	 * <strong>Note:</strong> If your plug-in should be loaded when a test run starts,
+	 * please contribute to the <code>org.eclipse.jdt.junit.testRunListeners</code> extension point instead.
+	 * </p>
 	 *
 	 * @param listener the listener to be added
 	 * @since 3.3
 	 */
 	public static void addTestRunListener(TestRunListener listener) {
-		JUnitPlugin.getDefault().getNewTestRunListeners().add(listener);
+		JUnitCorePlugin.getDefault().getNewTestRunListeners().add(listener);
 	}
 
 	/**
@@ -76,7 +80,7 @@ public class JUnitCore {
 	 * @since 3.3
 	 */
 	public static void removeTestRunListener(TestRunListener listener) {
-		JUnitPlugin.getDefault().getNewTestRunListeners().remove(listener);
+		JUnitCorePlugin.getDefault().getNewTestRunListeners().remove(listener);
 	}
 
 	/**

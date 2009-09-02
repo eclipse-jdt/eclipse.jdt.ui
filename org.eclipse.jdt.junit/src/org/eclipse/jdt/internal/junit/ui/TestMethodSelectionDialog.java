@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -113,7 +114,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	private IType findTestType() {
-		String qualifiedName= JUnitPlugin.TEST_INTERFACE_NAME;
+		String qualifiedName= JUnitCorePlugin.TEST_INTERFACE_NAME;
 		IJavaProject[] projects;
 		Set result= new HashSet();
 		try {
@@ -129,7 +130,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 			return null;
 		}
 		if (result.size() == 0) {
-			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_test_not_found, BasicElementLabels.getJavaElementName(JUnitPlugin.TEST_INTERFACE_NAME));
+			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_test_not_found, BasicElementLabels.getJavaElementName(JUnitCorePlugin.TEST_INTERFACE_NAME));
 			MessageDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_select_dialog_title, msg);
 			return null;
 		}

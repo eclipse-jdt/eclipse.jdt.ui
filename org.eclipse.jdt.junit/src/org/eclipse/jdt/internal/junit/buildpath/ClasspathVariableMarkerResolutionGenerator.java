@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
@@ -55,8 +56,8 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 			String[] arguments= CorrectionEngine.getProblemArguments(marker);
 			if (arguments == null || arguments.length == 0)
 				return false;
-			if (arguments[0].startsWith(JUnitPlugin.JUNIT_HOME + IPath.SEPARATOR)
-					|| arguments[0].startsWith(JUnitPlugin.JUNIT_SRC_HOME + IPath.SEPARATOR))
+			if (arguments[0].startsWith(JUnitCorePlugin.JUNIT_HOME + IPath.SEPARATOR)
+					|| arguments[0].startsWith(JUnitCorePlugin.JUNIT_SRC_HOME + IPath.SEPARATOR))
 				return true;
 		}
 		return false;

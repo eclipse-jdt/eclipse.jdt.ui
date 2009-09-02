@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
  *     Sebastian Davids: sdavids@gmx.de 35762 JUnit View wasting a lot of screen space [JUnit]
  *     Brock Janiczak (brockj@tpg.com.au)
  *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
+ *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -56,9 +57,11 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -71,7 +74,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IActionBars;
@@ -111,6 +113,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -337,7 +341,7 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public List getHistoryEntries() {
-			return JUnitPlugin.getModel().getTestRunSessions();
+			return JUnitCorePlugin.getModel().getTestRunSessions();
 		}
 
 		public Object getCurrentEntry() {
@@ -353,10 +357,10 @@ public class TestRunnerViewPart extends ViewPart {
 		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
 			setActiveTestRunSession((TestRunSession) activeEntry);
 
-			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
+			List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 			testRunSessions.removeAll(remainingEntries);
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
-				JUnitPlugin.getModel().removeTestRunSession((TestRunSession) iter.next());
+				JUnitCorePlugin.getModel().removeTestRunSession((TestRunSession) iter.next());
 			}
 			for (Iterator iter= remainingEntries.iterator(); iter.hasNext();) {
 				TestRunSession remaining= (TestRunSession) iter.next();
@@ -405,13 +409,11 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public int getMaxEntries() {
-			IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-			return store.getInt(JUnitPreferencesConstants.MAX_TEST_RUNS);
+			return Platform.getPreferencesService().getInt(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null);
 		}
 
 		public void setMaxEntries(int maxEntries) {
-			IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-			store.setValue(JUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
+			new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
 		}
 	}
 
@@ -495,33 +497,44 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private class TestRunSessionListener implements ITestRunSessionListener {
-		public void sessionAdded(TestRunSession testRunSession) {
-			if (getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
-				TestRunSession deactivatedSession= setActiveTestRunSession(testRunSession);
-				if (deactivatedSession != null)
-					deactivatedSession.swapOut();
-				String testRunLabel= BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName());
-				String msg;
-				if (testRunSession.getLaunch() != null) {
-					msg= Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ testRunLabel });
-				} else {
-					msg= testRunLabel;
+		public void sessionAdded(final TestRunSession testRunSession) {
+			getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					if (getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
+						if (fInfoMessage == null) {
+							String testRunLabel= BasicElementLabels.getJavaElementName(testRunSession.getTestRunName());
+							String msg;
+							if (testRunSession.getLaunch() != null) {
+								msg= Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ testRunLabel });
+							} else {
+								msg= testRunLabel;
+							}
+							registerInfoMessage(msg);
+						}
+						
+						TestRunSession deactivatedSession= setActiveTestRunSession(testRunSession);
+						if (deactivatedSession != null)
+							deactivatedSession.swapOut();
+					}
 				}
-				setContentDescription(msg);
-			}
+			});
 		}
-		public void sessionRemoved(TestRunSession testRunSession) {
-			if (testRunSession.equals(fTestRunSession)) {
-				List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
-				TestRunSession deactivatedSession;
-				if (! testRunSessions.isEmpty()) {
-					deactivatedSession= setActiveTestRunSession((TestRunSession) testRunSessions.get(0));
-				} else {
-					deactivatedSession= setActiveTestRunSession(null);
+		public void sessionRemoved(final TestRunSession testRunSession) {
+			getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					if (testRunSession.equals(fTestRunSession)) {
+						List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+						TestRunSession deactivatedSession;
+						if (! testRunSessions.isEmpty()) {
+							deactivatedSession= setActiveTestRunSession((TestRunSession) testRunSessions.get(0));
+						} else {
+							deactivatedSession= setActiveTestRunSession(null);
+						}
+						if (deactivatedSession != null)
+							deactivatedSession.swapOut();
+					}
 				}
-				if (deactivatedSession != null)
-					deactivatedSession.swapOut();
-			}
+			});
 		}
 	}
 
@@ -537,6 +550,8 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void sessionEnded(long elapsedTime){
+			deregisterTestSessionListener(false);
+			
 			fTestViewer.registerAutoScrollTarget(null);
 
 			String[] keys= {elapsedTimeAsString(elapsedTime)};
@@ -564,6 +579,8 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void sessionStopped(final long elapsedTime) {
+			deregisterTestSessionListener(false);
+			
 			fTestViewer.registerAutoScrollTarget(null);
 
 			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_stopped);
@@ -571,6 +588,8 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void sessionTerminated() {
+			deregisterTestSessionListener(true);
+			
 			fTestViewer.registerAutoScrollTarget(null);
 
 			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
@@ -674,7 +693,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
 
 			boolean enabled= false;
-			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
+			List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
 				TestRunSession testRunSession= (TestRunSession) iter.next();
 				if (! testRunSession.isRunning() && ! testRunSession.isStarting()) {
@@ -692,7 +711,7 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		private List getRunningSessions() {
-			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
+			List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
 				TestRunSession testRunSession= (TestRunSession) iter.next();
 				if (! testRunSession.isRunning() && ! testRunSession.isStarting()) {
@@ -876,8 +895,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public void run() {
 			boolean checked= isChecked();
 			fShowOnErrorOnly= checked;
-			IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-			store.setValue(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
+			new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
 		}
 	}
 
@@ -1270,10 +1288,7 @@ action enablement
 		if (fTestRunSession == testRunSession)
 			return null;
 
-		if (fTestRunSession != null && fTestSessionListener != null) {
-			fTestRunSession.removeTestSessionListener(fTestSessionListener);
-			fTestSessionListener= null;
-		}
+		deregisterTestSessionListener(true);
 
 		TestRunSession deactivatedSession= fTestRunSession;
 
@@ -1299,9 +1314,11 @@ action enablement
 			fRerunLastTestAction.setEnabled(false);
 
 		} else {
-			fTestSessionListener= new TestSessionListener();
-			fTestRunSession.addTestSessionListener(fTestSessionListener);
-
+			if (fTestRunSession.isStarting() || fTestRunSession.isRunning() || fTestRunSession.isKeptAlive()) {
+				fTestSessionListener= new TestSessionListener();
+				fTestRunSession.addTestSessionListener(fTestSessionListener);
+			}
+			
 			setTitleToolTip();
 
 			clearStatus();
@@ -1324,6 +1341,13 @@ action enablement
 			}
 		}
 		return deactivatedSession;
+	}
+
+	private void deregisterTestSessionListener(boolean force) {
+		if (fTestRunSession != null && fTestSessionListener != null && (force || !fTestRunSession.isKeptAlive())) {
+			fTestRunSession.removeTestSessionListener(fTestSessionListener);
+			fTestSessionListener= null;
+		}
 	}
 
 	private void updateRerunFailedFirstAction() {
@@ -1362,7 +1386,7 @@ action enablement
 	public synchronized void dispose(){
 		fIsDisposed= true;
 		if (fTestRunSessionListener != null)
-			JUnitPlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
+			JUnitCorePlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
 
 		IHandlerService handlerService= (IHandlerService) getSite().getWorkbenchWindow().getService(IHandlerService.class);
 		handlerService.deactivateHandler(fRerunLastActivation);
@@ -1565,7 +1589,13 @@ action enablement
 		fMemento= null;
 
 		fTestRunSessionListener= new TestRunSessionListener();
-		JUnitPlugin.getModel().addTestRunSessionListener(fTestRunSessionListener);
+		JUnitCorePlugin.getModel().addTestRunSessionListener(fTestRunSessionListener);
+		
+		// always show youngest test run in view. simulate "sessionAdded" event to do that
+		List testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+		if (!testRunSessions.isEmpty()) {
+			fTestRunSessionListener.sessionAdded((TestRunSession)testRunSessions.get(0));
+		}
 	}
 
 	private void initPageSwitcher() {
@@ -1876,8 +1906,7 @@ action enablement
 	}
 
 	private static boolean getShowOnErrorOnly() {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY);
+		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
 	}
 
 	public FailureTrace getFailureTrace() {

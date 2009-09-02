@@ -10,16 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -46,7 +41,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 /**
  * Custom Search engine for suite() methods
@@ -56,23 +51,6 @@ public class TestSearchEngine {
 	public static boolean isTestOrTestSuite(IType declaringType) throws CoreException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(declaringType);
 		return testKind.getFinder().isTest(declaringType);
-	}
-
-
-	public static IType[] findTests(IRunnableContext context, final IJavaElement element, final ITestKind testKind) throws InvocationTargetException, InterruptedException {
-		final Set result= new HashSet();
-
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
-				try {
-					testKind.getFinder().findTestsInContainer(element, result, pm);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
-			}
-		};
-		context.run(true, true, runnable);
-		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 
 	public static boolean isAccessibleClass(IType type) throws JavaModelException {
@@ -116,7 +94,7 @@ public class TestSearchEngine {
 
 	public static boolean hasTestCaseType(IJavaProject javaProject) {
 		try {
-			return javaProject != null && javaProject.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) != null;
+			return javaProject != null && javaProject.findType(JUnitCorePlugin.TEST_SUPERCLASS_NAME) != null;
 		} catch (JavaModelException e) {
 			// not available
 		}
@@ -125,7 +103,7 @@ public class TestSearchEngine {
 
 	public static boolean hasTestAnnotation(IJavaProject project) {
 		try {
-			return project != null && project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) != null;
+			return project != null && project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) != null;
 		} catch (JavaModelException e) {
 			// not available
 		}
@@ -136,7 +114,7 @@ public class TestSearchEngine {
 		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
 		IType[] superInterfaces= typeHier.getAllInterfaces();
 		for (int i= 0; i < superInterfaces.length; i++) {
-			if (JUnitPlugin.TEST_INTERFACE_NAME.equals(superInterfaces[i].getFullyQualifiedName('.'))) {
+			if (JUnitCorePlugin.TEST_INTERFACE_NAME.equals(superInterfaces[i].getFullyQualifiedName('.'))) {
 				return true;
 			}
 		}
@@ -151,7 +129,7 @@ public class TestSearchEngine {
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
 			ITypeBinding curr= interfaces[i];
-			if (JUnitPlugin.TEST_INTERFACE_NAME.equals(curr.getQualifiedName()) || isTestImplementor(curr)) {
+			if (JUnitCorePlugin.TEST_INTERFACE_NAME.equals(curr.getQualifiedName()) || isTestImplementor(curr)) {
 				return true;
 			}
 		}
@@ -166,7 +144,7 @@ public class TestSearchEngine {
 		if (!Flags.isStatic(method.getFlags()) || !Flags.isPublic(method.getFlags())) {
 			return false;
 		}
-		if (!Signature.getSimpleName(Signature.toString(method.getReturnType())).equals(JUnitPlugin.SIMPLE_TEST_INTERFACE_NAME)) {
+		if (!Signature.getSimpleName(Signature.toString(method.getReturnType())).equals(JUnitCorePlugin.SIMPLE_TEST_INTERFACE_NAME)) {
 			return false;
 		}
 		return true;

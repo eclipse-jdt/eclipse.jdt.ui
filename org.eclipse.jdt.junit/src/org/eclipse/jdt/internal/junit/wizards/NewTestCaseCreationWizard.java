@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
@@ -100,11 +101,11 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		IRunnableWithProgress runnable= fPage1.getRunnable();
 		try {
 			if (fPage1.isJUnit4()) {
-				if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
+				if (project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) == null) {
 					runnable= addJUnitToClasspath(project, runnable, true);
 				}
 			} else {
-				if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
+				if (project.findType(JUnitCorePlugin.TEST_SUPERCLASS_NAME) == null) {
 					runnable= addJUnitToClasspath(project, runnable, false);
 				}
 			}
