@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,7 +21,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
@@ -63,7 +63,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	private IMember[] fMembers;
 
 	public AddJavaDocStubOperation(IMember[] members) {
-		super();
+		Assert.isLegal(members.length > 0);
 		fMembers= members;
 	}
 
@@ -94,20 +94,16 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	 * @return Returns the scheduling rule for this operation
 	 */
 	public ISchedulingRule getScheduleRule() {
-		return ResourcesPlugin.getWorkspace().getRoot();
+		return fMembers[0].getResource();
 	}
 
-	/**
-	 * Runs the operation.
-	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	/*
+	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		if (monitor == null) {
+		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		}
-		if (fMembers.length == 0) {
-			return;
-		}
+
 		try {
 			monitor.beginTask(CodeGenerationMessages.AddJavaDocStubOperation_description, fMembers.length + 2);
 
