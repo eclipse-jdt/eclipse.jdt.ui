@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
+
 
 /**
  * Default implementation of the creator. Creates all or nearly all constraints for program constructs.
@@ -523,27 +524,28 @@ public class FullConstraintCreator extends ConstraintCreator{
 		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
 
-	private Collection getConstraintsForOverriding(IMethodBinding overriddingMethod) {
+	private Collection getConstraintsForOverriding(IMethodBinding overridingMethod) {
 		Collection result= new ArrayList();
-		Set declaringSupertypes= getDeclaringSuperTypes(overriddingMethod);
+		Set declaringSupertypes= getDeclaringSuperTypes(overridingMethod);
 		for (Iterator iter= declaringSupertypes.iterator(); iter.hasNext();) {
 			ITypeBinding superType= (ITypeBinding) iter.next();
-			IMethodBinding overriddenMethod= findMethod(overriddingMethod, superType);
+			IMethodBinding overriddenMethod= findMethod(overridingMethod, superType);
 			Assert.isNotNull(overriddenMethod);//because we asked for declaring types
-			if (Bindings.equals(overriddingMethod, overriddenMethod)) continue;
+			if (Bindings.equals(overridingMethod, overriddenMethod))
+				continue;
 			ITypeConstraint[] returnTypeConstraint= fTypeConstraintFactory.createEqualsConstraint(
 					fConstraintVariableFactory.makeReturnTypeVariable(overriddenMethod),
-					fConstraintVariableFactory.makeReturnTypeVariable(overriddingMethod));
+					fConstraintVariableFactory.makeReturnTypeVariable(overridingMethod));
 			result.addAll(Arrays.asList(returnTypeConstraint));
-			Assert.isTrue(overriddenMethod.getParameterTypes().length == overriddingMethod.getParameterTypes().length);
+			Assert.isTrue(overriddenMethod.getParameterTypes().length == overridingMethod.getParameterTypes().length);
 			for (int i= 0, n= overriddenMethod.getParameterTypes().length; i < n; i++) {
 				ITypeConstraint[] parameterTypeConstraint= fTypeConstraintFactory.createEqualsConstraint(
 						fConstraintVariableFactory.makeParameterTypeVariable(overriddenMethod, i),
-						fConstraintVariableFactory.makeParameterTypeVariable(overriddingMethod, i));
+						fConstraintVariableFactory.makeParameterTypeVariable(overridingMethod, i));
 				result.addAll(Arrays.asList(parameterTypeConstraint));
 			}
 			ITypeConstraint[] declaringTypeConstraint= fTypeConstraintFactory.createStrictSubtypeConstraint(
-					fConstraintVariableFactory.makeDeclaringTypeVariable(overriddingMethod),
+					fConstraintVariableFactory.makeDeclaringTypeVariable(overridingMethod),
 					fConstraintVariableFactory.makeDeclaringTypeVariable(overriddenMethod));
 			result.addAll(Arrays.asList(declaringTypeConstraint));
 		}
