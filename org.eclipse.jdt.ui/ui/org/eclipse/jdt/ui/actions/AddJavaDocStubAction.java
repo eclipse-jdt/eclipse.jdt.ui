@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -123,7 +124,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			IEditorPart editor= JavaUI.openInEditor(cu);
 
 			if (ElementValidator.check(members, getShell(), getDialogTitle(), false))
-				run(cu, members);
+				run(members);
 			JavaModelUtil.reconcile(cu);
 			EditorUtility.revealInEditor(editor, members[0]);
 
@@ -163,7 +164,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			}
 			IMember[] members= new IMember[] { (IMember)element };
 			if (ElementValidator.checkValidateEdit(members, getShell(), getDialogTitle()))
-				run(members[0].getCompilationUnit(), members);
+				run(members);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed);
 		}
@@ -174,14 +175,22 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/**
 	 * Note this method is for internal use only.
 	 *
-	 * @param cu the compilation unit
 	 * @param members an array of members
-	 *
-	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	public void run(ICompilationUnit cu, IMember[] members) {
+	private void run(IMember[] members) {
+		AddJavaDocStubOperation op= new AddJavaDocStubOperation(members);
+		if (members.length < 11) {
+			try {
+				op.run(null);
+			} catch (CoreException e) {
+				ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed);
+			} catch (OperationCanceledException e) {
+				// operation canceled
+			}
+			return;
+		}
+
 		try {
-			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members);
 			PlatformUI.getWorkbench().getProgressService().runInUI(
 				PlatformUI.getWorkbench().getProgressService(),
 				new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
