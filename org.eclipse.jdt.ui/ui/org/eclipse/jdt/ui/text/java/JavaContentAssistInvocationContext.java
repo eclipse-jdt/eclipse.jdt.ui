@@ -147,13 +147,18 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * @return the core completion context if available, <code>null</code> otherwise
 	 */
 	public CompletionContext getCoreContext() {
-		if (fCoreContext == null) {
-			// use the context from the existing collector if it exists, retrieve one ourselves otherwise
-			if (fCollector != null)
-				fCoreContext= fCollector.getContext();
-			if (fCoreContext == null)
-				computeKeywordsAndContext();
+		if (fCollector != null) {
+			CompletionContext context= fCollector.getContext();
+			if (context != null) {
+				if (fCoreContext == null)
+					fCoreContext= context;
+				return context;
+			}
 		}
+
+		if (fCoreContext == null)
+			computeKeywordsAndContext(); // Retrieve the context ourselves
+
 		return fCoreContext;
 	}
 
