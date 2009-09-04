@@ -617,7 +617,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= node.getAST();
 		ITypeBinding stringBinding= ast.resolveWellKnownType("java.lang.String"); //$NON-NLS-1$
 
-		if (node instanceof StringLiteral || node instanceof SimpleName) {
+		if (node instanceof Expression && !(node instanceof InfixExpression)) {
 			node= node.getParent();
 		}
 		if (node instanceof VariableDeclarationFragment) {

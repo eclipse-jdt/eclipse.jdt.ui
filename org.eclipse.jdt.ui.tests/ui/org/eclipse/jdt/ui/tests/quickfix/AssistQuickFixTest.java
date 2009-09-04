@@ -5360,7 +5360,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("}\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 1 + \""), 0);
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("1 + \""), 0);
 			List proposals= collectAssists(context, false);
 
 			assertCorrectLabels(proposals);
