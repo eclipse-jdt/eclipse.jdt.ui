@@ -712,13 +712,17 @@ public final class JavaModelUtil {
 		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
 		if (compliance == null)
 			return true; // assume 5.0
-		return compliance.startsWith(JavaCore.VERSION_1_5) || compliance.startsWith(JavaCore.VERSION_1_6);
+		return compliance.startsWith(JavaCore.VERSION_1_5)
+				|| compliance.startsWith(JavaCore.VERSION_1_6)
+				|| compliance.startsWith(JavaCore.VERSION_1_7);
 	}
 
 	public static String getCompilerCompliance(IVMInstall2 vMInstall, String defaultCompliance) {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_1_7)) {
+			return JavaCore.VERSION_1_7;
 		} else if (version.startsWith(JavaCore.VERSION_1_6)) {
 			return JavaCore.VERSION_1_6;
 		} else if (version.startsWith(JavaCore.VERSION_1_5)) {
@@ -745,8 +749,8 @@ public final class JavaModelUtil {
 		
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_1_6) != -1) {
-			return JavaCore.VERSION_1_6;
+		if (desc.indexOf(JavaCore.VERSION_1_7) != -1) {
+			return JavaCore.VERSION_1_7;
 		} else if (desc.indexOf(JavaCore.VERSION_1_6) != -1) {
 			return JavaCore.VERSION_1_6;
 		} else if (desc.indexOf(JavaCore.VERSION_1_5) != -1) {

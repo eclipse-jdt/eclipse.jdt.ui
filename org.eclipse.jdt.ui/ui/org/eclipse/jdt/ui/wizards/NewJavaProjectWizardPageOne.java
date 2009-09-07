@@ -886,11 +886,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) selectedJVM, JavaCore.VERSION_1_4);
 			}
 			if (!selectedCompliance.equals(jvmCompliance) && (JavaModelUtil.is50OrHigher(selectedCompliance) || JavaModelUtil.is50OrHigher(jvmCompliance))) {
-				if (selectedCompliance.equals(JavaCore.VERSION_1_5))
-					selectedCompliance= "5.0"; //$NON-NLS-1$
-				else if (selectedCompliance.equals(JavaCore.VERSION_1_6))
-					selectedCompliance= "6.0"; //$NON-NLS-1$
-
 				fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_jre_message, new String[] {BasicElementLabels.getVersionName(selectedCompliance), BasicElementLabels.getVersionName(jvmCompliance)}));
 				fHintText.setVisible(true);
 				fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));

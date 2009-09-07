@@ -109,6 +109,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_4= JavaCore.VERSION_1_4;
 	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
 	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
+	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
 
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
@@ -242,12 +243,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 
-		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
+		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7 };
 		String[] values3456Labels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
 			PreferencesMessages.ComplianceConfigurationBlock_version15,
-			PreferencesMessages.ComplianceConfigurationBlock_version16
+			PreferencesMessages.ComplianceConfigurationBlock_version16,
+			PreferencesMessages.ComplianceConfigurationBlock_version17
 		};
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -311,7 +313,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 
-		String[] versions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
+		String[] versions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7 };
 		String[] versionsLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 			PreferencesMessages.ComplianceConfigurationBlock_version11,
@@ -319,7 +321,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
 			PreferencesMessages.ComplianceConfigurationBlock_version15,
-			PreferencesMessages.ComplianceConfigurationBlock_version16
+			PreferencesMessages.ComplianceConfigurationBlock_version16,
+			PreferencesMessages.ComplianceConfigurationBlock_version17
 		};
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label;
@@ -766,6 +769,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					enumAsId= ERROR;
 					source= VERSION_1_6;
 					target= VERSION_1_6;
+				} else if (VERSION_1_7.equals(complianceLevel)) {
+					assertAsId= ERROR;
+					enumAsId= ERROR;
+					source= VERSION_1_7;
+					target= VERSION_1_7;
 				} else {
 					assertAsId= IGNORE;
 					enumAsId= IGNORE;
@@ -821,7 +829,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
 				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
 				&& VERSION_1_6.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_6.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
+				&& VERSION_1_6.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
+			|| (VERSION_1_7.equals(complianceLevel)
+				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
+				&& VERSION_1_7.equals(getValue(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_7.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
 			return DEFAULT_CONF;
 		}
 		return USER_CONF;
