@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,9 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
 			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider, IType[] changedTypes) {
 				if (changedTypes == null) {
-					fMethodOverrideTester= null;
+					synchronized (this) {
+						fMethodOverrideTester= null;
+					}
 				}
 			}
 		};
@@ -90,25 +92,29 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List children) throws JavaModelException {
-		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
-		IMethod[] methods= typeToFindIn.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			IMethod curr= methods[i];
-			if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides) && !children.contains(curr)) {
-				children.add(curr);
+		synchronized (fTypeHierarchyLifeCycleListener) {
+			boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
+			IMethod[] methods= typeToFindIn.getMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethod curr= methods[i];
+				if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides) && !children.contains(curr)) {
+					children.add(curr);
+				}
 			}
 		}
 	}
 
 	private boolean hasCompatibleMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
-		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
-		IMethod[] methods= typeToFindIn.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if (isCompatibleMethod(filterMethod, methods[i], filterMethodOverrides)) {
-				return true;
+		synchronized (fTypeHierarchyLifeCycleListener) {
+			boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
+			IMethod[] methods= typeToFindIn.getMethods();
+			for (int i= 0; i < methods.length; i++) {
+				if (isCompatibleMethod(filterMethod, methods[i], filterMethodOverrides)) {
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
 	}
 
 	private boolean isCompatibleMethod(IMethod filterMethod, IMethod method, boolean filterOverrides) throws JavaModelException {
