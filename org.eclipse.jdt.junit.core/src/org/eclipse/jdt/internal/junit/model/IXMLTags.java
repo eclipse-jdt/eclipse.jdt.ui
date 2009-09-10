@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak (brockj@tpg.com.au)
  *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
+ *     Neale Upstone <neale@nealeupstone.com> - [JUnit] JUnit viewer doesn't recognise <skipped/> node - https://bugs.eclipse.org/bugs/show_bug.cgi?id=276068
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.model;
@@ -27,6 +28,7 @@ public interface IXMLTags {
 	public static final String NODE_ACTUAL= "actual";  //$NON-NLS-1$
 	public static final String NODE_SYSTEM_OUT= "system-out"; //$NON-NLS-1$
 	public static final String NODE_SYSTEM_ERR= "system-err"; //$NON-NLS-1$
+	public static final String NODE_SKIPPED = "skipped"; //$NON-NLS-1$
 
 	/**
 	 * value: String
