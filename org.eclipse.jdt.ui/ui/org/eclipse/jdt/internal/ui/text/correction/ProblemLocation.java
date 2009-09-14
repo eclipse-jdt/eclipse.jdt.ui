@@ -15,8 +15,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.NodeFinder;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -112,8 +111,7 @@ public class ProblemLocation implements IProblemLocation {
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveringNode(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
 	public ASTNode getCoveringNode(CompilationUnit astRoot) {
-		NodeFinder finder= new NodeFinder(fOffset, fLength);
-		astRoot.accept(finder);
+		NodeFinder finder= new NodeFinder(astRoot, fOffset, fLength);
 		return finder.getCoveringNode();
 	}
 
@@ -122,8 +120,7 @@ public class ProblemLocation implements IProblemLocation {
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveredNode(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
 	public ASTNode getCoveredNode(CompilationUnit astRoot) {
-		NodeFinder finder= new NodeFinder(fOffset, fLength);
-		astRoot.accept(finder);
+		NodeFinder finder= new NodeFinder(astRoot, fOffset, fLength);
 		return finder.getCoveredNode();
 	}
 

@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -73,7 +74,6 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -740,8 +740,7 @@ public class TypeContextChecker {
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(wc, true);
-				ASTNode type= NodeFinder.perform(compilationUnit, superClassContext.getBeforeString().length(),
-						superclass.length());
+				ASTNode type= NodeFinder.perform(compilationUnit, superClassContext.getBeforeString().length(), superclass.length());
 				if (type instanceof Type) {
 					return handleBug84585(((Type) type).resolveBinding());
 				} else if (type instanceof Name) {

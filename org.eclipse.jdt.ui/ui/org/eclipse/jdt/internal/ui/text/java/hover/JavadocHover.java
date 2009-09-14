@@ -64,10 +64,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -682,7 +682,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (unit == null)
 			return null;
 
-		ASTNode node= NodeFinder.perform(unit, hoverRegion.getOffset(),	hoverRegion.getLength());
+		ASTNode node= NodeFinder.perform(unit, hoverRegion.getOffset(), hoverRegion.getLength());
 		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			IBinding binding= ((SimpleName)node).resolveBinding();
 			if (binding != null && binding.getKind() == IBinding.VARIABLE) {

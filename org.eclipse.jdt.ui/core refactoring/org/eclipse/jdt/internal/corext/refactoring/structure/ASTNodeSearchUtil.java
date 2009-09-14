@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -49,7 +50,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -239,8 +239,7 @@ public class ASTNodeSearchUtil {
 	}
 
 	private static ASTNode findNode(ISourceRange range, CompilationUnit cuNode){
-		NodeFinder nodeFinder= new NodeFinder(range.getOffset(), range.getLength());
-		cuNode.accept(nodeFinder);
+		NodeFinder nodeFinder= new NodeFinder(cuNode, range.getOffset(), range.getLength());
 		ASTNode coveredNode= nodeFinder.getCoveredNode();
 		if (coveredNode != null)
 			return coveredNode;

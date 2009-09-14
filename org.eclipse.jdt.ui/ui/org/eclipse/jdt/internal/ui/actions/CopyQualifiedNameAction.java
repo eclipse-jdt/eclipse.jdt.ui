@@ -58,13 +58,12 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
@@ -275,8 +274,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (ast == null)
 			return null;
 
-		NodeFinder finder= new NodeFinder(offset, length);
-		ast.accept(finder);
+		NodeFinder finder= new NodeFinder(ast, offset, length);
 		ASTNode node= finder.getCoveringNode();
 
 		IBinding binding= null;

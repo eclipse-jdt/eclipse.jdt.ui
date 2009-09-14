@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -87,7 +88,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -883,7 +883,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					if (binding != null) {
 						node= target.findDeclaringNode(binding.getKey());
 						if (node instanceof MethodDeclaration || node instanceof VariableDeclarationFragment) {
-							node= NodeFinder.perform(target, node.getStartPosition() + node.getLength() - delta, 0);
+							node= NodeFinder.perform(target, (node.getStartPosition() + node.getLength() - delta), 0);
 							if (node instanceof SimpleName)
 								rewriteTypeOccurrence(estimate, rewrite, node, group);
 						}
@@ -902,7 +902,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					if (binding != null) {
 						node= target.findDeclaringNode(binding.getKey());
 						if (node instanceof SimpleName || node instanceof MethodDeclaration || node instanceof VariableDeclarationFragment) {
-							node= NodeFinder.perform(target, node.getStartPosition() + node.getLength() - delta, 0);
+							node= NodeFinder.perform(target, (node.getStartPosition() + node.getLength() - delta), 0);
 							if (node instanceof SimpleName)
 								rewriteTypeOccurrence(estimate, rewrite, node, group);
 						}
@@ -917,7 +917,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					binding= ((MethodDeclaration) node).resolveBinding();
 					node= target.findDeclaringNode(binding.getKey());
 					if (node instanceof MethodDeclaration) {
-						node= NodeFinder.perform(target, node.getStartPosition() + node.getLength() - delta, 0);
+						node= NodeFinder.perform(target, (node.getStartPosition() + node.getLength() - delta), 0);
 						if (node instanceof CastExpression)
 							rewriteTypeOccurrence(estimate, rewrite, ((CastExpression) node).getType(), group);
 					}

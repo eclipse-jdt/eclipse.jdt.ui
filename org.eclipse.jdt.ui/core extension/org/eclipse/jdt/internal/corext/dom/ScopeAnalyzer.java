@@ -129,9 +129,9 @@ public class ScopeAnalyzer {
 
 	}
 
-	private HashSet fTypesVisited;
+	private final HashSet fTypesVisited;
 
-	private CompilationUnit fRoot;
+	private final CompilationUnit fRoot;
 
 	public ScopeAnalyzer(CompilationUnit root) {
 		fTypesVisited= new HashSet();
@@ -490,8 +490,7 @@ public class ScopeAnalyzer {
 	}
 
 	public IBinding[] getDeclarationsInScope(int offset, int flags) {
-		NodeFinder finder= new NodeFinder(offset, 0);
-		fRoot.accept(finder);
+		org.eclipse.jdt.core.dom.NodeFinder finder= new org.eclipse.jdt.core.dom.NodeFinder(fRoot, offset, 0);
 		ASTNode node= finder.getCoveringNode();
 		if (node == null) {
 			return NO_BINDING;
@@ -599,8 +598,7 @@ public class ScopeAnalyzer {
 
 	public IBinding[] getDeclarationsAfter(int offset, int flags) {
 		try {
-			NodeFinder finder= new NodeFinder(offset, 0);
-			fRoot.accept(finder);
+			org.eclipse.jdt.core.dom.NodeFinder finder= new org.eclipse.jdt.core.dom.NodeFinder(fRoot, offset, 0);
 			ASTNode node= finder.getCoveringNode();
 			if (node == null) {
 				return null;
@@ -627,8 +625,8 @@ public class ScopeAnalyzer {
 
 	private class ScopeAnalyzerVisitor extends HierarchicalASTVisitor {
 
-		private int fPosition;
-		private int fFlags;
+		private final int fPosition;
+		private final int fFlags;
 		private final IBindingRequestor fRequestor;
 		private boolean fBreak;
 

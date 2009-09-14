@@ -18,8 +18,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.NodeFinder;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -32,6 +31,11 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 
 	private CompilationUnit fASTRoot;
 	private final SharedASTProvider.WAIT_FLAG fWaitFlag;
+	/**
+	 * The cached node finder, can be null.
+	 * @since 3.6
+	 */
+	private NodeFinder fNodeFinder;
 
 
 	/*
@@ -130,18 +134,20 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveringNode()
 	 */
 	public ASTNode getCoveringNode() {
-		NodeFinder finder= new NodeFinder(getOffset(), getLength());
-		getASTRoot().accept(finder);
-		return finder.getCoveringNode();
+		if (fNodeFinder == null) {
+			fNodeFinder= new NodeFinder(getASTRoot(), getOffset(), getLength());
+		}
+		return fNodeFinder.getCoveringNode();
 	}
 
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveredNode()
 	 */
 	public ASTNode getCoveredNode() {
-		NodeFinder finder= new NodeFinder(getOffset(), getLength());
-		getASTRoot().accept(finder);
-		return finder.getCoveredNode();
+		if (fNodeFinder == null) {
+			fNodeFinder= new NodeFinder(getASTRoot(), getOffset(), getLength());
+		}
+		return fNodeFinder.getCoveredNode();
 	}
 
 }

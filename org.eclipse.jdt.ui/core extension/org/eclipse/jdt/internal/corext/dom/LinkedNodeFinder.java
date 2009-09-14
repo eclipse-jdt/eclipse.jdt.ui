@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 
@@ -149,7 +150,7 @@ public class LinkedNodeFinder  {
 			if (probStart > bodyStart && probEnd < bodyEnd) {
 				int currKind= getProblemKind(curr);
 				if ((nameNodeKind & currKind) != 0) {
-					ASTNode node= NodeFinder.perform(parent, probStart, probEnd - probStart);
+					ASTNode node= NodeFinder.perform(parent, probStart, (probEnd - probStart));
 					if (node instanceof SimpleName && name.equals(((SimpleName) node).getIdentifier())) {
 						res.add(node);
 					}

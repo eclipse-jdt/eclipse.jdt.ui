@@ -16,9 +16,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.NodeFinder;
 
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 public final class CompilationUnitRange {
 
@@ -46,8 +46,7 @@ public final class CompilationUnitRange {
 
 	//rootNode must be the ast root for fCompilationUnit
 	public ASTNode getNode(CompilationUnit rootNode) {
-		NodeFinder finder= new NodeFinder(fSourceRange.getOffset(), fSourceRange.getLength());
-		rootNode.accept(finder);
+		NodeFinder finder= new NodeFinder(rootNode, fSourceRange.getOffset(), fSourceRange.getLength());
 		ASTNode result= finder.getCoveringNode();
 		if (result != null)
 			return result;
