@@ -196,9 +196,17 @@ public class TestRunHandler extends DefaultHandler {
 
 		} else if (qName.equals(IXMLTags.NODE_EXPECTED)) {
 			fInExpected= false;
+			if (fFailureBuffer != null) {
+				// skip whitespace from before <expected> and <actual> nodes
+				fFailureBuffer.setLength(0);
+			}
 
 		} else if (qName.equals(IXMLTags.NODE_ACTUAL)) {
 			fInActual= false;
+			if (fFailureBuffer != null) {
+				// skip whitespace from before <expected> and <actual> nodes
+				fFailureBuffer.setLength(0);
+			}
 
 		} else if (qName.equals(IXMLTags.NODE_SYSTEM_OUT) || qName.equals(IXMLTags.NODE_SYSTEM_ERR)) {
 			// OK
