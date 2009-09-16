@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.junit.source
+Bundle-Version: 4.5.0.qualifier
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Eclipse-SourceBundle: org.junit;version="4.5.0.qualifier";roots:="junitsrc"
+
