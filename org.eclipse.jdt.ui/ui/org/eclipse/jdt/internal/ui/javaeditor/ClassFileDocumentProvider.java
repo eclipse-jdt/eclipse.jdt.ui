@@ -355,8 +355,11 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			if (project != null) {
 				type= project.findType(type.getFullyQualifiedName());
 				if (type != null) {
-					fireInputChanged((IClassFileEditorInput)EditorUtility.getEditorInput(type.getParent()));
-					return;
+					IEditorInput editorInput= EditorUtility.getEditorInput(type.getParent());
+					if (editorInput instanceof IClassFileEditorInput) {
+						fireInputChanged((IClassFileEditorInput)editorInput);
+						return;
+					}
 				}
 			}
 		} catch (JavaModelException x) {
