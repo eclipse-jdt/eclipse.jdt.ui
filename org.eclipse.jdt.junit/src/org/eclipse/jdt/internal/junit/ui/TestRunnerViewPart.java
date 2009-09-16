@@ -1905,7 +1905,7 @@ action enablement
 			layout.numColumns= 1;
 	}
 
-	private static boolean getShowOnErrorOnly() {
+	static boolean getShowOnErrorOnly() {
 		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
 	}
 

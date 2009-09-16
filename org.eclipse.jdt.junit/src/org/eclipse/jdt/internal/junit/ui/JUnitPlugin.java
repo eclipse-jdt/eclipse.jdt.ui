@@ -315,7 +315,9 @@ public class JUnitPlugin extends AbstractUIPlugin {
 				return null;
 			//	show the result view if it isn't shown yet.
 			testRunner= (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME, null, IWorkbenchPage.VIEW_VISIBLE);
-			page.bringToTop(testRunner);
+			if (!TestRunnerViewPart.getShowOnErrorOnly()) {
+				page.bringToTop(testRunner);
+			}
 			return testRunner;
 		} catch (PartInitException pie) {
 			JUnitPlugin.log(pie);
