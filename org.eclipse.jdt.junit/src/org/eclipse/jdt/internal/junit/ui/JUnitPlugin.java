@@ -42,7 +42,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -305,7 +304,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	public static TestRunnerViewPart showTestRunnerViewPartInActivePage() {
 		TestRunnerViewPart testRunner= findTestRunnerViewPartInActivePage();
-		IWorkbenchPart activePart= null;
 		IWorkbenchPage page= null;
 		try {
 			// TODO: have to force the creation of view part contents
@@ -315,16 +313,13 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			page= JUnitPlugin.getActivePage();
 			if (page == null)
 				return null;
-			activePart= page.getActivePart();
 			//	show the result view if it isn't shown yet.
-			return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
+			testRunner= (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME, null, IWorkbenchPage.VIEW_VISIBLE);
+			page.bringToTop(testRunner);
+			return testRunner;
 		} catch (PartInitException pie) {
 			JUnitPlugin.log(pie);
 			return null;
-		} finally {
-			//restore focus stolen by the creation of the result view
-			if (page != null && activePart != null)
-				page.activate(activePart);
 		}
 	}
 	
