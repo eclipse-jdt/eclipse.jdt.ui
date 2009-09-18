@@ -20,9 +20,13 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.ui.texteditor.IEditorStatusLine;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
@@ -39,6 +43,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameLinkedMode;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameJavaElementAction extends SelectionDispatchAction {
@@ -105,11 +111,13 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 		if (selection instanceof JavaTextSelection) {
 			try {
-				IJavaElement[] elements= ((JavaTextSelection)selection).resolveElementAtOffset();
+				JavaTextSelection javaTextSelection= (JavaTextSelection)selection;
+				IJavaElement[] elements= javaTextSelection.resolveElementAtOffset();
 				if (elements.length == 1) {
 					setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0]));
 				} else {
-					setEnabled(false);
+					ASTNode node= javaTextSelection.resolveCoveringNode();
+					setEnabled(node instanceof SimpleName);
 				}
 			} catch (CoreException e) {
 				setEnabled(false);
@@ -136,10 +144,21 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 
 		try {
 			IJavaElement element= getJavaElementFromEditor();
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			boolean lightweight= store.getBoolean(PreferenceConstants.REFACTOR_LIGHTWEIGHT);
 			if (element != null && RefactoringAvailabilityTester.isRenameElementAvailable(element)) {
-				IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-				run(element, store.getBoolean(PreferenceConstants.REFACTOR_LIGHTWEIGHT));
+				run(element, lightweight);
 				return;
+			} else if (lightweight) {
+				// fall back to local rename:
+				CorrectionCommandHandler handler= new CorrectionCommandHandler(fEditor, LinkedNamesAssistProposal.ASSIST_ID, true);
+				if (handler.doExecute()) {
+					IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
+					if (statusLine != null) {
+						statusLine.setMessage(true, RefactoringMessages.RenameJavaElementAction_started_rename_in_file, null);
+					}
+					return;
+				}
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);
@@ -154,7 +173,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		try {
 			IJavaElement element= getJavaElementFromEditor();
 			if (element == null)
-				return false;
+				return true;
 
 			return RefactoringAvailabilityTester.isRenameElementAvailable(element);
 		} catch (JavaModelException e) {

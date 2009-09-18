@@ -65,19 +65,31 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		doExecute();
+		return null;
+	}
+
+	/**
+	 * Try to execute the correction command.
+	 * 
+	 * @return <code>true</code> iff the correction could be started
+	 * @since 3.6
+	 */
+	public boolean doExecute() {
 		ISelection selection= fEditor.getSelectionProvider().getSelection();
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 		if (selection instanceof ITextSelection && cu != null && model != null) {
 			if (! ActionUtil.isEditable(fEditor)) {
-				return null;
+				return false;
 			}
 			ICompletionProposal proposal= findCorrection(fId, fIsAssist, (ITextSelection) selection, cu, model);
 			if (proposal != null) {
 				invokeProposal(proposal, ((ITextSelection) selection).getOffset());
+				return true;
 			}
 		}
-		return null;
+		return false;
 	}
 
 	private ICompletionProposal findCorrection(String id, boolean isAssist, ITextSelection selection, ICompilationUnit cu, IAnnotationModel model) {
