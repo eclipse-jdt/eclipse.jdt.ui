@@ -249,6 +249,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	private final RenameLinkedMode fRenameLinkedMode;
 
 	private int fSnapPosition;
+	private boolean fSnapPositionChanged;
 	private Shell fPopup;
 	private GridLayout fPopupLayout;
 	private Region fRegion;
@@ -275,6 +276,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			// default:
 			fSnapPosition= SNAP_POSITION_UNDER_LEFT_FIELD;
 		}
+		fSnapPositionChanged= true;
 	}
 
 	private IDialogSettings getDialogSettings() {
@@ -371,7 +373,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 
 		packPopup();
 		Point loc= computePopupLocation(fSnapPosition);
-		if (loc != null) {
+		if (loc != null && ! loc.equals(fPopup.getLocation())) {
 			fPopup.setLocation(loc);
 			// XXX workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=170774
 //			fPopup.moveBelow(fEditor.getSite().getShell().getShells()[0]);
@@ -552,6 +554,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 							if (dist < minDist) {
 								minDist= dist;
 								fSnapPosition= snapPos;
+								fSnapPositionChanged= true;
 								currentRects[1]= DROP_TARGETS[snapPos];
 							}
 						}
@@ -566,6 +569,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 					getDialogSettings().put(SNAP_POSITION_KEY, fSnapPosition);
 				} else {
 					fSnapPosition= originalSnapPosition;
+					fSnapPositionChanged= true;
 				}
 				updatePopupLocation(true);
 				activateEditor();
@@ -574,6 +578,11 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	}
 
 	private void packPopup() {
+		if (!fSnapPositionChanged) {
+			return;
+		}
+		fSnapPositionChanged= false;
+		
 		boolean isUnderLeft= fSnapPosition == SNAP_POSITION_UNDER_LEFT_FIELD;
 		boolean isOverLeft= fSnapPosition == SNAP_POSITION_OVER_LEFT_FIELD;
 		fPopupLayout.marginTop= isUnderLeft ? HAH : 0;
@@ -774,6 +783,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		IAction action= new Action(text, IAction.AS_RADIO_BUTTON) {
 			public void run() {
 				fSnapPosition= snapPosition;
+				fSnapPositionChanged= true;
 				getDialogSettings().put(SNAP_POSITION_KEY, fSnapPosition);
 				updatePopupLocation(true);
 				activateEditor();
