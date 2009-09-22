@@ -645,7 +645,6 @@ public class ASTView extends ViewPart implements IShowInSource {
 	protected void refreshASTSettingsActions() {
 		boolean enabled;
 		switch (getCurrentInputKind()) {
-			case ASTInputKindAction.USE_RECONCILE:
 			case ASTInputKindAction.USE_CACHE:
 				enabled= false;
 				break;
@@ -653,8 +652,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 				enabled= true;
 				break;
 		}
+		fCreateBindingsAction.setEnabled(enabled && getCurrentInputKind() != ASTInputKindAction.USE_RECONCILE);
 		fBindingsRecoveryAction.setEnabled(enabled);
-		fCreateBindingsAction.setEnabled(enabled);
 		fStatementsRecoveryAction.setEnabled(enabled);
 		fASTVersionToggleActions[0].setEnabled(enabled);
 		fASTVersionToggleActions[1].setEnabled(enabled);
