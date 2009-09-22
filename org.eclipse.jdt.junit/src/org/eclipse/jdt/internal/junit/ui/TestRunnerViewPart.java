@@ -1487,7 +1487,7 @@ action enablement
 				testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
 				if(testRunner == null) {
 					IWorkbenchPart activePart= page.getActivePart();
-					testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+					testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME, null, IWorkbenchPage.VIEW_VISIBLE);
 					//restore focus
 					page.activate(activePart);
 				} else {

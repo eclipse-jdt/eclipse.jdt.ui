@@ -21,9 +21,10 @@ import org.eclipse.jdt.junit.model.ITestRunSession;
  */
 public class UITestRunListener extends TestRunListener {
 	/*
-	 * @see org.eclipse.jdt.junit.TestRunListener#sessionStarted(org.eclipse.jdt.junit.model.ITestRunSession)
+	 * @see org.eclipse.jdt.junit.TestRunListener#sessionLaunched(org.eclipse.jdt.junit.model.ITestRunSession)
+	 * @since 3.6
 	 */
-	public void sessionStarted(ITestRunSession session) {
+	public void sessionLaunched(ITestRunSession session) {
 		JUnitPlugin.asyncShowTestRunnerViewPart();
 	}
 }

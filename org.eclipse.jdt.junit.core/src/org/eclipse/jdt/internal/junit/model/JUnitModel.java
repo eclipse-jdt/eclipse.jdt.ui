@@ -37,6 +37,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import org.eclipse.jdt.junit.TestRunListener;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -125,6 +127,11 @@ public final class JUnitModel {
 		private void connectTestRunner(ILaunch launch, IJavaProject javaProject, int port) {
 			TestRunSession testRunSession= new TestRunSession(launch, javaProject, port);
 			addTestRunSession(testRunSession);
+			
+			Object[] listeners= JUnitCorePlugin.getDefault().getNewTestRunListeners().getListeners();
+			for (int i= 0; i < listeners.length; i++) {
+				((TestRunListener) listeners[i]).sessionLaunched(testRunSession);
+			}
 		}
 	}
 
