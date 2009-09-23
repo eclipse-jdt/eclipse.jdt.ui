@@ -6415,7 +6415,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public void test() {\n");
 		buf.append("        List l;\n");
 		buf.append("    }\n");
@@ -6463,7 +6463,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    private class E1<P1, P2> {}\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public void test() {\n");
 		buf.append("        E1 e1;\n");
 		buf.append("    }\n");
@@ -6668,7 +6668,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    private List l= new ArrayList<String>();\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
@@ -6714,7 +6714,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    private List l;\n");
 		buf.append("    private void foo() {\n");
 		buf.append("        l.add(\"String\");\n");
@@ -6821,7 +6821,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public Class[] get() {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");
@@ -6860,7 +6860,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.List;\n");
 		buf.append("\n");
 		buf.append("public class E1 {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public void foo(List<List> list) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
