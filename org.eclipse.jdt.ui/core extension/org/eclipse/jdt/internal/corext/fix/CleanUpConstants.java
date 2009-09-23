@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -197,15 +197,13 @@ public class CleanUpConstants {
 	/**
 	 * Adds a 'this' qualifier to field accesses.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                     int fField;
 	 *                     void foo() {fField= 10;} -&gt; void foo() {this.fField= 10;}
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -221,15 +219,13 @@ public class CleanUpConstants {
 	/**
 	 * Removes 'this' qualifier to field accesses.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                     int fField;
 	 *                     void foo() {this.fField= 10;} -&gt; void foo() {fField= 10;}
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -260,15 +256,13 @@ public class CleanUpConstants {
 	/**
 	 * Adds a 'this' qualifier to method accesses.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                     int method(){};
 	 *                     void foo() {method()} -&gt; void foo() {this.method();}
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -282,17 +276,15 @@ public class CleanUpConstants {
 	public static final String MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS= "cleanup.always_use_this_for_non_static_method_access"; //$NON-NLS-1$
 
 	/**
-	 * Removes 'this' qualifier to field accesses.
+	 * Removes 'this' qualifier from field accesses.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                     int fField;
 	 *                     void foo() {this.fField= 10;} -&gt; void foo() {fField= 10;}
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -325,15 +317,13 @@ public class CleanUpConstants {
 	/**
 	 * Qualify static field accesses with declaring type.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   class E {
 	 *                     public static int i;
 	 *                     void foo() {i= 10;} -&gt; void foo() {E.i= 10;}
 	 *                   }
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
 	 * <br>
@@ -352,18 +342,15 @@ public class CleanUpConstants {
 	/**
 	 * Qualifies static method accesses with declaring type.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   class E {
 	 *                     public static int m();
 	 *                     void foo() {m();} -&gt; void foo() {E.m();}
 	 *                   }
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -379,18 +366,15 @@ public class CleanUpConstants {
 	/**
 	 * Changes indirect accesses to static members to direct ones.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   class E {public static int i;}
 	 *                   class ESub extends E {
 	 *                     void foo() {ESub.i= 10;} -&gt; void foo() {E.i= 10;}
 	 *                   }
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -406,18 +390,15 @@ public class CleanUpConstants {
 	/**
 	 * Changes non static accesses to static members to static accesses.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   class E {
 	 *                     public static int i;
 	 *                     void foo() {(new E()).i= 10;} -&gt; void foo() {E.i= 10;}
 	 *                   }
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -448,15 +429,12 @@ public class CleanUpConstants {
 	/**
 	 * Adds block to control statement body if the body is not a block.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   	 if (b) foo(); -&gt; if (b) {foo();}
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #CONTROL_STATEMENTS_USE_BLOCKS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -473,15 +451,12 @@ public class CleanUpConstants {
 	 * Remove unnecessary blocks in control statement bodies if they contain a single return or
 	 * throw statement.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                     if (b) {return;} -&gt; if (b) return;
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #CONTROL_STATEMENTS_USE_BLOCKS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -497,15 +472,12 @@ public class CleanUpConstants {
 	/**
 	 * Remove unnecessary blocks in control statement bodies.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                     if (b) {foo();} -&gt; if (b) foo();
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #CONTROL_STATEMENTS_USE_BLOCKS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -521,16 +493,12 @@ public class CleanUpConstants {
 	/**
 	 * Convert for loops to enhanced for loops.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   for (int i = 0; i &lt; array.length; i++) {} -&gt; for (int element : array) {}
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
-	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
 	 * 
 	 * <br>
@@ -542,7 +510,7 @@ public class CleanUpConstants {
 	public static final String CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED= "cleanup.convert_to_enhanced_for_loop"; //$NON-NLS-1$
 
 	/**
-	 * Controls the usage of parenthesis in expressions. For detailed settings use<br>
+	 * Controls the usage of parentheses in expressions. For detailed settings use<br>
 	 * {@link #EXPRESSIONS_USE_PARENTHESES_ALWAYS}<br> {@link #EXPRESSIONS_USE_PARENTHESES_NEVER}<br>
 	 * <br>
 	 * <br>
@@ -557,18 +525,16 @@ public class CleanUpConstants {
 	public static final String EXPRESSIONS_USE_PARENTHESES= "cleanup.use_parentheses_in_expressions"; //$NON-NLS-1$
 
 	/**
-	 * Add paranoic parenthesis around conditional expressions.
+	 * Add paranoiac parentheses around conditional expressions.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   boolean b= i &gt; 10 &amp;&amp; i &lt; 100 || i &gt; 20;
 	 *                   -&gt;
 	 *                   boolean b= ((i &gt; 10) &amp;&amp; (i &lt; 100)) || (i &gt; 20);
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #EXPRESSIONS_USE_PARENTHESES} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -584,16 +550,14 @@ public class CleanUpConstants {
 	/**
 	 * Remove unnecessary parenthesis around conditional expressions.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   boolean b= ((i &gt; 10) &amp;&amp; (i &lt; 100)) || (i &gt; 20);
 	 *                   -&gt;
 	 *                   boolean b= i &gt; 10 &amp;&amp; i &lt; 100 || i &gt; 20;
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #EXPRESSIONS_USE_PARENTHESES} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -626,12 +590,9 @@ public class CleanUpConstants {
 	 * Add a final modifier to private fields where possible i.e.:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   private int field= 0; -&gt; private final int field= 0;
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #VARIABLE_DECLARATIONS_USE_FINAL} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -648,12 +609,9 @@ public class CleanUpConstants {
 	 * Add a final modifier to method parameters where possible i.e.:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   void foo(int i) {} -&gt; void foo(final int i) {}
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #VARIABLE_DECLARATIONS_USE_FINAL} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -670,12 +628,9 @@ public class CleanUpConstants {
 	 * Add a final modifier to local variables where possible i.e.:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   int i= 0; -&gt; final int i= 0;
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Only has an effect if {@link #VARIABLE_DECLARATIONS_USE_FINAL} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -691,15 +646,12 @@ public class CleanUpConstants {
 	/**
 	 * Adds type parameters to raw type references.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   List l; -&gt; List&lt;Object&gt; l;
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
-	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
 	 * Default value: Not set<br>
 	 * <br>
@@ -823,12 +775,10 @@ public class CleanUpConstants {
 	/**
 	 * Remove unnecessary '$NON-NLS$' tags.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 * String s; //$NON-NLS-1$ -&gt; String s;
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
 	 * <br>
@@ -860,17 +810,15 @@ public class CleanUpConstants {
 	/**
 	 * Add '@Override' annotation in front of overriding methods.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   class E1 {void foo();}
 	 *                   class E2 extends E1 {
 	 *                   	 void foo(); -&gt;  @Override void foo();
 	 *                   }
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #ADD_MISSING_ANNOTATIONS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -886,10 +834,9 @@ public class CleanUpConstants {
 	/**
 	 * Add '@Deprecated' annotation in front of deprecated members.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                         /**@deprecated* /
 	 *                        int i;
 	 *                    -&gt;
@@ -898,7 +845,6 @@ public class CleanUpConstants {
 	 *                        int i;
 	 * </pre>
 	 * 
-	 * </code> <br>
 	 * Only has an effect if {@link #ADD_MISSING_ANNOTATIONS} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -965,12 +911,10 @@ public class CleanUpConstants {
 	/**
 	 * Add '$NON-NLS$' tags to non externalized strings.
 	 * <p>
-	 * i.e.:
+	 * Example:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 *                   	 String s= &quot;&quot;; -&gt; String s= &quot;&quot;; //$NON-NLS-1$
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
 	 * <br>
@@ -1056,9 +1000,7 @@ public class CleanUpConstants {
 	 * Following code snippet can load the profiles:
 	 * 
 	 * <pre>
-	 * &lt;code&gt;
 	 * List profiles= new ProfileStore(CLEANUP_PROFILES, new CleanUpVersioner()).readProfiles(new InstanceScope());
-	 * &lt;/code&gt;
 	 * </pre>
 	 * 
 	 * @since 3.3
