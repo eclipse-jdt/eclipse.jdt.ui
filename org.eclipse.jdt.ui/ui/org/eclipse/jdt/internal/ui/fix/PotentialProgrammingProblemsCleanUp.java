@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -115,7 +115,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 
-		buf.append("class E implements java.io.Serializable{\n"); //$NON-NLS-1$
+		buf.append("class E implements java.io.Serializable {\n"); //$NON-NLS-1$
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))) {
 			buf.append("    private static final long serialVersionUID = -391484377137870342L;\n"); //$NON-NLS-1$
 		} else if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT))) {

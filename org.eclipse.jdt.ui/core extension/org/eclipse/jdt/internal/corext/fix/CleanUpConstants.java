@@ -832,6 +832,31 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_ANNOTATIONS_OVERRIDE= "cleanup.add_missing_override_annotations"; //$NON-NLS-1$
 
 	/**
+	 * Add '@Override' annotation in front of methods that override or implement a superinterface method.
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>
+	 *                   interface I {void foo();}
+	 *                   class E implements I {
+	 *                   	 void foo(); -&gt;  @Override void foo();
+	 *                   }
+	 * </pre>
+	 * 
+	 * Only has an effect if {@link #ADD_MISSING_ANNOTATIONS} and {@link #ADD_MISSING_ANNOTATIONS_OVERRIDE} are TRUE and
+	 * the compiler compliance is 1.6 or higher.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * 
+	 * <br>
+	 * 
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 3.6
+	 */
+	public static final String ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION= "cleanup.add_missing_override_annotations_interface_methods"; //$NON-NLS-1$
+	
+	/**
 	 * Add '@Deprecated' annotation in front of deprecated members.
 	 * <p>
 	 * Example:
@@ -1127,6 +1152,7 @@ public class CleanUpConstants {
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 		options.setOption(ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
+		options.setOption(ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpOptions.TRUE);
 		options.setOption(ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpOptions.TRUE);
 
 		options.setOption(ADD_MISSING_SERIAL_VERSION_ID, CleanUpOptions.FALSE);
@@ -1206,6 +1232,7 @@ public class CleanUpConstants {
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 		options.setOption(ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
+		options.setOption(ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpOptions.TRUE);
 		options.setOption(ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpOptions.TRUE);
 
 		options.setOption(ADD_MISSING_SERIAL_VERSION_ID, CleanUpOptions.FALSE);

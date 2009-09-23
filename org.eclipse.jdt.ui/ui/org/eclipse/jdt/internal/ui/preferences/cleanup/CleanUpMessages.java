@@ -83,6 +83,8 @@ public class CleanUpMessages extends NLS {
 	public static String MissingCodeTabPage_CheckboxName_AddMissingAnnotations;
 	public static String MissingCodeTabPage_CheckboxName_AddMissingDeprecatedAnnotations;
 	public static String MissingCodeTabPage_CheckboxName_AddMissingOverrideAnnotations;
+
+	public static String MissingCodeTabPage_CheckboxName_AddMissingOverrideInterfaceAnnotations;
 	public static String MissingCodeTabPage_CheckboxName_AddMethods;
 	public static String MissingCodeTabPage_CheckboxName_AddSUID;
 	public static String MissingCodeTabPage_GroupName_Annotations;

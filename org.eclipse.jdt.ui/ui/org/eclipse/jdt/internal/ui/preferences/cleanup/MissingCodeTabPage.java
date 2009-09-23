@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -38,12 +40,32 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 
     	Group annotationsGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_Annotations);
 
-    	final CheckboxPreference annotationsPref= createCheckboxPref(annotationsGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpModifyDialog.FALSE_TRUE);
-    	intent(annotationsGroup);
+		final CheckboxPreference annotationsPref= createCheckboxPref(annotationsGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpModifyDialog.FALSE_TRUE);
+		
+		intent(annotationsGroup);
 		final CheckboxPreference overridePref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingOverrideAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpModifyDialog.FALSE_TRUE);
 		intent(annotationsGroup);
+		intent(annotationsGroup);
+		final CheckboxPreference overrideInterfacePref= createCheckboxPref(annotationsGroup, numColumns - 2, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingOverrideInterfaceAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpModifyDialog.FALSE_TRUE);
+		
+		intent(annotationsGroup);
 		final CheckboxPreference deprecatedPref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingDeprecatedAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpModifyDialog.FALSE_TRUE);
+		
+		/* This observable preferences framework is over-designed but under-performing.
+		 * I didn't find an easy way to make it work for non-trivial (3-level) dependencies, so I just do it by hand for now...
+		 */
+		// Need to add observer before registering slaves below, since java.util.Observable notifies in wrong order!
+		annotationsPref.addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				boolean enabled= overridePref.getEnabled() && overridePref.getChecked();
+				overrideInterfacePref.setEnabled(enabled);
+			}
+		});
+		
 		registerSlavePreference(annotationsPref, new CheckboxPreference[] {overridePref, deprecatedPref});
+		registerSlavePreference(overridePref, new CheckboxPreference[] {overrideInterfacePref});
+		
+		overrideInterfacePref.setEnabled(overridePref.getEnabled() && overridePref.getChecked());
 
 		if (!isSaveAction()) {
 			Group pppGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_PotentialProgrammingProblems);

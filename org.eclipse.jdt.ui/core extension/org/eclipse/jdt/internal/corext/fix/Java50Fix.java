@@ -157,6 +157,10 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return createFix(compilationUnit, problem, OVERRIDE, FixMessages.Java50Fix_AddOverride_description);
 	}
 
+	public static boolean isMissingOverrideAnnotationInterfaceProblem(int id) {
+		return id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
+	}
+	
 	public static boolean isMissingOverrideAnnotationProblem(int id) {
 		return id == IProblem.MissingOverrideAnnotation || id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
 	}
@@ -205,6 +209,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean addOverrideAnnotation,
+			boolean addOverrideInterfaceAnnotation,
 			boolean addDeprecatedAnnotation,
 			boolean rawTypeReference) {
 
@@ -224,7 +229,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		if (addOverrideAnnotation)
-			createAddOverrideAnnotationOperations(compilationUnit, locations, operations);
+			createAddOverrideAnnotationOperations(compilationUnit, addOverrideInterfaceAnnotation, locations, operations);
 
 		if (addDeprecatedAnnotation)
 			createAddDeprecatedAnnotationOperations(compilationUnit, locations, operations);
@@ -248,6 +253,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean addOverrideAnnotation,
+			boolean addOverrideInterfaceAnnotation,
 			boolean addDeprecatedAnnotation,
 			boolean rawTypeReferences) {
 
@@ -261,7 +267,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		List/*<CompilationUnitRewriteOperation>*/ operations= new ArrayList();
 
 		if (addOverrideAnnotation)
-			createAddOverrideAnnotationOperations(compilationUnit, problems, operations);
+			createAddOverrideAnnotationOperations(compilationUnit, addOverrideInterfaceAnnotation, problems, operations);
 
 		if (addDeprecatedAnnotation)
 			createAddDeprecatedAnnotationOperations(compilationUnit, problems, operations);
@@ -296,19 +302,22 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
+	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List result) {
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
+			int problemId= problem.getProblemId();
 			
-			if (isMissingOverrideAnnotationProblem(problem.getProblemId())) {
-				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
-				if (selectedNode != null) {
-
-					ASTNode declaringNode= getDeclaringNode(selectedNode);
-					if (declaringNode instanceof BodyDeclaration) {
-						BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-						AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, OVERRIDE);
-						result.add(operation);
+			if (isMissingOverrideAnnotationProblem(problemId)) {
+				if (!isMissingOverrideAnnotationInterfaceProblem(problemId) || addOverrideInterfaceAnnotation) {
+					ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+					if (selectedNode != null) {
+	
+						ASTNode declaringNode= getDeclaringNode(selectedNode);
+						if (declaringNode instanceof BodyDeclaration) {
+							BodyDeclaration declaration= (BodyDeclaration) declaringNode;
+							AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, OVERRIDE);
+							result.add(operation);
+						}
 					}
 				}
 			}
