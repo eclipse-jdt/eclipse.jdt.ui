@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -165,11 +165,17 @@ public class MixedLineDelimiterDetector  {
 		assertNoMixedLineDelimiters(resource);
 	}
 	public static void assertNoMixedLineDelimiters(IResource resource) {
-		IResource[] mixedResources= search(resource);
+		IResource[] mixedResources= findFilesWithMixedLineDelimiters(resource);
 		Assert.assertTrue(mixedResources == null || mixedResources.length == 0);
 	}
 
-	private static IResource[] search(final IResource resource) {
+	/**
+	 * Finds files with mixed line delimiters.
+	 * 
+	 * @param resource the resource to search
+	 * @return the resources with mixed line delimiters
+	 */
+	private static IResource[] findFilesWithMixedLineDelimiters(final IResource resource) {
 //		final List result= new ArrayList(5);
 //		ResultCollector collector= new ResultCollector(result);
 //		TextSearchEngine engine= new TextSearchEngine();

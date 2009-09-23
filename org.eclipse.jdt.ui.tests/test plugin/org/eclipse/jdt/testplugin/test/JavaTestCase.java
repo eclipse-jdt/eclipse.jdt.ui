@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,8 @@ public class JavaTestCase extends TestCase {
 
 	/**
 	 * Creates a new test Java project.
+	 * 
+	 * @throws Exception in case of any problem
 	 */
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("HelloWorldProject", "bin");
@@ -57,6 +59,8 @@ public class JavaTestCase extends TestCase {
 
 	/**
 	 * Removes the test java project.
+	 * 
+	 * @throws Exception in case of any problem
 	 */
 	protected void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);

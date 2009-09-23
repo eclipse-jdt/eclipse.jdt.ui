@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,12 +113,11 @@ public abstract class DisplayHelper {
 	}
 
 	/**
-	 * The condition which has to be met in order for
-	 * {@link #waitForCondition(Display, int)} to return before the timeout
-	 * elapses.
-	 *
-	 * @return <code>true</code> if the condition is met, <code>false</code>
-	 *         if the event loop should be driven some more
+	 * The condition which has to be met in order for {@link #waitForCondition(Display, long)} to
+	 * return before the timeout elapses.
+	 * 
+	 * @return <code>true</code> if the condition is met, <code>false</code> if the event loop
+	 *         should be driven some more
 	 */
 	protected abstract boolean condition();
 
