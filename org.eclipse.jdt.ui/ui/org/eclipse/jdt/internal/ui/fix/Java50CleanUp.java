@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,13 +142,15 @@ public class Java50CleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		if (problem.getProblemId() == IProblem.MissingOverrideAnnotation)
+		int id= problem.getProblemId();
+		
+		if (Java50Fix.isMissingOverrideAnnotationProblem(id))
 			return isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 
-		if (Java50Fix.isMissingDeprecationProblem(problem))
+		if (Java50Fix.isMissingDeprecationProblem(id))
 			return isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 
-		if (Java50Fix.isRawTypeReference(problem))
+		if (Java50Fix.isRawTypeReferenceProblem(id))
 			return isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
 
 		return false;
@@ -159,23 +161,20 @@ public class Java50CleanUp extends AbstractMultiFix {
 	 */
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
+		
+		boolean addMissingOverride= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+		boolean addMissingDeprecated= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
+		boolean useTypeArgs= isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
+		
 		IProblem[] problems= compilationUnit.getProblems();
-		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
-			result+= getNumberOfProblems(problems, IProblem.MissingOverrideAnnotation);
-		}
-		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED)) {
-			for (int i=0;i<problems.length;i++) {
-				int id= problems[i].getID();
-				if (id == IProblem.FieldMissingDeprecatedAnnotation || id == IProblem.MethodMissingDeprecatedAnnotation || id == IProblem.TypeMissingDeprecatedAnnotation)
-					result++;
-			}
-		}
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES)) {
-			for (int i=0;i<problems.length;i++) {
-				int id= problems[i].getID();
-				if (id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation)
-					result++;
-			}
+		for (int i= 0; i < problems.length; i++) {
+			int id= problems[i].getID();
+			if (addMissingOverride && Java50Fix.isMissingOverrideAnnotationProblem(id))
+				result++;
+			if (addMissingDeprecated && Java50Fix.isMissingDeprecationProblem(id))
+				result++;
+			if (useTypeArgs && Java50Fix.isRawTypeReferenceProblem(id))
+				result++;
 		}
 		return result;
 	}

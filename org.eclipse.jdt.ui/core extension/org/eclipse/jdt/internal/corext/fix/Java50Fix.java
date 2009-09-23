@@ -151,31 +151,27 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	public static Java50Fix createAddOverrideAnnotationFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		if (problem.getProblemId() != IProblem.MissingOverrideAnnotation)
+		if (!isMissingOverrideAnnotationProblem(problem.getProblemId()))
 			return null;
 
 		return createFix(compilationUnit, problem, OVERRIDE, FixMessages.Java50Fix_AddOverride_description);
 	}
 
+	public static boolean isMissingOverrideAnnotationProblem(int id) {
+		return id == IProblem.MissingOverrideAnnotation || id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
+	}
+
 	public static Java50Fix createAddDeprectatedAnnotation(CompilationUnit compilationUnit, IProblemLocation problem) {
-		if (!isMissingDeprecationProblem(problem))
+		if (!isMissingDeprecationProblem(problem.getProblemId()))
 			return null;
 
 		return createFix(compilationUnit, problem, DEPRECATED, FixMessages.Java50Fix_AddDeprecated_description);
 	}
 
-	public static boolean isMissingDeprecationProblem(IProblemLocation problem) {
-		int id= problem.getProblemId();
-		if (id == IProblem.FieldMissingDeprecatedAnnotation)
-			return true;
-
-		if (id == IProblem.MethodMissingDeprecatedAnnotation)
-			return true;
-
-		if (id == IProblem.TypeMissingDeprecatedAnnotation)
-			return true;
-
-		return false;
+	public static boolean isMissingDeprecationProblem(int id) {
+		return id == IProblem.FieldMissingDeprecatedAnnotation
+				|| id == IProblem.MethodMissingDeprecatedAnnotation
+				|| id == IProblem.TypeMissingDeprecatedAnnotation;
 	}
 
 	private static Java50Fix createFix(CompilationUnit compilationUnit, IProblemLocation problem, String annotation, String label) {
@@ -283,14 +279,9 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
 	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
 		for (int i= 0; i < locations.length; i++) {
-			int id= locations[i].getProblemId();
+			IProblemLocation problem= locations[i];
 
-			if (id == IProblem.FieldMissingDeprecatedAnnotation ||
-				id == IProblem.MethodMissingDeprecatedAnnotation ||
-				id == IProblem.TypeMissingDeprecatedAnnotation) {
-
-				IProblemLocation problem= locations[i];
-
+			if (isMissingDeprecationProblem(problem.getProblemId())) {
 				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 				if (selectedNode != null) {
 
@@ -307,11 +298,9 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
 	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
 		for (int i= 0; i < locations.length; i++) {
-
-			if (locations[i].getProblemId() == IProblem.MissingOverrideAnnotation) {
-
-				IProblemLocation problem= locations[i];
-
+			IProblemLocation problem= locations[i];
+			
+			if (isMissingOverrideAnnotationProblem(problem.getProblemId())) {
 				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 				if (selectedNode != null) {
 
@@ -334,7 +323,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 
-			if (isRawTypeReference(problem)) {
+			if (isRawTypeReferenceProblem(problem.getProblemId())) {
 				ASTNode node= problem.getCoveredNode(compilationUnit);
 				if (node instanceof ClassInstanceCreation) {
 					ASTNode rawReference= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
@@ -403,8 +392,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return false;
 	}
 
-	public static boolean isRawTypeReference(IProblemLocation problem) {
-		int id= problem.getProblemId();
+	public static boolean isRawTypeReferenceProblem(int id) {
 		return id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation;
 	}
 

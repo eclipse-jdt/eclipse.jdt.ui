@@ -190,6 +190,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodMissingDeprecatedAnnotation:
 			case IProblem.TypeMissingDeprecatedAnnotation:
 			case IProblem.MissingOverrideAnnotation:
+			case IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation:
 			case IProblem.MethodMustOverride:
 			case IProblem.MethodMustOverrideOrImplement:
 			case IProblem.IsClassPathCorrect:
@@ -553,6 +554,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				TypeArgumentMismatchSubProcessor.removeMismatchedArguments(context, problem, proposals);
 				break;
 			case IProblem.MissingOverrideAnnotation:
+			case IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation:
 				ModifierCorrectionSubProcessor.addOverrideAnnotationProposal(context, problem, proposals);
 				break;
 			case IProblem.MethodMustOverride:
