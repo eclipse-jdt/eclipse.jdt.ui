@@ -23,6 +23,7 @@ import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -69,8 +71,15 @@ public class SuppressWarningsSubProcessor {
 
 	private static final String ADD_SUPPRESSWARNINGS_ID= "org.eclipse.jdt.ui.correction.addSuppressWarnings"; //$NON-NLS-1$
 
-	public static final boolean hasSuppressWarningsProposal(int problemId) {
-		return CorrectionEngine.getWarningToken(problemId) != null; // Suppress warning annotations
+	public static final boolean hasSuppressWarningsProposal(IJavaProject javaProject, int problemId) {
+		if (CorrectionEngine.getWarningToken(problemId) != null && JavaModelUtil.is50OrHigher(javaProject)) {
+			String optionId= JavaCore.getOptionForConfigurableSeverity(problemId);
+			if (optionId != null) {
+				String optionValue= javaProject.getOption(optionId, true);
+				return JavaCore.WARNING.equals(optionValue);
+			}
+		}
+		return false;
 	}
 
 

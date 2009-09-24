@@ -213,10 +213,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingSynchronizedModifierInInheritedMethod:
 				return true;
 			default:
-				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-					return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(problemId);
-				}
-				return false;
+				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
 		}
 	}
 
