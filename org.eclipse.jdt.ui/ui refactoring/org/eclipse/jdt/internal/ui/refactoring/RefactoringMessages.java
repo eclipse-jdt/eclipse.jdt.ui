@@ -258,6 +258,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractInterfaceWizard_Extract_Interface;
 
+	public static String ExtractInterfaceWizard_generate_annotations;
+
 	public static String ExtractInterfaceWizard_generate_comments;
 
 	public static String ExtractInterfaceWizard_public_label;

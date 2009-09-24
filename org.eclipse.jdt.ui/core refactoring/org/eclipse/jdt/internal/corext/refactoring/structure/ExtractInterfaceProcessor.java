@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -170,6 +170,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/** Should extracted methods be declared as abstract? */
 	private boolean fAbstract= true;
+
+	/** Should override annotations be generated? */
+	private boolean fAnnotations= false;
 
 	/** The text edit based change manager */
 	private TextEditBasedChangeManager fChangeManager= null;
@@ -592,14 +595,25 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected final void createMethodComments(final CompilationUnitRewrite sourceRewrite, final Set replacements) throws CoreException {
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(replacements);
-		if (fComments && fMembers.length > 0) {
-			final IJavaProject project= fSubType.getJavaProject();
-			final boolean javadoc= project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true).equals(JavaCore.ENABLED);
+		if (fMembers.length > 0 && (fAnnotations || fComments)) {
+			IJavaProject project= fSubType.getJavaProject();
+			boolean annotations= fAnnotations && !JavaModelUtil.isVersionLessThan(project.getOption(JavaCore.COMPILER_SOURCE, true), JavaCore.VERSION_1_6);
+			boolean javadoc= project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true).equals(JavaCore.ENABLED);
 			IMember member= null;
 			for (int index= 0; index < fMembers.length; index++) {
 				member= fMembers[index];
-				if (member instanceof IMethod)
-					createMethodComment(sourceRewrite, ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, sourceRewrite.getRoot()), replacements, javadoc);
+				if (member instanceof IMethod) {
+					MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, sourceRewrite.getRoot());
+					if (annotations) {
+						ASTRewrite rewrite= sourceRewrite.getASTRewrite();
+						AST ast= rewrite.getAST();
+						Annotation marker= ast.newMarkerAnnotation();
+						marker.setTypeName(ast.newSimpleName("Override")); //$NON-NLS-1$
+						rewrite.getListRewrite(declaration, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
+					}
+					if (fComments)
+						createMethodComment(sourceRewrite, declaration, replacements, javadoc);
+				}
 			}
 		}
 	}
@@ -839,6 +853,15 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	public final String getTypeName() {
 		return fSuperName;
+	}
+
+	/**
+	 * Should override annotations be generated?
+	 * 
+	 * @return <code>true</code> if annotations should be generated, <code>false</code> otherwise
+	 */
+	public final boolean isAnnotations() {
+		return fAnnotations;
 	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
@@ -1129,6 +1152,15 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	public final void setAbstract(final boolean declare) {
 		fAbstract= declare;
+	}
+
+	/**
+	 * Determines whether override annotations should be generated.
+	 * 
+	 * @param annotations <code>true</code> to generate override annotations, <code>false</code> otherwise
+	 */
+	public final void setAnnotations(final boolean annotations) {
+		fAnnotations= annotations;
 	}
 
 	/**

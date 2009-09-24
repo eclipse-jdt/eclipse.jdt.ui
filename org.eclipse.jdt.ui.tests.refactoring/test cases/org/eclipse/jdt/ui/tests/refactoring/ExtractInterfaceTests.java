@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -40,6 +41,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	private static final Class clazz= ExtractInterfaceTests.class;
 	private static final String REFACTORING_PATH= "ExtractInterface/";
     private Hashtable fOldOptions;
+    private boolean fGenerateAnnotations= false;
 
 	public ExtractInterfaceTests(String name) {
 		super(name);
@@ -111,6 +113,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 				cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);
 		}
 		processor.setReplace(replaceOccurrences);
+		processor.setAnnotations(fGenerateAnnotations);
 		IMethod[] extractedMethods= getMethods(clas, extractedMethodNames, extractedSignatures);
 	    IField[] extractedFields= getFields(clas, extractedFieldNames);
 		processor.setExtractedMembers(merge(extractedMethods, extractedFields));
@@ -140,6 +143,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		if (extractAll)
 			processor.setExtractedMembers(processor.getExtractableMembers());
 		processor.setReplace(replaceOccurrences);
+		processor.setAnnotations(fGenerateAnnotations);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEqualLines("incorrect changes in " + className,
 			getFileContents(getOutputTestFileName(className)),
@@ -753,7 +757,23 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	public void test108() throws Exception{
 		// bug 195817
+		fGenerateAnnotations= true; // should not generate because project is 1.5
 		standardPassingTest();
+	}
+	
+	public void test109() throws Exception{
+		// Generate @Override in 1.6 project
+		fGenerateAnnotations= true;
+		RefactoringTestSetup refactoringTestSetup= new RefactoringTestSetup(null);
+		try {
+			JavaProjectHelper.addRTJar16(getRoot().getJavaProject());
+			
+			standardPassingTest();
+			
+			refactoringTestSetup.tearDown();
+		} finally {
+			refactoringTestSetup.setUp();
+		}
 	}
 	
 	public void testPaperExample0() throws Exception{
