@@ -284,7 +284,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		String testFailureNames= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 
 		programArguments.add("-version"); //$NON-NLS-1$
-		programArguments.add("3"); //$NON-NLS-1$
+		programArguments.add("4"); //$NON-NLS-1$
 
 		programArguments.add("-port"); //$NON-NLS-1$
 		programArguments.add(String.valueOf(fPort));
