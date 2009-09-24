@@ -20,8 +20,6 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.ui.texteditor.IEditorStatusLine;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -153,10 +151,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 				// fall back to local rename:
 				CorrectionCommandHandler handler= new CorrectionCommandHandler(fEditor, LinkedNamesAssistProposal.ASSIST_ID, true);
 				if (handler.doExecute()) {
-					IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
-					if (statusLine != null) {
-						statusLine.setMessage(true, RefactoringMessages.RenameJavaElementAction_started_rename_in_file, null);
-					}
+					fEditor.setStatusLineErrorMessage(RefactoringMessages.RenameJavaElementAction_started_rename_in_file);
 					return;
 				}
 			}

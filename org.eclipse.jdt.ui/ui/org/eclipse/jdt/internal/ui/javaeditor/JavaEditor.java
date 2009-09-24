@@ -3569,7 +3569,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setStatusLineErrorMessage(java.lang.String)
 	 * @since 3.5
 	 */
-	protected void setStatusLineErrorMessage(String message) {
+	public void setStatusLineErrorMessage(String message) {
 		long now= System.currentTimeMillis();
 		if (message != null || now - fErrorMessageTime > ERROR_MESSAGE_TIMEOUT) {
 			super.setStatusLineErrorMessage(message);
