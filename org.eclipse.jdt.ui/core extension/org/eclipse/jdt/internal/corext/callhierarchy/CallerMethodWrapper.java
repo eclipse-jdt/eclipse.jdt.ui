@@ -110,11 +110,11 @@ public class CallerMethodWrapper extends MethodWrapper {
 			}
 			if (type != null) {
 				if (! type.isAnonymous()) {
-					pattern= SearchPattern.createPattern(type.getFullyQualifiedName('.'),
-							IJavaSearchConstants.CONSTRUCTOR,
-							IJavaSearchConstants.REFERENCES,
+					pattern= SearchPattern.createPattern(type,
+							IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE,
 							SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 				} else {
+					// search engine does not find reference to anonymous, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=207774
 					CallSearchResultCollector resultCollector= new CallSearchResultCollector();
 					IJavaElement parent= type.getParent();
 					if (parent instanceof IMember) {
