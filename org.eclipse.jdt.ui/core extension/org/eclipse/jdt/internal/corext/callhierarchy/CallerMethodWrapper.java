@@ -109,11 +109,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 				type= (IType) member.getParent();
 			}
 			if (type != null) {
-				if (! type.isAnonymous()) {
-					pattern= SearchPattern.createPattern(type,
-							IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE,
-							SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-				} else {
+				if (type.isAnonymous()) {
 					// search engine does not find reference to anonymous, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=207774
 					CallSearchResultCollector resultCollector= new CallSearchResultCollector();
 					IJavaElement parent= type.getParent();
@@ -125,6 +121,16 @@ public class CallerMethodWrapper extends MethodWrapper {
 						resultCollector.addMember(type, parentMember, start, start + len);
 						return resultCollector.getCallers();
 					}
+				} else if (type.getParent() instanceof IMethod) {
+					// good enough for local types (does not find super(..) references in subtype constructors):
+					pattern= SearchPattern.createPattern(type,
+							IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE,
+							SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				} else {
+					pattern= SearchPattern.createPattern(type.getFullyQualifiedName('.'),
+							IJavaSearchConstants.CONSTRUCTOR,
+							IJavaSearchConstants.REFERENCES,
+							SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 				}
 			}
 			if (pattern == null) {
