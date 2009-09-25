@@ -836,7 +836,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			fIcon= new Label(composite, SWT.LEFT);
 			fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
-			GridData gridData= new GridData(SWT.LEFT, SWT.CENTER, false, false);
+			GridData gridData= new GridData(SWT.LEFT, SWT.TOP, false, false);
 			fIcon.setLayoutData(gridData);
 
 			fHintText= new Link(composite, SWT.WRAP);
