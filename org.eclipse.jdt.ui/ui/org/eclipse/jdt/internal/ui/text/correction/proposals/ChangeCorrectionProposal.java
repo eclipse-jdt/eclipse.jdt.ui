@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -105,6 +106,8 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * @throws CoreException Thrown when the invocation of the change failed.
 	 */
 	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
+		Shell disabledShell= null;
+		
 		Change change= null;
 		IRewriteTarget rewriteTarget= null;
 		try {
@@ -118,6 +121,17 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 					if (rewriteTarget != null) {
 						rewriteTarget.beginCompoundChange();
 					}
+					/*
+					 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=195834#c7 :
+					 * During change execution, an EventLoopProgressMonitor can process the event queue while the text
+					 * widget has focus. When that happens and the user e.g. pressed a key, the event is prematurely
+					 * delivered to the text widget and screws up the document. Change execution fails or performs
+					 * wrong changes.
+					 * 
+					 * The fix is to temporarily disable the shell.
+					 */
+					disabledShell= activeEditor.getSite().getShell();
+					disabledShell.setEnabled(false);
 				}
 
 				change.initializeValidationData(new NullProgressMonitor());
@@ -144,6 +158,9 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 				}
 			}
 		} finally {
+			if (disabledShell != null) {
+				disabledShell.setEnabled(true);
+			}
 			if (rewriteTarget != null) {
 				rewriteTarget.endCompoundChange();
 			}
