@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.junit.TestRunListener;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
@@ -379,6 +381,66 @@ public final class JUnitModel {
 			throwImportError(file, e);
 		}
 		return null; // does not happen
+	}
+
+	/**
+	 * Imports a test run session from the given URL.
+	 *
+	 * @param url an URL to a test run session transcript
+	 * @param monitor a progress monitor for cancellation
+	 * @return the imported test run session
+	 * @throws InvocationTargetException wrapping a CoreException if the import failed
+	 * @throws InterruptedException if the import was cancelled
+	 * @since 3.6
+	 */
+	public static TestRunSession importTestRunSession(final String url, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+		monitor.beginTask(ModelMessages.JUnitModel_importing_from_url, 1);
+		final TestRunHandler handler= new TestRunHandler();
+		
+		final CoreException[] exception= { null };
+		final TestRunSession[] session= { null };
+		
+		Thread importThread= new Thread("JUnit URL importer") { //$NON-NLS-1$
+			public void run() {
+				try {
+					SAXParserFactory parserFactory= SAXParserFactory.newInstance();
+//					parserFactory.setValidating(true); // TODO: add DTD and debug flag
+					SAXParser parser= parserFactory.newSAXParser();
+					parser.parse(url, handler);
+					session[0]= handler.getTestRunSession();
+				} catch (ParserConfigurationException e) {
+					storeImportError(e);
+				} catch (SAXException e) {
+					storeImportError(e);
+				} catch (IOException e) {
+					storeImportError(e);
+				}
+			}
+			private void storeImportError(Exception e) {
+				exception[0]= new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
+						JUnitCorePlugin.getPluginId(), ModelMessages.JUnitModel_could_not_import, e));
+			}
+		};
+		importThread.start();
+		
+		while (session[0] == null && exception[0] == null && !monitor.isCanceled()) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// that's OK
+			}
+		}
+		if (session[0] == null) {
+			if (exception[0] != null) {
+				throw new InvocationTargetException(exception[0]);
+			} else {
+				importThread.interrupt(); // have to kill the thread since we don't control URLConnection and XML parsing
+				throw new InterruptedException();
+			}
+		}
+		
+		JUnitCorePlugin.getModel().addTestRunSession(session[0]);
+		return session[0];
 	}
 
 	public static void importIntoTestRunSession(File swapFile, TestRunSession testRunSession) throws CoreException {

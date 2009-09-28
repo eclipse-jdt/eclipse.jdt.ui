@@ -247,6 +247,12 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_ImportTestRunSessionAction_name;
 
 	public static String TestRunnerViewPart_ImportTestRunSessionAction_title;
+	public static String TestRunnerViewPart_ImportTestRunSessionFromURLAction_import_from_url;
+
+	public static String TestRunnerViewPart_ImportTestRunSessionFromURLAction_invalid_url;
+
+	public static String TestRunnerViewPart_ImportTestRunSessionFromURLAction_url;
+
 	public static String TestRunnerViewPart_jobName;
 	public static String TestRunnerViewPart_label_failure;
 	public static String TestRunnerViewPart_Launching;

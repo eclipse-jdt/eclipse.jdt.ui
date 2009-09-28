@@ -20,6 +20,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -43,6 +46,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Layout;
@@ -72,8 +76,12 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IActionBars;
@@ -98,6 +106,7 @@ import org.eclipse.ui.part.PageSwitcher;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -259,6 +268,11 @@ public class TestRunnerViewPart extends ViewPart {
 	 */
 	static final String PREF_LAST_PATH= "lastImportExportPath"; //$NON-NLS-1$
 
+	/**
+	 * @since 3.6
+	 */
+	static final String PREF_LAST_URL= "lastImportURL"; //$NON-NLS-1$
+	
 	//orientations
 	static final int VIEW_ORIENTATION_VERTICAL= 0;
 	static final int VIEW_ORIENTATION_HORIZONTAL= 1;
@@ -400,6 +414,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public void addMenuEntries(MenuManager manager) {
 			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction(fParent.getShell()));
+			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionFromURLAction(fParent.getShell()));
 			if (fTestRunSession != null)
 				manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ExportTestRunSessionAction(fParent.getShell(), fTestRunSession));
 		}
@@ -446,6 +461,82 @@ public class TestRunnerViewPart extends ViewPart {
 			} catch (CoreException e) {
 				JUnitPlugin.log(e);
 				ErrorDialog.openError(fShell, JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());
+			}
+		}
+	}
+	
+	private static class ImportTestRunSessionFromURLAction extends Action {
+		private static class URLValidator implements IInputValidator {
+			public String isValid(String newText) {
+				if (newText.length() == 0)
+					return null;
+				try {
+					new URL(newText);
+					return null;
+				} catch (MalformedURLException e) {
+					return JUnitMessages.TestRunnerViewPart_ImportTestRunSessionFromURLAction_invalid_url + e.getLocalizedMessage();
+				}
+			}
+		}
+
+		private static final String DIALOG_SETTINGS= "ImportTestRunSessionFromURLAction"; //$NON-NLS-1$
+		
+		private final Shell fShell;
+		
+		public ImportTestRunSessionFromURLAction(Shell shell) {
+			super(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionFromURLAction_import_from_url);
+			fShell= shell;
+		}
+		
+		public void run() {
+			String title= JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title;
+			String message= JUnitMessages.TestRunnerViewPart_ImportTestRunSessionFromURLAction_url;
+			
+			final IDialogSettings dialogSettings= JUnitPlugin.getDefault().getDialogSettings();
+			String url= dialogSettings.get(PREF_LAST_URL);
+			
+			IInputValidator validator= new URLValidator();
+			
+			InputDialog inputDialog= new InputDialog(fShell, title, message, url, validator) {
+				protected Control createDialogArea(Composite parent) {
+					Control dialogArea2= super.createDialogArea(parent);
+					Object layoutData= getText().getLayoutData();
+					if (layoutData instanceof GridData) {
+						GridData gd= (GridData)layoutData;
+						gd.widthHint= convertWidthInCharsToPixels(150);
+					}
+					return dialogArea2;
+				}
+				protected IDialogSettings getDialogBoundsSettings() {
+					IDialogSettings settings= dialogSettings.getSection(DIALOG_SETTINGS);
+					if (settings == null) {
+						settings= dialogSettings.addNewSection(DIALOG_SETTINGS);
+					}
+					return settings;
+				}
+				protected boolean isResizable() {
+					return true;
+				}
+			};
+			
+			int res= inputDialog.open();
+			if (res == IDialogConstants.OK_ID) {
+				url= inputDialog.getValue();
+				dialogSettings.put(PREF_LAST_URL, url);
+				final String url2= url;
+				try {
+					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+							JUnitModel.importTestRunSession(url2, monitor);
+						}
+					});
+					
+				} catch (InterruptedException e) {
+					// cancelled
+				} catch (InvocationTargetException e) {
+					CoreException ce= (CoreException) e.getCause();
+					StatusManager.getManager().handle(ce.getStatus(), StatusManager.SHOW | StatusManager.LOG);
+				}
 			}
 		}
 	}
