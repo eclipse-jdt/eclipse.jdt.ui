@@ -27,6 +27,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -126,6 +127,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		} finally {
 			// Note: Above code is OK since clients are responsible to close the stream
 		}
+		parser.setErrorHandler(new DefaultHandler());
 		Element xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
 		if (!xmlJarDesc.getNodeName().equals(JarPackagerUtil.DESCRIPTION_EXTENSION)) {
 			throw new IOException(JarPackagerMessages.JarPackageReader_error_badFormat);

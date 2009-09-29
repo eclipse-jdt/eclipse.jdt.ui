@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,8 +37,9 @@ public class JavadocReader extends Object {
 	private InputStream fInputStream;
 
 	/**
-	 * Reads a Javadoc Ant Script from the underlying stream.
-	 * It is the client's responsibility to close the stream.
+	 * Reads a Javadoc Ant Script from the underlying stream. It is the client's responsibility to
+	 * close the stream.
+	 * 
 	 * @param inputStream the input stream to read from
 	 */
 	public JavadocReader(InputStream inputStream) {
@@ -46,10 +48,9 @@ public class JavadocReader extends Object {
 	}
 
 	/**
-	 * Closes this stream.
-	 * It is the clients responsibility to close the stream.
-	 *
-	 * @exception IOException
+	 * Closes this stream. It is the clients responsibility to close the stream.
+	 * 
+	 * @exception IOException if the stream cannot be closed
 	 */
 	public void close() throws IOException {
 		if (fInputStream != null)
@@ -70,6 +71,7 @@ public class JavadocReader extends Object {
 		}
 
 		//find the project associated with the ant script
+		parser.setErrorHandler(new DefaultHandler());
 		Element xmlJavadocDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
 
 		NodeList targets= xmlJavadocDesc.getChildNodes();
