@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -106,7 +110,8 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * @throws CoreException Thrown when the invocation of the change failed.
 	 */
 	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
-		Shell disabledShell= null;
+		StyledText disabledStyledText= null;
+		TraverseListener traverseBlocker= null;
 		
 		Change change= null;
 		IRewriteTarget rewriteTarget= null;
@@ -128,10 +133,24 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 					 * delivered to the text widget and screws up the document. Change execution fails or performs
 					 * wrong changes.
 					 * 
-					 * The fix is to temporarily disable the shell.
+					 * The fix is to temporarily disable the text widget.
 					 */
-					disabledShell= activeEditor.getSite().getShell();
-					disabledShell.setEnabled(false);
+					Object control= activeEditor.getAdapter(Control.class);
+					if (control instanceof StyledText) {
+						disabledStyledText= (StyledText) control;
+						if (disabledStyledText.getEditable()) {
+							disabledStyledText.setEditable(false);
+							traverseBlocker= new TraverseListener() {
+								public void keyTraversed(TraverseEvent e) {
+									e.doit= true;
+									e.detail= SWT.TRAVERSE_NONE;
+								}
+							};
+							disabledStyledText.addTraverseListener(traverseBlocker);
+						} else {
+							disabledStyledText= null;
+						}
+					}
 				}
 
 				change.initializeValidationData(new NullProgressMonitor());
@@ -158,8 +177,9 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 				}
 			}
 		} finally {
-			if (disabledShell != null) {
-				disabledShell.setEnabled(true);
+			if (disabledStyledText != null) {
+				disabledStyledText.setEditable(true);
+				disabledStyledText.removeTraverseListener(traverseBlocker);
 			}
 			if (rewriteTarget != null) {
 				rewriteTarget.endCompoundChange();
@@ -276,7 +296,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * @return returns the change for this proposal.
 	 * @throws CoreException thrown when the change could not be created
 	 */
-	public final Change getChange() throws CoreException {
+	public final synchronized Change getChange() throws CoreException {
 		if (fChange == null) {
 			fChange= createChange();
 		}
