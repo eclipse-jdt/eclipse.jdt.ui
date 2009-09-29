@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1060,7 +1060,10 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			monitor.beginTask("", 2); //$NON-NLS-1$
 			final String separator= StubUtility.getLineDelimiterUsed(fType.getJavaProject());
 			final String block= getAlignedSourceBlock(unit, fNewSourceOfInputType);
-			String content= CodeGeneration.getCompilationUnitContent(unit, null, block, separator);
+			String fileComment= null;
+			if (StubUtility.doAddComments(unit.getJavaProject()))
+				fileComment= CodeGeneration.getFileComment(unit, separator);
+			String content= CodeGeneration.getCompilationUnitContent(unit, fileComment, null, block, separator);
 			if (content == null || block.startsWith("/*") || block.startsWith("//")) { //$NON-NLS-1$//$NON-NLS-2$
 				final StringBuffer buffer= new StringBuffer();
 				if (!fType.getPackageFragment().isDefaultPackage()) {
