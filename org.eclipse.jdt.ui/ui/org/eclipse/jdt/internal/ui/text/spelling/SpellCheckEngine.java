@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -225,7 +225,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 *
 	 * @return The singleton instance of the spell check engine
 	 */
-	public static final synchronized ISpellCheckEngine getInstance() {
+	public static synchronized final ISpellCheckEngine getInstance() {
 
 		if (fgEngine == null)
 			fgEngine= new SpellCheckEngine();
@@ -236,7 +236,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	/**
 	 * Shuts down the singleton instance of the spell check engine.
 	 */
-	public static final synchronized void shutdownInstance() {
+	public static synchronized final void shutdownInstance() {
 		if (fgEngine != null) {
 			fgEngine.shutdown();
 			fgEngine= null;
@@ -289,7 +289,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine#getSpellChecker()
 	 */
-	public final synchronized ISpellChecker getSpellChecker() throws IllegalStateException {
+	public synchronized final ISpellChecker getSpellChecker() throws IllegalStateException {
 		if (fGlobalDictionaries == null)
 			throw new IllegalStateException("spell checker has been shut down"); //$NON-NLS-1$
 

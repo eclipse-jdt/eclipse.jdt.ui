@@ -296,7 +296,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * @return returns the change for this proposal.
 	 * @throws CoreException thrown when the change could not be created
 	 */
-	public final synchronized Change getChange() throws CoreException {
+	public synchronized final Change getChange() throws CoreException {
 		if (fChange == null) {
 			fChange= createChange();
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -464,7 +464,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#isLoaded()
 	 */
-	public final synchronized boolean isLoaded() {
+	public synchronized final boolean isLoaded() {
 		return fLoaded || fHashBuckets.size() > 0;
 	}
 
