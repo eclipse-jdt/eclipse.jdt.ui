@@ -39,6 +39,12 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Image;
@@ -523,20 +529,7 @@ public class TestRunnerViewPart extends ViewPart {
 			if (res == IDialogConstants.OK_ID) {
 				url= inputDialog.getValue();
 				dialogSettings.put(PREF_LAST_URL, url);
-				final String url2= url;
-				try {
-					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-							JUnitModel.importTestRunSession(url2, monitor);
-						}
-					});
-					
-				} catch (InterruptedException e) {
-					// cancelled
-				} catch (InvocationTargetException e) {
-					CoreException ce= (CoreException) e.getCause();
-					StatusManager.getManager().handle(ce.getStatus(), StatusManager.SHOW | StatusManager.LOG);
-				}
+				importTestRunSession(url);
 			}
 		}
 	}
@@ -1665,6 +1658,7 @@ action enablement
 		fCopyAction = new JUnitCopyAction(fFailureTrace, fClipboard);
 		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 		initPageSwitcher();
+		addDropAdapter(parent);
 
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
@@ -1687,6 +1681,32 @@ action enablement
 		if (!testRunSessions.isEmpty()) {
 			fTestRunSessionListener.sessionAdded((TestRunSession)testRunSessions.get(0));
 		}
+	}
+
+	private void addDropAdapter(Composite parent) {
+		DropTarget dropTarget = new DropTarget(parent, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
+		dropTarget.setTransfer(new Transfer[] { TextTransfer.getInstance() });
+		class DropAdapter extends DropTargetAdapter {
+		    public void dragEnter(DropTargetEvent event) {
+		        event.detail = DND.DROP_COPY;
+		        event.feedback = DND.FEEDBACK_NONE;
+		    }
+		    public void dragOver(DropTargetEvent event) {
+		        event.detail = DND.DROP_COPY;
+		        event.feedback = DND.FEEDBACK_NONE;
+		    }
+		    public void dragOperationChanged(DropTargetEvent event) {
+		        event.detail = DND.DROP_COPY;
+		        event.feedback = DND.FEEDBACK_NONE;
+		    }
+		    public void drop(final DropTargetEvent event) {
+		        if (TextTransfer.getInstance().isSupportedType(event.currentDataType)) {
+					String url= (String) event.data;
+					importTestRunSession(url);
+		        }
+		    }
+		}
+		dropTarget.addDropListener(new DropAdapter());
 	}
 
 	private void initPageSwitcher() {
@@ -1998,6 +2018,21 @@ action enablement
 
 	static boolean getShowOnErrorOnly() {
 		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
+	}
+
+	static void importTestRunSession(final String url) {
+		try {
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					JUnitModel.importTestRunSession(url, monitor);
+				}
+			});
+		} catch (InterruptedException e) {
+			// cancelled
+		} catch (InvocationTargetException e) {
+			CoreException ce= (CoreException) e.getCause();
+			StatusManager.getManager().handle(ce.getStatus(), StatusManager.SHOW | StatusManager.LOG);
+		}
 	}
 
 	public FailureTrace getFailureTrace() {
