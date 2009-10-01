@@ -6629,4 +6629,52 @@
       </cleanUp>
    </extension>
 
+  <extension
+         point="org.eclipse.ui.preferenceTransfer">
+       <transfer
+            id="org.eclipse.jdt.internal.core.transfer.compiler"
+            icon="$nl$/icons/full/eview16/jperspective.gif"
+            name="%preferenceTransfer.java.compiler.name">
+            <mapping scope="instance">
+               <entry node="org.eclipse.jdt.core">
+                  <key name="org.eclipse.jdt.core.compiler." match="prefix"/>
+                  <key name="org.eclipse.jdt.core.builder." match="prefix"/>
+                  <key name="org.eclipse.jdt.core.classpath." match="prefix"/>
+                  <key name="org.eclipse.jdt.core.circularClasspath"/>
+                  <key name="org.eclipse.jdt.core.incompatibleJDKLevel"/>
+                  <key name="org.eclipse.jdt.core.incompleteClasspath"/>
+               </entry>
+               <entry node="org.eclipse.jdt.launching">
+                  <key name="org.eclipse.jdt.launching.PREF_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE"/>
+               </entry>
+            </mapping>
+            <description>
+               %preferenceTransfer.java.compiler.description
+            </description>
+      </transfer>
+       <transfer
+            id="org.eclipse.jdt.internal.ui.transfer.appearance"
+            icon="$nl$/icons/full/eview16/jperspective.gif"
+            name="%preferenceTransfer.java.appearance.name">
+            <mapping scope="instance">
+               <entry node="org.eclipse.jdt.ui">
+                  <key name="org.eclipse.jdt.ui.typefilter." match="prefix"/>
+                  <key name="org.eclipse.jdt.ui.category"/>
+                  <key name="org.eclipse.jdt.ui.compresspackagenames"/>
+                  <key name="org.eclipse.jdt.ui.flatPackagesInPackageExplorer"/>
+                  <key name="org.eclipse.jdt.ui.methodreturntype"/>
+                  <key name="org.eclipse.jdt.ui.methodtypeparametesr"/>
+                  <key name="PackagesView.pkgNamePatternForPackagesView"/>
+                  <key name="org.eclipse.jdt.ui.packages.cuchildren"/>
+                  <key name="org.eclipse.jdt.ui.browsing.stackVertically"/>
+                  <key name="org.eclipse.jdt.ui.visibility.order"/>
+                  <key name="org.eclipse.jdt.ui.enable.visibility.order"/>
+                  <key name="outlinesortoption"/>
+               </entry>
+            </mapping>
+            <description>
+               %preferenceTransfer.java.appearance.description
+            </description>
+      </transfer>
+   </extension>
 </plugin>
