@@ -286,7 +286,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	 * This writer always returns OK
 	 */
 	public IStatus getStatus() {
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
+		return Status.OK_STATUS;
 	}
 
 }

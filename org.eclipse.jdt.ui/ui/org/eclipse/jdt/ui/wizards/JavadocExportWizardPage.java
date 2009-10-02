@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * A Javadoc export wizard page allows the user to add an additional page to the
@@ -83,7 +81,7 @@ public abstract class JavadocExportWizardPage {
 	}
 
 
-	private IStatus fPageStatus= new Status(IStatus.OK, JavaUI.ID_PLUGIN, null);
+	private IStatus fPageStatus= Status.OK_STATUS;
 	private IJavadocExportWizardPageContainer fContainer;
 
     /**

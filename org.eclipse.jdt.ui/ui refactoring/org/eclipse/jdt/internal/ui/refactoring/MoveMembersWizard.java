@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -299,7 +299,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, Messages.format(RefactoringMessages.MoveMembersInputPage_not_found, BasicElementLabels.getJavaElementName(typeName)), null);
 			if (type.isBinary())
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_no_binary, null);
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+			return Status.OK_STATUS;
 		}
 
 		private MoveStaticMembersProcessor getMoveProcessor() {

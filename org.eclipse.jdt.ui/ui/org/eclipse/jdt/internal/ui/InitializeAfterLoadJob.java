@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class InitializeAfterLoadJob extends UIJob {
 				JavaPlugin.log(e);
 				return e.getStatus();
 			}
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+			return Status.OK_STATUS;
 		}
 		public boolean belongsTo(Object family) {
 			return JavaUI.ID_PLUGIN.equals(family);
@@ -53,6 +53,6 @@ public class InitializeAfterLoadJob extends UIJob {
 		Job job = new RealJob(JavaUIMessages.JavaPlugin_initializing_ui);
 		job.setPriority(Job.SHORT);
 		job.schedule();
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+		return Status.OK_STATUS;
 	}
 }

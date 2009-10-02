@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,8 +51,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * History for the open type dialog. Object and keys are both {@link TypeNameMatch}s.
@@ -156,7 +154,7 @@ public class OpenTypeHistory extends History {
 		protected IStatus run(IProgressMonitor monitor) {
 			OpenTypeHistory history= OpenTypeHistory.getInstance();
 			history.internalCheckConsistency(monitor);
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+			return Status.OK_STATUS;
 		}
 		public boolean belongsTo(Object family) {
 			return FAMILY.equals(family);

@@ -234,7 +234,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	}
 
 	private static IStatus compileCandidates(List result, IJavaElement elem) {
-		IStatus ok= new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
+		IStatus ok= Status.OK_STATUS;
 		try {
 			switch (elem.getElementType()) {
 				case IJavaElement.INITIALIZER:

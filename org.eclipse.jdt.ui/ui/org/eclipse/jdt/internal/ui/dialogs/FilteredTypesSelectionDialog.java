@@ -605,7 +605,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			Object[] elements= { type };
 			return fValidator.validate(elements);
 		} else
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+			return Status.OK_STATUS;
 	}
 
 	/**

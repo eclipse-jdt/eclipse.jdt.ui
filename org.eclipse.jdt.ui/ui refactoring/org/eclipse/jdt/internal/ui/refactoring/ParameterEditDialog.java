@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -181,7 +181,7 @@ public class ParameterEditDialog extends StatusDialog {
 				return;
 			}
 		}
-		updateStatus(createOkStatus());
+		updateStatus(Status.OK_STATUS);
 	}
 
 	private IStatus validateType() {
@@ -191,7 +191,7 @@ public class ParameterEditDialog extends StatusDialog {
 
 		RefactoringStatus status= TypeContextChecker.checkParameterTypeSyntax(type, fContext.getCuHandle().getJavaProject());
 		if (status == null || status.isOK())
-			return createOkStatus();
+			return Status.OK_STATUS;
 		if (status.hasError())
 			return createErrorStatus(status.getEntryWithHighestSeverity().getMessage());
 		else
@@ -211,7 +211,7 @@ public class ParameterEditDialog extends StatusDialog {
 			return status;
 		if (! Checks.startsWithLowerCase(text))
 			return createWarningStatus(RefactoringCoreMessages.ExtractTempRefactoring_convention);
-		return createOkStatus();
+		return Status.OK_STATUS;
 	}
 
 	private IStatus validateDefaultValue() {
@@ -221,14 +221,10 @@ public class ParameterEditDialog extends StatusDialog {
 		if (defaultValue.length() == 0)
 			return createErrorStatus(RefactoringMessages.ParameterEditDialog_defaultValue_error);
 		if (ChangeSignatureProcessor.isValidExpression(defaultValue))
-			return createOkStatus();
+			return Status.OK_STATUS;
 		String msg= Messages.format(RefactoringMessages.ParameterEditDialog_defaultValue_invalid, new String[]{defaultValue});
 		return createErrorStatus(msg);
 
-	}
-
-	private Status createOkStatus() {
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 	}
 
 	private Status createWarningStatus(String message) {

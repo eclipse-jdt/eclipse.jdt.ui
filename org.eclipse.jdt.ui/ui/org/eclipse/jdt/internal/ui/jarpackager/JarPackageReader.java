@@ -395,7 +395,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	 */
 	public IStatus getStatus() {
 		if (fWarnings.getChildren().length == 0)
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
+			return Status.OK_STATUS;
 		else
 			return fWarnings;
 	}
