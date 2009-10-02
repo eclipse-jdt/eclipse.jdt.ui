@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -72,17 +80,22 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.actions.ContributionItemFactory;
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -93,6 +106,7 @@ import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -109,11 +123,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
 import org.eclipse.jdt.jeview.EditorUtility;
 import org.eclipse.jdt.jeview.JEPluginImages;
 import org.eclipse.jdt.jeview.JEViewPlugin;
+import org.eclipse.jdt.jeview.properties.ClasspathEntryProperties;
 import org.eclipse.jdt.jeview.properties.JarEntryResourceProperties;
 import org.eclipse.jdt.jeview.properties.JavaElementProperties;
 import org.eclipse.jdt.jeview.properties.MarkerProperties;
@@ -317,6 +331,12 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
 		
+		if (! getSite().getSelectionProvider().getSelection().isEmpty()) {
+			MenuManager showInSubMenu= new MenuManager(getShowInMenuLabel());
+			IWorkbenchWindow workbenchWindow= getSite().getWorkbenchWindow();
+			showInSubMenu.add(ContributionItemFactory.VIEWS_SHOW_IN.create(workbenchWindow));
+			manager.add(showInSubMenu);
+		}
 		addElementActionsOrNot(manager);
 		manager.add(new Separator());
 		
@@ -332,6 +352,19 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fPropertiesAction);
 	}
 
+	private String getShowInMenuLabel() {
+		String keyBinding= null;
+
+		IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		if (bindingService != null)
+			keyBinding= bindingService.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN_QUICK_MENU);
+
+		if (keyBinding == null)
+			keyBinding= ""; //$NON-NLS-1$
+
+		return "Sho&w In" + '\t' + keyBinding;
+	}
+	
 	private void addFocusActionOrNot(IMenuManager manager) {
 		if (fViewer.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
@@ -621,7 +654,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				}
 			}
 		};
-		fPropertiesAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
+		fPropertiesAction.setActionDefinitionId(IWorkbenchCommandConstants.FILE_PROPERTIES);
 		
 		fDoubleClickAction = new Action() {
 			private Object fPreviousDouble;
@@ -643,8 +676,21 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 							case IJavaElement.JAVA_PROJECT :
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 							case IJavaElement.PACKAGE_FRAGMENT :
-								ShowInPackageViewAction showInPackageViewAction= new ShowInPackageViewAction(getViewSite());
-								showInPackageViewAction.run(javaElement);
+								ICommandService service = (ICommandService) getSite().getService(ICommandService.class);
+								Command showInCommand= service.getCommand(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN);
+								Map<String, String> params= Collections.singletonMap("org.eclipse.ui.navigate.showIn.targetId", JavaUI.ID_PACKAGES);
+								try {
+									Object context= ((IHandlerService) getSite().getService(IHandlerService.class)).getCurrentState();
+									showInCommand.executeWithChecks(new ExecutionEvent(null, params, null, context));
+								} catch (ExecutionException e1) {
+									showAndLogError("Could not show element", e1);
+								} catch (NotDefinedException e1) {
+									showAndLogError("Could not show element", e1);
+								} catch (NotEnabledException e1) {
+									showAndLogError("Could not show element", e1);
+								} catch (NotHandledException e1) {
+									showAndLogError("Could not show element", e1);
+								}
 								break;
 								
 							default :
@@ -874,7 +920,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySheetPage.class) {
@@ -898,6 +944,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 						return new JarEntryResourceProperties((IJarEntryResource) object);
 					else if (object instanceof IMemberValuePair)
 						return new MemberValuePairProperties((IMemberValuePair) object);
+					else if (object instanceof IClasspathEntry)
+						return new ClasspathEntryProperties((IClasspathEntry) object);
 					else
 						return null;
 				}

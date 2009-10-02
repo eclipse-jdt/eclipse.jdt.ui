@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -223,7 +223,6 @@ public class JavaElement extends JEAttribute {
 	}
 
 	private void addJavaProjectChildren(ArrayList<JEAttribute> result, final IJavaProject project) {
-		//TODO: IClassPathEntry
 		result.add(new JavaElementChildrenProperty(this, "ALL PACKAGE FRAGMENT ROOTS") {
 			@Override
 			protected JEAttribute[] computeChildren() throws JavaModelException {
@@ -290,6 +289,11 @@ public class JavaElement extends JEAttribute {
 				return createResources(this, packageFragmentRoot.getNonJavaResources());
 			}
 		});
+		result.add(JEClasspathEntry.compute(this, "RAW CLASSPATH ENTRY", new Callable<IClasspathEntry>() {
+			public IClasspathEntry call() throws JavaModelException {
+				return packageFragmentRoot.getRawClasspathEntry();
+			}
+		}));
 	}
 
 	private void addPackageFragmentChildren(ArrayList<JEAttribute> result, final IPackageFragment packageFragment) {
@@ -546,7 +550,7 @@ public class JavaElement extends JEAttribute {
 		JEAttribute[] entryChildren= new JEAttribute[entries.length];
 		for (int i= 0; i < entries.length; i++) {
 			IClasspathEntry entry= entries[i];
-			entryChildren[i]= new JavaElementProperty(parent, null, entry);
+			entryChildren[i]= new JEClasspathEntry(parent, null, entry);
 		}
 		return entryChildren;
 	}
