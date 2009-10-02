@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * 		Remove unnecessary $NON-NLS$ tag
  *
  */
-public class StringFix implements ICleanUpFix, IProposableFix {
+public class StringFix implements IProposableFix {
 
 	private final TextEditGroup[] fEditGroups;
 	private final String fName;
@@ -104,6 +104,9 @@ public class StringFix implements ICleanUpFix, IProposableFix {
 
 	private static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+		if (!cu.isStructureKnown())
+			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 : 
+		
 		List result= new ArrayList();
 
 		List missingNLSProblems= new ArrayList();
