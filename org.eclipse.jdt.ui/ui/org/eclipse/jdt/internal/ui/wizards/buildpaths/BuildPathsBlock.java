@@ -798,7 +798,6 @@ public class BuildPathsBlock {
 			if (!fWorkspaceRoot.exists(outputLocation)) {
 				IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
 				CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
-				folder.setDerived(true);
 			} else {
 				monitor.worked(1);
 			}
