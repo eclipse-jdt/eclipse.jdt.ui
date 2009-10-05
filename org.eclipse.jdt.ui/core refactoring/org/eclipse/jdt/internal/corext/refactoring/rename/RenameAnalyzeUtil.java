@@ -406,17 +406,17 @@ class RenameAnalyzeUtil {
 	 * @param analyzePackages the LocalAnalyzePackages containing the information about the local renames
 	 * @param cuChange the TextChange containing all local variable changes to be applied.
 	 * @param oldCUNode the fully (incl. bindings) resolved AST node of the original compilation unit
-	 * @param statementsRecovery whether statements recovery should be performed when parsing the changed CU
+	 * @param recovery whether statements and bindings recovery should be performed when parsing the changed CU
 	 * @return a RefactoringStatus containing errors if compile errors or wrongly renamed nodes are found
 	 * @throws CoreException thrown if there was an error greating the preview content of the change
 	 */
-	public static RefactoringStatus analyzeLocalRenames(LocalAnalyzePackage[] analyzePackages, TextChange cuChange, CompilationUnit oldCUNode, boolean statementsRecovery) throws CoreException {
+	public static RefactoringStatus analyzeLocalRenames(LocalAnalyzePackage[] analyzePackages, TextChange cuChange, CompilationUnit oldCUNode, boolean recovery) throws CoreException {
 
 		RefactoringStatus result= new RefactoringStatus();
 		ICompilationUnit compilationUnit= (ICompilationUnit) oldCUNode.getJavaElement();
 
 		String newCuSource= cuChange.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, compilationUnit, true, statementsRecovery, null);
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, compilationUnit, true, recovery, null);
 
 		result.merge(analyzeCompileErrors(newCuSource, newCUNode, oldCUNode));
 		if (result.hasError())

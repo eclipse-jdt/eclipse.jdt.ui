@@ -68,13 +68,14 @@ public class RefactoringASTParser {
 	 * @param newCuSource the source
 	 * @param originalCu the compilation unit to get the name and project from
 	 * @param resolveBindings whether bindings are to be resolved
-	 * @param statementsRecovery whether statements recovery should be enabled
+	 * @param recovery whether statements and binding recovery should be enabled
 	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
 	 * @return the parsed CompilationUnit
 	 */
-	public CompilationUnit parse(String newCuSource, ICompilationUnit originalCu, boolean resolveBindings, boolean statementsRecovery, IProgressMonitor pm) {
+	public CompilationUnit parse(String newCuSource, ICompilationUnit originalCu, boolean resolveBindings, boolean recovery, IProgressMonitor pm) {
 		fParser.setResolveBindings(resolveBindings);
-		fParser.setStatementsRecovery(statementsRecovery);
+		fParser.setStatementsRecovery(recovery);
+		fParser.setBindingsRecovery(recovery);
 		fParser.setSource(newCuSource.toCharArray());
 		fParser.setUnitName(originalCu.getElementName());
 		fParser.setProject(originalCu.getJavaProject());
