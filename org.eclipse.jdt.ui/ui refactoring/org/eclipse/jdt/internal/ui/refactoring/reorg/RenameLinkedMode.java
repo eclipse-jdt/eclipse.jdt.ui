@@ -438,6 +438,9 @@ public class RenameLinkedMode {
 
 		viewer.setSelectedRange(fOriginalSelection.x, fOriginalSelection.y);
 
+		if (newName.length() == 0)
+			return null;
+		
 		RenameJavaElementDescriptor descriptor= createRenameDescriptor(fJavaElement, newName);
 		RenameSupport renameSupport= RenameSupport.create(descriptor);
 		return renameSupport;
