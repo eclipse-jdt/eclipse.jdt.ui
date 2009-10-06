@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.runtime.CoreException;
@@ -35,7 +36,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -160,6 +163,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private IStatus fComplianceStatus;
 
 	private Link fJRE50InfoText;
+	private Label fJRE50InfoImage;
 	private Composite fControlsComposite;
 	private ControlEnableState fBlockEnableState;
 
@@ -376,8 +380,17 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label;
 		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);
-
-		fJRE50InfoText= new Link(composite, SWT.WRAP);
+		
+		Composite infoComposite= new Composite(fControlsComposite, SWT.NONE);
+		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		infoComposite.setLayout(new GridLayout(2, false));
+		
+		fJRE50InfoImage= new Label(infoComposite, SWT.NONE);
+		fJRE50InfoImage.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+		GridData gd= new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false);
+		fJRE50InfoImage.setLayoutData(gd);
+		
+		fJRE50InfoText= new Link(infoComposite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
 		// set a text: not the real one, just for layouting
 		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { getVersionLabel(VERSION_1_3), getVersionLabel(VERSION_1_3) }));
@@ -396,7 +409,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				widgetDefaultSelected(e);
 			}
 		});
-		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, true);
+		gd= new GridData(GridData.FILL, GridData.FILL, true, true);
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
 		fJRE50InfoText.setLayoutData(gd);
 		validateComplianceStatus();
@@ -557,6 +570,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 			fJRE50InfoText.setVisible(isVisible);
+			fJRE50InfoImage.setImage(isVisible ? JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING) : null);
+			fJRE50InfoImage.getParent().layout();
 		}
 	}
 
