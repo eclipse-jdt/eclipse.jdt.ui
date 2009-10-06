@@ -20,6 +20,8 @@ import java.util.StringTokenizer;
 import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -27,6 +29,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -47,6 +51,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 
+import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -407,7 +412,7 @@ public abstract class OptionsConfigurationBlock {
 		return checkBox;
 	}
 
-	protected Button addCheckBoxWithLink(Composite parent, String label, Key key, String[] values, int indent, int widthHint, SelectionListener listener) {
+	protected Button addCheckBoxWithLink(Composite parent, final String label, Key key, String[] values, int indent, int widthHint, SelectionListener listener) {
 		LinkControlData data= new LinkControlData(key, values);
 
 		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false);
@@ -427,6 +432,11 @@ public abstract class OptionsConfigurationBlock {
 		checkBox.setData(data);
 		checkBox.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
 		checkBox.addSelectionListener(getSelectionListener());
+		checkBox.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			public void getName(AccessibleEvent e) {
+				e.result = LegacyActionTools.removeMnemonics(label.replaceAll("</?[aA][^>]*>", "")); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		});
 
 		gd= new GridData(GridData.FILL, GridData.CENTER, true, false);
 		gd.widthHint= widthHint;
@@ -453,6 +463,17 @@ public abstract class OptionsConfigurationBlock {
 			}
 			public void mouseUp(MouseEvent e) {
 				if (!linkSelected[0]) {
+					checkBox.setSelection(!checkBox.getSelection());
+					checkBox.setFocus();
+					linkSelected[0]= false;
+					controlChanged(checkBox);
+				}
+			}
+		});
+		link.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit == true) {
+					e.detail= SWT.TRAVERSE_NONE;
 					checkBox.setSelection(!checkBox.getSelection());
 					checkBox.setFocus();
 					linkSelected[0]= false;
