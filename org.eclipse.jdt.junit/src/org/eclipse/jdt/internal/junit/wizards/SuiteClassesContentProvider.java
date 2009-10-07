@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -30,13 +32,17 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 		IPackageFragment pack= (IPackageFragment) parent;
 		if (! pack.exists())
 			return new Object[0];
+		return getTests(pack).toArray();
+	}
+
+	public Set getTests(IPackageFragment pack) {
 		try {
 			HashSet result= new HashSet();
 			new JUnit3TestFinder().findTestsInContainer(pack, result, null);
-			return result.toArray();
+			return result;
 		} catch (CoreException e) {
 			JUnitPlugin.log(e);
-			return new Object[0];
+			return Collections.EMPTY_SET;
 		}
 	}
 

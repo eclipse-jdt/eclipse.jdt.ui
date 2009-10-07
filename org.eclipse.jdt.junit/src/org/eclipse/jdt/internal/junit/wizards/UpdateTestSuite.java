@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
 
@@ -30,7 +31,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 
@@ -130,7 +130,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	 */
 	public void run(IAction action) {
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		IStructuredContentProvider cprovider= new SuiteClassesContentProvider();
+		SuiteClassesContentProvider cprovider= new SuiteClassesContentProvider();
 
 		/* find TestClasses already in Test Suite */
 		IType testSuiteType= fTestSuite.findPrimaryType();
@@ -146,7 +146,9 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				dialog.setValidator(new UpdateAllTestsValidator());
 				dialog.setTitle(WizardMessages.UpdateAllTests_title);
 				dialog.setMessage(WizardMessages.UpdateAllTests_message);
-				dialog.setInitialSelections(cprovider.getElements(fPack));
+				Set elements= cprovider.getTests(fPack);
+				elements.remove(testSuiteType);
+				dialog.setInitialSelections(elements.toArray());
 				dialog.setSize(60, 25);
 				dialog.setInput(fPack);
 				if (dialog.open() == Window.OK) {
