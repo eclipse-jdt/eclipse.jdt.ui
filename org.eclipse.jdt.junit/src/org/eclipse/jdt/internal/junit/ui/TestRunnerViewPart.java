@@ -1402,6 +1402,8 @@ action enablement
 				fTestSessionListener= new TestSessionListener();
 				fTestRunSession.addTestSessionListener(fTestSessionListener);
 			}
+			if (!fTestRunSession.isStarting() && !fShowOnErrorOnly)
+				showTestResultsView();
 			
 			setTitleToolTip();
 
@@ -1950,10 +1952,6 @@ action enablement
 		};
 		if (!isDisposed())
 			getDisplay().asyncExec(r);
-	}
-
-	public boolean isCreated() {
-		return fCounterPanel != null;
 	}
 
 	public void rerunTest(String testId, String className, String testName, String launchMode) {

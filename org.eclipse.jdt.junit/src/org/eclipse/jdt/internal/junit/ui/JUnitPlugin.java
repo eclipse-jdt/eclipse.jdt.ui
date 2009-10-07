@@ -303,14 +303,10 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	}
 
 	public static TestRunnerViewPart showTestRunnerViewPartInActivePage() {
-		TestRunnerViewPart testRunner= findTestRunnerViewPartInActivePage();
-		IWorkbenchPage page= null;
 		try {
-			// TODO: have to force the creation of view part contents
+			// Have to force the creation of view part contents
 			// otherwise the UI will not be updated
-			if (testRunner != null && testRunner.isCreated())
-				return testRunner;
-			page= JUnitPlugin.getActivePage();
+			IWorkbenchPage page= JUnitPlugin.getActivePage();
 			if (page == null)
 				return null;
 			//	show the result view if it isn't shown yet.
@@ -319,13 +315,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			JUnitPlugin.log(pie);
 			return null;
 		}
-	}
-	
-	private static TestRunnerViewPart findTestRunnerViewPartInActivePage() {
-		IWorkbenchPage page= JUnitPlugin.getActivePage();
-		if (page == null)
-			return null;
-		return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
 	}
 	
 	private static Display getDisplay() {
