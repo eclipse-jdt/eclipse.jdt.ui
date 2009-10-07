@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -327,16 +327,15 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 */
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		writeImports(imports);
-		type.createMethod(getSuiteMethodString(), null, false, null);
+		type.createMethod(getSuiteMethodString(type), null, false, null);
 	}
 
 	/*
 	 * Returns the string content for creating a new suite() method.
 	 */
-	private String getSuiteMethodString() {
-		IPackageFragment pack= getPackageFragment();
-		String packName= pack.getElementName();
-		StringBuffer suite= new StringBuffer("public static Test suite () {TestSuite suite= new TestSuite(\"Test for "+((packName.equals(""))?"default package":packName)+"\");\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	private String getSuiteMethodString(IType type) {
+		String typeName= type.getElementName();
+		StringBuffer suite= new StringBuffer("public static Test suite () {TestSuite suite= new TestSuite(" + typeName + ".class.getName());\n"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		suite.append(getUpdatableString());
 		suite.append("\nreturn suite;}"); //$NON-NLS-1$
 		return suite.toString();
@@ -399,7 +398,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 				MessageDialog.openError(getShell(), WizardMessages.NewTestSuiteWizPage_createType_updateErrorDialog_title, WizardMessages.NewTestSuiteWizPage_createType_updateErrorDialog_message);
 			}
 		} else {
-			suiteType.createMethod(getSuiteMethodString(), null, true, monitor);
+			suiteType.createMethod(getSuiteMethodString(suiteType), null, true, monitor);
 			String originalContent= cu.getSource();
 			monitor.worked(2);
 			String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), originalContent, lineDelimiter);
