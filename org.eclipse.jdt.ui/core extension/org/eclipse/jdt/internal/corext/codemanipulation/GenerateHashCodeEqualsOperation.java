@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1023,7 +1023,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private boolean needsNoSuperCall(ITypeBinding typeBinding, String name, ITypeBinding[] parameters) {
 		Assert.isNotNull(typeBinding);
 		IMethodBinding binding= Bindings.findMethodInHierarchy(typeBinding.getSuperclass(), name, parameters);
-		if (binding != null) {
+		if (binding != null && !Modifier.isAbstract(binding.getModifiers())) {
 			ITypeBinding declaring= binding.getDeclaringClass();
 			return declaring.getQualifiedName().equals(JAVA_LANG_OBJECT);
 		}
