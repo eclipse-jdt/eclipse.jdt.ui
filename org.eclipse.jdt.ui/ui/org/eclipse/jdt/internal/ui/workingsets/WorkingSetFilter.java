@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
 
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -50,6 +51,10 @@ public class WorkingSetFilter extends JavaViewerFilter {
 				// that means it will only appear if the parent container project is in the working set
 				IResource fakeInternal= proj.getProject().getFile(wrapper.getProject().getElementName() + "-fake-jar.jar"); //$NON-NLS-1$
 				init(proj.getPackageFragmentRoot(fakeInternal));
+			} else if (a instanceof IJarEntryResource) {
+				IJarEntryResource jarEntryResource= (IJarEntryResource)a;
+				IPackageFragmentRoot root= jarEntryResource.getPackageFragmentRoot();
+				init(root);
 			} else {
 				IJavaElement je= (IJavaElement) a.getAdapter(IJavaElement.class);
 				if (je != null) {
