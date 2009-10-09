@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,7 +125,9 @@ public class MatchLocations {
 		private void createMethodFieldMatchLocationsControls(Composite contents) {
 
 			Composite composite= new Composite(contents, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.LEFT, SWT.BEGINNING, true, true, 2, 1));
+			GridData gd= new GridData(SWT.LEFT, SWT.BEGINNING, true, true, 2, 1);
+			gd.minimumWidth= convertHorizontalDLUsToPixels(200);
+			composite.setLayoutData(gd);
 			GridLayout blayout= new GridLayout(1, false);
 			blayout.marginWidth= 0;
 			blayout.marginHeight= 0;
@@ -144,15 +146,17 @@ public class MatchLocations {
 			group.setLayout(new GridLayout(1, false));
 			group.setText(SearchMessages.MatchLocations_declaration_group_label);
 
-			int superTypes= IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE;
-			createButton(group, SearchMessages.MatchLocations_super_types_label, superTypes);
+			createButton(group, SearchMessages.MatchLocations_imports_label, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE);
+			createButton(group, SearchMessages.MatchLocations_super_types_label, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
 			addSeparator(group);
+			
 			createButton(group, SearchMessages.MatchLocations_annotations_label , IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE);
 			addSeparator(group);
 
 			createButton(group, SearchMessages.MatchLocations_field_types_label, IJavaSearchConstants.FIELD_DECLARATION_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_local_types_label, IJavaSearchConstants.LOCAL_VARIABLE_DECLARATION_TYPE_REFERENCE);
 			addSeparator(group);
+			
 			createButton(group, SearchMessages.MatchLocations_method_types_label, IJavaSearchConstants.RETURN_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_parameter_types_label, IJavaSearchConstants.PARAMETER_DECLARATION_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_thrown_exceptions_label, IJavaSearchConstants.THROWS_CLAUSE_TYPE_REFERENCE);
@@ -168,7 +172,7 @@ public class MatchLocations {
 			createButton(ptGroup, SearchMessages.MatchLocations_type_arguments_label, IJavaSearchConstants.TYPE_ARGUMENT_TYPE_REFERENCE);
 
 			Group statementGroup= new Group(contents, SWT.NONE);
-			statementGroup.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+			statementGroup.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
 			statementGroup.setLayout(new GridLayout(1, false));
 			statementGroup.setText(SearchMessages.MatchLocations_expression_group_label);
 
@@ -254,6 +258,9 @@ public class MatchLocations {
 			return SearchMessages.MatchLocations_match_locations_description;
 		}
 		ArrayList args= new ArrayList(3);
+		if (isSet(locations, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE)) {
+			args.add(SearchMessages.MatchLocations_imports_description);
+		}
 		if (isSet(locations, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_super_types_description);
 		}
@@ -327,7 +334,7 @@ public class MatchLocations {
 
 	public static int getTotalNumberOfSettings(int searchFor) {
 		if (searchFor == IJavaSearchConstants.TYPE) {
-			return 14;
+			return 15;
 		} else if (searchFor == IJavaSearchConstants.METHOD || searchFor == IJavaSearchConstants.FIELD) {
 			return 4;
 		}
@@ -338,6 +345,9 @@ public class MatchLocations {
 		int count= 0;
 		if (searchFor == IJavaSearchConstants.TYPE) {
 
+			if (isSet(locations, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE)) {
+				count++;
+			}
 			if (isSet(locations, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE)) {
 				count++;
 			}

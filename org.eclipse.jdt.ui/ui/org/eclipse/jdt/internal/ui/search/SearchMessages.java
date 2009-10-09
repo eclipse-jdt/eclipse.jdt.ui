@@ -285,6 +285,8 @@ public final class SearchMessages extends NLS {
 	public static String MatchLocations_implicit_this_description;
 	public static String MatchLocations_implicit_this_label;
 
+	public static String MatchLocations_imports_description;
+	public static String MatchLocations_imports_label;
 	public static String MatchLocations_local_types_description;
 	public static String MatchLocations_local_types_label;
 

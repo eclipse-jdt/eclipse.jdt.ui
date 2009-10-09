@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -368,6 +368,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (searchFor != FIELD && (limitTo == READ_ACCESSES || limitTo == WRITE_ACCESSES)) {
 			limitTo= REFERENCES;
 		}
+		
+		if (searchFor != TYPE && searchFor != FIELD && searchFor != METHOD && limitTo == SPECIFIC_REFERENCES) {
+			limitTo= REFERENCES;
+		}
 		fillLimitToGroup(searchFor, limitTo);
 		return limitTo;
 	}
@@ -501,7 +505,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 		Composite result= new Composite(parent, SWT.NONE);
 
-		GridLayout layout= new GridLayout(2, false);
+		GridLayout layout= new GridLayout(2, true);
 		layout.horizontalSpacing= 10;
 		result.setLayout(layout);
 
@@ -733,6 +737,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (searchFor == FIELD) {
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_readReferences, READ_ACCESSES, limitTo == READ_ACCESSES));
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_writeReferences, WRITE_ACCESSES, limitTo == WRITE_ACCESSES));
+			
+			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
+		}
+		
+		if (searchFor == METHOD) {
+			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
 		}
 
 		fLimitTo= (Button[]) buttons.toArray(new Button[buttons.size()]);
@@ -746,8 +756,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			fLimitTo[i].addSelectionListener(listener);
 		}
 		Dialog.applyDialogFont(fLimitToGroup); // re-apply font as we disposed the previous widgets
-
-		fLimitToGroup.layout();
+		
+		// searchFor == FIELD needs one more row than the others
+		fLimitToGroup.getShell().layout(new Control[] { fLimitToGroup.getChildren()[0] });
 	}
 
 
