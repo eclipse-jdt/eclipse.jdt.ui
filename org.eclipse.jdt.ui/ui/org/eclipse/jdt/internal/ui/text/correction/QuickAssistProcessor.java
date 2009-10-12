@@ -736,15 +736,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		// collect operands
 		List operands= new ArrayList();
-		operands.add(rewrite.createCopyTarget(oldInfixExpression.getLeftOperand()));
-		operands.add(rewrite.createCopyTarget(oldInfixExpression.getRightOperand()));
-		for (int i= 0; i < oldInfixExpression.extendedOperands().size(); i++) {
-			ASTNode extNode= (ASTNode) oldInfixExpression.extendedOperands().get(i);
-			operands.add(rewrite.createCopyTarget(extNode));
-		}
-
+		collectInfixPlusOperands(oldInfixExpression, operands);
+		
 		Statement lastAppend= insertAfter;
 		for (Iterator iter= operands.iterator(); iter.hasNext();) {
 			Expression operand= (Expression) iter.next();
@@ -759,7 +753,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 
 			appendIncovationExpression.setExpression(bufferNameReference);
-			appendIncovationExpression.arguments().add(operand);
+			appendIncovationExpression.arguments().add(rewrite.createCopyTarget(operand));
 
 			ExpressionStatement appendExpressionStatement= ast.newExpressionStatement(appendIncovationExpression);
 			if (lastAppend == null) {
@@ -788,6 +782,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		return proposal;
+	}
+
+	private static void collectInfixPlusOperands(Expression expression, List collector) {
+		if (expression instanceof InfixExpression && ((InfixExpression)expression).getOperator() == InfixExpression.Operator.PLUS) {
+			InfixExpression infixExpression= (InfixExpression)expression;
+			
+			collectInfixPlusOperands(infixExpression.getLeftOperand(), collector);
+			collectInfixPlusOperands(infixExpression.getRightOperand(), collector);
+			List extendedOperands= infixExpression.extendedOperands();
+			for (Iterator iter= extendedOperands.iterator(); iter.hasNext();) {
+				collectInfixPlusOperands((Expression)iter.next(), collector);
+			}
+			
+		} else {
+			collector.add(expression);
+		}
 	}
 
 	/**
@@ -843,12 +853,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		// collect operands
 		List operands= new ArrayList();
-		operands.add(oldInfixExpression.getLeftOperand());
-		operands.add(oldInfixExpression.getRightOperand());
-		for (int i= 0; i < oldInfixExpression.extendedOperands().size(); i++) {
-			ASTNode extNode= (ASTNode) oldInfixExpression.extendedOperands().get(i);
-			operands.add(extNode);
-		}
+		collectInfixPlusOperands(oldInfixExpression, operands);
 
 		List formatArguments= new ArrayList();
 		String formatString= ""; //$NON-NLS-1$
