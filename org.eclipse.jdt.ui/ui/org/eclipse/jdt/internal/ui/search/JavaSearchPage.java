@@ -369,7 +369,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			limitTo= REFERENCES;
 		}
 		
-		if (searchFor != TYPE && searchFor != FIELD && searchFor != METHOD && limitTo == SPECIFIC_REFERENCES) {
+		if (searchFor != TYPE /*&& searchFor != FIELD*/ && searchFor != METHOD && limitTo == SPECIFIC_REFERENCES) {
 			limitTo= REFERENCES;
 		}
 		fillLimitToGroup(searchFor, limitTo);
@@ -737,8 +737,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (searchFor == FIELD) {
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_readReferences, READ_ACCESSES, limitTo == READ_ACCESSES));
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_writeReferences, WRITE_ACCESSES, limitTo == WRITE_ACCESSES));
-			
-			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
+
+//			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
 		}
 		
 		if (searchFor == METHOD) {
@@ -757,8 +757,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		}
 		Dialog.applyDialogFont(fLimitToGroup); // re-apply font as we disposed the previous widgets
 		
-		// searchFor == FIELD needs one more row than the others
-		fLimitToGroup.getShell().layout(new Control[] { fLimitToGroup.getChildren()[0] });
+		fLimitToGroup.layout();
+//		// searchFor == FIELD needs one more row than the others
+//		fLimitToGroup.getShell().layout(new Control[] { fLimitToGroup.getChildren()[0] });
 	}
 
 
