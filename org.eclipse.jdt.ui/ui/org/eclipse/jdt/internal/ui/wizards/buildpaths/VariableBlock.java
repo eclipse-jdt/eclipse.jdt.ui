@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModel;
@@ -299,7 +301,7 @@ public class VariableBlock {
 			final VariableBlockRunnable runnable= new VariableBlockRunnable(removedVariables, changedElements);
 			final ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			try {
-				dialog.run(true, true, runnable);
+				PlatformUI.getWorkbench().getProgressService().runInUI(dialog, runnable, ResourcesPlugin.getWorkspace().getRoot());
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(new InvocationTargetException(new NullPointerException()), getShell(), NewWizardMessages.VariableBlock_variableSettingError_titel, NewWizardMessages.VariableBlock_variableSettingError_message);
 				return false;
