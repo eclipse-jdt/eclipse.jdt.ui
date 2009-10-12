@@ -622,7 +622,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 	final void updateOKStatus() {
 		boolean isValid= isValidSearchPattern();
-		getContainer().setPerformActionEnabled(isValid);
+		int includeMask= getIncludeMask();
+		getContainer().setPerformActionEnabled(isValid && includeMask > 0);
 	}
 
 	private boolean isValidSearchPattern() {
@@ -737,10 +738,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (searchFor == FIELD) {
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_readReferences, READ_ACCESSES, limitTo == READ_ACCESSES));
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_writeReferences, WRITE_ACCESSES, limitTo == WRITE_ACCESSES));
-
+			
 //			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
 		}
-		
+
 		if (searchFor == METHOD) {
 			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
 		}
@@ -756,7 +757,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			fLimitTo[i].addSelectionListener(listener);
 		}
 		Dialog.applyDialogFont(fLimitToGroup); // re-apply font as we disposed the previous widgets
-		
+
 		fLimitToGroup.layout();
 //		// searchFor == FIELD needs one more row than the others
 //		fLimitToGroup.getShell().layout(new Control[] { fLimitToGroup.getChildren()[0] });
@@ -836,6 +837,16 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_jre, JavaSearchScopeFactory.JRE, false),
 			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_libraries, JavaSearchScopeFactory.LIBS, true),
 		};
+
+		SelectionAdapter listener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				updateOKStatus();
+			}
+		};
+		for (int i= 0; i < fIncludeMasks.length; i++) {
+			fIncludeMasks[i].addSelectionListener(listener);
+		}
+
 		return result;
 	}
 
