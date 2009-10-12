@@ -5281,6 +5281,69 @@ public class AssistQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	public void testConvertToStringBufferExisting1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuffer buf= new StringBuffer();\n");
+		buf.append("        buf.append(\"high\" + 5);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 5"), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuffer buf= new StringBuffer();\n");
+		buf.append("        buf.append(\"high\");\n");
+		buf.append("        buf.append(5);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testConvertToStringBufferExisting2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuilder sb= new StringBuilder();\n");
+		buf.append("        sb.append(\"high\" + 5 + \" ho\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 5"), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuilder sb= new StringBuilder();\n");
+		buf.append("        sb.append(\"high\");\n");
+		buf.append("        sb.append(5);\n");
+		buf.append("        sb.append(\" ho\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
 	public void testConvertToMessageFormat14() throws Exception {
 
 		Map oldOptions= fJProject1.getOptions(false);
