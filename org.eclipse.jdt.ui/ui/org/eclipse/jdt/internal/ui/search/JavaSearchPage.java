@@ -621,9 +621,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	final void updateOKStatus() {
-		boolean isValid= isValidSearchPattern();
-		int includeMask= getIncludeMask();
-		getContainer().setPerformActionEnabled(isValid && includeMask > 0);
+		boolean isValidPattern= isValidSearchPattern();
+		boolean isValidMask= getIncludeMask() != 0;
+		getContainer().setPerformActionEnabled(isValidPattern && isValidMask);
 	}
 
 	private boolean isValidSearchPattern() {
