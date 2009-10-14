@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GenerateHashCodeEqualsOperation;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -124,42 +125,53 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	}
 
 	boolean isMethodAlreadyImplemented(ITypeBinding typeBinding) {
-		HashCodeEqualsInfo info= getTypeInfo(typeBinding);
+		HashCodeEqualsInfo info= getTypeInfo(typeBinding, false);
 		return (info.foundEquals || info.foundHashCode);
 	}
 
-	private HashCodeEqualsInfo getTypeInfo(ITypeBinding someType) {
+	private HashCodeEqualsInfo getTypeInfo(ITypeBinding someType, boolean checkSuperclasses) {
 		HashCodeEqualsInfo info= new HashCodeEqualsInfo();
 		if (someType.isTypeVariable()) {
 			someType= someType.getErasure();
 		}
-
-		IMethodBinding[] declaredMethods= someType.getDeclaredMethods();
-
-		for (int i= 0; i < declaredMethods.length; i++) {
-			if (declaredMethods[i].getName().equals(METHODNAME_EQUALS)) {
-				ITypeBinding[] b= declaredMethods[i].getParameterTypes();
-				if ((b.length == 1) && (b[0].getQualifiedName().equals("java.lang.Object"))) { //$NON-NLS-1$
-					info.foundEquals= true;
-					if (Modifier.isFinal(declaredMethods[i].getModifiers()))
-						info.foundFinalEquals= true;
+		
+		while (true) {
+			IMethodBinding[] declaredMethods= someType.getDeclaredMethods();
+	
+			for (int i= 0; i < declaredMethods.length; i++) {
+				if (declaredMethods[i].getName().equals(METHODNAME_EQUALS)) {
+					ITypeBinding[] b= declaredMethods[i].getParameterTypes();
+					if ((b.length == 1) && (b[0].getQualifiedName().equals("java.lang.Object"))) { //$NON-NLS-1$
+						info.foundEquals= true;
+						if (Modifier.isFinal(declaredMethods[i].getModifiers()))
+							info.foundFinalEquals= true;
+					}
 				}
+				if (declaredMethods[i].getName().equals(METHODNAME_HASH_CODE) && declaredMethods[i].getParameterTypes().length == 0) {
+					info.foundHashCode= true;
+					if (Modifier.isFinal(declaredMethods[i].getModifiers()))
+						info.foundFinalHashCode= true;
+				}
+				if (info.foundEquals && info.foundHashCode)
+					break;
 			}
-			if (declaredMethods[i].getName().equals(METHODNAME_HASH_CODE) && declaredMethods[i].getParameterTypes().length == 0) {
-				info.foundHashCode= true;
-				if (Modifier.isFinal(declaredMethods[i].getModifiers()))
-					info.foundFinalHashCode= true;
-			}
-			if (info.foundEquals && info.foundHashCode)
+			if (checkSuperclasses) {
+				someType= someType.getSuperclass();
+				if (someType == null || TypeRules.isJavaLangObject(someType)) {
+					break;
+				}
+			} else {
 				break;
+			}
 		}
+		
 		return info;
 	}
 
 	private RefactoringStatus checkHashCodeEqualsExists(ITypeBinding someType, boolean superClass) {
 
 		RefactoringStatus status= new RefactoringStatus();
-		HashCodeEqualsInfo info= getTypeInfo(someType);
+		HashCodeEqualsInfo info= getTypeInfo(someType, true);
 
 		String concreteTypeWarning= superClass ? ActionMessages.GenerateMethodAbstractAction_super_class : ActionMessages.GenerateHashCodeEqualsAction_field_type;
 		String concreteMethWarning= (someType.isInterface() || Modifier.isAbstract(someType.getModifiers()))
@@ -174,7 +186,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		else if (!info.foundHashCode)
 			concreteHCEWarning= ActionMessages.GenerateHashCodeEqualsAction_hashCode;
 
-		if (!info.foundEquals && !info.foundHashCode)
+		if (!info.foundEquals || !info.foundHashCode)
 			status.addWarning(Messages.format(concreteMethWarning, new String[] {
 					Messages.format(concreteTypeWarning, BindingLabelProvider.getBindingLabel(someType, JavaElementLabels.ALL_FULLY_QUALIFIED)), concreteHCEWarning }),
 					createRefactoringStatusContext(someType.getJavaElement()));
