@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
 
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -34,9 +35,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaViewerFilter;
  */
 public class WorkingSetFilter extends JavaViewerFilter {
 
+
 	private static class WorkingSetCompareEntry {
+
+		/**
+		 * Denotes an {@link IJarEntryResource} if it is
+		 * <code>null &amp;&amp; fJavaElement != null.</code>
+		 */
 		private IPath fResourcePath;
 		private IJavaElement fJavaElement;
+
 
 		public WorkingSetCompareEntry(IAdaptable a) {
 			if (a instanceof IJavaElement) {
@@ -50,6 +58,8 @@ public class WorkingSetFilter extends JavaViewerFilter {
 				// that means it will only appear if the parent container project is in the working set
 				IResource fakeInternal= proj.getProject().getFile(wrapper.getProject().getElementName() + "-fake-jar.jar"); //$NON-NLS-1$
 				init(proj.getPackageFragmentRoot(fakeInternal));
+			} else if (a instanceof IJarEntryResource) {
+				init((IJarEntryResource)a);
 			} else {
 				IJavaElement je= (IJavaElement) a.getAdapter(IJavaElement.class);
 				if (je != null) {
@@ -76,6 +86,14 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			fResourcePath= curr.getPath();
 		}
 
+		private void init(IJarEntryResource jarEntryResource) {
+			Object parent= jarEntryResource.getParent();
+			while (parent instanceof IJarEntryResource)
+				parent= ((IJarEntryResource)parent).getParent();
+			fJavaElement= (IJavaElement)parent;
+			fResourcePath= null;
+		}
+
 		public boolean contains(WorkingSetCompareEntry element) {
 			if (fJavaElement != null && element.fJavaElement != null) {
 				IJavaElement other= element.fJavaElement;
@@ -88,7 +106,8 @@ public class WorkingSetFilter extends JavaViewerFilter {
 					}
 				}
 
-				if (isAncestor(other, fJavaElement) || isAncestor(fJavaElement, other)) {
+				// Check relationship in both directions except for IJarFileEntryResource which cannot be part of a working set
+				if (isAncestor(other, fJavaElement) || isAncestor(fJavaElement, other) && element.fResourcePath != null) {
 					return true;
 				}
 				return false;
@@ -101,6 +120,14 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			return false;
 		}
 
+		/**
+		 * Check whether the given parent is an ancestor of the given element
+		 * or the same as the element.
+		 * 
+		 * @param elem the element
+		 * @param parent the anchestor
+		 * @return <code>true</code> if it is an ancestor
+		 */
 		private boolean isAncestor(IJavaElement elem, IJavaElement parent) {
 			IJavaElement anc= elem.getAncestor(parent.getElementType());
 			if (parent.equals(anc)) {
