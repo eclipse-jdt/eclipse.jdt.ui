@@ -34,9 +34,6 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -224,7 +221,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private SelectFieldModeAction[] fToggleFieldModeActions;
     private CallHierarchyFiltersActionGroup fFiltersActionGroup;
     private HistoryDropDownAction fHistoryDropDownAction;
-    private RefreshAction fRefreshAction;
+    private RefreshElementAction fRefreshSingleElementAction;
+    private RefreshViewAction fRefreshViewAction;
     private OpenLocationAction fOpenLocationAction;
 	private LocationCopyAction fLocationCopyAction;
     private FocusOnSelectionAction fFocusOnSelectionAction;
@@ -846,20 +844,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         JavaPlugin.createStandardGroups(menu);
 
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenLocationAction);
-        menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshAction);
+        menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fLocationCopyAction);
-    }
-
-    protected void handleKeyEvent(KeyEvent event) {
-        if (event.stateMask == 0) {
-            if (event.keyCode == SWT.F5) {
-                if ((fRefreshAction != null) && fRefreshAction.isEnabled()) {
-                    fRefreshAction.run();
-
-                    return;
-                }
-            }
-        }
     }
 
     private IActionBars getActionBars() {
@@ -917,7 +903,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private void createLocationViewer(Composite parent) {
         fLocationViewer= new LocationViewer(parent);
 
-        fLocationViewer.getControl().addKeyListener(createKeyListener());
 
         fLocationViewer.initContextMenu(new IMenuListener() {
                 public void menuAboutToShow(IMenuManager menu) {
@@ -928,21 +913,18 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private void createHierarchyLocationSplitter(Composite parent) {
         fHierarchyLocationSplitter = new SashForm(parent, SWT.NONE);
-
-        fHierarchyLocationSplitter.addKeyListener(createKeyListener());
     }
 
     private void createCallHierarchyViewer(Composite parent) {
         fCallHierarchyViewer = new CallHierarchyViewer(parent, this);
 
-        fCallHierarchyViewer.addKeyListener(createKeyListener());
         fCallHierarchyViewer.addSelectionChangedListener(this);
     }
 
     protected void fillCallHierarchyViewerContextMenu(IMenuManager menu) {
         JavaPlugin.createStandardGroups(menu);
 
-        menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshAction);
+        menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshSingleElementAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new Separator(GROUP_FOCUS));
 
         if (fFocusOnSelectionAction.canActionBeAdded()) {
@@ -967,13 +949,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private void fillActionBars() {
         IActionBars actionBars = getActionBars();
-		actionBars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
+		actionBars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshSingleElementAction);
 
         IToolBarManager toolBar = actionBars.getToolBarManager();
 
         fActionGroups.fillActionBars(actionBars);
 
-        toolBar.add(fRefreshAction);
+        toolBar.add(fRefreshViewAction);
         toolBar.add(fCancelSearchAction);
         for (int i = 0; i < fToggleCallModeActions.length; i++) {
             toolBar.add(fToggleCallModeActions[i]);
@@ -981,21 +963,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         toolBar.add(fHistoryDropDownAction);
     }
 
-    private KeyListener createKeyListener() {
-        KeyListener keyListener = new KeyAdapter() {
-                public void keyReleased(KeyEvent event) {
-                    handleKeyEvent(event);
-                }
-            };
-
-        return keyListener;
-    }
-
     /**
      *
      */
     private void makeActions() {
-        fRefreshAction = new RefreshAction(this);
+        fRefreshViewAction = new RefreshViewAction(this);
+        fRefreshSingleElementAction= new RefreshElementAction(this, fCallHierarchyViewer);
 
 		new CallHierarchyOpenEditorHelper(fLocationViewer);
 		new CallHierarchyOpenEditorHelper(fCallHierarchyViewer);

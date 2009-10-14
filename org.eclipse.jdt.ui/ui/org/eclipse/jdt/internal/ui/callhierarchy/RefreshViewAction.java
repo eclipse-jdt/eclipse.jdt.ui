@@ -13,22 +13,20 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-class RefreshAction extends Action {
+class RefreshViewAction extends Action {
     private CallHierarchyViewPart fPart;
 
-	public RefreshAction(CallHierarchyViewPart part) {
+	public RefreshViewAction(CallHierarchyViewPart part) {
 		fPart= part;
-		setText(CallHierarchyMessages.RefreshAction_text);
-		setToolTipText(CallHierarchyMessages.RefreshAction_tooltip);
+		setText(CallHierarchyMessages.RefreshViewAction_text);
+		setToolTipText(CallHierarchyMessages.RefreshViewAction_tooltip);
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
-		setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_VIEW_ACTION);
 	}
 
     /**

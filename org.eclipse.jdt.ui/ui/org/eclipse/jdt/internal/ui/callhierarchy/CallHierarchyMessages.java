@@ -93,8 +93,11 @@ public final class CallHierarchyMessages extends NLS {
 	public static String FocusOnSelectionAction_focusOnSelection_tooltip;
 	public static String FocusOnSelectionAction_focusOn_selected;
 	public static String FocusOnSelectionAction_focusOn_text;
-	public static String RefreshAction_text;
-	public static String RefreshAction_tooltip;
+	public static String RefreshViewAction_text;
+	public static String RefreshViewAction_tooltip;
+	public static String RefreshSingleElementAction_text;
+	public static String RefreshSingleElementAction_tooltip;
+	public static String RefreshSingleElementAction_description;
 	public static String SearchScopeActionGroup_searchScope;
 	public static String SearchScopeActionGroup_hierarchy_text;
 	public static String SearchScopeActionGroup_hierarchy_tooltip;

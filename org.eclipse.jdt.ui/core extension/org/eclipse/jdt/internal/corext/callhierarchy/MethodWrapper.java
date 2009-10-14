@@ -355,4 +355,14 @@ public abstract class MethodWrapper extends PlatformObject {
             progressMonitor.worked(1);
         }
     }
+
+	/**
+	 * Removes the given method call from the cache.
+	 *
+	 * @since 3.6
+	 */
+	public void removeFromCache() {
+		fElements= null;
+		fMethodCache.remove(getMethodCall().getKey());
+	}
 }

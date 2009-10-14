@@ -437,7 +437,7 @@ public interface IJavaHelpContextIds {
     public static final String CALL_HIERARCHY_FOCUS_ON_SELECTION_ACTION= PREFIX + "call_hierarchy_focus_on_selection_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_HISTORY_ACTION= PREFIX + "call_hierarchy_history_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_HISTORY_DROP_DOWN_ACTION= PREFIX + "call_hierarchy_history_drop_down_action_context"; //$NON-NLS-1$
-    public static final String CALL_HIERARCHY_REFRESH_ACTION= PREFIX + "call_hierarchy_refresh_action_context"; //$NON-NLS-1$
+    public static final String CALL_HIERARCHY_REFRESH_VIEW_ACTION= PREFIX + "call_hierarchy_refresh_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_SEARCH_SCOPE_ACTION= PREFIX + "call_hierarchy_search_scope_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION= PREFIX + "call_hierarchy_toggle_call_mode_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_TOGGLE_JAVA_LABEL_FORMAT_ACTION= PREFIX + "call_hierarchy_toggle_java_label_format_action_context"; //$NON-NLS-1$
@@ -449,6 +449,11 @@ public interface IJavaHelpContextIds {
     public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_ACTION= PREFIX + "call_hierarchy_expand_with_constructors_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_EXPAND_WITH_CONSTRUCTORS_DIALOG= PREFIX + "call_hierarchy_expand_with_constructors_dialog_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_REMOVE_FROM_VIEW_ACTION= PREFIX + "call_hierarchy_remove_from_view_action_context"; //$NON-NLS-1$
+
+    /**
+     * @since 3.6
+     */
+    public static final String CALL_HIERARCHY_REFRESH_SINGLE_ELEMENT_ACTION= PREFIX + "call_hierarchy_refresh_single_element_action_context"; //$NON-NLS-1$
     /**
      * @since 3.2
      */
