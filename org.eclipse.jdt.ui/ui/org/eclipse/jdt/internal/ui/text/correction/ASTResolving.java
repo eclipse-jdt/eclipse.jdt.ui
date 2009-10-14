@@ -940,8 +940,13 @@ public class ASTResolving {
 		res.add(type);
 		if (type.isArray()) {
 			res.add(ast.resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$
-			res.add(ast.resolveWellKnownType("java.io.Serializable")); //$NON-NLS-1$
-			res.add(ast.resolveWellKnownType("java.lang.Cloneable")); //$NON-NLS-1$
+			// The following two types are not available in some j2me implementations, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=288060 :
+			ITypeBinding serializable= ast.resolveWellKnownType("java.io.Serializable"); //$NON-NLS-1$
+			if (serializable != null)
+				res.add(serializable);
+			ITypeBinding cloneable= ast.resolveWellKnownType("java.lang.Cloneable"); //$NON-NLS-1$
+			if (cloneable != null)
+				res.add(cloneable);
 		} else if (type.isPrimitive()) {
 			Code code= PrimitiveType.toCode(type.getName());
 			boolean found= false;
