@@ -294,7 +294,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewriter, fInsert);
 
 				// equals(..)
-				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType("java.lang.Object") }; //$NON-NLS-1$
+				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType(JAVA_LANG_OBJECT) };
 				BodyDeclaration oldEquals= fForce ? findMethodToReplace(list, METHODNAME_EQUALS, objectAsParam) : null;
 
 				MethodDeclaration equalsMethod= createEqualsMethod();
