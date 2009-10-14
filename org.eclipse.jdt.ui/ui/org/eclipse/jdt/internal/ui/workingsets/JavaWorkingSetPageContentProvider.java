@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvider {
-	
+
 	public boolean hasChildren(Object element) {
 
 		if (element instanceof IProject && !((IProject)element).isAccessible())
@@ -31,8 +31,10 @@ class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvid
 		if (element instanceof IPackageFragment) {
 			IPackageFragment pkg= (IPackageFragment)element;
 			try {
-				if (pkg.getKind() == IPackageFragmentRoot.K_BINARY)
+				if (pkg.getKind() == IPackageFragmentRoot.K_BINARY) {
+					// Don't show IJarEntryResource
 					return pkg.getChildren().length > 0;
+				}
 			} catch (JavaModelException ex) {
 				// use super behavior
 			}
@@ -42,9 +44,9 @@ class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvid
 
 	public Object[] getChildren(Object parentElement) {
 		try {
-			if (parentElement instanceof IJavaModel) 
+			if (parentElement instanceof IJavaModel)
 				return concatenate(super.getChildren(parentElement), getNonJavaProjects((IJavaModel)parentElement));
-			
+
 			if (parentElement instanceof IProject) {
 				IProject project= (IProject) parentElement;
 				if (project.isAccessible()) {
@@ -56,6 +58,15 @@ class JavaWorkingSetPageContentProvider extends StandardJavaElementContentProvid
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}
+	}
+
+	protected Object[] getPackageFragmentRootContent(IPackageFragmentRoot root) throws JavaModelException {
+		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
+			// Don't show IJarEntryResource
+			return root.getChildren();
+		}
+
+		return super.getPackageFragmentRootContent(root);
 	}
 
 	private Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
