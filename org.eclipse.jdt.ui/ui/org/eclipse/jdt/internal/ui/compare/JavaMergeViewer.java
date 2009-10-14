@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -165,13 +166,15 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private void handlePropertyChange(PropertyChangeEvent event) {
 		if (fSourceViewerConfiguration != null) {
-			for (Iterator iterator= fSourceViewerConfiguration.values().iterator(); iterator.hasNext();) {
-				JavaSourceViewerConfiguration configuration= (JavaSourceViewerConfiguration)iterator.next();
+			for (Iterator iterator= fSourceViewerConfiguration.entrySet().iterator(); iterator.hasNext();) {
+				Entry entry= (Entry)iterator.next();
+				JavaSourceViewerConfiguration configuration= (JavaSourceViewerConfiguration)entry.getValue();
 				if (configuration.affectsTextPresentation(event)) {
 					configuration.handlePropertyChangeEvent(event);
+					ITextViewer viewer= (ITextViewer)entry.getKey();
+					viewer.invalidateTextPresentation();
 				}
 			}
-			invalidateTextPresentation();
 		}
 	}
 
