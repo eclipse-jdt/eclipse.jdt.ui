@@ -16,6 +16,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="internal compatibility/org/eclipse/jdt/internal/corext/SourceRange.java" type="org.eclipse.jdt.internal.corext.SourceRange">
+        <filter id="574619656">
+            <message_arguments>
+                <message_argument value="ISourceRange"/>
+                <message_argument value="SourceRange"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui refactoring/org/eclipse/jdt/internal/ui/refactoring/PullPushCheckboxTableViewer.java" type="org.eclipse.jdt.internal.ui.refactoring.PullPushCheckboxTableViewer">
         <filter id="571473929">
             <message_arguments>
