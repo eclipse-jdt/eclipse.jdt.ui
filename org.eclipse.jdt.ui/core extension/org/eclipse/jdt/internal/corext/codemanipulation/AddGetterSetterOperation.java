@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -179,9 +179,9 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Generates a new setter method for the specified field
-	 *
+	 * 
 	 * @param field the field
-	 * @param astRewrite
+	 * @param astRewrite the AST rewrite to use
 	 * @param rewrite the list rewrite to use
 	 * @throws CoreException if an error occurs
 	 * @throws OperationCanceledException if the operation has been cancelled
@@ -190,7 +190,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 		final IType type= field.getDeclaringType();
 		final String name= GetterSetterUtil.getSetterName(field, null);
 		final IMethod existing= JavaModelUtil.findMethod(name, new String[] { field.getTypeSignature()}, false, type);
-		if (existing == null || querySkipExistingMethods(existing)) {
+		if (existing == null || !querySkipExistingMethods(existing)) {
 			IJavaElement sibling= null;
 			if (existing != null) {
 				sibling= StubUtility.findNextSibling(existing);
