@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -195,14 +195,18 @@ public final class ToggleCommentAction extends TextEditorAction {
 
 		try {
 
-			int startLine= document.getLineOfOffset(region.getOffset());
+			final int startLine= document.getLineOfOffset(region.getOffset());
 
 			int offset= document.getLineOffset(startLine);
 			if (offset >= region.getOffset())
 				return startLine;
 
-			offset= document.getLineOffset(startLine + 1);
-			return (offset > region.getOffset() + region.getLength() ? -1 : startLine + 1);
+			final int nextLine= startLine + 1;
+			if (nextLine == document.getNumberOfLines())
+				return -1;
+
+			offset= document.getLineOffset(nextLine);
+			return (offset > region.getOffset() + region.getLength() ? -1 : nextLine);
 
 		} catch (BadLocationException x) {
 			// should not happen
