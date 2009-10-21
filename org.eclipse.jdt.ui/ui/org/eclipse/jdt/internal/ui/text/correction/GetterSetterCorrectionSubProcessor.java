@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionPro
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
+
 public class GetterSetterCorrectionSubProcessor {
 
 	public static final String SELF_ENCAPSULATE_FIELD_ID= "org.eclipse.jdt.ui.correction.encapsulateField.assist"; //$NON-NLS-1$
@@ -298,6 +299,8 @@ public class GetterSetterCorrectionSubProcessor {
 		ITypeBinding returnType= context.variableBinding.getType();
 		String getterName= GetterSetterUtil.getGetterName(context.variableBinding, context.compilationUnit.getJavaProject(), null, isBoolean(context));
 		ITypeBinding declaringType= context.variableBinding.getDeclaringClass();
+		if (declaringType == null)
+			return null;
 		IMethodBinding getter= Bindings.findMethodInHierarchy(declaringType, getterName, new ITypeBinding[0]);
 		if (getter != null && getter.getReturnType().isAssignmentCompatible(returnType) && Modifier.isStatic(getter.getModifiers()) == Modifier.isStatic(context.variableBinding.getModifiers()))
 			return getter;
@@ -337,6 +340,9 @@ public class GetterSetterCorrectionSubProcessor {
 		boolean isBoolean= isBoolean(context);
 		String setterName= GetterSetterUtil.getSetterName(context.variableBinding, context.compilationUnit.getJavaProject(), null, isBoolean);
 		ITypeBinding declaringType= context.variableBinding.getDeclaringClass();
+		if (declaringType == null)
+			return null;
+
 		IMethodBinding method= Bindings.findMethodInHierarchy(declaringType, setterName, new ITypeBinding[] { context.variableBinding.getType() });
 		if (method != null && Bindings.isVoidType(method.getReturnType()) && (Modifier.isStatic(method.getModifiers()) == Modifier.isStatic(context.variableBinding.getModifiers()))) {
 			Expression assignedValue= getAssignedValue(context);
