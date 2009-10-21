@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /*
- * The page for setting general java plugin preferences.
+ * The page for setting general Java plug-in preferences.
  * See PreferenceConstants to access or change these values through public API.
  */
 public class JavaBasePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
