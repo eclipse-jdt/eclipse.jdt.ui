@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+
 /**
  * Create fixes which can transform pre Java50 code to Java50 code
  * @see org.eclipse.jdt.internal.corext.fix.Java50Fix
@@ -116,7 +117,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
 			result.add(MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
 			if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION)) {
-				result.add("Add missing '@Override' annotations to implementations of interface methods");
+				result.add(MultiFixMessages.Java50MultiFix_AddMissingOverride_description2);
 			}
 		}
 		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED))
