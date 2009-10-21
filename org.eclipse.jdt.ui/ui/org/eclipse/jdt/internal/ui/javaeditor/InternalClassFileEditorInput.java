@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
@@ -18,6 +17,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -108,7 +108,9 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	public Object getAdapter(Class adapter) {
 		if (adapter == IClassFile.class)
 			return fClassFile;
-		return fClassFile.getAdapter(adapter);
+		else if (adapter == IJavaElement.class)
+			return fClassFile;
+		return null;
 	}
 
 	/*
