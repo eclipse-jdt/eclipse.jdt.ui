@@ -810,9 +810,11 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistStaticMembersConfigurationBlock_edit_button;
 	public static String CodeAssistStaticMembersConfigurationBlock_remove_button;
 
-	public static String FavoriteStaticMemberInputDialog_member_title;
+	public static String FavoriteStaticMemberInputDialog_member_new_title;
+	public static String FavoriteStaticMemberInputDialog_member_edit_title;
 	public static String FavoriteStaticMemberInputDialog_member_labelText;
-	public static String FavoriteStaticMemberInputDialog_type_title;
+	public static String FavoriteStaticMemberInputDialog_type_new_title;
+	public static String FavoriteStaticMemberInputDialog_type_edit_title;
 	public static String FavoriteStaticMemberInputDialog_type_labelText;
 	public static String FavoriteStaticMemberInputDialog_browse_button;
 	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_title;

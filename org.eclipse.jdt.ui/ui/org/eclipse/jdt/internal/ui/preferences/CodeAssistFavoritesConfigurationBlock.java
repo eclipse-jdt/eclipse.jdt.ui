@@ -97,17 +97,17 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		private List fExistingEntries;
 		private final boolean fIsEditingMember;
 
-		public FavoriteStaticMemberInputDialog(Shell parent, List existingEntries, boolean isEditingMember) {
+		public FavoriteStaticMemberInputDialog(Shell parent, List existingEntries, boolean isMember, boolean isNew) {
 			super(parent);
-			fIsEditingMember= isEditingMember;
+			fIsEditingMember= isMember;
 			fExistingEntries= existingEntries;
 
 			String label, title;
-			if (isEditingMember) {
-				title= PreferencesMessages.FavoriteStaticMemberInputDialog_member_title;
+			if (isMember) {
+				title= isNew ? PreferencesMessages.FavoriteStaticMemberInputDialog_member_new_title : PreferencesMessages.FavoriteStaticMemberInputDialog_member_edit_title;
 				label= PreferencesMessages.FavoriteStaticMemberInputDialog_member_labelText;
 			} else {
-				title= PreferencesMessages.FavoriteStaticMemberInputDialog_type_title;
+				title= isNew ? PreferencesMessages.FavoriteStaticMemberInputDialog_type_new_title : PreferencesMessages.FavoriteStaticMemberInputDialog_type_edit_title;
 				label= PreferencesMessages.FavoriteStaticMemberInputDialog_type_labelText;
 			}
 			setTitle(title);
@@ -410,7 +410,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	private void doButtonPressed(int index) {
 		if (index == IDX_NEW_TYPE || index == IDX_NEW_MEMBER) { // add new
 			List existing= fList.getElements();
-			FavoriteStaticMemberInputDialog dialog= new FavoriteStaticMemberInputDialog(getShell(), existing, index == IDX_NEW_MEMBER);
+			FavoriteStaticMemberInputDialog dialog= new FavoriteStaticMemberInputDialog(getShell(), existing, index == IDX_NEW_MEMBER, true);
 			if (dialog.open() == Window.OK) {
 				fList.addElement(dialog.getResult());
 			}
@@ -424,7 +424,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			List existing= fList.getElements();
 			existing.remove(editedEntry);
 			boolean isType= editedEntry.endsWith(WILDCARD);
-			FavoriteStaticMemberInputDialog dialog= new FavoriteStaticMemberInputDialog(getShell(), existing, !isType);
+			FavoriteStaticMemberInputDialog dialog= new FavoriteStaticMemberInputDialog(getShell(), existing, !isType, false);
 			if (isType)
 				dialog.setInitialSelection(editedEntry.substring(0, editedEntry.length() - 2));
 			else
