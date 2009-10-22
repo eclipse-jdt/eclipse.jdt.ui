@@ -61,6 +61,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
@@ -1271,7 +1272,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			if (part instanceof ITextEditorExtension3) {
 				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
 				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
-			}
+			} else if (EditorUtility.isCompareEditorInput(part.getEditorInput())) {
+				ITextEditorExtension3 extension = (ITextEditorExtension3)part.getAdapter(ITextEditorExtension3.class);
+				if (extension != null)
+					return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
+			} 
 		}
 		return false;
 	}

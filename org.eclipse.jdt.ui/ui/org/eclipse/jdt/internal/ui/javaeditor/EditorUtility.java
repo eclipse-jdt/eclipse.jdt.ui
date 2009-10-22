@@ -233,7 +233,7 @@ public class EditorUtility {
 	/*
 	 * Avoid unnecessary loading of Compare plug-in
 	 */
-	private static boolean isCompareEditorInput(IEditorInput input) {
+	public static boolean isCompareEditorInput(IEditorInput input) {
 		return isComparePlugInActivated() && JavaCompareUtilities.isCompareEditorInput(input);
 	}
 

@@ -56,6 +56,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -519,6 +520,19 @@ public class JavaMergeViewer extends TextMergeViewer {
 		}
 	}
 	
+	public Object getAdapter(Class adapter) {
+		if (adapter == ITextEditorExtension3.class) {
+			IEditorInput activeInput= (IEditorInput)super.getAdapter(IEditorInput.class);
+			for (Iterator iterator= fEditor.values().iterator(); iterator.hasNext();) {
+				CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)iterator.next();
+				if (editor.getEditorInput().equals(activeInput))
+					return editor;
+			}
+			return null;
+		}
+		return super.getAdapter(adapter);
+	}
+
 	private class CompilationUnitEditorAdapter extends CompilationUnitEditor {
 		private boolean fInputSet = false;
 		private int fTextOrientation;
