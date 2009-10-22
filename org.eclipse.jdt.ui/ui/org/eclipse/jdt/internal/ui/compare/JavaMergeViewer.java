@@ -523,10 +523,12 @@ public class JavaMergeViewer extends TextMergeViewer {
 	public Object getAdapter(Class adapter) {
 		if (adapter == ITextEditorExtension3.class) {
 			IEditorInput activeInput= (IEditorInput)super.getAdapter(IEditorInput.class);
-			for (Iterator iterator= fEditor.values().iterator(); iterator.hasNext();) {
-				CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)iterator.next();
-				if (editor.getEditorInput().equals(activeInput))
-					return editor;
+			if (activeInput != null) {
+				for (Iterator iterator= fEditor.values().iterator(); iterator.hasNext();) {
+					CompilationUnitEditorAdapter editor= (CompilationUnitEditorAdapter)iterator.next();
+					if (activeInput.equals(editor.getEditorInput()))
+						return editor;
+				}
 			}
 			return null;
 		}
