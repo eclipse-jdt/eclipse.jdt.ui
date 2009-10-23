@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -211,11 +211,9 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_option_separateFolders;
 	public static String NewJavaProjectWizardPageOne_LayoutGroup_title;
 	public static String NewJavaProjectWizardPageOne_WorkingSets_group;
-	public static String NewJavaProjectWizardPageOne_LocationGroup_title;
-	public static String NewJavaProjectWizardPageOne_LocationGroup_external_desc;
+	public static String NewJavaProjectWizardPageOne_LocationGroup_location_desc;
 	public static String NewJavaProjectWizardPageOne_LocationGroup_browseButton_desc;
 	public static String NewJavaProjectWizardPageOne_LocationGroup_locationLabel_desc;
-	public static String NewJavaProjectWizardPageOne_LocationGroup_workspace_desc;
 	public static String NewJavaProjectWizardPageOne_NameGroup_label_text;
 	public static String NewJavaProjectWizardPageOne_DetectGroup_jre_message;
 	public static String NewJavaProjectWizardPageOne_DetectGroup_message;

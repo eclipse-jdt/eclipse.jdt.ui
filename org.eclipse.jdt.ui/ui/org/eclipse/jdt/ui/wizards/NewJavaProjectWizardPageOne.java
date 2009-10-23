@@ -129,7 +129,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public Control createControl(Composite composite) {
 			Composite nameComposite= new Composite(composite, SWT.NONE);
 			nameComposite.setFont(composite.getFont());
-			nameComposite.setLayout(initGridLayout(new GridLayout(2, false), false));
+			nameComposite.setLayout(new GridLayout(2, false));
 
 			fNameField.doFillIntoGrid(nameComposite, 2);
 			LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(null));
@@ -169,8 +169,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	 */
 	private final class LocationGroup extends Observable implements Observer, IStringButtonAdapter, IDialogFieldListener {
 
-		protected final SelectionButtonDialogField fWorkspaceRadio;
-		protected final SelectionButtonDialogField fExternalRadio;
+		protected final SelectionButtonDialogField fUseDefaults;
 		protected final StringButtonDialogField fLocation;
 
 		private String fPreviousExternalLocation;
@@ -178,39 +177,31 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private static final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
 
 		public LocationGroup() {
-			fWorkspaceRadio= new SelectionButtonDialogField(SWT.RADIO);
-			fWorkspaceRadio.setDialogFieldListener(this);
-			fWorkspaceRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_workspace_desc);
-
-			fExternalRadio= new SelectionButtonDialogField(SWT.RADIO);
-			fExternalRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_external_desc);
+			fUseDefaults= new SelectionButtonDialogField(SWT.CHECK);
+			fUseDefaults.setDialogFieldListener(this);
+			fUseDefaults.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_location_desc);
 
 			fLocation= new StringButtonDialogField(this);
 			fLocation.setDialogFieldListener(this);
 			fLocation.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_locationLabel_desc);
 			fLocation.setButtonLabel(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_browseButton_desc);
 
-			fExternalRadio.attachDialogField(fLocation);
-
-			fWorkspaceRadio.setSelection(true);
-			fExternalRadio.setSelection(false);
+			fUseDefaults.setSelection(true);
 
 			fPreviousExternalLocation= ""; //$NON-NLS-1$
 		}
 
 		public Control createControl(Composite composite) {
-			final int numColumns= 3;
+			final int numColumns= 4;
 
-			final Group group= new Group(composite, SWT.NONE);
-			group.setLayout(initGridLayout(new GridLayout(numColumns, false), true));
-			group.setText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_title);
+			final Composite locationComposite= new Composite(composite, SWT.NONE);
+			locationComposite.setLayout(new GridLayout(numColumns, false));
 
-			fWorkspaceRadio.doFillIntoGrid(group, numColumns);
-			fExternalRadio.doFillIntoGrid(group, numColumns);
-			fLocation.doFillIntoGrid(group, numColumns);
+			fUseDefaults.doFillIntoGrid(locationComposite, numColumns);
+			fLocation.doFillIntoGrid(locationComposite, numColumns);
 			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
 
-			return group;
+			return locationComposite;
 		}
 
 		protected void fireEvent() {
@@ -227,21 +218,21 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 		 */
 		public void update(Observable o, Object arg) {
-			if (isWorkspaceRadioSelected()) {
+			if (isUseDefaultSelected()) {
 				fLocation.setText(getDefaultPath(fNameGroup.getName()));
 			}
 			fireEvent();
 		}
 
 		public IPath getLocation() {
-			if (isWorkspaceRadioSelected()) {
+			if (isUseDefaultSelected()) {
 				return Platform.getLocation();
 			}
 			return Path.fromOSString(fLocation.getText().trim());
 		}
 
-		public boolean isWorkspaceRadioSelected() {
-			return fWorkspaceRadio.isSelected();
+		public boolean isUseDefaultSelected() {
+			return fUseDefaults.isSelected();
 		}
 
 		/**
@@ -257,7 +248,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 
 		public void setLocation(IPath path) {
-			fWorkspaceRadio.setSelection(path == null);
+			fUseDefaults.setSelection(path == null);
 			if (path != null) {
 				fLocation.setText(path.toOSString());
 			} else {
@@ -301,13 +292,15 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fWorkspaceRadio) {
-				final boolean checked= fWorkspaceRadio.isSelected();
+			if (field == fUseDefaults) {
+				final boolean checked= fUseDefaults.isSelected();
 				if (checked) {
 					fPreviousExternalLocation= fLocation.getText();
 					fLocation.setText(getDefaultPath(fNameGroup.getName()));
+					fLocation.setEnabled(false);
 				} else {
 					fLocation.setText(fPreviousExternalLocation);
+					fLocation.setEnabled(true);
 				}
 			}
 			fireEvent();
@@ -897,7 +890,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 		private boolean computeDetectState() {
-			if (fLocationGroup.isWorkspaceRadioSelected()) {
+			if (fLocationGroup.isUseDefaultSelected()) {
 				String name= fNameGroup.getName();
 				if (name.length() == 0 || JavaPlugin.getWorkspace().getRoot().findMember(name) != null) {
 					return false;
@@ -1033,7 +1026,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			IPath projectPath= Path.fromOSString(location);
 
-			if (fLocationGroup.isWorkspaceRadioSelected())
+			if (fLocationGroup.isUseDefaultSelected())
 				projectPath= projectPath.append(fNameGroup.getName());
 
 			if (projectPath.toFile().exists()) {//create from existing source
@@ -1050,7 +1043,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 						return;
 					}
 				}
-			} else if (!fLocationGroup.isWorkspaceRadioSelected()) {//create at non existing external location
+			} else if (!fLocationGroup.isUseDefaultSelected()) {//create at non existing external location
 				if (!canCreate(projectPath.toFile())) {
 					setErrorMessage(NewWizardMessages.NewJavaProjectWizardPageOne_Message_cannotCreateAtExternalLocation);
 					setPageComplete(false);
