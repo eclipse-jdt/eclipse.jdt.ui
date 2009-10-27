@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,17 +9,17 @@
  *   David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit4.runner;
 
 import org.eclipse.jdt.internal.junit.runner.ITestLoader;
 import org.eclipse.jdt.internal.junit.runner.ITestReference;
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 
+
 public class JUnit4TestLoader implements ITestLoader {
 
 	public ITestReference[] loadTests(
-			@SuppressWarnings("unchecked") Class[] testClasses, // https://bugs.eclipse.org/bugs/show_bug.cgi?id=164472
+			@SuppressWarnings("rawtypes") Class[] testClasses, // https://bugs.eclipse.org/bugs/show_bug.cgi?id=164472
 			String testName,
 			String[] failureNames,
 			RemoteTestRunner listener) {
