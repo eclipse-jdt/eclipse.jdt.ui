@@ -265,7 +265,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderWizardPage_warning_ReplaceSFandOL;
 	public static String NewSourceFolderWizardPage_warning_ReplaceOL;
 	public static String NewSourceFolderWizardPage_warning_ReplaceSF;
-	public static String NewSourceFolderWizardPage_warning_AddedExclusions;
+	public static String NewSourceFolderWizardPage_warning_AddedExclusions_singular;
+	public static String NewSourceFolderWizardPage_warning_AddedExclusions_plural;
 	public static String NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label;
 	public static String NewSourceFolderWizardPage_edit_description;
 
@@ -547,10 +548,13 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_inclusion_filter_label;
 	public static String CPListLabelProvider_inclusion_filter_separator;
 	public static String CPListLabelProvider_unknown_element_label;
-	public static String CPListLabelProvider_access_rules_enabled;
-	public static String CPListLabelProvider_project_access_rules_combined;
+	public static String CPListLabelProvider_access_rules_enabled_singular;
+	public static String CPListLabelProvider_access_rules_enabled_plural;
+	public static String CPListLabelProvider_project_access_rules_combined_singular;
+	public static String CPListLabelProvider_project_access_rules_combined_plural;
 	public static String CPListLabelProvider_project_access_rules_no_rules;
-	public static String CPListLabelProvider_project_access_rules_not_combined;
+	public static String CPListLabelProvider_project_access_rules_not_combined_singular;
+	public static String CPListLabelProvider_project_access_rules_not_combined_plural;
 	public static String CPListLabelProvider_access_rules_disabled;
 
 	public static String NewSourceFolderDialog_useproject_button;
@@ -694,7 +698,8 @@ public final class NewWizardMessages extends NLS {
 
 	public static String CPListLabelProvider_non_modifiable_attribute;
 	public static String CPListLabelProvider_access_rules_label;
-	public static String CPListLabelProvider_container_access_rules;
+	public static String CPListLabelProvider_container_access_rules_singular;
+	public static String CPListLabelProvider_container_access_rules_plural;
 	public static String CPListLabelProvider_container_no_access_rules;
 	public static String CPListLabelProvider_missing;
 
