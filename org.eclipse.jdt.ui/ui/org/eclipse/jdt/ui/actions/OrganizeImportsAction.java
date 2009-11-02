@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -309,9 +309,17 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	private String getOrganizeInfo(OrganizeImportsOperation op) {
 		int nImportsAdded= op.getNumberOfImportsAdded();
 		if (nImportsAdded >= 0) {
-			return Messages.format(ActionMessages.OrganizeImportsAction_summary_added, String.valueOf(nImportsAdded));
+			if (nImportsAdded == 1) {
+				return ActionMessages.OrganizeImportsAction_summary_added_singular;
+			} else {
+				return Messages.format(ActionMessages.OrganizeImportsAction_summary_added_plural, String.valueOf(nImportsAdded));
+			}
 		} else {
-			return Messages.format(ActionMessages.OrganizeImportsAction_summary_removed, String.valueOf(-nImportsAdded));
+			if (nImportsAdded == -1) {
+				return ActionMessages.OrganizeImportsAction_summary_removed_singular;
+			} else {
+				return Messages.format(ActionMessages.OrganizeImportsAction_summary_removed_plural, String.valueOf(-nImportsAdded));
+			}
 		}
 	}
 

@@ -377,7 +377,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DeleteRefactoring_2;
 
-	public static String DeleteRefactoring_3;
+	public static String DeleteRefactoring_3_singular;
+
+	public static String DeleteRefactoring_3_plural;
 
 	public static String DeleteRefactoring_4;
 
@@ -1125,7 +1127,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String JavaDeleteProcessor_description_singular;
 
-	public static String JavaDeleteProcessor_header;
+	public static String JavaDeleteProcessor_header_singular;
+
+	public static String JavaDeleteProcessor_header_plural;
 
 	public static String JavaDeleteProcessor_project_pattern;
 
@@ -2063,7 +2067,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_copy_description_singular;
 
-	public static String ReorgPolicyFactory_copy_elements_header;
+	public static String ReorgPolicyFactory_copy_elements_header_singular;
+
+	public static String ReorgPolicyFactory_copy_elements_header_plural;
 
 	public static String ReorgPolicyFactory_copy_elements_plural;
 
@@ -2081,7 +2087,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_copy_folders;
 
-	public static String ReorgPolicyFactory_copy_header;
+	public static String ReorgPolicyFactory_copy_header_singular;
+
+	public static String ReorgPolicyFactory_copy_header_plural;
 
 	public static String ReorgPolicyFactory_copy_import;
 
@@ -2105,11 +2113,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_copy_package_singular;
 
-	public static String ReorgPolicyFactory_copy_packages_header;
+	public static String ReorgPolicyFactory_copy_packages_header_singular;
+
+	public static String ReorgPolicyFactory_copy_packages_header_plural;
 
 	public static String ReorgPolicyFactory_copy_packages_plural;
 
-	public static String ReorgPolicyFactory_copy_roots_header;
+	public static String ReorgPolicyFactory_copy_roots_header_singular;
+
+	public static String ReorgPolicyFactory_copy_roots_header_plural;
 
 	public static String ReorgPolicyFactory_copy_roots_plural;
 
@@ -2145,7 +2157,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_move_description_singular;
 
-	public static String ReorgPolicyFactory_move_elements_header;
+	public static String ReorgPolicyFactory_move_elements_header_singular;
+
+	public static String ReorgPolicyFactory_move_elements_header_plural;
 
 	public static String ReorgPolicyFactory_move_elements_plural;
 
@@ -2163,7 +2177,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_move_folders;
 
-	public static String ReorgPolicyFactory_move_header;
+	public static String ReorgPolicyFactory_move_header_singular;
+
+	public static String ReorgPolicyFactory_move_header_plural;
 
 	public static String ReorgPolicyFactory_move_import_containers;
 
@@ -2185,13 +2201,17 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_move_package_declarations;
 
-	public static String ReorgPolicyFactory_move_packages_header;
+	public static String ReorgPolicyFactory_move_packages_header_singular;
+
+	public static String ReorgPolicyFactory_move_packages_header_plural;
 
 	public static String ReorgPolicyFactory_move_packages_plural;
 
 	public static String ReorgPolicyFactory_move_packages_singular;
 
-	public static String ReorgPolicyFactory_move_roots_header;
+	public static String ReorgPolicyFactory_move_roots_header_singular;
+
+	public static String ReorgPolicyFactory_move_roots_header_plural;
 
 	public static String ReorgPolicyFactory_move_roots_plural;
 

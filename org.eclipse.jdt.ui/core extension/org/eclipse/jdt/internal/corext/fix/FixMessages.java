@@ -61,10 +61,12 @@ public final class FixMessages extends NLS {
 	public static String SortMembersFix_Change_description;
 	public static String SortMembersFix_Fix_description;
 	public static String UnusedCodeFix_change_name;
-	public static String UnusedCodeFix_RemoveFieldOrLocal_AlteredAssignments_preview;
+	public static String UnusedCodeFix_RemoveFieldOrLocal_AlteredAssignments_preview_singular;
+	public static String UnusedCodeFix_RemoveFieldOrLocal_AlteredAssignments_preview_plural;
 
 	public static String UnusedCodeFix_RemoveFieldOrLocal_description;
-	public static String UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview;
+	public static String UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview_singular;
+	public static String UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview_plural;
 	public static String UnusedCodeFix_RemoveFieldOrLocalWithInitializer_description;
 	public static String UnusedCodeFix_RemoveMethod_description;
 	public static String UnusedCodeFix_RemoveConstructor_description;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -184,22 +184,34 @@ public class CPListLabelProvider extends LabelProvider {
 				Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
 				if (nRules > 0) {
 					if (combined.booleanValue()) {
-						return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_combined, String.valueOf(nRules));
+						if (nRules == 1) {
+							return NewWizardMessages.CPListLabelProvider_project_access_rules_combined_singular;
+						} else {
+							return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_combined_plural, String.valueOf(nRules));
+						}
 					} else {
-						return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined, String.valueOf(nRules));
+						if (nRules == 1) {
+							return NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined_singular;
+						} else {
+							return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined_plural, String.valueOf(nRules));
+						}
 					}
 				} else {
 					return NewWizardMessages.CPListLabelProvider_project_access_rules_no_rules;
 				}
 			} else if (parentKind == IClasspathEntry.CPE_CONTAINER) {
-				if (nRules > 0) {
-					return Messages.format(NewWizardMessages.CPListLabelProvider_container_access_rules, String.valueOf(nRules));
+				if (nRules > 1) {
+					return Messages.format(NewWizardMessages.CPListLabelProvider_container_access_rules_plural, String.valueOf(nRules));
+				} else if (nRules == 1) {
+					return NewWizardMessages.CPListLabelProvider_container_access_rules_singular;
 				} else {
 					return NewWizardMessages.CPListLabelProvider_container_no_access_rules;
 				}
 			} else {
-				if (nRules > 0) {
-					return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled, String.valueOf(nRules));
+				if (nRules > 1) {
+					return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_plural, String.valueOf(nRules));
+				} else if (nRules == 1) {
+					return NewWizardMessages.CPListLabelProvider_access_rules_enabled_singular;
 				} else {
 					return NewWizardMessages.CPListLabelProvider_access_rules_disabled;
 				}

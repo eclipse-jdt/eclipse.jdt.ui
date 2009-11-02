@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -520,7 +520,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 				String excl= BasicElementLabels.getPathLabel(fNewElement.getPath(), false);
 				result.setInfo(Messages.format(NewWizardMessages.AddSourceFolderWizardPage_addSinglePattern, new Object[] {excl, changed}));
 			} else {
-				result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions, String.valueOf(modified.size())));
+				result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions_plural, String.valueOf(modified.size())));
 			}
 			return result;
 		}

@@ -535,7 +535,9 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 	private void export(TemplatePersistenceData[] templates) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(Messages.format(PreferencesMessages.CodeTemplateBlock_export_title, String.valueOf(templates.length)));
+		String text= templates.length == 1 ? PreferencesMessages.CodeTemplateBlock_export_title_singular : Messages.format(PreferencesMessages.CodeTemplateBlock_export_title_plural, String
+				.valueOf(templates.length));
+		dialog.setText(text);
 		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_export_extension});
 		dialog.setFileName(PreferencesMessages.CodeTemplateBlock_export_filename);
 		String path= dialog.open();

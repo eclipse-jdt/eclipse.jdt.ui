@@ -248,7 +248,8 @@ public final class ActionMessages extends NLS {
 	public static String FindStringsToExternalizeAction_error_cannotBeParsed;
 	public static String FindStringsToExternalizeAction_foundStrings;
 	public static String FindStringsToExternalizeAction_noStrings;
-	public static String FindStringsToExternalizeAction_non_externalized;
+	public static String FindStringsToExternalizeAction_non_externalized_singular;
+	public static String FindStringsToExternalizeAction_non_externalized_plural;
 	public static String FindStringsToExternalizeAction_button_label;
 	public static String FindStringsToExternalizeAction_find_strings;
 	public static String OpenExternalBrowserAction_javadoc_label;
@@ -280,8 +281,10 @@ public final class ActionMessages extends NLS {
 	public static String OrganizeImportsAction_error_title;
 	public static String OrganizeImportsAction_error_message;
 	public static String OrganizeImportsAction_single_error_parse;
-	public static String OrganizeImportsAction_summary_added;
-	public static String OrganizeImportsAction_summary_removed;
+	public static String OrganizeImportsAction_summary_added_singular;
+	public static String OrganizeImportsAction_summary_added_plural;
+	public static String OrganizeImportsAction_summary_removed_singular;
+	public static String OrganizeImportsAction_summary_removed_plural;
 	public static String OrganizeImportsAction_multi_status_title;
 	public static String OrganizeImportsAction_multi_status_description;
 	public static String OrganizeImportsAction_EmptySelection_description;

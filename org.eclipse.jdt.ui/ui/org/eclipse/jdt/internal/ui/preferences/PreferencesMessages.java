@@ -591,7 +591,8 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_preview;
 	public static String CodeTemplateBlock_import_title;
 	public static String CodeTemplateBlock_import_extension;
-	public static String CodeTemplateBlock_export_title;
+	public static String CodeTemplateBlock_export_title_singular;
+	public static String CodeTemplateBlock_export_title_plural;
 	public static String CodeTemplateBlock_export_filename;
 	public static String CodeTemplateBlock_export_extension;
 	public static String CodeTemplateBlock_export_exists_title;

@@ -359,7 +359,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			setAddCancelButton(false);
 			setInput(Arrays.asList(input));
 			setTitle(ActionMessages.FindStringsToExternalizeAction_dialog_title);
-			setMessage(Messages.format(ActionMessages.FindStringsToExternalizeAction_non_externalized, new Object[] {new Integer(count)} ));
+			String message= count == 1 ? ActionMessages.FindStringsToExternalizeAction_non_externalized_singular : Messages.format(
+					ActionMessages.FindStringsToExternalizeAction_non_externalized_plural, new Object[] { new Integer(count) });
+			setMessage(message);
 			setContentProvider(new ArrayContentProvider());
 			setLabelProvider(createLabelProvider());
 		}

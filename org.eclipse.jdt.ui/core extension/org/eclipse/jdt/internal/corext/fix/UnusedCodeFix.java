@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -383,11 +383,15 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 		public String getAdditionalInfo() {
 			StringBuffer sb=new StringBuffer();
-			if (fRemovedAssignmentsCount>0){
-				sb.append(Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview,String.valueOf(fRemovedAssignmentsCount)));
+			if (fRemovedAssignmentsCount == 1) {
+				sb.append(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview_singular);
+			} else if (fRemovedAssignmentsCount > 1) {
+				sb.append(Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview_plural, String.valueOf(fRemovedAssignmentsCount)));
 			}
-			if (fAlteredAssignmentsCount>0){
-				sb.append(Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_AlteredAssignments_preview,String.valueOf(fAlteredAssignmentsCount)));
+			if (fAlteredAssignmentsCount == 1) {
+				sb.append(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_AlteredAssignments_preview_singular);
+			} else if (fAlteredAssignmentsCount > 1) {
+				sb.append(Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_AlteredAssignments_preview_plural, String.valueOf(fAlteredAssignmentsCount)));
 			}
 			if (sb.length()>0) {
 				return sb.toString();

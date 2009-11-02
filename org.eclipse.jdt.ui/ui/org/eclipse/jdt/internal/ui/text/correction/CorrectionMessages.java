@@ -153,7 +153,8 @@ public final class CorrectionMessages extends NLS {
 	public static String TypeArgumentMismatchSubProcessor_removeTypeArguments;
 	public static String UnimplementedMethodsCorrectionProposal_description;
 	public static String UnimplementedMethodsCorrectionProposal_enum_info;
-	public static String UnimplementedMethodsCorrectionProposal_info;
+	public static String UnimplementedMethodsCorrectionProposal_info_singular;
+	public static String UnimplementedMethodsCorrectionProposal_info_plural;
 
 	public static String UnimplementedCodeFix_DependenciesErrorMessage;
 	public static String UnimplementedCodeFix_DependenciesStatusMessage;

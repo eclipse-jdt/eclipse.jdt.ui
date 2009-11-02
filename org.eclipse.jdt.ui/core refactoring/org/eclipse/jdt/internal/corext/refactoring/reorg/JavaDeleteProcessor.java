@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -558,7 +558,9 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private static boolean skipDeletingReferencedRoot(IConfirmQuery query, IPackageFragmentRoot root, List referencingProjects) throws OperationCanceledException {
 		if (referencingProjects.isEmpty() || root == null || ! root.exists() ||! root.isArchive())
 			return false;
-		String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_3, JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT));
+		String label= JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+		String question= referencingProjects.size() == 1 ? Messages.format(RefactoringCoreMessages.DeleteRefactoring_3_singular, label) : Messages.format(
+				RefactoringCoreMessages.DeleteRefactoring_3_plural, label);
 		return ! query.confirm(question, referencingProjects.toArray());
 	}
 
@@ -617,7 +619,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
 			final String source= project != null ? Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_project_pattern, BasicElementLabels.getJavaElementName(project)) : RefactoringCoreMessages.JavaDeleteProcessor_workspace;
-			final String header= Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_header, new String[] { String.valueOf(fElements.length), source});
+			final String header= fElements.length == 1 ? RefactoringCoreMessages.JavaDeleteProcessor_header_singular : Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_header_plural,
+					new String[] { String.valueOf(fElements.length), source });
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			if (fDeleteSubPackages)

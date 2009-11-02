@@ -326,8 +326,12 @@ public final class ReorgPolicyFactory {
 			return getDestinationAsContainer();
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_copy_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_header_plural;
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -437,8 +441,12 @@ public final class ReorgPolicyFactory {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_singular;
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_roots_header_plural;
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -558,8 +566,12 @@ public final class ReorgPolicyFactory {
 			return RefactoringCoreMessages.ReorgPolicyFactory_copy_package_singular;
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_copy_packages_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_packages_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_packages_header_plural;
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -698,8 +710,12 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_header_plural;
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -848,7 +864,7 @@ public final class ReorgPolicyFactory {
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
+			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
@@ -1414,8 +1430,12 @@ public final class ReorgPolicyFactory {
 			return fFilePatterns;
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_move_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_header_plural;
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -1685,8 +1705,12 @@ public final class ReorgPolicyFactory {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_singular;
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_roots_header_plural;
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -1922,8 +1946,12 @@ public final class ReorgPolicyFactory {
 			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_singular;
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_packages_header_plural;
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -2178,8 +2206,12 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		protected String getHeaderPattern() {
-			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_header;
+		protected String getHeaderPatternSingular() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_header_singular;
+		}
+
+		protected String getHeaderPatternPlural() {
+			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_header_plural;
 		}
 
 		protected String getProcessorId() {
@@ -2497,7 +2529,11 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
-		protected String getHeaderPattern() {
+		protected String getHeaderPatternSingular() {
+			return UNUSED_STRING;
+		}
+
+		protected String getHeaderPatternPlural() {
 			return UNUSED_STRING;
 		}
 
@@ -2568,7 +2604,11 @@ public final class ReorgPolicyFactory {
 			return null;
 		}
 
-		protected String getHeaderPattern() {
+		protected String getHeaderPatternSingular() {
+			return UNUSED_STRING;
+		}
+
+		protected String getHeaderPatternPlural() {
 			return UNUSED_STRING;
 		}
 
@@ -2753,7 +2793,7 @@ public final class ReorgPolicyFactory {
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
+			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
@@ -2967,7 +3007,7 @@ public final class ReorgPolicyFactory {
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
+			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
@@ -3248,7 +3288,9 @@ public final class ReorgPolicyFactory {
 			return JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_FULLY_QUALIFIED);
 		}
 
-		protected abstract String getHeaderPattern();
+		protected abstract String getHeaderPatternSingular();
+
+		protected abstract String getHeaderPatternPlural();
 
 		public final IJavaElement getJavaElementDestination() {
 			if (!(fDestination instanceof JavaElementDestination))
@@ -3704,7 +3746,7 @@ public final class ReorgPolicyFactory {
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
+			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());

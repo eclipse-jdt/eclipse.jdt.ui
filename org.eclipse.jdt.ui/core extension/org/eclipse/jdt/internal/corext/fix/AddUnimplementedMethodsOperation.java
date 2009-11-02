@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,7 +114,11 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		IMethodBinding[] methodsToOverride= getMethodsToImplement();
 		StringBuffer buf= new StringBuffer();
 		buf.append("<b>"); //$NON-NLS-1$
-		buf.append(Messages.format(CorrectionMessages.UnimplementedMethodsCorrectionProposal_info, String.valueOf(methodsToOverride.length)));
+		if (methodsToOverride.length == 1) {
+			buf.append(CorrectionMessages.UnimplementedMethodsCorrectionProposal_info_singular);
+		} else {
+			buf.append(Messages.format(CorrectionMessages.UnimplementedMethodsCorrectionProposal_info_plural, String.valueOf(methodsToOverride.length)));
+		}
 		buf.append("</b><ul>"); //$NON-NLS-1$
 		for (int i= 0; i < methodsToOverride.length; i++) {
 			buf.append("<li>"); //$NON-NLS-1$
