@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -565,6 +565,10 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void updateSelectionLabel() {
-		fSelectionLabel.setText(Messages.format(RefactoringMessages.PullUpInputPage_hierarchyLabal, String.valueOf(getCheckedMethods().length)));
+		int checkedMethodsCount= getCheckedMethods().length;
+		String text= checkedMethodsCount == 1 ? RefactoringMessages.PullUpInputPage_hierarchyLabal_singular : Messages.format(
+				RefactoringMessages.PullUpInputPage_hierarchyLabal_plural, String.valueOf(checkedMethodsCount));
+		fSelectionLabel.setText(text);
+
 	}
 }

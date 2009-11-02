@@ -634,7 +634,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String MoveMembersInputPage_choose_Type;
 
-	public static String MoveMembersInputPage_descriptionKey;
+	public static String MoveMembersInputPage_descriptionKey_singular;
+
+	public static String MoveMembersInputPage_descriptionKey_plural;
 
 	public static String MoveMembersInputPage_destination_multi;
 
@@ -714,7 +716,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String PullUpInputPage_exception;
 
-	public static String PullUpInputPage_hierarchyLabal;
+	public static String PullUpInputPage_hierarchyLabal_singular;
+
+	public static String PullUpInputPage_hierarchyLabal_plural;
 
 	public static String PullUpInputPage_pull_Up;
 
@@ -756,7 +760,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String PullUpInputPage1_Specify_actions;
 
-	public static String PullUpInputPage1_status_line;
+	public static String PullUpInputPage1_status_line_singular;
+
+	public static String PullUpInputPage1_status_line_plural;
 
 	public static String PullUpInputPage2_Select;
 
@@ -800,7 +806,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String PushDownInputPage_Specify_actions;
 
-	public static String PushDownInputPage_status_line;
+	public static String PushDownInputPage_status_line_singular;
+
+	public static String PushDownInputPage_status_line_plural;
 
 	public static String PushDownWizard_defaultPageTitle;
 

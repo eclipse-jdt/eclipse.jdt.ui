@@ -581,8 +581,8 @@ public final class PushDownWizard extends RefactoringWizard {
 			if (fStatusLine == null)
 				return;
 			final int selected= fTableViewer.getCheckedElements().length;
-			final String[] keys= { String.valueOf(selected)};
-			final String msg= Messages.format(RefactoringMessages.PushDownInputPage_status_line, keys);
+			final String msg= selected == 1 ? RefactoringMessages.PushDownInputPage_status_line_singular : Messages.format(RefactoringMessages.PushDownInputPage_status_line_plural, String
+					.valueOf(selected));
 			fStatusLine.setText(msg);
 		}
 
