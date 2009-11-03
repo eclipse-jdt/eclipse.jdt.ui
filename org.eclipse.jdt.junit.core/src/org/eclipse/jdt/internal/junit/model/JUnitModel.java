@@ -394,7 +394,7 @@ public final class JUnitModel {
 	 * @since 3.6
 	 */
 	public static TestRunSession importTestRunSession(final String url, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		monitor.beginTask(ModelMessages.JUnitModel_importing_from_url, 1);
+		monitor.beginTask(ModelMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
 		final TestRunHandler handler= new TestRunHandler();
 		
 		final CoreException[] exception= { null };
@@ -440,6 +440,7 @@ public final class JUnitModel {
 		}
 		
 		JUnitCorePlugin.getModel().addTestRunSession(session[0]);
+		monitor.done();
 		return session[0];
 	}
 
