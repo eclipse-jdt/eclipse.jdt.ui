@@ -364,7 +364,7 @@ public class FatJarExportTests extends TestCase {
 		try {
 			ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 			ILaunchConfigurationType configType= launchManager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
-			wc= configType.newInstance(null, launchManager.generateUniqueLaunchConfigurationNameFrom(configname));
+			wc= configType.newInstance(null, launchManager.generateLaunchConfigurationName(configname));
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return null;
