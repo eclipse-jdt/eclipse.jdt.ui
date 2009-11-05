@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Chris West (Faux) <eclipse@goeswhere.com> - [clean up] "Use modifier 'final' where possible" can introduce compile errors - https://bugs.eclipse.org/bugs/show_bug.cgi?id=272532
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -34,6 +36,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -87,6 +90,14 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 				fResult.put(binding, list);
 			}
 
+			return super.visit(node);
+		}
+	}
+
+	private static class ReturnFinder extends ASTVisitor {
+		boolean foundOne;
+		public boolean visit(ReturnStatement node) {
+			foundOne= true;
 			return super.visit(node);
 		}
 	}
@@ -233,6 +244,9 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 	            if (writingConstructors.contains(constructor))//variable is written twice or more in constructor
 	            	return false;
 
+	            if (canReturn(constructor))
+	            	return false;
+
 	            writingConstructors.add(constructor);
 	            IMethodBinding constructorBinding= constructor.resolveBinding();
 	            if (constructorBinding == null)
@@ -268,6 +282,12 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 
 	        return true;
         }
+
+		private boolean canReturn(MethodDeclaration constructor) {
+			final ReturnFinder retFinder= new ReturnFinder();
+			constructor.accept(retFinder);
+			return retFinder.foundOne;
+		}
 
 		private boolean callsWrittingConstructor(MethodDeclaration methodDeclaration, HashSet writingConstructorBindings) {
 			Block body= methodDeclaration.getBody();
