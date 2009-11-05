@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -21,6 +23,8 @@ import java.util.jar.Manifest;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A manifest provider creates manifest files for a fat jar with a JAR in JAR loader.
@@ -55,6 +59,11 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 		result.append(JIJConstants.CURRENT_DIR); 
 		for (Iterator iterator= jarNames.iterator(); iterator.hasNext();) {
 			String jarName= (String) iterator.next();
+			try {
+				jarName= URLEncoder.encode(jarName, "UTF-8"); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e) {
+				JavaPlugin.log(e); // does not happen
+			}
 			result.append(" ").append(jarName); //$NON-NLS-1$
 		}
 		return result.toString();
