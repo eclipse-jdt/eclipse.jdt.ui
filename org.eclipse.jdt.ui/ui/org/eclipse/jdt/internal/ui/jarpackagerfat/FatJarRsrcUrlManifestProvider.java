@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262748 [jar exporter] extract constants for string literals in JarRsrcLoader et al.
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -28,13 +29,6 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
  */
 public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 
-	private static final String RSRC_MAIN_CLASS_MANIFEST_ATTRIBUTE= "Rsrc-Main-Class"; //$NON-NLS-1$
-	/**
-	 * This is <code>{@link org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader}.class.getName()</code>,
-	 * but that's not visible for the PDE builder.
-	 */
-	private static final String JAR_RSRC_LOADER_MAIN_CLASS= "org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"; //$NON-NLS-1$
-
 	public FatJarRsrcUrlManifestProvider(FatJarRsrcUrlBuilder builder) {
 		super(builder);
 	}
@@ -53,12 +47,12 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 			}
 		}
 		String manifestRsrcClasspath= getManifestRsrcClasspath(jarNames);
-		ownManifest.getMainAttributes().putValue("Rsrc-Class-Path", manifestRsrcClasspath); //$NON-NLS-1$
+		ownManifest.getMainAttributes().putValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME, manifestRsrcClasspath); 
 	}
 
 	public String getManifestRsrcClasspath(Set jarNames) {
 		StringBuffer result= new StringBuffer();
-		result.append("./"); //$NON-NLS-1$
+		result.append(JIJConstants.CURRENT_DIR); 
 		for (Iterator iterator= jarNames.iterator(); iterator.hasNext();) {
 			String jarName= (String) iterator.next();
 			result.append(" ").append(jarName); //$NON-NLS-1$
@@ -79,8 +73,8 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 
 	private void putMainClass(Manifest manifest, JarPackageData jarPackage) {
 		if (jarPackage.getManifestMainClass() != null && jarPackage.getManifestMainClass().getFullyQualifiedName().length() > 0) {
-			manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, JAR_RSRC_LOADER_MAIN_CLASS);
-			manifest.getMainAttributes().putValue(RSRC_MAIN_CLASS_MANIFEST_ATTRIBUTE, jarPackage.getManifestMainClass().getFullyQualifiedName());
+			manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, JIJConstants.LOADER_MAIN_CLASS);
+			manifest.getMainAttributes().putValue(JIJConstants.REDIRECTED_MAIN_CLASS_MANIFEST_NAME, jarPackage.getManifestMainClass().getFullyQualifiedName());
 		}
 	}
 

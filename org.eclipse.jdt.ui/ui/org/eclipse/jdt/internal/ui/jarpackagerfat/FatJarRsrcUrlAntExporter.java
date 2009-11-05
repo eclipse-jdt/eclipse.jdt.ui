@@ -10,6 +10,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262763 [jar exporter] remove Built-By attribute in ANT files from Fat JAR Exporter
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262748 [jar exporter] extract constants for string literals in JarRsrcLoader et al.
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -111,11 +112,11 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 
 		Element attribute= document.createElement("attribute"); //$NON-NLS-1$
 		attribute.setAttribute("name", "Main-Class"); //$NON-NLS-1$ //$NON-NLS-2$s 
-		attribute.setAttribute("value", "org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		attribute.setAttribute("value", JIJConstants.LOADER_MAIN_CLASS); //$NON-NLS-1$ 
 		manifest.appendChild(attribute);
 
 		attribute= document.createElement("attribute"); //$NON-NLS-1$
-		attribute.setAttribute("name", "Rsrc-Main-Class"); //$NON-NLS-1$ //$NON-NLS-2$s 
+		attribute.setAttribute("name", JIJConstants.REDIRECTED_MAIN_CLASS_MANIFEST_NAME); //$NON-NLS-1$ 
 		attribute.setAttribute("value", mainClass); //$NON-NLS-1$ 
 		manifest.appendChild(attribute);
 
@@ -125,9 +126,9 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 		manifest.appendChild(attribute);
 
 		attribute= document.createElement("attribute"); //$NON-NLS-1$
-		attribute.setAttribute("name", "Rsrc-Class-Path"); //$NON-NLS-1$ //$NON-NLS-2$s 
+		attribute.setAttribute("name", JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME); //$NON-NLS-1$ 
 		StringBuffer rsrcClassPath= new StringBuffer();
-		rsrcClassPath.append("./"); //$NON-NLS-1$
+		rsrcClassPath.append(JIJConstants.CURRENT_DIR); 
 		for (int i= 0; i < sourceInfos.length; i++) {
 			SourceInfo sourceInfo= sourceInfos[i];
 			if (sourceInfo.isJar) {

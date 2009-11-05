@@ -9,6 +9,7 @@
  *     Ferenc Hechler - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262746 [jar exporter] Create a builder for jar-in-jar-loader.zip
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262748 [jar exporter] extract constants for string literals in JarRsrcLoader et al.
  *******************************************************************************/
 package org.eclipse.jdt.internal.jarinjarloader;
 
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
@@ -44,21 +46,21 @@ public class JarRsrcLoader {
 		URL[] rsrcUrls = new URL[mi.rsrcClassPath.length];
 		for (int i = 0; i < mi.rsrcClassPath.length; i++) {
 			String rsrcPath = mi.rsrcClassPath[i];
-			if (rsrcPath.endsWith("/")) //$NON-NLS-1$
-				rsrcUrls[i] = new URL("rsrc:" + rsrcPath); //$NON-NLS-1$
+			if (rsrcPath.endsWith(JIJConstants.PATH_SEPARATOR)) 
+				rsrcUrls[i] = new URL(JIJConstants.INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath); 
 			else
-				rsrcUrls[i] = new URL("jar:rsrc:" + rsrcPath+ "!/");  //$NON-NLS-1$//$NON-NLS-2$
+				rsrcUrls[i] = new URL(JIJConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath + JIJConstants.JAR_INTERNAL_SEPARATOR);    
 		}
 		ClassLoader jceClassLoader = new URLClassLoader(rsrcUrls, null);
 		Thread.currentThread().setContextClassLoader(jceClassLoader);
 		Class c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
-		Method main = c.getMethod("main", new Class[]{args.getClass()}); //$NON-NLS-1$
+		Method main = c.getMethod(JIJConstants.MAIN_METHOD_NAME, new Class[]{args.getClass()}); 
 		main.invoke((Object)null, new Object[]{args});
 	}
 
 	private static ManifestInfo getManifestInfo() throws IOException {
 		Enumeration resEnum;
-		resEnum = Thread.currentThread().getContextClassLoader().getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
+		resEnum = Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME); 
 		while (resEnum.hasMoreElements()) {
 			try {
 				URL url = (URL)resEnum.nextElement();
@@ -67,12 +69,12 @@ public class JarRsrcLoader {
 					ManifestInfo result = new ManifestInfo();
 					Manifest manifest = new Manifest(is);
 					Attributes mainAttribs = manifest.getMainAttributes();
-					result.rsrcMainClass = mainAttribs.getValue("Rsrc-Main-Class"); //$NON-NLS-1$
-					String rsrcCP = mainAttribs.getValue("Rsrc-Class-Path"); //$NON-NLS-1$
+					result.rsrcMainClass = mainAttribs.getValue(JIJConstants.REDIRECTED_MAIN_CLASS_MANIFEST_NAME); 
+					String rsrcCP = mainAttribs.getValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME); 
 					if (rsrcCP == null)
-						rsrcCP = ""; //$NON-NLS-1$
+						rsrcCP = JIJConstants.DEFAULT_REDIRECTED_CLASSPATH; 
 					result.rsrcClassPath = splitSpaces(rsrcCP);
-					if ((result.rsrcMainClass != null) && !result.rsrcMainClass.trim().equals(""))  //$NON-NLS-1$
+					if ((result.rsrcMainClass != null) && !result.rsrcMainClass.trim().equals(""))    //$NON-NLS-1$
 							return result;
 				}
 			}
@@ -80,7 +82,7 @@ public class JarRsrcLoader {
 				// Silently ignore wrong manifests on classpath?
 			}
 		}
-		System.err.println("Missing attributes for RsrcLoader in Manifest (Rsrc-Main-Class, Rsrc-Class-Path)"); //$NON-NLS-1$
+		System.err.println("Missing attributes for JarRsrcLoader in Manifest ("+JIJConstants.REDIRECTED_MAIN_CLASS_MANIFEST_NAME+", "+JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME+")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return null;
 	}
 

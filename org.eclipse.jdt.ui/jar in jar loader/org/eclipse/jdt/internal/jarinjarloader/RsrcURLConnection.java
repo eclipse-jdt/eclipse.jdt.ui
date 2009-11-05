@@ -9,6 +9,7 @@
  *     Ferenc Hechler - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262746 [jar exporter] Create a builder for jar-in-jar-loader.zip
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262748 [jar exporter] extract constants for string literals in JarRsrcLoader et al.
  *******************************************************************************/
 package org.eclipse.jdt.internal.jarinjarloader;
 
@@ -39,7 +40,7 @@ public class RsrcURLConnection extends URLConnection {
 	}
 
 	public InputStream getInputStream() throws IOException {
-		String file= URLDecoder.decode(url.getFile(), "UTF-8"); //$NON-NLS-1$
+		String file= URLDecoder.decode(url.getFile(), JIJConstants.UTF8_ENCODING);
 		InputStream result= classLoader.getResourceAsStream(file);
 		if (result == null) {
 			throw new MalformedURLException("Could not open InputStream for URL '" + url + "'"); //$NON-NLS-1$ //$NON-NLS-2$

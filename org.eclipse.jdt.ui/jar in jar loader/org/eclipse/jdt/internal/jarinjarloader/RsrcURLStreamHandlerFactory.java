@@ -9,6 +9,7 @@
  *     Ferenc Hechler - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262746 [jar exporter] Create a builder for jar-in-jar-loader.zip
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262748 [jar exporter] extract constants for string literals in JarRsrcLoader et al.
  *******************************************************************************/
 package org.eclipse.jdt.internal.jarinjarloader;
 
@@ -31,7 +32,7 @@ public class RsrcURLStreamHandlerFactory implements URLStreamHandlerFactory {
 	}
 
 	public URLStreamHandler createURLStreamHandler(String protocol) {
-		if ("rsrc".equals(protocol)) //$NON-NLS-1$
+		if (JIJConstants.INTERNAL_URL_PROTOCOL.equals(protocol)) 
 			return new RsrcURLStreamHandler(classLoader);
 		if (chainFac != null)
 			return chainFac.createURLStreamHandler(protocol);
