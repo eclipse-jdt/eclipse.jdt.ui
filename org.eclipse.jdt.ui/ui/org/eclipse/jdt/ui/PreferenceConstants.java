@@ -3620,7 +3620,7 @@ public class PreferenceConstants {
 		if (store.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX)) {
 			String prefix= store.getString(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
 			if (prefix.length() > 0) {
-				JavaCore.getPlugin().getPluginPreferences().setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, prefix);
+				new InstanceScope().getNode(JavaCore.PLUGIN_ID).put(JavaCore.CODEASSIST_FIELD_PREFIXES, prefix);
 				store.setToDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX);
 				store.setToDefault(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
 			}
@@ -3628,7 +3628,7 @@ public class PreferenceConstants {
 		if (store.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX)) {
 			String suffix= store.getString(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
 			if (suffix.length() > 0) {
-				JavaCore.getPlugin().getPluginPreferences().setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, suffix);
+				new InstanceScope().getNode(JavaCore.PLUGIN_ID).put(JavaCore.CODEASSIST_FIELD_SUFFIXES, suffix);
 				store.setToDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX);
 				store.setToDefault(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
 			}
