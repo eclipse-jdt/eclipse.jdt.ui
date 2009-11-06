@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class NLSSearchTestHelper {
 		assertNumberResults(searchProblems(accessor, propertiesFile), expected);
 	}
 
-	public static void assertHasUndefinedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws IOException, CoreException {
+	public static void assertHasUndefinedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws CoreException {
 		assertResultHasUndefinedKey(key, file, searchProblems(accessor, propertiesFile));
 	}
 
@@ -63,7 +63,7 @@ public class NLSSearchTestHelper {
 		Assert.assertTrue("Expected number of results is " + expected + " but was " + is, is == expected);
 	}
 
-	private static void assertResultHasUndefinedKey(String key, IFile file, NLSSearchResult result) throws IOException, CoreException {
+	private static void assertResultHasUndefinedKey(String key, IFile file, NLSSearchResult result) throws CoreException {
 		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
 
 		for (int i= 0; i < matches.length; i++) {
