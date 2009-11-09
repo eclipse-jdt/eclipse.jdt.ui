@@ -65,10 +65,12 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 					result.add(new GetterSetterCompletionProposal(curr, offset, length, true, getterRelevance));
 				}
 
-				String setterName= GetterSetterUtil.getSetterName(curr, null);
-				if (Strings.startsWithIgnoreCase(setterName, prefix) && !hasMethod(methods, setterName)) {
-					suggestedMethods.add(setterName);
-					result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
+				if (!JdtFlags.isFinal(curr)) {
+					String setterName= GetterSetterUtil.getSetterName(curr, null);
+					if (Strings.startsWithIgnoreCase(setterName, prefix) && !hasMethod(methods, setterName)) {
+						suggestedMethods.add(setterName);
+						result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
+					}
 				}
 			}
 		}
