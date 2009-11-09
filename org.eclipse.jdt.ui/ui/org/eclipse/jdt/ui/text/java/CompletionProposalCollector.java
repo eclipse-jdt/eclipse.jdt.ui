@@ -646,7 +646,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				int completionEnd= proposal.getReplaceEnd();
 				int relevance= computeRelevance(proposal);
 
-				GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 1, fSuggestedMethodNames, fJavaProposals);
+				GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 2, fSuggestedMethodNames, fJavaProposals);
 				MethodDeclarationCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance, fSuggestedMethodNames, fJavaProposals);
 			}
 		} catch (CoreException e) {

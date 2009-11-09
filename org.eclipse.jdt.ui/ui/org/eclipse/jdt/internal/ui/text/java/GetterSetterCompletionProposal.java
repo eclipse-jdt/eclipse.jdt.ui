@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,12 +57,17 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 			IField curr= fields[i];
 			if (!JdtFlags.isEnum(curr)) {
 				String getterName= GetterSetterUtil.getGetterName(curr, null);
-				if (Strings.startsWithIgnoreCase(getterName, prefix) && !hasMethod(methods, getterName) && suggestedMethods.add(getterName)) {
-					result.add(new GetterSetterCompletionProposal(curr, offset, length, true, relevance));
+				if (Strings.startsWithIgnoreCase(getterName, prefix) && !hasMethod(methods, getterName)) {
+					suggestedMethods.add(getterName);
+					int getterRelevance= relevance;
+					if (JdtFlags.isStatic(curr) && JdtFlags.isFinal(curr))
+						getterRelevance= relevance - 1;
+					result.add(new GetterSetterCompletionProposal(curr, offset, length, true, getterRelevance));
 				}
 
 				String setterName= GetterSetterUtil.getSetterName(curr, null);
-				if (Strings.startsWithIgnoreCase(setterName, prefix) && !hasMethod(methods, setterName) && suggestedMethods.add(setterName)) {
+				if (Strings.startsWithIgnoreCase(setterName, prefix) && !hasMethod(methods, setterName)) {
+					suggestedMethods.add(setterName);
 					result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
 				}
 			}
