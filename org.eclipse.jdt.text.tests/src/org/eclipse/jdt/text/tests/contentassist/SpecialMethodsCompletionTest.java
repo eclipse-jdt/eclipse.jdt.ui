@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,5 +67,52 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 				"        //TODO\n" +
 				"\n" +
 				"    }|");
+	}
+
+	public void testGetterCreation() throws Exception {
+		addMembers("String test;");
+		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
+				"     * @return the test\n" +
+				"     */\n" +
+				"    public String getTest() {\n" +
+				"        return test;\n" +
+				"    }|");
+	}
+
+	public void testConstGetterCreation() throws Exception {
+		addMembers("static final String TEST;");
+		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
+				"     * @return the test\n" +
+				"     */\n" +
+				"    public static String getTest() {\n" +
+				"        return TEST;\n" +
+				"    }|");
+	}
+
+
+	public void testDuplicateGetterCreation() throws Exception {
+		addMembers("static final String TEST;");
+		addMembers("String test;");
+		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
+				"     * @return the test\n" +
+				"     */\n" +
+				"    public String getTest() {\n" +
+				"        return test;\n" +
+				"    }|");
+	}
+
+	public void testSetterCreation() throws Exception {
+		addMembers("String test;");
+		assertTypeBodyProposal("set|", "setTest(", "/**\n" +
+				"     * @param test the test to set\n" +
+				"     */\n" +
+				"    public void setTest(String test) {\n" +
+				"        this.test = test;\n" +
+				"    }|");
+	}
+
+	public void testNoFinalSetterCreation() throws Exception {
+		addMembers("final String test;");
+		assertNoTypeBodyProposal("set|", "setTest(");
 	}
 }

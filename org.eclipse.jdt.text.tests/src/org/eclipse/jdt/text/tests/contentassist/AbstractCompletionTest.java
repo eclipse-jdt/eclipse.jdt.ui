@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -242,12 +242,12 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	/**
-	 * Creates a CU with a method containing <code>before</code>, then runs code assist and applies
+	 * Creates a CU with a class containing <code>before</code>, then runs code assist and applies
 	 * the first proposal whose display name matches <code>selector</code> and asserts that the
 	 * method's body now has the content of <code>expected</code>.
-	 *
-	 * @param before the contents of the javadoc line before code completion is run
-	 * @param expected the expected contents of the type javadoc line
+	 * 
+	 * @param before the contents of the class body line before code completion is run
+	 * @param expected the expected contents of the class body
 	 * @param selector the prefix to match a proposal with
 	 * @throws CoreException if asserting the proposal failed
 	 */
@@ -258,6 +258,21 @@ public class AbstractCompletionTest extends TestCase {
 		IRegion expectedSelection= assembleClassBodyTestCUExtractSelection(result, expected, fAfterImports);
 
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+
+	/**
+	 * Creates a CU with a class containing <code>before</code>, then runs code assist and asserts
+	 * that there is no proposal.
+	 * 
+	 * @param before the contents of the class body line before code completion is run
+	 * @param selector the prefix to match a proposal with
+	 * @throws CoreException if asserting the proposal failed
+	 * @since 3.6
+	 */
+	protected void assertNoTypeBodyProposal(String before, String selector) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleClassBodyTestCUExtractSelection(contents, before, fBeforeImports);
+		assertNoProposal(selector, contents, preSelection);
 	}
 
 	/**
