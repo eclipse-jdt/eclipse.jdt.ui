@@ -54,6 +54,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		super(name);
 	}
 
+	public static Test setupTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
+	
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -99,7 +103,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	// ------------- Actual tests
 
 	/**
-	 * Test non-reference types in a direct subclass of Object
+	 * Test non-reference types (and Enum) in a direct subclass of Object
 	 *
 	 * @throws Exception
 	 */
@@ -116,10 +120,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	double aDouble;\r\n" +
 				"	float aFloat;\r\n" +
 				"	long aLong;\r\n" +
+				"	java.lang.annotation.ElementType anEnum;\r\n" +
 				"\r\n" +
 				"}", true, null);
 
-		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong" });
+		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "anEnum" });
 		runOperation(a.getType("A"), fields, false, false);
 
 		String expected= "package p;\r\n" +
@@ -133,6 +138,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	double aDouble;\r\n" +
 				"	float aFloat;\r\n" +
 				"	long aLong;\r\n" +
+				"	java.lang.annotation.ElementType anEnum;\r\n" +
 				"	/* (non-Javadoc)\r\n" +
 				"	 * @see java.lang.Object#hashCode()\r\n" +
 				"	 */\r\n" +
@@ -149,6 +155,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
 				"		result = prime * result + Float.floatToIntBits(aFloat);\r\n" +
 				"		result = prime * result + (int) (aLong ^ (aLong >>> 32));\r\n" +
+				"		result = prime * result + ((anEnum == null) ? 0 : anEnum.hashCode());\r\n" +
 				"		return result;\r\n" +
 				"	}\r\n" +
 				"	/* (non-Javadoc)\r\n" +
@@ -176,6 +183,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		if (Float.floatToIntBits(aFloat) != Float.floatToIntBits(other.aFloat))\r\n" +
 				"			return false;\r\n" +
 				"		if (aLong != other.aLong)\r\n" +
+				"			return false;\r\n" +
+				"		if (anEnum != other.anEnum)\r\n" +
 				"			return false;\r\n" +
 				"		return true;\r\n" +
 				"	}\r\n" +

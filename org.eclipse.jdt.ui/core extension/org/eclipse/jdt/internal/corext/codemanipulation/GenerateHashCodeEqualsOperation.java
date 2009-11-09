@@ -848,7 +848,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 
 		for (int i= 0; i < fFields.length; i++) {
-			if (fFields[i].getType().isPrimitive())
+			if (fFields[i].getType().isPrimitive() || fFields[i].getType().isEnum())
 				body.statements().add(createSimpleComparison(fFields[i]));
 			else if (fFields[i].getType().isArray())
 				body.statements().add(createArrayComparison(fFields[i].getName()));
