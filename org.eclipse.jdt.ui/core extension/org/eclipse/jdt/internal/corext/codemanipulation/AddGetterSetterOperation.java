@@ -7,8 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mateusz Wenus <mateusz.wenus@gmail.com> - [override method] generate in declaration order [code generation] - https://bugs.eclipse.org/bugs/show_bug.cgi?id=140971
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -308,28 +313,39 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 
 			fSkipAllExisting= (fSkipExistingQuery == null);
+			
+			Set accessors = new HashSet(Arrays.asList(fAccessorFields));
+			Set getters = new HashSet(Arrays.asList(fGetterFields));
+			Set setters= new HashSet(Arrays.asList(fSetterFields));
+			IField[] fields= fType.getFields(); // generate methods in order of field declarations
 			if (!fSort) {
-				for (int index= 0; index < fAccessorFields.length; index++) {
-					generateGetterMethod(fAccessorFields[index], listRewriter);
-					generateSetterMethod(fAccessorFields[index], astRewrite, listRewriter);
+				for (int i= 0; i < fields.length; i++) {
+					if (accessors.contains(fields[i])) {
+						generateGetterMethod(fields[i], listRewriter);
+						generateSetterMethod(fields[i], astRewrite, listRewriter);
+						monitor.worked(1);
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+					}
+				}
+			}
+			for (int i= 0; i < fields.length; i++) {
+				if (getters.contains(fields[i])) {
+					generateGetterMethod(fields[i], listRewriter);
 					monitor.worked(1);
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 				}
 			}
-			for (int index= 0; index < fGetterFields.length; index++) {
-				generateGetterMethod(fGetterFields[index], listRewriter);
-				monitor.worked(1);
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-			}
-			for (int index= 0; index < fSetterFields.length; index++) {
-				generateSetterMethod(fSetterFields[index], astRewrite, listRewriter);
-				monitor.worked(1);
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
+			for (int i= 0; i < fields.length; i++) {
+				if (setters.contains(fields[i])) {
+					generateSetterMethod(fields[i], astRewrite, listRewriter);
+					monitor.worked(1);
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
 				}
 			}
 			fEdit= astRewrite.rewriteAST();

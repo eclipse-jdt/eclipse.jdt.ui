@@ -7,9 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mateusz Wenus <mateusz.wenus@gmail.com> - [override method] generate in declaration order [code generation] - https://bugs.eclipse.org/bugs/show_bug.cgi?id=140971
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.corext.fix;
+
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -36,6 +39,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.MethodsSourcePositionComparator;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -157,6 +161,8 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		if (binding == null)
 			return new IMethodBinding[0];
 
-		return StubUtility2.getUnimplementedMethods(binding, implementAbstractsOfInput);
+		IMethodBinding[] unimplementedMethods= StubUtility2.getUnimplementedMethods(binding, implementAbstractsOfInput);
+		Arrays.sort(unimplementedMethods, new MethodsSourcePositionComparator(binding));
+		return unimplementedMethods;
 	}
 }
