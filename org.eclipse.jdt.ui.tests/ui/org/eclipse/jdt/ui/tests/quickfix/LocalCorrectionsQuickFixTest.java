@@ -5567,11 +5567,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5582,7 +5582,26 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false) {\n");
+		buf.append("            System.out.println(\"a\");\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(\"b\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
 	public void testRemoveDeadCodeIfElse() throws Exception {
@@ -5606,11 +5625,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5621,7 +5640,26 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (Math.random() == -1 || true) {\n");
+		buf.append("            System.out.println(\"a\");\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(\"b\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
 	public void testRemoveDeadCodeAfterIf() throws Exception {
@@ -5642,11 +5680,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5655,7 +5693,23 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        return false;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public boolean foo() {\n");
+		buf.append("        if (true) return false;\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
 	public void testRemoveDeadCodeConditional() throws Exception {
@@ -5675,11 +5729,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5688,7 +5742,22 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        return 1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return true ? 1 : 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
 	public void testRemoveDeadCodeMultiStatements() throws Exception {
@@ -5712,11 +5781,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5725,10 +5794,29 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        return;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            return;\n");
+		buf.append("        foo();\n");
+		buf.append("        foo();\n");
+		buf.append("        foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
-	public void testRemoveDeadCodeMultiStatementsSwitch() throws Exception {
+	public void testRemoveUnreachableCodeMultiStatementsSwitch() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
@@ -6415,7 +6503,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public void test() {\n");
 		buf.append("        List l;\n");
 		buf.append("    }\n");
@@ -6463,7 +6551,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    private class E1<P1, P2> {}\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public void test() {\n");
 		buf.append("        E1 e1;\n");
 		buf.append("    }\n");
@@ -6668,7 +6756,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    private List l= new ArrayList<String>();\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
@@ -6714,7 +6802,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    private List l;\n");
 		buf.append("    private void foo() {\n");
 		buf.append("        l.add(\"String\");\n");
@@ -6821,7 +6909,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public Class[] get() {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");
@@ -6860,7 +6948,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.List;\n");
 		buf.append("\n");
 		buf.append("public class E1 {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
 		buf.append("    public void foo(List<List> list) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");

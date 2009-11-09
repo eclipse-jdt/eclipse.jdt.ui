@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,8 +32,8 @@ public class SearchTestHelper {
 		return result.getMatchCount();
 	}
 
-	static int countMethodRefs(String methodName, String[] parameterTypes) throws JavaModelException {
-		JavaSearchQuery query= runMethodRefQuery(methodName, parameterTypes);
+	static int countMethodRefs(String methodName) {
+		JavaSearchQuery query= runMethodRefQuery(methodName);
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		return result.getMatchCount();
 	}
@@ -54,7 +54,7 @@ public class SearchTestHelper {
 		return query;
 	}
 
-	static JavaSearchQuery runMethodRefQuery(String methodName, String[] parameterTypes) throws JavaModelException {
+	static JavaSearchQuery runMethodRefQuery(String methodName) {
 		JavaSearchQuery query= new JavaSearchQuery(new PatternQuerySpecification(methodName, IJavaSearchConstants.METHOD, true, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;

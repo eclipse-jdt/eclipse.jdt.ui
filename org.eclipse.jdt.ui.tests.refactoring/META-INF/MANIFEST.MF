@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests.refactoring; singleton:=true
-Bundle-Version: 3.5.100
+Bundle-Version: 3.6.0
 Bundle-ClassPath: refactoringtests.jar
 Bundle-Activator: org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin
 Bundle-ActivationPolicy: lazy
@@ -37,5 +37,5 @@ Require-Bundle:
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.workbench.texteditor,
- org.junit
+ org.junit;bundle-version="3.8.2"
 Bundle-RequiredExecutionEnvironment: J2SE-1.4

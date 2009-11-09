@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,10 +36,6 @@ public class NLSScannerTester extends TestCase {
 		return new TestSuite(NLSScannerTester.class);
 	}
 
-	private void printDisabledMessage(String msg){
-		System.out.println("\nTest " + getName() + " disabled (" + msg + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	}
-
 	public void test0() throws Exception{
 		String text= "fred"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
@@ -47,48 +43,39 @@ public class NLSScannerTester extends TestCase {
 	}
 
 	public void test1() throws Exception{
-//		String text= "fred\"x\"";
-//		List l= NLSScanner.scan(text);
-//		assertEquals("non empty", false, l.isEmpty());
-//		assertEquals("1 line", 1, l.size());
-		printDisabledMessage("Scanner does not handle strings in the first line"); //$NON-NLS-1$
+		String text= "fred\"x\"";
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals("1 line", 1, l.length);
 	}
 
 	public void test1a() throws Exception{
 		String text= "fred\n\"x\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("non empty", false, l.length == 0); //$NON-NLS-1$
 		assertEquals("1 line", 1,l.length); //$NON-NLS-1$
 	}
 
 	public void test2() throws Exception{
-//		String text= "fred\"x\" \"xx\"";
-//		NLSLine[] l= NLSScanner.scan(text);
-//		assertEquals("non empty", false, l.isEmpty());
-//		assertEquals("2 line", 2,l.length);
-		printDisabledMessage("Scanner does not handle strings in the first line"); //$NON-NLS-1$
+		String text= "fred\"x\"\n\"xx\"";
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals("2 line", 2,l.length);
 	}
 
 	public void test2a() throws Exception{
 		String text= "fred\n\"x\" \"xx\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("non empty", false, l.length == 0); //$NON-NLS-1$
 		assertEquals("1 lines", 1,l.length); //$NON-NLS-1$
 	}
 
 	public void test3() throws Exception{
-//		String text= "fred\"x\"\n \"xx\"";
-//		NLSLine[] l= NLSScanner.scan(text);
-//		assertEquals("non empty", false, l.length == 0);
-//		assertEquals("2 lines", 2,l.length);
-		printDisabledMessage("Scanner does not handle strings in the first line"); //$NON-NLS-1$
+		String text= "fred\"x\"\n \"xx\"";
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals("2 lines", 2,l.length);
 	}
 
 
 	public void test4() throws Exception{
 		String text= "fred\n \"xx\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("non empty", false, l.length == 0); //$NON-NLS-1$
 		assertEquals("1 line", 1,l.length); //$NON-NLS-1$
 	}
 

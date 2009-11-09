@@ -180,15 +180,25 @@ class P2Utils {
 		if (bundles == null)
 			return null;
 		
+		BundleInfo bestMatch= null;
+		Version bestVersion= null;
 		for (int i= 0; i < bundles.length; i++) {
-			if (symbolicName.equals(bundles[i].getSymbolicName()) && versionRange.isIncluded(new Version(bundles[i].getVersion()))) {
-				IPath path= getBundleLocationPath(bundles[i]);
-				if (path.toFile().exists())
-					return bundles[i];
+			BundleInfo bundleInfo= bundles[i];
+			if (symbolicName.equals(bundleInfo.getSymbolicName())) {
+				Version version= new Version(bundleInfo.getVersion());
+				if (versionRange.isIncluded(version)) {
+					IPath path= getBundleLocationPath(bundleInfo);
+					if (path.toFile().exists()) {
+						if (bestMatch == null || bestVersion.compareTo(version) < 0) {
+							bestMatch= bundleInfo;
+							bestVersion= version;
+						}
+					}
+				}
 			}
 		}
 		
-		return null;
+		return bestMatch;
 	}
 
 	/**
