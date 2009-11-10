@@ -2555,12 +2555,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    A {\n");
 		buf.append("\n");
 		buf.append("        @Override\n");
-		buf.append("        public void bar() {\n");
+		buf.append("        public boolean foo() {\n");
+		buf.append("            return false;\n");
 		buf.append("        }\n");
 		buf.append("\n");
 		buf.append("        @Override\n");
-		buf.append("        public boolean foo() {\n");
-		buf.append("            return false;\n");
+		buf.append("        public void bar() {\n");
 		buf.append("        }\n");
 		buf.append("    };\n");
 		buf.append("    public abstract boolean foo();\n");
