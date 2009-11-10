@@ -605,10 +605,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"				return false;\r\n" +
 				"		} else if (!intBoolHashMap.equals(other.intBoolHashMap))\r\n" +
 				"			return false;\r\n" +
-				"		if (someEnum == null) {\r\n" +
-				"			if (other.someEnum != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!someEnum.equals(other.someEnum))\r\n" +
+				"		if (someEnum != other.someEnum)\r\n" +
 				"			return false;\r\n" +
 				"		return true;\r\n" +
 				"	}\r\n" +
