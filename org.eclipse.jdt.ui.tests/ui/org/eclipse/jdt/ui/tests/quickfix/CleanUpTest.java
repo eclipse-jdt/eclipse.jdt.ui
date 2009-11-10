@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Alex Blewitt - https://bugs.eclipse.org/bugs/show_bug.cgi?id=168954
+ *     Chris West (Faux) <eclipse@goeswhere.com> - [clean up] "Use modifier 'final' where possible" can introduce compile errors - https://bugs.eclipse.org/bugs/show_bug.cgi?id=272532
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -32,6 +33,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -1083,6 +1085,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1173,6 +1176,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1292,7 +1296,145 @@ public class CleanUpTest extends CleanUpTestCase {
 			assertTrue(cleanUp.canFix(cu1, location));
 		}
 	}
+	
+	public void testAddOverride15() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    void m();\n");
+		buf.append("    boolean equals(Object obj);\n");
+		buf.append("}\n");
+		buf.append("interface J extends I {\n");
+		buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
+		buf.append("}\n");
+		buf.append("class X implements J {\n");
+		buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
+		buf.append("    public int hashCode() { return 0; }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
 
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    void m();\n");
+		buf.append("    boolean equals(Object obj);\n");
+		buf.append("}\n");
+		buf.append("interface J extends I {\n");
+		buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
+		buf.append("}\n");
+		buf.append("class X implements J {\n");
+		buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
+		buf.append("    @Override\n");
+		buf.append("    public int hashCode() { return 0; }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+
+	public void testAddOverride16() throws Exception {
+		IJavaProject project= JavaProjectHelper.createJavaProject("CleanUpTestProject", "bin");
+		try {
+			JavaProjectHelper.addRTJar16(project);
+			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
+			
+			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("interface I {\n");
+			buf.append("    void m();\n");
+			buf.append("    boolean equals(Object obj);\n");
+			buf.append("}\n");
+			buf.append("interface J extends I {\n");
+			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
+			buf.append("}\n");
+			buf.append("class X implements J {\n");
+			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
+			buf.append("    public int hashCode() { return 0; }\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("interface I {\n");
+			buf.append("    void m();\n");
+			buf.append("    @Override\n");
+			buf.append("    boolean equals(Object obj);\n");
+			buf.append("}\n");
+			buf.append("interface J extends I {\n");
+			buf.append("    @Override\n");
+			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
+			buf.append("}\n");
+			buf.append("class X implements J {\n");
+			buf.append("    @Override\n");
+			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
+			buf.append("    @Override\n");
+			buf.append("    public int hashCode() { return 0; }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.delete(project);
+		}
+	}
+	
+	public void testAddOverride16_no_interface_methods() throws Exception {
+		IJavaProject project= JavaProjectHelper.createJavaProject("CleanUpTestProject", "bin");
+		try {
+			JavaProjectHelper.addRTJar16(project);
+			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
+			
+			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("interface I {\n");
+			buf.append("    void m();\n");
+			buf.append("    boolean equals(Object obj);\n");
+			buf.append("}\n");
+			buf.append("interface J extends I {\n");
+			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
+			buf.append("}\n");
+			buf.append("class X implements J {\n");
+			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
+			buf.append("    public int hashCode() { return 0; }\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+			
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+			
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("interface I {\n");
+			buf.append("    void m();\n");
+			buf.append("    boolean equals(Object obj);\n");
+			buf.append("}\n");
+			buf.append("interface J extends I {\n");
+			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
+			buf.append("}\n");
+			buf.append("class X implements J {\n");
+			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
+			buf.append("    @Override\n");
+			buf.append("    public int hashCode() { return 0; }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+			
+			assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		} finally {
+			JavaProjectHelper.delete(project);
+		}
+	}
+	
 	public void testCodeStyle01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -6717,6 +6859,26 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+	}
+
+	public void testAddFinalBug272532() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int field;\n");
+		buf.append("    public E1() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            return;\n");
+		buf.append("        field= 5;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 
 	public void testRemoveBlockReturnThrows01() throws Exception {

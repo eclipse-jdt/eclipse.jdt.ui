@@ -2665,9 +2665,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package a;\n");
 		buf.append("\n");
@@ -2678,6 +2678,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
