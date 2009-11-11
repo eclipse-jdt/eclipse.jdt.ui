@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,24 +67,32 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	}
 
 	private void checkTextHovers() {
-		if (fTextHoverSpecifications.size() == 0)
+		if (fTextHoverSpecifications == null)
 			return;
 
+		boolean done= true;
+		int i= -1;
 		for (Iterator iterator= new ArrayList(fTextHoverSpecifications).iterator(); iterator.hasNext(); ) {
+			i++;
 			JavaEditorTextHoverDescriptor spec= (JavaEditorTextHoverDescriptor) iterator.next();
+			if (spec == null)
+				continue;
+
+			done= false;
 
 			IJavaEditorTextHover hover= spec.createTextHover();
 			if (hover != null) {
 				hover.setEditor(getEditor());
-				addTextHover(hover);
-				fTextHoverSpecifications.remove(spec);
+				fTextHoverSpecifications.set(i, null);
 			}
-		}
-	}
+			if (i == fInstantiatedTextHovers.size())
+				fInstantiatedTextHovers.add(i, hover);
+			else
+				fInstantiatedTextHovers.set(i, hover);
 
-	protected void addTextHover(ITextHover hover) {
-		if (!fInstantiatedTextHovers.contains(hover))
-			fInstantiatedTextHovers.add(hover);
+		}
+		if (done)
+			fTextHoverSpecifications= null;
 	}
 
 	/*
@@ -100,6 +108,8 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 
 		for (Iterator iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
 			ITextHover hover= (ITextHover)iterator.next();
+			if (hover == null)
+				continue;
 
 			String s= hover.getHoverInfo(textViewer, hoverRegion);
 			if (s != null && s.trim().length() > 0) {
@@ -124,6 +134,8 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 
 		for (Iterator iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
 			ITextHover hover= (ITextHover)iterator.next();
+			if (hover == null)
+				continue;
 
 			if (hover instanceof ITextHoverExtension2) {
 				Object info= ((ITextHoverExtension2) hover).getHoverInfo2(textViewer, hoverRegion);
