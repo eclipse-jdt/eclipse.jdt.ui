@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
+
 
 class NLSSearchResultRequestor extends SearchRequestor {
 	/*
@@ -201,9 +203,10 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	}
 
 	/**
-	 * Finds the key defined by the given match. The assumption is that
-	 * the key is the first argument and it is a string i.e. quoted ("...").
-	 *
+	 * Finds the key defined by the given match. The assumption is that the key is the first
+	 * argument and it is a string literal i.e. quoted ("...") or a string constant i.e. 'static
+	 * final String' defined in the same class.
+	 * 
 	 * @param keyPositionResult reference parameter: will be filled with the position of the found key
 	 * @param enclosingElement enclosing java element
 	 * @return a string denoting the key, null if no key can be found
@@ -230,23 +233,39 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				return null;
 
 			String src= new String(scanner.getCurrentTokenSource());
-			int keyStart= scanner.getCurrentTokenStartPosition();
-			int keyEnd= scanner.getCurrentTokenEndPosition();
+			int tokenStart= scanner.getCurrentTokenStartPosition();
+			int tokenEnd= scanner.getCurrentTokenEndPosition();
 
 			if (scanner.getNextToken() == ITerminalSymbols.TokenNameLPAREN) {
 				// Old school
 				// next must be key string:
-				if (scanner.getNextToken() != ITerminalSymbols.TokenNameStringLiteral)
+				int nextToken= scanner.getNextToken();
+				if (nextToken != ITerminalSymbols.TokenNameStringLiteral && nextToken != ITerminalSymbols.TokenNameIdentifier)
 					return null;
-				// found it:
-				keyStart= scanner.getCurrentTokenStartPosition() + 1;
-				keyEnd= scanner.getCurrentTokenEndPosition();
-				keyPositionResult.setOffset(keyStart);
-				keyPositionResult.setLength(keyEnd - keyStart);
-				return source.substring(keyStart, keyEnd);
+
+				tokenStart= scanner.getCurrentTokenStartPosition();
+				tokenEnd= scanner.getCurrentTokenEndPosition();
+				if (nextToken == ITerminalSymbols.TokenNameStringLiteral) {
+					keyPositionResult.setOffset(tokenStart + 1);
+					keyPositionResult.setLength(tokenEnd - tokenStart - 1);
+					return source.substring(tokenStart + 1, tokenEnd);
+				} else if (nextToken == ITerminalSymbols.TokenNameIdentifier) {
+					keyPositionResult.setOffset(tokenStart);
+					keyPositionResult.setLength(tokenEnd - tokenStart + 1);
+					IType parentClass= (IType)enclosingElement.getAncestor(IJavaElement.TYPE);
+					IField[] fields= parentClass.getFields();
+					String identifier= source.substring(tokenStart, tokenEnd + 1);
+					for (int i= 0; i < fields.length; i++) {
+						if (fields[i].getElementName().equals(identifier)) {
+							Object obj= fields[i].getConstant();
+							return obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;
+						}
+					}
+				}
+				return null;
 			} else {
-				keyPositionResult.setOffset(keyStart);
-				keyPositionResult.setLength(keyEnd - keyStart + 1);
+				keyPositionResult.setOffset(tokenStart);
+				keyPositionResult.setLength(tokenEnd - tokenStart + 1);
 				return src;
 			}
 		} catch (InvalidInputException e) {
