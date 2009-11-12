@@ -32,6 +32,9 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
+import org.eclipse.search.ui.ISearchResultViewPart;
+import org.eclipse.search.ui.NewSearchUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -71,11 +74,15 @@ public class NLSSearchTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		ISearchResultViewPart searchResultView= NewSearchUI.getSearchResultView();
+		if (searchResultView != null) {
+			searchResultView.getSite().getPage().hideView(searchResultView);
+		}
 	}
 
 	private IFile write(IFolder folder, final String content, final String fileName) throws CoreException {
 		InputStream stream= new InputStream() {
-			private Reader fReader= new StringReader(content);
+			private final Reader fReader= new StringReader(content);
 			public int read() throws IOException {
 				return fReader.read();
 			}
