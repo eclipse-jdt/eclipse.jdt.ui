@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -252,7 +252,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return result;
 		}
 		computeUsedNames();
-		fRewriter= ASTRewrite.create(fRoot.getAST());
 		return result;
 	}
 
@@ -328,10 +327,13 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= new RefactoringStatus();
-		fChangeManager.clear();
 		pm.beginTask(NO_NAME, 12);
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_checking_preconditions);
+		
+		RefactoringStatus result= new RefactoringStatus();
+		fRewriter= ASTRewrite.create(fRoot.getAST());
+		fChangeManager.clear();
+		
 		boolean usingLocalGetter=isUsingLocalGetter();
 		boolean usingLocalSetter=isUsingLocalSetter();
 		result.merge(checkMethodNames(usingLocalGetter,usingLocalSetter));
