@@ -148,7 +148,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String DeleteWizard_11;
 
-	public static String DeleteWizard_12;
+	public static String DeleteWizard_12_singular;
+
+	public static String DeleteWizard_12_plural;
 
 	public static String DeleteWizard_2;
 
@@ -746,7 +748,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String PullUpInputPage1_label_use_in_instanceof;
 
-	public static String PullUpInputPage1_Mark_selected_members;
+	public static String PullUpInputPage1_Mark_selected_members_singular;
+
+	public static String PullUpInputPage1_Mark_selected_members_plural;
 
 	public static String PullUpInputPage1_Member;
 
@@ -794,7 +798,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String PushDownInputPage_leave_abstract;
 
-	public static String PushDownInputPage_Mark_selected_members;
+	public static String PushDownInputPage_Mark_selected_members_singular;
+
+	public static String PushDownInputPage_Mark_selected_members_plural;
 
 	public static String PushDownInputPage_Member;
 

@@ -140,7 +140,8 @@ public final class ActionMessages extends NLS {
 	public static String AddGetterSetterAction_label;
 	public static String AddGetterSetterAction_description;
 	public static String AddGetterSetterAction_tooltip;
-	public static String AddGetterSetterAction_error_duplicate_methods;
+	public static String AddGetterSetterAction_error_duplicate_methods_singular;
+	public static String AddGetterSetterAction_error_duplicate_methods_plural;
 	public static String AddGetterSetterAction_error_title;
 	public static String AddGetterSetterAction_error_actionfailed;
 	public static String AddGetterSetterAction_not_applicable;
@@ -363,7 +364,8 @@ public final class ActionMessages extends NLS {
 	public static String AddDelegateMethodsAction_not_applicable;
 	public static String AddDelegateMethodsAction_annotation_not_applicable;
 	public static String AddDelegateMethodsAction_interface_not_applicable;
-	public static String AddDelegateMethodsAction_duplicate_methods;
+	public static String AddDelegateMethodsAction_duplicate_methods_singular;
+	public static String AddDelegateMethodsAction_duplicate_methods_plural;
 	public static String AddDelegateMethodsAction_title;
 	public static String AddDelegateMethodsAction_message;
 	public static String AddDelegateMethodsAction_selectioninfo_more;

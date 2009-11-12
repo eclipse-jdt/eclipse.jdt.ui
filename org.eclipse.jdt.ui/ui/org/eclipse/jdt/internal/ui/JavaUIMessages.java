@@ -175,7 +175,8 @@ public final class JavaUIMessages extends NLS {
 
 	public static String ResourceTransferDragAdapter_cannot_delete_resource;
 	public static String ResourceTransferDragAdapter_moving_resource;
-	public static String ResourceTransferDragAdapter_cannot_delete_files;
+	public static String ResourceTransferDragAdapter_cannot_delete_files_singular;
+	public static String ResourceTransferDragAdapter_cannot_delete_files_plural;
 
 	public static String Spelling_error_label;
 	public static String Spelling_correct_label;

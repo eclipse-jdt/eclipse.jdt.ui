@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -124,12 +126,13 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 				status.add(e.getStatus());
 			}
 		}
-		if (status.getChildren().length > 0) {
+		int childrenCount= status.getChildren().length;
+		if (childrenCount > 0) {
 			Shell parent= SWTUtil.getShell(event.widget);
 			ErrorDialog error= new ErrorDialog(parent,
-				JavaUIMessages.ResourceTransferDragAdapter_moving_resource,
-				JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_files,
-				status, IStatus.ERROR);
+					JavaUIMessages.ResourceTransferDragAdapter_moving_resource,
+					childrenCount == 1 ? JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_files_singular : Messages.format(
+							JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_files_plural, String.valueOf(childrenCount)), status, IStatus.ERROR);
 			error.open();
 		}
 	}

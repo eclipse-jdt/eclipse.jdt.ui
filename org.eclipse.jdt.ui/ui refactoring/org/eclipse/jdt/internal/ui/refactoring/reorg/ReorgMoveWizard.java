@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,10 +40,14 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public class ReorgMoveWizard extends RefactoringWizard {
@@ -72,6 +76,9 @@ public class ReorgMoveWizard extends RefactoringWizard {
 	private static class MoveInputPage extends ReorgUserInputPage{
 
 		private static final String PAGE_NAME= "MoveInputPage"; //$NON-NLS-1$
+		private static final long LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
+				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
+
 		private Button fReferenceCheckbox;
 		private Button fQualifiedNameCheckbox;
 		private QualifiedNameComponent fQualifiedNameComponent;
@@ -142,8 +149,26 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			final JavaMoveProcessor processor= getJavaMoveProcessor();
 			if (! processor.canUpdateJavaReferences())
 				return;
+
+			String text;
+			int resources= getResources().length;
+			int javaElements= getJavaElements().length;
+			if (resources == 0 && javaElements == 1) {
+				text= Messages.format(
+						ReorgMessages.JdtMoveAction_update_references_singular,
+						JavaElementLabels.getElementLabel(getJavaElements()[0], LABEL_FLAGS));
+			} else if (resources == 1 && javaElements == 0) {
+				text= Messages.format(
+						ReorgMessages.JdtMoveAction_update_references_singular,
+						BasicElementLabels.getResourceName(getResources()[0]));
+			} else {
+				text= Messages.format(
+						ReorgMessages.JdtMoveAction_update_references_plural,
+						String.valueOf(resources + javaElements));
+			}
+
 			fReferenceCheckbox= new Button(result, SWT.CHECK);
-			fReferenceCheckbox.setText(ReorgMessages.JdtMoveAction_update_references);
+			fReferenceCheckbox.setText(text);
 			fReferenceCheckbox.setSelection(processor.getUpdateReferences());
 
 			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {

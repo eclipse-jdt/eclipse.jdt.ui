@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,8 @@ public final class ReorgMessages extends NLS {
 	public static String JdtCopyAction_update_classpath;
 	public static String JdtCopyAction_Copy;
 	public static String JdtMoveAction_move;
-	public static String JdtMoveAction_update_references;
+	public static String JdtMoveAction_update_references_singular;
+	public static String JdtMoveAction_update_references_plural;
 	public static String JdtMoveAction_preview;
 	public static String JdtMoveAction_exception;
 	public static String JdtMoveAction_referenced;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,8 +86,9 @@ public class DeleteWizard extends RefactoringWizard {
 		}
 
 		protected String getMessageString() {
+			int numberOfSelectedElements= numberOfSelectedElements();
 			try {
-				if (1 == numberOfSelectedElements()) {
+				if (1 == numberOfSelectedElements) {
 					String pattern= createConfirmationStringForOneElement();
 					String name= getNameOfSingleSelectedElement();
 					return Messages.format(pattern, new String[] { name });
@@ -101,7 +102,8 @@ public class DeleteWizard extends RefactoringWizard {
 					JavaPlugin.log(e);
 				setPageComplete(false);
 				if (e.isDoesNotExist())
-					return RefactoringMessages.DeleteWizard_12;
+					return 1 == numberOfSelectedElements ? RefactoringMessages.DeleteWizard_12_singular : Messages.format(RefactoringMessages.DeleteWizard_12_plural, String
+							.valueOf(numberOfSelectedElements));
 				return RefactoringMessages.DeleteWizard_2;
 			}
 		}

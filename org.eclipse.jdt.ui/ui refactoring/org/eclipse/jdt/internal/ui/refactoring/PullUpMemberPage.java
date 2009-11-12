@@ -700,8 +700,11 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 		final ISelection preserved= fTableViewer.getSelection();
 		try {
+			MemberActionInfo[] selectedMembers= getSelectedMembers();
 			final String shellTitle= RefactoringMessages.PullUpInputPage1_Edit_members;
-			final String labelText= RefactoringMessages.PullUpInputPage1_Mark_selected_members;
+			final String labelText= selectedMembers.length == 1
+					? RefactoringMessages.PullUpInputPage1_Mark_selected_members_singular
+					: Messages.format(RefactoringMessages.PullUpInputPage1_Mark_selected_members_plural, String.valueOf(selectedMembers.length));
 			final Map stringMapping= createStringMappingForSelectedMembers();
 			final String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 			Arrays.sort(keys);
@@ -711,7 +714,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			if (dialog.open() == Window.CANCEL)
 				return;
 			final int action= ((Integer) stringMapping.get(dialog.getSelectedString())).intValue();
-			setActionForInfos(getSelectedMembers(), action);
+			setActionForInfos(selectedMembers, action);
 		} finally {
 			updateWizardPage(preserved, true);
 		}

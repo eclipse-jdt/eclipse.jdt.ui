@@ -424,17 +424,20 @@ public final class PushDownWizard extends RefactoringWizard {
 				return;
 			final ISelection preserved= fTableViewer.getSelection();
 			try {
+				MemberActionInfo[] selectedMembers= getSelectedMemberActionInfos();
+				final String labelText= selectedMembers.length == 1 ? RefactoringMessages.PushDownInputPage_Mark_selected_members_singular : Messages.format(
+						RefactoringMessages.PushDownInputPage_Mark_selected_members_plural, String.valueOf(selectedMembers.length));
 				final Map stringMapping= createStringMappingForSelectedElements();
 				final String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 				Arrays.sort(keys);
 				final int initialSelectionIndex= getInitialSelectionIndexForEditDialog(stringMapping, keys);
 
-				final ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), RefactoringMessages.PushDownInputPage_Edit_members, RefactoringMessages.PushDownInputPage_Mark_selected_members, keys, initialSelectionIndex);
+				final ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), RefactoringMessages.PushDownInputPage_Edit_members, labelText, keys, initialSelectionIndex);
 				dialog.setBlockOnOpen(true);
 				if (dialog.open() == Window.CANCEL)
 					return;
 				final int action= ((Integer) stringMapping.get(dialog.getSelectedString())).intValue();
-				setInfoAction(getSelectedMemberActionInfos(), action);
+				setInfoAction(selectedMembers, action);
 			} finally {
 				updateWizardPage(preserved, true);
 			}
