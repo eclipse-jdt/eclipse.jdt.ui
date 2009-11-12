@@ -17,6 +17,11 @@ import org.eclipse.jdt.testplugin.util.DialogCheck;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.IWorkbenchPart;
+
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -29,6 +34,8 @@ import org.eclipse.jdt.internal.junit.launcher.JUnitTabGroup;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencePage;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TestEnableAssertions extends TestCase {
 	private static final String configName = "NoOneWouldEverThinkOfUsingANameLikeThis"; //$NON-NLS-1$
@@ -54,6 +61,16 @@ public class TestEnableAssertions extends TestCase {
 	}
 
 	public void testJUnitTabGroupSetDefaults() {
+		IWorkbenchPart activePart= JavaPlugin.getActiveWorkbenchWindow().getPartService().getActivePart();
+		if (activePart != null) {
+			ISelectionProvider selectionProvider= activePart.getSite().getSelectionProvider();
+			if (selectionProvider != null) {
+				// make sure there's no active selection, otherwise JUnitLaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
+				// can fail because it tries to initialize attributes on a selection 
+				selectionProvider.setSelection(new StructuredSelection());
+			}
+		}
+		
 		JUnitTabGroup testSubject= new JUnitTabGroup();
 		tabGroupSetDefaultTester(testSubject);
 	}
