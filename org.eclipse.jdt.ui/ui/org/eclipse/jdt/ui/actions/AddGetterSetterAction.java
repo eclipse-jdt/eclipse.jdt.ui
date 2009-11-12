@@ -355,7 +355,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				map= new HashSet(selection.length);
 			}
 
-			int count= 0;
+			int selectedCount= 0;
+			int possibleDuplicateCount= 0;
 			for (int i= 0; i < selection.length; i++) {
 				try {
 					if (selection[i] instanceof GetterSetterEntry) {
@@ -363,22 +364,27 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 						IField getsetField= ((GetterSetterEntry) selection[i]).field;
 						if (((GetterSetterEntry) selection[i]).isGetter) {
 							if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
-								return new StatusInfo(IStatus.WARNING, ActionMessages.AddGetterSetterAction_error_duplicate_methods);
+								possibleDuplicateCount++;
 						} else {
 							key= createSignatureKey(GetterSetterUtil.getSetterName(getsetField, null), getsetField);
 							if (!map.add(key))
-								return new StatusInfo(IStatus.WARNING, ActionMessages.AddGetterSetterAction_error_duplicate_methods);
+								possibleDuplicateCount++;
 						}
-						count++;
+						selectedCount++;
 					}
 				} catch (JavaModelException e) {
 				}
 			}
 
-			if (count == 0)
+			if (possibleDuplicateCount > 0) {
+				return new StatusInfo(IStatus.WARNING, possibleDuplicateCount == 1
+						? ActionMessages.AddGetterSetterAction_error_duplicate_methods_singular
+						: Messages.format(ActionMessages.AddGetterSetterAction_error_duplicate_methods_plural, String.valueOf(possibleDuplicateCount)));
+			}
+			if (selectedCount == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			String message= Messages.format(ActionMessages.AddGetterSetterAction_methods_selected,
-					new Object[] { String.valueOf(count), String.valueOf(fEntries)});
+					new Object[] { String.valueOf(selectedCount), String.valueOf(fEntries)});
 			return new StatusInfo(IStatus.INFO, message);
 		}
 	}

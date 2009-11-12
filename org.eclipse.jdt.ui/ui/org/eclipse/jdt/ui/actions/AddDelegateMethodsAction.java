@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,23 +123,26 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 		public IStatus validate(Object[] selection) {
-			StatusInfo info= new StatusInfo();
-			int count= 0;
+			int selectedCount= 0;
+			int duplicateCount= 0;
 			if (selection != null && selection.length > 0) {
 
 				HashSet signatures= new HashSet(selection.length);
 				for (int index= 0; index < selection.length; index++) {
 					if (selection[index] instanceof DelegateEntry) {
 						DelegateEntry delegateEntry= (DelegateEntry) selection[index];
-						if (!signatures.add(getSignature(delegateEntry.delegateMethod))) {
-							return new StatusInfo(IStatus.ERROR, ActionMessages.AddDelegateMethodsAction_duplicate_methods);
-						}
-						count++;
+						if (!signatures.add(getSignature(delegateEntry.delegateMethod)))
+							duplicateCount++;
+						selectedCount++;
 					}
 				}
 			}
-			info= new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.AddDelegateMethodsAction_selectioninfo_more, new Object[] { String.valueOf(count), String.valueOf(fEntries)}));
-			return info;
+			if (duplicateCount > 0) {
+				return new StatusInfo(IStatus.ERROR, duplicateCount == 1
+						? ActionMessages.AddDelegateMethodsAction_duplicate_methods_singular
+						: Messages.format(ActionMessages.AddDelegateMethodsAction_duplicate_methods_plural, String.valueOf(duplicateCount)));
+			}
+			return new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.AddDelegateMethodsAction_selectioninfo_more, new Object[] { String.valueOf(selectedCount), String.valueOf(fEntries) }));
 		}
 
 		private String getSignature(IMethodBinding binding) {
