@@ -72,7 +72,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 
 		boolean done= true;
 		int i= -1;
-		for (Iterator iterator= new ArrayList(fTextHoverSpecifications).iterator(); iterator.hasNext(); ) {
+		for (Iterator iterator= fTextHoverSpecifications.iterator(); iterator.hasNext();) {
 			i++;
 			JavaEditorTextHoverDescriptor spec= (JavaEditorTextHoverDescriptor) iterator.next();
 			if (spec == null)
