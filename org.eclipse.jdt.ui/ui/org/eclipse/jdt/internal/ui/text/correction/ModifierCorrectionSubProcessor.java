@@ -151,6 +151,10 @@ public class ModifierCorrectionSubProcessor {
 		boolean isLocalVar= false;
 		if (binding instanceof IMethodBinding) {
 			IMethodBinding methodDecl= (IMethodBinding) binding;
+			if (methodDecl.isDefaultConstructor()) {
+				UnresolvedElementsSubProcessor.getConstructorProposals(context, problem, proposals);
+				return;
+			}
 			bindingDecl= methodDecl.getMethodDeclaration();
 			typeBinding= methodDecl.getDeclaringClass();
 			name= BasicElementLabels.getJavaElementName(methodDecl.getName() + "()"); //$NON-NLS-1$
