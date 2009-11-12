@@ -427,7 +427,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fAddFilterButton= new Button(buttonContainer, SWT.PUSH);
 		fAddFilterButton.setText(JUnitMessages.JUnitPreferencePage_addfilterbutton_label);
-		fAddFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addfilterbutton_tooltip);
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddFilterButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddFilterButton);
@@ -439,7 +438,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fAddTypeButton= new Button(buttonContainer, SWT.PUSH);
 		fAddTypeButton.setText(JUnitMessages.JUnitPreferencePage_addtypebutton_label);
-		fAddTypeButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addtypebutton_tooltip);
 		gd= getButtonGridData(fAddTypeButton);
 		fAddTypeButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddTypeButton);
@@ -451,7 +449,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fAddPackageButton= new Button(buttonContainer, SWT.PUSH);
 		fAddPackageButton.setText(JUnitMessages.JUnitPreferencePage_addpackagebutton_label);
-		fAddPackageButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addpackagebutton_tooltip);
 		gd= getButtonGridData(fAddPackageButton);
 		fAddPackageButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fAddPackageButton);
@@ -463,7 +460,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fRemoveFilterButton= new Button(buttonContainer, SWT.PUSH);
 		fRemoveFilterButton.setText(JUnitMessages.JUnitPreferencePage_removefilterbutton_label);
-		fRemoveFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_removefilterbutton_tooltip);
 		gd= getButtonGridData(fRemoveFilterButton);
 		fRemoveFilterButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fRemoveFilterButton);
@@ -476,7 +472,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fEnableAllButton= new Button(buttonContainer, SWT.PUSH);
 		fEnableAllButton.setText(JUnitMessages.JUnitPreferencePage_enableallbutton_label);
-		fEnableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_enableallbutton_tooltip);
 		gd= getButtonGridData(fEnableAllButton);
 		fEnableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fEnableAllButton);
@@ -488,7 +483,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fDisableAllButton= new Button(buttonContainer, SWT.PUSH);
 		fDisableAllButton.setText(JUnitMessages.JUnitPreferencePage_disableallbutton_label);
-		fDisableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_disableallbutton_tooltip);
 		gd= getButtonGridData(fDisableAllButton);
 		fDisableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fDisableAllButton);
