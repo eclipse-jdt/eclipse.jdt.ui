@@ -6423,6 +6423,22 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=294768
+	public void testAddFinalBug294768() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private transient int field= 0;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+	
 	public void testAddFinalBug157276_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

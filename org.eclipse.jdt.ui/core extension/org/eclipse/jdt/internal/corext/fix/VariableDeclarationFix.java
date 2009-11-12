@@ -207,7 +207,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			if (toChange.size() == 0)
 				return false;
 
-			ModifierChangeOperation op= new ModifierChangeOperation(declaration, toChange, Modifier.FINAL, Modifier.VOLATILE);
+			ModifierChangeOperation op= new ModifierChangeOperation(declaration, toChange, Modifier.FINAL, Modifier.NONE);
 			fResult.add(op);
 			return false;
 		}
@@ -525,18 +525,18 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			return null;
 
 		if (decl instanceof SingleVariableDeclaration) {
-			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.VOLATILE);
+			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.NONE);
 		} else if (decl instanceof VariableDeclarationExpression) {
-			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.VOLATILE);
+			return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.NONE);
 		} else if (decl instanceof VariableDeclarationFragment){
 			VariableDeclarationFragment frag= (VariableDeclarationFragment)decl;
 			decl= decl.getParent();
 			if (decl instanceof FieldDeclaration || decl instanceof VariableDeclarationStatement) {
 				List list= new ArrayList();
 				list.add(frag);
-				return new ModifierChangeOperation(decl, list, Modifier.FINAL, Modifier.VOLATILE);
+				return new ModifierChangeOperation(decl, list, Modifier.FINAL, Modifier.NONE);
 			} else if (decl instanceof VariableDeclarationExpression) {
-				return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.VOLATILE);
+				return new ModifierChangeOperation(decl, new ArrayList(), Modifier.FINAL, Modifier.NONE);
 			}
 		}
 
@@ -548,14 +548,15 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			return false;
 
 		IVariableBinding varbinding= (IVariableBinding)binding;
-		if (Modifier.isFinal(varbinding.getModifiers()))
+		int modifiers= varbinding.getModifiers();
+		if (Modifier.isFinal(modifiers) || Modifier.isVolatile(modifiers) || Modifier.isTransient(modifiers))
 			return false;
 
 		ASTNode parent= ASTNodes.getParent(declNode, VariableDeclarationExpression.class);
 		if (parent != null && ((VariableDeclarationExpression)parent).fragments().size() > 1)
 			return false;
 
-		if (varbinding.isField() && !Modifier.isPrivate(varbinding.getModifiers()))
+		if (varbinding.isField() && !Modifier.isPrivate(modifiers))
 			return false;
 
 		if (varbinding.isParameter()) {
@@ -566,9 +567,6 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 					return false;
 			}
 		}
-
-		if (Modifier.isVolatile(varbinding.getModifiers()))
-			return false;
 
 		return true;
 	}
