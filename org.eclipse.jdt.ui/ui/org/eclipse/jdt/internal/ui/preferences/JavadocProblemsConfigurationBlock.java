@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -26,6 +28,8 @@ import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -146,8 +150,22 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-//		layout.marginTop= 5;
 		outer.setLayout(layout);
+
+		StyledText widget= new StyledText(outer, SWT.READ_ONLY | SWT.WRAP);
+		widget.setText(Messages.format(PreferencesMessages.JavadocProblemsConfigurationBlock_note_message, PreferencesMessages.JavadocProblemsConfigurationBlock_note_title));
+		widget.setBackground(outer.getBackground());
+		widget.setLeftMargin(0);
+		widget.setEnabled(false);
+		StyleRange styleRange= new StyleRange();
+		styleRange.start= 0;
+		styleRange.length= PreferencesMessages.JavadocProblemsConfigurationBlock_note_title.length();
+		styleRange.fontStyle= SWT.BOLD;
+		widget.setStyleRange(styleRange);
+		GridDataFactory.generate(widget, nColumns, 1);
+
+		Composite spacer= new Composite(outer, SWT.NONE);
+		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
 		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label;
 		addCheckBox(outer, label, PREF_JAVADOC_SUPPORT, enabledDisabled, 0);
@@ -155,7 +173,6 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		layout = new GridLayout();
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
-		//layout.marginWidth= 0;
 
 		Composite composite= new Composite(outer, SWT.NONE);
 		composite.setLayout(layout);
@@ -163,19 +180,10 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 
 		fJavadocComposite= composite;
 		
-		Label note= new Label(composite, SWT.WRAP);
-//		note.setText("Note: Javadoc processing not only affects compiler errors and warnings, but also includes search, refactoring, content assist, organize imports, ...");
-		note.setText("Note: This also affects search, refactoring, content assist, missing/unused imports, etc.");
-		GridDataFactory.generate(note, nColumns, 1);
-		
-		Composite spacer= new Composite(composite, SWT.NONE);
-		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
-
 		Label description= new Label(composite, SWT.WRAP);
 		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description);
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
-		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);

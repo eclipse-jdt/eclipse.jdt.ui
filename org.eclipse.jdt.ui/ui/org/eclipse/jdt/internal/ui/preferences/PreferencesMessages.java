@@ -460,6 +460,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocProblemsConfigurationBlock_error;
 	public static String JavadocProblemsConfigurationBlock_warning;
 	public static String JavadocProblemsConfigurationBlock_ignore;
+	public static String JavadocProblemsConfigurationBlock_note_title;
+	public static String JavadocProblemsConfigurationBlock_note_message;
 	public static String JavadocProblemsConfigurationBlock_needsbuild_title;
 	public static String JavadocProblemsConfigurationBlock_needsfullbuild_message;
 	public static String JavadocProblemsConfigurationBlock_needsprojectbuild_message;
