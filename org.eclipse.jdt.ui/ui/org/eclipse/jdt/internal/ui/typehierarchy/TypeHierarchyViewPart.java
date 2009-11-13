@@ -242,6 +242,21 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private OpenAction fOpenAction;
 
+	/**
+	 * Indicates whether the restore job was canceled explicitly.
+	 * 
+	 * @since 3.6
+	 */
+	private boolean fRestoreJobCanceledExplicitly= true;
+
+	/**
+	 * Indicates whether empty viewers should keep showing. If false, replace them with
+	 * fEmptyTypesViewer.
+	 * 
+	 * @since 3.6
+	 */
+	private boolean fKeepShowingEmptyViewers= true;
+
 
 	public TypeHierarchyViewPart() {
 		fSelectedType= null;
@@ -251,7 +266,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fSelectInEditor= true;
 		fRestoreStateJob= null;
 
-		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
+		fHierarchyLifeCycle= new TypeHierarchyLifeCycle(this);
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
 			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy, IType[] changedTypes) {
 				doTypeHierarchyChanged(typeHierarchy, changedTypes);
@@ -511,6 +526,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		synchronized (this) {
 			if (fRestoreStateJob != null) {
 				fRestoreStateJob.cancel();
+				fRestoreJobCanceledExplicitly= false;
 				try {
 					fRestoreStateJob.join();
 				} catch (InterruptedException e) {
@@ -529,6 +545,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (inputElement == null) {
 			clearInput();
 		} else {
+			if (!inputElement.equals(prevInput)) {
+				for (int i= 0; i < fAllViewers.length; i++) {
+					fAllViewers[i].setInput(null);
+				}
+			}
 			fInputElement= inputElement;
 			fNoHierarchyShownLabel.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, JavaElementLabels.getElementLabel(inputElement, JavaElementLabels.ALL_DEFAULT)));
 			try {
@@ -537,32 +558,45 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.TypeHierarchyViewPart_exception_title, TypeHierarchyMessages.TypeHierarchyViewPart_exception_message);
 				clearInput();
-				return;
+				return;// panic code. This code wont be executed.
 			} catch (InterruptedException e) {
 				fNoHierarchyShownLabel.setText(TypeHierarchyMessages.TypeHierarchyViewPart_empty);
-				return;
+				return;// panic code. This code wont be executed.
 			}
 
 			if (inputElement.getElementType() != IJavaElement.TYPE) {
 				setHierarchyMode(HIERARCHY_MODE_CLASSIC);
 			}
-			// turn off member filtering
-			fSelectInEditor= false;
-			setMemberFilter(null);
-			internalSelectType(null, false); // clear selection
-			fIsEnableMemberFilter= false;
-			if (!inputElement.equals(prevInput)) {
-				updateHierarchyViewer(true);
-			}
-			IType root= getSelectableType(inputElement);
-			internalSelectType(root, true);
-			updateMethodViewer(root);
-			updateToolbarButtons();
-			updateToolTipAndDescription();
-			showMembersInHierarchy(false);
-			fPagebook.showPage(fTypeMethodsSplitter);
-			fSelectInEditor= true;
+			updateViewers();
 		}
+	}
+
+	/**
+	 * Updates the viewers, toolbar buttons and tooltip.
+	 * 
+	 * @since 3.6
+	 */
+	public void updateViewers() {
+		if (fInputElement == null)
+			return;
+		if (!fHierarchyLifeCycle.isRefreshJobRunning()) {
+			setViewersInput();
+		}
+		setViewerVisibility(true);
+		// turn off member filtering
+		fSelectInEditor= false;
+		setMemberFilter(null);
+		internalSelectType(null, false); // clear selection
+		fIsEnableMemberFilter= false;
+		updateHierarchyViewer(true);
+		IType root= getSelectableType(fInputElement);
+		internalSelectType(root, true);
+		updateMethodViewer(root);
+		updateToolbarButtons();
+		updateToolTipAndDescription();
+		showMembersInHierarchy(false);
+		fPagebook.showPage(fTypeMethodsSplitter);		
+		fSelectInEditor= true;		
 	}
 
 	private void processOutstandingEvents() {
@@ -1139,7 +1173,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				if (!isChildVisible(fViewerbook, getCurrentViewer().getControl())) {
 					setViewerVisibility(true);
 				}
-			} else {
+			} else if (!isKeepShowingEmptyViewers()) {//Show the empty hierarchy viewer till fresh computation is done.
 				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT)));
 				setViewerVisibility(false);
 			}
@@ -1566,6 +1600,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						} catch (JavaModelException e) {
 							return e.getStatus();
 						} catch (OperationCanceledException e) {
+							if (fRestoreJobCanceledExplicitly) {
+								showEmptyViewer();
+							}
 							return Status.CANCEL_STATUS;
 						}
 						return Status.OK_STATUS;
@@ -1579,17 +1616,16 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private void doRestoreInBackground(final IMemento memento, final IJavaElement hierarchyInput, IProgressMonitor monitor) throws JavaModelException {
 		fHierarchyLifeCycle.doHierarchyRefresh(hierarchyInput, monitor);
 		final boolean doRestore= !monitor.isCanceled();
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				// running async: check first if view still exists
-				if (fPagebook != null && !fPagebook.isDisposed()) {
-					if (doRestore)
+		if (doRestore) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					// running async: check first if view still exists
+					if (fPagebook != null && !fPagebook.isDisposed()) {
 						doRestoreState(memento, hierarchyInput);
-					else
-						fNoHierarchyShownLabel.setText(TypeHierarchyMessages.TypeHierarchyViewPart_empty);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 
@@ -1602,6 +1638,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 
 		fWorkingSetActionGroup.restoreState(memento);
+		setKeepShowingEmptyViewers(false);
 		setInputElement(input);
 
 		Integer viewerIndex= memento.getInteger(TAG_VIEW);
@@ -1731,4 +1768,65 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fNeedRefresh= false;
 	}
 
+	/**
+	 * Sets the empty viewer when the user cancels the computation.
+	 * 
+	 * @since 3.6
+	 */
+	public void showEmptyViewer() {
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				clearInput();
+				setKeepShowingEmptyViewers(true);
+			}
+		});
+	}
+
+	/**
+	 * Returns the type hierarchy life cycle.
+	 *
+	 * @return the type hierarchy life cycle
+	 *
+	 * @since 3.6
+	 */
+	public TypeHierarchyLifeCycle getTypeHierarchyLifeCycle() {
+		return fHierarchyLifeCycle;
+
+	}
+
+	/**
+	 * Sets the input for all the hierarchy viewers with their respective viewer instances.
+	 * 
+	 * @since 3.6
+	 */
+	public void setViewersInput() {
+		for (int i= 0; i < fAllViewers.length; i++) {
+			fAllViewers[i].setInput(fAllViewers[i]);
+		}
+		setKeepShowingEmptyViewers(false);
+	}
+
+	/**
+	 * Sets whether empty viewers should keep showing. If false, replace with fEmptyTypesViewer.
+	 * 
+	 * @param keepShowingEmptyViewers <code>true</code> if the empty viewers can be shown,
+	 *            <code>false otherwise
+	 * 
+	 * @since 3.6
+	 */
+	public void setKeepShowingEmptyViewers(boolean keepShowingEmptyViewers) {
+		fKeepShowingEmptyViewers= keepShowingEmptyViewers;
+	}
+
+	/**
+	 * Returns value that determines whether the empty viewers should keep showing. If false,
+	 * replace with fEmptyTypesViewer.
+	 * 
+	 * @return <code>true</code> if the empty viewers can be shown, <code>false otherwise
+	 * 
+	 * @since 3.6
+	 */
+	public boolean isKeepShowingEmptyViewers() {
+		return fKeepShowingEmptyViewers;
+	}	
 }

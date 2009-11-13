@@ -72,6 +72,7 @@ public final class TypeHierarchyMessages extends NLS {
 	public static String TypeHierarchyViewPart_ws_tooltip;
 	public static String TypeHierarchyViewPart_restoreinput;
 	public static String TypeHierarchyViewPart_layout_submenu;
+	public static String TypeHierarchyLifeCycle_computeInput;
 	public static String ToggleViewAction_subtypes_label;
 	public static String ToggleViewAction_subtypes_tooltip;
 	public static String ToggleViewAction_subtypes_description;
