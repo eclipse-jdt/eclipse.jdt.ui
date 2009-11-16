@@ -410,7 +410,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public String getText(Object element) {
 			TestRunSession session= (TestRunSession) element;
 			String testRunLabel= BasicElementLabels.getJavaElementName(session.getTestRunName());
-			if (session.getStartTime() == 0) {
+			if (session.getStartTime() <= 0) {
 				return testRunLabel;
 			} else {
 				String startTime= DateFormat.getDateTimeInstance().format(new Date(session.getStartTime()));
@@ -572,7 +572,7 @@ public class TestRunnerViewPart extends ViewPart {
 		private String getFileName() {
 			String testRunName= fTestRunSession.getTestRunName();
 			long startTime= fTestRunSession.getStartTime();
-			if (startTime == 0)
+			if (startTime <= 0)
 				return testRunName;
 
 			String isoTime= new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(startTime)); //$NON-NLS-1$

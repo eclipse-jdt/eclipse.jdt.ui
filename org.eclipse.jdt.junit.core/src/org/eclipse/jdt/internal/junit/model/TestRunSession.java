@@ -119,7 +119,11 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	volatile int fTotalCount;
 	/**
-	 * Start time in millis.
+	 * <ul>
+	 * <li>If &gt; 0: Start time in millis</li>
+	 * <li>If &lt; 0: Unique identifier for imported test run</li>
+	 * <li>If = 0: Session not started yet</li>
+	 * </ul>
 	 */
 	volatile long fStartTime;
 	volatile boolean fIsRunning;
@@ -138,6 +142,7 @@ public class TestRunSession implements ITestRunSession {
 
 		fLaunch= null;
 		fProject= project;
+		fStartTime= -System.currentTimeMillis();
 
 		Assert.isNotNull(testRunName);
 		fTestRunName= testRunName;
