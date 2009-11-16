@@ -6,8 +6,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   David Saff (saff@mit.edu) - initial API and implementation
+ *     David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)
+ *     Andrew Eisenberg <andrew@eisenberg.as> - [JUnit] Rerun failed first does not work with JUnit4 - https://bugs.eclipse.org/bugs/show_bug.cgi?id=140392
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit4.runner;
 
@@ -27,17 +28,17 @@ public class JUnit4TestLoader implements ITestLoader {
 		ITestReference[] refs= new ITestReference[testClasses.length];
 		for (int i= 0; i < testClasses.length; i++) {
 			Class<?> clazz= testClasses[i];
-			ITestReference ref= createTest(clazz, testName);
+			ITestReference ref= createTest(clazz, testName, failureNames);
 			refs[i]= ref;
 		}
 		return refs;
 	}
 
-	private ITestReference createTest(Class<?> clazz, String testName) {
+	private ITestReference createTest(Class<?> clazz, String testName, String[] failureNames) {
 		if (clazz == null)
 			return null;
 		if (testName == null)
-			return new JUnit4TestClassReference(clazz);
-		return new JUnit4TestMethodReference(clazz, testName);
+			return new JUnit4TestClassReference(clazz, failureNames);
+		return new JUnit4TestMethodReference(clazz, testName, failureNames);
 	}
 }
