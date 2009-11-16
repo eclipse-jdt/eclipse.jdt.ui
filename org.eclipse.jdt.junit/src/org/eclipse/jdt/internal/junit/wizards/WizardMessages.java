@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,6 @@ public final class WizardMessages extends NLS {
 	public static String NewTestCaseWizardPageOne_junit3_radio_label;
 	public static String NewTestCaseWizardPageOne_junit4_radio_label;
 	public static String NewTestCaseWizardPageOne_linkedtext_java5required;
-	public static String NewTestCaseWizardPageOne_linkedtext_junit3_notonbuildpath;
-	public static String NewTestCaseWizardPageOne_linkedtext_junit4_notonbuildpath;
 	public static String NewTestCaseWizardPageOne_methodStub_setUpBeforeClass;
 	public static String NewTestCaseWizardPageOne_methodStub_tearDownAfterClass;
 	public static String NewTestCaseWizardPageOne_not_yet_implemented_string;
@@ -55,7 +53,6 @@ public final class WizardMessages extends NLS {
 	public static String NewTestCaseCreationWizard_fix_selection_junit3_description;
 	public static String NewTestCaseCreationWizard_fix_selection_junit4_description;
 	public static String NewTestCaseCreationWizard_fix_selection_open_build_path_dialog;
-	public static String NewTestCaseCreationWizard_fix_selection_problem_updating_classpath;
 	public static String NewTestCaseCreationWizard_fix_selection_invoke_fix;
 	public static String NewTestCaseCreationWizard_create_progress;
 	public static String NewTestCaseCreationWizard_fix_selection_not_now;
