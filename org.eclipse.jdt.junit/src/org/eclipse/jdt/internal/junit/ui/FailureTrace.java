@@ -32,6 +32,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.OpenStrategy;
 
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 
 /**
@@ -185,8 +186,8 @@ public class FailureTrace implements IMenuListener {
 	}
 
 	private String[] getFilterPatterns() {
-		if (JUnitPreferencePage.getFilterStack())
-			return JUnitPreferencePage.getFilterPatterns();
+		if (JUnitPreferencesConstants.getFilterStack())
+			return JUnitPreferencesConstants.getFilterPatterns();
 		return new String[0];
 	}
 

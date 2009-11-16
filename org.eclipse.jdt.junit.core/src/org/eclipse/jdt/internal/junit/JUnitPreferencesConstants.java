@@ -11,8 +11,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 /**
  * Defines constants which are used to refer to values in the plugin's preference store.
@@ -98,8 +103,7 @@ public class JUnitPreferencesConstants {
 	}
 
 	/**
-	 * Serializes the array of strings into one comma
-	 * separated string.
+	 * Serializes the array of strings into one comma-separated string.
 	 *
 	 * @param list array of strings
 	 * @return a single string composed of the given list
@@ -116,5 +120,31 @@ public class JUnitPreferencesConstants {
 			buffer.append(list[i]);
 		}
 		return buffer.toString();
+	}
+	
+	/**
+	 * Parses the comma-separated string into an array of strings.
+	 * 
+	 * @param listString a comma-separated string
+	 * @return an array of strings
+	 */
+	public static String[] parseList(String listString) {
+		List list= new ArrayList(10);
+		StringTokenizer tokenizer= new StringTokenizer(listString, ","); //$NON-NLS-1$
+		while (tokenizer.hasMoreTokens())
+			list.add(tokenizer.nextToken());
+		return (String[]) list.toArray(new String[list.size()]);
+	}
+
+	public static String[] getFilterPatterns() {
+		return JUnitPreferencesConstants.parseList(Platform.getPreferencesService().getString(JUnitCorePlugin.CORE_PLUGIN_ID, PREF_ACTIVE_FILTERS_LIST, null, null));
+	}
+
+	public static boolean getFilterStack() {
+		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, DO_FILTER_STACK, true, null);
+	}
+
+	public static void setFilterStack(boolean filter) {
+		new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(DO_FILTER_STACK, filter);
 	}
 }

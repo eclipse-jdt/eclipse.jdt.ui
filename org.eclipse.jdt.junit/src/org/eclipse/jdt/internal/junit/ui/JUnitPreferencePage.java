@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.eclipse.osgi.util.TextProcessor;
 
@@ -40,7 +39,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -745,7 +743,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 * @return list
 	 */
 	protected List createActiveStackFiltersList() {
-		return Arrays.asList(getFilterPatterns());
+		return Arrays.asList(JUnitPreferencesConstants.getFilterPatterns());
 	}
 
 	/**
@@ -755,7 +753,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 */
 	protected List createInactiveStackFiltersList() {
 		String[] strings=
-			JUnitPreferencePage.parseList(getPreferenceStore().getString(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST));
+			JUnitPreferencesConstants.parseList(getPreferenceStore().getString(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST));
 		return Arrays.asList(strings);
 	}
 
@@ -766,28 +764,5 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		boolean enabled= fFilterViewer.getTable().getItemCount() > 0;
 		fEnableAllButton.setEnabled(enabled);
 		fDisableAllButton.setEnabled(enabled);
-	}
-
-	public static String[] getFilterPatterns() {
-		return JUnitPreferencePage.parseList(Platform.getPreferencesService().getString(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, null, null));
-	}
-
-	public static boolean getFilterStack() {
-		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.DO_FILTER_STACK, true, null);
-	}
-
-	public static void setFilterStack(boolean filter) {
-		new InstanceScope().getNode(JUnitCorePlugin.CORE_PLUGIN_ID).putBoolean(JUnitPreferencesConstants.DO_FILTER_STACK, filter);
-	}
-
-	/*
-	 * Parses the comma separated string into an array of strings
-	 */
-	private static String[] parseList(String listString) {
-		List list= new ArrayList(10);
-		StringTokenizer tokenizer= new StringTokenizer(listString, ","); //$NON-NLS-1$
-		while (tokenizer.hasMoreTokens())
-			list.add(tokenizer.nextToken());
-		return (String[]) list.toArray(new String[list.size()]);
 	}
 }

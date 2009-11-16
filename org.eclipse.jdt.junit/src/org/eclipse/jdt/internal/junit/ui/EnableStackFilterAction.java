@@ -15,6 +15,8 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
+
 /**
  * Action to enable/disable stack trace filtering.
  */
@@ -33,14 +35,14 @@ public class EnableStackFilterAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
 
 		fView= view;
-		setChecked(JUnitPreferencePage.getFilterStack());
+		setChecked(JUnitPreferencesConstants.getFilterStack());
 	}
 
 	/*
 	 * @see Action#actionPerformed
 	 */
 	public void run() {
-		JUnitPreferencePage.setFilterStack(isChecked());
+		JUnitPreferencesConstants.setFilterStack(isChecked());
 		fView.refresh();
 	}
 }
