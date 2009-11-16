@@ -18,7 +18,6 @@ public final class FixMessages extends NLS {
 	private FixMessages() {
 	}
 
-	public static String CleanUpPostSaveListener_exception_error;
 	public static String CleanUpPostSaveListener_name;
 	public static String CleanUpPostSaveListener_SaveAction_ChangeName;
 	public static String CleanUpPostSaveListener_SlowCleanUpDialog_link;
@@ -55,7 +54,6 @@ public final class FixMessages extends NLS {
 	public static String Java50Fix_add_type_parameters_change_name;
 	public static String PotentialProgrammingProblemsFix_add_id_change_name;
 
-	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_binding;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_exception;
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown;
 	public static String SortMembersFix_Change_description;
@@ -83,7 +81,6 @@ public final class FixMessages extends NLS {
 	public static String Java50Fix_AddDeprecated_description;
 	public static String Java50Fix_AddOverride_description;
 	public static String Java50Fix_ConvertToEnhancedForLoop_description;
-	public static String Java50Fix_ParametrizeTypeReference_description;
 	public static String Java50Fix_AddTypeArguments_description;
 	public static String Java50Fix_SerialVersion_default_description;
 	public static String Java50Fix_SerialVersion_hash_description;
@@ -95,7 +92,6 @@ public final class FixMessages extends NLS {
 	public static String StringFix_RemoveNonNls_description;
 
 	public static String CodeStyleFix_ChangeAccessToStatic_description;
-	public static String CodeStyleFix_AddThisQualifier_description;
 	public static String CodeStyleFix_QualifyWithThis_description;
 	public static String CodeStyleFix_ChangeAccessToStaticUsingInstanceType_description;
 	public static String CodeStyleFix_ChangeStaticAccess_description;

@@ -236,7 +236,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageTwo_error_title;
 	public static String NewJavaProjectWizardPage_op_desc;
 
-	public static String NewJavaWorkingSetWizard_add_as_root_message;
 	public static String NewJavaWorkingSetWizard_title;
 	public static String NewSourceFolderCreationWizard_title;
 	public static String NewSourceFolderCreationWizard_edit_title;
@@ -437,7 +436,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewVariableEntryDialog_vars_label;
 	public static String NewVariableEntryDialog_ExtensionDialog_title;
 	public static String NewVariableEntryDialog_ExtensionDialog_description;
-	public static String NewVariableEntryDialog_info_isfolder;
 	public static String NewVariableEntryDialog_info_notexists;
 	public static String NewVariableEntryDialog_info_noselection;
 	public static String NewVariableEntryDialog_info_selected;

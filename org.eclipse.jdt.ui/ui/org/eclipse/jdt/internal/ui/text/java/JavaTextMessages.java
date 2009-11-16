@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,6 @@ final class JavaTextMessages extends NLS {
 	public static String ContentAssistProcessor_all_disabled_title;
 	public static String FilledArgumentNamesMethodProposal_error_msg;
 	public static String ParameterGuessingProposal_error_msg;
-	public static String ProposalInfo_more_to_come;
 	public static String GetterSetterCompletionProposal_getter_label;
 	public static String GetterSetterCompletionProposal_setter_label;
 	public static String MethodCompletionProposal_constructor_label;

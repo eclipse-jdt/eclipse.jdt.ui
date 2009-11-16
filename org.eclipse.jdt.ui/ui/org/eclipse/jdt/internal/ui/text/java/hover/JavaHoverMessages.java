@@ -30,7 +30,6 @@ final class JavaHoverMessages extends NLS {
 
 	public static String JavadocHover_back;
 	public static String JavadocHover_back_toElement_toolTip;
-	public static String JavadocHover_back_toolTip;
 	public static String JavadocHover_noAttachments;
 	public static String JavadocHover_noAttachedJavadoc;
 	public static String JavadocHover_noAttachedSource;

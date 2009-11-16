@@ -256,8 +256,6 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarPackageReader_error_tagPathNotFound;
 
-	public static String JarPackageReader_error_unknownJarBuilder;
-
 	public static String JarPackageReader_jarPackageReaderWarnings;
 
 	public static String JarPackageReader_warning_javaElementDoesNotExist;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,13 +43,10 @@ final class PropertiesFileEditorMessages extends NLS {
 
 	public static String OpenAction_label;
 	public static String OpenAction_tooltip;
-	public static String OpenAction_select_element;
 	public static String OpenAction_error_title;
 	public static String OpenAction_error_message;
 	public static String OpenAction_error_messageArgs;
 	public static String OpenAction_error_messageProblems;
-	public static String OpenAction_error_messageBadSelection;
-	public static String OpenAction_error_messageErrorResolvingSelection;
 	public static String OpenAction_error_messageErrorSearchingKey;
 	public static String OpenAction_error_messageNoResult;
 	public static String OpenAction_hyperlinkText;

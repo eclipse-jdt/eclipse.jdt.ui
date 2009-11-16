@@ -110,8 +110,6 @@ public final class CallHierarchyMessages extends NLS {
 	public static String SearchScopeActionGroup_workingset_select_tooltip;
 	public static String WorkingSetScope;
 	public static String SearchUtil_workingSetConcatenation;
-	public static String SelectWorkingSetAction_error_title;
-	public static String SelectWorkingSetAction_error_message;
 	public static String OpenLocationAction_error_title;
 	public static String CallHierarchyUI_open_in_editor_error_message;
 	public static String CallHierarchyUI_open_in_editor_error_messageArgs;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,7 +89,6 @@ final class NLSUIMessages extends NLS {
 	public static String ExternalizeWizardPage_value;
 	public static String ExternalizeWizardPage_Edit_key_and_value;
 	public static String ExternalizeWizardPage_accessorclass_label;
-	public static String ExternalizeWizardPage_propertiesfile_label;
 	public static String ExternalizeWizardPage_configure_button;
 	public static String ExternalizeWizardPage_warning_conflicting;
 	public static String ExternalizeWizardPage_warning_keymissing;

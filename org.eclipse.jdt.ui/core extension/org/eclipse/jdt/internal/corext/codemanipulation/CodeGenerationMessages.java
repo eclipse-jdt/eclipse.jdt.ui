@@ -33,7 +33,6 @@ public final class CodeGenerationMessages extends NLS {
 	public static String OrganizeImportsOperation_description;
 	public static String AddJavaDocStubOperation_description;
 	public static String AddDelegateMethodsOperation_monitor_message;
-	public static String ImportsStructure_operation_description;
 	public static String GenerateHashCodeEqualsOperation_description;
 
 	static {
@@ -52,8 +51,6 @@ public final class CodeGenerationMessages extends NLS {
 	public static String GenerateToStringOperation_objectIdentityHashCodeVariableDescription;
 	public static String GenerateToStringOperation_objectSuperToStringVariableDescription;
 	public static String GenerateToStringOperation_description;
-	public static String GenerateToStringOperation_error_dialog_title;
-	public static String GenerateToStringOperation_invalid_message;
 	public static String GenerateToStringOperation_memberNameParenthesesVariableDescription;
 	public static String GenerateToStringOperation_memberNameVariableDescription;
 	public static String GenerateToStringOperation_memberValueVariableDescription;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,6 @@ public final class CompareMessages extends NLS {
 	public static String JavaNode_importDeclarations;
 	public static String JavaNode_initializer;
 	public static String JavaNode_packageDeclaration;
-	public static String PropertiesStructureCreator_error_occurred;
 	public static String PropertyCompareViewer_title;
 	public static String PropertyCompareViewer_malformedEncoding;
 	public static String CompareWithHistory_title;
@@ -43,7 +42,6 @@ public final class CompareMessages extends NLS {
 	public static String AddFromHistory_title;
 	public static String AddFromHistory_internalErrorMessage;
 	public static String AddFromHistory_invalidSelectionMessage;
-	public static String AddFromHistory_noHistoryMessage;
 	public static String Editor_Buffer;
 	public static String Workspace_File;
 	public static String LocalHistoryActionGroup_menu_local_history;

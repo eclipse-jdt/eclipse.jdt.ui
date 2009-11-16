@@ -307,7 +307,6 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_enum_superinterfaces;
 	public static String LineWrappingTabPage_assignment_alignment;
 	public static String LineWrappingTabPage_binary_expression_wrap_operator;
-	public static String LineWrappingTabPage_binary_expression;
 
 	public static String BlankLinesTabPage_preview_header;
 	public static String BlankLinesTabPage_compilation_unit_group_title;
@@ -362,7 +361,6 @@ final class FormatterMessages extends NLS {
 	public static String CommentsTabPage_new_line_after_param_tags;
 	public static String CommentsTabPage_group3_title;
 	public static String CommentsTabPage_group4_title;
-	public static String CommentsTabPage_group5_title;
 	public static String CommentsTabPage_line_width;
 	public static String CommentsTabPage_never_indent_block_comments_on_first_column;
 	public static String CommentsTabPage_never_indent_line_comments_on_first_column;
@@ -458,7 +456,7 @@ final class FormatterMessages extends NLS {
 	public static String CodingStyleConfigurationBlock_save_profile_overwrite_message;
 	public static String CodingStyleConfigurationBlock_export_all_button_desc;
 	public static String CodingStyleConfigurationBlock_export_profiles_dialog_title;
-	public static String CodingStyleConfigurationBlock_export_profiles_error_title;	
+	public static String CodingStyleConfigurationBlock_export_profiles_error_title;
 	public static String CodingStyleConfigurationBlock_export_profiles_error_message;
 	public static String CodingStyleConfigurationBlock_export_profiles_overwrite_title;
 	public static String CodingStyleConfigurationBlock_export_profiles_overwrite_message;
@@ -466,7 +464,6 @@ final class FormatterMessages extends NLS {
 	public static String CodingStyleConfigurationBlock_remove_button_desc;
 	public static String CodingStyleConfigurationBlock_new_button_desc;
 	public static String CodingStyleConfigurationBlock_load_button_desc;
-	public static String CodingStyleConfigurationBlock_save_button_desc;
 	public static String CodingStyleConfigurationBlock_preview_label_text;
 	public static String CodingStyleConfigurationBlock_error_reading_xml_message;
 	public static String CodingStyleConfigurationBlock_error_serializing_xml_message;
