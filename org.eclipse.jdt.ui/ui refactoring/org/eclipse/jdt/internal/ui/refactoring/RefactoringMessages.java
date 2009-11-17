@@ -134,10 +134,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ConvertNestedToTopAction_Convert;
 
-	public static String ConvertNestedToTopAction_not_possible;
-
-	public static String ConvertNestedToTopAction_Refactoring;
-
 	public static String ConvertNestedToTopAction_To_activate;
 
 	public static String DelegateCreator_deprecate_delegates;
@@ -172,15 +168,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractClassAction_action_text;
 
-	public static String ExtractClassWizard_button_down;
-
 	public static String ExtractClassWizard_button_edit;
 
-	public static String ExtractClassWizard_button_up;
-
 	public static String ExtractClassWizard_checkbox_create_gettersetter;
-
-	public static String ExtractClassWizard_checke_setters;
 
 	public static String ExtractClassWizard_column_name;
 
@@ -231,10 +221,6 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractConstantWizard_defaultPageTitle;
 
 	public static String ExtractInterfaceAction_Extract_Interface;
-
-	public static String ExtractInterfaceAction_not_possible;
-
-	public static String ExtractInterfaceAction_Refactoring;
 
 	public static String ExtractInterfaceAction_To_activate;
 
@@ -352,13 +338,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractTempInputPage_enter_name;
 
-	public static String ExtractTempInputPage_exception;
-
 	public static String ExtractTempInputPage_extract_local;
 
 	public static String ExtractTempInputPage_replace_all;
-
-	public static String ExtractTempInputPage_signature_preview;
 
 	public static String ExtractTempInputPage_variable_name;
 
@@ -486,8 +468,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String IntroduceIndirectionInputPage_new_method_name;
 
-	public static String IntroduceIndirectionInputPage_select_declaring_class;
-
 	public static String IntroduceIndirectionInputPage_update_references;
 
 	public static String IntroduceParameterAction_dialog_title;
@@ -496,25 +476,11 @@ public final class RefactoringMessages extends NLS {
 
 	public static String IntroduceParameterInputPage_description;
 
-	public static String IntroduceParameterObjectWizard_choosepackage_button;
-
-	public static String IntroduceParameterObjectWizard_choosepackage_label;
-
-	public static String IntroduceParameterObjectWizard_ChoosePackageDialog_description;
-
-	public static String IntroduceParameterObjectWizard_ChoosePackageDialog_empty;
-
-	public static String IntroduceParameterObjectWizard_ChoosePackageDialog_title;
-
 	public static String IntroduceParameterObjectWizard_classnamefield_label;
 
 	public static String IntroduceParameterObjectWizard_createasnestedclass_radio;
 
 	public static String IntroduceParameterObjectWizard_createastoplevel_radio;
-
-	public static String IntroduceParameterObjectWizard_createcomments_checkbox;
-
-	public static String IntroduceParameterObjectWizard_createdelegate_checkbox;
 
 	public static String IntroduceParameterObjectWizard_creategetter_checkbox;
 
@@ -529,8 +495,6 @@ public final class RefactoringMessages extends NLS {
 	public static String IntroduceParameterObjectWizard_error_description;
 
 	public static String IntroduceParameterObjectWizard_error_title;
-
-	public static String IntroduceParameterObjectWizard_fieldgroup_text;
 
 	public static String IntroduceParameterObjectWizard_fieldname_message;
 
@@ -608,10 +572,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String MoveInstanceMethodAction_unexpected_exception;
 
-	public static String MoveInstanceMethodPage_Create_button_name;
-
-	public static String MoveInstanceMethodPage_Deprecate_button_name;
-
 	public static String MoveInstanceMethodPage_invalid_target;
 
 	public static String MoveInstanceMethodPage_Method_name;
@@ -625,10 +585,6 @@ public final class RefactoringMessages extends NLS {
 	public static String MoveInstanceMethodPage_Type;
 
 	public static String MoveInstanceMethodWizard_Move_Method;
-
-	public static String MoveMembersAction_error_message;
-
-	public static String MoveMembersAction_error_title;
 
 	public static String MoveMembersAction_unavailable;
 
@@ -648,23 +604,15 @@ public final class RefactoringMessages extends NLS {
 
 	public static String MoveMembersInputPage_exception;
 
-	public static String MoveMembersInputPage_internal_error;
-
 	public static String MoveMembersInputPage_invalid_name;
 
 	public static String MoveMembersInputPage_Invalid_selection;
-
-	public static String MoveMembersInputPage_lowerListLabel;
-
-	public static String MoveMembersInputPage_move;
 
 	public static String MoveMembersInputPage_move_Member;
 
 	public static String MoveMembersInputPage_no_binary;
 
 	public static String MoveMembersInputPage_not_found;
-
-	public static String MoveMembersInputPage_upperListLabel;
 
 	public static String MoveMembersWizard_page_title;
 
@@ -693,10 +641,6 @@ public final class RefactoringMessages extends NLS {
 	public static String ParameterEditDialog_title;
 
 	public static String ParameterEditDialog_type;
-
-	public static String ParameterEditDialog_type_error;
-
-	public static String ParameterEditDialog_type_invalid;
 
 	public static String PromoteTempInputPage_constructors;
 
@@ -778,11 +722,7 @@ public final class RefactoringMessages extends NLS {
 
 	public static String PullUpWizard_select_all_label;
 
-	public static String PushDownAction_not_possible;
-
 	public static String PushDownAction_Push_Down;
-
-	public static String PushDownAction_Refactoring;
 
 	public static String PushDownAction_To_activate;
 
@@ -904,8 +844,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RenameLocalVariableWizard_defaultPageTitle;
 
-	public static String RenameLocalVariableWizard_inputPage_description;
-
 	public static String RenameMethodWizard_defaultPageTitle;
 
 	public static String RenameMethodWizard_inputPage_description;
@@ -918,15 +856,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RenameRefactoringWizard_internal_error;
 
-	public static String RenameResourceWizard_defaultPageTitle;
-
-	public static String RenameResourceWizard_inputPage_description;
-
 	public static String RenameSourceFolder_defaultPageTitle;
 
 	public static String RenameSourceFolder_inputPage_description;
-
-	public static String RenameTempAction_exception;
 
 	public static String RenameTypeParameterWizard_defaultPageTitle;
 
@@ -1030,17 +962,9 @@ public final class RefactoringMessages extends NLS {
 
 	public static String SurroundWithTryCatchAction_label;
 
-	public static String SurroundWithTryCatchAction_no_exceptions;
-
-	public static String UseSupertypeAction_not_possible;
-
-	public static String UseSupertypeAction_Refactoring;
-
 	public static String UseSupertypeAction_to_activate;
 
 	public static String UseSupertypeAction_use_Supertype;
-
-	public static String UseSupertypeInputPage_Internal_Error;
 
 	public static String UseSupertypeInputPage_no_possible_updates;
 
@@ -1056,8 +980,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String UseSupertypeInputPage_Use_in_instanceof;
 
-	public static String UseSupertypeInputPage_Use_Supertype;
-
 	public static String UseSupertypeWizard_10;
 
 	public static String UseSupertypeWizard_Use_Super_Type_Where_Possible;
@@ -1065,10 +987,6 @@ public final class RefactoringMessages extends NLS {
 	public static String VisibilityControlUtil_Access_modifier;
 
 	public static String VisibilityControlUtil_defa_ult_4;
-
-	public static String VisibilityControlUtil_final;
-
-	public static String VisibilityControlUtil_synchronized;
 
 	public static String SelfEncapsulateFieldInputPage_useexistingsetter_label;
 
