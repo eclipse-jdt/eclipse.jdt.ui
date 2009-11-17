@@ -20,10 +20,6 @@ public final class WorkingSetMessages extends NLS {
 		// Do not instantiate
 	}
 
-	public static String AbstractWorkingSetPage_workingSet_name;
-	public static String AbstractWorkingSetPage_warning_nameMustNotBeEmpty;
-	public static String AbstractWorkingSetPage_warning_workingSetExists;
-	public static String AbstractWorkingSetPage_warning_nameWhitespace;
 	public static String ConfigureWorkingSetAssignementAction_DeselectAll_button;
 	public static String ConfigureWorkingSetAssignementAction_DialogMessage_multi;
 	public static String ConfigureWorkingSetAssignementAction_SelectAll_button;
@@ -48,9 +44,6 @@ public final class WorkingSetMessages extends NLS {
 	public static String JavaWorkingSetPage_warning_workingSetExists;
 	public static String JavaWorkingSetPage_warning_resourceMustBeChecked;
 	public static String JavaWorkingSetPage_warning_nameWhitespace;
-	public static String JavaWorkingSetPage_projectClosedDialog_message;
-	public static String JavaWorkingSetPage_projectClosedDialog_title;
-	public static String OpenCloseWorkingSetAction_error_details;
 
 	public static String SelectWorkingSetAction_text;
 	public static String SelectWorkingSetAction_toolTip;
@@ -68,7 +61,6 @@ public final class WorkingSetMessages extends NLS {
 	public static String ViewActionGroup_show_label;
 	public static String ViewActionGroup_projects_label;
 	public static String ViewActionGroup_workingSets_label;
-	public static String WorkingSetModel_histroy_name;
 	public static String WorkingSetModel_others_name;
 
 	public static String WorkingSetConfigurationDialog_title;
@@ -82,12 +74,6 @@ public final class WorkingSetMessages extends NLS {
 	public static String WorkingSetConfigurationDialog_deselectAll_label;
 	public static String WorkingSetConfigurationDialog_sort_working_sets;
 
-	public static String OpenCloseWorkingSetAction_close_label;
-	public static String OpenCloseWorkingSetAction_close_error_title;
-	public static String OpenCloseWorkingSetAction_close_error_message;
-	public static String OpenCloseWorkingSetAction_open_label;
-	public static String OpenCloseWorkingSetAction_open_error_title;
-	public static String OpenCloseWorkingSetAction_open_error_message;
 	public static String RemoveWorkingSetElementAction_label;
 
 	static {

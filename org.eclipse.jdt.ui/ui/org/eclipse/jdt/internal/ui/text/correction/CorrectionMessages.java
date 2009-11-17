@@ -45,8 +45,6 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_inline_local_description;
 	public static String QuickAssistProcessor_name_extension_from_class;
 	public static String QuickAssistProcessor_name_extension_from_interface;
-	public static String SelfEncapsulateFieldAction_dialog_cannot_perform;
-	public static String SelfEncapsulateFieldAction_dialog_title;
 	public static String SerialVersionHashOperation_computing_id;
 	public static String SerialVersionHashOperation_error_classnotfound;
 	public static String SerialVersionHashOperation_save_caption;
@@ -69,7 +67,6 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_renamecu_description;
 	public static String ReorgCorrectionsSubProcessor_movecu_default_description;
 	public static String ReorgCorrectionsSubProcessor_movecu_description;
-	public static String ReorgCorrectionsSubProcessor_unusedimport_description;
 	public static String ReorgCorrectionsSubProcessor_organizeimports_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_project_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_archive_description;
@@ -86,15 +83,9 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_unnecessaryinstanceof_description;
 	public static String LocalCorrectionsSubProcessor_unnecessarythrow_description;
 	public static String LocalCorrectionsSubProcessor_classtointerface_description;
-	public static String LocalCorrectionsSubProcessor_unqualifiedfieldaccess_description;
 	public static String LocalCorrectionsSubProcessor_externalizestrings_description;
-	public static String LocalCorrectionsSubProcessor_externalizestrings_dialog_title;
 	public static String LocalCorrectionsSubProcessor_extendstoimplements_description;
-	public static String LocalCorrectionsSubProcessor_addnon_nls_description;
-	public static String LocalCorrectionsSubProcessor_changeaccesstostatic_description;
-	public static String LocalCorrectionsSubProcessor_changeaccesstostaticdefining_description;
 	public static String LocalCorrectionsSubProcessor_setparenteses_bitop_description;
-	public static String LocalCorrectionsSubProcessor_indirectaccesstostatic_description;
 	public static String LocalCorrectionsSubProcessor_uninitializedvariable_description;
 	public static String LocalCorrectionsSubProcessor_removesemicolon_description;
 	public static String LocalCorrectionsSubProcessor_removeunreachablecode_description;
@@ -263,7 +254,6 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_invertequals_description;
 	public static String QuickAssistProcessor_typetoarrayInitializer_description;
 	public static String QuickAssistProcessor_createmethodinsuper_description;
-	public static String QuickAssistProcessor_forLoop_description;
 	public static String LinkedNamesAssistProposal_proposalinfo;
 	public static String LinkedNamesAssistProposal_description;
 	public static String QuickTemplateProcessor_surround_label;
@@ -302,10 +292,8 @@ public final class CorrectionMessages extends NLS {
 	public static String AdvancedQuickAssistProcessor_exchangeInnerAndOuterIfConditions_description;
 	public static String AdvancedQuickAssistProcessor_inverseConditions_description;
 	public static String AdvancedQuickAssistProcessor_inverseConditionalExpression_description;
-	public static String AdvancedQuickAssistProcessor_removeParenthesis_description;
 	public static String AdvancedQuickAssistProcessor_replaceIfWithConditional;
 	public static String AdvancedQuickAssistProcessor_replaceConditionalWithIf;
-	public static String AdvancedQuickAssistProcessor_addParethesis_description;
 	public static String AdvancedQuickAssistProcessor_joinWithOuter_description;
 	public static String AdvancedQuickAssistProcessor_joinWithInner_description;
 	public static String AdvancedQuickAssistProcessor_splitAndCondition_description;
@@ -319,8 +307,6 @@ public final class CorrectionMessages extends NLS {
 		NLS.initializeMessages(BUNDLE_NAME, CorrectionMessages.class);
 	}
 
-	public static String ModifierCorrectionSubProcessor_addoverrideannotation;
-	public static String ModifierCorrectionSubProcessor_adddeprecatedannotation;
 	public static String LocalCorrectionsSubProcessor_externalizestrings_additional_info;
 	public static String LocalCorrectionsSubProcessor_generate_hashCode_equals_additional_info;
 	public static String LocalCorrectionsSubProcessor_generate_hashCode_equals_description;
@@ -331,7 +317,6 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeworkspace_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeproject_description;
 	public static String GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description;
-	public static String GetterSetterCorrectionSubProcessor_createsetterusingencapsulatefield_description;
 	public static String GetterSetterCorrectionSubProcessor_encapsulate_field_error_message;
 	public static String GetterSetterCorrectionSubProcessor_additional_info;
 	public static String GetterSetterCorrectionSubProcessor_encapsulate_field_error_title;
@@ -352,21 +337,16 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_project_seup_fix_description;
 	public static String ReorgCorrectionsSubProcessor_project_seup_fix_info;
 	public static String UnresolvedElementsSubProcessor_change_full_type_description;
-	public static String LocalCorrectionsSubProcessor_remove_nls_tag_description;
 	public static String LocalCorrectionsSubProcessor_remove_redundant_superinterface;
 	public static String LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
 	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
-	public static String CorrectionMessages_add_type_parameters_to_instantiation;
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_changetoattribute_description;
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_createattribute_description;
 	public static String MissingAnnotationAttributesProposal_add_missing_attributes_label;
 	public static String FixCorrectionProposal_ErrorAdditionalProposalInfo;
-	public static String FixCorrectionProposal_1;
 	public static String FixCorrectionProposal_MultiFixChange_label;
 	public static String FixCorrectionProposal_HitCtrlEnter_description;
 	public static String FixCorrectionProposal_hitCtrlEnter_variable_description;
-	public static String CorrectionMarkerResolutionGenerator__multiFixErrorDialog_Titel;
-	public static String CorrectionMarkerResolutionGenerator_multiFixErrorDialog_description;
 	public static String LocalCorrectionsSubProcessor_insert_break_statement;
 	public static String LocalCorrectionsSubProcessor_insert_fall_through;
 	public static String LocalCorrectionsSubProcessor_override_hashCode_description;

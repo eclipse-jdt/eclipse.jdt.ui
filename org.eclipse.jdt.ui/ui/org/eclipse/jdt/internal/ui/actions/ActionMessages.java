@@ -148,7 +148,6 @@ public final class ActionMessages extends NLS {
 	public static String AddGetterSetterAction_interface_not_applicable;
 	public static String AddGetterSetterAction_annotation_not_applicable;
 	public static String AddGetterSetterAction_QueryDialog_title;
-	public static String AddGetterSetterAction_SkipSetterForFinalDialog_message;
 	public static String AddGetterSetterAction_SkipExistingDialog_message;
 	public static String AddGetterSetterAction_SkipExistingDialog_skip_label;
 	public static String AddGetterSetterAction_SkipExistingDialog_replace_label;
@@ -242,7 +241,6 @@ public final class ActionMessages extends NLS {
 	public static String AddJavaDocStubsAction_not_applicable;
 	public static String ExternalizeStringsAction_label;
 	public static String ExternalizeStringsAction_dialog_title;
-	public static String ExternalizeStringsAction_dialog_message;
 	public static String FindStringsToExternalizeAction_label;
 	public static String FindStringsToExternalizeAction_dialog_title;
 	public static String FindStringsToExternalizeAction_error_message;
@@ -261,7 +259,6 @@ public final class ActionMessages extends NLS {
 	public static String OpenExternalJavadocAction_select_element;
 	public static String OpenExternalJavadocAction_libraries_no_location;
 	public static String OpenExternalJavadocAction_source_no_location;
-	public static String OpenExternalJavadocAction_no_entry;
 	public static String OpenExternalJavadocAction_opening_failed;
 	public static String OpenExternalJavadocAction_dialog_title;
 	public static String OpenExternalJavadocAction_code_resolve_failed;
@@ -272,11 +269,8 @@ public final class ActionMessages extends NLS {
 	public static String OrganizeImportsAction_label;
 	public static String OrganizeImportsAction_tooltip;
 	public static String OrganizeImportsAction_description;
-	public static String OrganizeImportsAction_multi_op_description;
 	public static String OrganizeImportsAction_multi_error_parse;
 	public static String OrganizeImportsAction_multi_error_unresolvable;
-	public static String OrganizeImportsAction_multi_error_unexpected;
-	public static String OrganizeImportsAction_multi_error_notoncp;
 	public static String OrganizeImportsAction_selectiondialog_title;
 	public static String OrganizeImportsAction_selectiondialog_message;
 	public static String OrganizeImportsAction_error_title;
@@ -286,8 +280,6 @@ public final class ActionMessages extends NLS {
 	public static String OrganizeImportsAction_summary_added_plural;
 	public static String OrganizeImportsAction_summary_removed_singular;
 	public static String OrganizeImportsAction_summary_removed_plural;
-	public static String OrganizeImportsAction_multi_status_title;
-	public static String OrganizeImportsAction_multi_status_description;
 	public static String OrganizeImportsAction_EmptySelection_description;
 	public static String OrganizeImportsAction_EmptySelection_title;
 
@@ -329,11 +321,7 @@ public final class ActionMessages extends NLS {
 	public static String RefreshAction_label;
 	public static String RefreshAction_toolTip;
 	public static String RefreshAction_progressMessage;
-	public static String RefreshAction_error_title;
-	public static String RefreshAction_error_message;
 	public static String RefreshAction_error_workbenchaction_message;
-	public static String RefreshAction_locationDeleted_title;
-	public static String RefreshAction_locationDeleted_message;
 	public static String RefreshAction_refresh_operation_label;
 	public static String ModifyParameterAction_problem_title;
 	public static String ModifyParameterAction_problem_message;

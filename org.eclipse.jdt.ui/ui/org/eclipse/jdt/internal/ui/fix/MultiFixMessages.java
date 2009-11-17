@@ -23,27 +23,18 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_CleaningUpN1_Title;
 	public static String CleanUpRefactoringWizard_CleaningUpNN_Title;
 	public static String CleanUpRefactoringWizard_CleanUpConfigurationPage_title;
-	public static String CleanUpRefactoringWizard_code_organizing_tab;
-	public static String CleanUpRefactoringWizard_code_style_tab;
 	public static String CleanUpRefactoringWizard_Configure_Button;
 	public static String CleanUpRefactoringWizard_ConfigureCustomProfile_button;
 	public static String CleanUpRefactoringWizard_CustomCleanUpsDialog_title;
 	public static String CleanUpRefactoringWizard_EmptySelection_message;
 	public static String CleanUpRefactoringWizard_HideWizard_Link;
-	public static String CleanUpRefactoringWizard_member_accesses_tab;
-	public static String CleanUpRefactoringWizard_missing_code_tab;
 	public static String CleanUpRefactoringWizard_Profile_TableHeader;
 	public static String CleanUpRefactoringWizard_Project_TableHeader;
 	public static String CleanUpRefactoringWizard_unknownProfile_Name;
 	public static String CleanUpRefactoringWizard_UnmanagedProfileWithName_Name;
-	public static String CleanUpRefactoringWizard_unnecessary_code_tab;
 	public static String CleanUpRefactoringWizard_use_configured_radio;
 	public static String CleanUpRefactoringWizard_use_custom_radio;
 	public static String CleanUpRefactoringWizard_XofYCleanUpsSelected_message;
-	public static String CleanUpSaveParticipantPreferenceConfiguration_clean_up_preference_link;
-	public static String CleanUpSaveParticipantPreferenceConfiguration_edit_button_label;
-	public static String CleanUpSaveParticipantPreferenceConfiguration_unknown_profile_name;
-	public static String CleanUpSaveParticipantPreferenceConfiguration_use_clean_up_profile_label;
 	public static String CodeFormatCleanUp_correctIndentation_description;
 	public static String CodeFormatCleanUp_RemoveTrailingAll_description;
 	public static String CodeFormatCleanUp_RemoveTrailingNoEmpty_description;
@@ -102,11 +93,6 @@ public class MultiFixMessages extends NLS {
 
 	public static String CodeFormatCleanUp_description;
 	public static String CodeFormatFix_description;
-
-	public static String CommentFormatCleanUp_javadocComments;
-	public static String CommentFormatCleanUp_multiLineComments;
-	public static String CommentFormatCleanUp_singleLineComments;
-	public static String CommentFormatFix_description;
 
 	static {
 		// initialize resource bundle

@@ -51,17 +51,9 @@ public final class JavaUIMessages extends NLS {
 	public static String PackageSelectionDialog_progress_findEmpty;
 	public static String PackageSelectionDialog_progress_search;
 
-	public static String TypeSelectionDialog_errorMessage;
-	public static String TypeSelectionDialog_dialogMessage;
-	public static String TypeSelectionDialog_errorTitle;
-	public static String TypeSelectionDialog_lowerLabel;
-	public static String TypeSelectionDialog_upperLabel;
-	public static String TypeSelectionDialog_notypes_title;
-	public static String TypeSelectionDialog_notypes_message;
 	public static String TypeSelectionDialog_error3Message;
 	public static String TypeSelectionDialog_error3Title;
 	public static String TypeSelectionDialog_progress_consistency;
-	public static String TypeSelectionDialog_error_type_doesnot_exist;
 
 	public static String ExceptionDialog_seeErrorLogMessage;
 
@@ -74,8 +66,6 @@ public final class JavaUIMessages extends NLS {
 	public static String PackageSelectionDialog_nopackages_message;
 	public static String ProblemMarkerManager_problem_marker_update_job_description;
 
-	public static String BuildPathDialog_title;
-
 	public static String OverrideMethodDialog_groupMethodsByTypes;
 	public static String OverrideMethodDialog_dialog_title;
 	public static String OverrideMethodDialog_dialog_description;
@@ -84,7 +74,6 @@ public final class JavaUIMessages extends NLS {
 	public static String OverrideMethodDialog_link_message;
 
 	public static String GenerateHashCodeEqualsDialog_dialog_title;
-	public static String GenerateHashCodeEqualsDialog_dialog_description;
 	public static String GenerateHashCodeEqualsDialog_selectioninfo_more;
 	public static String GenerateHashCodeEqualsDialog_no_entries;
 	public static String GenerateHashCodeEqualsDialog_select_at_least_one_field;
@@ -147,8 +136,6 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateToStringDialog_teplatesManagerEditButton;
 	public static String GenerateToStringDialog_up_button;
 
-	public static String JavaImageLabelprovider_assert_wrongImage;
-
 	public static String JavaElementLabels_default_package;
 	public static String JavaElementLabels_anonym_type;
 	public static String JavaElementLabels_anonym;
@@ -196,9 +183,6 @@ public final class JavaUIMessages extends NLS {
 	public static String JavaAnnotationHover_multipleMarkersAtThisLine;
 	public static String JavaEditor_codeassist_noCompletions;
 
-	public static String HTMLTextPresenter_ellipsis;
-	public static String HTML2TextReader_listItemPrefix;
-
 	public static String OptionalMessageDialog_dontShowAgain;
 	public static String ElementValidator_cannotPerform;
 	public static String SelectionListenerWithASTManager_job_title;
@@ -221,29 +205,7 @@ public final class JavaUIMessages extends NLS {
 	public static String FilteredTypeSelectionDialog_showContainerForDuplicatesAction;
 	public static String FilteredTypeSelectionDialog_titleFormat;
 
-	public static String TypeSelectionDialog2_title_format;
-
-	public static String TypeSelectionComponent_label;
-	public static String TypeSelectionComponent_menu;
-	public static String TypeSelectionComponent_show_status_line_label;
-	public static String TypeSelectionComponent_fully_qualify_duplicates_label;
-
-	public static String TypeInfoViewer_job_label;
-	public static String TypeInfoViewer_job_error;
-	public static String TypeInfoViewer_job_cancel;
-	public static String TypeInfoViewer_default_package;
-	public static String TypeInfoViewer_progress_label;
-	public static String TypeInfoViewer_searchJob_taskName;
-	public static String TypeInfoViewer_syncJob_label;
-	public static String TypeInfoViewer_syncJob_taskName;
-	public static String TypeInfoViewer_progressJob_label;
-	public static String TypeInfoViewer_remove_from_history;
-	public static String TypeInfoViewer_separator_message;
-	public static String TypeInfoViewer_library_name_format;
-
 	public static String InitializeAfterLoadJob_starter_job_name;
-
-	public static String SortMembersMessageDialog_configure_preferences_tool_tip;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
