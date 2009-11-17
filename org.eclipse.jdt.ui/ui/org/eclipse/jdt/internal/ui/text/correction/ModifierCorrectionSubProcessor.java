@@ -149,6 +149,9 @@ public class ModifierCorrectionSubProcessor {
 		String name;
 		IBinding bindingDecl;
 		boolean isLocalVar= false;
+		if (binding instanceof IVariableBinding && problem.getProblemId() == IProblem.NotVisibleType) {
+			binding= ((IVariableBinding) binding).getType();
+		}
 		if (binding instanceof IMethodBinding) {
 			IMethodBinding methodDecl= (IMethodBinding) binding;
 			if (methodDecl.isDefaultConstructor()) {
