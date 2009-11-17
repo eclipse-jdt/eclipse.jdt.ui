@@ -27,6 +27,32 @@ public abstract class Filter {
 			return "all tests";
 		}
 	};
+	
+	/**
+	 * Returns a {@code Filter} that only runs the single method described by
+	 * {@code desiredDescription}
+	 */
+	public static Filter matchMethodDescription(final Description desiredDescription) {
+		return new Filter() {
+			@Override
+			public boolean shouldRun(Description description) {
+				if (description.isTest())
+					return desiredDescription.equals(description);
+				
+				// explicitly check if any children want to run
+				for (Description each : description.getChildren())
+					if (shouldRun(each))
+						return true;
+				return false;					
+			}
+
+			@Override
+			public String describe() {
+				return String.format("Method %s", desiredDescription.getDisplayName());
+			}
+		};
+	}
+
 
 	/**
 	 * @param description the description of the test to be run

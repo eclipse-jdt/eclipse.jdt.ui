@@ -4,6 +4,8 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>A <code>Description</code> describes a test which is to be run or has been run. <code>Descriptions</code> 
@@ -32,6 +34,8 @@ public class Description {
 	 * @return a <code>Description</code> named <code>name</code>
 	 */
 	public static Description createSuiteDescription(String name, Annotation... annotations) {
+		if (name.length() == 0)
+			throw new IllegalArgumentException("name must have non-zero length");
 		return new Description(name, annotations);
 	}
 
@@ -188,5 +192,50 @@ public class Description {
 	 */
 	public Collection<Annotation> getAnnotations() {
 		return Arrays.asList(fAnnotations);
+	}
+
+	/**
+	 * @return If this describes a method invocation, 
+	 * the class of the test instance.
+	 */
+	public Class<?> getTestClass() {
+		String name= getClassName();
+		if (name == null)
+			return null;
+		try {
+			return Class.forName(name);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * @return If this describes a method invocation, 
+	 * the name of the class of the test instance
+	 */
+	public String getClassName() {
+		Matcher matcher= methodStringMatcher();
+		return matcher.matches()
+			? matcher.group(2)
+			: toString();
+	}
+	
+	/**
+	 * @return If this describes a method invocation, 
+	 * the name of the method (or null if not)
+	 */
+	public String getMethodName() {
+		return parseMethod();
+	}
+
+	private String parseMethod() {
+		Matcher matcher= methodStringMatcher();
+		if (matcher.matches())
+			return matcher.group(1);
+		return null;
+	}
+
+	private Matcher methodStringMatcher() {
+		return Pattern.compile("(.*)\\((.*)\\)").matcher(toString());
 	}
 }

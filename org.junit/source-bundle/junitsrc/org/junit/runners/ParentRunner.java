@@ -25,6 +25,7 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runner.notification.StoppedByUserException;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.RunnerScheduler;
 import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
 
@@ -45,6 +46,16 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 	private Filter fFilter= null;
 
 	private Sorter fSorter= Sorter.NULL;
+
+	private RunnerScheduler fScheduler= new RunnerScheduler() {	
+		public void schedule(Runnable childStatement) {
+			childStatement.run();
+		}
+	
+		public void finished() {
+			// do nothing
+		}
+	};
 
 	/**
 	 * Constructs a new {@code ParentRunner} that will run {@code @TestClass}
@@ -77,11 +88,11 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 	 * reported through {@code notifier}
 	 */
 	protected abstract void runChild(T child, RunNotifier notifier);
-
+		
 	//
 	// May be overridden
 	//
-
+	
 	/**
 	 * Adds to {@code errors} a throwable for each problem noted with the test class (available from {@link #getTestClass()}).
 	 * Default implementation adds an error for each method annotated with
@@ -143,8 +154,8 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 	protected Statement withBeforeClasses(Statement statement) {
 		List<FrameworkMethod> befores= fTestClass
 				.getAnnotatedMethods(BeforeClass.class);
-		statement= new RunBefores(statement, befores, null);
-		return statement;
+		return befores.isEmpty() ? statement :
+			new RunBefores(statement, befores, null);
 	}
 
 	/**
@@ -157,8 +168,8 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 	protected Statement withAfterClasses(Statement statement) {
 		List<FrameworkMethod> afters= fTestClass
 				.getAnnotatedMethods(AfterClass.class);
-		statement= new RunAfters(statement, afters, null);
-		return statement;
+		return afters.isEmpty() ? statement : 
+			new RunAfters(statement, afters, null);
 	}
 
 	/**
@@ -176,8 +187,13 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 	}
 
 	private void runChildren(final RunNotifier notifier) {
-		for (T each : getFilteredChildren())
-			runChild(each, notifier);
+		for (final T each : getFilteredChildren())
+			fScheduler.schedule(new Runnable() {			
+				public void run() {
+					ParentRunner.this.runChild(each, notifier);
+				}
+			});
+		fScheduler.finished();
 	}
 
 	/**
@@ -194,7 +210,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 	/**
 	 * Returns a {@link TestClass} object wrapping the class to be executed.
 	 */
-	protected final TestClass getTestClass() {
+	public final TestClass getTestClass() {
 		return fTestClass;
 	}
 
@@ -289,5 +305,13 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
 				return fSorter.compare(describeChild(o1), describeChild(o2));
 			}
 		};
+	}
+
+	/**
+	 * Sets a scheduler that determines the order and parallelization
+	 * of children.  Highly experimental feature that may change.
+	 */
+	public void setScheduler(RunnerScheduler scheduler) {
+		this.fScheduler = scheduler;
 	}
 }

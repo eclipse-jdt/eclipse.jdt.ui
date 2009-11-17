@@ -25,7 +25,6 @@ import org.junit.runner.notification.RunNotifier;
  * @see org.junit.runner.Request
  */
 public class JUnitCore {
-	
 	private RunNotifier fNotifier;
 
 	/**
@@ -59,11 +58,22 @@ public class JUnitCore {
 	 * Run the tests contained in <code>classes</code>. Write feedback while the tests
 	 * are running and write stack traces for all failed tests after all tests complete. This is
 	 * similar to {@link #main(String[])}, but intended to be used programmatically.
+	 * @param computer Helps construct Runners from classes
+	 * @param classes Classes in which to find tests
+	 * @return a {@link Result} describing the details of the test run and the failed tests.
+	 */
+	public static Result runClasses(Computer computer, Class<?>... classes) {
+		return new JUnitCore().run(computer, classes);
+	}
+	/**
+	 * Run the tests contained in <code>classes</code>. Write feedback while the tests
+	 * are running and write stack traces for all failed tests after all tests complete. This is
+	 * similar to {@link #main(String[])}, but intended to be used programmatically.
 	 * @param classes Classes in which to find tests
 	 * @return a {@link Result} describing the details of the test run and the failed tests.
 	 */
 	public static Result runClasses(Class<?>... classes) {
-		return new JUnitCore().run(classes);
+		return new JUnitCore().run(defaultComputer(), classes);
 	}
 	
 	/**
@@ -104,7 +114,17 @@ public class JUnitCore {
 	 * @return a {@link Result} describing the details of the test run and the failed tests.
 	 */
 	public Result run(Class<?>... classes) {
-		return run(Request.classes(classes));
+		return run(Request.classes(defaultComputer(), classes));
+	}
+
+	/**
+	 * Run all the tests in <code>classes</code>.
+	 * @param computer Helps construct Runners from classes
+	 * @param classes the classes containing tests
+	 * @return a {@link Result} describing the details of the test run and the failed tests.
+	 */
+	public Result run(Computer computer, Class<?>... classes) {
+		return run(Request.classes(computer, classes));
 	}
 
 	/**
@@ -131,7 +151,7 @@ public class JUnitCore {
 	public Result run(Runner runner) {
 		Result result= new Result();
 		RunListener listener= result.createListener();
-		addFirstListener(listener);
+		fNotifier.addFirstListener(listener);
 		try {
 			fNotifier.fireTestRunStarted(runner.getDescription());
 			runner.run(fNotifier);
@@ -142,11 +162,6 @@ public class JUnitCore {
 		return result;
 	}
 	
-	private void addFirstListener(RunListener listener) {
-		fNotifier.addFirstListener(listener);
-	}
-	
-
 	/**
 	 * Add a listener to be notified as the tests run.
 	 * @param listener the listener to add
@@ -163,4 +178,9 @@ public class JUnitCore {
 	public void removeListener(RunListener listener) {
 		fNotifier.removeListener(listener);
 	}
+	
+	static Computer defaultComputer() {
+		return new Computer();
+	}
+
 }

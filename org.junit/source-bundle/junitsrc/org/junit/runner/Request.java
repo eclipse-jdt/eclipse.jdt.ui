@@ -8,7 +8,6 @@ import org.junit.internal.requests.FilterRequest;
 import org.junit.internal.requests.SortingRequest;
 import org.junit.internal.runners.ErrorReportingRunner;
 import org.junit.runner.manipulation.Filter;
-import org.junit.runners.Suite;
 import org.junit.runners.model.InitializationError;
 
 /**
@@ -60,17 +59,31 @@ public abstract class Request {
 	/**
 	 * Create a <code>Request</code> that, when processed, will run all the tests
 	 * in a set of classes.
+	 * @param computer Helps construct Runners from classes
 	 * @param classes the classes containing the tests
 	 * @return a <code>Request</code> that will cause all tests in the classes to be run
 	 */
-	public static Request classes(Class<?>... classes) {
+	public static Request classes(Computer computer, Class<?>... classes) {
 		try {
-			return runner(new Suite(new AllDefaultPossibilitiesBuilder(true), classes));
+			AllDefaultPossibilitiesBuilder builder= new AllDefaultPossibilitiesBuilder(true);
+			Runner suite= computer.getSuite(builder, classes);
+			return runner(suite);
 		} catch (InitializationError e) {
 			throw new RuntimeException(
 					"Bug in saff's brain: Suite constructor, called as above, should always complete");
 		}
 	}
+
+	/**
+	 * Create a <code>Request</code> that, when processed, will run all the tests
+	 * in a set of classes with the default <code>Computer</code>.
+	 * @param classes the classes containing the tests
+	 * @return a <code>Request</code> that will cause all tests in the classes to be run
+	 */
+	public static Request classes(Class<?>... classes) {
+		return classes(JUnitCore.defaultComputer(), classes);
+	}
+	
 
 	/**
 	 * Not used within JUnit.  Clients should simply instantiate ErrorReportingRunner themselves
@@ -116,24 +129,7 @@ public abstract class Request {
 	 * @return the filtered Request
 	 */
 	public Request filterWith(final Description desiredDescription) {
-		return filterWith(new Filter() {
-			@Override
-			public boolean shouldRun(Description description) {
-				if (description.isTest())
-					return desiredDescription.equals(description);
-				
-				// explicitly check if any children want to run
-				for (Description each : description.getChildren())
-					if (shouldRun(each))
-						return true;
-				return false;					
-			}
-
-			@Override
-			public String describe() {
-				return String.format("Method %s", desiredDescription.getDisplayName());
-			}
-		});
+		return filterWith(Filter.matchMethodDescription(desiredDescription));
 	}
 
 	/**

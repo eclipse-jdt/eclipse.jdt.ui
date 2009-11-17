@@ -1,4 +1,4 @@
-package org.junit.runners.model;
+package org.junit.runners.model; 
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -11,11 +11,11 @@ import org.junit.internal.runners.model.ReflectiveCallable;
 /**
  * Represents a method on a test class to be invoked at the appropriate point in
  * test execution. These methods are usually marked with an annotation (such as
- * {@code @Test}, {@code @Before}, {@code @After}, {@code @BeforeClass}, {@code
- * @AfterClass}, etc.)
+ * {@code @Test}, {@code @Before}, {@code @After}, {@code @BeforeClass}, 
+ * {@code @AfterClass}, etc.)
  */
-public class FrameworkMethod {
-	private final Method fMethod;
+public class FrameworkMethod extends FrameworkMember<FrameworkMethod> {
+	final Method fMethod;
 
 	/**
 	 * Returns a new {@code FrameworkMethod} for {@code method}
@@ -90,20 +90,14 @@ public class FrameworkMethod {
 			errors.add(new Exception("Method " + fMethod.getName() + "() should be void"));
 	}
 
-	boolean isShadowedBy(List<FrameworkMethod> results) {
-		for (FrameworkMethod each : results)
-			if (isShadowedBy(each))
-				return true;
-		return false;
-	}
-
-	private boolean isShadowedBy(FrameworkMethod each) {
-		if (!each.getName().equals(getName()))
+	@Override
+	public boolean isShadowedBy(FrameworkMethod other) {
+		if (!other.getName().equals(getName()))
 			return false;
-		if (each.getParameterTypes().length != getParameterTypes().length)
+		if (other.getParameterTypes().length != getParameterTypes().length)
 			return false;
-		for (int i= 0; i < each.getParameterTypes().length; i++)
-			if (!each.getParameterTypes()[i].equals(getParameterTypes()[i]))
+		for (int i= 0; i < other.getParameterTypes().length; i++)
+			if (!other.getParameterTypes()[i].equals(getParameterTypes()[i]))
 				return false;
 		return true;
 	}
@@ -136,6 +130,7 @@ public class FrameworkMethod {
 	/**
 	 * Returns the annotations on this method
 	 */
+	@Override
 	public Annotation[] getAnnotations() {
 		return fMethod.getAnnotations();
 	}

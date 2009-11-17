@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.junit.experimental.results;
 
 import java.io.ByteArrayOutputStream;
@@ -12,22 +9,37 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
+/**
+ * A test result that prints nicely in error messages.
+ * This is only intended to be used in JUnit self-tests.
+ * For example:
+ * 
+ * <pre>
+ *    assertThat(testResult(HasExpectedException.class), isSuccessful());
+ * </pre>
+ */
 public class PrintableResult {
+	/**
+	 * The result of running JUnit on {@code type}
+	 */
 	public static PrintableResult testResult(Class<?> type) {
 		return new PrintableResult(type);
 	}
 	
 	private Result result;
 
+	/**
+	 * A result that includes the given {@code failures}
+	 */
 	public PrintableResult(List<Failure> failures) {
 		this(new FailureList(failures).result());
 	}
 
-	public PrintableResult(Result result) {
+	private PrintableResult(Result result) {
 		this.result = result;
 	}
 	
-	public PrintableResult(Class<?> type) {
+	private PrintableResult(Class<?> type) {
 		this(JUnitCore.runClasses(type));
 	}
 
@@ -38,7 +50,10 @@ public class PrintableResult {
 		return stream.toString();
 	}
 
-	public List<Failure> getFailures() {
-		return result.getFailures();
+	/**
+	 * Returns the number of failures in this result.
+	 */
+	public int failureCount() {
+		return result.getFailures().size();
 	}
 }

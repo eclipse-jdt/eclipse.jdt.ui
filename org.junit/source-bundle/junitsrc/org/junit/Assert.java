@@ -1,11 +1,11 @@
 package org.junit;
 
-import java.lang.reflect.Array;
-
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.junit.internal.ArrayComparisonFailure;
+import org.junit.internal.ExactComparisonCriteria;
+import org.junit.internal.InexactComparisonCriteria;
 
 /**
  * A set of assertion methods useful for writing tests. Only failed assertions
@@ -332,6 +332,66 @@ public class Assert {
 	public static void assertArrayEquals(long[] expecteds, long[] actuals) {
 		assertArrayEquals(null, expecteds, actuals);
 	}
+	
+	/**
+	 * Asserts that two double arrays are equal. If they are not, an
+	 * {@link AssertionError} is thrown with the given message.
+	 * 
+	 * @param message
+	 *            the identifying message for the {@link AssertionError} (<code>null</code>
+	 *            okay)
+	 * @param expecteds
+	 *            double array with expected values.
+	 * @param actuals
+	 *            double array with actual values
+	 */
+	public static void assertArrayEquals(String message, double[] expecteds,
+			double[] actuals, double delta) throws ArrayComparisonFailure {
+		new InexactComparisonCriteria(delta).arrayEquals(message, expecteds, actuals);
+	}
+
+	/**
+	 * Asserts that two double arrays are equal. If they are not, an
+	 * {@link AssertionError} is thrown.
+	 * 
+	 * @param expecteds
+	 *            double array with expected values.
+	 * @param actuals
+	 *            double array with actual values
+	 */
+	public static void assertArrayEquals(double[] expecteds, double[] actuals, double delta) {
+		assertArrayEquals(null, expecteds, actuals, delta);
+	}
+
+	/**
+	 * Asserts that two float arrays are equal. If they are not, an
+	 * {@link AssertionError} is thrown with the given message.
+	 * 
+	 * @param message
+	 *            the identifying message for the {@link AssertionError} (<code>null</code>
+	 *            okay)
+	 * @param expecteds
+	 *            float array with expected values.
+	 * @param actuals
+	 *            float array with actual values
+	 */
+	public static void assertArrayEquals(String message, float[] expecteds,
+			float[] actuals, float delta) throws ArrayComparisonFailure {
+		new InexactComparisonCriteria(delta).arrayEquals(message, expecteds, actuals);
+	}
+
+	/**
+	 * Asserts that two float arrays are equal. If they are not, an
+	 * {@link AssertionError} is thrown.
+	 * 
+	 * @param expecteds
+	 *            float array with expected values.
+	 * @param actuals
+	 *            float array with actual values
+	 */
+	public static void assertArrayEquals(float[] expecteds, float[] actuals, float delta) {
+		assertArrayEquals(null, expecteds, actuals, delta);
+	}
 
 	/**
 	 * Asserts that two object arrays are equal. If they are not, an
@@ -351,41 +411,8 @@ public class Assert {
 	 */
 	private static void internalArrayEquals(String message, Object expecteds,
 			Object actuals) throws ArrayComparisonFailure {
-		if (expecteds == actuals)
-			return;
-		String header= message == null ? "" : message + ": ";
-		if (expecteds == null)
-			fail(header + "expected array was null");
-		if (actuals == null)
-			fail(header + "actual array was null");
-		int actualsLength= Array.getLength(actuals);
-		int expectedsLength= Array.getLength(expecteds);
-		if (actualsLength != expectedsLength)
-			fail(header + "array lengths differed, expected.length="
-					+ expectedsLength + " actual.length=" + actualsLength);
-
-		for (int i= 0; i < expectedsLength; i++) {
-			Object expected= Array.get(expecteds, i);
-			Object actual= Array.get(actuals, i);
-			if (isArray(expected) && isArray(actual)) {
-				try {
-					internalArrayEquals(message, expected, actual);
-				} catch (ArrayComparisonFailure e) {
-					e.addDimension(i);
-					throw e;
-				}
-			} else
-				try {
-					assertEquals(expected, actual);
-				} catch (AssertionError e) {
-					throw new ArrayComparisonFailure(header, e, i);
-				}
-		}
-	}
-
-	private static boolean isArray(Object expected) {
-		return expected != null && expected.getClass().isArray();
-	}
+		new ExactComparisonCriteria().arrayEquals(message, expecteds, actuals);
+	}	
 
 	/**
 	 * Asserts that two doubles or floats are equal to within a positive delta.
@@ -744,9 +771,10 @@ public class Assert {
 			Description description= new StringDescription();
 			description.appendText(reason);
 			description.appendText("\nExpected: ");
-			matcher.describeTo(description);
-			description.appendText("\n     got: ").appendValue(actual)
-					.appendText("\n");
+			description.appendDescriptionOf(matcher);
+			description.appendText("\n     got: ");
+			description.appendValue(actual);
+			description.appendText("\n");
 			throw new java.lang.AssertionError(description.toString());
 		}
 	}

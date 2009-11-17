@@ -29,7 +29,7 @@ import org.junit.runners.model.TestClass;
  * &#064;RunWith(Parameterized.class)
  * public class FibonacciTest {
  * 	&#064;Parameters
- * 	public static Collection&lt;Object[]&gt; data() {
+ * 	public static List&lt;Object[]&gt; data() {
  * 		return Arrays.asList(new Object[][] {
  * 				Fibonacci,
  * 				{ { 0, 0 }, { 1, 1 }, { 2, 1 }, { 3, 2 }, { 4, 3 }, { 5, 5 },
@@ -46,11 +46,7 @@ import org.junit.runners.model.TestClass;
  * 	}
  * 
  * 	&#064;Test
- * 	public void test(@HeresHowYouGetValue Type value) {
- * 		assertAnswerKey(new Object[][] {
- * 				Fibonacci,
- * 				{ { 0, 0 }, { 1, 1 }, { 2, 1 }, { 3, 2 }, { 4, 3 }, { 5, 5 },
- * 						{ 6, 8 } } });
+ * 	public void test() {
  * 		assertEquals(fExpected, Fibonacci.compute(fInput));
  * 	}
  * }
@@ -114,8 +110,8 @@ public class Parameterized extends Suite {
 		}
 
 		@Override
-		protected void validateZeroArgConstructor(List<Throwable> errors) {
-			// constructor can, nay, should have args.
+		protected void validateConstructor(List<Throwable> errors) {
+			validateOnlyOneConstructor(errors);
 		}
 
 		@Override

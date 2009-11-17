@@ -5,8 +5,6 @@ package org.junit.experimental.theories.internal;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +17,9 @@ import org.junit.experimental.theories.PotentialAssignment;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 
+/**
+ * Supplies Theory parameters based on all public members of the target class.
+ */
 public class AllMembersSupplier extends ParameterSupplier {
 	static class MethodParameterValue extends PotentialAssignment {
 		private final FrameworkMethod fMethod;
@@ -51,6 +52,9 @@ public class AllMembersSupplier extends ParameterSupplier {
 
 	private final TestClass fClass;
 
+	/**
+	 * Constructs a new supplier for {@code type}
+	 */
 	public AllMembersSupplier(TestClass type) {
 		fClass= type;
 	}
@@ -94,7 +98,8 @@ public class AllMembersSupplier extends ParameterSupplier {
 				if (sig.canAcceptArrayType(type)
 						&& field.getAnnotation(DataPoints.class) != null) {
 					addArrayValues(field.getName(), list, getStaticFieldValue(field));
-				} else if (sig.canAcceptType(type)) {
+				} else if (sig.canAcceptType(type)
+						&& field.getAnnotation(DataPoint.class) != null) {
 					list.add(PotentialAssignment
 							.forValue(field.getName(), getStaticFieldValue(field)));
 				}

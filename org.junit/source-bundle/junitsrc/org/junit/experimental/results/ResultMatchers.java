@@ -5,11 +5,25 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
 
+/**
+ * Matchers on a PrintableResult, to enable JUnit self-tests.
+ * For example:
+ * 
+ * <pre>
+ * 		assertThat(testResult(HasExpectedException.class), isSuccessful());
+ * </pre>
+ */
 public class ResultMatchers {
+	/**
+	 * Matches if the tests are all successful
+	 */
 	public static Matcher<PrintableResult> isSuccessful() {
 		return failureCountIs(0);
 	}
 
+	/**
+	 * Matches if there are {@code count} failures
+	 */
 	public static Matcher<PrintableResult> failureCountIs(final int count) {
 		return new TypeSafeMatcher<PrintableResult>() {
 			public void describeTo(Description description) {
@@ -18,11 +32,14 @@ public class ResultMatchers {
 
 			@Override
 			public boolean matchesSafely(PrintableResult item) {
-				return item.getFailures().size() == count;
+				return item.failureCount() == count;
 			}
 		};
 	}
 	
+	/**
+	 * Matches if the result has exactly one failure, and it contains {@code string}
+	 */
 	public static Matcher<Object> hasSingleFailureContaining(final String string) {
 		return new BaseMatcher<Object>() {
 			public boolean matches(Object item) {
@@ -34,7 +51,11 @@ public class ResultMatchers {
 			}
 		};
 	}
-	
+
+	/**
+	 * Matches if the result has one or more failures, and at least one of them
+	 * contains {@code string}
+	 */
 	public static Matcher<PrintableResult> hasFailureContaining(final String string) {
 		return new BaseMatcher<PrintableResult>() {
 			public boolean matches(Object item) {

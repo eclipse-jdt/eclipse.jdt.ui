@@ -1,6 +1,7 @@
 package org.junit.runners;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -22,11 +23,23 @@ import org.junit.runners.model.RunnerBuilder;
  */
 public class Suite extends ParentRunner<Runner> {
 	/**
+	 * Returns an empty suite.
+	 */
+	public static Runner emptySuite() {
+		try {
+			return new Suite((Class<?>)null, new Class<?>[0]);
+		} catch (InitializationError e) {
+			throw new RuntimeException("This shouldn't be possible");
+		}
+	}
+	
+	/**
 	 * The <code>SuiteClasses</code> annotation specifies the classes to be run when a class
 	 * annotated with <code>@RunWith(Suite.class)</code> is run.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
+	@Inherited
 	public @interface SuiteClasses {
 		/**
 		 * @return the classes to be run
