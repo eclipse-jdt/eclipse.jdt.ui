@@ -15,15 +15,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class RefactoringCoreMessages extends NLS {
 
-	public static String AbstractDeleteChange_deleting;
-
 	public static String AbstractRenameChange_Renaming;
-
-	public static String AddToClasspathChange_add;
-
-	public static String Assert_assertion_failed;
-
-	public static String Assert_null_argument;
 
 	public static String ASTData_update_imports;
 
@@ -52,14 +44,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String CallInliner_super_into_this_expression;
 
 	public static String Change_does_not_exist;
-
-	public static String Change_has_modifications;
-
-	public static String Change_is_read_only;
-
-	public static String Change_is_unsaved;
-
-	public static String Change_same_read_only;
 
 	public static String ChangeSignatureRefactoring_add_constructor;
 
@@ -157,10 +141,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeTypeRefactoring_arraysNotSupported;
 
-	public static String ChangeTypeRefactoring_cantDoIt;
-
-	public static String ChangeTypeRefactoring_changes;
-
 	public static String ChangeTypeRefactoring_checking_preconditions;
 
 	public static String ChangeTypeRefactoring_descriptor_description;
@@ -169,15 +149,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeTypeRefactoring_enumsNotSupported;
 
-	public static String ChangeTypeRefactoring_failedToSelectType;
-
-	public static String ChangeTypeRefactoring_Generalize_Type;
-
 	public static String ChangeTypeRefactoring_insideLocalTypesNotSupported;
 
 	public static String ChangeTypeRefactoring_invalidSelection;
-
-	public static String ChangeTypeRefactoring_javaLangObject;
 
 	public static String ChangeTypeRefactoring_localTypesNotSupported;
 
@@ -206,8 +180,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeTypeRefactoring_typeChange;
 
 	public static String ChangeTypeRefactoring_typeParametersNotSupported;
-
-	public static String ChangeTypeRefactoring_unhandledSearchException;
 
 	public static String Checks_all_excluded;
 
@@ -281,8 +253,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ConvertAnonymousToNestedRefactoring_descriptor_description_short;
 
-	public static String ConvertAnonymousToNestedRefactoring_edit_name;
-
 	public static String ConvertAnonymousToNestedRefactoring_extends_local_class;
 
 	public static String ConvertAnonymousToNestedRefactoring_name;
@@ -314,8 +284,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String CopyRefactoring_resource_copyOf1;
 
 	public static String CopyRefactoring_resource_copyOfMore;
-
-	public static String CopyRefactoring_searching;
 
 	public static String CopyRefactoring_update_ref;
 
@@ -363,12 +331,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DeleteChangeCreator_1;
 
-	public static String DeleteFileChange_1;
-
-	public static String DeleteFolderChange_0;
-
-	public static String DeleteFromClassPathChange_remove;
-
 	public static String DeletePackageFragmentRootChange_delete;
 
 	public static String DeletePackageFragmentRootChange_restore_file;
@@ -395,8 +357,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DeleteSourceManipulationChange_0;
 
-	public static String DeleteSourceManipulationChange_1;
-
 	public static String DynamicValidationRefactoringChange_fatal_error;
 
 	public static String DynamicValidationStateChange_workspace_changed;
@@ -406,8 +366,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractClassRefactoring_change_comment_header;
 
 	public static String ExtractClassRefactoring_change_name;
-
-	public static String ExtractClassRefactoring_comment_enclosing_type;
 
 	public static String ExtractClassRefactoring_comment_extracted_class;
 
@@ -506,8 +464,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractConstantRefactoring_replace_occurrences;
 
 	public static String ExtractConstantRefactoring_select_expression;
-
-	public static String ExtractConstantRefactoring_syntax_error;
 
 	public static String ExtractConstantRefactoring_visibility_pattern;
 
@@ -671,8 +627,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractSupertypeProcessor_subtypes_pattern;
 
-	public static String ExtractSupertypeProcessor_unexpected_exception;
-
 	public static String ExtractSupertypeProcessor_unexpected_exception_on_layer;
 
 	public static String ExtractTempRefactoring_another_variable;
@@ -705,8 +659,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractTempRefactoring_expression_pattern;
 
-	public static String ExtractTempRefactoring_extract_temp;
-
 	public static String ExtractTempRefactoring_for_initializer_updater;
 
 	public static String ExtractTempRefactoring_name;
@@ -721,8 +673,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractTempRefactoring_null_literals;
 
-	public static String ExtractTempRefactoring_preview;
-
 	public static String ExtractTempRefactoring_refers_to_for_variable;
 
 	public static String ExtractTempRefactoring_replace;
@@ -730,10 +680,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_replace_occurrences;
 
 	public static String ExtractTempRefactoring_select_expression;
-
-	public static String ExtractTempRefactoring_syntax_error;
-
-	public static String ExtractTempRefactoring_update_imports;
 
 	public static String FlowAnalyzer_execution_flow;
 
@@ -815,8 +761,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String InlineConstantRefactoring_local_anonymous_unsupported;
 
-	public static String InlineConstantRefactoring_members_declared_in_anonymous;
-
 	public static String InlineConstantRefactoring_name;
 
 	public static String InlineConstantRefactoring_original_pattern;
@@ -826,8 +770,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineConstantRefactoring_remove_declaration;
 
 	public static String InlineConstantRefactoring_replace_references;
-
-	public static String InlineConstantRefactoring_source_code_unavailable;
 
 	public static String InlineConstantRefactoring_static_final_field;
 
@@ -914,8 +856,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_remove_edit_name;
 
 	public static String InlineTempRefactoring_select_temp;
-
-	public static String InlineTempRefactoring_syntax_errors;
 
 	public static String InlineTemRefactoring_error_message_fieldsCannotBeInlined;
 
@@ -1143,8 +1083,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String JavaRefactoringDescriptor_inferred_setting_pattern;
 
-	public static String JavaRefactoringDescriptor_initialization_error;
-
 	public static String JavaRefactoringDescriptor_keep_original;
 
 	public static String JavaRefactoringDescriptor_keep_original_deprecated;
@@ -1207,10 +1145,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MemberVisibilityAdjustor_adjustments_name;
 
-	public static String MemberVisibilityAdjustor_binary_outgoing_project;
-
-	public static String MemberVisibilityAdjustor_binary_outgoing_resource;
-
 	public static String MemberVisibilityAdjustor_change_visibility;
 
 	public static String MemberVisibilityAdjustor_change_visibility_default;
@@ -1233,8 +1167,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MethodChecks_overrides;
 
-	public static String MoveCompilationUnitChange_default_package;
-
 	public static String MoveCompilationUnitChange_name;
 
 	public static String MoveCuUpdateCreator_searching;
@@ -1248,14 +1180,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveInnerToTopRefactoring_change_label;
 
 	public static String MoveInnerToTopRefactoring_change_qualifier;
-
-	public static String MoveInnerToTopRefactoring_change_visibility;
-
-	public static String MoveInnerToTopRefactoring_change_visibility_constructor_warning;
-
-	public static String MoveInnerToTopRefactoring_change_visibility_field_warning;
-
-	public static String MoveInnerToTopRefactoring_change_visibility_method_warning;
 
 	public static String MoveInnerToTopRefactoring_change_visibility_type_warning;
 
@@ -1299,27 +1223,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_creating;
 
-	public static String MoveInstanceMethodProcessor_deprecate_delegator_message;
-
-	public static String MoveInstanceMethodProcessor_deprecate_delegator_method;
-
 	public static String MoveInstanceMethodProcessor_descriptor_description;
 
 	public static String MoveInstanceMethodProcessor_descriptor_description_short;
-
-	public static String MoveInstanceMethodProcessor_inline_binary_project;
-
-	public static String MoveInstanceMethodProcessor_inline_binary_resource;
 
 	public static String MoveInstanceMethodProcessor_inline_inaccurate;
 
 	public static String MoveInstanceMethodProcessor_inline_method_invocation;
 
 	public static String MoveInstanceMethodProcessor_inline_overridden;
-
-	public static String MoveInstanceMethodProcessor_javadoc_binary_project;
-
-	public static String MoveInstanceMethodProcessor_javadoc_binary_resource;
 
 	public static String MoveInstanceMethodProcessor_method_already_exists;
 
@@ -1363,8 +1275,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_remove_original_method;
 
-	public static String MoveInstanceMethodProcessor_replace_body_with_delegation;
-
 	public static String MoveInstanceMethodProcessor_single_implementation;
 
 	public static String MoveInstanceMethodProcessor_target_element_pattern;
@@ -1386,8 +1296,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveMembersRefactoring_addMembers;
 
 	public static String MoveMembersRefactoring_binary;
-
-	public static String MoveMembersRefactoring_check_availability;
 
 	public static String MoveMembersRefactoring_checking;
 
@@ -1441,8 +1349,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveRefactoring_scanning_qualified_names;
 
-	public static String MoveResourceChange_move;
-
 	public static String MoveStaticMemberAnalyzer_nonStatic;
 
 	public static String MoveStaticMembersProcessor_description_descriptor_short_multi;
@@ -1462,8 +1368,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String OverwriteHelper_2;
 
 	public static String OverwriteHelper_3;
-
-	public static String ProcessorBasedRefactoring_error_unsupported_initialization;
 
 	public static String PromoteTempToFieldRefactoring_cannot_promote;
 
@@ -1506,8 +1410,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String PromoteTempToFieldRefactoring_select_declaration;
 
 	public static String PromoteTempToFieldRefactoring_uses_type_declared_locally;
-
-	public static String PromoteTempToFieldRefactoring_uses_types_declared_locally;
 
 	public static String PromoteTempToFieldRefactoring_visibility_pattern;
 
@@ -1687,8 +1589,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameCompilationUnitRefactoring_same_name;
 
-	public static String RenameEnumConstProcessor_change_name;
-
 	public static String RenameEnumConstProcessor_descriptor_description;
 
 	public static String RenameEnumConstProcessor_descriptor_description_short;
@@ -1708,8 +1608,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameFieldRefactoring_another_name;
 
 	public static String RenameFieldRefactoring_another_name2;
-
-	public static String RenameFieldRefactoring_change_name;
 
 	public static String RenameFieldRefactoring_checking;
 
@@ -1859,23 +1757,7 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenamePrivateMethodRefactoring_update;
 
-	public static String RenameResourceChange_descriptor_description;
-
-	public static String RenameResourceChange_descriptor_description_short;
-
 	public static String RenameResourceChange_does_not_exist;
-
-	public static String RenameResourceChange_name;
-
-	public static String RenameResourceChange_rename_resource;
-
-	public static String RenameResourceProcessor_name;
-
-	public static String RenameResourceRefactoring_alread_exists;
-
-	public static String RenameResourceRefactoring_Internal_Error;
-
-	public static String RenameResourceRefactoring_invalidName;
 
 	public static String RenameSourceFolderChange_descriptor_description;
 
@@ -1944,8 +1826,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReferencesInBinaryContext_binaryRefsNotUpdated;
 
 	public static String RenameTypeProcessor_cannot_rename_fields_same_new_name;
-
-	public static String RenameTypeProcessor_cannot_rename_locals_same_new_name;
 
 	public static String RenameTypeProcessor_cannot_rename_methods_same_new_name;
 
@@ -2313,8 +2193,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReplaceInvocationsRefactoring_select_method_to_apply;
 
-	public static String RippleMethodFinder_analizing_hierarchy;
-
 	public static String SelfEncapsulateField_AccessAnalyzer_cannot_convert_postfix_expression;
 
 	public static String SelfEncapsulateField_AccessAnalyzer_encapsulate_postfix_access;
@@ -2429,8 +2307,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SurroundWithTryCatchAnalyzer_doesNotCover;
 
-	public static String SurroundWithTryCatchAnalyzer_noUncaughtExceptions;
-
 	public static String SurroundWithTryCatchAnalyzer_onlyStatements;
 
 	public static String SurroundWithTryCatchRefactoring_name;
@@ -2468,8 +2344,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String TypeContextChecker_parameter_type;
 
 	public static String TypeContextChecker_return_type_not_empty;
-
-	public static String UndoCompilationUnitChange_no_resource;
 
 	public static String UndoDeleteResourceChange_already_exists;
 

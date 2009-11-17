@@ -24,8 +24,6 @@ public final class PreferencesMessages extends NLS {
 		// Do not instantiate
 	}
 
-	public static String BuildPathDialog_error_title;
-	public static String BuildPathDialog_error_message;
 	public static String BuildPathsPropertyPage_error_message;
 	public static String BuildPathsPropertyPage_error_title;
 	public static String BuildPathsPropertyPage_job_title;
@@ -57,15 +55,10 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_emptyInput;
 	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_invalidInput;
 	public static String CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_invalidRange;
-	public static String ImportOrganizeConfigurationBlock_emptylines_between_groups_label;
-	public static String ImportOrganizeConfigurationBlock_error_invalidnumberofemptylines;
-	public static String ImportOrganizePreferencePage_description;
 	public static String ImportOrganizePreferencePage_title;
 	public static String ImportOrganizeConfigurationBlock_order_label;
 	public static String ImportOrganizeConfigurationBlock_other_static;
-	public static String ImportOrganizeConfigurationBlock_other_static_label;
 	public static String ImportOrganizeConfigurationBlock_other_normal;
-	public static String ImportOrganizeConfigurationBlock_other_normal_label;
 	public static String ImportOrganizeConfigurationBlock_order_add_button;
 	public static String ImportOrganizeConfigurationBlock_order_edit_button;
 	public static String ImportOrganizeConfigurationBlock_order_up_button;
@@ -74,7 +67,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ImportOrganizeConfigurationBlock_order_add_static_button;
 	public static String ImportOrganizeConfigurationBlock_order_load_button;
 	public static String ImportOrganizeConfigurationBlock_order_save_button;
-	public static String ImportOrganizeConfigurationBlock_other_description;
 	public static String ImportOrganizeConfigurationBlock_ignoreLowerCase_label;
 	public static String ImportOrganizeConfigurationBlock_threshold_label;
 	public static String ImportOrganizeConfigurationBlock_error_invalidthreshold;
@@ -95,7 +87,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ImportOrganizeInputDialog_ChooseTypeDialog_title;
 	public static String ImportOrganizeInputDialog_ChooseTypeDialog_description;
 	public static String ImportOrganizeInputDialog_ChooseTypeDialog_error_message;
-	public static String ImportOrganizeInputDialog_error_enterName;
 	public static String ImportOrganizeInputDialog_error_invalidName;
 	public static String ImportOrganizeInputDialog_error_entryExists;
 	public static String ImportOrganizeInputDialog_name_group_label;
@@ -137,7 +128,6 @@ public final class PreferencesMessages extends NLS {
 	public static String NewJavaProjectPreferencePage_folders_error_invalidbinname;
 	public static String NewJavaProjectPreferencePage_folders_error_invalidcp;
 	public static String NewJavaProjectPreferencePage_error_decode;
-	public static String JavaEditorPreferencePage_showQuickFixables;
 	public static String JavaEditorPreferencePage_analyseAnnotationsWhileTyping;
 	public static String JavaEditorPreferencePage_multiLineComment;
 	public static String JavaEditorPreferencePage_singleLineComment;
@@ -152,11 +142,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_javaDocHtmlTags;
 	public static String JavaEditorPreferencePage_javaDocLinks;
 	public static String JavaEditorPreferencePage_javaDocOthers;
-	public static String JavaEditorPreferencePage_backgroundColor;
 	public static String JavaEditorPreferencePage_systemDefault;
-	public static String JavaEditorPreferencePage_custom;
-	public static String JavaEditorPreferencePage_semanticHighlighting_option;
-	public static String JavaEditorPreferencePage_foreground;
 	public static String JavaEditorPreferencePage_color;
 	public static String JavaEditorPreferencePage_bold;
 	public static String JavaEditorPreferencePage_italic;
@@ -164,13 +150,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_underline;
 	public static String JavaEditorPreferencePage_enable;
 	public static String JavaEditorPreferencePage_preview;
-	public static String JavaEditorPreferencePage_displayedTabWidth;
-	public static String JavaEditorPreferencePage_insertSpaceForTabs;
-	public static String JavaEditorPreferencePage_showOverviewRuler;
 	public static String JavaEditorPreferencePage_highlightMatchingBrackets;
-	public static String JavaEditorPreferencePage_highlightCurrentLine;
-	public static String JavaEditorPreferencePage_showPrintMargin;
-	public static String JavaEditorPreferencePage_printMarginColumn;
 	public static String JavaEditorPreferencePage_insertSingleProposalsAutomatically;
 	public static String JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext;
 	public static String JavaEditorPreferencePage_presentProposalsInAlphabeticalOrder;
@@ -197,14 +177,9 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_colors;
 	public static String JavaEditorPreferencePage_empty_input;
 	public static String JavaEditorPreferencePage_invalid_input;
-	public static String JavaEditorPreferencePage_showLineNumbers;
-	public static String JavaEditorPreferencePage_lineNumberForegroundColor;
 	public static String JavaEditorPreferencePage_matchingBracketsHighlightColor2;
-	public static String JavaEditorPreferencePage_currentLineHighlighColor;
-	public static String JavaEditorPreferencePage_printMarginColor2;
 	public static String JavaEditorPreferencePage_appearanceOptions;
 	public static String JavaEditorPreferencePage_typing_tabTitle;
-	public static String JavaEditorPreferencePage_typing_description;
 	public static String JavaEditorPreferencePage_closeStrings;
 	public static String JavaEditorPreferencePage_closeBrackets;
 	public static String JavaEditorPreferencePage_closeBraces;
@@ -221,18 +196,14 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_typing_smartOpeningBrace;
 	public static String JavaEditorPreferencePage_typing_smartTab;
 	public static String JavaEditorPreferencePage_hoverTab_title;
-	public static String JavaEditorPreferencePage_showEditorBreadcrumb;
 	public static String JavaEditorColoringConfigurationBlock_link;
 	public static String JavaBasePreferencePage_openTypeHierarchy;
 	public static String JavaBasePreferencePage_inView;
 	public static String JavaBasePreferencePage_inPerspective;
 	public static String JavaEditorPreferencePage_quickassist_lightbulb;
 	public static String JavaEditorPreferencePage_showJavaElementOnly;
-	public static String JavaEditorPreferencePage_accessibility_disableCustomCarets;
-	public static String JavaEditorPreferencePage_accessibility_wideCaret;
 	public static String JavaEditorHoverConfigurationBlock_annotationRollover;
 	public static String JavaEditorHoverConfigurationBlock_hoverPreferences;
-	public static String JavaEditorHoverConfigurationBlock_enabled;
 	public static String JavaEditorHoverConfigurationBlock_keyModifier;
 	public static String JavaEditorHoverConfigurationBlock_description;
 	public static String JavaEditorHoverConfigurationBlock_modifierIsNotValid;
@@ -309,7 +280,6 @@ public final class PreferencesMessages extends NLS {
 	public static String SourceAttachmentPropertyPage_error_message;
 	public static String SourceAttachmentPropertyPage_invalid_container;
 	public static String SourceAttachmentPropertyPage_noarchive_message;
-	public static String SourceAttachmentPropertyPage_containerentry_message;
 	public static String NativeLibrariesPropertyPage_invalidElementSelection_desription;
 	public static String NativeLibrariesPropertyPage_errorAttaching_title;
 	public static String NativeLibrariesPropertyPage_errorAttaching_message;
@@ -326,7 +296,6 @@ public final class PreferencesMessages extends NLS {
 	public static String AppearancePreferencePage_packageNameCompressionPattern_error_isEmpty;
 	public static String AppearancePreferencePage_foldEmptyPackages;
 	public static String CodeFormatterPreferencePage_title;
-	public static String CodeFormatterPreferencePage_description;
 	public static String SourceAttachmentPropertyPage_not_supported;
 	public static String SourceAttachmentPropertyPage_read_only;
 	public static String TodoTaskPreferencePage_title;
@@ -360,10 +329,8 @@ public final class PreferencesMessages extends NLS {
 	public static String PropertyAndPreferencePage_showprojectspecificsettings_label;
 	public static String PropertyAndPreferencePage_useprojectsettings_label;
 	public static String JavaBuildPreferencePage_title;
-	public static String JavaBuildPreferencePage_description;
 	public static String JavaBuildConfigurationBlock_section_general;
 	public static String JavaBuildConfigurationBlock_section_output_folder;
-	public static String JavaBuildConfigurationBlock_section_access_rules;
 	public static String JavaBuildConfigurationBlock_section_build_path_problems;
 	public static String JavaBuildConfigurationBlock_error;
 	public static String JavaBuildConfigurationBlock_warning;
@@ -394,7 +361,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_ignore;
 	public static String ProblemSeveritiesConfigurationBlock_section_potential_programming_problems;
 	public static String ProblemSeveritiesConfigurationBlock_section_unnecessary_code;
-	public static String ProblemSeveritiesConfigurationBlock_section_nls;
 	public static String ProblemSeveritiesConfigurationBlock_section_code_style;
 	public static String ProblemSeveritiesConfigurationBlock_section_deprecations;
 	public static String ProblemSeveritiesConfigurationBlock_section_name_shadowing;
@@ -481,7 +447,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocProblemsConfigurationBlock_pb_missing_tag_description;
 	public static String JavadocProblemsConfigurationBlock_returnTag;
 	public static String CompliancePreferencePage_title;
-	public static String CompliancePreferencePage_description;
 	public static String ComplianceConfigurationBlock_error;
 	public static String ComplianceConfigurationBlock_warning;
 	public static String ComplianceConfigurationBlock_ignore;
@@ -509,9 +474,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_compliance_follows_EE_with_EE_label;
 	public static String ComplianceConfigurationBlock_compliance_group_label;
 	public static String ComplianceConfigurationBlock_classfiles_group_label;
-	public static String OptionsConfigurationBlock_job_title;
-	public static String OptionsConfigurationBlock_buildall_taskname;
-	public static String OptionsConfigurationBlock_buildproject_taskname;
 	public static String CodeStylePreferencePage_title;
 	public static String CodeTemplatesPreferencePage_title;
 	public static String JavaCategoryPropertyPage_text;
@@ -562,7 +524,6 @@ public final class PreferencesMessages extends NLS {
 	public static String MembersOrderPreferencePage_protected_label;
 	public static String MembersOrderPreferencePage_default_label;
 	public static String MembersOrderPreferencePage_usevisibilitysort_label;
-	public static String CodeTemplateBlock_link_tooltip;
 	public static String CodeTemplateBlock_templates_comment_node;
 	public static String CodeTemplateBlock_templates_code_node;
 	public static String CodeTemplateBlock_catchblock_label;
@@ -625,8 +586,6 @@ public final class PreferencesMessages extends NLS {
 	public static String TypeFilterInputDialog_error_entryExists;
 	public static String TypeFilterInputDialog_choosepackage_label;
 	public static String TypeFilterInputDialog_choosepackage_description;
-	public static String JavaEditorPreferencePage_selectionBackgroundColor;
-	public static String JavaEditorPreferencePage_selectionForegroundColor;
 	public static String SpellingPreferencePage_empty_threshold;
 	public static String SpellingPreferencePage_invalid_threshold;
 	public static String SpellingPreferencePage_ignore_digits_label;
@@ -648,10 +607,6 @@ public final class PreferencesMessages extends NLS {
 	public static String SpellingPreferencePage_dictionary_none;
 	public static String SpellingPreferencePage_locale_error;
 	public static String SpellingPreferencePage_filedialog_title;
-	public static String SpellingPreferencePage_filter_dictionary_extension;
-	public static String SpellingPreferencePage_filter_all_extension;
-	public static String SpellingPreferencePage_filter_dictionary_label;
-	public static String SpellingPreferencePage_filter_all_label;
 	public static String SpellingPreferencePage_enable_contentassist_label;
 	public static String SpellingPreferencePage_group_user;
 	public static String SpellingPreferencePage_group_dictionary;
@@ -659,8 +614,6 @@ public final class PreferencesMessages extends NLS {
 	public static String SpellingPreferencePage_group_advanced;
 	public static String SpellingPreferencePage_user_dictionary_description;
 	public static String SpellingPreferencePage_variables;
-	public static String BuildPathPreferencePage_title;
-	public static String BuildPathPreferencePage_description;
 	public static String UserLibraryPreferencePage_title;
 	public static String UserLibraryPreferencePage_description;
 	public static String UserLibraryPreferencePage_libraries_label;
@@ -743,7 +696,6 @@ public final class PreferencesMessages extends NLS {
 	public static String PropertiesFileEditorPreferencePage_italic;
 	public static String PropertiesFileEditorPreferencePage_strikethrough;
 	public static String PropertiesFileEditorPreferencePage_underline;
-	public static String PropertiesFileEditorPreferencePage_enable;
 	public static String PropertiesFileEditorPreferencePage_preview;
 	public static String PropertiesFileEditorPreferencePage_link;
 	public static String PropertiesFileEditorPreferencePage_link_tooltip;
@@ -758,8 +710,6 @@ public final class PreferencesMessages extends NLS {
 	public static String SmartTypingConfigurationBlock_tabs_message_tabsAndSpaces;
 	public static String SmartTypingConfigurationBlock_pasting_title;
 	public static String SmartTypingConfigurationBlock_strings_title;
-	public static String WorkingSetPropertyPage_ReadOnlyWizard_description;
-	public static String WorkingSetPropertyPage_ReadOnlyWizard_title;
 	public static String CodeAssistConfigurationBlock_typeFilters_link;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
 	public static String CodeAssistConfigurationBlock_autoactivationSection_title;
@@ -823,7 +773,6 @@ public final class PreferencesMessages extends NLS {
 	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_title;
 	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_description;
 	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_error_message;
-	public static String FavoriteStaticMemberInputDialog_error_enterName;
 	public static String FavoriteStaticMemberInputDialog_error_invalidMemberName;
 	public static String FavoriteStaticMemberInputDialog_error_invalidTypeName;
 	public static String FavoriteStaticMemberInputDialog_error_entryExists;
