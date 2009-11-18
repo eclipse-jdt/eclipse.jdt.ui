@@ -58,7 +58,8 @@ public class OpenViewActionGroup extends ActionGroup {
 
 	private OpenSuperImplementationAction fOpenSuperImplementation;
 	private OpenImplementationAction fOpenImplementation;
-	private OpenExternalJavadocAction fOpenExternalJavadoc;
+
+	private OpenAttachedJavadocAction fOpenAttachedJavadoc;
 	private OpenTypeHierarchyAction fOpenTypeHierarchy;
     private OpenCallHierarchyAction fOpenCallHierarchy;
 	private PropertyDialogAction fOpenPropertiesDialog;
@@ -155,9 +156,9 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
 		part.setAction("OpenSuperImplementation", fOpenSuperImplementation); //$NON-NLS-1$
 
-		fOpenExternalJavadoc= new OpenExternalJavadocAction(part);
-		fOpenExternalJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
-		part.setAction("OpenExternalJavadoc", fOpenExternalJavadoc); //$NON-NLS-1$
+		fOpenAttachedJavadoc= new OpenAttachedJavadocAction(part);
+		fOpenAttachedJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
+		part.setAction("OpenAttachedJavadoc", fOpenAttachedJavadoc); //$NON-NLS-1$
 
 		fOpenTypeHierarchy= new OpenTypeHierarchyAction(part);
 		fOpenTypeHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_TYPE_HIERARCHY);
@@ -201,9 +202,9 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
 		fOpenSuperImplementation.setSpecialSelectionProvider(specialProvider);
 
-		fOpenExternalJavadoc= new OpenExternalJavadocAction(site);
-		fOpenExternalJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
-		fOpenExternalJavadoc.setSpecialSelectionProvider(specialProvider);
+		fOpenAttachedJavadoc= new OpenAttachedJavadocAction(site);
+		fOpenAttachedJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
+		fOpenAttachedJavadoc.setSpecialSelectionProvider(specialProvider);
 
 		fOpenTypeHierarchy= new OpenTypeHierarchyAction(site);
 		fOpenTypeHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_TYPE_HIERARCHY);
@@ -226,7 +227,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 		fOpenImplementation.update(selection);
 		fOpenSuperImplementation.update(selection);
-		fOpenExternalJavadoc.update(selection);
+		fOpenAttachedJavadoc.update(selection);
 		fOpenTypeHierarchy.update(selection);
 		fOpenCallHierarchy.update(selection);
 		if (!fEditorIsOwner) {
@@ -239,7 +240,7 @@ public class OpenViewActionGroup extends ActionGroup {
 			}
 			provider.addSelectionChangedListener(fOpenImplementation);
 			provider.addSelectionChangedListener(fOpenSuperImplementation);
-			provider.addSelectionChangedListener(fOpenExternalJavadoc);
+			provider.addSelectionChangedListener(fOpenAttachedJavadoc);
 			provider.addSelectionChangedListener(fOpenTypeHierarchy);
 			provider.addSelectionChangedListener(fOpenCallHierarchy);
 			// no need to register the open properties dialog action since it registers itself
@@ -295,7 +296,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	public void dispose() {
 		fSelectionProvider.removeSelectionChangedListener(fOpenImplementation);
 		fSelectionProvider.removeSelectionChangedListener(fOpenSuperImplementation);
-		fSelectionProvider.removeSelectionChangedListener(fOpenExternalJavadoc);
+		fSelectionProvider.removeSelectionChangedListener(fOpenAttachedJavadoc);
 		fSelectionProvider.removeSelectionChangedListener(fOpenTypeHierarchy);
 		fSelectionProvider.removeSelectionChangedListener(fOpenCallHierarchy);
 		super.dispose();
@@ -304,7 +305,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	private void setGlobalActionHandlers(IActionBars actionBars) {
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_IMPLEMENTATION, fOpenImplementation);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_SUPER_IMPLEMENTATION, fOpenSuperImplementation);
-		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalJavadoc);
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_ATTACHED_JAVA_DOC, fOpenAttachedJavadoc);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_TYPE_HIERARCHY, fOpenTypeHierarchy);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_CALL_HIERARCHY, fOpenCallHierarchy);
 

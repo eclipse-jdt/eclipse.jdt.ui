@@ -494,10 +494,18 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String OPEN_SUPER_IMPLEMENTATION= "org.eclipse.jdt.ui.edit.text.java.open.super.implementation"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the navigate -> open external javadoc action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"</code>).
+	 * Action definition ID of the navigate -> open external javadoc action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"</code>).
+	 * @deprecated As of 3.6, replaced by {@link #OPEN_ATTACHED_JAVADOC}
 	 */
 	public static final String OPEN_EXTERNAL_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the navigate -> open attached javadoc action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"</code>).
+	 * @since 3.6
+	 */
+	public static final String OPEN_ATTACHED_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"; //$NON-NLS-1$
 
 	/**
 	 * Action definition ID of the navigate -> open type hierarchy action

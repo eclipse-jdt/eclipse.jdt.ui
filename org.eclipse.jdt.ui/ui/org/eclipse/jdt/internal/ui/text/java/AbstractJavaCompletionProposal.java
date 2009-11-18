@@ -71,6 +71,10 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
@@ -998,10 +1002,20 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			 * FIXME: Take control creators (and link handling) out of JavadocHover,
 			 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=232024
 			 */
-			JavadocHover.PresenterControlCreator presenterControlCreator= new JavadocHover.PresenterControlCreator();
+			JavadocHover.PresenterControlCreator presenterControlCreator= new JavadocHover.PresenterControlCreator(getSite());
 			fCreator= new JavadocHover.HoverControlCreator(presenterControlCreator, true);
 		}
 		return fCreator;
+	}
+
+	private IWorkbenchSite getSite() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IWorkbenchPart part= page.getActivePart();
+			if (part != null)
+				return part.getSite();
+		}
+		return null;
 	}
 
 	public String getSortString() {

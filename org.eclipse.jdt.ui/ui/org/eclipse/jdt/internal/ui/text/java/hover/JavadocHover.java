@@ -45,7 +45,10 @@ import org.eclipse.jface.text.IInputChangedListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
@@ -76,11 +79,11 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
-import org.eclipse.jdt.internal.ui.actions.OpenExternalBrowserAction;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
@@ -243,6 +246,18 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	public static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
 
+		private IWorkbenchSite fSite;
+
+		/**
+		 * Creates a new PresenterControlCreator.
+		 * 
+		 * @param site the site or <code>null</code> if none
+		 * @since 3.6
+		 */
+		public PresenterControlCreator(IWorkbenchSite site) {
+			fSite= site;
+		}
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -265,10 +280,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				tbm.add(openDeclarationAction);
 
 				final SimpleSelectionProvider selectionProvider= new SimpleSelectionProvider();
-				OpenExternalBrowserAction openExternalJavadocAction= new OpenExternalBrowserAction(parent.getDisplay(), selectionProvider);
-				selectionProvider.addSelectionChangedListener(openExternalJavadocAction);
-				selectionProvider.setSelection(new StructuredSelection());
-				tbm.add(openExternalJavadocAction);
+				if (fSite != null) {
+					OpenAttachedJavadocAction openAttachedJavadocAction= new OpenAttachedJavadocAction(fSite);
+					openAttachedJavadocAction.setSpecialSelectionProvider(selectionProvider);
+					openAttachedJavadocAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
+					openAttachedJavadocAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
+					selectionProvider.addSelectionChangedListener(openAttachedJavadocAction);
+					selectionProvider.setSelection(new StructuredSelection());
+					tbm.add(openAttachedJavadocAction);
+				}
 
 				IInputChangedListener inputChangeListener= new IInputChangedListener() {
 					public void inputChanged(Object newInput) {
@@ -404,8 +424,21 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
-			fPresenterControlCreator= new PresenterControlCreator();
+			fPresenterControlCreator= new PresenterControlCreator(getSite());
 		return fPresenterControlCreator;
+	}
+
+	private IWorkbenchSite getSite() {
+		IEditorPart editor= getEditor();
+		if (editor == null) {
+			IWorkbenchPage page= JavaPlugin.getActivePage();
+			if (page != null)
+				editor= page.getActiveEditor();
+		}
+		if (editor != null)
+			return editor.getSite();
+
+		return null;
 	}
 
 	/*
@@ -469,8 +502,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				control.notifyDelayedInputChange(null);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
 
-				// open external links in real browser:
-				OpenBrowserUtil.open(url, display, ""); //$NON-NLS-1$
+				// Open attached Javadoc links
+				OpenBrowserUtil.open(url, display);
 
 				return true;
 			}

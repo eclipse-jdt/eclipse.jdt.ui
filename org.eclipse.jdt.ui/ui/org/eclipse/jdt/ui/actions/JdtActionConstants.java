@@ -74,10 +74,18 @@ public class JdtActionConstants {
     public static final String OPEN_CALL_HIERARCHY= "org.eclipse.jdt.ui.actions.OpenCallHierarchy"; //$NON-NLS-1$
 
 	/**
-	 * Navigate menu: name of standard Open External Javadoc global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"</code>).
+	 * Navigate menu: name of standard Open External Javadoc global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"</code>).
+	 * @deprecated As of 3.6, replaced by {@link #OPEN_ATTACHED_JAVA_DOC}
 	 */
 	public static final String OPEN_EXTERNAL_JAVA_DOC= "org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"; //$NON-NLS-1$
+
+	/**
+	 * Navigate menu: name of standard Open Attached Javadoc global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"</code>).
+	 * @since 3.6
+	 */
+	public static final String OPEN_ATTACHED_JAVA_DOC= "org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"; //$NON-NLS-1$
 
 	/**
 	 * Navigate menu: name of standard Show in Packages View global action

@@ -201,7 +201,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 						}
 					}
 					File file= fStore.writeXML(javadocXMLElement);
-					IFile[] files= fRoot.findFilesForLocation(Path.fromOSString(file.getPath()));
+					IFile[] files= fRoot.findFilesForLocationURI(file.toURI());
 					if (files != null) {
 						for (int i= 0; i < files.length; i++) {
 							files[i].refreshLocal(IResource.DEPTH_ONE, null);
@@ -414,7 +414,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	private void refresh(IPath path) {
-		IContainer[] containers= fRoot.findContainersForLocation(path);
+		IContainer[] containers= fRoot.findContainersForLocationURI(path.toFile().toURI());
 		try {
 			for (int i= 0; i < containers.length; i++) {
 				containers[i].refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -429,7 +429,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			try {
 				IPath indexFile= fDestination.append("index.html"); //$NON-NLS-1$
 				URL url= indexFile.toFile().toURI().toURL();
-				OpenBrowserUtil.open(url, display, getWindowTitle());
+				OpenBrowserUtil.open(url, display);
 			} catch (MalformedURLException e) {
 				JavaPlugin.log(e);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,22 +15,62 @@ import java.net.URL;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 public class OpenBrowserUtil {
 
-	public static void open(final URL url, Display display, final String dialogTitle) {
+	/**
+	 * Opens the given url in the browser as choosen in the preferences.
+	 * 
+	 * @param url the URL
+	 * @param display the display
+	 * @since 3.6
+	 */
+	public static void open(final URL url, Display display) {
 		display.syncExec(new Runnable() {
 			public void run() {
-				internalOpen(url, dialogTitle);
+				internalOpen(url, false);
 			}
 		});
 	}
 
-	private static void internalOpen(final URL url, String title) {
+	/**
+	 * Opens the given URL in an external browser.
+	 * 
+	 * @param url the URL
+	 * @param display the display
+	 * @since 3.6
+	 */
+	public static void openExternal(final URL url, Display display) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				internalOpen(url, true);
+			}
+		});
+	}
+
+	private static void internalOpen(final URL url, final boolean useExternalBrowser) {
 		BusyIndicator.showWhile(null, new Runnable() {
 			public void run() {
-				PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
+				URL helpSystemUrl= PlatformUI.getWorkbench().getHelpSystem().resolve(url.toExternalForm(), true);
+				try {
+					IWorkbenchBrowserSupport browserSupport= PlatformUI.getWorkbench().getBrowserSupport();
+					IWebBrowser browser;
+					if (useExternalBrowser)
+						browser= browserSupport.getExternalBrowser();
+					else
+						browser= browserSupport.createBrowser(null);
+					browser.openURL(helpSystemUrl);
+				} catch (PartInitException ex) {
+					// XXX: show dialog?
+					JavaPlugin.logErrorStatus("Opening Javadoc failed", ex.getStatus()); //$NON-NLS-1$
+				}
 			}
 		});
 	}

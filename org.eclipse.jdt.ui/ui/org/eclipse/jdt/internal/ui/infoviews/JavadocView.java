@@ -131,12 +131,12 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.OpenExternalBrowserAction;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
@@ -387,10 +387,11 @@ public class JavadocView extends AbstractInfoView {
 	private LinkAction fToggleLinkAction;
 
 	/**
-	 * Action to show content in external browser
+	 * Action to open the attached Javadoc.
+	 * 
 	 * @since 3.4
 	 */
-	private OpenExternalBrowserAction fOpenExternalBrowserAction;
+	private OpenAttachedJavadocAction fOpenAttachedJavadocAction;
 
 	/**
 	 * A selection provider providing the current
@@ -672,9 +673,12 @@ public class JavadocView extends AbstractInfoView {
 		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 
 		fInputSelectionProvider= new SimpleSelectionProvider();
-		fOpenExternalBrowserAction= new OpenExternalBrowserAction(getSite().getShell().getDisplay(), fInputSelectionProvider);
-		fOpenExternalBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
-		fInputSelectionProvider.addSelectionChangedListener(fOpenExternalBrowserAction);
+		fOpenAttachedJavadocAction= new OpenAttachedJavadocAction(getSite());
+		fOpenAttachedJavadocAction.setSpecialSelectionProvider(fInputSelectionProvider);
+		fOpenAttachedJavadocAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
+		fOpenAttachedJavadocAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
+		fOpenAttachedJavadocAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
+		fInputSelectionProvider.addSelectionChangedListener(fOpenAttachedJavadocAction);
 
 		IJavaElement input= getInput();
 		StructuredSelection selection;
@@ -698,7 +702,7 @@ public class JavadocView extends AbstractInfoView {
 
 		fInputSelectionProvider.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalBrowserAction);
+				actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_ATTACHED_JAVA_DOC, fOpenAttachedJavadocAction);
 			}
 		});
 
@@ -717,7 +721,7 @@ public class JavadocView extends AbstractInfoView {
 
 		tbm.add(fToggleLinkAction);
 		super.fillToolBar(tbm);
-		tbm.add(fOpenExternalBrowserAction);
+		tbm.add(fOpenAttachedJavadocAction);
 	}
 
 	/* (non-Javadoc)
@@ -730,7 +734,7 @@ public class JavadocView extends AbstractInfoView {
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fBackAction);
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fForthAction);
 
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenExternalBrowserAction);
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenAttachedJavadocAction);
 	}
 
 	/*
@@ -808,9 +812,9 @@ public class JavadocView extends AbstractInfoView {
 			fFontListener= null;
 		}
 
-		if (fOpenExternalBrowserAction != null) {
-			fInputSelectionProvider.removeSelectionChangedListener(fOpenExternalBrowserAction);
-			fOpenExternalBrowserAction= null;
+		if (fOpenAttachedJavadocAction != null) {
+			fInputSelectionProvider.removeSelectionChangedListener(fOpenAttachedJavadocAction);
+			fOpenAttachedJavadocAction= null;
 		}
 	}
 
