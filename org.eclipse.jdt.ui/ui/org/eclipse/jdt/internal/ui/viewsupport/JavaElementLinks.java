@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,12 +78,12 @@ public class JavaElementLinks {
 		void handleDeclarationLink(IJavaElement target);
 
 		/**
-		 * Handle link to given link to open in external browser
-		 *
+		 * Handle link to given URL to open in browser.
+		 * 
 		 * @param url the url to show
 		 * @param display the current display
-		 * @return <code>true</code> if the handler could open the link
-		 *         <code>false</code> if the browser should follow the link
+		 * @return <code>true</code> if the handler could open the link <code>false</code> if the
+		 *         browser should follow the link
 		 */
 		boolean handleExternalLink(URL url, Display display);
 
