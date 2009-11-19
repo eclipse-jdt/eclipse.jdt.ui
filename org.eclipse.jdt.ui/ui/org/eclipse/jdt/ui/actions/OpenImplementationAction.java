@@ -125,7 +125,7 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 			return;
 
 		IRegion region= new Region(selection.getOffset(), 0);
-		JavaElementImplementationHyperlink.openImplementations(fEditor, region, element, openAction);
+		JavaElementImplementationHyperlink.openImplementations(fEditor, region, (IMethod)element, openAction);
 
 	}
 

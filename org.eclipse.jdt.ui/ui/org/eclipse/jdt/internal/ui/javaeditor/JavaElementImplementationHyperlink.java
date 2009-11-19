@@ -36,10 +36,11 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.SharedASTProvider;
@@ -76,7 +79,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	
 	private final IRegion fRegion;
 	private final SelectionDispatchAction fOpenAction;
-	private final IJavaElement fElement;
+	private final IMethod fMethod;
 	private final boolean fQualify;
 
 	/**
@@ -89,19 +92,19 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * 
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
-	 * @param element the java element to open
+	 * @param method the method to open
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element.
 	 * @param editor the active java editor
 	 */
-	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, ITextEditor editor) {
+	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, ITextEditor editor) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
-		Assert.isNotNull(element);
+		Assert.isNotNull(method);
 
 		fRegion= region;
 		fOpenAction= openAction;
-		fElement= element;
+		fMethod= method;
 		fQualify= qualify;
 		fEditor= editor;
 	}
@@ -118,8 +121,8 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 */
 	public String getHyperlinkText() {
 		if (fQualify) {
-			String elementLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_FULLY_QUALIFIED);
-			return Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText_qualified, new Object[] { elementLabel });
+			String methodLabel= JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED);
+			return Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText_qualified, new Object[] { methodLabel });
 		} else {
 			return JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText;
 		}
@@ -140,23 +143,23 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * </p>
 	 */
 	public void open() {
-		openImplementations(fEditor, fRegion, fElement, fOpenAction);
+		openImplementations(fEditor, fRegion, fMethod, fOpenAction);
 	}
 
 	/**
 	 * Finds the implementations for the method.
 	 * <p>
-	 * If there's only one implementor that java element is opened in the editor, otherwise the
-	 * Quick Hierarchy is opened.
+	 * If there's only one implementor that method is opened in the editor, otherwise the Quick
+	 * Hierarchy is opened.
 	 * </p>
 	 * 
-	 * @param openAction the action to use to open the java elements
-	 * @param javaElement the java element
+	 * @param openAction the action to use to open the methods
+	 * @param method the method
 	 * @param region the region of the selection
 	 * @param editor the active java editor
 	 * @since 3.6
 	 */
-	public static void openImplementations(IEditorPart editor, IRegion region, final IJavaElement javaElement, SelectionDispatchAction openAction) {
+	public static void openImplementations(IEditorPart editor, IRegion region, final IMethod method, SelectionDispatchAction openAction) {
 		ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
 
 		CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -178,14 +181,14 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 				}
 			} else if (parent instanceof SuperMethodInvocation) {
 				// Directly go to the super method definition
-				openAction.run(new StructuredSelection(javaElement));
+				openAction.run(new StructuredSelection(method));
 				return;
 			} else if (parent instanceof MethodDeclaration) {
 				parentTypeBinding= Bindings.getBindingOfParentType(node);
 			}
 		}
-		final IType type= parentTypeBinding != null ? (IType) parentTypeBinding.getJavaElement() : null;
-		if (type == null) {
+		final IType receiverType= parentTypeBinding != null ? (IType)parentTypeBinding.getJavaElement() : null;
+		if (receiverType == null) {
 			openQuickHierarchy(editor);
 			return;
 		}
@@ -199,28 +202,45 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					monitor= new NullProgressMonitor();
 				}
 				try {
-					String methodLabel= JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.DEFAULT_QUALIFIED);
-					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 100);
+					String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
+					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
+					IType type;
+					boolean isFullHierarchyNeeded= true;
+					if (receiverType.isInterface()) {
+						type= method.getDeclaringType();
+					} else {
+						type= receiverType;
+						isFullHierarchyNeeded= isFullHierarchyNeeded(monitor, method, receiverType);
+					}
 					SearchRequestor requestor= new SearchRequestor() {
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
-								IJavaElement element= (IJavaElement)match.getElement();
-								if (element instanceof IMethod && !JdtFlags.isAbstract((IMethod)element)) {
-									links.add(element);
-									if (links.size() > 1) {
-										throw new OperationCanceledException(dummyString);
+								Object element= match.getElement();
+								if (element instanceof IMethod) {
+									IMethod methodFound= (IMethod)element;
+									if (!JdtFlags.isAbstract(methodFound) && !links.contains(methodFound)) {
+										links.add(element);
+										if (links.size() > 1) {
+											throw new OperationCanceledException(dummyString);
+										}
 									}
 								}
 							}
 						}
 					};
 					int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
-					SearchPattern pattern= SearchPattern.createPattern(javaElement, limitTo);
+					SearchPattern pattern= SearchPattern.createPattern(method, limitTo);
 					Assert.isNotNull(pattern);
 					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 					SearchEngine engine= new SearchEngine();
-					engine.search(pattern, participants, SearchEngine.createHierarchyScope(type), requestor, new SubProgressMonitor(monitor, 100));
-
+					IJavaSearchScope hierarchyScope;
+					if (isFullHierarchyNeeded) {
+						hierarchyScope= SearchEngine.createHierarchyScope(type);
+					} else {
+						links.add(method);
+						hierarchyScope= SearchEngine.createHierarchyScope(null, type, true, false, null);
+					}
+					engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
@@ -237,7 +257,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			context.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
 			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK,
-					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, javaElement.getElementName()), e.getCause());
+					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, method.getElementName()), e.getCause());
 			JavaPlugin.log(status);
 			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
@@ -253,6 +273,27 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 		} else {
 			openQuickHierarchy(editor);
 		}
+	}
+
+	/**
+	 * Checks whether a full type hierarchy is needed to search for implementors.
+	 * 
+	 * @param monitor the progress monitor
+	 * @param method the method
+	 * @param receiverType the receiver type
+	 * @return <code>true</code> if a full type hierarchy is needed, <code>false</code> otherwise
+	 * @throws JavaModelException if the java element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 * @since 3.6
+	 */
+	private static boolean isFullHierarchyNeeded(IProgressMonitor monitor, IMethod method, IType receiverType) throws JavaModelException {
+		ITypeHierarchy superTypeHierarchy= receiverType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 3));
+		MethodOverrideTester methodOverrideTester= new MethodOverrideTester(receiverType, superTypeHierarchy);
+		IMethod methodInReceiver= methodOverrideTester.findOverriddenMethodInType(receiverType, method);
+		if (methodInReceiver == null || JdtFlags.isAbstract(methodInReceiver)) {
+			return true;
+		}
+		return false;
 	}
 
 	/**

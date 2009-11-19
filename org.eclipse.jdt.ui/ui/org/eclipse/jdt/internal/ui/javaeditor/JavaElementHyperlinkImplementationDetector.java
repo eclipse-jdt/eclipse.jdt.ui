@@ -40,7 +40,7 @@ public class JavaElementHyperlinkImplementationDetector extends JavaElementHyper
 	 */
 	protected IHyperlink createHyperlink(IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, ITextEditor editor) {
 		if (element.getElementType() == IJavaElement.METHOD && canBeOverridden((IMethod)element)) {
-			return new JavaElementImplementationHyperlink(wordRegion, openAction, element, qualify, editor);
+			return new JavaElementImplementationHyperlink(wordRegion, openAction, (IMethod)element, qualify, editor);
 		}
 		return null;
 	}
