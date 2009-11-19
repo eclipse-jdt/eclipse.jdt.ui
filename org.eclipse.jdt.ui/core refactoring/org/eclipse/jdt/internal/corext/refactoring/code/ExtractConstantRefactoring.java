@@ -64,7 +64,9 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractConstantDescriptor;
@@ -73,6 +75,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -541,7 +544,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 			ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
 			AST ast= fCuRewrite.getAST();
 			typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, ast);
-			fConstantTypeCache= fCuRewrite.getImportRewrite().addImport(typeBinding, ast);
+			ImportRewrite importRewrite= fCuRewrite.getImportRewrite();
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fCuRewrite.getRoot(), fSelectionStart, importRewrite);
+			fConstantTypeCache= importRewrite.addImport(typeBinding, ast, context);
 		}
 		return fConstantTypeCache;
 	}
