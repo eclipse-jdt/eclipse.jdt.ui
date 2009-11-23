@@ -204,21 +204,13 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 				try {
 					String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
 					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
-					IType type;
-					boolean isFullHierarchyNeeded= true;
-					if (receiverType.isInterface()) {
-						type= method.getDeclaringType();
-					} else {
-						type= receiverType;
-						isFullHierarchyNeeded= isFullHierarchyNeeded(monitor, method, receiverType);
-					}
 					SearchRequestor requestor= new SearchRequestor() {
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
 								Object element= match.getElement();
 								if (element instanceof IMethod) {
 									IMethod methodFound= (IMethod)element;
-									if (!JdtFlags.isAbstract(methodFound) && !links.contains(methodFound)) {
+									if (!JdtFlags.isAbstract(methodFound)) {
 										links.add(element);
 										if (links.size() > 1) {
 											throw new OperationCanceledException(dummyString);
@@ -228,18 +220,25 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 							}
 						}
 					};
+
+					IJavaSearchScope hierarchyScope;
+					if (receiverType.isInterface()) {
+						hierarchyScope= SearchEngine.createHierarchyScope(method.getDeclaringType());
+					} else {
+						if (isFullHierarchyNeeded(new SubProgressMonitor(monitor, 3), method, receiverType))
+							hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
+						else {
+							if (!JdtFlags.isAbstract(method))
+								links.add(method);
+							hierarchyScope= SearchEngine.createHierarchyScope(null, receiverType, true, false, null);
+						}
+					}
+
 					int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
 					SearchPattern pattern= SearchPattern.createPattern(method, limitTo);
 					Assert.isNotNull(pattern);
 					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 					SearchEngine engine= new SearchEngine();
-					IJavaSearchScope hierarchyScope;
-					if (isFullHierarchyNeeded) {
-						hierarchyScope= SearchEngine.createHierarchyScope(type);
-					} else {
-						links.add(method);
-						hierarchyScope= SearchEngine.createHierarchyScope(null, type, true, false, null);
-					}
 					engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -287,13 +286,9 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * @since 3.6
 	 */
 	private static boolean isFullHierarchyNeeded(IProgressMonitor monitor, IMethod method, IType receiverType) throws JavaModelException {
-		ITypeHierarchy superTypeHierarchy= receiverType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 3));
+		ITypeHierarchy superTypeHierarchy= receiverType.newSupertypeHierarchy(monitor);
 		MethodOverrideTester methodOverrideTester= new MethodOverrideTester(receiverType, superTypeHierarchy);
-		IMethod methodInReceiver= methodOverrideTester.findOverriddenMethodInType(receiverType, method);
-		if (methodInReceiver == null || JdtFlags.isAbstract(methodInReceiver)) {
-			return true;
-		}
-		return false;
+		return methodOverrideTester.findOverriddenMethodInType(receiverType, method) == null;
 	}
 
 	/**
