@@ -210,7 +210,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 								Object element= match.getElement();
 								if (element instanceof IMethod) {
 									IMethod methodFound= (IMethod)element;
-									if (!JdtFlags.isAbstract(methodFound)) {
+									if (!JdtFlags.isAbstract(methodFound) && !links.contains(methodFound)) {//Workaround for the search bug http://dev.eclipse.org/bugs/show_bug.cgi?id=295894
 										links.add(element);
 										if (links.size() > 1) {
 											throw new OperationCanceledException(dummyString);
