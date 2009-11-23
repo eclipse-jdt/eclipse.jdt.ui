@@ -269,9 +269,16 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 
 		if (links.size() == 1) {
 			openAction.run(new StructuredSelection(links.get(0)));
-		} else {
-			openQuickHierarchy(editor);
-		}
+		} else
+			try {
+				if (links.size() == 0 && JdtFlags.isAbstract(method)) {
+					openAction.run(new StructuredSelection(method));
+				} else {
+					openQuickHierarchy(editor);
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
 	}
 
 	/**
