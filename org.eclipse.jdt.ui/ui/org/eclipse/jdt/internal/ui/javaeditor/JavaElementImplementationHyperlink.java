@@ -210,7 +210,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 								Object element= match.getElement();
 								if (element instanceof IMethod) {
 									IMethod methodFound= (IMethod)element;
-									if (!JdtFlags.isAbstract(methodFound) && !links.contains(methodFound)) {//Workaround for the search bug http://dev.eclipse.org/bugs/show_bug.cgi?id=295894
+									if (!JdtFlags.isAbstract(methodFound)) {
 										links.add(element);
 										if (links.size() > 1) {
 											throw new OperationCanceledException(dummyString);
@@ -230,7 +230,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 						else {
 							if (!JdtFlags.isAbstract(method))
 								links.add(method);
-							hierarchyScope= SearchEngine.createHierarchyScope(null, receiverType, true, false, null);
+							hierarchyScope= SearchEngine.createHierarchyScope(null, receiverType, true, true, null);
 						}
 					}
 
