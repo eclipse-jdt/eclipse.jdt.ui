@@ -193,6 +193,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			return;
 		}
 
+		final boolean isMethodAbstract[]= new boolean[1];
 		final String dummyString= new String();
 		final ArrayList links= new ArrayList();
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
@@ -208,10 +209,15 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
 								Object element= match.getElement();
+
+								// Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=295894
+								if (links.contains(element))
+									return;
+
 								if (element instanceof IMethod) {
 									IMethod methodFound= (IMethod)element;
 									if (!JdtFlags.isAbstract(methodFound)) {
-										links.add(element);
+										links.add(methodFound);
 										if (links.size() > 1) {
 											throw new OperationCanceledException(dummyString);
 										}
@@ -228,9 +234,10 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 						if (isFullHierarchyNeeded(new SubProgressMonitor(monitor, 3), method, receiverType))
 							hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
 						else {
-							if (!JdtFlags.isAbstract(method))
+							isMethodAbstract[0]= JdtFlags.isAbstract(method);
+							if (!isMethodAbstract[0])
 								links.add(method);
-							hierarchyScope= SearchEngine.createHierarchyScope(null, receiverType, true, true, null);
+							hierarchyScope= SearchEngine.createHierarchyScope(null, receiverType, true, false, null);
 						}
 					}
 
@@ -267,18 +274,12 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			}
 		}
 
-		if (links.size() == 1) {
+		if (links.isEmpty() && isMethodAbstract[0])
+			openAction.run(new StructuredSelection(method));
+		else if (links.size() == 1)
 			openAction.run(new StructuredSelection(links.get(0)));
-		} else
-			try {
-				if (links.size() == 0 && JdtFlags.isAbstract(method)) {
-					openAction.run(new StructuredSelection(method));
-				} else {
-					openQuickHierarchy(editor);
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
+		else
+			openQuickHierarchy(editor);
 	}
 
 	/**
