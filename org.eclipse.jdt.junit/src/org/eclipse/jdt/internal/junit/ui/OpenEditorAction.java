@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -65,7 +66,7 @@ public abstract class OpenEditorAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		ITextEditor textEditor= null;
+		IEditorPart editor= null;
 		try {
 			IJavaElement element= findElement(getLaunchedProject(), fClassName);
 			if (element == null) {
@@ -73,16 +74,16 @@ public abstract class OpenEditorAction extends Action {
 					JUnitMessages.OpenEditorAction_error_cannotopen_title, JUnitMessages.OpenEditorAction_error_cannotopen_message);
 				return;
 			}
-			textEditor= (ITextEditor) JavaUI.openInEditor(element, fActivate, false);
+			editor= JavaUI.openInEditor(element, fActivate, false);
 		} catch (CoreException e) {
 			ErrorDialog.openError(getShell(), JUnitMessages.OpenEditorAction_error_dialog_title, JUnitMessages.OpenEditorAction_error_dialog_message, e.getStatus());
 			return;
 		}
-		if (textEditor == null) {
+		if (!(editor instanceof ITextEditor)) {
 			fTestRunner.registerInfoMessage(JUnitMessages.OpenEditorAction_message_cannotopen);
 			return;
 		}
-		reveal(textEditor);
+		reveal((ITextEditor)editor);
 	}
 
 	protected Shell getShell() {
