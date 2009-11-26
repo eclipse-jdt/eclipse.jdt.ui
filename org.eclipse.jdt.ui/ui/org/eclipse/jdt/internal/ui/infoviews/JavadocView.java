@@ -297,9 +297,7 @@ public class JavadocView extends AbstractInfoView {
 
 		public LinkAction() {
 			super(InfoViewMessages.JavadocView_action_toogleLinking_text, SWT.TOGGLE);
-
-			setTitleToolTip(InfoViewMessages.JavadocView_action_toggleLinking_toolTipText);
-
+			setToolTipText(InfoViewMessages.JavadocView_action_toggleLinking_toolTipText);
 			JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$
 			setChecked(isLinkingEnabled());
 		}
