@@ -393,7 +393,7 @@ public class JavadocContentAccess2 {
 
 	private final IMember fMember;
 	/**
-	 * The method, or <code>null</code> if {@link #fMember} is not a method where {@inheritDoc} could work.
+	 * The method, or <code>null</code> if {@link #fMember} is not a method where @inheritDoc could work.
 	 */
 	private final IMethod fMethod;
 	private final Javadoc fJavadoc;
@@ -1020,7 +1020,12 @@ public class JavadocContentAccess2 {
 		return null;
 	}
 
+		
 	private void handleContentElements(List nodes) {
+		handleContentElements(nodes, false);
+	}
+	
+	private void handleContentElements(List nodes, boolean skipLeadingWhitespace) {
 		ASTNode previousNode= null;
 		for (Iterator iter= nodes.iterator(); iter.hasNext(); ) {
 			ASTNode child= (ASTNode) iter.next();
@@ -1038,7 +1043,11 @@ public class JavadocContentAccess2 {
 			}
 			previousNode= child;
 			if (child instanceof TextElement) {
-				handleText(((TextElement) child).getText());
+				String text= ((TextElement) child).getText();
+				if (skipLeadingWhitespace) {
+					text= text.replaceFirst("^\\s+", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				handleText(text);
 			} else if (child instanceof TagElement) {
 				handleInlineTagElement((TagElement) child);
 			} else {
@@ -1113,7 +1122,7 @@ public class JavadocContentAccess2 {
 		if (isLink || isLinkplain)
 			handleLink(node.fragments());
 		else if (isCode || isLiteral)
-			handleContentElements(node.fragments());
+			handleContentElements(node.fragments(), true);
 		else if (handleInheritDoc(node)) {
 			// handled
 		} else if (handleDocRoot(node)) {
@@ -1443,17 +1452,7 @@ public class JavadocContentAccess2 {
 				}
 				fBuf.append("'>"); //$NON-NLS-1$
 				if (fs > 1) {
-					//TODO:
-					// - Set fLiteralContent for label? Check spec.
-					// - Javadoc of java.util.regex.Pattern has a space in front of link in <pre>
-//					if (fs == 2 && fragments.get(1) instanceof TextElement) {
-//						String text= removeLeadingWhitespace(((TextElement) fragments.get(1)).getText());
-//						if (text.length() != 0)
-//							handleText(text);
-//						else
-//							//throws
-//					}
-					handleContentElements(fragments.subList(1, fs));
+					handleContentElements(fragments.subList(1, fs), true);
 				} else {
 					fBuf.append(refTypeName);
 					if (refMemberName != null) {
