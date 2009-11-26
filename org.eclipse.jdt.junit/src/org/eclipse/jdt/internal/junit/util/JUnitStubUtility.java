@@ -287,16 +287,12 @@ public class JUnitStubUtility {
 		return (pack != null && otherpack != null && pack.getElementName().equals(otherpack.getElementName()));
 	}
 
-	private static boolean isVersionLessThan(String version1, String version2) {
-		return version1.compareTo(version2) < 0;
-	}
-
 	public static boolean is50OrHigher(IJavaProject project) {
-		return is50OrHigher(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+		return TestSearchEngine.is50OrHigher(project);
 	}
 
 	public static boolean is50OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
+		return TestSearchEngine.is50OrHigher(compliance);
 	}
 
 	public static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {

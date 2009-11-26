@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
@@ -106,7 +107,13 @@ public class TestKindRegistry {
 	}
 
 	public static String getContainerTestKindId(IJavaElement element) {
-		return element != null && TestSearchEngine.hasTestAnnotation(element.getJavaProject()) ? JUNIT4_TEST_KIND_ID : JUNIT3_TEST_KIND_ID;
+		if (element != null) {
+			IJavaProject project= element.getJavaProject();
+			if (TestSearchEngine.is50OrHigher(project) && TestSearchEngine.hasTestAnnotation(project)) {
+				return JUNIT4_TEST_KIND_ID;
+			}
+		}
+		return JUNIT3_TEST_KIND_ID;
 	}
 
 	public static ITestKind getContainerTestKind(IJavaElement element) {

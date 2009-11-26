@@ -217,4 +217,38 @@ public class TestSearchEngine {
 		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
 	}
 
+	
+// --- copied from org.eclipse.jdt.internal.corext.util.JavaModelUtil: ---
+	/**
+	 * @param version1 the first version
+	 * @param version2 the second version
+	 * @return <code>true</code> iff version1 is less than version2
+	 */
+	public static boolean isVersionLessThan(String version1, String version2) {
+		if (JavaCore.VERSION_CLDC_1_1.equals(version1)) {
+			version1= JavaCore.VERSION_1_1 + 'a';
+		}
+		if (JavaCore.VERSION_CLDC_1_1.equals(version2)) {
+			version2= JavaCore.VERSION_1_1 + 'a';
+		}
+		return version1.compareTo(version2) < 0;
+	}
+
+
+	public static boolean is50OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
+	}
+
+	/**
+	 * Checks if the given project or workspace has source compliance 5.0 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 5.0 or greater.
+	 */
+	public static boolean is50OrHigher(IJavaProject project) {
+		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
+		return is50OrHigher(source);
+	}
+// ---
+
 }
