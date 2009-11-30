@@ -385,6 +385,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_STATEMENTS_RECOVERY= "no_statements_recovery"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_BINDINGS_RECOVERY= "no_bindings_recovery"; //$NON-NLS-1$
+	private final static String SETTINGS_IGNORE_METHOD_BODIES= "ignore_method_bodies"; //$NON-NLS-1$
 	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
@@ -399,6 +400,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fCreateBindingsAction;
 	private Action fStatementsRecoveryAction;
 	private Action fBindingsRecoveryAction;
+	private Action fIgnoreMethodBodiesAction;
 	private Action fFilterNonRelevantAction;
 	private Action fFindDeclaringNodeAction;
 	private Action fParseBindingFromKeyAction;
@@ -429,6 +431,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private NonRelevantFilter fNonRelevantFilter;
 	private boolean fStatementsRecovery;
 	private boolean fBindingsRecovery;
+	private boolean fIgnoreMethodBodies;
 	
 	private Object fPreviousDouble;
 	
@@ -450,6 +453,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fCreateBindings= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS); // inverse so that default is to create bindings
 		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
 		fBindingsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS_RECOVERY); // inverse so that default is use recovery
+		fIgnoreMethodBodies= fDialogSettings.getBoolean(SETTINGS_IGNORE_METHOD_BODIES);
 		fCurrentASTLevel= JLS3;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
@@ -606,6 +610,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 					reconcileFlags |= ICompilationUnit.ENABLE_STATEMENTS_RECOVERY;
 				if (fBindingsRecovery)
 					reconcileFlags |= ICompilationUnit.ENABLE_BINDINGS_RECOVERY;
+				if (fIgnoreMethodBodies)
+					reconcileFlags |= ICompilationUnit.IGNORE_METHOD_BODIES;
 				startTime= System.currentTimeMillis();
 				root= wc.reconcile(getCurrentASTLevel(), reconcileFlags, null, null);
 				endTime= System.currentTimeMillis();
@@ -629,6 +635,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			}
 			parser.setStatementsRecovery(fStatementsRecovery);
 			parser.setBindingsRecovery(fBindingsRecovery);
+			parser.setIgnoreMethodBodies(fIgnoreMethodBodies);
 			if (getCurrentInputKind() == ASTInputKindAction.USE_FOCAL) {
 				parser.setFocalPosition(offset);
 			}
@@ -653,8 +660,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 				break;
 		}
 		fCreateBindingsAction.setEnabled(enabled && getCurrentInputKind() != ASTInputKindAction.USE_RECONCILE);
-		fBindingsRecoveryAction.setEnabled(enabled);
 		fStatementsRecoveryAction.setEnabled(enabled);
+		fBindingsRecoveryAction.setEnabled(enabled);
+		fIgnoreMethodBodiesAction.setEnabled(enabled);
 		fASTVersionToggleActions[0].setEnabled(enabled);
 		fASTVersionToggleActions[1].setEnabled(enabled);
 	}
@@ -846,7 +854,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(fCreateBindingsAction);
 		manager.add(fStatementsRecoveryAction);
 		manager.add(fBindingsRecoveryAction);
-		manager.add(fFilterNonRelevantAction);
+		manager.add(fIgnoreMethodBodiesAction);
 		manager.add(new Separator());
 		for (int i= 0; i < fASTInputKindActions.length; i++) {
 			manager.add(fASTInputKindActions[i]);
@@ -856,6 +864,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(fParseBindingFromKeyAction);
 		manager.add(fParseBindingFromElementAction);
 		manager.add(new Separator());
+		manager.add(fFilterNonRelevantAction);
 		manager.add(fLinkWithEditor);
 	}
 
@@ -944,6 +953,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		};
 		fBindingsRecoveryAction.setChecked(fBindingsRecovery);
 		fBindingsRecoveryAction.setEnabled(true);
+		
+		fIgnoreMethodBodiesAction = new Action("&Ignore Method Bodies", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performIgnoreMethodBodies();
+			}
+		};
+		fIgnoreMethodBodiesAction.setChecked(fIgnoreMethodBodies);
+		fIgnoreMethodBodiesAction.setEnabled(true);
 		
 		fFilterNonRelevantAction = new Action("&Hide Non-Relevant Attributes", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			public void run() {
@@ -1296,6 +1313,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 	protected void performBindingsRecovery() {
 		fBindingsRecovery= fBindingsRecoveryAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_BINDINGS_RECOVERY, !fBindingsRecovery);
+		performRefresh();
+	}
+	
+	protected void performIgnoreMethodBodies() {
+		fIgnoreMethodBodies= fIgnoreMethodBodiesAction.isChecked();
+		fDialogSettings.put(SETTINGS_IGNORE_METHOD_BODIES, fIgnoreMethodBodies);
 		performRefresh();
 	}
 	
