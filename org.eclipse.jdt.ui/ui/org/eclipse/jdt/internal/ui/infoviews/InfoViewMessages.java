@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,9 @@ final class InfoViewMessages extends NLS {
 	public static String GotoInputAction_label;
 	public static String GotoInputAction_tooltip;
 	public static String GotoInputAction_description;
+	
+	public static String OpenInBrowserAction_url_label;
+	public static String OpenInBrowserAction_url_toolTip;
 
 	public static String CopyToClipboard_error_title;
 	public static String CopyToClipboard_error_message;

@@ -14,6 +14,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -48,19 +50,18 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	}
 
 	/**
-	 * Creates a new <code>OpenExternalJavadocAction</code>. The action requires
-	 * that the selection provided by the given selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 *
+	 * Creates a new <code>OpenExternalJavadocAction</code>. The action requires that the selection
+	 * provided by the given selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>
+	 * .
+	 * 
 	 * @param site the site providing additional context information for this action
-	 * @param provider a special selection provider which is used instead
-	 *  of the site's selection provider or <code>null</code> to use the site's
-	 *  selection provider
-	 *
+	 * @param provider a special selection provider which is used instead of the site's selection
+	 *            provider or <code>null</code> to use the site's selection provider
+	 * 
 	 * @since 3.2
-	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This API will be
-	 * removed after 3.2 M5.
-     */
+	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead.
+	 */
     public OpenExternalJavadocAction(IWorkbenchSite site, ISelectionProvider provider) {
         this(site);
         setSpecialSelectionProvider(provider);
@@ -77,6 +78,14 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 		setText(ActionMessages.OpenExternalJavadocAction_label);
 		setDescription(ActionMessages.OpenExternalJavadocAction_description);
 		setToolTipText(ActionMessages.OpenExternalJavadocAction_tooltip);
+	}
+
+	/*
+	 * No Javadoc since the method isn't meant to be public but is
+	 * since the beginning
+	 */
+	public void run(IJavaElement element) {
+		super.run(element);
 	}
 
 	/*

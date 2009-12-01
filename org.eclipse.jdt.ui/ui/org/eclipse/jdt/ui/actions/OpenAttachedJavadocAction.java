@@ -97,10 +97,16 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(checkEnabled(selection));
+		setEnabled(canEnableFor(selection));
 	}
 
-	private boolean checkEnabled(IStructuredSelection selection) {
+	/**
+	 * Tells whether this action can be enabled for the given selection.
+	 * 
+	 * @param selection the structured selection.
+	 * @return <code>true</code> if the action can be enabled, <code>false</code> otherwise
+	 */
+	protected boolean canEnableFor(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;
 		return selection.getFirstElement() instanceof IJavaElement;
@@ -136,7 +142,7 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(IStructuredSelection selection) {
-		if (!checkEnabled(selection))
+		if (!canEnableFor(selection))
 			return;
 		IJavaElement element= (IJavaElement)selection.getFirstElement();
 		if (!ActionUtil.isProcessable(getShell(), element))
@@ -144,11 +150,12 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 		run(element);
 	}
 
-	/*
-	 * No Javadoc since the method isn't meant to be public but is
-	 * since the beginning
+	/**
+	 * Executes this actions with the given Java element.
+	 * 
+	 * @param element the Java element
 	 */
-	public void run(IJavaElement element) {
+	protected void run(IJavaElement element) {
 		if (element == null)
 			return;
 		Shell shell= getShell();
@@ -169,16 +176,24 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 				return;
 			}
 			URL url= JavaUI.getJavadocLocation(element, true);
-			if (url != null) {
-				if (forceExternalBrowser())
-					OpenBrowserUtil.openExternal(url, shell.getDisplay());
-				else
-					OpenBrowserUtil.open(url, shell.getDisplay());
-			}
+			if (url != null)
+				open(url);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			showMessage(shell, ActionMessages.OpenAttachedJavadocAction_opening_failed, true);
 		}
+	}
+
+	/**
+	 * Opens the given URL in the browser.
+	 * 
+	 * @param url the URL
+	 */
+	protected void open(URL url) {
+		if (forceExternalBrowser())
+			OpenBrowserUtil.openExternal(url, getShell().getDisplay());
+		else
+			OpenBrowserUtil.open(url, getShell().getDisplay());
 	}
 
 	/**

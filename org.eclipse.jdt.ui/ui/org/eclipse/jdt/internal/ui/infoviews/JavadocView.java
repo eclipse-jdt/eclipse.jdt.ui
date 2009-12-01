@@ -64,6 +64,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -86,6 +87,7 @@ import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -137,6 +139,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
@@ -311,6 +314,69 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/**
+	 * Action to open the selection in an external browser. If the selection is a java element its
+	 * corresponding javadoc is shown if possible. If it is an URL the URL's content is shown.
+	 * 
+	 * The action is disabled if the selection can not be opened.
+	 * 
+	 * @since 3.6
+	 */
+	private static class OpenInBrowserAction extends OpenAttachedJavadocAction {
+
+		/**
+		 * Create a new ShowExternalJavadocAction
+		 * 
+		 * @param site the site
+		 */
+		public OpenInBrowserAction(IWorkbenchSite site) {
+			super(site);
+		}
+
+		/* (non-Javadoc)
+		 * Method declared on SelectionDispatchAction.
+		 */
+		public void selectionChanged(IStructuredSelection structuredSelection) {
+			super.selectionChanged(structuredSelection);
+			Object element= structuredSelection.getFirstElement();
+			if (element instanceof URL) {
+				setText(InfoViewMessages.OpenInBrowserAction_url_label);
+				setToolTipText(InfoViewMessages.OpenInBrowserAction_url_toolTip);
+			} else {
+				setText(ActionMessages.OpenAttachedJavadocAction_label);
+				setToolTipText(ActionMessages.OpenAttachedJavadocAction_tooltip);
+			}
+		}
+
+		/* (non-Javadoc)
+		 * Method declared on SelectionDispatchAction.
+		 */
+		public void run(IStructuredSelection selection) {
+			if (!canEnableFor(selection))
+				return;
+
+			Object element= selection.getFirstElement();
+			if (element instanceof IJavaElement)
+				super.run(selection);
+			else
+				open((URL)element);
+
+		}
+
+		/*
+		 * @see org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction#canEnableFor(org.eclipse.jface.viewers.IStructuredSelection)
+		 */
+		protected boolean canEnableFor(IStructuredSelection selection) {
+			if (selection.size() != 1)
+				return false;
+
+			Object element= selection.getFirstElement();
+			return element instanceof URL || super.canEnableFor(selection);
+		}
+
+	}
+
+
+	/**
 	 * Preference key for the preference whether to show a dialog
 	 * when the SWT Browser widget is not available.
 	 * @since 3.0
@@ -389,7 +455,7 @@ public class JavadocView extends AbstractInfoView {
 	 * 
 	 * @since 3.4
 	 */
-	private OpenAttachedJavadocAction fOpenAttachedJavadocAction;
+	private OpenInBrowserAction fOpenBrowserAction;
 
 	/**
 	 * A selection provider providing the current
@@ -671,12 +737,12 @@ public class JavadocView extends AbstractInfoView {
 		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 
 		fInputSelectionProvider= new SimpleSelectionProvider();
-		fOpenAttachedJavadocAction= new OpenAttachedJavadocAction(getSite());
-		fOpenAttachedJavadocAction.setSpecialSelectionProvider(fInputSelectionProvider);
-		fOpenAttachedJavadocAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
-		fOpenAttachedJavadocAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
-		fOpenAttachedJavadocAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
-		fInputSelectionProvider.addSelectionChangedListener(fOpenAttachedJavadocAction);
+		fOpenBrowserAction= new OpenInBrowserAction(getSite());
+		fOpenBrowserAction.setSpecialSelectionProvider(fInputSelectionProvider);
+		fOpenBrowserAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
+		fOpenBrowserAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
+		fOpenBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
+		fInputSelectionProvider.addSelectionChangedListener(fOpenBrowserAction);
 
 		IJavaElement input= getInput();
 		StructuredSelection selection;
@@ -700,7 +766,7 @@ public class JavadocView extends AbstractInfoView {
 
 		fInputSelectionProvider.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_ATTACHED_JAVA_DOC, fOpenAttachedJavadocAction);
+				actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_ATTACHED_JAVA_DOC, fOpenBrowserAction);
 			}
 		});
 
@@ -719,7 +785,7 @@ public class JavadocView extends AbstractInfoView {
 
 		tbm.add(fToggleLinkAction);
 		super.fillToolBar(tbm);
-		tbm.add(fOpenAttachedJavadocAction);
+		tbm.add(fOpenBrowserAction);
 	}
 
 	/* (non-Javadoc)
@@ -732,7 +798,7 @@ public class JavadocView extends AbstractInfoView {
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fBackAction);
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fForthAction);
 
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenAttachedJavadocAction);
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenBrowserAction);
 	}
 
 	/*
@@ -810,9 +876,9 @@ public class JavadocView extends AbstractInfoView {
 			fFontListener= null;
 		}
 
-		if (fOpenAttachedJavadocAction != null) {
-			fInputSelectionProvider.removeSelectionChangedListener(fOpenAttachedJavadocAction);
-			fOpenAttachedJavadocAction= null;
+		if (fOpenBrowserAction != null) {
+			fInputSelectionProvider.removeSelectionChangedListener(fOpenBrowserAction);
+			fOpenBrowserAction= null;
 		}
 	}
 
