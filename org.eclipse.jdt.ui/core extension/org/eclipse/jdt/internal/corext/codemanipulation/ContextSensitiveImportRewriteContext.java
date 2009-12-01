@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -45,6 +46,25 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	private Name[] fImportedNames;
 	private final ImportRewrite fImportRewrite;
 
+	/**
+	 * Creates an import rewrite context at the given node's start position.
+	 * 
+	 * @param node the node to use as context
+	 * @param importRewrite the import rewrite
+	 * 
+	 * @since 3.6
+	 */
+	public ContextSensitiveImportRewriteContext(ASTNode node, ImportRewrite importRewrite) {
+		this((CompilationUnit)node.getRoot(), node.getStartPosition(), importRewrite);
+	}
+	
+	/**
+	 * Creates an import rewrite context at the given start position.
+	 * 
+	 * @param compilationUnit the root
+	 * @param position the context position
+	 * @param importRewrite the import rewrite
+	 */
 	public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position, ImportRewrite importRewrite) {
 		fCompilationUnit= compilationUnit;
 		fPosition= position;
