@@ -13,8 +13,11 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+
+import org.osgi.service.prefs.Preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,6 +35,7 @@ import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.BundleDefaultsScope;
 
 import org.eclipse.core.resources.IProject;
 
@@ -68,7 +72,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	/**
 	 * Key for the "Compiler compliance follows EE" setting.
-	 * <br>Only applicable if <code>fProject != null</code>. 
+	 * <br>Only applicable if <code>fProject != null</code>.
 	 * <p>Values are { {@link #DEFAULT_CONF}, {@link #USER_CONF}, or {@link #DISABLED} }.
 	 */
 	private static final Key INTR_COMPLIANCE_FOLLOWS_EE= getLocalKey("internal.compliance.follows.ee"); //$NON-NLS-1$
@@ -109,6 +113,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_1= JavaCore.VERSION_1_1;
 	private static final String VERSION_1_2= JavaCore.VERSION_1_2;
 	private static final String VERSION_1_3= JavaCore.VERSION_1_3;
+
 	private static final String VERSION_1_4= JavaCore.VERSION_1_4;
 	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
 	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
@@ -540,7 +545,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				updateComplianceEnableState();
 				validateComplianceStatus();
 			}
-		}			
+		}
 	}
 
 	private void validateComplianceStatus() {
@@ -914,13 +919,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	/**
-	 * Sets the default compiler compliance options based on the current default JRE in the workspace.
-	 *  
+	 * Sets the default compiler compliance options based on the current default JRE in the
+	 * workspace.
+	 * 
 	 * @since 3.5
 	 */
 	private void setDefaultCompilerComplianceValues() {
 		IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
-		if (defaultVMInstall instanceof IVMInstall2) {
+		if (defaultVMInstall instanceof IVMInstall2 && isOriginalDefaultCompliance()) {
 			String complianceLevel= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVMInstall, JavaCore.VERSION_1_4);
 			Map complianceOptions= new HashMap();
 			JavaModelUtil.setComplianceOptions(complianceOptions, complianceLevel);
@@ -930,6 +936,52 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			setDefaultValue(PREF_SOURCE_COMPATIBILITY, (String)complianceOptions.get(PREF_SOURCE_COMPATIBILITY.getName()));
 			setDefaultValue(PREF_CODEGEN_TARGET_PLATFORM, (String)complianceOptions.get(PREF_CODEGEN_TARGET_PLATFORM.getName()));
 		}
+	}
+
+	/**
+	 * Tells whether the compliance option is the same as the original default.
+	 * 
+	 * @return <code>true</code> if the compliance is the same as the original default
+	 * @since 3.6
+	 */
+	private static final boolean isOriginalDefaultCompliance() {
+		Hashtable options= JavaCore.getDefaultOptions();
+		Preferences bundleDefaults= new BundleDefaultsScope().getNode(JavaCore.PLUGIN_ID);
+
+		return equals(JavaCore.COMPILER_COMPLIANCE, bundleDefaults, options)
+				&& equals(JavaCore.COMPILER_SOURCE, bundleDefaults, options)
+				&& equals(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, bundleDefaults, options)
+				&& equals(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, bundleDefaults, options)
+				&& equals(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, bundleDefaults, options);
+	}
+
+	/**
+	 * Returns whether the option for the given key is the same in the map and the preferences.
+	 * 
+	 * @param key the key of option to test
+	 * @param preferences the preferences
+	 * @param map the map
+	 * @return <code>true</code> if the options are the same in both maps
+	 * @since 3.6
+	 */
+	private static boolean equals(String key, Preferences preferences, Map map) {
+		String dummy= new String();
+		String defaultValue= preferences.get(key, dummy);
+		return defaultValue != null && defaultValue != dummy
+				? map.containsKey(key) && equals(defaultValue, map.get(key))
+				: !map.containsKey(key);
+	}
+
+	/**
+	 * Returns whether the objects are equal.
+	 * 
+	 * @param o1 an object
+	 * @param o2 an object
+	 * @return <code>true</code> if the two objects are equal
+	 * @since 3.6
+	 */
+	private static boolean equals(Object o1, Object o2) {
+		return o1 == null ? o2 == null : o1.equals(o2);
 	}
 
 }
