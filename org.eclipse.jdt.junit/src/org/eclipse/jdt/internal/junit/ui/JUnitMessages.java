@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
+ *     Robert Konigsberg <konigsberg@google.com> - [JUnit] Improve discoverability of the ability to run a single method under JUnit Tests - https://bugs.eclipse.org/bugs/show_bug.cgi?id=285637
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -104,6 +105,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationTab_error_test_class_not_found;
 
+	public static String JUnitLaunchConfigurationTab_error_test_method_not_found;
+
 	public static String JUnitLaunchConfigurationTab_error_testannotationnotonpath;
 
 	public static String JUnitLaunchConfigurationTab_error_testcasenotonpath;
@@ -127,6 +130,15 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitLaunchConfigurationTab_label_project;
 
 	public static String JUnitLaunchConfigurationTab_label_search;
+
+	public static String JUnitLaunchConfigurationTab_label_search_method;
+
+	public static String JUnitLaunchConfigurationTab_method_text_decoration;
+
+	public static String JUnitLaunchConfigurationTab_select_method_header;
+	public static String JUnitLaunchConfigurationTab_select_method_title;
+
+	public static String JUnitLaunchConfigurationTab_all_methods_text;
 
 	public static String JUnitLaunchConfigurationTab_label_test;
 

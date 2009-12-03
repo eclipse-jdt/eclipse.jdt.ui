@@ -9,12 +9,15 @@
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids: sdavids@gmx.de bug: 26293, 27889
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
+ *     Robert Konigsberg <konigsberg@google.com> - [JUnit] Improve discoverability of the ability to run a single method under JUnit Tests - https://bugs.eclipse.org/bugs/show_bug.cgi?id=285637
  *******************************************************************************/
 package org.eclipse.jdt.junit.launcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -69,15 +72,19 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -136,6 +143,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private final Image fTestIcon= createImage("obj16/test.gif"); //$NON-NLS-1$
 	private String fOriginalTestMethodName;
 	private Label fTestMethodLabel;
+	private Text fTestMethodText;
+	private Button fTestMethodSearchButton;
 	private Text fContainerText;
 	private IJavaElement fContainerElement;
 	private final ILabelProvider fJavaElementLabelProvider= new JavaElementLabelProvider();
@@ -149,6 +158,11 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 	private ILaunchConfiguration fLaunchConfiguration;
 
+	private boolean fIsValid= true;
+	
+	private Set/*<String>*/ fMethodsCache;
+	private String fMethodsCacheKey;
+	
 	/**
 	 * Creates a JUnit launch configuration tab.
 	 */
@@ -168,12 +182,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		comp.setLayout(topLayout);
 
 		createSingleTestSection(comp);
+		createSpacer(comp);
+		
 		createTestContainerSelectionGroup(comp);
-
 		createSpacer(comp);
 
 		createTestLoaderGroup(comp);
-
 		createSpacer(comp);
 
 		createKeepAliveGroup(comp);
@@ -264,6 +278,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fTestText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
+				fTestMethodSearchButton.setEnabled(fTestText.getText().length() > 0);
 				validatePage();
 				updateLaunchConfigurationDialog();
 			}
@@ -279,14 +294,35 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		});
 		setButtonGridData(fSearchButton);
 
-		new Label(comp, SWT.NONE);
-
-		fTestMethodLabel= new Label(comp, SWT.NONE);
-		fTestMethodLabel.setText("");  //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalSpan = 2;
+		fTestMethodLabel = new Label(comp, SWT.NONE);
+		gd = new GridData();
+		gd.horizontalIndent = 25;
 		fTestMethodLabel.setLayoutData(gd);
+		fTestMethodLabel.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_method);
 
+		
+		fTestMethodText= new Text(comp, SWT.SINGLE | SWT.BORDER);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		fTestMethodText.setLayoutData(gd);
+
+		fTestMethodText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent evt) {
+				validatePage();
+				updateLaunchConfigurationDialog();
+			}
+		});
+
+
+		fTestMethodSearchButton = new Button(comp, SWT.PUSH);
+		fTestMethodSearchButton.setEnabled(fTestText.getText().length() > 0);
+		fTestMethodSearchButton.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_search_method);
+		fTestMethodSearchButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent evt) {
+				handleTestMethodSearchButtonSelected();
+			}
+		});
+
+		setButtonGridData(fTestMethodSearchButton);
 	}
 
 	private void createTestContainerSelectionGroup(Composite comp) {
@@ -428,9 +464,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestContainerRadioButton.setSelection(false);
 		fTestText.setText(testTypeName);
 		fContainerText.setText(""); //$NON-NLS-1$
-		String methodLabelText= "".equals(fOriginalTestMethodName) ? "" : //$NON-NLS-1$//$NON-NLS-2$
-				Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_label_method, fOriginalTestMethodName);
-		fTestMethodLabel.setText(methodLabelText);
+		fTestMethodText.setText(fOriginalTestMethodName);
 	}
 
 	private void updateTestContainerFromConfig(ILaunchConfiguration config) {
@@ -469,7 +503,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, fTestText.getText());
 			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
-			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, fOriginalTestMethodName);
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, fTestMethodText.getText());
 		}
 		config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
 		try {
@@ -600,6 +634,104 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fProjText.setText(projectName);
 	}
 
+	private void handleTestMethodSearchButtonSelected() {
+		try {
+			IJavaProject javaProject = getJavaProject();
+			IType testType= javaProject.findType(fTestText.getText());
+			Set methodNames= getMethodsForType(javaProject, testType, getSelectedTestKind());
+			String methodName= chooseMethodName(methodNames);
+			
+			if (methodName != null) {
+				fTestMethodText.setText(methodName);
+				validatePage();
+				updateLaunchConfigurationDialog();
+			}
+		} catch (JavaModelException e) {
+			JUnitPlugin.log(e.getStatus());
+		}
+	}
+
+	private Set getMethodsForType(IJavaProject javaProject, IType type, TestKind testKind) throws JavaModelException {
+		if (javaProject == null || type == null || testKind == null)
+			return Collections.EMPTY_SET;
+		
+		String methodsCacheKey= javaProject.getElementName() + '\n' + type.getFullyQualifiedName() + '\n' + testKind.getId();
+		if (methodsCacheKey.equals(fMethodsCacheKey))
+			return fMethodsCache;
+		
+		Set methodNames= new HashSet();
+		fMethodsCache= methodNames;
+		fMethodsCacheKey= methodsCacheKey;
+
+		boolean isJUnit4= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
+
+		while (type != null) {
+			IMethod[] methods= type.getMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethod method= methods[i];
+				int flags= method.getFlags();
+				// Only include public, non-static, no-arg methods that return void and start with "test":
+				if (Modifier.isPublic(flags) && !Modifier.isStatic(flags) &&
+						method.getNumberOfParameters() == 0 && Signature.SIG_VOID.equals(method.getReturnType()) &&
+						method.getElementName().startsWith("test")) { //$NON-NLS-1$
+					methodNames.add(method.getElementName());
+				}
+				if (isJUnit4) {
+					IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
+					if (annotation.exists()) {
+						methodNames.add(method.getElementName());
+					}
+				}
+			}
+			String superclassName= type.getSuperclassName();
+			if (superclassName != null) {
+				int pos= superclassName.indexOf('<');
+				if (pos != -1) 
+					superclassName= superclassName.substring(0, pos);
+				String[][] resolvedSupertype= type.resolveType(superclassName);
+				if (resolvedSupertype != null && resolvedSupertype.length > 0) {
+					String[] superclass= resolvedSupertype[0];
+					type= javaProject.findType(superclass[0], superclass[1]);
+				} else {
+					type= null;
+				}
+			} else {
+				type= null;
+			}
+		}
+		return methodNames;
+	}
+
+	private String chooseMethodName(Set methodNames) {
+		Shell shell= getShell();
+
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new LabelProvider());
+		dialog.setMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_select_method_header, fTestText.getText()));
+		dialog.setTitle(JUnitMessages.JUnitLaunchConfigurationTab_select_method_title);
+
+		int methodCount= methodNames.size();
+		String[] elements= new String[methodCount + 1];
+		methodNames.toArray(elements);
+		elements[methodCount]= JUnitMessages.JUnitLaunchConfigurationTab_all_methods_text;
+
+		dialog.setElements(elements);
+
+		String methodName= fTestMethodText.getText();
+
+		if (methodNames.contains(methodName)) {
+			dialog.setInitialSelections(new String[] { methodName });
+		}
+
+		dialog.setAllowDuplicates(false);
+		dialog.setMultipleSelection(false);
+		if (dialog.open() == Window.OK) {
+			String result= (String)dialog.getFirstResult();
+			return (result == null || result.equals(JUnitMessages.JUnitLaunchConfigurationTab_all_methods_text))
+					? "" : result; //$NON-NLS-1$
+		}
+		return null;
+	}
+	
 	/*
 	 * Realize a Java Project selection dialog and return the first selected project,
 	 * or null if there was none.
@@ -661,7 +793,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	 */
 	public boolean isValid(ILaunchConfiguration config) {
 		validatePage();
-		return getErrorMessage() == null;
+		return fIsValid;
 	}
 
 	private void testModeChanged() {
@@ -678,6 +810,15 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		}
 		validatePage();
 		updateLaunchConfigurationDialog();
+	}
+	
+	/*
+	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#setErrorMessage(java.lang.String)
+	 * @since 3.6
+	 */
+	protected void setErrorMessage(String errorMessage) {
+		fIsValid= errorMessage == null;
+		super.setErrorMessage(errorMessage);
 	}
 
 	private void validatePage() {
@@ -724,9 +865,18 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testnotdefined);
 				return;
 			}
-			if (javaProject.findType(className) == null) {
+			IType type= javaProject.findType(className);
+			if (type == null) {
 				setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_class_not_found, new String[] { className, projectName }));
 				return;
+			}
+			String methodName = fTestMethodText.getText();
+			if (methodName.length() > 0) {
+				Set methodsForType= getMethodsForType(javaProject, type, getSelectedTestKind());
+				if (!methodsForType.contains(methodName)) {
+					super.setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
+					return;
+				}
 			}
 
 
@@ -785,8 +935,11 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fProjButton.setEnabled(enabled);
 		fTestLabel.setEnabled(enabled);
 		fTestText.setEnabled(enabled);
-		fSearchButton.setEnabled(enabled && fProjText.getText().length() > 0);
+		boolean projectTextHasContents= fProjText.getText().length() > 0;
+		fSearchButton.setEnabled(enabled && projectTextHasContents);
 		fTestMethodLabel.setEnabled(enabled);
+		fTestMethodText.setEnabled(enabled);
+		fTestMethodSearchButton.setEnabled(enabled && projectTextHasContents &&  fTestText.getText().length() > 0);
 	}
 
 	/* (non-Javadoc)
