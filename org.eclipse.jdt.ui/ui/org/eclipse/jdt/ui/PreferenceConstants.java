@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
@@ -44,6 +45,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer;
 import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyContentProvider;
+import org.eclipse.jdt.internal.ui.callhierarchy.ExpandWithConstructorsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
@@ -3233,6 +3235,29 @@ public class PreferenceConstants {
 	 */
 	public static final String EDITOR_FOLDING_HEADERS= "editor_folding_default_headers"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that holds the methods or types whose methods are by default expanded with
+	 * constructors in the Call Hierarchy.
+	 * <p>
+	 * Value is of type <code>String</code>: semicolon separated list of fully qualified type names
+	 * appended with ".*" or "." + method name.
+	 * </p>
+	 * 
+	 * @since 3.6
+	 */
+	public static final String PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS= "CallHierarchy.defaultExpandWithConstructorsMembers"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether methods from anonymous types are by default expanded
+	 * with constructors in the Call Hierarchy.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.6
+	 */
+	public static final String PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.anonymousExpandWithConstructors"; //$NON-NLS-1$
+
 
 	//---------- Properties File Editor ----------
 
@@ -3875,9 +3900,19 @@ public class PreferenceConstants {
 
 		// Colors that are set by the current theme
 		JavaUIPreferenceInitializer.setThemeBasedPreferences(store, false);
-		
-		store.setDefault(CallHierarchyContentProvider.PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS, true);
-		store.setDefault(CallHierarchyContentProvider.PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS, "java.lang.Runnable;java.util.concurrent.Callable;org.eclipse.swt.widgets.Listener"); //$NON-NLS-1$
+
+		store.setDefault(PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS, true);
+		store.setDefault(PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS, "java.lang.Runnable.run;java.util.concurrent.Callable.call;org.eclipse.swt.widgets.Listener.handleEvent"); //$NON-NLS-1$
+		// compatibility code
+		String str= store.getString(CallHierarchyContentProvider.OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS);
+		if (str.length() > 0) {
+			String[] oldPrefStr= str.split(";"); //$NON-NLS-1$
+			for (int i= 0; i < oldPrefStr.length; i++) {
+				oldPrefStr[i]= oldPrefStr[i] + (".*"); //$NON-NLS-1$				
+			}
+			store.setValue(PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS, ExpandWithConstructorsConfigurationBlock.serializeMembers(Arrays.asList(oldPrefStr)));
+			store.setToDefault(CallHierarchyContentProvider.OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS);
+		}
 	}
 
 	/**

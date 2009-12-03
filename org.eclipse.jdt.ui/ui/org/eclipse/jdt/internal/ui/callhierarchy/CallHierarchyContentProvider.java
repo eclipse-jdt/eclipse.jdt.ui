@@ -49,22 +49,13 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 * constructors in the Call Hierarchy.
 	 * <p>
 	 * Value is of type <code>String</code>: semicolon separated list of fully qualified type names.
+	 * <strong> It has been replaced in 3.6 by API:
+	 * {@link PreferenceConstants#PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS}</strong>
 	 * </p>
 	 * 
 	 * @since 3.5
 	 */
-	public static final String PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.defaultExpandWithConstructors"; //$NON-NLS-1$
-
-	/**
-	 * A named preference that controls whether methods from anonymous types are by default expanded
-	 * with constructors in the Call Hierarchy.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * 
-	 * @since 3.5
-	 */
-	public static final String PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.anonymousExpandWithConstructors"; //$NON-NLS-1$
+	public static final String OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.defaultExpandWithConstructors"; //$NON-NLS-1$
 
 	private final static Object[] EMPTY_ARRAY= new Object[0];
 
@@ -175,14 +166,15 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
 		if (!wrapper.isExpandWithConstructorsSet()) {
 			if (CallHierarchyContentProvider.canExpandWithConstructors(wrapper)) {
-				IType type= wrapper.getMember().getDeclaringType();
+				IMethod method= (IMethod)wrapper.getMember();
+				IType type= method.getDeclaringType();
 				try {
 					boolean withConstructors= false;
 					if (type != null) {
-						boolean anonymousPref= PreferenceConstants.getPreferenceStore().getBoolean(PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS);
+						boolean anonymousPref= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS);
 						if (anonymousPref && type.isAnonymous()) {
 							withConstructors= true;
-						} else if (isInTheDefaultExpandWithConstructorList(type)) {
+						} else if (isInTheDefaultExpandWithConstructorList(method)) {
 							withConstructors= true;
 						}
 					}
@@ -217,42 +209,84 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	}
 	
 	/**
-	 * Checks if declaring type matches the pre-defined array of types for default expand with
-	 * constructors.
+	 * Checks if the method or its declaring type matches the pre-defined array of methods and types
+	 * for default expand with constructors.
 	 * 
-	 * @param type the declaring type of the caller method wrapper
-	 * @return <code>true</code> if type matches the pre-defined list, <code>false</code> otherwise
+	 * @param method the wrapped method
+	 * @return <code>true</code> if method or type matches the pre-defined list, <code>false</code>
+	 *         otherwise
+	 * 
 	 * @since 3.5
 	 */
-	static boolean isInTheDefaultExpandWithConstructorList(IType type) {
-		String serializedTypes= PreferenceConstants.getPreferenceStore().getString(PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS);
-		if (serializedTypes.length() == 0)
+	static boolean isInTheDefaultExpandWithConstructorList(IMethod method) {
+		String serializedMembers= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS);
+		if (serializedMembers.length() == 0)
 			return false;
 		
-		String[] defaultTypes= serializedTypes.split(";"); //$NON-NLS-1$
+		String[] defaultMemberPatterns= serializedMembers.split(";"); //$NON-NLS-1$
 		
-		String typeName= type.getFullyQualifiedName('.');
-		String superClass;
-		String[] superInterfaces;
+		String methodName= method.getElementName();
+		IType declaringType= method.getDeclaringType();
+		String declaringTypeName= declaringType.getFullyQualifiedName('.');
+		String superClassName;
+		String[] superInterfaceNames;
 		try {
-			superClass= type.getSuperclassName();
-			superInterfaces= type.getSuperInterfaceNames();
+			superClassName= declaringType.getSuperclassName();
+			if (superClassName != null) {
+				superClassName= stripTypeArguments(superClassName);
+			}
+			superInterfaceNames= declaringType.getSuperInterfaceNames();
+			for (int i= 0; i < superInterfaceNames.length; i++) {
+				superInterfaceNames[i]= stripTypeArguments(superInterfaceNames[i]);
+			}
 		} catch (JavaModelException e) {
 			return false;
 		}
-		for (int i= 0; i < defaultTypes.length; i++) {
-			String defaultType= defaultTypes[i];
-			if (typeName.equals(defaultType) || (superClass != null && typeNameMatches(superClass, defaultType))) {
+		
+		for (int i= 0; i < defaultMemberPatterns.length; i++) {
+			String defaultMemberPattern= defaultMemberPatterns[i];
+			int pos= defaultMemberPattern.lastIndexOf('.');
+			String defaultTypeName= defaultMemberPattern.substring(0, pos);
+			String defaultMethodName= defaultMemberPattern.substring(pos + 1);
+			
+			if ("*".equals(defaultMethodName)) { //$NON-NLS-1$
+				if (declaringTypeName.equals(defaultTypeName)) {
+					return true;
+				}
+			} else {
+				if (!methodName.equals(defaultMethodName)) {
+					continue;
+				}
+				if (declaringTypeName.equals(defaultTypeName)) {
+					return true;
+				}
+			}
+			if (superClassName != null && typeNameMatches(superClassName, defaultTypeName)) {
 				return true;
 			}
-			if (superInterfaces.length > 0) {
-				for (int j= 0; j < superInterfaces.length; j++) {
-					if (typeNameMatches(superInterfaces[j], defaultType))
-						return true;
+			for (int j= 0; j < superInterfaceNames.length; j++) {
+				String superInterfaceName= superInterfaceNames[j];
+				if (typeNameMatches(superInterfaceName, defaultTypeName)) {
+					return true;
 				}
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Strips type arguments from the given type name and returns only erased type name.
+	 * 
+	 * @param typeName the type name
+	 * @return the erased type name
+	 * 
+	 * @since 3.6
+	 */
+	private static String stripTypeArguments(String typeName) {
+		int pos= typeName.indexOf('<');
+		if (pos != -1)
+			return typeName.substring(0, pos);
+		return typeName;
 	}
 
 	/**

@@ -88,6 +88,25 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyViewPart_callsFromMembers_3;
 	public static String CallHierarchyViewPart_callsFromMembers_more;
 	public static String CallHierarchyViewPart_callsFromMethod;
+	public static String ExpandWithConstructorsConfigurationBlock_description;
+	public static String ExpandWithConstructorsConfigurationBlock_newType_button;
+	public static String ExpandWithConstructorsConfigurationBlock_newMember_button;
+	public static String ExpandWithConstructorsConfigurationBlock_edit_button;
+	public static String ExpandWithConstructorsConfigurationBlock_remove_button;
+	public static String ExpandWithConstructorsConfigurationBlock_restoreDefaults_button;
+	public static String CallHierarchyTypesOrMembersDialog_member_title;
+	public static String CallHierarchyTypesOrMembersDialog_member_labelText;
+	public static String CallHierarchyTypesOrMembersDialog_type_title;
+	public static String CallHierarchyTypesOrMembersDialog_type_labelText;
+	public static String CallHierarchyTypesOrMembersDialog_browse_button;
+	public static String CallHierarchyTypesOrMembersDialog_ChooseTypeDialog_title;
+	public static String CallHierarchyTypesOrMembersDialog_ChooseTypeDialog_description;
+	public static String CallHierarchyTypesOrMembersDialog_ChooseTypeDialog_error_message;
+	public static String CallHierarchyTypesOrMembersDialog_error_enterName;
+	public static String CallHierarchyTypesOrMembersDialog_error_invalidMemberName;
+	public static String CallHierarchyTypesOrMembersDialog_error_invalidTypeName;
+	public static String CallHierarchyTypesOrMembersDialog_error_entryExists;
+	public static String CallHierarchyTypesOrMembersDialog_anonymousTypes_label;
 	public static String FocusOnSelectionAction_focusOnSelection_text;
 	public static String FocusOnSelectionAction_focusOnSelection_description;
 	public static String FocusOnSelectionAction_focusOnSelection_tooltip;
@@ -140,11 +159,7 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ExpandWithConstructorsAction_expandWithConstructors_text;
 	public static String ExpandWithConstructorsAction_expandWithConstructors_description;
 	public static String ExpandWithConstructorsAction_expandWithConstructors_tooltip;
-	public static String ExpandWithConstructorsDialog_anonymousTypes_label;
-	public static String ExpandWithConstructorsDialog_explanation_label;
-	public static String ExpandWithConstructorsDialog_not_a_valid_type_name;
 	public static String ExpandWithConstructorsDialog_title;
-	public static String ExpandWithConstructorsDialog_typeNames_label;
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CallHierarchyMessages.class);
 	}
