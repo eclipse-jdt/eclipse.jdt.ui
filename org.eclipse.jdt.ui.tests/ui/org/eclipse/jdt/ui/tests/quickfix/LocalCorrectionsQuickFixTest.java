@@ -1357,6 +1357,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends A {\n");
+		buf.append("    /**\n");
+		buf.append("     * @throws Exception sometimes...\n");
+		buf.append("     */\n");
 		buf.append("    public E() {\n");
 		buf.append("        super();\n");
 		buf.append("    }\n");
@@ -1375,6 +1378,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends A {\n");
+		buf.append("    /**\n");
+		buf.append("     * @throws Exception sometimes...\n");
+		buf.append("     */\n");
 		buf.append("    public E() throws Exception {\n");
 		buf.append("        super();\n");
 		buf.append("    }\n");
