@@ -311,6 +311,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				updateLaunchConfigurationDialog();
 			}
 		});
+		fTestMethodText.setMessage(JUnitMessages.JUnitLaunchConfigurationTab_all_methods_text);
 
 
 		fTestMethodSearchButton = new Button(comp, SWT.PUSH);
