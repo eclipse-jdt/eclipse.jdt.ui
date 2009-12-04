@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -88,6 +90,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
 
 /**
@@ -362,16 +365,22 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			GridLayout layout= new GridLayout(3, false);
 			layout.verticalSpacing= 2;
 			composite.setLayout(layout);
-
-			final Link[] links= new Link[proposals.length];
+			
+			List list= new ArrayList();
 			for (int i= 0; i < proposals.length; i++) {
-				Label indent= new Label(composite, SWT.NONE);
-				GridData gridData1= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-				gridData1.widthHint= 0;
-				indent.setLayoutData(gridData1);
+				createIndent(composite);
+				list.add(createCompletionProposalLink(composite, proposals[i], 1));// Original link for single fix, hence pass 1 for count
 
-				links[i]= createCompletionProposalLink(composite, proposals[i]);
+				if (proposals[i] instanceof FixCorrectionProposal) {
+					FixCorrectionProposal proposal= (FixCorrectionProposal)proposals[i];
+					int count= proposal.computeNumberofFixesForCleanUp(proposal.getCleanUp());
+					if (count > 1) {
+						createIndent(composite);
+						list.add(createCompletionProposalLink(composite, proposals[i], count));
+					}
+				}
 			}
+			final Link[] links= (Link[])list.toArray(new Link[list.size()]);
 
 			scrolledComposite.setContent(composite);
 			setColorAndFont(scrolledComposite, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
@@ -441,10 +450,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 		}
 
-		private Link createCompletionProposalLink(Composite parent, final ICompletionProposal proposal) {
+		private Link createCompletionProposalLink(Composite parent, final ICompletionProposal proposal, int count) {
+			final boolean isMultiFix= count > 1;
 			Label proposalImage= new Label(parent, SWT.NONE);
 			proposalImage.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-			Image image= proposal.getImage();
+			Image image= isMultiFix ? null : proposal.getImage();
 			if (image != null) {
 				proposalImage.setImage(image);
 
@@ -458,7 +468,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 					public void mouseUp(MouseEvent e) {
 						if (e.button == 1) {
-							apply(proposal, fInput.viewer, fInput.position.offset);
+							apply(proposal, fInput.viewer, fInput.position.offset, isMultiFix);
 						}
 					}
 
@@ -466,21 +476,27 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 
 			Link proposalLink= new Link(parent, SWT.WRAP);
-			proposalLink.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-			proposalLink.setText("<a>" + proposal.getDisplayString() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+			if (isMultiFix) {
+				String multiFixString= Messages.format(JavaHoverMessages.AbstractAnnotationHover_multifix_variable_description, new Integer(count));
+				layoutData.horizontalIndent= 10;
+				proposalLink.setText("<a>" + multiFixString + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				proposalLink.setText("<a>" + proposal.getDisplayString() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			proposalLink.setLayoutData(layoutData);
 			proposalLink.addSelectionListener(new SelectionAdapter() {
 				/*
 				 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 				 */
 				public void widgetSelected(SelectionEvent e) {
-					apply(proposal, fInput.viewer, fInput.position.offset);
+					apply(proposal, fInput.viewer, fInput.position.offset, isMultiFix);
 				}
 			});
-
 			return proposalLink;
 		}
 
-		private void apply(ICompletionProposal p, ITextViewer viewer, int offset) {
+		private void apply(ICompletionProposal p, ITextViewer viewer, int offset, boolean isMultiFix) {
 			//Focus needs to be in the text viewer, otherwise linked mode does not work
 			dispose();
 
@@ -498,7 +514,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 				if (p instanceof ICompletionProposalExtension2) {
 					ICompletionProposalExtension2 e= (ICompletionProposalExtension2) p;
-					e.apply(viewer, (char) 0, SWT.NONE, offset);
+					if (isMultiFix) {
+						e.apply(viewer, (char)0, SWT.CONTROL, offset);
+					} else {
+						e.apply(viewer, (char)0, SWT.NONE, offset);
+					}
 				} else if (p instanceof ICompletionProposalExtension) {
 					ICompletionProposalExtension e= (ICompletionProposalExtension) p;
 					e.apply(document, (char) 0, offset);
@@ -780,5 +800,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		if (annotation.isMarkedDeleted())
 			return null;
 		return EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
+	}
+
+	/**
+	 * Creates an indent for the control.
+	 * 
+	 * @param composite the parent control
+	 * @since 3.6
+	 */
+	private static void createIndent(Composite composite) {
+		Label indent= new Label(composite, SWT.NONE);
+		GridData gridData1= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+		gridData1.widthHint= 0;
+		indent.setLayoutData(gridData1);
 	}
 }
