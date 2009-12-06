@@ -87,6 +87,8 @@ import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
@@ -362,20 +364,19 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 			Composite composite= new Composite(scrolledComposite, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			GridLayout layout= new GridLayout(3, false);
+			GridLayout layout= new GridLayout(2, false);
+			layout.marginLeft= 5;
 			layout.verticalSpacing= 2;
 			composite.setLayout(layout);
 			
 			List list= new ArrayList();
 			for (int i= 0; i < proposals.length; i++) {
-				createIndent(composite);
 				list.add(createCompletionProposalLink(composite, proposals[i], 1));// Original link for single fix, hence pass 1 for count
 
 				if (proposals[i] instanceof FixCorrectionProposal) {
 					FixCorrectionProposal proposal= (FixCorrectionProposal)proposals[i];
 					int count= proposal.computeNumberofFixesForCleanUp(proposal.getCleanUp());
 					if (count > 1) {
-						createIndent(composite);
 						list.add(createCompletionProposalLink(composite, proposals[i], count));
 					}
 				}
@@ -452,9 +453,26 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 		private Link createCompletionProposalLink(Composite parent, final ICompletionProposal proposal, int count) {
 			final boolean isMultiFix= count > 1;
+			if (isMultiFix) {
+				new Label(parent, SWT.NONE); // spacer to fill image cell
+				parent= new Composite(parent, SWT.NONE); // indented composite for multi-fix
+				GridLayout layout= new GridLayout(2, false);
+				layout.marginWidth= 0;
+				layout.marginHeight= 0;
+				parent.setLayout(layout);
+			}
+			
 			Label proposalImage= new Label(parent, SWT.NONE);
 			proposalImage.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-			Image image= isMultiFix ? null : proposal.getImage();
+			Image image= isMultiFix ? JavaUI.getSharedImages().getImage(JavaPluginImages.IMG_OBJS_QUICK_FIX) : proposal.getImage();
+//			Image image= isMultiFix ? JavaUI.getSharedImages().getImage(JavaPluginImages.IMG_CORRECTION_CHANGE) : proposal.getImage();
+//			Image image= isMultiFix ? JavaUI.getSharedImages().getImage(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE) : proposal.getImage();
+//			Image image= isMultiFix ? null : proposal.getImage();
+			
+//Warning: Only for testing, cannot be release like this!
+//			ImageDescriptor cueID= ImageDescriptor.createFromFile(AbstractControlContentAssistSubjectAdapter.class, "images/content_assist_cue.gif"); //$NON-NLS-1$
+//			Image image= isMultiFix ? image= cueID.createImage(parent.getDisplay()) : proposal.getImage();
+
 			if (image != null) {
 				proposalImage.setImage(image);
 
@@ -477,13 +495,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 			Link proposalLink= new Link(parent, SWT.WRAP);
 			GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+			String linkText;
 			if (isMultiFix) {
-				String multiFixString= Messages.format(JavaHoverMessages.AbstractAnnotationHover_multifix_variable_description, new Integer(count));
-				layoutData.horizontalIndent= 10;
-				proposalLink.setText("<a>" + multiFixString + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+				linkText= Messages.format(JavaHoverMessages.AbstractAnnotationHover_multifix_variable_description, new Integer(count));
 			} else {
-				proposalLink.setText("<a>" + proposal.getDisplayString() + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+				linkText= proposal.getDisplayString();
 			}
+			proposalLink.setText("<a>" + linkText + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			proposalLink.setLayoutData(layoutData);
 			proposalLink.addSelectionListener(new SelectionAdapter() {
 				/*
@@ -514,11 +532,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 				if (p instanceof ICompletionProposalExtension2) {
 					ICompletionProposalExtension2 e= (ICompletionProposalExtension2) p;
-					if (isMultiFix) {
-						e.apply(viewer, (char)0, SWT.CONTROL, offset);
-					} else {
-						e.apply(viewer, (char)0, SWT.NONE, offset);
-					}
+					e.apply(viewer, (char) 0, isMultiFix ? SWT.CONTROL : SWT.NONE, offset);
 				} else if (p instanceof ICompletionProposalExtension) {
 					ICompletionProposalExtension e= (ICompletionProposalExtension) p;
 					e.apply(document, (char) 0, offset);
@@ -800,18 +814,5 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		if (annotation.isMarkedDeleted())
 			return null;
 		return EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
-	}
-
-	/**
-	 * Creates an indent for the control.
-	 * 
-	 * @param composite the parent control
-	 * @since 3.6
-	 */
-	private static void createIndent(Composite composite) {
-		Label indent= new Label(composite, SWT.NONE);
-		GridData gridData1= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-		gridData1.widthHint= 0;
-		indent.setLayoutData(gridData1);
 	}
 }
