@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -103,6 +103,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -199,7 +200,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	/**
 	 * Creates a new change signature refactoring.
 	 * @param method the method, or <code>null</code> if invoked by scripting framework
-	 * @throws JavaModelException
+	 * @throws JavaModelException if something's wrong with the given method
 	 */
 	public ChangeSignatureProcessor(IMethod method) throws JavaModelException {
 		fMethod= method;
@@ -428,9 +429,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	/**
 	 * @return true if the new method cannot coexist with the old method since
 	 *         the signatures are too much alike
-	 * @throws JavaModelException
 	 */
-	public boolean isSignatureClashWithInitial() throws JavaModelException {
+	public boolean isSignatureClashWithInitial() {
 
 		if (!isMethodNameSameAsInitial())
 			return false; // name has changed.
@@ -779,8 +779,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					ITypeBinding typeBinding= name.resolveTypeBinding();
 					if (typeBinding == null)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_no_exception_binding);
-					IType type= (IType) typeBinding.getJavaElement();
-					result.add(ExceptionInfo.createInfoForOldException(type, typeBinding));
+					IJavaElement element= typeBinding.getJavaElement();
+					result.add(ExceptionInfo.createInfoForOldException(element, typeBinding));
 				}
 				fExceptionInfos= result;
 			} catch (JavaModelException e) {
@@ -932,7 +932,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
 			if (! info.isDeleted()) {
-				buff.append(info.getType().getElementName());
+				buff.append(info.getElement().getElementName());
 				buff.append(", "); //$NON-NLS-1$
 			}
 		}
@@ -948,7 +948,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
 			if (! info.isAdded()) {
-				buff.append(info.getType().getElementName());
+				buff.append(info.getElement().getElementName());
 				buff.append(", "); //$NON-NLS-1$
 			}
 		}
@@ -1220,7 +1220,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			ExceptionInfo ei= (ExceptionInfo) exceptionInfos.get(i);
 			if (!ei.isDeleted()) {
 				int oldIndex= ei.isAdded() ? -1 : i;
-				String qualifiedTypeName= ei.getType().getFullyQualifiedName('.');
+				String qualifiedTypeName= ei.getFullyQualifiedName();
 				String newTypeSig= Signature.createTypeSignature(qualifiedTypeName, true);
 				exceptionList.add(new ThrownException(oldIndex, newTypeSig));
 			}
@@ -1251,7 +1251,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			final String description= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fMethod.getElementName()));
 			final String header= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()});
 			final JDTRefactoringDescriptorComment comment= createComment(project, header);
-			descriptor= new ChangeMethodSignatureDescriptor(project, description, comment.asString(), arguments, getDescriptorFlags());
+			descriptor= RefactoringSignatureDescriptorFactory.createChangeMethodSignatureDescriptor(project, description, comment.asString(), arguments, getDescriptorFlags());
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project,fMethod));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
 			arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
@@ -1300,7 +1300,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			count= 1;
 			for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
 				final ExceptionInfo info= (ExceptionInfo) iterator.next();
-				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count, JavaRefactoringDescriptorUtil.elementToHandle(project,info.getType()));
+				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count, JavaRefactoringDescriptorUtil.elementToHandle(project,info.getElement()));
 				arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
 				count++;
 			}
@@ -1361,9 +1361,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
 			final ExceptionInfo info= (ExceptionInfo) iterator.next();
 			if (info.isAdded())
-				added.add(info.getType().getElementName());
+				added.add(info.getElement().getElementName());
 			else if (info.isDeleted())
-				deleted.add(info.getType().getElementName());
+				deleted.add(info.getElement().getElementName());
 		}
 		if (!added.isEmpty())
 			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_exceptions, (String[]) added.toArray(new String[added.size()])));
@@ -1827,7 +1827,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		/**
-		 * @param info
+		 * @param info TODO
 		 * @param parameterInfos TODO
 		 * @param nodes TODO
 		 * @return a new method parameter or argument, or <code>null</code> for an empty vararg argument
@@ -2149,7 +2149,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				 // if (Bindings.isSuperType(typeToRemove, currentType))
 				if (currentType == null)
 					continue; // newly added or unresolvable type
-				if (Bindings.equals(currentType, typeToRemove) || toRemove.getType().getElementName().equals(currentType.getName())) {
+				if (Bindings.equals(currentType, typeToRemove) || toRemove.getElement().getElementName().equals(currentType.getName())) {
 					getASTRewrite().remove(currentName, fDescription);
 					registerImportRemoveNode(currentName);
 				}
@@ -2157,7 +2157,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		private void addExceptionToNodeList(ExceptionInfo exceptionInfo, ListRewrite exceptionListRewrite) {
-			String fullyQualified= exceptionInfo.getType().getFullyQualifiedName('.');
+			String fullyQualified= exceptionInfo.getFullyQualifiedName();
 			for (Iterator iter= exceptionListRewrite.getOriginalList().iterator(); iter.hasNext(); ) {
 				Name exName= (Name) iter.next();
 				//XXX: existing superclasses of the added exception are redundant and could be removed
@@ -2167,7 +2167,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (typeBinding.getQualifiedName().equals(fullyQualified))
 					return; // don't add it again
 			}
-			String importedType= getImportRewrite().addImport(exceptionInfo.getType().getFullyQualifiedName('.'));
+			String importedType= getImportRewrite().addImport(exceptionInfo.getFullyQualifiedName());
 			getImportRemover().registerAddedImport(importedType);
 			ASTNode exNode= getASTRewrite().createStringPlaceholder(importedType, ASTNode.SIMPLE_NAME);
 			exceptionListRewrite.insertLast(exNode, fDescription);
@@ -2309,7 +2309,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 								final ITypeBinding infoBinding= info.getTypeBinding();
 								if (infoBinding != null && Bindings.equals(infoBinding, nameBinding))
 									remove= true;
-								else if (info.getType().getElementName().equals(nameBinding.getName()))
+								else if (info.getElement().getElementName().equals(nameBinding.getName()))
 									remove= true;
 								if (remove) {
 									getASTRewrite().remove(tag, fDescription);
@@ -2331,7 +2331,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					if (info.isAdded()) {
 						if (!isTopOfRipple)
 							continue;
-						TagElement excptNode= createExceptionTag(info.getType().getElementName());
+						TagElement excptNode= createExceptionTag(info.getElement().getElementName());
 						insertTag(excptNode, previousTag, tagsRewrite);
 						previousTag= excptNode;
 					} else {
@@ -2344,7 +2344,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 								final ITypeBinding infoBinding= info.getTypeBinding();
 								if (infoBinding != null && Bindings.equals(infoBinding, nameBinding))
 									process= true;
-								else if (info.getType().getElementName().equals(nameBinding.getName()))
+								else if (info.getElement().getElementName().equals(nameBinding.getName()))
 									process= true;
 								if (process) {
 									tagIter.remove();
@@ -2728,7 +2728,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 				else {
 					try {
-						info= new ExceptionInfo((IType) element, Integer.valueOf(kind).intValue(), null);
+						info= new ExceptionInfo(element, Integer.valueOf(kind).intValue(), null);
 					} catch (NumberFormatException exception) {
 						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { kind, ATTRIBUTE_KIND }));
 					}
