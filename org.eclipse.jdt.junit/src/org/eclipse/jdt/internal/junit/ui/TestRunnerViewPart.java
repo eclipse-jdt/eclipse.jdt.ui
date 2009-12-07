@@ -120,6 +120,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -1948,9 +1949,9 @@ action enablement
 	}
 
 	public void rerunTest(String testId, String className, String testName, String launchMode) {
-		DebugUITools.saveAndBuildBeforeLaunch();
+		boolean buildBeforeLaunch= Platform.getPreferencesService().getBoolean(IDebugUIConstants.PLUGIN_ID, IDebugUIConstants.PREF_BUILD_BEFORE_LAUNCH, false, null);
 		try {
-			boolean couldLaunch= fTestRunSession.rerunTest(testId, className, testName, launchMode);
+			boolean couldLaunch= fTestRunSession.rerunTest(testId, className, testName, launchMode, buildBeforeLaunch);
 			if (! couldLaunch) {
 				MessageDialog.openInformation(getSite().getShell(),
 						JUnitMessages.TestRunnerViewPart_cannotrerun_title,

@@ -448,10 +448,11 @@ public class TestRunSession implements ITestRunSession {
 	 * @param className test class name
 	 * @param testName test method name
 	 * @param launchMode launch mode, see {@link ILaunchManager}
+	 * @param buildBeforeLaunch whether a build should be done before launch 
 	 * @return <code>false</code> iff the rerun could not be started
 	 * @throws CoreException if the launch fails
 	 */
-	public boolean rerunTest(String testId, String className, String testName, String launchMode) throws CoreException {
+	public boolean rerunTest(String testId, String className, String testName, String launchMode, boolean buildBeforeLaunch) throws CoreException {
 		if (isKeptAlive()) {
 			Status status= ((TestCaseElement) getTestElement(testId)).getStatus();
 			if (status == Status.ERROR) {
@@ -481,7 +482,7 @@ public class TestRunSession implements ITestRunSession {
 					//	String args= "-rerun "+testId;
 					//	tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
 				}
-				tmp.launch(launchMode, null);
+				tmp.launch(launchMode, null, buildBeforeLaunch);
 				return true;
 			}
 		}
