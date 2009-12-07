@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,14 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public class ExceptionInfo {
-	private final IType fType;
+	private final IJavaElement fElement;
 	private final ITypeBinding fTypeBinding;
 	private int fKind;
 
@@ -25,15 +27,16 @@ public class ExceptionInfo {
 	public static final int ADDED= 1;
 	public static final int DELETED= 2;
 
-	public ExceptionInfo(IType type, int kind, ITypeBinding binding) {
-		Assert.isNotNull(type);
-		fType= type;
+	public ExceptionInfo(IJavaElement element, int kind, ITypeBinding binding) {
+		Assert.isNotNull(element);
+		Assert.isTrue(element instanceof IType || element instanceof ITypeParameter);
+		fElement= element;
 		fKind= kind;
 		fTypeBinding= binding;
 	}
 
-	public static ExceptionInfo createInfoForOldException(IType type, ITypeBinding binding){
-		return new ExceptionInfo(type, OLD, binding);
+	public static ExceptionInfo createInfoForOldException(IJavaElement element, ITypeBinding binding){
+		return new ExceptionInfo(element, OLD, binding);
 	}
 	public static ExceptionInfo createInfoForAddedException(IType type){
 		return new ExceptionInfo(type, ADDED, null);
@@ -61,8 +64,12 @@ public class ExceptionInfo {
 		return fKind == OLD;
 	}
 
-	public IType getType() {
-		return fType;
+	public IJavaElement getElement() {
+		return fElement;
+	}
+	
+	public String getFullyQualifiedName() {
+		return fElement instanceof IType ? ((IType) fElement).getFullyQualifiedName('.') : fElement.getElementName();
 	}
 
 	public int getKind() {
@@ -83,10 +90,10 @@ public class ExceptionInfo {
 			case ADDED : result.append("ADDED: "); break; //$NON-NLS-1$
 			case DELETED : result.append("DELETED: "); break; //$NON-NLS-1$
 		}
-		if (fType == null)
+		if (fElement == null)
 			result.append("null"); //$NON-NLS-1$
 		else
-			result.append(fType.toString());
+			result.append(fElement.toString());
 		return result.toString();
 	}
 }

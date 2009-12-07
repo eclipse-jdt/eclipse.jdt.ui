@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,7 +70,7 @@ public class TestChangeMethodSignaturParticipant extends ChangeMethodSignaturePa
 		Assert.assertEquals(exceptionTypes.length, thrownExceptions.length);
 
 		for (int i= 0; i < exceptionTypes.length; i++) {
-			Assert.assertEquals(exceptionTypes[i], thrownExceptions[i].getType());
+			assertEqualSignature(exceptionTypes[i], thrownExceptions[i].getType());
 		}
 	}
 

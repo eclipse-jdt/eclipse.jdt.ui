@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -515,7 +515,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private void mangleExceptions(List list, String[] removeExceptions, String[] addExceptions, ICompilationUnit cu) throws Exception {
 		for (Iterator iter= list.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
-			String name= info.getType().getFullyQualifiedName('.');
+			String name= info.getFullyQualifiedName();
 			for (int i= 0; i < removeExceptions.length; i++) {
 				if (name.equals(removeExceptions[i]))
 					info.markAsDeleted();
@@ -2179,6 +2179,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 				newVisibility, deletedIndices, newReturnTypeName);
 	}
 
+	public void testGenerics06() throws Exception {
+		String[] signature= { "QString;" };
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= { "string" };
+		String[] newParamNames= {};
+		String[] newParameterTypeNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.PRIVATE;
+		String newReturnTypeName= null;
+		helperDoAll("C", "foo", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
 	public void testDelegate01() throws Exception {
 		// simple reordering with delegate
 		helper1(new String[]{"j", "i"}, new String[]{"I", "QString;"}, null, null, true);

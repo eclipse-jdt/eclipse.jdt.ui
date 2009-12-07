@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,7 +102,7 @@ public class ChangeExceptionsControl extends Composite {
 		}
 		public String getColumnText(Object element, int columnIndex) {
 			ExceptionInfo info= (ExceptionInfo) element;
-			return BasicElementLabels.getJavaElementName(info.getType().getFullyQualifiedName('.'));
+			return BasicElementLabels.getJavaElementName(info.getFullyQualifiedName());
 		}
 	}
 
@@ -282,7 +282,7 @@ public class ChangeExceptionsControl extends Composite {
 	private ExceptionInfo findExceptionInfo(IType exception) {
 		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
-			if (info.getType().equals(exception))
+			if (info.getElement().equals(exception))
 				return info;
 		}
 		return null;
