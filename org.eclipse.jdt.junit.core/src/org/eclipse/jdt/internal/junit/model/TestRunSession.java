@@ -703,7 +703,6 @@ public class TestRunSession implements ITestRunSession {
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
-				return;
 			}
 
 			Status status= Status.convert(statusCode);
