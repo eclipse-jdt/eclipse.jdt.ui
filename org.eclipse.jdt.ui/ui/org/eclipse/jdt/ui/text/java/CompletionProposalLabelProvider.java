@@ -697,7 +697,19 @@ public class CompletionProposalLabelProvider {
 		int flags= proposal.getFlags();
 		int kind= proposal.getKind();
 
-		if (Flags.isDeprecated(flags))
+		boolean deprecated= Flags.isDeprecated(flags);
+		if (!deprecated) {
+			CompletionProposal[] requiredProposals= proposal.getRequiredProposals();
+			if (requiredProposals != null) {
+				for (int i= 0; i < requiredProposals.length; i++) {
+					CompletionProposal requiredProposal= requiredProposals[i];
+					if (requiredProposal.getKind() == CompletionProposal.TYPE_REF) {
+						deprecated |= Flags.isDeprecated(requiredProposal.getFlags());
+					}
+				}
+			}
+		}
+		if (deprecated)
 			adornments |= JavaElementImageDescriptor.DEPRECATED;
 
 		if (kind == CompletionProposal.FIELD_REF || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE
