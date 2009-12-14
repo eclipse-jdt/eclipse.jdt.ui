@@ -247,7 +247,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 		if (fCleanUp == null)
 			return null;
 
-		int count= computeNumberofFixesForCleanUp(fCleanUp);
+		int count= computeNumberOfFixesForCleanUp(fCleanUp);
 
 		if (count == -1) {
 			return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
@@ -265,13 +265,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	 * @return the maximum number of fixes or -1 if unknown
 	 * @since 3.6
 	 */
-	public int computeNumberofFixesForCleanUp(ICleanUp cleanUp) {
-		int count;
-		if (cleanUp instanceof IMultiFix) {
-			count= ((IMultiFix)cleanUp).computeNumberOfFixes(fCompilationUnit);
-		} else {
-			count= -1;
-		}
-		return count;
+	public int computeNumberOfFixesForCleanUp(ICleanUp cleanUp) {
+		return cleanUp instanceof IMultiFix ? ((IMultiFix)cleanUp).computeNumberOfFixes(fCompilationUnit) : -1;
 	}
 }

@@ -375,7 +375,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 				if (proposals[i] instanceof FixCorrectionProposal) {
 					FixCorrectionProposal proposal= (FixCorrectionProposal)proposals[i];
-					int count= proposal.computeNumberofFixesForCleanUp(proposal.getCleanUp());
+					int count= proposal.computeNumberOfFixesForCleanUp(proposal.getCleanUp());
 					if (count > 1) {
 						list.add(createCompletionProposalLink(composite, proposals[i], count));
 					}
@@ -465,14 +465,6 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			Label proposalImage= new Label(parent, SWT.NONE);
 			proposalImage.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 			Image image= isMultiFix ? JavaUI.getSharedImages().getImage(JavaPluginImages.IMG_OBJS_QUICK_FIX) : proposal.getImage();
-//			Image image= isMultiFix ? JavaUI.getSharedImages().getImage(JavaPluginImages.IMG_CORRECTION_CHANGE) : proposal.getImage();
-//			Image image= isMultiFix ? JavaUI.getSharedImages().getImage(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE) : proposal.getImage();
-//			Image image= isMultiFix ? null : proposal.getImage();
-			
-//Warning: Only for testing, cannot be release like this!
-//			ImageDescriptor cueID= ImageDescriptor.createFromFile(AbstractControlContentAssistSubjectAdapter.class, "images/content_assist_cue.gif"); //$NON-NLS-1$
-//			Image image= isMultiFix ? image= cueID.createImage(parent.getDisplay()) : proposal.getImage();
-
 			if (image != null) {
 				proposalImage.setImage(image);
 
