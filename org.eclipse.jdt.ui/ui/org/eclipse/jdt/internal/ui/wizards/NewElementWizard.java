@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,11 +77,12 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	}
 
 	/**
-	 * Subclasses should override to perform the actions of the wizard.
-	 * This method is run in the wizard container's context as a workspace runnable.
-	 * @param monitor
-	 * @throws InterruptedException
-	 * @throws CoreException
+	 * Subclasses should override to perform the actions of the wizard. This method is run in the
+	 * wizard container's context as a workspace runnable.
+	 * 
+	 * @param monitor the progress monitor
+	 * @throws InterruptedException when the operation is cancelled
+	 * @throws CoreException if the element cannot be created
 	 */
 	protected abstract void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException;
 
