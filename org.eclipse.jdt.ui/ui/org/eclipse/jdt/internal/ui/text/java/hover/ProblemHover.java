@@ -203,6 +203,8 @@ public class ProblemHover extends AbstractAnnotationHover {
 		private ICompletionProposal[] getJavaAnnotationFixes(IJavaAnnotation javaAnnotation) {
 			ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), javaAnnotation);
 			ICompilationUnit cu= javaAnnotation.getCompilationUnit();
+			if (cu == null)
+				return NO_PROPOSALS;
 
 			ISourceViewer sourceViewer= null;
 			if (viewer instanceof ISourceViewer)
