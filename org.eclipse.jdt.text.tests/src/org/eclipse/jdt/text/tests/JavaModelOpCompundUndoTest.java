@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * Tests that Java model operations can be undone in one group.
  * <p>
- * For details see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=262389
+ * For details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=262389
  * </p>
  * 
  * @since 3.5
