@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
 
@@ -41,11 +43,12 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	/*
 	 * @since 3.5
 	 */
-	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, IEditorPart editor, int offset, int length, SharedASTProvider.WAIT_FLAG waitFlag) {
+	private AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, IEditorPart editor, int offset, int length, SharedASTProvider.WAIT_FLAG waitFlag) {
 		super(sourceViewer, offset, length);
+		Assert.isLegal(cu != null);
+		Assert.isLegal(waitFlag != null);
 		fCompilationUnit= cu;
 		fEditor= editor;
-		fASTRoot= null;
 		fWaitFlag= waitFlag;
 	}
 	
