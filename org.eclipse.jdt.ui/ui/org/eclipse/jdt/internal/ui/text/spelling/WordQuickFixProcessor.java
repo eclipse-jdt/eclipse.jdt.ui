@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.TextInvocationContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -46,7 +50,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext,org.eclipse.jdt.ui.text.java.IProblemLocation[])
 	 */
-	public IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
+	public IJavaCompletionProposal[] getCorrections(IInvocationContext invocationContext, IProblemLocation[] locations) throws CoreException {
 
 		final int threshold= PreferenceConstants.getPreferenceStore().getInt(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
 
@@ -68,8 +72,13 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 		if (checker != null) {
 
 			for (int index= 0; index < locations.length; index++) {
-
 				location= locations[index];
+				
+				ISourceViewer sourceViewer= null;
+				if (invocationContext instanceof IQuickAssistInvocationContext)
+					sourceViewer= ((IQuickAssistInvocationContext)invocationContext).getSourceViewer();
+				IQuickAssistInvocationContext context= new TextInvocationContext(sourceViewer, location.getOffset(), location.getLength());
+				
 				if (location.getProblemId() == JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID) {
 
 					arguments= location.getProblemArguments();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,10 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -61,7 +61,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	}
 
 	/** The invocation context */
-	private final IInvocationContext fContext;
+	private final IQuickAssistInvocationContext fContext;
 
 	/** The length in the document */
 	private final int fLength;
@@ -88,7 +88,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	 * @param context the invocation context for this proposal
 	 * @param relevance the relevance of this proposal
 	 */
-	public WordCorrectionProposal(final String word, final String[] arguments, final int offset, final int length, final IInvocationContext context, final int relevance) {
+	public WordCorrectionProposal(final String word, final String[] arguments, final int offset, final int length, final IQuickAssistInvocationContext context, final int relevance) {
 
 		fWord= Character.isUpperCase(arguments[0].charAt(0)) ? Character.toUpperCase(word.charAt(0)) + word.substring(1) : word;
 
@@ -161,8 +161,8 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	 */
 	public final Point getSelection(final IDocument document) {
 
-		int offset= fContext.getSelectionOffset();
-		int length= fContext.getSelectionLength();
+		int offset= fContext.getOffset();
+		int length= fContext.getLength();
 
 		final int delta= fWord.length() - fLength;
 		if (offset <= fOffset && offset + length >= fOffset)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,17 +21,16 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.jface.text.source.TextInvocationContext;
 
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
@@ -104,7 +103,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals(org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext)
 	 * @since 3.4
 	 */
-	public ICompletionProposal[] getProposals(IQuickAssistInvocationContext originalContext) {
+	public ICompletionProposal[] getProposals(IQuickAssistInvocationContext context) {
 		String[] arguments= getArguments();
 		if (arguments == null)
 			return new ICompletionProposal[0];
@@ -129,11 +128,10 @@ public class JavaSpellingProblem extends SpellingProblem {
 
 		if (checker != null) {
 
-			IInvocationContext context;
-			if (originalContext == null)
-				context= new AssistContext(null, getOffset(), getLength());
+			if (context == null)
+				context= new TextInvocationContext(null, getOffset(), getLength());
 			else
-				context= new AssistContext(null, originalContext.getSourceViewer(), getOffset(), getLength());
+				context= new TextInvocationContext(context.getSourceViewer(), getOffset(), getLength());
 
 			// FIXME: this is a pretty ugly hack
 			fixed= arguments[0].charAt(0) == IHtmlTagConstants.HTML_TAG_PREFIX

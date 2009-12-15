@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -39,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 public class WordIgnoreProposal implements IJavaCompletionProposal {
 
 	/** The invocation context */
-	private IInvocationContext fContext;
+	private IQuickAssistInvocationContext fContext;
 
 	/** The word to ignore */
 	private String fWord;
@@ -52,7 +51,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	 * @param context
 	 *                   The invocation context
 	 */
-	public WordIgnoreProposal(final String word, final IInvocationContext context) {
+	public WordIgnoreProposal(final String word, final IQuickAssistInvocationContext context) {
 		fWord= word;
 		fContext= context;
 	}
@@ -67,11 +66,9 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 
 		if (checker != null) {
 			checker.ignoreWord(fWord);
-			if (fContext instanceof IQuickAssistInvocationContext) {
-				ISourceViewer sourceViewer= ((IQuickAssistInvocationContext)fContext).getSourceViewer();
-				if (sourceViewer != null)
-					SpellingProblem.removeAll(sourceViewer, fWord);
-			}
+			ISourceViewer sourceViewer= fContext.getSourceViewer();
+			if (sourceViewer != null)
+				SpellingProblem.removeAll(sourceViewer, fWord);
 		}
 	}
 
@@ -113,6 +110,6 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
 	public final Point getSelection(final IDocument document) {
-		return new Point(fContext.getSelectionOffset(), fContext.getSelectionLength());
+		return new Point(fContext.getOffset(), fContext.getLength());
 	}
 }

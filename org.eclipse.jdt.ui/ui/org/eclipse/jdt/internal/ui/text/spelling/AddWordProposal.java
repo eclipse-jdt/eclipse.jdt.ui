@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,6 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -48,7 +47,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	private static final String PREF_KEY_DO_NOT_ASK= "do_not_ask_to_install_user_dictionary"; //$NON-NLS-1$
 
 	/** The invocation context */
-	private final IInvocationContext fContext;
+	private final IQuickAssistInvocationContext fContext;
 
 	/** The word to add */
 	private final String fWord;
@@ -62,7 +61,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @param context
 	 *                   The invocation context
 	 */
-	public AddWordProposal(final String word, final IInvocationContext context) {
+	public AddWordProposal(final String word, final IQuickAssistInvocationContext context) {
 		fContext= context;
 		fWord= word;
 	}
@@ -78,14 +77,10 @@ public class AddWordProposal implements IJavaCompletionProposal {
 		if (checker == null)
 			return;
 
-		IQuickAssistInvocationContext quickAssistContext= null;
-		if (fContext instanceof IQuickAssistInvocationContext)
-			quickAssistContext= (IQuickAssistInvocationContext)fContext;
-
 		if (!checker.acceptsWords()) {
 			final Shell shell;
-			if (quickAssistContext != null && quickAssistContext.getSourceViewer() != null)
-				shell= quickAssistContext.getSourceViewer().getTextWidget().getShell();
+			if (fContext != null && fContext.getSourceViewer() != null)
+				shell= fContext.getSourceViewer().getTextWidget().getShell();
 			else
 				shell= JavaPlugin.getActiveWorkbenchShell();
 
@@ -98,16 +93,15 @@ public class AddWordProposal implements IJavaCompletionProposal {
 
 		if (checker.acceptsWords()) {
 			checker.addWord(fWord);
-			if (quickAssistContext != null && quickAssistContext.getSourceViewer() != null)
-				SpellingProblem.removeAll(quickAssistContext.getSourceViewer(), fWord);
+			if (fContext != null && fContext.getSourceViewer() != null)
+				SpellingProblem.removeAll(fContext.getSourceViewer(), fWord);
 		}
 	}
 
 	/**
-	 * Asks the user whether he wants to configure
-	 * a user dictionary.
-	 *
-	 * @param shell
+	 * Asks the user whether he wants to configure a user dictionary.
+	 * 
+	 * @param shell the shell
 	 * @return <code>true</code> if the user wants to configure the user dictionary
 	 * @since 3.3
 	 */
@@ -175,6 +169,6 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
 	public final Point getSelection(final IDocument document) {
-		return new Point(fContext.getSelectionOffset(), fContext.getSelectionLength());
+		return new Point(fContext.getOffset(), fContext.getLength());
 	}
 }

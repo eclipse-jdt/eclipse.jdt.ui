@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,12 +17,12 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -37,14 +37,14 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class DisableSpellCheckingProposal implements IJavaCompletionProposal {
 
 	/** The invocation context */
-	private IInvocationContext fContext;
+	private IQuickAssistInvocationContext fContext;
 
 	/**
 	 * Creates a new proposal.
 	 *
 	 * @param context the invocation context
 	 */
-	public DisableSpellCheckingProposal(IInvocationContext context) {
+	public DisableSpellCheckingProposal(IQuickAssistInvocationContext context) {
 		fContext= context;
 	}
 
@@ -94,6 +94,6 @@ public class DisableSpellCheckingProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
 	public final Point getSelection(final IDocument document) {
-		return new Point(fContext.getSelectionOffset(), fContext.getSelectionLength());
+		return new Point(fContext.getOffset(), fContext.getLength());
 	}
 }
