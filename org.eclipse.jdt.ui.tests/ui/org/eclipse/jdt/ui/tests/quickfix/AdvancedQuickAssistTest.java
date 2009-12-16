@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -959,7 +959,78 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
+	public void testInverseIfConditionUnboxing() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=297645
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Boolean b) {\n");
+		buf.append("        if (b) {\n");
+		buf.append("            System.out.println(\"######\");\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(\"-\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Boolean b) {\n");
+		buf.append("        if (!b) {\n");
+		buf.append("            System.out.println(\"-\");\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(\"######\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
 
+	public void testInverseIfConditionEquals() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, boolean b) {\n");
+		buf.append("        if (a == (b && a))\n");
+		buf.append("            return 1;\n");
+		buf.append("        else\n");
+		buf.append("            return 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+	
+		int offset= buf.toString().indexOf("if (");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+	
+		assertCorrectLabels(proposals);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, boolean b) {\n");
+		buf.append("        if (a != (b && a))\n");
+		buf.append("            return 2;\n");
+		buf.append("        else\n");
+		buf.append("            return 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
 
 
 

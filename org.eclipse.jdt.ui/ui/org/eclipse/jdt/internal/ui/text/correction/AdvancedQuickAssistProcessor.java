@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -265,7 +265,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Statement elseStatement= ifStatement.getElseStatement();
 
 		// prepare original nodes
-		Expression inversedExpression= getInversedBooleanExpression(rewrite, ifStatement.getExpression());
+		Expression inversedExpression= getInversedExpression(rewrite, ifStatement.getExpression());
 
 		Statement newElseStatement= (Statement) rewrite.createMoveTarget(thenStatement);
 		Statement newThenStatement= (Statement) rewrite.createMoveTarget(elseStatement);
@@ -315,7 +315,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= covering.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// create inverted 'if' statement
-		Expression inversedExpression= getInversedBooleanExpression(rewrite, ifStatement.getExpression());
+		Expression inversedExpression= getInversedExpression(rewrite, ifStatement.getExpression());
 		IfStatement newIf= ast.newIfStatement();
 		newIf.setExpression(inversedExpression);
 		// prepare 'then' for new 'if'
@@ -367,7 +367,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= covering.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// create inverted 'if' statement
-		Expression inversedExpression= getInversedBooleanExpression(rewrite, ifStatement.getExpression());
+		Expression inversedExpression= getInversedExpression(rewrite, ifStatement.getExpression());
 		IfStatement newIf= ast.newIfStatement();
 		newIf.setExpression(inversedExpression);
 		newIf.setThenStatement(ast.newContinueStatement());
@@ -430,7 +430,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ASTNode covered= (ASTNode) iter.next();
 			Expression coveredExpression= getBooleanExpression(covered);
 			if (coveredExpression != null) {
-				Expression inversedExpression= getInversedBooleanExpression(rewrite, coveredExpression);
+				Expression inversedExpression= getInversedExpression(rewrite, coveredExpression);
 				rewrite.replace(coveredExpression, inversedExpression, null);
 				hasChanges= true;
 			}
@@ -450,8 +450,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static Expression getInversedBooleanExpression(ASTRewrite rewrite, Expression expression) {
-		return getInversedBooleanExpression(rewrite, expression, null);
+	private static Expression getInversedExpression(ASTRewrite rewrite, Expression expression) {
+		return getInversedExpression(rewrite, expression, null);
 	}
 	private interface SimpleNameRenameProvider {
 		SimpleName getRenamed(SimpleName name);
@@ -470,10 +470,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return (Expression) rewrite.createCopyTarget(expression);
 	}
 
-	private static Expression getInversedBooleanExpression(ASTRewrite rewrite, Expression expression, SimpleNameRenameProvider provider) {
-		if (!isBoolean(expression)) {
-			return (Expression) rewrite.createCopyTarget(expression);
-		}
+	private static Expression getInversedExpression(ASTRewrite rewrite, Expression expression, SimpleNameRenameProvider provider) {
 		AST ast= rewrite.getAST();
 		//
 		if (expression instanceof BooleanLiteral) {
@@ -483,22 +480,22 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			InfixExpression infixExpression= (InfixExpression) expression;
 			InfixExpression.Operator operator= infixExpression.getOperator();
 			if (operator == InfixExpression.Operator.LESS) {
-				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.GREATER_EQUALS, provider);
+				return getInversedInfixExpression(rewrite, infixExpression, InfixExpression.Operator.GREATER_EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.GREATER) {
-				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.LESS_EQUALS, provider);
+				return getInversedInfixExpression(rewrite, infixExpression, InfixExpression.Operator.LESS_EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.LESS_EQUALS) {
-				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.GREATER, provider);
+				return getInversedInfixExpression(rewrite, infixExpression, InfixExpression.Operator.GREATER, provider);
 			}
 			if (operator == InfixExpression.Operator.GREATER_EQUALS) {
-				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.LESS, provider);
+				return getInversedInfixExpression(rewrite, infixExpression, InfixExpression.Operator.LESS, provider);
 			}
 			if (operator == InfixExpression.Operator.EQUALS) {
-				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.NOT_EQUALS, provider);
+				return getInversedInfixExpression(rewrite, infixExpression, InfixExpression.Operator.NOT_EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.NOT_EQUALS) {
-				return getInversedInfixBooleanExpression(rewrite, infixExpression, InfixExpression.Operator.EQUALS, provider);
+				return getInversedInfixExpression(rewrite, infixExpression, InfixExpression.Operator.EQUALS, provider);
 			}
 			if (operator == InfixExpression.Operator.CONDITIONAL_AND) {
 				return getInversedAndOrExpression(rewrite, infixExpression, InfixExpression.Operator.CONDITIONAL_OR, provider);
@@ -534,10 +531,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				innerExpression= ((ParenthesizedExpression) innerExpression).getExpression();
 			}
 			if (innerExpression instanceof InstanceofExpression) {
-				return getInversedBooleanExpression(rewrite, innerExpression, provider);
+				return getInversedExpression(rewrite, innerExpression, provider);
 			}
 			parenthesizedExpression= ast.newParenthesizedExpression();
-			parenthesizedExpression.setExpression(getInversedBooleanExpression(rewrite, innerExpression, provider));
+			parenthesizedExpression.setExpression(getInversedExpression(rewrite, innerExpression, provider));
 			return parenthesizedExpression;
 		}
 		//
@@ -548,14 +545,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean isBoolean(Expression expression) {
-		return expression.resolveTypeBinding() == expression.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+		ITypeBinding typeBinding= expression.resolveTypeBinding();
+		AST ast= expression.getAST();
+		return typeBinding == ast.resolveWellKnownType("boolean") //$NON-NLS-1$
+				|| typeBinding == ast.resolveWellKnownType("java.lang.Boolean"); //$NON-NLS-1$
 	}
 
-	private static Expression getInversedInfixBooleanExpression(ASTRewrite rewrite, InfixExpression expression, InfixExpression.Operator newOperator, SimpleNameRenameProvider provider) {
+	private static Expression getInversedInfixExpression(ASTRewrite rewrite, InfixExpression expression, InfixExpression.Operator newOperator, SimpleNameRenameProvider provider) {
 		InfixExpression newExpression= rewrite.getAST().newInfixExpression();
 		newExpression.setOperator(newOperator);
-		newExpression.setLeftOperand(getInversedBooleanExpression(rewrite, expression.getLeftOperand(), provider));
-		newExpression.setRightOperand(getInversedBooleanExpression(rewrite, expression.getRightOperand(), provider));
+		newExpression.setLeftOperand(getRenamedNameCopy(provider, rewrite, expression.getLeftOperand()));
+		newExpression.setRightOperand(getRenamedNameCopy(provider, rewrite, expression.getRightOperand()));
 		return newExpression;
 	}
 
@@ -572,16 +572,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		int newOperatorPrecedence= OperatorPrecedence.getOperatorPrecedence(newOperator);
 		//
-		Expression leftOperand= getInversedBooleanExpression(rewrite, infixExpression.getLeftOperand(), provider);
+		Expression leftOperand= getInversedExpression(rewrite, infixExpression.getLeftOperand(), provider);
 		newExpression.setLeftOperand(parenthesizeIfRequired(leftOperand, newOperatorPrecedence));
 
-		Expression rightOperand= getInversedBooleanExpression(rewrite, infixExpression.getRightOperand(), provider);
+		Expression rightOperand= getInversedExpression(rewrite, infixExpression.getRightOperand(), provider);
 		newExpression.setRightOperand(parenthesizeIfRequired(rightOperand, newOperatorPrecedence));
 
 		List extraOperands= infixExpression.extendedOperands();
 		List newExtraOperands= newExpression.extendedOperands();
 		for (int i= 0; i < extraOperands.size(); i++) {
-			Expression extraOperand= getInversedBooleanExpression(rewrite, (Expression) extraOperands.get(i), provider);
+			Expression extraOperand= getInversedExpression(rewrite, (Expression) extraOperands.get(i), provider);
 			newExtraOperands.add(parenthesizeIfRequired(extraOperand, newOperatorPrecedence));
 		}
 		return newExpression;
@@ -1066,7 +1066,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// prepare new conditional expression
 		ConditionalExpression newExpression= ast.newConditionalExpression();
-		newExpression.setExpression(getInversedBooleanExpression(rewrite, expression.getExpression()));
+		newExpression.setExpression(getInversedExpression(rewrite, expression.getExpression()));
 		newExpression.setThenExpression((Expression) rewrite.createCopyTarget(expression.getElseExpression()));
 		newExpression.setElseExpression((Expression) rewrite.createCopyTarget(expression.getThenExpression()));
 		// replace old expression with new
@@ -1762,7 +1762,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						return null;
 					}
 				};
-				Expression inversedExpression= getInversedBooleanExpression(rewrite, expression, provider);
+				Expression inversedExpression= getInversedExpression(rewrite, expression, provider);
 				// if any name was not renamed during expression inverting, we can not already rename it, so fail to create assist
 				for (Iterator iter= overlapNames.iterator(); iter.hasNext();) {
 					Object o= iter.next();
@@ -1794,7 +1794,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				VariableDeclarationFragment vdf= (VariableDeclarationFragment) name.getParent();
 				Expression expression= vdf.getInitializer();
 				if (expression != null) {
-					rewrite.replace(expression, getInversedBooleanExpression(rewrite, expression), null);
+					rewrite.replace(expression, getInversedExpression(rewrite, expression), null);
 				}
 				// set new name
 				rewrite.replace(name, newName, null);
@@ -1840,7 +1840,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final AST ast= covering.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		// prepared inverted expression
-		Expression inversedExpression= getInversedBooleanExpression(rewrite, parenthesizedExpression.getExpression());
+		Expression inversedExpression= getInversedExpression(rewrite, parenthesizedExpression.getExpression());
 		// check, may be we should keep parentheses
 		boolean keepParentheses= false;
 		if (negationExpression.getParent() instanceof Expression) {
@@ -1916,7 +1916,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= expression.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		// prepared inverted expression
-		Expression inversedExpression= getInversedBooleanExpression(rewrite, expression);
+		Expression inversedExpression= getInversedExpression(rewrite, expression);
 		// prepare ParenthesizedExpression
 		ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
 		parenthesizedExpression.setExpression(inversedExpression);
