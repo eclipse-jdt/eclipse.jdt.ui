@@ -45,7 +45,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
@@ -186,13 +185,17 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			fFixSelectionTable= new TableViewer(composite, SWT.SINGLE | SWT.BORDER);
 			fFixSelectionTable.setContentProvider(new ArrayContentProvider());
 			fFixSelectionTable.setLabelProvider(new ClasspathFixLabelProvider());
-			fFixSelectionTable.setComparator(new ViewerComparator());
+			fFixSelectionTable.setComparator(new ViewerComparator() {
+				public int category(Object element) {
+					return - ((ClasspathFixProposal) element).getRelevance();
+				}
+			});
 			fFixSelectionTable.addDoubleClickListener(listener);
 			fFixSelectionTable.setInput(fClasspathFixProposals);
-			fFixSelectionTable.setSelection(new StructuredSelection(fClasspathFixProposals[0]));
+			Table table= fFixSelectionTable.getTable();
+			table.select(0);
 			fFixSelectionTable.addSelectionChangedListener(listener);
 
-			Table table= fFixSelectionTable.getTable();
 			Dialog.applyDialogFont(table);
 			
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
