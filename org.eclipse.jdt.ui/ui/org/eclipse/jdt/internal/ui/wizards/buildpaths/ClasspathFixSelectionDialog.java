@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,7 +55,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -105,7 +105,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 							ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
 							Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
 
-							PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
+							PerformChangeOperation op= new PerformChangeOperation(change);
 							op.setUndoManager(RefactoringCore.getUndoManager(), change.getName());
 							op.run(new SubProgressMonitor(monitor, 1));
 						} catch (OperationCanceledException e) {
@@ -168,7 +168,8 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 
 		ListenerMix listener= new ListenerMix();
 
-		if (fClasspathFixProposals.length == 0) {
+		int count= fClasspathFixProposals.length;
+		if (count == 0) {
 			Link link= createLink(composite, listener);
 			String[] args= {  BasicElementLabels.getJavaElementName(fMissingType), BasicElementLabels.getJavaElementName(fProject.getElementName()) };
 			link.setText(Messages.format(NewWizardMessages.ClasspathFixSelectionDialog_no_proposals_message, args));
@@ -191,11 +192,13 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			fFixSelectionTable.setSelection(new StructuredSelection(fClasspathFixProposals[0]));
 			fFixSelectionTable.addSelectionChangedListener(listener);
 
+			Table table= fFixSelectionTable.getTable();
+			Dialog.applyDialogFont(table);
+			
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
-			gridData.heightHint= convertHeightInCharsToPixels(4);
+			gridData.heightHint= table.getItemHeight() * Math.max(4, Math.min(10, count));
 			gridData.widthHint= convertWidthInCharsToPixels(50);
-
-			fFixSelectionTable.getControl().setLayoutData(gridData);
+			table.setLayoutData(gridData);
 
 			Link link= createLink(composite, listener);
 			link.setText(Messages.format(NewWizardMessages.ClasspathFixSelectionDialog_open_buld_path_dialog_message, BasicElementLabels.getJavaElementName(fProject.getElementName())));
