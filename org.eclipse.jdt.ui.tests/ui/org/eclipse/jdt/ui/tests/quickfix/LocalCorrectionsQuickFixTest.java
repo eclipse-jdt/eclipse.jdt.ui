@@ -280,7 +280,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(Thread t) {\n");
+		buf.append("    public void foo(Thread t) throws InterruptedException {\n");
 		buf.append("        t.sleep(10);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -297,7 +297,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(Thread t) {\n");
+		buf.append("    public void foo(Thread t) throws InterruptedException {\n");
 		buf.append("        Thread.sleep(10);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
