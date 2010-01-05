@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,8 +72,8 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceFactoryDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -830,8 +830,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		factoryMethodCall.setName(ast.newSimpleName(fNewMethodName));
 
-		for (int i=0; i < actualCtorArgs.getRewrittenList().size(); i++) {
-			Expression actualCtorArg= (Expression) actualCtorArgs.getRewrittenList().get(i);
+		List actualCtorArgsList= actualCtorArgs.getRewrittenList();
+		for (int i=0; i < actualCtorArgsList.size(); i++) {
+			Expression actualCtorArg= (Expression) actualCtorArgsList.get(i);
 			
 			ASTNode movedArg;
 			if (ASTNodes.isExistingNode(actualCtorArg)) {
