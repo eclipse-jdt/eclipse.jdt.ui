@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,8 +50,8 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 
@@ -178,10 +178,8 @@ public class JUnit4TestFinder implements ITestFinder {
 				Object element= match.getElement();
 				if (element instanceof IType || element instanceof IMethod) {
 					IMember member= (IMember) element;
-					if (member.getNameRange().getOffset() > match.getOffset()) {
-						IType type= member.getElementType() == IJavaElement.TYPE ? (IType) member : member.getDeclaringType();
-						addTypeAndSubtypes(type);
-					}
+					IType type= member.getElementType() == IJavaElement.TYPE ? (IType) member : member.getDeclaringType();
+					addTypeAndSubtypes(type);
 				}
 			}
 		}

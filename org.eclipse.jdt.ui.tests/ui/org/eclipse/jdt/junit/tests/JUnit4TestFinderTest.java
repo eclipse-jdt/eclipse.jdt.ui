@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,9 +20,11 @@ import junit.framework.TestCase;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.StringAsserts;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -279,10 +282,53 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(validTest3, new String[] { "p.Test5"});
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.Test5" });
 
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import org.junit.runner.RunWith;\n");
+		buf.append("\n");
+		buf.append("@SuiteClasses(Test1.class)\n");
+		buf.append("public class Test6 {\n");
+		buf.append("    RunWith aRunWith;\n");
+		buf.append("}\n");
+		IType invalidTest2= p.createCompilationUnit("Test6.java", buf.toString(), false, null).getType("Test6");
 
-		String[] validTests= { "p.Test1", "p.Test2", "p.Test3", "p.Test5"};
+		assertTestFound(invalidTest2, new String[] {});
+		assertTestFound(invalidTest2.getCompilationUnit(), new String[] {});
 
-		assertTestFound(p, validTests);
+		buf= new StringBuffer();
+		buf.append("import java.util.Arrays;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("\n");
+		buf.append("import org.junit.runners.Parameterized.Parameters;\n");
+		buf.append("\n");
+		buf.append("public class Test7 extends StackTest {\n");
+		buf.append("\n");
+		buf.append("	public Test7(int num) {\n");
+		buf.append("		super(num);\n");
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	@Parameters\n");
+		buf.append("	 public static Collection data() {\n");
+		buf.append("	   Object[][] data = new Object[][] { { 1 }, { 2 }, { 3 }, { 4 } };\n");
+		buf.append("	   return Arrays.asList(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		IType validTest4= fRoot.getPackageFragment("").createCompilationUnit("Test7.java", buf.toString(), false, null).getType("Test7");
+
+		File lib= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/stacktest.jar"));
+		JavaProjectHelper.addLibrary(fProject, Path.fromOSString(lib.getPath()));
+		
+		assertTestFound(validTest4, new String[] { "Test7"});
+		assertTestFound(validTest4.getCompilationUnit(), new String[] { "Test7" });
+		
+		String[] validTestsP= { "p.Test1", "p.Test2", "p.Test3", "p.Test5"};
+		assertTestFound(p, validTestsP);
+		
+		String[] validTests= new String[validTestsP.length + 1];
+		System.arraycopy(validTestsP, 0, validTests, 0, validTestsP.length);
+		validTests[validTestsP.length]= "Test7";
+		
 		assertTestFound(fRoot, validTests);
 		assertTestFound(fProject, validTests);
 	}
