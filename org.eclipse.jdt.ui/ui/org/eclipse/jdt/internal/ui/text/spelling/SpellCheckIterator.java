@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,13 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator;
  * @since 3.0
  */
 public class SpellCheckIterator implements ISpellCheckIterator {
+
+	/**
+	 * The token that denotes whitespace.
+	 * 
+	 * @since 3.6
+	 */
+	private static final int WHITE_SPACE_TOKEN= -1;
 
 	/** The content of the region */
 	protected final String fContent;
@@ -353,7 +360,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 			} else if (!isWhitespace(fPrevious, fNext) && isAlphaNumeric(fPrevious, fNext)) {
 
 				if (isUrlToken(fPrevious))
-					skipTokens(fPrevious, ' ');
+					skipTokens(fPrevious, WHITE_SPACE_TOKEN);
 				else if (isToken(IJavaDocTagConstants.JAVADOC_PARAM_TAGS))
 					fLastToken= null;
 				else if (isToken(IJavaDocTagConstants.JAVADOC_REFERENCE_TAGS)) {
@@ -392,12 +399,15 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 * @param begin the begin index
 	 * @param stop the stop character
 	 */
-	protected final void skipTokens(final int begin, final char stop) {
-
+	protected final void skipTokens(final int begin, final int stop) {
+		final boolean isStoppingOnWhiteSpace= stop == WHITE_SPACE_TOKEN;
 		int end= begin;
-
-		while (end < fContent.length() && fContent.charAt(end) != stop)
+		while (end < fContent.length()) {
+			char ch= fContent.charAt(end);
+			if (ch == stop || isStoppingOnWhiteSpace && Character.isWhitespace(ch))
+				break;
 			end++;
+		}
 
 		if (end < fContent.length()) {
 
