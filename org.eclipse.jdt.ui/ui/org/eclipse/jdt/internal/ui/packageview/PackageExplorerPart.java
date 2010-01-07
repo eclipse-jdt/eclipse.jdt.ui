@@ -140,10 +140,9 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 /**
- * The ViewPart for the ProjectExplorer. It listens to part activation events.
- * When selection linking with the editor is enabled the view selection tracks
- * the active editor page. Similarly when a resource is selected in the packages
- * view the corresponding editor is activated.
+ * The ViewPart for the Package Explorer. It listens to part activation events. When selection
+ * linking with the editor is enabled the view selection tracks the active editor page. Similarly
+ * when a resource is selected in the packages view the corresponding editor is activated.
  */
 
 public class PackageExplorerPart extends ViewPart
