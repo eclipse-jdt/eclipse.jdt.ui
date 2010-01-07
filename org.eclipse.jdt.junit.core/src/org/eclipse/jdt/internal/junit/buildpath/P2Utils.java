@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Patrick Higgins <patrick133t@yahoo.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=297663
+ *     Patrick Higgins <patrick133t@yahoo.com> - [JUnit] JUnit not found when JDT installed as dropin - https://bugs.eclipse.org/bugs/show_bug.cgi?id=297663
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.buildpath;
 
