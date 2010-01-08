@@ -122,6 +122,8 @@ class P2Utils {
 		addLocationDirs(bundleLocations, Platform.getConfigurationLocation(), true);
 		addLocationDirs(bundleLocations, Platform.getInstallLocation(), false);
 
+		BundleInfo bestMatch= null;
+		Version bestVersion= null;
 		for (Location configLocation= Platform.getConfigurationLocation(); configLocation != null; configLocation= configLocation.getParentLocation()) {
 			URL configUrl= configLocation.getURL();
 			if (configUrl == null)
@@ -141,11 +143,18 @@ class P2Utils {
 					BundleInfo bundles[]= manipulator.loadConfiguration(bundlesTxt, home);
 					if (bundles != null) {
 						for (int j= 0; j < bundles.length; j++) {
-							BundleInfo bundle= bundles[j];
-							if (symbolicName.equals(bundle.getSymbolicName()) && versionRange.isIncluded(new Version(bundle.getVersion()))) {
-								IPath path= getBundleLocationPath(bundle);
-								if (path.toFile().exists())
-									return bundle;
+							BundleInfo bundleInfo= bundles[j];
+							if (symbolicName.equals(bundleInfo.getSymbolicName())) {
+								Version version= new Version(bundleInfo.getVersion());
+								if (versionRange.isIncluded(version)) {
+									IPath path= getBundleLocationPath(bundleInfo);
+									if (path.toFile().exists()) {
+										if (bestMatch == null || bestVersion.compareTo(version) < 0) {
+											bestMatch= bundleInfo;
+											bestVersion= version;
+										}
+									}
+								}
 							}
 						}
 					}
@@ -157,7 +166,7 @@ class P2Utils {
 			}
 		}
 		
-		return null;
+		return bestMatch;
 	}
 
 	/**
