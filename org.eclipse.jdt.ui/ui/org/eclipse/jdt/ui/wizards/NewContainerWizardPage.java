@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -356,6 +356,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 						} else if (!jproject.isOnClasspath(fCurrRoot)) {
 							status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_NotOnClassPath, BasicElementLabels.getPathLabel(path, false)));
 						}
+					} catch (JavaModelException e) {
+						status.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotOnClassPath);
 					} catch (CoreException e) {
 						status.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotAJavaProject);
 					}
