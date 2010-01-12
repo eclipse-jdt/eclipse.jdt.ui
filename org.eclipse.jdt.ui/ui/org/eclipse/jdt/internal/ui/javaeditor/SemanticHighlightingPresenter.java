@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -698,11 +698,12 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 	/**
 	 * Add a position with the given range and highlighting unconditionally, only from UI thread.
-	 * The position will also be registered on the document. The text presentation is not invalidated.
-	 *
+	 * The position will also be registered on the document. The text presentation is not
+	 * invalidated.
+	 * 
 	 * @param offset The range offset
 	 * @param length The range length
-	 * @param highlighting
+	 * @param highlighting the highlighting
 	 */
 	private void addPositionFromUI(int offset, int length, Highlighting highlighting) {
 		Position position= createHighlightedPosition(offset, length, highlighting);
