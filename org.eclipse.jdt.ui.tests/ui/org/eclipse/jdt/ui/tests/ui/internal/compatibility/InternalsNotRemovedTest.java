@@ -34,6 +34,14 @@ public class InternalsNotRemovedTest extends TestCase {
 		testFieldNotRemoved("org.eclipse.jdt.internal.ui.actions.ActionMessages", "OrganizeImportsAction_summary_removed");
 	}
 
+	public void testReorgMessagesNotRemoved() {
+		
+		// See https://bugs.eclipse.org/296836
+		testFieldNotRemoved("org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages", "ReorgGroup_paste");
+		testFieldNotRemoved("org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages", "ReorgGroup_delete");
+		testFieldNotRemoved("org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages", "CutSourceReferencesToClipboardAction_cut");
+	}
+
 
 	private void testFieldNotRemoved(String className, String fieldName) {
 		Accessor classObject= new Accessor(className, getClass().getClassLoader());
