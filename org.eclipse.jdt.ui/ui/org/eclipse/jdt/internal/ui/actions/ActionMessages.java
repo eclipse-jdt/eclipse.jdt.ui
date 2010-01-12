@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -275,6 +275,13 @@ public final class ActionMessages extends NLS {
 	public static String OrganizeImportsAction_error_title;
 	public static String OrganizeImportsAction_error_message;
 	public static String OrganizeImportsAction_single_error_parse;
+	
+	/* DO NOT REMOVE THIS CONSTANT, it is used in a product, see https://bugs.eclipse.org/296836 */
+	public static String OrganizeImportsAction_summary_added;
+	
+	/* DO NOT REMOVE THIS CONSTANT, it is used in a product, see https://bugs.eclipse.org/296836 */
+	public static String OrganizeImportsAction_summary_removed;
+
 	public static String OrganizeImportsAction_summary_added_singular;
 	public static String OrganizeImportsAction_summary_added_plural;
 	public static String OrganizeImportsAction_summary_removed_singular;
