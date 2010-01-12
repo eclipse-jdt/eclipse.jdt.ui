@@ -35,6 +35,7 @@ Export-Package:
  org.eclipse.jdt.ui.tests.preferences;x-internal:=true,
  org.eclipse.jdt.ui.tests.quickfix;x-internal:=true,
  org.eclipse.jdt.ui.tests.search;x-internal:=true,
+ org.eclipse.jdt.ui.tests.ui.internal.compatibility;x-internal:=true,
  org.eclipse.jdt.ui.tests.wizardapi;x-internal:=true
 Require-Bundle: 
  org.eclipse.core.expressions,
@@ -61,5 +62,6 @@ Require-Bundle:
  org.eclipse.ui.navigator,
  org.eclipse.ui.views,
  org.eclipse.ui.workbench.texteditor,
+ org.eclipse.text.tests,
  org.junit;bundle-version="3.8.2"
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
