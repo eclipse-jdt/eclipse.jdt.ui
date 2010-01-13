@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,12 +75,14 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -111,6 +113,7 @@ import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -990,6 +993,67 @@ public class LocalCorrectionsSubProcessor {
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 		proposals.add(proposal);
+	}
+
+	public static void getUnusedObjectAllocationProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit root= context.getASTRoot();
+		AST ast= root.getAST();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (selectedNode == null) {
+			return;
+		}
+		
+		ASTNode parent= selectedNode.getParent();
+		
+		if (parent instanceof ExpressionStatement) {
+			ExpressionStatement expressionStatement= (ExpressionStatement) parent;
+			Expression expr= expressionStatement.getExpression();
+			ITypeBinding exprType= expr.resolveTypeBinding();
+			
+			if (exprType != null && Bindings.isSuperType(ast.resolveWellKnownType("java.lang.Throwable"), exprType)) { //$NON-NLS-1$
+				ASTRewrite rewrite= ASTRewrite.create(ast);
+				TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
+				rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
+				
+				ThrowStatement throwStatement= ast.newThrowStatement();
+				throwStatement.setExpression((Expression) rewrite.createMoveTarget(expr));
+				sourceRangeComputer.addTightSourceNode(expressionStatement);
+				rewrite.replace(expressionStatement, throwStatement, null);
+
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_throw_allocated_description;
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+				proposals.add(proposal);
+			}
+			
+			MethodDeclaration method= ASTResolving.findParentMethodDeclaration(selectedNode);
+			if (method != null) {
+				ASTRewrite rewrite= ASTRewrite.create(ast);
+				TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
+				rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
+				
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				returnStatement.setExpression((Expression) rewrite.createMoveTarget(expr));
+				sourceRangeComputer.addTightSourceNode(expressionStatement);
+				rewrite.replace(expressionStatement, returnStatement, null);
+
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_return_allocated_description;
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 7, image);
+				proposals.add(proposal);
+			}
+			
+			{
+				ASTRewrite rewrite= ASTRewrite.create(ast);
+				rewrite.remove(parent, null);
+				
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_allocated_description;
+				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image);
+				proposals.add(proposal);
+			}
+			
+		}
 	}
 
 	public static void getAssignmentHasNoEffectProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
