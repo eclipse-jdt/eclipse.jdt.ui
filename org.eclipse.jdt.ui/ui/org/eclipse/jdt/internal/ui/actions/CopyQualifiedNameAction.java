@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -147,6 +148,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (element instanceof IJavaProject)
 			return true;
 
+		if (element instanceof IJarEntryResource)
+			return true;
+
 		if (element instanceof IResource)
 			return true;
 
@@ -174,6 +178,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				IResource resource;
 				if (element instanceof IJavaElement)
 					resource= ((IJavaElement) element).getCorrespondingResource();
+				else if (element instanceof IJarEntryResource)
+					resource= null;
 				else
 					resource= (IResource) element;
 
@@ -195,7 +201,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				buf.append(getQualifiedName(elements[0]));
 				for (int i= 1; i < elements.length; i++) {
 					String qualifiedName= getQualifiedName(elements[i]);
-					buf.append('\r').append('\n').append(qualifiedName);
+					buf.append(System.getProperty("line.separator")).append(qualifiedName); //$NON-NLS-1$
 				}
 				data= new Object[] {buf.toString()};
 				dataTypes= new Transfer[] {TextTransfer.getInstance()};
@@ -222,6 +228,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	private String getQualifiedName(Object element) throws JavaModelException {
 		if (element instanceof IResource)
 			return ((IResource) element).getFullPath().toString();
+
+		if (element instanceof IJarEntryResource)
+			return ((IJarEntryResource)element).getFullPath().toString();
 
 		if (element instanceof IPackageFragmentRoot || element instanceof ITypeRoot) {
 			IResource resource= ((IJavaElement) element).getCorrespondingResource();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
@@ -94,10 +95,11 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		List elements= selection.toList();
 		IResource[] resources= ReorgUtils.getResources(elements);
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-		if (elements.size() != resources.length + javaElements.length)
+		IJarEntryResource[] jarEntryResources= ReorgUtils.getJarEntryResources(elements);
+		if (elements.size() != resources.length + javaElements.length + jarEntryResources.length)
 			setEnabled(false);
 		else
-			setEnabled(canEnable(resources, javaElements));
+			setEnabled(canEnable(resources, javaElements, jarEntryResources));
 	}
 
 	/* (non-Javadoc)
@@ -108,15 +110,16 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (elements.size() == resources.length + javaElements.length && canEnable(resources, javaElements))
-				doRun(resources, javaElements);
+			IJarEntryResource[] jarEntryResources= ReorgUtils.getJarEntryResources(elements);
+			if (elements.size() == resources.length + javaElements.length + jarEntryResources.length && canEnable(resources, javaElements, jarEntryResources))
+				doRun(resources, javaElements, jarEntryResources);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), ReorgMessages.CopyToClipboardAction_2, ReorgMessages.CopyToClipboardAction_3);
 		}
 	}
 
-	private void doRun(IResource[] resources, IJavaElement[] javaElements) throws CoreException {
-		ClipboardCopier copier= new ClipboardCopier(resources, javaElements, getShell(), fAutoRepeatOnFailure);
+	private void doRun(IResource[] resources, IJavaElement[] javaElements, IJarEntryResource[] jarEntryResources) throws CoreException {
+		ClipboardCopier copier= new ClipboardCopier(resources, javaElements, jarEntryResources, getShell(), fAutoRepeatOnFailure);
 
 		if (fClipboard != null) {
 			copier.copyToClipboard(fClipboard);
@@ -130,8 +133,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 	}
 
-	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) {
-		return new CopyToClipboardEnablementPolicy(resources, javaElements).canEnable();
+	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements, IJarEntryResource[] jarEntryResources) {
+		return new CopyToClipboardEnablementPolicy(resources, javaElements, jarEntryResources).canEnable();
 	}
 
 	//----------------------------------------------------------------------------------------//
@@ -140,41 +143,51 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private final boolean fAutoRepeatOnFailure;
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
+		private final IJarEntryResource[] fJarEntryResources;
 		private final Shell fShell;
 		private final ILabelProvider fLabelProvider;
 
-		private ClipboardCopier(IResource[] resources, IJavaElement[] javaElements, Shell shell, boolean autoRepeatOnFailure) {
+		private ClipboardCopier(IResource[] resources, IJavaElement[] javaElements, IJarEntryResource[] jarEntryResources, Shell shell, boolean autoRepeatOnFailure) {
 			Assert.isNotNull(resources);
 			Assert.isNotNull(javaElements);
+			Assert.isNotNull(jarEntryResources);
 			Assert.isNotNull(shell);
 			fResources= resources;
 			fJavaElements= javaElements;
+			fJarEntryResources= jarEntryResources;
 			fShell= shell;
 			fLabelProvider= createLabelProvider();
 			fAutoRepeatOnFailure= autoRepeatOnFailure;
 		}
 
 		public void copyToClipboard(Clipboard clipboard) throws CoreException {
-			//Set<String> fileNames
-			Set fileNames= new HashSet(fResources.length + fJavaElements.length);
-			StringBuffer namesBuf = new StringBuffer();
-			processResources(fileNames, namesBuf);
-			processJavaElements(fileNames, namesBuf);
+			StringBuffer namesBuf= new StringBuffer();
+			int countOfNonJarResources= fResources.length + fJavaElements.length;
 
-			IType[] mainTypes= ReorgUtils.getMainTypes(fJavaElements);
-			ICompilationUnit[] cusOfMainTypes= ReorgUtils.getCompilationUnits(mainTypes);
-			IResource[] resourcesOfMainTypes= ReorgUtils.getResources(cusOfMainTypes);
-			addFileNames(fileNames, resourcesOfMainTypes);
+			processJarEntryResources(namesBuf);
+			if (countOfNonJarResources == 0) {
+				copyToClipboard(fResources, new String[0], namesBuf.toString(), fJavaElements, new TypedSource[0], 0, clipboard);
+			} else {
+				//Set<String> fileNames
+				Set fileNames= new HashSet(countOfNonJarResources);
+				processResources(fileNames, namesBuf);
+				processJavaElements(fileNames, namesBuf);
 
-			IResource[] cuResources= ReorgUtils.getResources(getCompilationUnits(fJavaElements));
-			addFileNames(fileNames, cuResources);
+				IType[] mainTypes= ReorgUtils.getMainTypes(fJavaElements);
+				ICompilationUnit[] cusOfMainTypes= ReorgUtils.getCompilationUnits(mainTypes);
+				IResource[] resourcesOfMainTypes= ReorgUtils.getResources(cusOfMainTypes);
+				addFileNames(fileNames, resourcesOfMainTypes);
 
-			IResource[] resourcesForClipboard= ReorgUtils.union(fResources, ReorgUtils.union(cuResources, resourcesOfMainTypes));
-			IJavaElement[] javaElementsForClipboard= ReorgUtils.union(fJavaElements, cusOfMainTypes);
+				IResource[] cuResources= ReorgUtils.getResources(getCompilationUnits(fJavaElements));
+				addFileNames(fileNames, cuResources);
 
-			TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsForClipboard);
-			String[] fileNameArray= (String[]) fileNames.toArray(new String[fileNames.size()]);
-			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources, 0, clipboard);
+				IResource[] resourcesForClipboard= ReorgUtils.union(fResources, ReorgUtils.union(cuResources, resourcesOfMainTypes));
+				IJavaElement[] javaElementsForClipboard= ReorgUtils.union(fJavaElements, cusOfMainTypes);
+
+				TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsForClipboard);
+				String[] fileNameArray= (String[])fileNames.toArray(new String[fileNames.size()]);
+				copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources, 0, clipboard);
+			}
 		}
 
 		private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
@@ -187,8 +200,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				IResource resource= fResources[i];
 				addFileName(fileNames, resource);
 
-				if (i > 0)
-					namesBuf.append('\n');
+				if (namesBuf.length() > 0 || i > 0)
+					namesBuf.append(System.getProperty("line.separator")); //$NON-NLS-1$
 				namesBuf.append(getName(resource));
 			}
 		}
@@ -208,9 +221,23 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 						break;
 				}
 
-				if (fResources.length > 0 || i > 0)
-					namesBuf.append('\n');
+				if (namesBuf.length() > 0 || i > 0)
+					namesBuf.append(System.getProperty("line.separator")); //$NON-NLS-1$
 				namesBuf.append(getName(element));
+			}
+		}
+
+		/**
+		 * Gets the names of the jar entry resources and adds them to the string buffer.
+		 * 
+		 * @param namesBuf the names buffer
+		 * @since 3.6
+		 */
+		private void processJarEntryResources(StringBuffer namesBuf) {
+			for (int i= 0; i < fJarEntryResources.length; i++) {
+				if (namesBuf.length() > 0 || i > 0)
+					namesBuf.append(System.getProperty("line.separator")); //$NON-NLS-1$
+				namesBuf.append(getName(fJarEntryResources[i]));
 			}
 		}
 
@@ -292,26 +319,39 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private String getName(IJavaElement javaElement){
 			return fLabelProvider.getText(javaElement);
 		}
+		/**
+		 * Gets the name of the jar entry resource.
+		 * @param resource the jar entry resource
+		 * @return the name of the jar entry resource
+		 * @since 3.6
+		 */
+		private String getName(IJarEntryResource resource) {
+			return fLabelProvider.getText(resource);
+		}
 	}
 
 	private static class CopyToClipboardEnablementPolicy {
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
-		public CopyToClipboardEnablementPolicy(IResource[] resources, IJavaElement[] javaElements){
+		private final IJarEntryResource[] fJarEntryResources;
+
+		public CopyToClipboardEnablementPolicy(IResource[] resources, IJavaElement[] javaElements, IJarEntryResource[] jarEntryResources) {
 			Assert.isNotNull(resources);
 			Assert.isNotNull(javaElements);
+			Assert.isNotNull(jarEntryResources);
 			fResources= resources;
 			fJavaElements= javaElements;
+			fJarEntryResources= jarEntryResources;
 		}
 
 		public boolean canEnable() {
-			if (fResources.length + fJavaElements.length == 0)
+			if (fResources.length + fJavaElements.length + fJarEntryResources.length == 0)
 				return false;
 			if (hasProjects() && hasNonProjects())
 				return false;
 			if (! canCopyAllToClipboard())
 				return false;
-			if (! new ParentChecker(fResources, fJavaElements).haveCommonParent())
+			if (! new ParentChecker(fResources, fJavaElements, fJarEntryResources).haveCommonParent())
 				return false;
 			return true;
 		}
@@ -323,6 +363,9 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			for (int i= 0; i < fJavaElements.length; i++) {
 				if (! canCopyToClipboard(fJavaElements[i])) return false;
 			}
+			for (int i= 0; i < fJarEntryResources.length; i++) {
+				if (fJarEntryResources[i] == null) return false;
+			}			
 			return true;
 		}
 

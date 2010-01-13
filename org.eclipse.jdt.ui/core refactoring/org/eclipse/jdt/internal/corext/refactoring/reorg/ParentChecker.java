@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -24,12 +25,19 @@ import org.eclipse.jdt.core.JavaCore;
 public class ParentChecker {
 	private IResource[] fResources;
 	private IJavaElement[] fJavaElements;
+	private IJarEntryResource[] fJarResources;
 
 	public ParentChecker(IResource[] resources, IJavaElement[] javaElements) {
+		this(resources, javaElements, new IJarEntryResource[0]);
+	}
+
+	public ParentChecker(IResource[] resources, IJavaElement[] javaElements, IJarEntryResource[] jarResources) {
 		Assert.isNotNull(resources);
 		Assert.isNotNull(javaElements);
+		Assert.isNotNull(jarResources);
 		fResources= resources;
 		fJavaElements= javaElements;
+		fJarResources= jarResources;
 	}
 
 	public boolean haveCommonParent() {
@@ -37,11 +45,13 @@ public class ParentChecker {
 	}
 
 	public Object getCommonParent(){
+		if (fJavaElements.length == 0 && fResources.length == 0 && fJarResources.length == 0)
+			return null;
+		if (! resourcesHaveCommonParent() || ! javaElementsHaveCommonParent() || ! jarResourcesHaveCommonParent())
+			return null;
 		if (fJavaElements.length == 0 && fResources.length == 0)
-			return null;
-		if (! resourcesHaveCommonParent() || ! javaElementsHaveCommonParent())
-			return null;
-		if (fJavaElements.length == 0){
+			return getCommonJarResourceParent();
+		if (fJavaElements.length == 0 && fJarResources.length == 0) {
 			IResource commonResourceParent= getCommonResourceParent();
 			Assert.isNotNull(commonResourceParent);
 			IJavaElement convertedToJava= JavaCore.create(commonResourceParent);
@@ -50,19 +60,46 @@ public class ParentChecker {
 			else
 				return commonResourceParent;
 		}
-		if (fResources.length == 0)
+		if (fResources.length == 0 && fJarResources.length == 0)
 			return getCommonJavaElementParent();
 
-		IResource commonResourceParent= getCommonResourceParent();
-		IJavaElement commonJavaElementParent= getCommonJavaElementParent();
-		Assert.isNotNull(commonJavaElementParent);
-		Assert.isNotNull(commonResourceParent);
-		IJavaElement convertedToJava= JavaCore.create(commonResourceParent);
-		if (convertedToJava == null ||
-			! convertedToJava.exists() ||
-			! commonJavaElementParent.equals(convertedToJava))
-			return null;
-		return commonJavaElementParent;
+		IJavaElement convertedToJava= null;
+		IJavaElement commonJavaElementParent= null;
+		Object commonJarResourcesParent= null;
+		Object commonParent= null;
+		if (fResources.length != 0) {
+			IResource commonResourceParent= getCommonResourceParent();
+			Assert.isNotNull(commonResourceParent);
+			convertedToJava= JavaCore.create(commonResourceParent);
+			if (convertedToJava == null || !convertedToJava.exists())
+				return null;
+		}
+		if (fJavaElements.length != 0) {
+			commonJavaElementParent= getCommonJavaElementParent();
+			Assert.isNotNull(commonJavaElementParent);
+			if (convertedToJava != null && !commonJavaElementParent.equals(convertedToJava))
+				return null;
+		}
+		if (fJarResources.length != 0) {
+			commonJarResourcesParent= getCommonJarResourceParent();
+			Assert.isNotNull(commonJarResourcesParent);
+			commonParent= convertedToJava == null ? commonJavaElementParent : convertedToJava;
+			if (!commonJarResourcesParent.equals(commonParent))
+				return null;
+		}
+		return commonParent;
+	}
+
+	/**
+	 * Return the common parent for the jar resources.
+	 * 
+	 * @return the common parent for the jar resources
+	 * @since 3.6
+	 */
+	private Object getCommonJarResourceParent() {
+		Assert.isNotNull(fJarResources);
+		Assert.isTrue(fJarResources.length > 0);//safe - checked before
+		return fJarResources[0].getParent();
 	}
 
 	private IJavaElement getCommonJavaElementParent() {
@@ -96,6 +133,25 @@ public class ParentChecker {
 		Assert.isNotNull(firstParent);
 		for (int i= 1; i < fResources.length; i++) {
 			if (! firstParent.equals(fResources[i].getParent()))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks whether the jar resources have the same parent.
+	 * 
+	 * @return <code>true</code> if the jar resources have the same parent, <code>false</code>
+	 *         otherwise
+	 * @since 3.6
+	 */
+	private boolean jarResourcesHaveCommonParent() {
+		if (fJarResources.length == 0)
+			return true;
+		Object firstParent= fJarResources[0].getParent();
+		Assert.isNotNull(firstParent);
+		for (int i= 1; i < fJarResources.length; i++) {
+			if (! firstParent.equals(fJarResources[i].getParent()))
 				return false;
 		}
 		return true;

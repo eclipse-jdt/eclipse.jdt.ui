@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -252,6 +253,23 @@ public class ReorgUtils {
 				resources.add(element);
 		}
 		return (IJavaElement[]) resources.toArray(new IJavaElement[resources.size()]);
+	}
+
+	/**
+	 * Returns the jar entry resources from the list of elements.
+	 * 
+	 * @param elements the list of elements
+	 * @return the array of jar entry resources
+	 * @since 3.6
+	 */
+	public static IJarEntryResource[] getJarEntryResources(List elements) {
+		List resources= new ArrayList(elements.size());
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IJarEntryResource)
+				resources.add(element);
+		}
+		return (IJarEntryResource[]) resources.toArray(new IJarEntryResource[resources.size()]);
 	}
 
 	public static IWorkingSet[] getWorkingSets(List elements) {
