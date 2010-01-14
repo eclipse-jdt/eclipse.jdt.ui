@@ -15,6 +15,7 @@ import junit.framework.TestCase;
 import org.eclipse.text.tests.Accessor;
 
 
+
 /**
  * Tests that internal code which is used by a product doesn't get removed.
  * 
@@ -22,25 +23,22 @@ import org.eclipse.text.tests.Accessor;
  */
 public class InternalsNotRemovedTest extends TestCase {
 
+	static final String[] INTERNAL_FIELDS= new String[] {
 
-	public void testSourceRangeNotRemove() {
-		testClassNotRemoved("org.eclipse.jdt.internal.corext.SourceRange");
-	}
+			// See https://bugs.eclipse.org/296836
+			org.eclipse.jdt.internal.ui.actions.ActionMessages.OrganizeImportsAction_summary_added,
+			org.eclipse.jdt.internal.ui.actions.ActionMessages.OrganizeImportsAction_summary_removed,
 
-	public void testActionMessageNotRemoved() {
+			// See https://bugs.eclipse.org/296836
+			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.ReorgGroup_paste,
+			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.ReorgGroup_delete,
+			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.CutSourceReferencesToClipboardAction_cut
 
-		// See https://bugs.eclipse.org/296836
-		testFieldNotRemoved("org.eclipse.jdt.internal.ui.actions.ActionMessages", "OrganizeImportsAction_summary_added");
-		testFieldNotRemoved("org.eclipse.jdt.internal.ui.actions.ActionMessages", "OrganizeImportsAction_summary_removed");
-	}
+	};
 
-	public void testReorgMessagesNotRemoved() {
-		
-		// See https://bugs.eclipse.org/296836
-		testFieldNotRemoved("org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages", "ReorgGroup_paste");
-		testFieldNotRemoved("org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages", "ReorgGroup_delete");
-		testFieldNotRemoved("org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages", "CutSourceReferencesToClipboardAction_cut");
-	}
+	static final Class[] INTERNAL_TYPES= new Class[] {
+			org.eclipse.jdt.internal.corext.SourceRange.class
+	};
 
 
 	private void testFieldNotRemoved(String className, String fieldName) {

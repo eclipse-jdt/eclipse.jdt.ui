@@ -19,8 +19,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 
 /**
- * DO NOT REMOVE, used in a product
- * 
+ * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.6, replaced by {@link org.eclipse.jdt.core.SourceRange}
  */
 public class SourceRange implements ISourceRange { // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=88265 (Allow implementation of ISourceRange)

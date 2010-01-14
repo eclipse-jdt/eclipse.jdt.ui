@@ -276,10 +276,16 @@ public final class ActionMessages extends NLS {
 	public static String OrganizeImportsAction_error_message;
 	public static String OrganizeImportsAction_single_error_parse;
 	
-	/* DO NOT REMOVE THIS CONSTANT, it is used in a product, see https://bugs.eclipse.org/296836 */
+	/**
+	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/296836.
+	 * @deprecated As of 3.6, replaced by {@link #OrganizeImportsAction_summary_added_singular} and {@link #OrganizeImportsAction_summary_added_plural} 
+	 */
 	public static String OrganizeImportsAction_summary_added;
-	
-	/* DO NOT REMOVE THIS CONSTANT, it is used in a product, see https://bugs.eclipse.org/296836 */
+
+	/**
+	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/296836.
+	 * @deprecated As of 3.6, replaced by {@link #OrganizeImportsAction_summary_removed_singular} and {@link #OrganizeImportsAction_summary_removed_plural}
+	 */
 	public static String OrganizeImportsAction_summary_removed;
 
 	public static String OrganizeImportsAction_summary_added_singular;

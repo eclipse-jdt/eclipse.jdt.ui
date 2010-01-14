@@ -46,13 +46,22 @@ public final class ReorgMessages extends NLS {
 	public static String ReorgQueries_resourceExistsWithDifferentCaseMassage;
 	public static String ReorgQueries_skip_all;
 
-	/* DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392 */
+	/**
+	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392.
+	 * @deprecated As of 3.6
+	 */
 	public static String ReorgGroup_paste;
 
-	/* DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392 */
+	/**
+	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392.
+	 * @deprecated As of 3.6
+	 */
 	public static String ReorgGroup_delete;
 
-	/* DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392 */
+	/**
+	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392.
+	 * @deprecated As of 3.6
+	 */
 	public static String CutSourceReferencesToClipboardAction_cut;
 
 	public static String CopyToClipboardAction_text;
