@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,10 +43,11 @@ import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
+
 /**
  * Custom Search engine for suite() methods
  */
-public class TestSearchEngine {
+public class CoreTestSearchEngine {
 
 	public static boolean isTestOrTestSuite(IType declaringType) throws CoreException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(declaringType);
@@ -173,7 +174,7 @@ public class TestSearchEngine {
 			IType type= subtypes[i];
 			int cachedFlags= typeHierarchy.getCachedFlags(type);
 			if (!Flags.isInterface(cachedFlags) && !Flags.isAbstract(cachedFlags) // do the cheaper tests first
-					&& region.contains(type) && TestSearchEngine.isAccessibleClass(type)) {
+					&& region.contains(type) && CoreTestSearchEngine.isAccessibleClass(type)) {
 				result.add(type);
 			}
 		}
@@ -198,7 +199,7 @@ public class TestSearchEngine {
 			}
 
 			IType declaringType= ((IMethod) enclosingElement).getDeclaringType();
-			if (!TestSearchEngine.isAccessibleClass(declaringType)) {
+			if (!CoreTestSearchEngine.isAccessibleClass(declaringType)) {
 				return;
 			}
 			fResult.add(declaringType);

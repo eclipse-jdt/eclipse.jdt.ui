@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 /**
  * Refactoring processor to replace type occurrences by a super type.
@@ -294,7 +295,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 										solveSuperTypeConstraints(subRewrite.getCu(), subRewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 100), status);
 										if (!status.hasFatalError()) {
 											rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet(), status, new SubProgressMonitor(monitor, 200));
-											final TextChange change= subRewrite.createChange();
+											final TextChange change= subRewrite.createChange(true);
 											if (change != null)
 												manager.manage(subRewrite.getCu(), change);
 										}
@@ -447,7 +448,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 						subMonitor.worked(10);
 					}
 					if (!sourceUnit.equals(unit)) {
-						final TextChange change= currentRewrite.createChange();
+						final TextChange change= currentRewrite.createChange(true);
 						if (change != null)
 							manager.manage(unit, change);
 					}

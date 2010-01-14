@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit.util;
 
 import org.eclipse.core.runtime.CoreException;
@@ -288,11 +287,11 @@ public class JUnitStubUtility {
 	}
 
 	public static boolean is50OrHigher(IJavaProject project) {
-		return TestSearchEngine.is50OrHigher(project);
+		return CoreTestSearchEngine.is50OrHigher(project);
 	}
 
 	public static boolean is50OrHigher(String compliance) {
-		return TestSearchEngine.is50OrHigher(compliance);
+		return CoreTestSearchEngine.is50OrHigher(compliance);
 	}
 
 	public static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {

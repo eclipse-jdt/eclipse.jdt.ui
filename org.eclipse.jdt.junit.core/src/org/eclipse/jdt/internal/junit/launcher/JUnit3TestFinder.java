@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *     David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit.launcher;
 
 import java.util.Set;
@@ -31,7 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 
 public class JUnit3TestFinder implements ITestFinder {
 
@@ -62,7 +61,7 @@ public class JUnit3TestFinder implements ITestFinder {
 				if (pm.isCanceled()) {
 					return;
 				}
-				TestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 3));
+				CoreTestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 3));
 			}
 			if (pm.isCanceled()) {
 				return;
@@ -79,17 +78,17 @@ public class JUnit3TestFinder implements ITestFinder {
 		if (testCaseType == null)
 			return;
 
-		IRegion region= TestSearchEngine.getRegion(element);
+		IRegion region= CoreTestSearchEngine.getRegion(element);
 		ITypeHierarchy typeHierarchy= javaProject.newTypeHierarchy(testCaseType, region, pm);
-		TestSearchEngine.findTestImplementorClasses(typeHierarchy, testCaseType, region, result);
+		CoreTestSearchEngine.findTestImplementorClasses(typeHierarchy, testCaseType, region, result);
 	}
 
 	public boolean isTest(IType type) throws JavaModelException {
-		return TestSearchEngine.isAccessibleClass(type) && (TestSearchEngine.hasSuiteMethod(type) || isTestImplementor(type));
+		return CoreTestSearchEngine.isAccessibleClass(type) && (CoreTestSearchEngine.hasSuiteMethod(type) || isTestImplementor(type));
 	}
 
 	private static boolean isTestImplementor(IType type) throws JavaModelException {
-		if (!Flags.isAbstract(type.getFlags()) && TestSearchEngine.isTestImplementor(type)) {
+		if (!Flags.isAbstract(type.getFlags()) && CoreTestSearchEngine.isTestImplementor(type)) {
 			return true;
 		}
 		return false;

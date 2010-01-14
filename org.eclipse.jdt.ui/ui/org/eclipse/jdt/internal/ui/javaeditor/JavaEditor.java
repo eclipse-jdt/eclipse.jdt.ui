@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1829,40 +1829,42 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		editorComposite.setLayout(fillLayout);
 
 		IPreferenceStore store= getPreferenceStore();
-		JavaSourceViewer javaSourceViewer= createJavaSourceViewer(editorComposite, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
+		ISourceViewer sourceViewer= createJavaSourceViewer(editorComposite, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 
-		JavaUIHelp.setHelp(this, javaSourceViewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
+		JavaUIHelp.setHelp(this, sourceViewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
 
 		/*
 		 * This is a performance optimization to reduce the computation of
 		 * the text presentation triggered by {@link #setVisibleDocument(IDocument)}
 		 */
-		if (isFoldingEnabled() && (store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
-			javaSourceViewer.prepareDelayedProjection();
+		if (sourceViewer instanceof JavaSourceViewer && isFoldingEnabled() && (store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
+			((JavaSourceViewer)sourceViewer).prepareDelayedProjection();
 
-		fProjectionSupport= new ProjectionSupport(javaSourceViewer, getAnnotationAccess(), getSharedColors());
-		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
-		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
-		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
-			public IInformationControl createInformationControl(Shell shell) {
-				return new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString());
-			}
-		});
-		fProjectionSupport.setInformationPresenterControlCreator(new IInformationControlCreator() {
-			public IInformationControl createInformationControl(Shell shell) {
-				return new SourceViewerInformationControl(shell, true, getOrientation(), null);
-			}
-		});
-		fProjectionSupport.install();
+		if (sourceViewer instanceof ProjectionViewer) {
+			fProjectionSupport= new ProjectionSupport((ProjectionViewer)sourceViewer, getAnnotationAccess(), getSharedColors());
+			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
+			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
+			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
+				public IInformationControl createInformationControl(Shell shell) {
+					return new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString());
+				}
+			});
+			fProjectionSupport.setInformationPresenterControlCreator(new IInformationControlCreator() {
+				public IInformationControl createInformationControl(Shell shell) {
+					return new SourceViewerInformationControl(shell, true, getOrientation(), null);
+				}
+			});
+			fProjectionSupport.install();
 
-		fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
-		if (fProjectionModelUpdater != null)
-			fProjectionModelUpdater.install(this, javaSourceViewer);
+			fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
+			if (fProjectionModelUpdater != null)
+				fProjectionModelUpdater.install(this, (ProjectionViewer)sourceViewer);
+		}
 
 		// ensure source viewer decoration support has been created and configured
-		getSourceViewerDecorationSupport(javaSourceViewer);
+		getSourceViewerDecorationSupport(sourceViewer);
 
-		return javaSourceViewer;
+		return sourceViewer;
 	}
 
 	/**
@@ -1979,7 +1981,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 * @return the source viewer
 	 */
-	protected JavaSourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
 		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 	}
 

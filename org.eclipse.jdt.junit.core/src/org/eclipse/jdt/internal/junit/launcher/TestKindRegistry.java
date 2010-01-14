@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *     David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit.launcher;
 
 import java.util.ArrayList;
@@ -27,7 +26,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
+
 
 public class TestKindRegistry {
 
@@ -109,7 +109,7 @@ public class TestKindRegistry {
 	public static String getContainerTestKindId(IJavaElement element) {
 		if (element != null) {
 			IJavaProject project= element.getJavaProject();
-			if (TestSearchEngine.is50OrHigher(project) && TestSearchEngine.hasTestAnnotation(project)) {
+			if (CoreTestSearchEngine.is50OrHigher(project) && CoreTestSearchEngine.hasTestAnnotation(project)) {
 				return JUNIT4_TEST_KIND_ID;
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,6 +135,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
 
 public final class MoveInnerToTopRefactoring extends Refactoring {
 
@@ -834,7 +835,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 					createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), inputCU, unit, true, status, monitor);
 				}
 				adjustor.rewriteVisibility(targetRewrite.getCu(), new SubProgressMonitor(monitor, 1));
-				manager.manage(unit, targetRewrite.createChange());
+				manager.manage(unit, targetRewrite.createChange(true));
 			}
 			if (fNewSourceOfInputType == null) {
 				fNewSourceOfInputType= createNewSource(fSourceRewrite, inputCU);
@@ -1022,7 +1023,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private String createNewSource(final CompilationUnitRewrite targetRewrite, final ICompilationUnit unit) throws CoreException, JavaModelException {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(unit);
-		TextChange change= targetRewrite.createChange();
+		TextChange change= targetRewrite.createChange(true);
 		if (change == null)
 			change= new CompilationUnitChange("", unit); //$NON-NLS-1$
 		final String source= change.getPreviewContent(new NullProgressMonitor());

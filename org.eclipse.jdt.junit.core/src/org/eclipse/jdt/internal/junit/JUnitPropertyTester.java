@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
+
 
 /**
  * JUnitPropertyTester provides propertyTester(s) for IResource types
@@ -109,7 +110,7 @@ public class JUnitPropertyTester extends PropertyTester {
 				testType= ((IMember) element).getDeclaringType();
 			}
 			if (testType != null && testType.exists()) {
-				return TestSearchEngine.isTestOrTestSuite(testType);
+				return CoreTestSearchEngine.isTestOrTestSuite(testType);
 			}
 		} catch (CoreException e) {
 			// ignore, return false

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,8 +100,8 @@ import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
+import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.internal.junit.util.UITestSearchEngine;
 
 import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -119,6 +119,7 @@ import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+
 
 /**
  * The launch configuration tab for JUnit.
@@ -556,7 +557,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			radioSetting[0]= fTestRadioButton.getSelection();
 			radioSetting[1]= fTestContainerRadioButton.getSelection();
 
-			types= UITestSearchEngine.findTests(getLaunchConfigurationDialog(), javaProject, getSelectedTestKind());
+			types= TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaProject, getSelectedTestKind());
 		} catch (InterruptedException e) {
 			setErrorMessage(e.getMessage());
 			return;
@@ -889,13 +890,13 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 	private void validateJavaProject(IJavaProject javaProject) {
-		if (! TestSearchEngine.hasTestCaseType(javaProject)) {
+		if (! CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
 			return;
 		}
 		TestKind testKind = getSelectedTestKind();
 		if (testKind != null && TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())) {
-			if (! TestSearchEngine.hasTestAnnotation(javaProject)) {
+			if (! CoreTestSearchEngine.hasTestAnnotation(javaProject)) {
 				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testannotationnotonpath);
 				return;
 			}
@@ -1001,7 +1002,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				ITestKind testKind= TestKindRegistry.getContainerTestKind(javaElement);
 				testKindId= testKind.getId();
 
-				IType[] types = UITestSearchEngine.findTests(getLaunchConfigurationDialog(), javaElement, testKind);
+				IType[] types = TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaElement, testKind);
 				if ((types == null) || (types.length < 1)) {
 					return;
 				}

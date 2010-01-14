@@ -38,6 +38,13 @@ public final class ReorgMessages extends NLS {
 	public static String RenameLinkedMode_error_saving_editor;
 	public static String JdtMoveAction_update_references_singular;
 	public static String JdtMoveAction_update_references_plural;
+
+	/**
+	 * DO NOT REMOVE, used in a product.
+	 * @deprecated As of 3.6
+	 */
+	public static String JdtMoveAction_update_references;
+
 	public static String ReorgQueries_enterNewNameQuestion;
 	public static String ReorgQueries_nameConflictMessage;
 	public static String ReorgQueries_resourceWithThisNameAlreadyExists;

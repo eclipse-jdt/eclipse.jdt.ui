@@ -15,7 +15,6 @@ import junit.framework.TestCase;
 import org.eclipse.text.tests.Accessor;
 
 
-
 /**
  * Tests that internal code which is used by a product doesn't get removed.
  * 
@@ -32,21 +31,36 @@ public class InternalsNotRemovedTest extends TestCase {
 			// See https://bugs.eclipse.org/296836
 			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.ReorgGroup_paste,
 			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.ReorgGroup_delete,
-			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.CutSourceReferencesToClipboardAction_cut
+			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.CutSourceReferencesToClipboardAction_cut,
+
+			org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages.JdtMoveAction_update_references,
+
+			org.eclipse.jdt.internal.ui.JavaUIMessages.TypeSelectionDialog_lowerLabel,
+			org.eclipse.jdt.internal.ui.JavaUIMessages.TypeSelectionDialog_upperLabel
 
 	};
 
 	static final Class[] INTERNAL_TYPES= new Class[] {
-			org.eclipse.jdt.internal.corext.SourceRange.class
+			org.eclipse.jdt.internal.corext.SourceRange.class,
+			org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper.class,
+			org.eclipse.jdt.internal.ui.util.PixelConverter.class,
+			org.eclipse.jdt.internal.junit.launcher.TestSelectionDialog.class,
+			org.eclipse.jdt.internal.corext.dom.NodeFinder.class,
+			org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange.class,
+			org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2.class
 	};
 
+	public void testInternalMethodsNotRemoved() throws Exception {
+		new org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite(null).createChange();
+	}
 
-	private void testFieldNotRemoved(String className, String fieldName) {
+
+	void testFieldNotRemoved(String className, String fieldName) {
 		Accessor classObject= new Accessor(className, getClass().getClassLoader());
 		classObject.getField(fieldName);
 	}
 
-	private void testClassNotRemoved(String className) {
+	void testClassNotRemoved(String className) {
 		new Accessor(className, getClass().getClassLoader());
 	}
 }

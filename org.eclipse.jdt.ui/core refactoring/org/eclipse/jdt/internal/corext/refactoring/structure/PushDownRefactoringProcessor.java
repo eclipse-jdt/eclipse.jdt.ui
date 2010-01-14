@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,6 +102,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 /**
  * Refactoring processor for the push down refactoring.
@@ -769,7 +770,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				unit= (ICompilationUnit) iterator.next();
 				rewrite= (CompilationUnitRewrite) rewrites.get(unit);
 				if (rewrite != null)
-					manager.manage(unit, rewrite.createChange());
+					manager.manage(unit, rewrite.createChange(true));
 			}
 			return manager;
 		} finally {

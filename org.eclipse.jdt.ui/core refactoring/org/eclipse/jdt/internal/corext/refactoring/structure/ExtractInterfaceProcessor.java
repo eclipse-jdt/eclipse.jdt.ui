@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -127,6 +127,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 /**
  * Refactoring processor to extract interfaces.
@@ -428,7 +429,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				if (fReplace)
 					rewriteTypeOccurrences(manager, sourceRewrite, copy, replacements, status, new SubProgressMonitor(monitor, 220));
 				createMethodComments(sourceRewrite, replacements);
-				manager.manage(fSubType.getCompilationUnit(), sourceRewrite.createChange());
+				manager.manage(fSubType.getCompilationUnit(), sourceRewrite.createChange(true));
 			}
 			return manager;
 		} finally {
@@ -1021,7 +1022,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				}
 			}
 			if (!isSubUnit) {
-				final TextChange change= currentRewrite.createChange();
+				final TextChange change= currentRewrite.createChange(true);
 				if (change != null)
 					manager.manage(unit, change);
 			}

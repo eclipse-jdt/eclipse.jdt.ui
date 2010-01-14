@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,8 +92,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PullUpDescriptor;
 
@@ -1201,7 +1201,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					ICompilationUnit unit= (ICompilationUnit) iterator.next();
 					CompilationUnitRewrite rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 					if (rewrite != null) {
-						final CompilationUnitChange change= rewrite.createChange(false, null);
+						final CompilationUnitChange change= rewrite.createChange(false);
 						if (change != null)
 							manager.manage(unit, change);
 					}
@@ -1799,7 +1799,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			unit= (ICompilationUnit) iterator.next();
 			rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 			if (rewrite != null) {
-				final CompilationUnitChange change= rewrite.createChange();
+				final CompilationUnitChange change= rewrite.createChange(true);
 				if (change != null)
 					manager.manage(unit, change);
 			}
@@ -1862,7 +1862,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				}
 			}
 			if (!isTouched) {
-				final TextChange change= currentRewrite.createChange();
+				final TextChange change= currentRewrite.createChange(true);
 				if (change != null)
 					manager.manage(unit, change);
 			}

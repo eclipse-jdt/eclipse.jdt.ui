@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,17 +177,38 @@ public class CompilationUnitRewrite {
 	 * Creates a compilation unit change based on the events recorded by this compilation unit
 	 * rewrite.
 	 * 
+	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
 	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 * @throws IllegalArgumentException when the AST rewrite encounters problems
+	 * @since 3.6
 	 */
-	public CompilationUnitChange createChange() throws CoreException {
-		return createChange(true, null);
+	public CompilationUnitChange createChange(boolean generateGroups) throws CoreException {
+		return createChange(generateGroups, null);
 	}
 
 	/**
-	 * Creates a compilation unit change based on the events recorded by this compilation unit rewrite.
-	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
+	 * Creates a compilation unit change based on the events recorded by this compilation unit
+	 * rewrite.
+	 * <p>
+	 * DO NOT REMOVE, used in a product.</p>
+	 * 
+	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
+	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
+	 * @throws IllegalArgumentException when the AST rewrite encounters problems
+	 * @deprecated since 3.5, replaced by {@link #createChange(boolean)}
+	 */
+	public org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange createChange() throws CoreException {
+		CompilationUnitChange change= createChange(true);
+		return new org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange(change);
+	}
+
+	/**
+	 * Creates a compilation unit change based on the events recorded by this compilation unit
+	 * rewrite.
+	 * 
+	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code>
+	 *            otherwise
 	 * @param monitor the progress monitor or <code>null</code>
 	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails

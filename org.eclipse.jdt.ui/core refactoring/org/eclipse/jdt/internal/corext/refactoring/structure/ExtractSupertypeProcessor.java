@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,6 +105,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 /**
  * Refactoring processor for the extract supertype refactoring.
@@ -392,7 +393,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fOwner, unit, root);
 			createTypeSignature(rewrite, subDeclaration, extractedType, extractedBinding, new NullProgressMonitor());
 			final Document document= new Document(unit.getBuffer().getContents());
-			final CompilationUnitChange change= rewrite.createChange();
+			final CompilationUnitChange change= rewrite.createChange(true);
 			if (change != null) {
 				fLayerChanges.put(unit.getPrimary(), change);
 				final TextEdit edit= change.getEdit();
@@ -613,7 +614,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			createTypeParameters(targetRewrite, superType, declaringDeclaration, targetDeclaration);
 			createTypeSignature(targetRewrite, superType, declaringDeclaration, targetDeclaration);
 			createNecessaryConstructors(targetRewrite, superType, targetDeclaration, status);
-			final TextEdit edit= targetRewrite.createChange().getEdit();
+			final TextEdit edit= targetRewrite.createChange(true).getEdit();
 			try {
 				edit.apply(document, TextEdit.UPDATE_REGIONS);
 			} catch (MalformedTreeException exception) {
@@ -1100,7 +1101,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				if (unit.equals(extractedUnit)) {
 					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 					if (rewrite != null) {
-						CompilationUnitChange change= rewrite.createChange();
+						CompilationUnitChange change= rewrite.createChange(true);
 
 						if (change != null) {
 							final TextEdit edit= ((TextChange) change).getEdit();
@@ -1122,7 +1123,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 					if (rewrite != null) {
 						final CompilationUnitChange layerChange= (CompilationUnitChange) fLayerChanges.get(unit.getPrimary());
-						final CompilationUnitChange rewriteChange= rewrite.createChange();
+						final CompilationUnitChange rewriteChange= rewrite.createChange(true);
 						if (rewriteChange != null && layerChange != null) {
 							final MultiStateCompilationUnitChange change= new MultiStateCompilationUnitChange(rewriteChange.getName(), unit);
 							change.addChange(layerChange);

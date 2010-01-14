@@ -9,7 +9,6 @@
  *   David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.junit.launcher;
 
 import java.util.Collection;
@@ -52,7 +51,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.JUnitMessages;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 
 
 public class JUnit4TestFinder implements ITestFinder {
@@ -125,7 +124,7 @@ public class JUnit4TestFinder implements ITestFinder {
 		try {
 			pm.beginTask(JUnitMessages.JUnit4TestFinder_searching_description, 4);
 
-			IRegion region= TestSearchEngine.getRegion(element);
+			IRegion region= CoreTestSearchEngine.getRegion(element);
 			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, new SubProgressMonitor(pm, 1));
 			IType[] allClasses= hierarchy.getAllClasses();
 
@@ -145,7 +144,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			// find all classes in the region
 			for (Iterator iterator= candidates.iterator(); iterator.hasNext();) {
 				IType curr= (IType) iterator.next();
-				if (TestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
+				if (CoreTestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
 					result.add(curr);
 				}
 			}
@@ -153,11 +152,11 @@ public class JUnit4TestFinder implements ITestFinder {
 			// add all classes implementing JUnit 3.8's Test interface in the region
 			IType testInterface= element.getJavaProject().findType(JUnitCorePlugin.TEST_INTERFACE_NAME);
 			if (testInterface != null) {
-				TestSearchEngine.findTestImplementorClasses(hierarchy, testInterface, region, result);
+				CoreTestSearchEngine.findTestImplementorClasses(hierarchy, testInterface, region, result);
 			}
 
 			//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods:
-			TestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 1));
+			CoreTestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
 		}
@@ -199,8 +198,8 @@ public class JUnit4TestFinder implements ITestFinder {
 	}
 
 	private boolean internalIsTest(IType type, IProgressMonitor monitor) throws JavaModelException {
-		if (TestSearchEngine.isAccessibleClass(type)) {
-			if (TestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
+		if (CoreTestSearchEngine.isAccessibleClass(type)) {
+			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
@@ -252,6 +251,6 @@ public class JUnit4TestFinder implements ITestFinder {
 		if (Annotation.RUN_WITH.annotatesTypeOrSuperTypes(binding) || Annotation.TEST.annotatesAtLeastOneMethod(binding)) {
 			return true;
 		}
-		return TestSearchEngine.isTestImplementor(binding);
+		return CoreTestSearchEngine.isTestImplementor(binding);
 	}
 }

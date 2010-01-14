@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,7 +108,7 @@ public class DelegateCreatorTests extends RefactoringTest {
 			if (destination != null) creator.setNewLocation(destination);
 			creator.prepareDelegate();
 			creator.createEdit();
-			CompilationUnitChange createChange= rewrite.createChange();
+			CompilationUnitChange createChange= rewrite.createChange(true);
 			createChange.initializeValidationData(new NullProgressMonitor());
 			createChange.perform(new NullProgressMonitor());
 			assertEqualLines("invalid delegate created", getFileContents(getOutputTestFileName("A")), cu.getSource());

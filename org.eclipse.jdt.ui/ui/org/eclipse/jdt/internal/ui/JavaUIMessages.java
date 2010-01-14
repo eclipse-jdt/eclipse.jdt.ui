@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,10 +50,43 @@ public final class JavaUIMessages extends NLS {
 	public static String MultiElementListSelectionDialog_pageInfoMessage;
 	public static String PackageSelectionDialog_progress_findEmpty;
 	public static String PackageSelectionDialog_progress_search;
+	
+
+	public static String TypeInfoViewer_job_label;
+	public static String TypeInfoViewer_job_error;
+	public static String TypeInfoViewer_job_cancel;
+	public static String TypeInfoViewer_default_package;
+	public static String TypeInfoViewer_progress_label;
+	public static String TypeInfoViewer_searchJob_taskName;
+	public static String TypeInfoViewer_syncJob_label;
+	public static String TypeInfoViewer_syncJob_taskName;
+	public static String TypeInfoViewer_progressJob_label;
+	public static String TypeInfoViewer_remove_from_history;
+	public static String TypeInfoViewer_separator_message;
+	public static String TypeInfoViewer_library_name_format;
+	public static String TypeSelectionComponent_label;
+	public static String TypeSelectionComponent_menu;
+	public static String TypeSelectionComponent_show_status_line_label;
+	public static String TypeSelectionComponent_fully_qualify_duplicates_label;
+	public static String TypeSelectionDialog2_title_format;
+	public static String TypeSelectionDialog_dialogMessage;
+	public static String TypeSelectionDialog_errorTitle;
+	public static String TypeSelectionDialog_error_type_doesnot_exist;
 
 	public static String TypeSelectionDialog_error3Message;
 	public static String TypeSelectionDialog_error3Title;
 	public static String TypeSelectionDialog_progress_consistency;
+	
+	/**
+	 * DO NOT REMOVE, used in a product.
+	 * @deprecated As of 3.6
+	 */
+	public static String TypeSelectionDialog_lowerLabel;
+	/**
+	 * DO NOT REMOVE, used in a product.
+	 * @deprecated As of 3.6
+	 */
+	public static String TypeSelectionDialog_upperLabel;
 
 	public static String ExceptionDialog_seeErrorLogMessage;
 

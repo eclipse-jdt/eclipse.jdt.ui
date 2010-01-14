@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
@@ -85,6 +85,7 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+
 
 /**
  * The class <code>NewTestCaseWizardPageOne</code> contains controls and validation routines
@@ -227,7 +228,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 			if (classToTest != null) {
 				try {
-					if (!TestSearchEngine.isTestImplementor(classToTest)) {
+					if (!CoreTestSearchEngine.isTestImplementor(classToTest)) {
 						setClassUnderTest(classToTest.getFullyQualifiedName('.'));
 					}
 				} catch (JavaModelException e) {
@@ -1100,7 +1101,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_is_interface);
 					return status;
 				}
-				if (!TestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
+				if (!CoreTestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
 					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, BasicElementLabels.getJavaElementName(JUnitCorePlugin.TEST_INTERFACE_NAME)));
 					return status;
 				}

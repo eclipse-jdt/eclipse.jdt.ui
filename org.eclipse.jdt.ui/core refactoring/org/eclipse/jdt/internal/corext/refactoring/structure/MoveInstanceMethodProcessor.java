@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,6 +152,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
 
 /**
  * Refactoring processor to move instance methods.
@@ -1812,7 +1813,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
 				unit= (ICompilationUnit) iterator.next();
 				rewrite= (CompilationUnitRewrite) rewrites.get(unit);
-				manager.manage(unit, rewrite.createChange());
+				manager.manage(unit, rewrite.createChange(true));
 			}
 			return manager;
 		} finally {
