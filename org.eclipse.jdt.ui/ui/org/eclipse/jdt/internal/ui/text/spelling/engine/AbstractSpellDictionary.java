@@ -100,7 +100,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * Canonical name for UTF-8 encoding
 	 * @since 3.6
 	 */
-	private static final String UTF8= "UTF8"; //$NON-NLS-1$
+	private static final String UTF_8= "UTF-8"; //$NON-NLS-1$
 
 	/** The bucket capacity */
 	protected static final int BUCKET_CAPACITY= 4;
@@ -160,7 +160,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	protected final Object getCandidates(final String hash) {
 		ByteArrayWrapper hashBytes;
 		try {
-			hashBytes= new ByteArrayWrapper(hash.getBytes(UTF8));
+			hashBytes= new ByteArrayWrapper(hash.getBytes(UTF_8));
 		} catch (UnsupportedEncodingException e) {
 			JavaPlugin.log(e);
 			return null;
@@ -199,7 +199,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			else if (candidates instanceof byte[]) {
 				String candidate;
 				try {
-					candidate= new String((byte[])candidates, UTF8);
+					candidate= new String((byte[])candidates, UTF_8);
 				} catch (UnsupportedEncodingException e) {
 					JavaPlugin.log(e);
 					return result;
@@ -221,7 +221,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 				String candidate;
 				try {
-					candidate= new String((byte[])candidateList.get(offset), UTF8);
+					candidate= new String((byte[])candidateList.get(offset), UTF_8);
 				} catch (UnsupportedEncodingException e) {
 					JavaPlugin.log(e);
 					return result;
@@ -269,7 +269,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		else if (candidates instanceof byte[]) {
 			String candidate;
 			try {
-				candidate= new String((byte[])candidates, UTF8);
+				candidate= new String((byte[])candidates, UTF_8);
 			} catch (UnsupportedEncodingException e) {
 				JavaPlugin.log(e);
 				return;
@@ -288,7 +288,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		for (int index= 0; index < candidateList.size(); index++) {
 			String candidate;
 			try {
-				candidate= new String((byte[])candidateList.get(index), UTF8);
+				candidate= new String((byte[])candidateList.get(index), UTF_8);
 			} catch (UnsupportedEncodingException e) {
 				JavaPlugin.log(e);
 				return;
@@ -476,8 +476,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		ByteArrayWrapper hashBytes;
 		byte[] wordBytes;
 		try {
-			hashBytes= new ByteArrayWrapper(hash.getBytes(UTF8));
-			wordBytes= word.getBytes(UTF8);
+			hashBytes= new ByteArrayWrapper(hash.getBytes(UTF_8));
+			wordBytes= word.getBytes(UTF_8);
 		} catch (UnsupportedEncodingException e) {
 			JavaPlugin.log(e);
 			return;
@@ -522,7 +522,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		else if (candidates instanceof byte[]) {
 			String candidate;
 			try {
-				candidate= new String((byte[])candidates, UTF8);
+				candidate= new String((byte[])candidates, UTF_8);
 			} catch (UnsupportedEncodingException e) {
 				JavaPlugin.log(e);
 				return false;
@@ -535,8 +535,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		byte[] wordBytes;
 		byte[] lowercaseWordBytes;
 		try {
-			wordBytes= word.getBytes(UTF8);
-			lowercaseWordBytes= word.toLowerCase().getBytes(UTF8);
+			wordBytes= word.getBytes(UTF_8);
+			lowercaseWordBytes= word.toLowerCase().getBytes(UTF_8);
 		} catch (UnsupportedEncodingException e) {
 			JavaPlugin.log(e);
 			return false;
