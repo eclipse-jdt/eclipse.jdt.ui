@@ -10,17 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.ui.internal.compatibility;
 
-import junit.framework.TestCase;
-
 import org.eclipse.text.tests.Accessor;
+
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 
 /**
- * Tests that internal code which is used by a product doesn't get removed.
+ * Ensures that internal code which is used by a product doesn't get removed.
  * 
+ * @deprecated to hide deprecation warnings
  * @since 3.6
  */
-public class InternalsNotRemovedTest extends TestCase {
+public class InternalsNotRemovedTest {
 
 	static final String[] INTERNAL_FIELDS= new String[] {
 
@@ -53,8 +54,9 @@ public class InternalsNotRemovedTest extends TestCase {
 			org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2.class
 	};
 
-	public void testInternalMethodsNotRemoved() throws Exception {
+	void internalMethods() throws Exception {
 		new org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite(null).createChange();
+		new JavaMoveProcessor(null).canUpdateReferences();
 	}
 
 
