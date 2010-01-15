@@ -200,6 +200,8 @@ public class CompilationUnitRewrite {
 	 */
 	public org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange createChange() throws CoreException {
 		CompilationUnitChange change= createChange(true);
+		if (change == null)
+			return null;
 		return new org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange(change);
 	}
 
