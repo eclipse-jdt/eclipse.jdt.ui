@@ -80,10 +80,10 @@ public class ParentChecker {
 			if (convertedToJava != null && !commonJavaElementParent.equals(convertedToJava))
 				return null;
 		}
+		commonParent= convertedToJava == null ? commonJavaElementParent : convertedToJava;
 		if (fJarResources.length != 0) {
 			commonJarResourcesParent= getCommonJarResourceParent();
-			Assert.isNotNull(commonJarResourcesParent);
-			commonParent= convertedToJava == null ? commonJavaElementParent : convertedToJava;
+			Assert.isNotNull(commonJarResourcesParent);			
 			if (!commonJarResourcesParent.equals(commonParent))
 				return null;
 		}
