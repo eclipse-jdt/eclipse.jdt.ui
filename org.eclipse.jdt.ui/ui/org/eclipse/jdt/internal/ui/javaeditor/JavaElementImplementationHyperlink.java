@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -209,11 +209,6 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
 								Object element= match.getElement();
-
-								// Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=295894
-								if (links.contains(element))
-									return;
-
 								if (element instanceof IMethod) {
 									IMethod methodFound= (IMethod)element;
 									if (!JdtFlags.isAbstract(methodFound)) {
@@ -235,9 +230,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 							hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
 						else {
 							isMethodAbstract[0]= JdtFlags.isAbstract(method);
-							if (!isMethodAbstract[0])
-								links.add(method);
-							hierarchyScope= SearchEngine.createHierarchyScope(null, receiverType, true, false, null);
+							hierarchyScope= SearchEngine.createStrictHierarchyScope(null, receiverType, true, !isMethodAbstract[0], null);
 						}
 					}
 
