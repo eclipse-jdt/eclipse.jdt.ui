@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 			if (!fRecursive) {
 				return true;
 			}
-			// Ignore closed projects
+			// ignore closed projects
 			if (element instanceof IProject && !((IProject)element).isOpen())
 				return false;
 			try {
