@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 import java.io.BufferedReader;
@@ -16,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -23,6 +23,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,12 +44,63 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
+
 /**
  * Partial implementation of a spell dictionary.
  *
  * @since 3.0
  */
 public abstract class AbstractSpellDictionary implements ISpellDictionary {
+
+	/**
+	 * Byte array wrapper
+	 * @since 3.6
+	 */
+	private static class ByteArrayWrapper {
+
+		private static int hashCode(byte[] array) {
+			int prime= 31;
+			if (array == null)
+				return 0;
+			int result= 1;
+			for (int index= 0; index < array.length; index++) {
+				result= prime * result + array[index];
+			}
+			return result;
+		}
+
+		private byte[] byteArray;
+
+		public ByteArrayWrapper(byte[] byteArray) {
+			this.byteArray= byteArray;
+		}
+		public int hashCode() {
+			final int prime= 31;
+			int result= 1;
+			result= prime * result + ByteArrayWrapper.hashCode(byteArray);
+			return result;
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof ByteArrayWrapper))
+				return false;
+			ByteArrayWrapper other= (ByteArrayWrapper)obj;
+			if (!Arrays.equals(byteArray, other.byteArray))
+				return false;
+			return true;
+		}
+	}
+
+	
+	/**
+	 * Canonical name for UTF-8 encoding
+	 * @since 3.6
+	 */
+	private static final String UTF8= "UTF8"; //$NON-NLS-1$
 
 	/** The bucket capacity */
 	protected static final int BUCKET_CAPACITY= 4;
@@ -59,14 +111,17 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/** The distance threshold */
 	protected static final int DISTANCE_THRESHOLD= 160;
 
-	/** The hash capacity */
-	protected static final int HASH_CAPACITY= 22 * 1024;
+	/**
+	 * The hash load factor
+	 * @since 3.6
+	 */
+	protected static final float LOAD_FACTOR= 0.85f;
 
 	/** The phonetic distance algorithm */
 	private IPhoneticDistanceAlgorithm fDistanceAlgorithm= new DefaultPhoneticDistanceAlgorithm();
 
 	/** The mapping from phonetic hashes to word lists */
-	private final Map fHashBuckets= new HashMap(HASH_CAPACITY);
+	private final Map fHashBuckets= new HashMap(getInitialSize(), LOAD_FACTOR);
 
 	/** The phonetic hash provider */
 	private IPhoneticHashProvider fHashProvider= new DefaultPhoneticHashProvider();
@@ -86,6 +141,16 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	boolean fIsStrippingNonLetters= true;
 
 	/**
+	 * Returns the initial size of dictionary.
+	 * 
+	 * @return The initial size of dictionary.
+	 * @since 3.6
+	 */
+	protected int getInitialSize() {
+		return 32;
+	}
+
+	/**
 	 * Returns all candidates with the same phonetic hash.
 	 *
 	 * @param hash
@@ -93,7 +158,14 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * @return Array of candidates for the phonetic hash
 	 */
 	protected final Object getCandidates(final String hash) {
-		return fHashBuckets.get(hash);
+		ByteArrayWrapper hashBytes;
+		try {
+			hashBytes= new ByteArrayWrapper(hash.getBytes(UTF8));
+		} catch (UnsupportedEncodingException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
+		return fHashBuckets.get(hashBytes);
 	}
 
 	/**
@@ -124,8 +196,14 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			final Object candidates= getCandidates(hash);
 			if (candidates == null)
 				continue;
-			else if (candidates instanceof String) {
-				String candidate= (String)candidates;
+			else if (candidates instanceof byte[]) {
+				String candidate;
+				try {
+					candidate= new String((byte[])candidates, UTF8);
+				} catch (UnsupportedEncodingException e) {
+					JavaPlugin.log(e);
+					return result;
+				}
 				distance= fDistanceAlgorithm.getDistance(word, candidate);
 				if (distance < DISTANCE_THRESHOLD) {
 					buffer.setLength(0);
@@ -141,7 +219,13 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			int candidateSize= Math.min(500, candidateList.size()); // see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=195357
 			for (int offset= 0; offset < candidateSize; offset++) {
 
-				String candidate= (String)candidateList.get(offset);
+				String candidate;
+				try {
+					candidate= new String((byte[])candidateList.get(offset), UTF8);
+				} catch (UnsupportedEncodingException e) {
+					JavaPlugin.log(e);
+					return result;
+				}
 				distance= fDistanceAlgorithm.getDistance(word, candidate);
 
 				if (distance < DISTANCE_THRESHOLD) {
@@ -182,8 +266,14 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final Object candidates= getCandidates(fHashProvider.getHash(word));
 		if (candidates == null)
 			return;
-		else if (candidates instanceof String) {
-			String candidate= (String)candidates;
+		else if (candidates instanceof byte[]) {
+			String candidate;
+			try {
+				candidate= new String((byte[])candidates, UTF8);
+			} catch (UnsupportedEncodingException e) {
+				JavaPlugin.log(e);
+				return;
+			}
 			distance= fDistanceAlgorithm.getDistance(word, candidate);
 			buffer.append(candidate);
 			if (sentence)
@@ -196,7 +286,13 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final ArrayList matches= new ArrayList(candidateList.size());
 
 		for (int index= 0; index < candidateList.size(); index++) {
-			String candidate= (String)candidateList.get(index);
+			String candidate;
+			try {
+				candidate= new String((byte[])candidateList.get(index), UTF8);
+			} catch (UnsupportedEncodingException e) {
+				JavaPlugin.log(e);
+				return;
+			}
 			distance= fDistanceAlgorithm.getDistance(word, candidate);
 
 			if (distance <= minimum) {
@@ -377,17 +473,27 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	protected final void hashWord(final String word) {
 
 		final String hash= fHashProvider.getHash(word);
-		Object bucket= fHashBuckets.get(hash);
+		ByteArrayWrapper hashBytes;
+		byte[] wordBytes;
+		try {
+			hashBytes= new ByteArrayWrapper(hash.getBytes(UTF8));
+			wordBytes= word.getBytes(UTF8);
+		} catch (UnsupportedEncodingException e) {
+			JavaPlugin.log(e);
+			return;
+		}
+
+		Object bucket= fHashBuckets.get(hashBytes);
 
 		if (bucket == null) {
-			fHashBuckets.put(hash, word);
+			fHashBuckets.put(hashBytes, wordBytes);
 		} else if (bucket instanceof ArrayList) {
-			((ArrayList)bucket).add(word);
+			((ArrayList)bucket).add(wordBytes);
 		} else {
 			ArrayList list= new ArrayList(BUCKET_CAPACITY);
 			list.add(bucket);
-			list.add(word);
-			fHashBuckets.put(hash, list);
+			list.add(wordBytes);
+			fHashBuckets.put(hashBytes, list);
 		}
 	}
 
@@ -413,16 +519,34 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final Object candidates= getCandidates(fHashProvider.getHash(word));
 		if (candidates == null)
 			return false;
-		else if (candidates instanceof String) {
-			String candidate= (String)candidates;
+		else if (candidates instanceof byte[]) {
+			String candidate;
+			try {
+				candidate= new String((byte[])candidates, UTF8);
+			} catch (UnsupportedEncodingException e) {
+				JavaPlugin.log(e);
+				return false;
+			}
 			if (candidate.equals(word) || candidate.equals(word.toLowerCase()))
 				return true;
 			return false;
 		}
 		final ArrayList candidateList= (ArrayList)candidates;
-		if (candidateList.contains(word) || candidateList.contains(word.toLowerCase()))
-			return true;
-
+		byte[] wordBytes;
+		byte[] lowercaseWordBytes;
+		try {
+			wordBytes= word.getBytes(UTF8);
+			lowercaseWordBytes= word.toLowerCase().getBytes(UTF8);
+		} catch (UnsupportedEncodingException e) {
+			JavaPlugin.log(e);
+			return false;
+		}
+		for (int index= 0; index < candidateList.size(); index++) {
+			byte[] candidate= (byte[])candidateList.get(index);
+			if (Arrays.equals(candidate, wordBytes) || Arrays.equals(candidate, lowercaseWordBytes)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
