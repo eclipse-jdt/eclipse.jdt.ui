@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
@@ -41,8 +43,10 @@ public class CompilationUnitChange extends org.eclipse.jdt.core.refactoring.Comp
 	public CompilationUnitChange(org.eclipse.jdt.core.refactoring.CompilationUnitChange change) {
 		super(change.getName(), change.getCompilationUnit());
 		setDescriptor(change.getDescriptor());
-		setEdit(change.getEdit());
-		setEnabled(change.isEnabled());
+		TextEdit edit= change.getEdit();
+		if (edit != null) {
+			setEdit(edit);
+		}
 		setEnabledShallow(change.isEnabled());
 		setKeepPreviewEdits(change.getKeepPreviewEdits());
 		setSaveMode(change.getSaveMode());
