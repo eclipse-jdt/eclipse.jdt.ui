@@ -451,7 +451,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			SearchResultGroup	rg=   groups[i];
 			ICompilationUnit	unit= rg.getCompilationUnit();
 
-			if (unit != null)	// Ignore hits within a binary unit
+			if (unit != null) // ignore hits within a binary unit
 				result.add(rg);
 			else
 				fCallSitesInBinaryUnits= true;

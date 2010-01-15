@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,7 +61,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.INullSelectionListener;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
@@ -132,7 +131,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 
-abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener, IViewPartInputProvider, INullSelectionListener {
+abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IViewPartInputProvider, INullSelectionListener {
 
 	private static final String TAG_SELECTED_ELEMENTS= "selectedElements"; //$NON-NLS-1$
 	private static final String TAG_SELECTED_ELEMENT= "selectedElement"; //$NON-NLS-1$
@@ -971,7 +970,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 					if (EditorUtility.isOpenInEditor(selectedElement) != null)
 						EditorUtility.openInEditor(selectedElement, true);
 				} catch (PartInitException ex) {
-					// Ignore if no editor input can be found
+					// ignore if no editor input can be found
 				}
 			}
 
