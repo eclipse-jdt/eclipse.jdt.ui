@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,13 @@ import org.eclipse.jdt.core.JavaCore;
 
 
 public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChangedListener {
+
+	/**
+	 * DO NOT REMOVE, used in a product, see: https://bugs.eclipse.org/297529.
+	 * @deprecated As of 3.5, replaced by {@link IWorkingSetIDs#JAVA}
+	 */
+	public static final String ID= IWorkingSetIDs.JAVA;
+	
 
 	private List fWorkingSets;
 
