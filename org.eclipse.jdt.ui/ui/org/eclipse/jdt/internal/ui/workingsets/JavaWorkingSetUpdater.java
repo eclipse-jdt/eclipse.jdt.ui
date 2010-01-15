@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
 public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChangedListener {
 
 	/**
-	 * DO NOT REMOVE, used in a product, see: https://bugs.eclipse.org/297529.
+	 * DO NOT REMOVE, used in a product, see: https://bugs.eclipse.org/297529 .
 	 * @deprecated As of 3.5, replaced by {@link IWorkingSetIDs#JAVA}
 	 */
 	public static final String ID= IWorkingSetIDs.JAVA;
