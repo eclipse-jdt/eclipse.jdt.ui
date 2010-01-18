@@ -95,7 +95,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	}
 
 	/**
-	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/299631 .</p>
+	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/299631 .
 	 * @return <code>true</code> iff <b>Java</b> references to the moved element can be updated
 	 * @deprecated since 3.5, replaced by {@link #canUpdateJavaReferences()}
 	 */
