@@ -12,8 +12,6 @@ package org.eclipse.jdt.ui.tests.ui.internal.compatibility;
 
 import org.eclipse.text.tests.Accessor;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-
 
 /**
  * Ensures that internal code which is used by a product doesn't get removed.
@@ -56,7 +54,7 @@ public class InternalsNotRemovedTest {
 
 	void internalMethods() throws Exception {
 		new org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite(null).createChange();
-		new JavaMoveProcessor(null).canUpdateReferences();
+		new org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor(null).canUpdateReferences();
 	}
 
 
