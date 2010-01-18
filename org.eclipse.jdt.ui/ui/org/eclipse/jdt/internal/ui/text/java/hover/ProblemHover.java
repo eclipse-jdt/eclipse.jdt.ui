@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,10 +60,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -172,7 +174,8 @@ public class ProblemHover extends AbstractAnnotationHover {
 		}
 
 		private boolean hasProjectSpecificOptions() {
-			return OptionsConfigurationBlock.hasProjectSpecificOptions(fProject.getProject(), ProblemSeveritiesConfigurationBlock.getKeys(), null);
+			Key[] keys= fIsJavadocOption ? JavadocProblemsConfigurationBlock.getKeys() : ProblemSeveritiesConfigurationBlock.getKeys();
+			return OptionsConfigurationBlock.hasProjectSpecificOptions(fProject.getProject(), keys, null);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		fBlockEnableState= null;
 	}
 
-	private static Key[] getKeys() {
+	public static Key[] getKeys() {
 		Key[] keys= new Key[] {
 				PREF_JAVADOC_SUPPORT,
 				PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS,
