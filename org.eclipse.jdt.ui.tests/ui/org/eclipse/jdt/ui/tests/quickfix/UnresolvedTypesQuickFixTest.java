@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -1025,8 +1026,12 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(2, problems);
+		
+		ArrayList proposals= collectCorrections(cu, problems[0], null);
+		proposals.addAll(collectCorrections(cu, problems[1], null));
+		
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[3];
