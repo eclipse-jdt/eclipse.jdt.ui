@@ -193,7 +193,7 @@ public class CompilationUnitRewrite {
 	 * <p>
 	 * DO NOT REMOVE, used in a product.</p>
 	 * 
-	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
+	 * @return a {@link org.eclipse.jdt.core.refactoring.CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 * @throws IllegalArgumentException when the AST rewrite encounters problems
 	 * @deprecated since 3.5, replaced by {@link #createChange(boolean)}
