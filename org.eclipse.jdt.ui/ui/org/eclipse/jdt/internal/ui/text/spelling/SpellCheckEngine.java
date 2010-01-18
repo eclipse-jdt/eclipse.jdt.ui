@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,10 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+
+import org.eclipse.ui.texteditor.spelling.SpellingService;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -284,6 +288,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		}
 
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		EditorsUI.getPreferenceStore().addPropertyChangeListener(this);
 	}
 
 	/*
@@ -367,6 +372,13 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			resetUserDictionary();
 			return;
 		}
+
+		if (event.getProperty().equals(SpellingService.PREFERENCE_SPELLING_ENABLED) && !EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
+			if (this == fgEngine)
+				SpellCheckEngine.shutdownInstance();
+			else
+				shutdown();
+		}
 	}
 
 	/**
@@ -438,6 +450,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	public synchronized final void shutdown() {
 
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
+		EditorsUI.getPreferenceStore().removePropertyChangeListener(this);
 
 		ISpellDictionary dictionary= null;
 		for (final Iterator iterator= fGlobalDictionaries.iterator(); iterator.hasNext();) {
