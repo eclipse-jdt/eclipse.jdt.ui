@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -54,6 +53,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
@@ -483,28 +484,49 @@ public class ASTNodes {
 	 * Returns the type to which an inlined variable initializer should be cast, or
 	 * <code>null</code> if no cast is necessary.
 	 * 
-	 * @param initializerType the type of the initializer expression of the variable to inline 
-	 * @param referenceType the type of the reference to the variable (which is to be inlined)
-	 * @param ast the AST (for resolving boxed/unboxed type binding)
-	 * @return <code>null</code> iff no cast is necessary, or a type binding to which the initializer should be cast
+	 * @param initializer the initializer expression of the variable to inline 
+	 * @param reference the reference to the variable (which is to be inlined)
+	 * @return a type binding to which the initializer should be cast, or <code>null</code> iff no cast is necessary
 	 * @since 3.6
 	 */
-	public static ITypeBinding getExplicitCast(ITypeBinding initializerType, ITypeBinding referenceType, AST ast) {
+	public static ITypeBinding getExplicitCast(Expression initializer, Expression reference) {
+		ITypeBinding initializerType= initializer.resolveTypeBinding();
+		ITypeBinding referenceType= reference.resolveTypeBinding();
 		if (initializerType == null || referenceType == null)
 			return null;
 		
 		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType))
 			return referenceType;
-		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // reference was autoboxed
-			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, ast);
+		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
+			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, reference.getAST());
 			if (unboxedReferenceType != initializerType)
 				return unboxedReferenceType;
-			else
-				return null;
+			else if (needsExplicitBoxing(reference))
+				return referenceType;
 		} else if (! TypeRules.canAssign(initializerType, referenceType))
 			return referenceType;
 		
 		return null;
+	}
+
+	/**
+	 * Returns whether an expression at the given location needs explicit boxing.
+	 * 
+	 * @param expression the expression
+	 * @return <code>true</code> iff an expression at the given location needs explicit boxing
+	 * @since 3.6
+	 */
+	private static boolean needsExplicitBoxing(Expression expression) {
+		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
+		if (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY)
+			return needsExplicitBoxing((ParenthesizedExpression) expression.getParent());
+		
+		if (locationInParent == ClassInstanceCreation.EXPRESSION_PROPERTY
+				|| locationInParent == FieldAccess.EXPRESSION_PROPERTY
+				|| locationInParent == MethodInvocation.EXPRESSION_PROPERTY)
+			return true;
+		
+		return false;
 	}
 
 	/**

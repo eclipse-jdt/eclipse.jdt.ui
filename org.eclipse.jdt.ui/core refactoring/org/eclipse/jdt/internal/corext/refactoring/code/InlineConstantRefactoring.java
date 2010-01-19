@@ -493,7 +493,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			boolean isStringPlaceholder= false;
 
 			AST ast= fCuRewrite.getAST();
-			ITypeBinding explicitCast= ASTNodes.getExplicitCast(fInitializer.resolveTypeBinding(), reference.resolveTypeBinding(), ast);
+			ITypeBinding explicitCast= ASTNodes.getExplicitCast(fInitializer, reference);
 			if (explicitCast != null) {
 				CastExpression cast= ast.newCastExpression();
 				Expression modifiedInitializerExpr= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());

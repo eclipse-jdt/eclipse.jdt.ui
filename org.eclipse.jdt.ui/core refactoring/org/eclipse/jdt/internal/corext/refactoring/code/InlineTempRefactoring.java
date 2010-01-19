@@ -364,7 +364,7 @@ public class InlineTempRefactoring extends Refactoring {
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
 		
 		AST ast= rewrite.getAST();
-		ITypeBinding explicitCast= ASTNodes.getExplicitCast(initializer.resolveTypeBinding(), reference.resolveTypeBinding(), ast);
+		ITypeBinding explicitCast= ASTNodes.getExplicitCast(initializer, reference);
 		if (explicitCast != null) {
 			CastExpression cast= ast.newCastExpression();
 			if (ASTNodes.substituteMustBeParenthesized(copy, cast)) {

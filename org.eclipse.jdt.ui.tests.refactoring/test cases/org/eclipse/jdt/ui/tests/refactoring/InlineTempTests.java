@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -293,6 +293,11 @@ public class InlineTempTests extends RefactoringTest {
 	public void test39() throws Exception{
 		// parameterized method invocation needs to keep super expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
 		helper1(5, 16, 5, 17);
+	}
+	
+	public void test40() throws Exception{
+		// better cast for unboxing: https://bugs.eclipse.org/bugs/show_bug.cgi?id=297868
+		helper1(5, 43, 5, 46);
 	}
 	
 	//------
