@@ -1534,6 +1534,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private EditorSelectionChangedListener fEditorSelectionChangedListener;
+
+	/**
+	 * DO NOT REMOVE, used in a product.
+	 * @deprecated As of 3.5
+	 */
+	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener= new AbstractSelectionChangedListener() {
+		public void selectionChanged(SelectionChangedEvent event) {
+		}
+		public void install(ISelectionProvider selectionProvider) {
+		}
+	};
+
 	/** The editor's bracket matcher */
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
 	/** This editor's encoding support */
