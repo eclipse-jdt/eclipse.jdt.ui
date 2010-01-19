@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -479,25 +480,31 @@ public class ASTNodes {
 	}
 
 	/**
-	 * Returns whether an inlined variable initializer needs an explicit cast.
+	 * Returns the type to which an inlined variable initializer should be cast, or
+	 * <code>null</code> if no cast is necessary.
 	 * 
 	 * @param initializerType the type of the initializer expression of the variable to inline 
 	 * @param referenceType the type of the reference to the variable (which is to be inlined)
-	 * @return <code>true</code> iff an explicit cast is necessary
-	 * @since 3.5
+	 * @param ast the AST (for resolving boxed/unboxed type binding)
+	 * @return <code>null</code> iff no cast is necessary, or a type binding to which the initializer should be cast
+	 * @since 3.6
 	 */
-	public static boolean needsExplicitCast(ITypeBinding initializerType, ITypeBinding referenceType) {
+	public static ITypeBinding getExplicitCast(ITypeBinding initializerType, ITypeBinding referenceType, AST ast) {
 		if (initializerType == null || referenceType == null)
-			return false;
+			return null;
 		
 		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType))
-			return true;
-		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) // reference was autoboxed
-			return true;
-		else if (! TypeRules.canAssign(initializerType, referenceType))
-			return true;
+			return referenceType;
+		else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // reference was autoboxed
+			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, ast);
+			if (unboxedReferenceType != initializerType)
+				return unboxedReferenceType;
+			else
+				return null;
+		} else if (! TypeRules.canAssign(initializerType, referenceType))
+			return referenceType;
 		
-		return false;
+		return null;
 	}
 
 	/**

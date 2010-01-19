@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -362,23 +363,23 @@ public class InlineTempRefactoring extends Refactoring {
 		
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
 		
-		ITypeBinding initializerType= initializer.resolveTypeBinding();
-		ITypeBinding referenceType= reference.resolveTypeBinding();
-		if (ASTNodes.needsExplicitCast(initializerType, referenceType)) {
-			CastExpression cast= rewrite.getAST().newCastExpression();
+		AST ast= rewrite.getAST();
+		ITypeBinding explicitCast= ASTNodes.getExplicitCast(initializer.resolveTypeBinding(), reference.resolveTypeBinding(), ast);
+		if (explicitCast != null) {
+			CastExpression cast= ast.newCastExpression();
 			if (ASTNodes.substituteMustBeParenthesized(copy, cast)) {
-				ParenthesizedExpression parenthesized= rewrite.getAST().newParenthesizedExpression();
+				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 				parenthesized.setExpression(copy);
 				copy= parenthesized;
 			}
 			cast.setExpression(copy);
-			cast.setType(rewrite.getImportRewrite().addImport(referenceType, rewrite.getAST()));
+			cast.setType(rewrite.getImportRewrite().addImport(explicitCast, ast));
 			copy= cast;
 			
 		} else if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
-			ArrayType newType= (ArrayType) ASTNodeFactory.newType(rewrite.getAST(), varDecl);
+			ArrayType newType= (ArrayType) ASTNodeFactory.newType(ast, varDecl);
 
-			ArrayCreation newArrayCreation= rewrite.getAST().newArrayCreation();
+			ArrayCreation newArrayCreation= ast.newArrayCreation();
 			newArrayCreation.setType(newType);
 			newArrayCreation.setInitializer((ArrayInitializer) copy);
 			return newArrayCreation;

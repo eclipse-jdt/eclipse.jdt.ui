@@ -492,22 +492,23 @@ public class InlineConstantRefactoring extends Refactoring {
 			Expression newReference;
 			boolean isStringPlaceholder= false;
 
-			ITypeBinding referenceType= reference.resolveTypeBinding();
-			if (ASTNodes.needsExplicitCast(fInitializer.resolveTypeBinding(), referenceType)) {
-				CastExpression cast= fCuRewrite.getAST().newCastExpression();
+			AST ast= fCuRewrite.getAST();
+			ITypeBinding explicitCast= ASTNodes.getExplicitCast(fInitializer.resolveTypeBinding(), reference.resolveTypeBinding(), ast);
+			if (explicitCast != null) {
+				CastExpression cast= ast.newCastExpression();
 				Expression modifiedInitializerExpr= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
 				if (ASTNodes.substituteMustBeParenthesized(fInitializer, cast)) {
-					ParenthesizedExpression parenthesized= fCuRewrite.getAST().newParenthesizedExpression();
+					ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 					parenthesized.setExpression(modifiedInitializerExpr);
 					modifiedInitializerExpr= parenthesized;
 				}
 				cast.setExpression(modifiedInitializerExpr);
-				cast.setType(fCuRewrite.getImportRewrite().addImport(referenceType, fCuRewrite.getAST()));
+				cast.setType(fCuRewrite.getImportRewrite().addImport(explicitCast, ast));
 				newReference= cast;
 				
 			} else if (fInitializer instanceof ArrayInitializer) {
-				ArrayCreation arrayCreation= fCuRewrite.getAST().newArrayCreation();
-				ArrayType arrayType= (ArrayType) ASTNodeFactory.newType(fCuRewrite.getAST(), fOriginalDeclaration);
+				ArrayCreation arrayCreation= ast.newArrayCreation();
+				ArrayType arrayType= (ArrayType) ASTNodeFactory.newType(ast, fOriginalDeclaration);
 				arrayCreation.setType(arrayType);
 
 				ArrayInitializer newArrayInitializer= (ArrayInitializer) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer,
@@ -525,7 +526,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 
 			if (ASTNodes.substituteMustBeParenthesized((isStringPlaceholder ? fInitializer : newReference), reference)) {
-				ParenthesizedExpression parenthesized= fCuRewrite.getAST().newParenthesizedExpression();
+				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 				parenthesized.setExpression(newReference);
 				newReference= parenthesized;
 			}
