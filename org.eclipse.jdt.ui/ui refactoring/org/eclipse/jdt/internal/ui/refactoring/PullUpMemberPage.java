@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -797,24 +797,47 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	private IMember[] getMembersForAction(final int action) {
-		final MemberActionInfo[] infos= getTableInput();
-		final List result= new ArrayList(infos.length);
-		for (int index= 0; index < infos.length; index++) {
-			if (infos[index].getAction() == action)
-				result.add(infos[index].getMember());
-		}
+		List result= new ArrayList();
+		getMembersForAction(action, false, result);
 		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 
 	private IMethod[] getMethodsForAction(final int action) {
+		List result= new ArrayList();
+		getMembersForAction(action, true, result);
+		return (IMethod[]) result.toArray(new IMethod[result.size()]);
+	}
+
+	private void getMembersForAction(int action, boolean onlyMethods, List result) {
+		boolean isDestinationInterface= isDestinationInterface();
 		final MemberActionInfo[] infos= getTableInput();
-		final List list= new ArrayList(infos.length);
 		for (int index= 0; index < infos.length; index++) {
-			if (infos[index].isMethodInfo() && infos[index].getAction() == action) {
-				list.add(infos[index].getMember());
+			MemberActionInfo info= infos[index];
+			int infoAction= info.getAction();
+			boolean isMethodInfo= info.isMethodInfo();
+			if (!isMethodInfo && onlyMethods)
+				continue;
+			if (isMethodInfo && isDestinationInterface) {
+				if (action == PULL_UP_ACTION)
+					continue; // skip methods pulled up to interface
+				if (action == DECLARE_ABSTRACT_ACTION && infoAction == PULL_UP_ACTION)
+					infoAction= DECLARE_ABSTRACT_ACTION; // method pulled to interface must be declared abstract
 			}
+			if (infoAction == action)
+				result.add(info.getMember());
 		}
-		return (IMethod[]) list.toArray(new IMethod[list.size()]);
+	}
+
+	private boolean isDestinationInterface() {
+		IType destination= getDestinationType();
+		try {
+			if (destination != null && destination.isInterface()) {
+				return true;
+			}
+		} catch (JavaModelException exception) {
+		    JavaPlugin.log(exception);
+		}
+		return false;
 	}
 
 	public IWizardPage getNextPage() {
@@ -822,13 +845,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		storeDialogSettings();
 		if (getMethodsForAction(PULL_UP_ACTION).length == 0)
 			return computeSuccessorPage();
-		try {
-	        final IType destination= getDestinationType();
-	        if (destination != null && destination.isInterface())
-	        	return computeSuccessorPage();
-        } catch (JavaModelException exception) {
-	        JavaPlugin.log(exception);
-        }
+        if (isDestinationInterface())
+        	return computeSuccessorPage();
 		return super.getNextPage();
 	}
 
