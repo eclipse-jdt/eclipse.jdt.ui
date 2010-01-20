@@ -150,6 +150,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -1854,8 +1855,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (sourceViewer instanceof ProjectionViewer) {
 			fProjectionSupport= new ProjectionSupport((ProjectionViewer)sourceViewer, getAnnotationAccess(), getSharedColors());
-			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
-			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
+			MarkerAnnotationPreferences markerAnnotationPreferences= (MarkerAnnotationPreferences)getAdapter(MarkerAnnotationPreferences.class);
+			if (markerAnnotationPreferences != null) {
+				Iterator e= markerAnnotationPreferences.getAnnotationPreferences().iterator();
+				while (e.hasNext()) {
+					AnnotationPreference annotationPreference= (AnnotationPreference)e.next();
+					Object annotationType= annotationPreference.getAnnotationType();
+					if (annotationType instanceof String)
+						fProjectionSupport.addSummarizableAnnotationType((String)annotationType);
+				}
+			} else {
+				fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
+				fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
+			}
 			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
 				public IInformationControl createInformationControl(Shell shell) {
 					return new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString());
