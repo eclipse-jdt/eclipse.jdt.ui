@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
@@ -1385,6 +1386,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			int result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 			if (result != 0)
 				return result;
+			
+			result= compareDeprecation(leftInfo.getModifiers(), rightInfo.getModifiers());
+			if (result != 0)
+				return result;
+			
 			result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
 			if (result != 0)
 				return result;
@@ -1409,6 +1415,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			} else {
 				return leftString.compareTo(rightString);
 			}
+		}
+		
+		private int compareDeprecation(int leftType, int rightType) {
+			boolean rightIsDeprecated= Flags.isDeprecated(rightType);
+			if (Flags.isDeprecated(leftType))
+				return rightIsDeprecated ? 0 : +1;
+			return rightIsDeprecated ? -1 : 0;
 		}
 
 		private int compareTypeContainerName(String leftString, String rightString) {
