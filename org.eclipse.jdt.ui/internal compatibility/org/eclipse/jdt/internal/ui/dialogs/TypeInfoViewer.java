@@ -862,7 +862,9 @@ public class TypeInfoViewer {
 		fElementKind= elementKind;
 		fFilterExtension= filterExtension;
 		fFullyQualifySelection= (flags & SWT.MULTI) != 0;
-		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT | flags | (VIRTUAL ? SWT.VIRTUAL : SWT.NONE));
+		if (VIRTUAL)
+			flags|= SWT.VIRTUAL;
+		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT | flags);
 		fTable.setFont(parent.getFont());
 		fLabelProvider= new TypeInfoLabelProvider(imageExtension);
 		fItems= new ArrayList(500);
