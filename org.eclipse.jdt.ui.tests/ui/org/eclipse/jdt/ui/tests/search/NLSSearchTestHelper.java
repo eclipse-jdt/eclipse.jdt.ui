@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,12 +38,12 @@ public class NLSSearchTestHelper {
 		assertNumberResults(searchProblems(accessor, propertiesFile), expected);
 	}
 
-	public static void assertHasUndefinedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws CoreException {
-		assertResultHasUndefinedKey(key, file, searchProblems(accessor, propertiesFile));
+	public static void assertHasUndefinedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file, boolean isAccessor) throws CoreException {
+		assertResultHasUndefinedKey(key, file, isAccessor, searchProblems(accessor, propertiesFile));
 	}
 
-	public static void assertHasUnusedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws IOException, CoreException {
-		assertResultHasUnusedKey(key, file, searchProblems(accessor, propertiesFile));
+	public static void assertHasUnusedKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file, boolean isAccessor) throws IOException, CoreException {
+		assertResultHasUnusedKey(key, file, isAccessor, searchProblems(accessor, propertiesFile));
 	}
 
 	public static void assertHasDuplicateKey(ICompilationUnit accessor, IFile propertiesFile, String key, IFile file) throws CoreException, IOException {
@@ -63,7 +63,7 @@ public class NLSSearchTestHelper {
 		Assert.assertTrue("Expected number of results is " + expected + " but was " + is, is == expected);
 	}
 
-	private static void assertResultHasUndefinedKey(String key, IFile file, NLSSearchResult result) throws CoreException {
+	private static void assertResultHasUndefinedKey(String key, IFile file, boolean isAccessor, NLSSearchResult result) throws CoreException {
 		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
 
 		for (int i= 0; i < matches.length; i++) {
@@ -71,7 +71,7 @@ public class NLSSearchTestHelper {
 			if (match.getElement() instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit)match.getElement();
 				String field= unit.getSource().substring(match.getOffset(), match.getOffset() + match.getLength());
-				if (field.indexOf(key) != -1)
+				if ((isAccessor && field.indexOf(key) != -1) || (!isAccessor && field.equals(key)))
 					return;
 			}
 		}
@@ -79,7 +79,7 @@ public class NLSSearchTestHelper {
 		Assert.assertTrue("No undefined key problem found for " + key + " in " + file.getName(), false);
 	}
 
-	private static void assertResultHasUnusedKey(String key, IFile file, NLSSearchResult result) throws IOException, CoreException {
+	private static void assertResultHasUnusedKey(String key, IFile file, boolean isAccessor, NLSSearchResult result) throws IOException, CoreException {
 		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
 
 		for (int i= 0; i < matches.length; i++) {
@@ -87,13 +87,13 @@ public class NLSSearchTestHelper {
 			if (match.getElement() instanceof CompilationUnitEntry) {
 				ICompilationUnit unit= ((CompilationUnitEntry)match.getElement()).getCompilationUnit();
 				String field= unit.getSource().substring(match.getOffset(), match.getOffset() + match.getLength());
-				if (field.indexOf(key) != -1)
+				if ((isAccessor && field.indexOf(key) != -1) || (!isAccessor && field.equals(key)))
 					return;
 			} else if (match.getElement() instanceof FileEntry) {
 				FileEntry entry= (FileEntry)match.getElement();
 				String content= getContent(entry.getPropertiesFile());
 				String propkey= content.substring(match.getOffset(), match.getOffset() + match.getLength());
-				if (propkey.indexOf(key) != -1)
+				if ((isAccessor && propkey.indexOf(key) != -1) || (!isAccessor && propkey.equals(key)))
 					return;
 			}
 		}

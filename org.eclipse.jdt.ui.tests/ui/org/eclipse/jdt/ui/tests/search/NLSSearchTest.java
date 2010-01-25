@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -165,8 +165,8 @@ public class NLSSearchTest extends TestCase {
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
 
-		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource());
-		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)client.getCorrespondingResource());
+		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource(), true);
+		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)client.getCorrespondingResource(), false);
 	}
 
 	public void test04() throws Exception {
@@ -196,8 +196,8 @@ public class NLSSearchTest extends TestCase {
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
 
-		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource());
-		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", propertiesFile);
+		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource(), true);
+		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", propertiesFile, false);
 	}
 
 	public void test05() throws Exception {
@@ -226,8 +226,8 @@ public class NLSSearchTest extends TestCase {
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
 
-		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource());
-		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource());
+		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource(), true);
+		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource(), true);
 	}
 
 	public void test06() throws Exception {
@@ -475,5 +475,42 @@ public class NLSSearchTest extends TestCase {
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);
+	}
+
+	public void testBug247012_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.MissingResourceException;\n");
+		buf.append("import java.util.ResourceBundle;\n");
+		buf.append("public class Accessor {\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\"; //$NON-NLS-1$\n");
+		buf.append("    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);\n");
+		buf.append("    private Accessor() {}\n");
+		buf.append("    public static String getString(String key) {\n");
+		buf.append("        try {\n");
+		buf.append("            return RESOURCE_BUNDLE.getString(key);\n");
+		buf.append("        } catch (MissingResourceException e) {\n");
+		buf.append("            return '!' + key + '!';\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Client {\n");
+		buf.append("	public static void main(String[] args) { \n");
+		buf.append("		System.out.println(Accessor.getString(\"Main.undefined\")); //$NON-NLS-1$ \n");
+		buf.append("	}\n");
+		buf.append("}\n");
+
+		ICompilationUnit client= pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
+
+		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);
+		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Main.undefined", (IFile)client.getCorrespondingResource(), false);
 	}
 }
