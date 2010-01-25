@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -88,19 +87,11 @@ public class CreateProfileDialog extends StatusDialog {
 
 		final int numColumns= 2;
 
-		GridData gd;
-
-		final GridLayout layout= new GridLayout(numColumns, false);
-		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
-		layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(layout);
-
+		final Composite composite= (Composite) super.createDialogArea(parent);
+		((GridLayout) composite.getLayout()).numColumns= numColumns;
+		
 		// Create "Profile name:" label
-		gd = new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		final Label nameLabel = new Label(composite, SWT.WRAP);
