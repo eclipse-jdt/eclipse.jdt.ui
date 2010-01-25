@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,11 +52,14 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
@@ -241,6 +244,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.5
 	 */
 	private boolean fIsValidated= true;
+
+	/**
+	 * The text presentation listener.
+	 * @since 3.6
+	 */
+	private ITextPresentationListener fTextPresentationListener;
 
 	protected AbstractJavaCompletionProposal() {
 		fInvocationContext= null;
@@ -923,10 +932,28 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	private void updateStyle(ITextViewer viewer) {
+		repairPresentation(viewer);
 
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
+		try {
+			viewer.getTextWidget().setStyleRange(fRememberedStyleRange);
+		} catch (IllegalArgumentException x) {
+			// catching exception as offset + length might be outside of the text widget
+			fRememberedStyleRange= null;
+		}
+	}
+
+	/**
+	 * Creates a style range for the viewer's control.
+	 * 
+	 * @param viewer the text viewer
+	 * @return the new style range or <code>null</code>
+	 * @since 3.6
+	 */
+	private StyleRange rememberStyleRange(ITextViewer viewer) {
 		StyledText text= viewer.getTextWidget();
 		if (text == null || text.isDisposed())
-			return;
+			return null;
 
 		int widgetCaret= text.getCaretOffset();
 
@@ -939,10 +966,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			modelCaret= widgetCaret + visibleRegion.getOffset();
 		}
 
-		if (modelCaret >= getReplacementOffset() + getReplacementLength()) {
-			repairPresentation(viewer);
-			return;
-		}
+		if (modelCaret >= getReplacementOffset() + getReplacementLength())
+			return null;
 
 		int offset= widgetCaret;
 		int length= getReplacementOffset() + getReplacementLength() - modelCaret;
@@ -950,32 +975,47 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		Color foreground= getForegroundColor();
 		Color background= getBackgroundColor();
 
-		StyleRange range= text.getStyleRangeAtOffset(offset);
-		int fontStyle= range != null ? range.fontStyle : SWT.NORMAL;
-
-		repairPresentation(viewer);
-		fRememberedStyleRange= new StyleRange(offset, length, foreground, background, fontStyle);
-		if (range != null) {
-			fRememberedStyleRange.strikeout= range.strikeout;
-			fRememberedStyleRange.underline= range.underline;
+		if (fTextPresentationListener == null) {
+			StyleRange range= text.getStyleRangeAtOffset(offset);
+			int fontStyle= range != null ? range.fontStyle : SWT.NORMAL;
+			fRememberedStyleRange= new StyleRange(offset, length, foreground, background, fontStyle);
+			if (range != null) {
+				fRememberedStyleRange.strikeout= range.strikeout;
+				fRememberedStyleRange.underline= range.underline;
+			}
+		} else {
+			fRememberedStyleRange= new StyleRange(offset, length, foreground, background);
 		}
-
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
-		try {
-			text.setStyleRange(fRememberedStyleRange);
-		} catch (IllegalArgumentException x) {
-			// catching exception as offset + length might be outside of the text widget
-			fRememberedStyleRange= null;
-		}
+		return fRememberedStyleRange;
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(ITextViewer, boolean)
 	 */
-	public void selected(ITextViewer viewer, boolean smartToggle) {
-		if (!insertCompletion() ^ smartToggle)
-			updateStyle(viewer);
-		else {
+	public void selected(final ITextViewer viewer, boolean smartToggle) {
+		if (!insertCompletion() ^ smartToggle) {
+			rememberStyleRange(viewer);
+			if (fRememberedStyleRange == null)
+				return;
+
+			if (viewer instanceof ITextViewerExtension4) {
+				fTextPresentationListener= new ITextPresentationListener() {
+
+					/* (non-Javadoc)
+					 * @see org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
+					 */
+					public void applyTextPresentation(TextPresentation textPresentation) {
+						rememberStyleRange(viewer);
+						if (fRememberedStyleRange != null)
+							textPresentation.mergeStyleRange(fRememberedStyleRange);
+					}
+				};
+				((ITextViewerExtension4)viewer).addTextPresentationListener(fTextPresentationListener);
+				repairPresentation(viewer);
+			} else {
+				updateStyle(viewer);
+			}
+		} else {
 			repairPresentation(viewer);
 			fRememberedStyleRange= null;
 		}
@@ -985,6 +1025,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(ITextViewer)
 	 */
 	public void unselected(ITextViewer viewer) {
+		if (fTextPresentationListener != null) {
+			((ITextViewerExtension4)viewer).removeTextPresentationListener(fTextPresentationListener);
+		}
 		repairPresentation(viewer);
 		fRememberedStyleRange= null;
 	}
