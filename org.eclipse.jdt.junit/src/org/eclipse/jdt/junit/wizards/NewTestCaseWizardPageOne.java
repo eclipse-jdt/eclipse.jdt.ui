@@ -69,10 +69,10 @@ import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
-import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
@@ -242,10 +242,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		boolean isJunit4= false;
 		if (element != null && element.getElementType() != IJavaElement.JAVA_MODEL) {
 			IJavaProject project= element.getJavaProject();
-			try {
-				isJunit4= project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) != null;
-			} catch (JavaModelException e) {
-				// ignore
+			isJunit4= CoreTestSearchEngine.hasTestAnnotation(project);
+			if (!isJunit4 && !CoreTestSearchEngine.hasTestCaseType(project) && JUnitStubUtility.is50OrHigher(project)) {
+				isJunit4= true;
 			}
 		}
 		setJUnit4(isJunit4, true);
