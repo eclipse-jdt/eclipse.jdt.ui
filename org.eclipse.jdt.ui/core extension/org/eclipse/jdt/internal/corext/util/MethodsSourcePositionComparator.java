@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,15 +32,16 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
  * <li><code>m1</code> and <code>m2</code> are defined in the same type (<code>T</code> or any
  * supertype of <code>T</code>), that type doesn't have a source attachment and name of
  * <code>m1</code> alphabetically precedes name of <code>m2</code></li>
- * <li><code>m1</code> is defined in <code>T</code> and <code>m2</code> is defined in any supertype
+ * 
+ * <li><code>m2</code> is defined in <code>T</code> and <code>m1</code> is defined in any supertype
  * of <code>T</code></li>
- * <li><code>m1</code> is defined in a superclass of <code>T</code> and <code>m2</code> is defined
+ * <li><code>m2</code> is defined in a superclass of <code>T</code> and <code>m1</code> is defined
  * in a superinterface of <code>T</code></li>
  * <li><code>m1</code> and <code>m2</code> are defined in different superclasses of <code>T</code>
- * and a class which defines <code>m2</code> extends class which defines <code>m1</code>
+ * and a class which defines <code>m1</code> extends class which defines <code>m2</code>
  * <li><code>m1</code> and <code>m2</code> are defined in different superinterfaces of
- * <code>T</code> and an interface which defines <code>m1</code> appears before an interface which
- * defines <code>m2</code> in <code>implements</code> clause of declaration of type <code>T</code></li>
+ * <code>T</code> and an interface which defines <code>m2</code> appears before an interface which
+ * defines <code>m1</code> in <code>implements</code> clause of declaration of type <code>T</code></li>
  * </ul>
  */
 public class MethodsSourcePositionComparator implements Comparator {
@@ -71,10 +72,10 @@ public class MethodsSourcePositionComparator implements Comparator {
 		}
 
 		if (firstMethodType.equals(fTypeBinding)) {
-			return -1;
+			return 1;
 		}
 		if (secondMethodType.equals(fTypeBinding)) {
-			return 1;
+			return -1;
 		}
 
 		ITypeBinding type= fTypeBinding;
@@ -89,22 +90,22 @@ public class MethodsSourcePositionComparator implements Comparator {
 			count++;
 		}
 		if (firstCount != -1 && secondCount != -1) {
-			return -(firstCount - secondCount);
+			return (firstCount - secondCount);
 		}
 		if (firstCount != -1 && secondCount == -1) {
-			return -1;
+			return 1;
 		}
 		if (firstCount == -1 && secondCount != -1) {
-			return 1;
+			return -1;
 		}
 
 		ITypeBinding[] interfaces= fTypeBinding.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
 			if (firstMethodType.equals(interfaces[i])) {
-				return -1;
+				return 1;
 			}
 			if (secondMethodType.equals(interfaces[i])) {
-				return 1;
+				return -1;
 			}
 		}
 		return 0;

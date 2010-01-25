@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -236,12 +237,47 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		testHelper(testClass);
 
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "b", "foo", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
+		checkMethodsInOrder(new String[] { "foo", "b", "clone", "equals", "finalize", "hashCode", "toString"}, methods);
 
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[0], imports);
 	}
 
+	public void testBug297183() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package ibm.util;\n");
+		buf.append("interface Shape {\r\n");
+		buf.append("  int getX();\r\n");
+		buf.append("  int getY();\r\n");
+		buf.append("  int getEdges();\r\n");
+		buf.append("  int getArea();\r\n");
+		buf.append("}\r\n");
+		fPackage.createCompilationUnit("Shape.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package ibm.util;\n");
+		buf.append("interface Circle extends Shape {\r\n");
+		buf.append("  int getR();\r\n");
+		buf.append("}\r\n");
+		buf.append("\r\n");
+		fPackage.createCompilationUnit("Circle.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package ibm.util;\n");
+		buf.append("public class DefaultCircle implements Circle {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= fPackage.getCompilationUnit("DefaultCircle.java");
+		IType testClass= cu.createType(buf.toString(), null, true, null);
+		
+		testHelper(testClass, -1, false);
+		
+		IMethod[] methods= testClass.getMethods();
+		checkMethodsInOrder(new String[] { "getX", "getY", "getEdges", "getArea", "getR"}, methods);
+		
+		IImportDeclaration[] imports= cu.getImports();
+		checkImports(new String[0], imports);
+	}
+	
 	public void testInsertAt() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -336,6 +372,14 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 	}
 
+	private void checkMethodsInOrder(String[] expected, IMethod[] methods) {
+		String[] actualNames= new String[methods.length];
+		for (int i= 0; i < actualNames.length; i++) {
+			actualNames[i]= methods[i].getElementName();
+		}
+		assertEquals(Strings.concatenate(expected, ", "), Strings.concatenate(actualNames, ", "));
+	}
+	
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;
