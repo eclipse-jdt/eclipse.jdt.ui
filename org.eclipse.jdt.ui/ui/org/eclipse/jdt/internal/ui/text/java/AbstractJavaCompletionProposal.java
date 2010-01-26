@@ -931,13 +931,18 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		}
 	}
 
-	private void updateStyle(ITextViewer viewer, StyleRange range) {
-		repairPresentation(viewer);
-		fRememberedStyleRange= range;
+	private void updateStyle(ITextViewer viewer) {
+		StyledText text= viewer.getTextWidget();
+		StyleRange range= text.getStyleRangeAtOffset(fRememberedStyleRange.start);
+		if (range != null) {
+			fRememberedStyleRange.strikeout= range.strikeout;
+			fRememberedStyleRange.underline= range.underline;
+			fRememberedStyleRange.fontStyle= range.fontStyle;
+		}
 
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
 		try {
-			viewer.getTextWidget().setStyleRange(fRememberedStyleRange);
+			text.setStyleRange(fRememberedStyleRange);
 		} catch (IllegalArgumentException x) {
 			// catching exception as offset + length might be outside of the text widget
 			fRememberedStyleRange= null;
@@ -976,51 +981,38 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		Color foreground= getForegroundColor();
 		Color background= getBackgroundColor();
 
-		StyleRange newRange= new StyleRange(offset, length, foreground, background);
-
-		if (fTextPresentationListener == null) {
-			StyleRange range= text.getStyleRangeAtOffset(offset);
-			if (range != null) {
-				newRange.strikeout= range.strikeout;
-				newRange.underline= range.underline;
-				newRange.fontStyle= range.fontStyle;
-			} else {
-				newRange.fontStyle= SWT.NORMAL;
-			}
-		}
-		return newRange;
+		return new StyleRange(offset, length, foreground, background);
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(ITextViewer, boolean)
 	 */
 	public void selected(final ITextViewer viewer, boolean smartToggle) {
+		repairPresentation(viewer);
+		fRememberedStyleRange= null;
+
 		if (!insertCompletion() ^ smartToggle) {
 			StyleRange range= createStyleRange(viewer);
 			if (range == null)
 				return;
+			
+			fRememberedStyleRange= range;
 
-			if (viewer instanceof ITextViewerExtension4) {
-				fRememberedStyleRange= range;
+			if (!(viewer instanceof ITextViewerExtension4)) {
 				fTextPresentationListener= new ITextPresentationListener() {
-
 					/* (non-Javadoc)
 					 * @see org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
 					 */
 					public void applyTextPresentation(TextPresentation textPresentation) {
-						StyleRange newRange= createStyleRange(viewer);
-						if (newRange != null)
-							textPresentation.mergeStyleRange(newRange);
+						fRememberedStyleRange= createStyleRange(viewer);
+						if (fRememberedStyleRange != null)
+							textPresentation.mergeStyleRange(fRememberedStyleRange);
 					}
 				};
 				((ITextViewerExtension4)viewer).addTextPresentationListener(fTextPresentationListener);
 				repairPresentation(viewer);
-			} else {
-				updateStyle(viewer, range);
-			}
-		} else {
-			repairPresentation(viewer);
-			fRememberedStyleRange= null;
+			} else
+				updateStyle(viewer);
 		}
 	}
 
