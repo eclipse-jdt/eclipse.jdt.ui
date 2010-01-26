@@ -998,7 +998,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			
 			fRememberedStyleRange= range;
 
-			if (!(viewer instanceof ITextViewerExtension4)) {
+			if (viewer instanceof ITextViewerExtension4) {
 				fTextPresentationListener= new ITextPresentationListener() {
 					/* (non-Javadoc)
 					 * @see org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
