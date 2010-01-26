@@ -397,7 +397,12 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		String filePath= store.getString(PreferenceConstants.SPELLING_USER_DICTIONARY);
-		IStringVariableManager variableManager= VariablesPlugin.getDefault().getStringVariableManager();
+
+		VariablesPlugin variablesPlugin= VariablesPlugin.getDefault();
+		if (variablesPlugin == null)
+			return;
+
+		IStringVariableManager variableManager= variablesPlugin.getStringVariableManager();
 		try {
 			filePath= variableManager.performStringSubstitution(filePath);
 		} catch (CoreException e) {
