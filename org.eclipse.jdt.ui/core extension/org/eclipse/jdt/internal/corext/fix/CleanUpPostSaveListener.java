@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.UndoEdit;
 
@@ -147,46 +148,98 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			try {
 				manager.connect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
 				buffer= manager.getTextFileBuffer(fFile.getFullPath(), LocationKind.IFILE);
-				IDocument document= buffer.getDocument();
-
-				long oldFileValue= fFile.getModificationStamp();
-				long oldDocValue;
-				if (document instanceof IDocumentExtension4) {
-					oldDocValue= ((IDocumentExtension4)document).getModificationStamp();
+				
+				final IDocument document= buffer.getDocument();
+				final long oldFileValue= fFile.getModificationStamp();
+				final LinkedList undoEditCollector= new LinkedList();
+				final long[] oldDocValue= new long[1];
+				final boolean[] setContentStampSuccess= { false };
+				
+				if (! buffer.isSynchronizationContextRequested()) {
+					performEdit(document, oldFileValue, undoEditCollector, oldDocValue, setContentStampSuccess);
+					
 				} else {
-					oldDocValue= oldFileValue;
-				}
-
-				// perform the changes
-				LinkedList list= new LinkedList();
-				for (int index= 0; index < fUndos.length; index++) {
-					UndoEdit edit= fUndos[index];
-					UndoEdit redo= edit.apply(document, TextEdit.CREATE_UNDO);
-					list.addFirst(redo);
-				}
-
-				boolean stampSetted= false;
-
-				if (document instanceof IDocumentExtension4 && fDocumentStamp != IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP) {
-					try {
-						((IDocumentExtension4)document).replace(0, 0, "", fDocumentStamp); //$NON-NLS-1$
-						stampSetted= true;
-					} catch (BadLocationException e) {
-						throw wrapBadLocationException(e);
+					ITextFileBufferManager fileBufferManager= FileBuffers.getTextFileBufferManager();
+					
+					class UIRunnable implements Runnable {
+						public boolean fDone;
+						public Exception fException;
+						
+						public void run() {
+							synchronized (this) {
+								try {
+									performEdit(document, oldFileValue, undoEditCollector, oldDocValue, setContentStampSuccess);
+								} catch (BadLocationException e) {
+									fException= e;
+								} catch (MalformedTreeException e) {
+									fException= e;
+								} catch (CoreException e) {
+									fException= e;
+								} finally {
+									fDone= true;
+									notifyAll();
+								}
+							}
+						}
+					}
+					UIRunnable runnable= new UIRunnable();
+					
+					synchronized (runnable) {
+						fileBufferManager.execute(runnable);
+						while (! runnable.fDone) {
+							try {
+								runnable.wait(500);
+							} catch (InterruptedException x) {
+							}
+						}
+					}
+					
+					if (runnable.fException != null) {
+						if (runnable.fException instanceof BadLocationException) {
+							throw (BadLocationException) runnable.fException;
+						} else if (runnable.fException instanceof MalformedTreeException) {
+							throw (MalformedTreeException) runnable.fException;
+						} else if (runnable.fException instanceof CoreException) {
+							throw (CoreException) runnable.fException;
+						}
 					}
 				}
 
 				buffer.commit(pm, false);
-				if (!stampSetted) {
+				if (!setContentStampSuccess[0]) {
 					fFile.revertModificationStamp(fFileStamp);
 				}
 
-				return new CleanUpSaveUndo(getName(), fFile, ((UndoEdit[]) list.toArray(new UndoEdit[list.size()])), oldDocValue, oldFileValue);
+				return new CleanUpSaveUndo(getName(), fFile, ((UndoEdit[]) undoEditCollector.toArray(new UndoEdit[undoEditCollector.size()])), oldDocValue[0], oldFileValue);
 			} catch (BadLocationException e) {
 				throw wrapBadLocationException(e);
 			} finally {
 				if (buffer != null)
 					manager.disconnect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
+			}
+		}
+
+		private void performEdit(IDocument document, long oldFileValue, LinkedList editCollector, long[] oldDocValue, boolean[] setContentStampSuccess) throws MalformedTreeException, BadLocationException, CoreException {
+			if (document instanceof IDocumentExtension4) {
+				oldDocValue[0]= ((IDocumentExtension4)document).getModificationStamp();
+			} else {
+				oldDocValue[0]= oldFileValue;
+			}
+
+			// perform the changes
+			for (int index= 0; index < fUndos.length; index++) {
+				UndoEdit edit= fUndos[index];
+				UndoEdit redo= edit.apply(document, TextEdit.CREATE_UNDO);
+				editCollector.addFirst(redo);
+			}
+
+			if (document instanceof IDocumentExtension4 && fDocumentStamp != IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP) {
+				try {
+					((IDocumentExtension4)document).replace(0, 0, "", fDocumentStamp); //$NON-NLS-1$
+					setContentStampSuccess[0]= true;
+				} catch (BadLocationException e) {
+					throw wrapBadLocationException(e);
+				}
 			}
 		}
 	}
