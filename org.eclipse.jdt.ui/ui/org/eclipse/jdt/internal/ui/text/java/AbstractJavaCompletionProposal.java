@@ -999,17 +999,19 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			fRememberedStyleRange= range;
 
 			if (viewer instanceof ITextViewerExtension4) {
-				fTextPresentationListener= new ITextPresentationListener() {
-					/* (non-Javadoc)
-					 * @see org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
-					 */
-					public void applyTextPresentation(TextPresentation textPresentation) {
-						fRememberedStyleRange= createStyleRange(viewer);
-						if (fRememberedStyleRange != null)
-							textPresentation.mergeStyleRange(fRememberedStyleRange);
-					}
-				};
-				((ITextViewerExtension4)viewer).addTextPresentationListener(fTextPresentationListener);
+				if (fTextPresentationListener == null) {
+					fTextPresentationListener= new ITextPresentationListener() {
+						/* (non-Javadoc)
+						 * @see org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
+						 */
+						public void applyTextPresentation(TextPresentation textPresentation) {
+							fRememberedStyleRange= createStyleRange(viewer);
+							if (fRememberedStyleRange != null)
+								textPresentation.mergeStyleRange(fRememberedStyleRange);
+						}
+					};
+					((ITextViewerExtension4)viewer).addTextPresentationListener(fTextPresentationListener);
+				}
 				repairPresentation(viewer);
 			} else
 				updateStyle(viewer);
