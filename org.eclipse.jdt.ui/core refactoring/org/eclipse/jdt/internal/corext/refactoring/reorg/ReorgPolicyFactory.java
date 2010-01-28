@@ -3568,7 +3568,7 @@ public final class ReorgPolicyFactory {
 			IJavaElement javaElementDestination= getJavaElementDestination();
 			ASTNode nodeDestination= getDestinationNode(javaElementDestination, targetCuNode);
 			ASTNode destinationContainer;
-			if (getLocation() == IReorgDestination.LOCATION_ON && javaElementDestination instanceof IType) {
+			if (getLocation() == IReorgDestination.LOCATION_ON && (javaElementDestination instanceof IType || javaElementDestination instanceof ICompilationUnit)) {
 				destinationContainer= nodeDestination;
 			} else {
 				destinationContainer= nodeDestination.getParent();
@@ -3625,6 +3625,12 @@ public final class ReorgPolicyFactory {
 					} else {
 						return ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, target);
 					}
+				case IJavaElement.COMPILATION_UNIT:
+					IType mainType= JavaElementUtil.getMainType((ICompilationUnit) destination);
+					if (mainType != null) {
+						return ASTNodeSearchUtil.getAbstractTypeDeclarationNode(mainType, target);
+					}
+					//$FALL-THROUGH$
 				default:
 					return null;
 			}
@@ -3844,8 +3850,10 @@ public final class ReorgPolicyFactory {
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 
 					int[] types0= new int[] {IJavaElement.TYPE, IJavaElement.PACKAGE_DECLARATION, IJavaElement.IMPORT_CONTAINER, IJavaElement.IMPORT_DECLARATION};
-					if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types0))
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types0)) {
+						if (JavaElementUtil.getMainType(destinationCu) == null || !ReorgUtils.hasOnlyElementsOfType(getJavaElements(), new int[] {IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD, IJavaElement.TYPE}))
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					}
 
 					break;
 				case IJavaElement.PACKAGE_DECLARATION: //drop nothing

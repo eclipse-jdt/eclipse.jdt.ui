@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1286,25 +1286,6 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_method_no_cu() throws Exception{
-		ICompilationUnit cu= null;
-		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{}", false, new NullProgressMonitor());
-		try {
-			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
-			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
-			IJavaElement[] javaElements= { method };
-			IResource[] resources= {};
-			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
-
-			Object destination= otherCu;
-			verifyInvalidDestination(ref, destination);
-		} finally {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-			otherCu.delete(true, new NullProgressMonitor());
-		}
-	}
-
 	public void testDestination_method_no_package() throws Exception{
 		ICompilationUnit cu= null;
 		try {
@@ -1491,22 +1472,23 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-//	public void test_method_yes_cu_with_main_type() throws Exception{
-//		ICompilationUnit cu= null;
-//		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
-//		try {
-//			cu= createCUfromTestFile(getPackageP(), "A");
-//			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
-//			IJavaElement[] javaElements= { method };
-//			Object destination= otherCu;
-//
-//			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
-//		} finally {
-//			performDummySearch();
-//			cu.delete(true, new NullProgressMonitor());
-//			otherCu.delete(true, new NullProgressMonitor());
-//		}
-//	}
+	public void test_method_yes_cu_with_main_type() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			Object destination= otherCu;
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
+	}
+	
 	public void test_method_yes_other_method() throws Exception{
 		ICompilationUnit cu= null;
 		try {
