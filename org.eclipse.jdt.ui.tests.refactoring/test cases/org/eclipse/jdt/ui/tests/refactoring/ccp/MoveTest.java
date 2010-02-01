@@ -891,8 +891,8 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_no_methodToCu() throws Exception {
-		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+	public void testDestination_yes_methodToCu() throws Exception {
+		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){/*impl*/}}", false, new NullProgressMonitor());
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("B.java", "package p;class B{}", false, new NullProgressMonitor());
 		try{
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
@@ -901,7 +901,19 @@ public class MoveTest extends RefactoringTest {
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu1;
-			verifyInvalidDestination(ref, destination);
+			verifyValidDestination(ref, destination);
+
+			RefactoringStatus status= performRefactoring(ref, true);
+			assertEquals(null, status);
+
+			assertTrue("source method not moved", ! method.exists());
+
+			IType typeB= cu1.getType("B");
+			IMethod methodBfoo= typeB.getMethod("foo", new String[0]);
+			assertTrue("method does not exist after", methodBfoo.exists());
+			
+			assertEquals("void foo(){/*impl*/}", methodBfoo.getSource());
+			
 		} finally{
 			performDummySearch();
 			safeDelete(cu);
