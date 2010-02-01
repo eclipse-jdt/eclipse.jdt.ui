@@ -37,6 +37,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  * This <code>ImportRewriteContext</code> is aware of all the types visible in
  * <code>compilationUnit</code> at <code>position</code>.
+ * <p>
+ * <b>Note:</b> This context only works if the AST was created with bindings!
+ * </p>
  */
 public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 
