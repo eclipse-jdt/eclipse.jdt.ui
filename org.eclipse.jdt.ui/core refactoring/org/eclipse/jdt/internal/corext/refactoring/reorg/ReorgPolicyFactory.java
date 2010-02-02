@@ -858,13 +858,27 @@ public final class ReorgPolicyFactory {
 			return fCus;
 		}
 
+		private final String getSingleElementName() {
+			switch (getContentKind()) {
+				case ONLY_FOLDERS:
+					return fFolders[0].getName();
+				case ONLY_FILES:
+					return fFiles[0].getName();
+				case ONLY_CUS:
+					return fCus[0].getElementName();
+			}
+			return null;
+		}
+
 		public final ChangeDescriptor getDescriptor() {
 			final Map arguments= new HashMap();
 			final int length= fFiles.length + fFolders.length + fCus.length;
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
+			final String header= length == 1 ? Messages.format(getHeaderPatternSingular(), new String[] { getSingleElementName(), getDestinationLabel() }) : Messages.format(
+					getHeaderPatternPlural(),
+					new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
@@ -2793,7 +2807,8 @@ public final class ReorgPolicyFactory {
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
+			final String header= length == 1 ? Messages.format(getHeaderPatternSingular(), new String[] { fPackageFragmentRoots[0].getElementName(), getDestinationLabel() }) : Messages.format(
+					getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
@@ -3007,7 +3022,9 @@ public final class ReorgPolicyFactory {
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
+			final String header= length == 1
+					? Messages.format(getHeaderPatternSingular(), new String[] { (fPackageFragments[0]).getElementName(), getDestinationLabel() })
+					: Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
@@ -3752,7 +3769,9 @@ public final class ReorgPolicyFactory {
 			final String description= length == 1 ? getDescriptionSingular() : getDescriptionPlural();
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String header= length == 1 ? getHeaderPatternSingular() : Messages.format(getHeaderPatternPlural(), new String[] { String.valueOf(length), getDestinationLabel() });
+			final String header= length == 1 ? Messages.format(getHeaderPatternSingular(), new String[] {
+					JavaElementLabels.getTextLabel(fJavaElements[0].getElementName(), JavaElementLabels.ALL_FULLY_QUALIFIED), getDestinationLabel() }) : Messages.format(getHeaderPatternPlural(),
+					new String[] { String.valueOf(length), getDestinationLabel() });
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
