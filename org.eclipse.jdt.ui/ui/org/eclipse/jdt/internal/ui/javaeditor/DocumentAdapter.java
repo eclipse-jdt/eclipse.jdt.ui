@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
-
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +17,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -205,17 +205,15 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	private Set fLegalLineDelimiters;
 
 	private List fBufferListeners= new ArrayList(3);
-	private IStatus fStatus;
 
-	/*
-	 * @since 3.2
-	 */
+	/** @since 3.2 */
 	private IPath fPath;
 
-	/*
-	 * @since 3.3
-	 */
+	/** @since 3.3 */
 	private LocationKind fLocationKind;
+
+	/** @since 3.6 */
+	private IFileStore fFileStore;
 
 
 	/**
@@ -227,8 +225,26 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	 */
 	public DocumentAdapter(IOpenable owner, IPath path) {
 		Assert.isLegal(path != null);
-
 		fOwner= owner;
+		fPath= path;
+		fLocationKind= LocationKind.NORMALIZE;
+
+		initialize();
+	}
+
+	/**
+	 * Constructs a new document adapter.
+	 * 
+	 * @param owner the owner of this buffer
+	 * @param fileStore the file store of the file that backs the buffer
+	 * @param path the path of the file that backs the buffer
+	 * @since 3.6
+	 */
+	public DocumentAdapter(IOpenable owner, IFileStore fileStore, IPath path) {
+		Assert.isLegal(fileStore != null);
+		Assert.isLegal(path != null);
+		fOwner= owner;
+		fFileStore= fileStore;
 		fPath= path;
 		fLocationKind= LocationKind.NORMALIZE;
 
@@ -242,7 +258,6 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	 * @param file the <code>IFile</code> that backs the buffer
 	 */
 	public DocumentAdapter(IOpenable owner, IFile file) {
-
 		fOwner= owner;
 		fFile= file;
 		fPath= fFile.getFullPath();
@@ -254,30 +269,21 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	private void initialize() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
-			manager.connect(fPath, fLocationKind, new NullProgressMonitor());
-			fTextFileBuffer= manager.getTextFileBuffer(fPath, fLocationKind);
+			if (fFileStore != null) {
+				manager.connectFileStore(fFileStore, new NullProgressMonitor());
+				fTextFileBuffer= manager.getFileStoreTextFileBuffer(fFileStore);
+			} else {
+				manager.connect(fPath, fLocationKind, new NullProgressMonitor());
+				fTextFileBuffer= manager.getTextFileBuffer(fPath, fLocationKind);
+			}
 			fDocument= fTextFileBuffer.getDocument();
 		} catch (CoreException x) {
-			fStatus= x.getStatus();
 			fDocument= manager.createEmptyDocument(fPath, fLocationKind);
 			if (fDocument instanceof ISynchronizable)
 				((ISynchronizable)fDocument).setLockObject(new Object());
 		}
 		fDocument.addDocumentListener(this);
 		fIsClosed= false;
-	}
-
-	/**
-	 * Returns the status of this document adapter.
-	 *
-	 * @return the status
-	 */
-	public IStatus getStatus() {
-		if (fStatus != null)
-			return fStatus;
-		if (fTextFileBuffer != null)
-			return fTextFileBuffer.getStatus();
-		return null;
 	}
 
 	/**
@@ -339,7 +345,10 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 		if (fTextFileBuffer != null) {
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.disconnect(fPath, fLocationKind, new NullProgressMonitor());
+				if (fFileStore != null)
+					manager.disconnectFileStore(fFileStore, new NullProgressMonitor());
+				else
+					manager.disconnect(fPath, fLocationKind, new NullProgressMonitor());
 			} catch (CoreException x) {
 				// ignore
 			}
