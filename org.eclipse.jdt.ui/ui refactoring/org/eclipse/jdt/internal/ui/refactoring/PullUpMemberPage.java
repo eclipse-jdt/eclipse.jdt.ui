@@ -79,6 +79,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -703,7 +704,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			MemberActionInfo[] selectedMembers= getSelectedMembers();
 			final String shellTitle= RefactoringMessages.PullUpInputPage1_Edit_members;
 			final String labelText= selectedMembers.length == 1
-					? RefactoringMessages.PullUpInputPage1_Mark_selected_members_singular
+					? Messages.format(RefactoringMessages.PullUpInputPage1_Mark_selected_members_singular, JavaElementLabels.getElementLabel(selectedMembers[0].getMember(),
+							JavaElementLabels.M_PARAMETER_TYPES))
 					: Messages.format(RefactoringMessages.PullUpInputPage1_Mark_selected_members_plural, String.valueOf(selectedMembers.length));
 			final Map stringMapping= createStringMappingForSelectedMembers();
 			final String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
@@ -989,9 +991,11 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	private void updateStatusLine() {
 		if (fStatusLine == null)
 			return;
-		final int selected= fTableViewer.getCheckedElements().length;
-		final String msg= selected == 1 ? RefactoringMessages.PullUpInputPage1_status_line_singular : Messages
-				.format(RefactoringMessages.PullUpInputPage1_status_line_plural, String.valueOf(selected));
+		Object[] selectedMembers= fTableViewer.getCheckedElements();
+		final int selected= selectedMembers.length;
+		final String msg= selected == 1 ? Messages.format(RefactoringMessages.PullUpInputPage1_status_line_singular, JavaElementLabels.getElementLabel(
+				((MemberActionInfo)selectedMembers[0]).getMember(), JavaElementLabels.M_PARAMETER_TYPES)) : Messages.format(RefactoringMessages.PullUpInputPage1_status_line_plural, String
+				.valueOf(selected));
 		fStatusLine.setText(msg);
 	}
 

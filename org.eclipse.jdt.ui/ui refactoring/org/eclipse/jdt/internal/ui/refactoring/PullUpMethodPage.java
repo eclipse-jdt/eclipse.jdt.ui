@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -565,9 +566,10 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void updateSelectionLabel() {
-		int checkedMethodsCount= getCheckedMethods().length;
-		String text= checkedMethodsCount == 1 ? RefactoringMessages.PullUpInputPage_hierarchyLabal_singular : Messages.format(
-				RefactoringMessages.PullUpInputPage_hierarchyLabal_plural, String.valueOf(checkedMethodsCount));
+		IMethod[] methods= getCheckedMethods();
+		int checkedMethodsCount= methods.length;
+		String text= checkedMethodsCount == 1 ? Messages.format(RefactoringMessages.PullUpInputPage_hierarchyLabal_singular, JavaElementLabels.getElementLabel(methods[0],
+				JavaElementLabels.M_PARAMETER_TYPES)) : Messages.format(RefactoringMessages.PullUpInputPage_hierarchyLabal_plural, String.valueOf(checkedMethodsCount));
 		fSelectionLabel.setText(text);
 
 	}

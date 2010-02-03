@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,11 +102,12 @@ public class MoveMembersWizard extends RefactoringWizard {
 
 		public void setVisible(boolean visible){
 			if (visible){
-				int membersToMoveCount= getMoveProcessor().getMembersToMove().length;
+				IMember[] membersToMove= getMoveProcessor().getMembersToMove();
+				int membersToMoveCount= membersToMove.length;
 				String label= JavaElementLabels.getElementLabel(getMoveProcessor().getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED);
-				String message= membersToMoveCount == 1 ? Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey_singular, label) :
-					Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey_plural,
-					new String[] { new Integer(membersToMoveCount).toString(), label });
+				String message= membersToMoveCount == 1 ? Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey_singular, new String[] {
+						JavaElementLabels.getTextLabel(membersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), label }) : Messages.format(
+						RefactoringMessages.MoveMembersInputPage_descriptionKey_plural, new String[] { new Integer(membersToMoveCount).toString(), label });
 				setDescription(message);
 			}
 			super.setVisible(visible);

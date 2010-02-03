@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -425,8 +426,9 @@ public final class PushDownWizard extends RefactoringWizard {
 			final ISelection preserved= fTableViewer.getSelection();
 			try {
 				MemberActionInfo[] selectedMembers= getSelectedMemberActionInfos();
-				final String labelText= selectedMembers.length == 1 ? RefactoringMessages.PushDownInputPage_Mark_selected_members_singular : Messages.format(
-						RefactoringMessages.PushDownInputPage_Mark_selected_members_plural, String.valueOf(selectedMembers.length));
+				final String labelText= selectedMembers.length == 1 ? Messages.format(RefactoringMessages.PushDownInputPage_Mark_selected_members_singular, JavaElementLabels.getElementLabel(
+						selectedMembers[0].getMember(), JavaElementLabels.M_PARAMETER_TYPES)) : Messages.format(RefactoringMessages.PushDownInputPage_Mark_selected_members_plural, String
+						.valueOf(selectedMembers.length));
 				final Map stringMapping= createStringMappingForSelectedElements();
 				final String[] keys= (String[]) stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
 				Arrays.sort(keys);
@@ -583,8 +585,10 @@ public final class PushDownWizard extends RefactoringWizard {
 		private void updateStatusLine() {
 			if (fStatusLine == null)
 				return;
-			final int selected= fTableViewer.getCheckedElements().length;
-			final String msg= selected == 1 ? RefactoringMessages.PushDownInputPage_status_line_singular : Messages.format(RefactoringMessages.PushDownInputPage_status_line_plural, String
+			Object[] selectedMembers= fTableViewer.getCheckedElements();
+			final int selected= selectedMembers.length;
+			final String msg= selected == 1 ? Messages.format(RefactoringMessages.PushDownInputPage_status_line_singular, JavaElementLabels.getElementLabel(
+					((MemberActionInfo)selectedMembers[0]).getMember(), JavaElementLabels.M_PARAMETER_TYPES)) : Messages.format(RefactoringMessages.PushDownInputPage_status_line_plural, String
 					.valueOf(selected));
 			fStatusLine.setText(msg);
 		}
