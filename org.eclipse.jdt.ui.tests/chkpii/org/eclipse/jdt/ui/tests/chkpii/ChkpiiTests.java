@@ -22,9 +22,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
-import junit.extensions.ActiveTestSuite;
 import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.osgi.service.environment.Constants;
 
@@ -108,7 +108,7 @@ public class ChkpiiTests extends TestCase {
 	private final FileCategory XML= new FileCategory("XML");
 
 	public static Test suite() {
-		return new ActiveTestSuite(ChkpiiTests.class);
+		return new TestSuite(ChkpiiTests.class);
 	}
 	
 	public void testHTMLFiles() {
