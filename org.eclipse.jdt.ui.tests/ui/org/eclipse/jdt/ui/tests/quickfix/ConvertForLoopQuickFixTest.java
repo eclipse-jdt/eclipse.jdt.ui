@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,13 +67,8 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	}
 
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new ConvertForLoopQuickFixTest("testSimplestClean"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
+//		return new ProjectTestSetup(new ConvertForLoopQuickFixTest("testSimplestClean"));
 	}
 
 	protected void setUp() throws Exception {
@@ -93,6 +88,9 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		fJProject1= null;
+		fSourceFolder= null;
+		fConvertLoopProposal= null;
 	}
 
 	public void testSimplestSmokeCase() throws Exception {
