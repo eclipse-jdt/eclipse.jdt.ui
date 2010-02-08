@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public class OverrideIndicatorImageProvider implements IAnnotationImageProvider 
 	}
 
 	private boolean isImageProviderFor(Annotation annotation) {
-		return annotation != null && OverrideIndicatorManager.ANNOTATION_TYPE.equals(annotation.getType());
+		return annotation instanceof OverrideIndicatorManager.OverrideIndicator && OverrideIndicatorManager.ANNOTATION_TYPE.equals(annotation.getType());
 	}
 
 	private boolean isOverwriting(Annotation annotation) {
