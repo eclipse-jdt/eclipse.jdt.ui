@@ -43,9 +43,10 @@ abstract class JavaMatchFilter extends MatchFilter {
 	public abstract boolean filters(JavaElementMatch match);
 
 	/**
-	 * Returns whether this filter is applicable for this query
-	 * @param query
-	 * @return returns <code>true</code> if this match filter is applicable for the given query
+	 * Returns whether this filter is applicable for this query.
+	 * 
+	 * @param query the query
+	 * @return <code>true</code> if this match filter is applicable for the given query
 	 */
 	public abstract boolean isApplicable(JavaSearchQuery query);
 
