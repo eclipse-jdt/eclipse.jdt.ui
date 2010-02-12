@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -58,6 +59,13 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 */
 
 	private static final StringMatcher fgGetClassNameMatcher= new StringMatcher("*.class.getName()*", false, false);  //$NON-NLS-1$
+
+	/**
+	 * Object to indicate that no key has been found.
+	 * @see #findKey(Position, IJavaElement)
+	 * @since 3.6
+	 */
+	private static final String NO_KEY= new String();
 
 	private NLSSearchResult fResult;
 	private IFile fPropertiesFile;
@@ -121,7 +129,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		Position mutableKeyPosition= new Position(offset, length);
 		//TODO: What to do if argument string not found? Currently adds a match with type name.
 		String key= findKey(mutableKeyPosition, javaElement);
-		if (key != null && isKeyDefined(key))
+		if (key == null || isKeyDefined(key))
 			return;
 
 		ICompilationUnit[] allCompilationUnits= JavaModelUtil.getAllCompilationUnits(new IJavaElement[] {javaElement});
@@ -181,11 +189,11 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * and adds it to the list of used properties.
 	 *
 	 * @param key the key
-	 * @return <code>true</code> if the key is defined
+	 * @return <code>true</code> if the key is defined, <code>false</code> otherwise
 	 */
 	private boolean isKeyDefined(String key) {
-		if (key == null)
-			return true; // Parse error - don't check key
+		if (key == NO_KEY)
+			return false;
 
 		fUsedPropertyNames.add(key);
 		if (fProperties.getProperty(key) != null) {
@@ -203,13 +211,15 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	}
 
 	/**
-	 * Finds the key defined by the given match. The assumption is that the key is the first
-	 * argument and it is a string literal i.e. quoted ("...") or a string constant i.e. 'static
-	 * final String' defined in the same class.
+	 * Finds the key defined by the given match. The assumption is that the key is the only argument
+	 * and it is a string literal i.e. quoted ("...") or a string constant i.e. 'static final
+	 * String' defined in the same class.
 	 * 
-	 * @param keyPositionResult reference parameter: will be filled with the position of the found key
+	 * @param keyPositionResult reference parameter: will be filled with the position of the found
+	 *            key
 	 * @param enclosingElement enclosing java element
-	 * @return a string denoting the key, null if no key can be found
+	 * @return a string denoting the key, {@link #NO_KEY} if no key can be found and
+	 *         <code>null</code> otherwise
 	 * @throws CoreException if a problem occurs while accessing the <code>enclosingElement</code>
 	 */
 	private String findKey(Position keyPositionResult, IJavaElement enclosingElement) throws CoreException {
@@ -238,13 +248,16 @@ class NLSSearchResultRequestor extends SearchRequestor {
 
 			if (scanner.getNextToken() == ITerminalSymbols.TokenNameLPAREN) {
 				// Old school
-				// next must be key string:
+				// next must be key string. Ignore methods which do not take a single String parameter (Bug 295040).
 				int nextToken= scanner.getNextToken();
 				if (nextToken != ITerminalSymbols.TokenNameStringLiteral && nextToken != ITerminalSymbols.TokenNameIdentifier)
 					return null;
 
 				tokenStart= scanner.getCurrentTokenStartPosition();
 				tokenEnd= scanner.getCurrentTokenEndPosition();
+				if (scanner.getNextToken() != ITerminalSymbols.TokenNameRPAREN)
+					return null;
+				
 				if (nextToken == ITerminalSymbols.TokenNameStringLiteral) {
 					keyPositionResult.setOffset(tokenStart + 1);
 					keyPositionResult.setLength(tokenEnd - tokenStart - 1);
@@ -257,12 +270,14 @@ class NLSSearchResultRequestor extends SearchRequestor {
 					String identifier= source.substring(tokenStart, tokenEnd + 1);
 					for (int i= 0; i < fields.length; i++) {
 						if (fields[i].getElementName().equals(identifier)) {
+							if (!Signature.getSignatureSimpleName(fields[i].getTypeSignature()).equals("String")) //$NON-NLS-1$
+								return null;
 							Object obj= fields[i].getConstant();
-							return obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;
+							return obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : NO_KEY;
 						}
 					}
 				}
-				return null;
+				return NO_KEY;
 			} else {
 				keyPositionResult.setOffset(tokenStart);
 				keyPositionResult.setLength(tokenEnd - tokenStart + 1);
