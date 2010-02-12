@@ -55,6 +55,7 @@ public class InternalsNotRemovedTest {
 	void internalMethods() throws Exception {
 		new org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite(null).createChange();
 		new org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor(null).canUpdateReferences();
+		org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil.open(null, null, null);
 	}
 
 

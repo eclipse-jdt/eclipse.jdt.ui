@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,4 +74,17 @@ public class OpenBrowserUtil {
 			}
 		});
 	}
+
+	/**
+	 * DO NOT REMOVE, used in a product.
+	 * 
+	 * @param url the URL
+	 * @param display the display
+	 * @param title the title
+	 * @deprecated As of 3.6, replaced by {@link #open(URL, Display)}
+	 */
+	public static void open(final URL url, Display display, String title) {
+		open(url, display);
+	}
+
 }
