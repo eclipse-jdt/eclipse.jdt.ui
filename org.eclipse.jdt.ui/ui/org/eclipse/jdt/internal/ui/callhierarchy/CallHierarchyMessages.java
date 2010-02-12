@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,7 +102,6 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyTypesOrMembersDialog_ChooseTypeDialog_title;
 	public static String CallHierarchyTypesOrMembersDialog_ChooseTypeDialog_description;
 	public static String CallHierarchyTypesOrMembersDialog_ChooseTypeDialog_error_message;
-	public static String CallHierarchyTypesOrMembersDialog_error_enterName;
 	public static String CallHierarchyTypesOrMembersDialog_error_invalidMemberName;
 	public static String CallHierarchyTypesOrMembersDialog_error_invalidTypeName;
 	public static String CallHierarchyTypesOrMembersDialog_error_entryExists;
