@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,44 +118,59 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	}
 
 	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves) {
+		registerSlavePreference(master, slaves, null);
+	}
+
+	/**
+	 * Connects master and slave checkboxes.
+	 * 
+	 * @param master the master
+	 * @param slaves direct slaves of the master
+	 * @param subSlaves indirect slaves, i.e. a slave is a master of its subSlave).
+	 * 		First index into array is the subSlave's master's index. subSlaves can also be <code>null</code>.
+	 */
+	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves, final CheckboxPreference[][] subSlaves) {
 		internalRegisterSlavePreference(master, slaves);
 		fCount+= slaves.length;
-
+		
 		master.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
-				if (master.getChecked()) {
-					for (int i= 0; i < slaves.length; i++) {
-						if (slaves[i].getChecked()) {
-							setSelectedCleanUpCount(fSelectedCount + 1);
-						}
-					}
-				} else {
-					for (int i= 0; i < slaves.length; i++) {
-						if (slaves[i].getChecked()) {
-							setSelectedCleanUpCount(fSelectedCount - 1);
+				boolean masterChecked= master.getChecked();
+				for (int i= 0; i < slaves.length; i++) {
+					if (slaves[i].getChecked()) {
+						setSelectedCleanUpCount(fSelectedCount + (masterChecked ? 1 : -1));
+						if (subSlaves != null) {
+							for (int j= 0; j < subSlaves[i].length; j++) {
+								if (subSlaves[i][j].getChecked()) {
+									setSelectedCleanUpCount(fSelectedCount + (masterChecked ? 1 : -1));
+								}
+							}
 						}
 					}
 				}
 			}
 		});
-
+		
 		for (int i= 0; i < slaves.length; i++) {
 			final CheckboxPreference slave= slaves[i];
 			slave.addObserver(new Observer() {
 				public void update(Observable o, Object arg) {
-					if (slave.getChecked()) {
-						setSelectedCleanUpCount(fSelectedCount + 1);
-					} else {
-						setSelectedCleanUpCount(fSelectedCount - 1);
-					}
+					setSelectedCleanUpCount(fSelectedCount + (slave.getChecked() ? 1 : -1));
 				}
 			});
 		}
-
+		
 		if (master.getChecked()) {
 			for (int i= 0; i < slaves.length; i++) {
-				if (slaves[i].getChecked()) {
+				if (slaves[i].getChecked() && master.getEnabled()) {
 					setSelectedCleanUpCount(fSelectedCount + 1);
+					if (subSlaves != null) {
+						for (int j= 0; j < subSlaves[i].length; j++) {
+							if (subSlaves[i][j].getChecked()) {
+								setSelectedCleanUpCount(fSelectedCount + 1);
+							}
+						}
+					}
 				}
 			}
 		}
