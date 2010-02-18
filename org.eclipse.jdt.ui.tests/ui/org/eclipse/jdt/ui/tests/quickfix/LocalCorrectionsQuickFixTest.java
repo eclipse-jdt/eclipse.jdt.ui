@@ -1071,6 +1071,97 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testUncaughtExceptionImportConflict() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Test {\n");
+		buf.append("    public void test1() {\n");
+		buf.append("        test2();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void test2() throws de.muenchen.test.Exception {\n");
+		buf.append("        throw new de.muenchen.test.Exception();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void test3() {\n");
+		buf.append("        try {\n");
+		buf.append("            java.io.File.createTempFile(\"\", \".tmp\");\n");
+		buf.append("        } catch (Exception ex) {\n");
+		buf.append("\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("de.muenchen.test", false, null);
+		buf= new StringBuffer();
+		buf.append("package de.muenchen.test;\n");
+		buf.append("\n");
+		buf.append("public class Exception extends java.lang.Throwable {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Exception.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+	
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Test {\n");
+		buf.append("    public void test1() {\n");
+		buf.append("        try {\n");
+		buf.append("            test2();\n");
+		buf.append("        } catch (de.muenchen.test.Exception e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void test2() throws de.muenchen.test.Exception {\n");
+		buf.append("        throw new de.muenchen.test.Exception();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void test3() {\n");
+		buf.append("        try {\n");
+		buf.append("            java.io.File.createTempFile(\"\", \".tmp\");\n");
+		buf.append("        } catch (Exception ex) {\n");
+		buf.append("\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+	
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Test {\n");
+		buf.append("    public void test1() throws de.muenchen.test.Exception {\n");
+		buf.append("        test2();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void test2() throws de.muenchen.test.Exception {\n");
+		buf.append("        throw new de.muenchen.test.Exception();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void test3() {\n");
+		buf.append("        try {\n");
+		buf.append("            java.io.File.createTempFile(\"\", \".tmp\");\n");
+		buf.append("        } catch (Exception ex) {\n");
+		buf.append("\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+	
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
 	public void testUncaughtExceptionExtendedSelection() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

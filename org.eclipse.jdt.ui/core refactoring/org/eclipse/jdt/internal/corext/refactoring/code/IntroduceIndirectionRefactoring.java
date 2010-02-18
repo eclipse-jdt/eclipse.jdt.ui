@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceIndirectionDescriptor;
@@ -82,6 +83,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -783,6 +785,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		AST ast= imRewrite.getAST();
 		MethodDeclaration intermediary= ast.newMethodDeclaration();
 
+		// Intermediary class is non-anonymous
+		AbstractTypeDeclaration type= (AbstractTypeDeclaration)typeToDeclaration(fIntermediaryClass, imRewrite.getRoot());
+
 		// Name
 		intermediary.setName(ast.newSimpleName(fIntermediaryMethodName));
 
@@ -794,10 +799,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		// Parameters
 		String targetParameterName= StubUtility.suggestArgumentName(getProject(), fIntermediaryFirstParameterType.getName(), fTargetMethod.getParameterNames());
 
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(type, imRewrite.getImportRewrite());
 		if (!isStaticTarget()) {
 			// Add first param
 			SingleVariableDeclaration parameter= imRewrite.getAST().newSingleVariableDeclaration();
-			Type t= imRewrite.getImportRewrite().addImport(fIntermediaryFirstParameterType, imRewrite.getAST());
+			Type t= imRewrite.getImportRewrite().addImport(fIntermediaryFirstParameterType, imRewrite.getAST(), context);
 			if (fIntermediaryFirstParameterType.isGenericType()) {
 				ParameterizedType parameterized= imRewrite.getAST().newParameterizedType(t);
 				ITypeBinding[] typeParameters= fIntermediaryFirstParameterType.getTypeParameters();
@@ -820,7 +826,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		copyTypeParameters(intermediary, imRewrite);
 
 		// Return type
-		intermediary.setReturnType2(imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getReturnType(), ast));
+		intermediary.setReturnType2(imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getReturnType(), ast, context));
 
 		// Exceptions
 		copyExceptions(intermediary, imRewrite);
@@ -829,8 +835,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		MethodInvocation invocation= imRewrite.getAST().newMethodInvocation();
 		invocation.setName(imRewrite.getAST().newSimpleName(fTargetMethod.getElementName()));
 		if (isStaticTarget()) {
-			Type type= imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getDeclaringClass(), ast);
-			invocation.setExpression(ASTNodeFactory.newName(ast, ASTNodes.asString(type)));
+			Type importedType= imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getDeclaringClass(), ast, context);
+			invocation.setExpression(ASTNodeFactory.newName(ast, ASTNodes.asString(importedType)));
 		} else {
 			invocation.setExpression(imRewrite.getAST().newSimpleName(targetParameterName));
 		}
@@ -852,9 +858,6 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		}
 
 		// Add the completed method to the intermediary type:
-
-		// Intermediary class is non-anonymous
-		AbstractTypeDeclaration type= (AbstractTypeDeclaration) typeToDeclaration(fIntermediaryClass, imRewrite.getRoot());
 		ChildListPropertyDescriptor typeBodyDeclarationsProperty= typeToBodyDeclarationProperty(fIntermediaryClass, imRewrite.getRoot());
 
 		ListRewrite bodyDeclarationsListRewrite= imRewrite.getASTRewrite().getListRewrite(type, typeBodyDeclarationsProperty);

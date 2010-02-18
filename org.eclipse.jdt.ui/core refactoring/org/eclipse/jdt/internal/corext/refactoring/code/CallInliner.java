@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,8 +81,10 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -749,7 +751,8 @@ public class CallInliner {
 	}
 
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {
-		String typeName= fImportRewrite.addImport(type);
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fTargetNode, fImportRewrite);
+		String typeName= fImportRewrite.addImport(type, context);
 		VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
 			fInvocation.getAST(), typeName + " " + name + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 		((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer(initializer);

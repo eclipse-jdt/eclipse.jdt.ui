@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -260,7 +262,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 					} else {
 						ITypeBinding normalizedBinding= Bindings.normalizeForDeclarationUse(fExpressionBinding, ast);
 						if (normalizedBinding != null) {
-							fReturnType= rewriter.addImport(normalizedBinding, ast);
+							ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fEnclosingBodyDeclaration, rewriter);
+							fReturnType= rewriter.addImport(normalizedBinding, ast, context);
 							fReturnTypeBinding= normalizedBinding;
 						}
 					}

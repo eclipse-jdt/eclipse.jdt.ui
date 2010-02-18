@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -32,8 +33,12 @@ import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposal {
@@ -85,6 +90,11 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 		}
 		ASTRewrite rewriter= listRewriter.getASTRewrite();
 		AST ast= rewriter.getAST();
+		ImportRewriteContext context= null;
+		ASTNode bodyDeclaration= ASTResolving.findParentBodyDeclaration(listRewriter.getParent());
+		if (bodyDeclaration != null) {
+			context= new ContextSensitiveImportRewriteContext(bodyDeclaration, getImportRewrite());
+		}
 
 		IMethodBinding[] declaredMethods= binding.getDeclaredMethods();
 		for (int i= 0; i < declaredMethods.length; i++) {
@@ -92,7 +102,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 			if (!implementedAttribs.contains(curr.getName()) && curr.getDefaultValue() == null) {
 				MemberValuePair pair= ast.newMemberValuePair();
 				pair.setName(ast.newSimpleName(curr.getName()));
-				pair.setValue(newDefaultExpression(ast, curr.getReturnType()));
+				pair.setValue(newDefaultExpression(ast, curr.getReturnType(), context));
 				listRewriter.insertLast(pair, null);
 
 				addLinkedPosition(rewriter.track(pair.getName()), false, "val_name_" + i); //$NON-NLS-1$
@@ -101,7 +111,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 		}
 	}
 
-	private Expression newDefaultExpression(AST ast, ITypeBinding type) {
+	private Expression newDefaultExpression(AST ast, ITypeBinding type, ImportRewriteContext context) {
 		if (type.isPrimitive()) {
 			String name= type.getName();
 			if ("boolean".equals(name)) { //$NON-NLS-1$
@@ -115,12 +125,12 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 		}
 		if (type.isArray()) {
 			ArrayInitializer initializer= ast.newArrayInitializer();
-			initializer.expressions().add(newDefaultExpression(ast, type.getElementType()));
+			initializer.expressions().add(newDefaultExpression(ast, type.getElementType(), context));
 			return initializer;
 		}
 		if (type.isAnnotation()) {
 			MarkerAnnotation annotation= ast.newMarkerAnnotation();
-			annotation.setTypeName(ast.newName(getImportRewrite().addImport(type)));
+			annotation.setTypeName(ast.newName(getImportRewrite().addImport(type, context)));
 			return annotation;
 		}
 		return ast.newNullLiteral();

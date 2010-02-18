@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,9 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -73,7 +75,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 
 	protected void rewrite(SimpleName node, ITypeBinding type) {
 		AST ast= node.getAST();
-		Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, fCuRewrite.getImportRewrite());
+		Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST(), context);
 		fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 		Name dummy= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 		QualifiedName name= ast.newQualifiedName(dummy, ast.newSimpleName(node.getIdentifier()));
@@ -91,7 +94,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 	protected void rewrite(FieldAccess node, ITypeBinding type) {
 		Expression exp= node.getExpression();
 		if (exp == null) {
-			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, fCuRewrite.getImportRewrite());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST(), context);
 			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 			exp= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, FieldAccess.EXPRESSION_PROPERTY, exp,  fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
@@ -107,7 +111,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 	protected void rewrite(MethodInvocation node, ITypeBinding type) {
 		Expression exp= node.getExpression();
 		if (exp == null) {
-			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, fCuRewrite.getImportRewrite());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST(), context);
 			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 			exp= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, MethodInvocation.EXPRESSION_PROPERTY, exp, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
@@ -123,7 +128,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 	protected void rewrite(MemberRef node, ITypeBinding type) {
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
-			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, fCuRewrite.getImportRewrite());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST(), context);
 			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 			qualifier= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, MemberRef.QUALIFIER_PROPERTY, qualifier, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
@@ -137,7 +143,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 	protected void rewrite(MethodRef node, ITypeBinding type) {
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
-			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, fCuRewrite.getImportRewrite());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST(), context);
 			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 			qualifier= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().set(node, MethodRef.QUALIFIER_PROPERTY, qualifier, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
@@ -163,7 +170,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 				fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fCuRewrite.getImportRemover().registerRemovedNode(name);
 		} else {
-			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST());
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(name, fCuRewrite.getImportRewrite());
+			Type result= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST(), context);
 			fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 			Name n= ASTNodeFactory.newName(fCuRewrite.getAST(), ASTFlattener.asString(result));
 			fCuRewrite.getASTRewrite().replace(
@@ -176,7 +184,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 	}
 
 	private void rewriteExpression(ASTNode node, Expression exp, ITypeBinding type) {
-		fCuRewrite.getASTRewrite().replace(exp, fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST()), fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(exp, fCuRewrite.getImportRewrite());
+		Type typeNode= fCuRewrite.getImportRewrite().addImport(type, fCuRewrite.getAST(), context);
+		fCuRewrite.getASTRewrite().replace(exp, typeNode, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 		fCuRewrite.getImportRemover().registerAddedImport(type.getQualifiedName());
 		fCuRewrite.getImportRemover().registerRemovedNode(exp);
 		fNeedsImport= true;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,9 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -214,6 +216,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 		AST ast= rewrite.getAST();
 
 		List arguments= fArguments;
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(getInvocationNode()), getImportRewrite());
 
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression elem= (Expression) arguments.get(i);
@@ -221,7 +224,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 
 			// argument type
 			String argTypeKey= "arg_type_" + i; //$NON-NLS-1$
-			Type type= evaluateParameterType(ast, elem, argTypeKey);
+			Type type= evaluateParameterType(ast, elem, argTypeKey, context);
 			param.setType(type);
 
 			// argument name
@@ -236,7 +239,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 		}
 	}
 
-	private Type evaluateParameterType(AST ast, Expression elem, String key) {
+	private Type evaluateParameterType(AST ast, Expression elem, String key, ImportRewriteContext context) {
 		ITypeBinding binding= Bindings.normalizeTypeBinding(elem.resolveTypeBinding());
 		if (binding != null && binding.isWildcardType()) {
 			binding= ASTResolving.normalizeWildcardType(binding, true, ast);
@@ -246,7 +249,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			for (int i= 0; i < typeProposals.length; i++) {
 				addLinkedPositionProposal(key, typeProposals[i]);
 			}
-			return getImportRewrite().addImport(binding, ast);
+			return getImportRewrite().addImport(binding, ast, context);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}

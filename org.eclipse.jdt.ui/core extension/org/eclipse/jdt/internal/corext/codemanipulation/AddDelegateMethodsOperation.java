@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,8 +44,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.util.DelegateEntryComparator;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.ui.CodeStyleConfiguration;
 
 /**
  * Workspace runnable to add delegate methods.
@@ -158,7 +156,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getTypeRoot();
 
 			ASTRewrite astRewrite= ASTRewrite.create(fASTRoot.getAST());
-			ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(fASTRoot, true);
+			ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
 
 			ITypeBinding parentType= fDelegatesToCreate[0].field.getDeclaringClass();
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,9 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -147,6 +149,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 
 		ImportRewrite imports= getImportRewrite();
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(methodDecl, imports);
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
 
 		List parameters= methodDecl.parameters(); // old parameters
@@ -162,7 +165,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-				newNode.setType(imports.addImport(desc.type, ast));
+				newNode.setType(imports.addImport(desc.type, ast, context));
 				newNode.setName(ast.newSimpleName("x")); //$NON-NLS-1$
 
 				// remember to set name later
@@ -206,7 +209,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					rewrite.set(decl, SingleVariableDeclaration.VARARGS_PROPERTY, Boolean.FALSE, null);
 				}
 
-				Type newType= imports.addImport(newTypeBinding, ast);
+				Type newType= imports.addImport(newTypeBinding, ast, context);
 				rewrite.replace(decl.getType(), newType, null);
 				rewrite.set(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
 
@@ -359,6 +362,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		AST ast= methodDecl.getAST();
 
 		ImportRewrite imports= getImportRewrite();
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(methodDecl, imports);
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
 
 		List exceptions= methodDecl.thrownExceptions(); // old exceptions
@@ -371,7 +375,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				k++;
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
-				String type= imports.addImport(desc.type);
+				String type= imports.addImport(desc.type, context);
 				ASTNode newNode= ASTNodeFactory.newName(ast, type);
 
 				listRewrite.insertAt(newNode, i, null);
@@ -406,7 +410,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
 				Name oldNode= (Name) exceptions.get(k);
 
-				String type= imports.addImport(desc.type);
+				String type= imports.addImport(desc.type, context);
 				ASTNode newNode= ASTNodeFactory.newName(ast, type);
 
 				listRewrite.replace(oldNode, newNode, null);

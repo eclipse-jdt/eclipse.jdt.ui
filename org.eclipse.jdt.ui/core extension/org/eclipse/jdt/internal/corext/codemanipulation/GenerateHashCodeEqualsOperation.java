@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -297,7 +298,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType(JAVA_LANG_OBJECT) };
 				BodyDeclaration oldEquals= fForce ? findMethodToReplace(list, METHODNAME_EQUALS, objectAsParam) : null;
 
-				MethodDeclaration equalsMethod= createEqualsMethod();
+				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(declaration, fRewrite.getImportRewrite());
+				MethodDeclaration equalsMethod= createEqualsMethod(context);
 				addMethod(rewriter, insertion, equalsMethod, oldEquals);
 
 				if (monitor.isCanceled())
@@ -759,7 +761,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	// *************** EQUALS ***************
 
-	private MethodDeclaration createEqualsMethod() throws CoreException {
+	private MethodDeclaration createEqualsMethod(ImportRewriteContext context) throws CoreException {
 
 		MethodDeclaration equalsMethodDeclaration= fAst.newMethodDeclaration();
 		equalsMethodDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(fAst, Modifier.PUBLIC));
@@ -806,7 +808,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			// if (!(obj instanceof Type)) return false;
 			InstanceofExpression expression= fAst.newInstanceofExpression();
 			expression.setLeftOperand(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
-			expression.setRightOperand(fRewrite.getImportRewrite().addImport(fType, fAst));
+			expression.setRightOperand(fRewrite.getImportRewrite().addImport(fType, fAst, context));
 
 			PrefixExpression notExpression= fAst.newPrefixExpression();
 			notExpression.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);

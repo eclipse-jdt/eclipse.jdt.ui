@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -251,9 +251,11 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						return null;
 					}
 
-					String res= importRewrite.addImport(typeBinding);
+					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(root, simpleNameStart, importRewrite);
+					String res= importRewrite.addImport(typeBinding, context);
 					if (containerName.length() > 0 && !res.equals(simpleName)) {
 						// adding import failed
+						fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_importclash, null);
 						return null;
 					}
 					if (containerName.length() == 0 && res.equals(simpleName)) {
@@ -345,7 +347,8 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		} else {
 			chosen= types[0];
 		}
-		importRewrite.addImport(chosen.getFullyQualifiedName());
+		ImportRewriteContext context= root == null ? null : new ContextSensitiveImportRewriteContext(root, simpleNameStart, importRewrite);
+		importRewrite.addImport(chosen.getFullyQualifiedName(), context);
 		return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 	}
 

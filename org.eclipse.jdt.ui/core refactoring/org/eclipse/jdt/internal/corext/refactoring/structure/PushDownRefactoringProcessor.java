@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PushDownDescriptor;
@@ -74,6 +75,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -620,6 +622,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					IMember member= null;
 					MemberVisibilityAdjustor adjustor= null;
 					AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unitRewriter.getRoot());
+					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(declaration, unitRewriter.getImportRewrite());
 					for (int offset= infos.length - 1; offset >= 0; offset--) {
 						member= infos[offset].getMember();
 						adjustor= new MemberVisibilityAdjustor(type, member);
@@ -642,14 +645,14 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 							if (oldField != null) {
 								FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
 								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
-								ImportRewriteUtil.addImports(unitRewriter, oldField.getParent(), new HashMap(), new HashMap(), false);
+								ImportRewriteUtil.addImports(unitRewriter, context, oldField.getParent(), new HashMap(), new HashMap(), false);
 							}
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldMethod != null) {
 								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], mapping, unitRewriter, oldMethod);
 								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
-								ImportRewriteUtil.addImports(unitRewriter, oldMethod, new HashMap(), new HashMap(), false);
+								ImportRewriteUtil.addImports(unitRewriter, context, oldMethod, new HashMap(), new HashMap(), false);
 							}
 						}
 					}

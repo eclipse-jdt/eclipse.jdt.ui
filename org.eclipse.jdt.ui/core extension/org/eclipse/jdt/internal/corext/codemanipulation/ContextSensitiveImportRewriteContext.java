@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,10 +77,6 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	}
 
 	public int findInContext(String qualifier, String name, int kind) {
-		int defaultResult= fImportRewrite.getDefaultImportRewriteContext().findInContext(qualifier, name, kind);
-		if (defaultResult != ImportRewriteContext.RES_NAME_UNKNOWN)
-			return defaultResult;
-
 		IBinding[] declarationsInScope= getDeclarationsInScope();
 		for (int i= 0; i < declarationsInScope.length; i++) {
 			if (declarationsInScope[i] instanceof ITypeBinding) {
@@ -162,7 +158,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			}
 		}
 
-		return RES_NAME_UNKNOWN;
+		return fImportRewrite.getDefaultImportRewriteContext().findInContext(qualifier, name, kind);
 	}
 
 	private boolean isConflicting(String name, String importt) {

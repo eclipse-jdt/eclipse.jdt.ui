@@ -84,6 +84,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.InlineConstantDescriptor;
@@ -94,6 +95,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -196,6 +198,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			private final Expression fNewLocation;
 			private final HashSet fStaticImportsInReference;
 			private final CompilationUnitRewrite fNewLocationCuRewrite;
+			private final ImportRewriteContext fNewLocationContext;
 
 			public InitializerTraversal(Expression initializer, HashSet staticImportsInInitializer, Expression newLocation, HashSet staticImportsInReference, CompilationUnitRewrite newLocationCuRewrite) {
 				fInitializer= initializer;
@@ -205,6 +208,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				fNewLocation= newLocation;
 				fStaticImportsInReference= staticImportsInReference;
 				fNewLocationCuRewrite= newLocationCuRewrite;
+				fNewLocationContext= new ContextSensitiveImportRewriteContext(fNewLocation, fNewLocationCuRewrite.getImportRewrite());
 
 				perform(initializer);
 			}
@@ -263,7 +267,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
 						ListRewrite typeArgsRewrite= fInitializerRewrite.getListRewrite(invocation, Invocations.getTypeArgumentsProperty(invocation));
 						for (int i= 0; i < typeArguments.length; i++) {
-							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArguments[i], fNewLocationCuRewrite.getAST());
+							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArguments[i], fNewLocationCuRewrite.getAST(), fNewLocationContext);
 							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
 							typeArgsRewrite.insertLast(typeArgument, null);
 						}
@@ -271,7 +275,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						if (invocation instanceof MethodInvocation) {
 							Expression expression= ((MethodInvocation)invocation).getExpression();
 							if (expression == null) {
-								expression= fNewLocationCuRewrite.getAST().newName(fNewLocationCuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration()));
+								expression= fNewLocationCuRewrite.getAST().newName(fNewLocationCuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), fNewLocationContext));
 								fInitializerRewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
 							}
 						}
@@ -308,7 +312,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				}
 
 				if (leftmostBinding instanceof ITypeBinding) {
-					String addedImport= fNewLocationCuRewrite.getImportRewrite().addImport((ITypeBinding) leftmostBinding);
+					String addedImport= fNewLocationCuRewrite.getImportRewrite().addImport((ITypeBinding)leftmostBinding, fNewLocationContext);
 					fNewLocationCuRewrite.getImportRemover().registerAddedImport(addedImport);
 				}
 
@@ -383,7 +387,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				if (declaringClass == null)
 					return;
 
-				Type newQualification= fNewLocationCuRewrite.getImportRewrite().addImport(declaringClass, fInitializerRewrite.getAST());
+				Type newQualification= fNewLocationCuRewrite.getImportRewrite().addImport(declaringClass, fInitializerRewrite.getAST(), fNewLocationContext);
 				fNewLocationCuRewrite.getImportRemover().registerAddedImports(newQualification);
 
 				SimpleName newToQualify= (SimpleName) fInitializerRewrite.createMoveTarget(toQualify);
@@ -503,7 +507,8 @@ public class InlineConstantRefactoring extends Refactoring {
 					modifiedInitializerExpr= parenthesized;
 				}
 				cast.setExpression(modifiedInitializerExpr);
-				cast.setType(fCuRewrite.getImportRewrite().addImport(explicitCast, ast));
+				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(reference, fCuRewrite.getImportRewrite());
+				cast.setType(fCuRewrite.getImportRewrite().addImport(explicitCast, ast, context));
 				newReference= cast;
 				
 			} else if (fInitializer instanceof ArrayInitializer) {
@@ -517,7 +522,8 @@ public class InlineConstantRefactoring extends Refactoring {
 				newReference= arrayCreation;
 
 				ITypeBinding typeToAddToImport= ASTNodes.getType(fOriginalDeclaration).resolveBinding();
-				fCuRewrite.getImportRewrite().addImport(typeToAddToImport);
+				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(reference, fCuRewrite.getImportRewrite());
+				fCuRewrite.getImportRewrite().addImport(typeToAddToImport, context);
 				fCuRewrite.getImportRemover().registerAddedImport(typeToAddToImport.getName());
 				
 			} else {

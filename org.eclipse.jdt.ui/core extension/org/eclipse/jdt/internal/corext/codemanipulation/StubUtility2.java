@@ -80,7 +80,7 @@ public final class StubUtility2 {
 		}
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings) throws CoreException {
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings) throws CoreException {
 		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
@@ -97,18 +97,18 @@ public final class StubUtility2 {
 			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 				List newTypeBounds= newTypeParam.typeBounds();
 				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(imports.addImport(typeBounds[k], ast));
+					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
 				}
 			}
 			typeParameters.add(newTypeParam);
 		}
 
-		List parameters= createParameters(unit.getJavaProject(), imports, null, ast, binding, decl);
+		List parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, decl);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
 		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= imports.addImport(excTypes[i]);
+			String excTypeName= imports.addImport(excTypes[i], context);
 			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 		}
 
@@ -148,7 +148,7 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ITypeBinding typeBinding, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, ITypeBinding typeBinding, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
 		AST ast= rewrite.getAST();
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
@@ -168,18 +168,18 @@ public final class StubUtility2 {
 				if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 					List newTypeBounds= newTypeParam.typeBounds();
 					for (int k= 0; k < typeBounds.length; k++) {
-						newTypeBounds.add(imports.addImport(typeBounds[k], ast));
+						newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
 					}
 				}
 				typeParameters.add(newTypeParam);
 			}
 
-			createParameters(unit.getJavaProject(), imports, null, ast, superConstructor, decl);
+			createParameters(unit.getJavaProject(), imports, context, ast, superConstructor, decl);
 
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= superConstructor.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
-				String excTypeName= imports.addImport(excTypes[i]);
+				String excTypeName= imports.addImport(excTypes[i], context);
 				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 			}
 		}
@@ -207,7 +207,7 @@ public final class StubUtility2 {
 		String[] excluded= null;
 		for (int i= 0; i < variableBindings.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(imports.addImport(variableBindings[i].getType(), ast));
+			var.setType(imports.addImport(variableBindings[i].getType(), ast, context));
 			excluded= new String[list.size()];
 			list.toArray(excluded);
 			param= suggestParameterName(unit, variableBindings[i], excluded);

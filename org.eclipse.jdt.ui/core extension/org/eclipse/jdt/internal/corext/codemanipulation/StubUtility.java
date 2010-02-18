@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1450,8 +1450,27 @@ public class StubUtility {
 		return CodeStyleConfiguration.createImportRewrite(cu, restoreExistingImports);
 	}
 
+	/**
+	 * Returns a {@link ImportRewrite} using {@link ImportRewrite#create(CompilationUnit, boolean)} and
+	 * configures the rewriter with the settings as specified in the JDT UI preferences.
+	 * <p>
+	 * This method sets {@link ImportRewrite#setUseContextToFilterImplicitImports(boolean)} to <code>true</code>
+	 * iff the given AST has been resolved with bindings. Clients should always supply a context
+	 * when they call one of the <code>addImport(...)</code> methods.
+	 * </p>
+	 *
+	 * @param astRoot the AST root to create the rewriter on
+	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
+	 * @return the new rewriter configured with the settings as specified in the JDT UI preferences.
+	 *
+	 * @see ImportRewrite#create(CompilationUnit, boolean)
+	 */
 	public static ImportRewrite createImportRewrite(CompilationUnit astRoot, boolean restoreExistingImports) {
-		return CodeStyleConfiguration.createImportRewrite(astRoot, restoreExistingImports);
+		ImportRewrite rewrite= CodeStyleConfiguration.createImportRewrite(astRoot, restoreExistingImports);
+		if (astRoot.getAST().hasResolvedBindings()) {
+			rewrite.setUseContextToFilterImplicitImports(true);
+		}
+		return rewrite;
 	}
 
 }

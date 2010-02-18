@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -228,7 +229,8 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			for (int i= 0; i < toImplement.length; i++) {
 				IMethodBinding curr= toImplement[i];
 				if (!curr.isDeprecated() || createDeprecated) {
-					MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings);
+					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, importRewrite);
+					MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, context, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings);
 					if (stub != null) {
 						fCreatedMethods.add(curr.getKey());
 						if (insertion != null)

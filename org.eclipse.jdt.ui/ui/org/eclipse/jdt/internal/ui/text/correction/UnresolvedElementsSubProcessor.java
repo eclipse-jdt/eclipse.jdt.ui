@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,7 +72,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -630,7 +632,8 @@ public class UnresolvedElementsSubProcessor {
 		String packName= Signature.getQualifier(fullName);
 		if (packName.length() > 0) { // no imports for primitive types, type variables
 			importRewrite= StubUtility.createImportRewrite((CompilationUnit) node.getRoot(), true);
-			simpleName= importRewrite.addImport(fullName);
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(node), importRewrite);
+			simpleName= importRewrite.addImport(fullName, context);
 		}
 
 		if (!isLikelyTypeName(simpleName)) {

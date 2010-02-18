@@ -848,8 +848,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		CompilationUnit root= context.getASTRoot();
-		ImportRewrite importRewrite= ImportRewrite.create(root, true);
-		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(context.getASTRoot(), oldInfixExpression.getStartPosition(), importRewrite);
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(root, true);
+		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(root, oldInfixExpression.getStartPosition(), importRewrite);
 
 		// collect operands
 		List operands= new ArrayList();

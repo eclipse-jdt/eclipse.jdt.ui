@@ -73,14 +73,16 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractSuperclassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -451,7 +453,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 						if (!curr.isDeprecated() || createDeprecated) {
 							MethodDeclaration stub;
 							try {
-								stub= StubUtility2.createConstructorStub(targetRewrite.getCu(), targetRewrite.getASTRewrite(), targetRewrite.getImportRewrite(), curr, binding.getName(), Modifier.PUBLIC, false, false, fSettings);
+								ImportRewriteContext context= new ContextSensitiveImportRewriteContext(targetDeclaration, targetRewrite.getImportRewrite());
+								stub= StubUtility2.createConstructorStub(targetRewrite.getCu(), targetRewrite.getASTRewrite(), targetRewrite.getImportRewrite(), context, curr, binding.getName(),
+										Modifier.PUBLIC, false, false, fSettings);
 								if (stub != null)
 									rewrite.insertLast(stub, null);
 							} catch (CoreException exception) {

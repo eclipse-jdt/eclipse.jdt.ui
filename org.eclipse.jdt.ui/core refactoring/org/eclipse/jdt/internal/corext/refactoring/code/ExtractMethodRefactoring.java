@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,12 +90,14 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -956,9 +958,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		List exceptions= result.thrownExceptions();
 		ITypeBinding[] exceptionTypes= fAnalyzer.getExceptions(fThrowRuntimeExceptions);
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(enclosingBodyDeclaration, fImportRewriter);
 		for (int i= 0; i < exceptionTypes.length; i++) {
 			ITypeBinding exceptionType= exceptionTypes[i];
-			exceptions.add(ASTNodeFactory.newName(fAST, fImportRewriter.addImport(exceptionType)));
+			exceptions.add(ASTNodeFactory.newName(fAST, fImportRewriter.addImport(exceptionType, context)));
 		}
 		return result;
 	}

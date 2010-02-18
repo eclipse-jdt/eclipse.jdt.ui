@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 
@@ -41,26 +42,28 @@ public final class ImportRewriteUtil {
 	 * Adds the necessary imports for an AST node to the specified compilation unit.
 	 *
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
+	 * @param context the import rewrite context, or <code>null</code> if none available
 	 * @param node the AST node specifying the element for which imports should be added
 	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
-	public static void addImports(final CompilationUnitRewrite rewrite, final ASTNode node, final Map typeImports, final Map staticImports, final boolean declarations) {
-		addImports(rewrite, node, typeImports, staticImports, null, declarations);
+	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map typeImports, final Map staticImports, final boolean declarations) {
+		addImports(rewrite, context, node, typeImports, staticImports, null, declarations);
 	}
 
 	/**
 	 * Adds the necessary imports for an AST node to the specified compilation unit.
 	 *
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
+	 * @param context the import rewrite context, or <code>null</code> if none available
 	 * @param node the AST node specifying the element for which imports should be added
 	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
-	public static void addImports(final CompilationUnitRewrite rewrite, final ASTNode node, final Map typeImports, final Map staticImports, final Collection excludeBindings, final boolean declarations) {
+	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map typeImports, final Map staticImports, final Collection excludeBindings, final boolean declarations) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeImports);
@@ -80,7 +83,7 @@ public final class ImportRewriteUtil {
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
 				if (excludeBindings == null || !excludeBindings.contains(type)) {
-					typeImports.put(name, rewriter.addImport(type));
+					typeImports.put(name, rewriter.addImport(type, context));
 					remover.registerAddedImport(((SimpleName)name).getIdentifier());
 				}
 			}

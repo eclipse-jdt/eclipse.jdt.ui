@@ -338,7 +338,10 @@ public class CompilationUnitRewrite {
 		if (fImportRewrite == null) {
 			// lazily initialized to avoid lengthy processing in checkInitialConditions(..)
 			try {
-				if (fRoot == null) {
+				/* If bindings are to be resolved, then create the AST, so that
+				 * ImportRewrite#setUseContextToFilterImplicitImports(boolean) will be set to true
+				 * and ContextSensitiveImportRewriteContext etc. can be used. */
+				if (fRoot == null && ! fResolveBindings) {
 					fImportRewrite= StubUtility.createImportRewrite(fCu, true);
 				} else {
 					fImportRewrite= StubUtility.createImportRewrite(getRoot(), true);

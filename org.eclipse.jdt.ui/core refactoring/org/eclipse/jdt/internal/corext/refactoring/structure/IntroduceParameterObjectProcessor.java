@@ -69,11 +69,13 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor.Parameter;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
@@ -100,6 +102,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			ClassInstanceCreation classCreation= ast.newClassInstanceCreation();
 
 			int startPosition= enclosingMethod != null ? enclosingMethod.getStartPosition() : cuRewrite.getRoot().getStartPosition();
+			ContextSensitiveImportRewriteContext context= fParameterObjectFactory.createParameterClassAwareContext(fCreateAsTopLevel, cuRewrite, startPosition);
 			classCreation.setType(fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite, startPosition));
 			List constructorArguments= classCreation.arguments();
 			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
@@ -107,10 +110,10 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 				if (isValidField(pi)) {
 					if (pi.isOldVarargs()) {
 						boolean isLastParameter= !iter.hasNext();
-						constructorArguments.addAll(computeVarargs(invocationArguments, pi, isLastParameter, cuRewrite));
+						constructorArguments.addAll(computeVarargs(invocationArguments, pi, isLastParameter, cuRewrite, context));
 					} else {
 						Expression exp= (Expression) invocationArguments.get(pi.getOldIndex());
-						importNodeTypes(exp, cuRewrite);
+						importNodeTypes(exp, cuRewrite, context);
 						constructorArguments.add(moveNode(exp, rewrite));
 					}
 				}
@@ -139,7 +142,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			return true;
 		}
 
-		private List computeVarargs(List invocationArguments, ParameterInfo varArgPI, boolean isLastParameter, CompilationUnitRewrite cuRewrite) {
+		private List computeVarargs(List invocationArguments, ParameterInfo varArgPI, boolean isLastParameter, CompilationUnitRewrite cuRewrite, ContextSensitiveImportRewriteContext context) {
 			boolean isEmptyVarArg= varArgPI.getOldIndex() >= invocationArguments.size();
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getAST();
@@ -157,7 +160,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 				// copy all varargs
 				for (int i= varArgPI.getOldIndex(); i < invocationArguments.size(); i++) {
 					ASTNode node= (ASTNode) invocationArguments.get(i);
-					importNodeTypes(node, cuRewrite);
+					importNodeTypes(node, cuRewrite, context);
 					constructorArguments.add(moveNode(node, rewrite));
 				}
 			} else { // new signature would be String...args, int
@@ -166,12 +169,12 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 					constructorArguments.add(moveNode(nullLiteral, rewrite));
 				} else {
 					ArrayCreation creation= ast.newArrayCreation();
-					creation.setType((ArrayType) importBinding(varArgPI.getNewTypeBinding(), cuRewrite));
+					creation.setType((ArrayType) importBinding(varArgPI.getNewTypeBinding(), cuRewrite, context));
 					ArrayInitializer initializer= ast.newArrayInitializer();
 					List expressions= initializer.expressions();
 					for (int i= varArgPI.getOldIndex(); i < invocationArguments.size(); i++) {
 						ASTNode node= (ASTNode) invocationArguments.get(i);
-						importNodeTypes(node, cuRewrite);
+						importNodeTypes(node, cuRewrite, context);
 						expressions.add(moveNode(node, rewrite));
 					}
 					if (expressions.isEmpty())
@@ -184,16 +187,16 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			return constructorArguments;
 		}
 
-		public Type importBinding(ITypeBinding newTypeBinding, CompilationUnitRewrite cuRewrite) {
-			Type type= cuRewrite.getImportRewrite().addImport(newTypeBinding, cuRewrite.getAST());
+		public Type importBinding(ITypeBinding newTypeBinding, CompilationUnitRewrite cuRewrite, ImportRewriteContext context) {
+			Type type= cuRewrite.getImportRewrite().addImport(newTypeBinding, cuRewrite.getAST(), context);
 			cuRewrite.getImportRemover().registerAddedImports(type);
 			return type;
 		}
 
-		private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite) {
+		private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite, final ImportRewriteContext context) {
 			ASTResolving.visitAllBindings(node, new TypeBindingVisitor() {
 				public boolean visit(ITypeBinding nodeBinding) {
-					importBinding(nodeBinding, cuRewrite);
+					importBinding(nodeBinding, cuRewrite, context);
 					return false;
 				}
 			});

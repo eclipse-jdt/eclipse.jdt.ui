@@ -81,6 +81,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
@@ -91,6 +92,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -851,6 +853,14 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return new CompilationUnitRewrite(unit);
 	}
 
+	private AbstractTypeDeclaration getDestinationNode() throws JavaModelException {
+		AbstractTypeDeclaration destination= (AbstractTypeDeclaration)
+				ASTNodes.getParent(
+						NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange()),
+						AbstractTypeDeclaration.class);
+		return destination;
+	}
+
 	private ITypeBinding getDestinationBinding() throws JavaModelException {
 		ASTNode node= NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange());
 		if (!(node instanceof SimpleName))
@@ -898,13 +908,14 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				}
 			}
 		}
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(getDestinationNode(), fTarget.getImportRewrite());
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
 			if (isSourceNotTarget)
 				typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
-			ImportRewriteUtil.addImports(fTarget, declaration, new HashMap(), new HashMap(), exclude, false);
+			ImportRewriteUtil.addImports(fTarget, context, declaration, new HashMap(), new HashMap(), exclude, false);
 			if (getDeclaringType().isInterface() && !fDestinationType.isInterface()) {
 				if (declaration instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
@@ -927,12 +938,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 		// Adjust imports
 		if (targetNeedsSourceImport && isSourceNotTarget) {
-			fTarget.getImportRewrite().addImport(fSourceBinding);
+			fTarget.getImportRewrite().addImport(fSourceBinding, context);
 		}
 		if (isSourceNotTarget) {
 			for (Iterator iter= typeRefs.iterator(); iter.hasNext();) {
 				ITypeBinding binding= (ITypeBinding) iter.next();
-				fTarget.getImportRewrite().addImport(binding);
+				fTarget.getImportRewrite().addImport(binding, context);
 			}
 		}
 		// extract updated members
@@ -954,10 +965,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	private RefactoringStatus moveMembers(BodyDeclaration[] members, String[] sources) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		AbstractTypeDeclaration destination= (AbstractTypeDeclaration)
-		ASTNodes.getParent(
-			NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange()),
-			AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration destination= getDestinationNode();
 		ListRewrite containerRewrite= fTarget.getASTRewrite().getListRewrite(destination, destination.getBodyDeclarationsProperty());
 
 		TextEditGroup delete= fSource.createGroupDescription(RefactoringCoreMessages.MoveMembersRefactoring_deleteMembers);

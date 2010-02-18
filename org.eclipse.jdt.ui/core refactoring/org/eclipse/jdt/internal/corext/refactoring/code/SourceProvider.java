@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,7 +72,9 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
@@ -438,21 +440,22 @@ public class SourceProvider {
 		List implicitReceivers= fAnalyzer.getImplicitReceivers();
 		for (Iterator iter= implicitReceivers.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode)iter.next();
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, context.importer);
 			if (node instanceof MethodInvocation) {
 				final MethodInvocation inv= (MethodInvocation)node;
-				rewriter.set(inv, MethodInvocation.EXPRESSION_PROPERTY, createReceiver(rewriter, context, (IMethodBinding)inv.getName().resolveBinding()), null);
+				rewriter.set(inv, MethodInvocation.EXPRESSION_PROPERTY, createReceiver(rewriter, context, (IMethodBinding)inv.getName().resolveBinding(), importRewriteContext), null);
 			} else if (node instanceof ClassInstanceCreation) {
 				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
-				rewriter.set(inst, ClassInstanceCreation.EXPRESSION_PROPERTY, createReceiver(rewriter, context, inst.resolveConstructorBinding()), null);
+				rewriter.set(inst, ClassInstanceCreation.EXPRESSION_PROPERTY, createReceiver(rewriter, context, inst.resolveConstructorBinding(), importRewriteContext), null);
 			} else if (node instanceof ThisExpression) {
 				rewriter.replace(node, rewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
 			} else if (node instanceof FieldAccess) {
 				final FieldAccess access= (FieldAccess)node;
-				rewriter.set(access, FieldAccess.EXPRESSION_PROPERTY, createReceiver(rewriter, context, access.resolveFieldBinding()), null);
+				rewriter.set(access, FieldAccess.EXPRESSION_PROPERTY, createReceiver(rewriter, context, access.resolveFieldBinding(), importRewriteContext), null);
 			} else if (node instanceof SimpleName && ((SimpleName)node).resolveBinding() instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)((SimpleName)node).resolveBinding();
 				if (vb.isField()) {
-					Expression receiver= createReceiver(rewriter, context, vb);
+					Expression receiver= createReceiver(rewriter, context, vb, importRewriteContext);
 					if (receiver != null) {
 						FieldAccess access= node.getAST().newFieldAccess();
 						ASTNode target= rewriter.createMoveTarget(node);
@@ -501,21 +504,21 @@ public class SourceProvider {
 
 	}
 
-	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IMethodBinding method) {
-		String receiver= getReceiver(context, method.getModifiers());
+	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IMethodBinding method, ImportRewriteContext importRewriteContext) {
+		String receiver= getReceiver(context, method.getModifiers(), importRewriteContext);
 		if (receiver == null)
 			return null;
 		return (Expression)rewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
 	}
 
-	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IVariableBinding field) {
-		String receiver= getReceiver(context, field.getModifiers());
+	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IVariableBinding field, ImportRewriteContext importRewriteContext) {
+		String receiver= getReceiver(context, field.getModifiers(), importRewriteContext);
 		if (receiver == null)
 			return null;
 		return (Expression)rewriter.createStringPlaceholder(receiver, ASTNode.SIMPLE_NAME);
 	}
 
-	private String getReceiver(CallContext context, int modifiers) {
+	private String getReceiver(CallContext context, int modifiers, ImportRewriteContext importRewriteContext) {
 		String receiver= context.receiver;
 		ITypeBinding invocationType= ASTNodes.getEnclosingType(context.invocation);
 		ITypeBinding sourceType= fDeclaration.resolveBinding().getDeclaringClass();
@@ -523,7 +526,7 @@ public class SourceProvider {
 			if ("this".equals(receiver) && invocationType != null && Bindings.equals(invocationType, sourceType)) { //$NON-NLS-1$
 				receiver= null;
 			} else {
-				receiver= context.importer.addImport(sourceType);
+				receiver= context.importer.addImport(sourceType, importRewriteContext);
 			}
 		}
 		return receiver;

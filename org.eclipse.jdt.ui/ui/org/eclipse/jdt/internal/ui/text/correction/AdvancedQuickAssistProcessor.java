@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,9 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -87,7 +89,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -2010,7 +2011,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		//
 		final AST ast= covering.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
-		final ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(context.getASTRoot(), true);
+		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 		//
 		SwitchStatement switchStatement= (SwitchStatement) covering;
 		IfStatement firstIfStatement= null;
@@ -2023,7 +2024,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		int caseCount= 0;
 
 		ArrayList allBlocks= new ArrayList();
-		//
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(covering), importRewrite);
 		for (Iterator iter= switchStatement.statements().iterator(); iter.hasNext();) {
 			Statement statement= (Statement) iter.next();
 			if (statement instanceof SwitchCase) {
@@ -2049,7 +2050,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 				// prepare condition
-				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, switchStatement, switchCase);
+				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast, rewrite, importRewrite, importRewriteContext, switchStatement, switchCase);
 				if (currentCondition == null) {
 					currentCondition= switchCaseCondition;
 				} else {
@@ -2125,7 +2126,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static InfixExpression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, SwitchStatement switchStatement, SwitchCase switchCase) {
+	private static InfixExpression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, SwitchStatement switchStatement,
+			SwitchCase switchCase) {
 		InfixExpression condition= ast.newInfixExpression();
 		condition.setOperator(InfixExpression.Operator.EQUALS);
 		//
@@ -2137,7 +2139,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (expression instanceof SimpleName && ((SimpleName) expression).resolveBinding() instanceof IVariableBinding) {
 			IVariableBinding binding= (IVariableBinding) ((SimpleName) expression).resolveBinding();
 			if (binding.isEnumConstant()) {
-				String qualifiedName= importRewrite.addImport(binding.getDeclaringClass()) + '.' + binding.getName();
+				String qualifiedName= importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext) + '.' + binding.getName();
 				rightExpression= ast.newName(qualifiedName);
 			}
 		}

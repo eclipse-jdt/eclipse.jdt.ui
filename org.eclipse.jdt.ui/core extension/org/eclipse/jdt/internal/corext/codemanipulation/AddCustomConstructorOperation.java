@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,10 +36,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.ui.CodeStyleConfiguration;
 
 /**
  * Workspace runnable to add custom constructors initializing fields.
@@ -160,7 +159,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getTypeRoot();
 
 			ASTRewrite astRewrite= ASTRewrite.create(fASTRoot.getAST());
-			ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(fASTRoot, true);
+			ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
 
 			ListRewrite listRewriter= null;
 
@@ -172,7 +171,8 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			}
 
 			if (listRewriter != null) {
-				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, fParentType, fOmitSuper ? null : fConstructorBinding, fFieldBindings, fVisibility, fSettings);
+				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(typeDecl, importRewrite);
+				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, context, fParentType, fOmitSuper ? null : fConstructorBinding, fFieldBindings, fVisibility, fSettings);
 				if (stub != null) {
 					ASTNode insertion= StubUtility2.getNodeToInsertBefore(listRewriter, fInsert);
 					if (insertion != null && insertion.getParent() == typeDecl) {

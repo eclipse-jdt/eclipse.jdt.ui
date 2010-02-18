@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -273,6 +273,61 @@ public class AddImportTest extends CoreTests {
 	}
 
 
+	public void testRemoveImports3() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack= sourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public class Inner {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment test1= sourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("import pack.A.Inner;\n");
+		buf.append("import pack.A.NotThere;\n");
+		buf.append("import pack.B;\n");
+		buf.append("import pack.B.Inner;\n");
+		buf.append("import pack.B.NotThere;\n");
+		buf.append("\n");
+		buf.append("public class T {\n");
+		buf.append("}\n");
+		ICompilationUnit cuT= test1.createCompilationUnit("T.java", buf.toString(), false, null);
+		
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setSource(cuT);
+		parser.setResolveBindings(true);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+		
+		ImportRewrite imports= newImportsRewrite(astRoot, new String[0], 99, 99, true);
+		imports.setUseContextToFilterImplicitImports(true);
+		
+		imports.removeImport("pack.A.Inner");
+		imports.removeImport("pack.A.NotThere");
+		imports.removeImport("pack.B.Inner");
+		imports.removeImport("pack.B.NotThere");
+		
+		apply(imports);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("import pack.B;\n");
+		buf.append("\n");
+		buf.append("public class T {\n");
+		buf.append("}\n");
+		assertEqualString(cuT.getSource(), buf.toString());
+	}
+	
+	
 	public void testAddImports_bug23078() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -888,6 +943,48 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector c= null\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testAddImportAction5() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private static class Serializable { }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        java.io.Serializable ser= null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Secondary {\n");
+		buf.append("    Serializable s;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		int selOffset= buf.indexOf("ser=") - 2;
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private static class Serializable { }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        java.io.Serializable ser= null;\n"); // no change
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Secondary {\n");
+		buf.append("    Serializable s;\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}

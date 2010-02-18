@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -458,18 +459,35 @@ public class ParameterObjectFactory {
 	}
 
 	public Type createType(boolean asTopLevelClass, CompilationUnitRewrite cuRewrite, int position) {
-		String concatenateName= null;
-		if (asTopLevelClass) {
-			concatenateName= JavaModelUtil.concatenateName(fPackage, fClassName);
-		} else {
-			concatenateName= JavaModelUtil.concatenateName(fEnclosingType, fClassName);
-		}
+		String qualifier= asTopLevelClass ? fPackage : fEnclosingType;
+		String concatenateName= JavaModelUtil.concatenateName(qualifier, fClassName);
+		
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-		ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(cuRewrite.getRoot(), position, importRewrite);
+		ContextSensitiveImportRewriteContext context= createParameterClassAwareContext(asTopLevelClass, cuRewrite, position);
 		String addedImport= importRewrite.addImport(concatenateName, context);
 		cuRewrite.getImportRemover().registerAddedImport(addedImport);
 		AST ast= cuRewrite.getAST();
 		return ast.newSimpleType(ast.newName(addedImport));
+	}
+
+	ContextSensitiveImportRewriteContext createParameterClassAwareContext(final boolean asTopLevelClass, final CompilationUnitRewrite cuRewrite, int position) {
+		ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(cuRewrite.getRoot(), position, cuRewrite.getImportRewrite()) {
+			public int findInContext(String qualifier, String name, int kind) {
+				String parameterClassName= getClassName();
+				if (kind == ImportRewriteContext.KIND_TYPE && parameterClassName.equals(name)) {
+					String parameterClassQualifier= asTopLevelClass ? getPackage() : getEnclosingType();
+					if (super.findInContext(qualifier, "", kind) == ImportRewriteContext.RES_NAME_FOUND) { //$NON-NLS-1$ // TODO: should be "*", not " "!
+						if (parameterClassQualifier.equals(qualifier)) {
+							return ImportRewriteContext.RES_NAME_FOUND;
+						} else {
+							return ImportRewriteContext.RES_NAME_CONFLICT;
+						}
+					}
+				}
+				return super.findInContext(qualifier, name, kind);
+			}
+		};
+		return context;
 	}
 
 	public String getClassName() {
