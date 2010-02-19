@@ -1618,7 +1618,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 
-		// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=58245
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=58245
 		JavaPlugin javaPlugin= JavaPlugin.getDefault();
 		if (javaPlugin == null)
 			return;

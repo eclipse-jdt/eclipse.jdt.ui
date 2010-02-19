@@ -216,7 +216,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			}
 
 			final ArrayList candidateList= (ArrayList)candidates;
-			int candidateSize= Math.min(500, candidateList.size()); // see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=195357
+			int candidateSize= Math.min(500, candidateList.size()); // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=195357
 			for (int offset= 0; offset < candidateSize; offset++) {
 
 				String candidate;

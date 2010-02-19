@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -241,7 +241,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 		/*
 		 * Using mouseDown as mouseUp isn't fired on some Platforms, for
-		 * details see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=165533
+		 * details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=165533
 		 *
 		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */

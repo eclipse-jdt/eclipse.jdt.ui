@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 
+
 /**
  * A special composite to layout columns inside a table. The composite is needed since we have
  * to layout the columns "before" the actual table gets layouted. Hence we can't use a normal
@@ -43,7 +44,7 @@ public class TableLayoutComposite extends Composite {
 	 * To ensure there are N pixels available for the content of the column,
 	 * assign N+COLUMN_TRIM for the column width.
 	 * <p>
-	 * XXX: Should either switch to use {@link org.eclipse.jface.layout.TableColumnLayout} or get API from JFace or SWT, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=218483
+	 * XXX: Should either switch to use {@link org.eclipse.jface.layout.TableColumnLayout} or get API from JFace or SWT, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=218483
 	 * </p>
 	 *
 	 * @since 3.1

@@ -70,13 +70,13 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
+
 /**
  * This annotation hover shows the description of the
  * selected java annotation.
  *
- * XXX: Currently this problem hover only works for
- *		Java and spelling problems.
- *		see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62081
+ * XXX: Currently this problem hover only works for Java and spelling problems,
+ *		see https://bugs.eclipse.org/bugs/show_bug.cgi?id=62081
  *
  * @since 3.0
  */
