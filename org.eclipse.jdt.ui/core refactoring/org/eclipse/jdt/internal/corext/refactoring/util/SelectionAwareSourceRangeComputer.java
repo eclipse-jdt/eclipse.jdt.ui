@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,17 +28,17 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer {
 
 	private ASTNode[] fSelectedNodes;
-	private IBuffer fBuffer;
 	private int fSelectionStart;
 	private int fSelectionLength;
 
 	private Map/*<ASTNode, SourceRange>*/ fRanges;
+	private String fDocumentPortionToScan;
 
 	public SelectionAwareSourceRangeComputer(ASTNode[] selectedNodes, IBuffer buffer, int selectionStart, int selectionLength) {
 		fSelectedNodes= selectedNodes;
-		fBuffer= buffer;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
+		fDocumentPortionToScan= buffer.getText(fSelectionStart, fSelectionLength);
 	}
 
 	public SourceRange computeSourceRange(ASTNode node) {
@@ -66,8 +66,9 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		fRanges.put(fSelectedNodes[last], super.computeSourceRange(fSelectedNodes[last]));
 
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		String documentPortionToScan= fBuffer.getText(fSelectionStart, fSelectionLength);
-		scanner.setSource(documentPortionToScan.toCharArray());
+		scanner.setSource(fDocumentPortionToScan.toCharArray());
+		fDocumentPortionToScan= null; // initializeRanges() is only called once
+
 		TokenScanner tokenizer= new TokenScanner(scanner);
 		int pos= tokenizer.getNextStartOffset(0, false);
 
@@ -90,7 +91,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		}
 		if (token == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 			int index= pos - 1;
-			while(index >= 0 && IndentManipulation.isLineDelimiterChar(documentPortionToScan.charAt(index))) {
+			while (index >= 0 && IndentManipulation.isLineDelimiterChar(fDocumentPortionToScan.charAt(index))) {
 				pos--;
 				index--;
 			}
