@@ -91,8 +91,8 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -1436,7 +1436,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IType[] allSubtypes= getDestinationTypeHierarchy(monitor).getAllSubtypes(getDestinationType());
 		final Set result= new HashSet(allSubtypes.length);
 		for (int i= 0; i < allSubtypes.length; i++) {
-			result.add(allSubtypes[i].getCompilationUnit());
+			ICompilationUnit cu= allSubtypes[i].getCompilationUnit();
+			if (cu != null)
+				result.add(cu);
 		}
 		result.add(getDestinationType().getCompilationUnit());
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
