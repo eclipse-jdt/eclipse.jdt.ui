@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -442,7 +442,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= createUnManaged(T_ELCL, "collapseall.gif"); //$NON-NLS-1$
 
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
-	// have a life cycle. So no change to dispose icons.
+	// have a life cycle. So no chance to dispose icons.
 
 	public static final String IMG_CORRECTION_CHANGE= NAME_PREFIX + "correction_change.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_MOVE= NAME_PREFIX + "correction_move.gif"; //$NON-NLS-1$
@@ -453,6 +453,7 @@ public class JavaPluginImages {
 	public static final String IMG_CORRECTION_REMOVE= NAME_PREFIX + "remove_correction.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_ADD= NAME_PREFIX + "add_correction.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_CAST= NAME_PREFIX + "correction_cast.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_MULTI_FIX= NAME_PREFIX + "correction_multi_fix.gif"; //$NON-NLS-1$
 
 	static {
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_CHANGE);
@@ -464,6 +465,7 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_REMOVE);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_ADD);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_CAST);
+		createManagedFromKey(T_OBJ, IMG_CORRECTION_MULTI_FIX);
 	}
 
 	private static final class CachedImageDescriptor extends ImageDescriptor {
@@ -599,7 +601,7 @@ public class JavaPluginImages {
 	}
 
 	/*
-	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle and let tye descriptor cache the image data.
+	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle and let type descriptor cache the image data.
 	 * If no image could be found, the 'missing image descriptor' is returned.
 	 */
 	private static ImageDescriptor createUnManagedCached(String prefix, String name) {
