@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 
 /**
@@ -374,6 +375,10 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			if (part instanceof ITextEditorExtension3) {
 				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
 				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
+			} else if (EditorUtility.isCompareEditorInput(part.getEditorInput())) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3)part.getAdapter(ITextEditorExtension3.class);
+				if (extension != null)
+					return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
 			}
 		}
 		return false;
