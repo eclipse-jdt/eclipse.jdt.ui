@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     istvan@benedek-home.de - 103706 [formatter] indent empty lines
  *     Aaron Luchko, aluchko@redhat.com - 105926 [Formatter] Exporting Unnamed profile fails silently
+ *     Brock Janiczak <brockj@tpg.com.au> - [formatter] Add  option: "add new line after label" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150741
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
@@ -420,6 +421,7 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_newlines_group_option_empty_method_body;
 	public static String NewLinesTabPage_newlines_group_option_empty_block;
 	public static String NewLinesTabPage_newlines_group_option_empty_end_of_file;
+	public static String NewLinesTabPage_newlines_group_option_empty_label;
 	public static String NewLinesTabPage_empty_statement_group_title;
 	public static String NewLinesTabPage_emtpy_statement_group_option_empty_statement_on_new_line;
 	public static String NewLinesTabPage_arrayInitializer_group_title;
