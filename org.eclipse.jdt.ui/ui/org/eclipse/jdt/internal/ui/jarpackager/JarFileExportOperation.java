@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -503,10 +503,29 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			boolean isOnCP= javaProject.isOnClasspath(container);
 			for (int i= 0; i < children.length; i++) {
 				IResource child= children[i];
-				if (isOnCP || !javaProject.isOnClasspath(child))
+				if (isOnCP || !javaProject.isOnClasspath(child) || isInternalJar(child))
 					exportElement(child, progressMonitor);
 			}
 		}
+	}
+
+	/**
+	 * Tells whether the given resource is an internal JAR.
+	 * 
+	 * @param resource the resource to test
+	 * @return <code>true</code> if it is an internal JAR, <code>false</code> otherwise
+	 * @since 3.6
+	 */
+	private boolean isInternalJar(IResource resource) {
+		if (resource.getType() != IResource.FILE)
+			return false;
+		
+		IJavaElement je= JavaCore.create(resource);
+		if (je == null || je.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			return false;
+		
+		IPackageFragmentRoot root= (IPackageFragmentRoot)je;
+		return root.isArchive() && !root.isExternal();
 	}
 
 	private IPackageFragmentRoot findPackageFragmentRoot(IJavaProject jProject, IPath path) throws JavaModelException {
@@ -879,7 +898,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	/**
 	 * Handles core exceptions that are thrown by {@link IJarBuilder#writeFile(IFile, IPath)}.
-	 *  
+	 * 
 	 * @param ex the core exception
 	 * @since 3.5
 	 */
