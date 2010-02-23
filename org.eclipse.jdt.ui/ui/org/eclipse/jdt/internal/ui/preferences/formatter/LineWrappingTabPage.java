@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -509,6 +509,13 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	    FormatterMessages.LineWrappingTabPage_binary_exprs
 	);
 
+	private final Category fAnnotationArgumentsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ANNOTATION,
+			"@MyAnnotation(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + //$NON-NLS-1$
+			"class Example {}", //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_annotations_arguments
+	);
+
 	private final Category fEnumConstArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ENUM_CONSTANT,
 	    "enum Example {" + //$NON-NLS-1$
@@ -628,6 +635,9 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	 */
 	protected List createCategories() {
 
+		final Category annotations = new Category(FormatterMessages.LineWrappingTabPage_annotations);
+		annotations.children.add(fAnnotationArgumentsCategory);
+
 		final Category classDeclarations= new Category(FormatterMessages.LineWrappingTabPage_class_decls);
 		classDeclarations.children.add(fTypeDeclarationSuperclassCategory);
 		classDeclarations.children.add(fTypeDeclarationSuperinterfacesCategory);
@@ -662,6 +672,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		statements.children.add(fCompactIfCategory);
 
 		final List root= new ArrayList();
+		root.add(annotations);
 		root.add(classDeclarations);
 		root.add(constructorDeclarations);
 		root.add(methodDeclarations);
