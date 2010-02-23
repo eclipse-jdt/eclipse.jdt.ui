@@ -58,7 +58,6 @@ import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
@@ -911,21 +910,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 	private void repairPresentation(ITextViewer viewer) {
 		if (fRememberedStyleRange != null) {
-			 if (viewer instanceof ITextViewerExtension2) {
-			 	// attempts to reduce the redraw area
-			 	ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
-
-			 	if (viewer instanceof ITextViewerExtension5) {
-
-			 		ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-			 		IRegion modelRange= extension.widgetRange2ModelRange(new Region(fRememberedStyleRange.start, fRememberedStyleRange.length));
-			 		if (modelRange != null)
-			 			viewer2.invalidateTextPresentation(modelRange.getOffset(), modelRange.getLength());
-
-			 	} else {
-					viewer2.invalidateTextPresentation(fRememberedStyleRange.start + viewer.getVisibleRegion().getOffset(), fRememberedStyleRange.length);
-			 	}
-
+			if (viewer instanceof ITextViewerExtension2) {
+				// attempts to reduce the redraw area
+				ITextViewerExtension2 viewer2= (ITextViewerExtension2)viewer;
+				viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
 			} else
 				viewer.invalidateTextPresentation();
 		}
@@ -933,16 +921,20 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 	private void updateStyle(ITextViewer viewer) {
 		StyledText text= viewer.getTextWidget();
-		StyleRange range= text.getStyleRangeAtOffset(fRememberedStyleRange.start);
-		if (range != null) {
-			fRememberedStyleRange.strikeout= range.strikeout;
-			fRememberedStyleRange.underline= range.underline;
-			fRememberedStyleRange.fontStyle= range.fontStyle;
+		int widgetOffset= getWidgetOffset(viewer, fRememberedStyleRange.start);
+		StyleRange range= new StyleRange(fRememberedStyleRange);
+		range.start= widgetOffset;
+		range.length= fRememberedStyleRange.length;
+		StyleRange currentRange= text.getStyleRangeAtOffset(widgetOffset);
+		if (currentRange != null) {
+			range.strikeout= currentRange.strikeout;
+			range.underline= currentRange.underline;
+			range.fontStyle= currentRange.fontStyle;
 		}
 
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
 		try {
-			text.setStyleRange(fRememberedStyleRange);
+			text.setStyleRange(range);
 		} catch (IllegalArgumentException x) {
 			// catching exception as offset + length might be outside of the text widget
 			fRememberedStyleRange= null;
@@ -950,10 +942,32 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	/**
-	 * Creates a style range for the viewer's control.
+	 * Convert a document offset to the corresponding widget offset.
 	 * 
 	 * @param viewer the text viewer
-	 * @return the new style range or <code>null</code>
+	 * @param documentOffset the document offset
+	 * @return widget offset
+	 * @since 3.6
+	 */
+	private int getWidgetOffset(ITextViewer viewer, int documentOffset) {
+		if (viewer instanceof ITextViewerExtension5) {
+			ITextViewerExtension5 extension= (ITextViewerExtension5)viewer;
+			return extension.modelOffset2WidgetOffset(documentOffset);
+		}
+		IRegion visible= viewer.getVisibleRegion();
+		int widgetOffset= documentOffset - visible.getOffset();
+		if (widgetOffset > visible.getLength()) {
+			return -1;
+		}
+		return widgetOffset;
+	}
+
+
+	/**
+	 * Creates a style range for the text viewer.
+	 * 
+	 * @param viewer the text viewer
+	 * @return the new style range for the text viewer or <code>null</code>
 	 * @since 3.6
 	 */
 	private StyleRange createStyleRange(ITextViewer viewer) {
@@ -975,13 +989,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		if (modelCaret >= getReplacementOffset() + getReplacementLength())
 			return null;
 
-		int offset= widgetCaret;
 		int length= getReplacementOffset() + getReplacementLength() - modelCaret;
 
 		Color foreground= getForegroundColor();
 		Color background= getBackgroundColor();
 
-		return new StyleRange(offset, length, foreground, background);
+		return new StyleRange(modelCaret, length, foreground, background);
 	}
 
 	/*
